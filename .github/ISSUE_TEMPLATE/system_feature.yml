@@ -1,5 +1,5 @@
-name: 🔧 MVP Feature Task
-description: Tarea funcional para implementar una parte del sistema antes del MVP
+name: ✅ MVP Feature Task
+description: Tarea funcional para implementar una parte del sistema antes del MVP (típicamente tareas del Project)
 title: "[MVP Feature] "
 labels: [mvp, feature, task]
 body:
