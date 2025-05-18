@@ -1,7 +1,9 @@
-# 🤝 Conectando Corazones
+![Conectando Corazones – Plataforma solidaria](./public/img/banner.png)
+
+<h1 align="center">💞Conectando Corazones</h1>
 
 <details open>
-<summary><strong>🇪🇸 Español</strong></summary>
+<summary><h2>🇪🇸 Español</h2></summary>
 
 **Conectando Corazones** es una plataforma digital sin fines de lucro que vincula a instituciones que necesitan ayuda —como escuelas, hospitales y comedores comunitarios— con personas, organizaciones y empresas dispuestas a brindarla en Argentina.
 
@@ -85,8 +87,8 @@ Podés colaborar como desarrollador/a, diseñador/a, tester, redactor/a o mentor
 
 ## 🛡️ Políticas y comunidad
 
-- 📜 [Código de Conducta](./CODE_OF_CONDUCT.md) – Basado en Contributor Covenant v2.1  
-- 🔐 [Política de Seguridad](./SECURITY.md) – Para reportar vulnerabilidades de forma responsable  
+- 📜 [Código de Conducta](./.github/CODE_OF_CONDUCT.md) – Basado en Contributor Covenant v2.1  
+- 🔐 [Política de Seguridad](./.github/SECURITY.md) – Para reportar vulnerabilidades de forma responsable  
 - 🧾 [Licencia AGPL-3.0](./LICENSE) – Uso libre con código abierto obligatorio para derivaciones
 
 ## 👨‍🎓 Créditos
@@ -106,7 +108,7 @@ Para consultas, propuestas de colaboración o reportes técnicos, escribinos a:
 </details>
 
 <details>
-<summary><strong>🌐 English</strong></summary>
+<summary><h2>🌐 English</h2></summary>
 
 **Conectando Corazones** is a non-profit digital platform that connects institutions in need —such as schools, hospitals and community kitchens— with individuals, organizations, and companies willing to help in Argentina.
 
@@ -189,8 +191,8 @@ You can help as a developer, designer, tester or technical reviewer.
 
 ## 🛡️ Community and Policies
 
-- 📜 [Code of Conduct](./CODE_OF_CONDUCT.md) – Based on Contributor Covenant v2.1  
-- 🔐 [Security Policy](./SECURITY.md) – Responsible disclosure instructions  
+- 📜 [Code of Conduct](./.github/CODE_OF_CONDUCT.md) – Based on Contributor Covenant v2.1  
+- 🔐 [Security Policy](./.github/SECURITY.md) – Responsible disclosure instructions  
 - 🧾 [AGPL-3.0 License](./LICENSE) – Strong copyleft open source license
 
 ## 👨‍🎓 Credits
