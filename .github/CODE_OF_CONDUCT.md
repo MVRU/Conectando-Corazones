@@ -1,13 +1,9 @@
 # 📜 Code of Conduct
 
-We are committed to fostering an inclusive, respectful, and safe environment for everyone who interacts with this project.  
-Please read and adhere to the following guidelines when contributing or engaging with the community.
-
-Nos comprometemos a fomentar un entorno inclusivo, respetuoso y seguro para todas las personas que interactúan con este proyecto.  
-Leé y respetá las siguientes pautas al contribuir o participar en la comunidad.
-
 <details>
 <summary><h2>🌐 ENG – English</h2></summary>
+
+We are committed to fostering an inclusive, respectful, and safe environment for everyone who interacts with this project. Please read and adhere to the following guidelines when contributing or engaging with the community.
 
 ## 💬 Our Pledge
 
@@ -54,6 +50,8 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 <details>
 <summary><h2>🇪🇸 ESP – Español</h2></summary>
+
+Nos comprometemos a fomentar un entorno inclusivo, respetuoso y seguro para todas las personas que interactúan con este proyecto. Leé y respetá las siguientes pautas al contribuir o participar en la comunidad.
 
 ## 💬 Nuestro compromiso
 
