@@ -1,0 +1,66 @@
+name: 🔧 MVP Feature Task
+description: Tarea funcional para implementar una parte del sistema antes del MVP
+title: "[MVP Feature] "
+labels: [mvp, feature, task]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Esta plantilla se usa para tareas técnicas de desarrollo que forman parte del MVP de la plataforma **Conectando Corazones**.  
+        Por favor, completá los siguientes campos con claridad para facilitar su seguimiento y ejecución.
+
+  - type: input
+    id: goal
+    attributes:
+      label: 🎯 Objetivo funcional
+      description: ¿Qué parte del sistema se desea implementar?
+      placeholder: "Registrar institución con validación externa"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 📋 Descripción de la funcionalidad
+      description: Detallá qué debe hacer esta función o módulo, cómo se espera que se comporte.
+      placeholder: |
+        Al registrar una institución, se debe validar su CUIT a través de la API de ARCA y guardar los datos básicos si la respuesta es válida.
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: ⚙️ Consideraciones de implementación
+      description: ¿Requiere endpoints? ¿Debe agregarse a alguna interfaz? ¿Afecta otras partes del sistema?
+      placeholder: "Requiere endpoint POST `/api/instituciones`, afecta autenticación y base de datos."
+    validations:
+      required: false
+
+  - type: textarea
+    id: tests
+    attributes:
+      label: 🧪 Pruebas esperadas
+      description: ¿Cómo se puede validar que esto funciona correctamente?
+      placeholder: "Crear institución con datos válidos → éxito. Con CUIT inválido → error."
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: affected
+    attributes:
+      label: 📦 Áreas afectadas
+      description: Seleccioná qué partes del sistema se verán impactadas por esta tarea.
+      options:
+        - label: Backend (API / lógica del servidor)
+        - label: Frontend (UI / componentes)
+        - label: Base de datos (modelos o migraciones)
+        - label: Integraciones externas (APIs, Firebase, etc.)
+        - label: Documentación (README, docs técnicos)
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📝 Notas adicionales
+      description: Links útiles, referencias, dudas o aclaraciones que puedan ayudar al equipo.
+      placeholder: "Ver especificación funcional 2.3.1 en docs para más detalles."
