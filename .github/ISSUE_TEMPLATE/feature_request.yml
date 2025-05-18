@@ -1,0 +1,31 @@
+name: Feature request
+description: Proponer una nueva funcionalidad o mejora
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por proponer una mejora. Por favor brindanos el detalle para analizar su implementación.
+
+  - type: input
+    id: title
+    attributes:
+      label: Título de la mejora
+      placeholder: "Permitir cargar más de una imagen por proyecto"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción de la funcionalidad
+      description: Contanos qué proponés, para qué serviría y a quién beneficiaría.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto adicional (opcional)
+      description: Información, enlaces o ejemplos relacionados con tu propuesta.
+      

@@ -1,0 +1,49 @@
+name: Bug report
+description: Reportar un error o comportamiento inesperado
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por reportar un error. Por favor completá los campos siguientes para ayudarnos a resolverlo.
+
+  - type: input
+    id: title
+    attributes:
+      label: Título del bug
+      placeholder: "Error al registrarse con correo no válido"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descripción del problema
+      description: Explicá qué ocurre, qué esperabas que ocurriera y cualquier mensaje de error recibido.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      description: Lista paso a paso para que podamos reproducir el error.
+      placeholder: |
+        1. Ir a la pantalla de registro
+        2. Ingresar un email inválido
+        3. Hacer clic en 'Registrarse'
+        4. Aparece el error 500
+    validations:
+      required: false
+
+  - type: input
+    id: environment
+    attributes:
+      label: Entorno (opcional)
+      description: Sistema operativo, navegador o versión de Node.js
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Evidencia visual (opcional)
+      description: Pegá aquí logs, capturas o videos que puedan ayudar.
