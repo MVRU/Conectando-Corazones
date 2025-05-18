@@ -1,4 +1,4 @@
-name: Bug report
+name: 🐞 Bug report
 description: Reportar un error o comportamiento inesperado
 labels: [bug]
 body:
