@@ -1,4 +1,4 @@
-![Conectando Corazones – Plataforma solidaria](../public/img/banner.png)
+![Conectando Corazones – Plataforma solidaria](/public/img/banner.png)
 
 <h1 align="center">📜 Code of Conduct</h1>
 
