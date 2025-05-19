@@ -1,4 +1,4 @@
-![Conectando Corazones – Plataforma solidaria](./public/img/banner.png)
+![Conectando Corazones – Plataforma solidaria](https://github.com/user-attachments/assets/99a5686b-6cb8-48f8-a468-c2cd612cfa9c)
 
 <h1 align="center">💞Conectando Corazones</h1>
 
