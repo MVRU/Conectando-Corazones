@@ -1,21 +1,33 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "desciption": "Backend de Conectando Corazones - Plataforma para vincular instituciones con colaboradores sociales.",
+  "main": "dist/index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "dev": "nodemon src/index.ts",
+    "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "Martín Alvarez, Marina Milo, Alexis Sklate <UTN FRRo - 2025>",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/MVRU/conectando-corazones #readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MVRU/conectando-corazones.git "
+  },
+  "bugs": {
+    "url": "https://github.com/MVRU/conectando-corazones/issues "
+  },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "@sendgrid/mail": "^8.1.5",
@@ -25,16 +37,17 @@
     "express": "^5.1.0",
     "firebase": "^11.7.3",
     "firebase-admin": "^13.4.0",
+    "helmet": "^8.1.0",
+    "morgan": "^1.10.0",
     "prisma": "^6.8.2"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.3.0",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.19",
     "nodemon": "^3.1.10",
     "playwright": "^1.52.0",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "vitest": "^3.1.4"
   }
