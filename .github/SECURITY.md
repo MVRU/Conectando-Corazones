@@ -1,4 +1,4 @@
-![Conectando Corazones – Plataforma solidaria](/public/img/banner.png)
+![Conectando Corazones – Plataforma solidaria](https://github.com/MVRU/Conectando-Corazones/blob/main/public/img/banner.png?raw=true)
 
 <h1 align="center">🔐 Security Policy</h1>
 
