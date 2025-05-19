@@ -39,22 +39,48 @@ El objetivo es potenciar el impacto colectivo y construir una red de colaboraci�
 
 ## ⚙️ Tecnologías utilizadas
 
-El sistema está construido con herramientas modernas y arquitectura desacoplada:
+El sistema está desarrollado con tecnologías modernas, arquitectura desacoplada y servicios de despliegue en la nube.
 
-### 🔸 Frontend
-- Next.js  
-- Tailwind CSS  
-- Chart.js
+### 🔸 Lenguaje principal
+- **TypeScript** (sobre JavaScript)
 
 ### 🔹 Backend
-- Node.js + Express.js  
-- PostgreSQL  
-- Firebase (chat, autenticación, archivos)
+- Node.js + Express.js
+- Arquitectura en capas (routes, controllers, services, repositories)
+- Prisma ORM (PostgreSQL)
+- Axios (consumo de APIs externas)
+- Firebase: Authentication, Storage y Realtime Database
+- Integraciones: RENAPER, ARCA y SendGrid
 
-### 🔧 Servicios externos
-- RENAPER + ARCA (validación oficial)  
-- SendGrid / Nodemailer (notificaciones)  
-- Vercel (frontend) y Render (backend + base de datos)
+### 🔹 Base de datos
+- PostgreSQL (servicio en la nube a través de Render)
+
+### 🔸 Frontend
+- React (SPA con Vite)
+- Tailwind CSS + clsx
+- React Router DOM (ruteo y roles)
+- React Hook Form + Yup (formularios y validación)
+- Zustand + Context API (gestión de estados)
+- Chart.js (visualización de métricas)
+
+### 🧪 Testing
+- Vitest + Testing Library (unitarias e integración)
+- Playwright (end-to-end)
+- Supertest (simulación de peticiones HTTP)
+
+### ☁️ Despliegue y servicios
+- Vercel (frontend)
+- Render (backend y base de datos)
+- Firebase (auth, almacenamiento, mensajería en tiempo real)
+
+### 🧠 Recomendaciones inteligentes
+- PostgreSQL: filtrado por historial, categorías y geolocalización
+- Librerías de apoyo: lodash, fastest-levenshtein, geo-distance
+
+### 🛡️ Seguridad y buenas prácticas
+- Helmet, CORS, express-rate-limit (seguridad en Express)
+- Validación oficial con APIs del Estado Argentino
+- Documentación técnica con Swagger y [GitHub Wiki](../../wiki)
 
 > La estructura del proyecto se encuentra organizada en `/frontend`, `/backend`, `/docs` y `/public`.
 
@@ -144,22 +170,56 @@ Our goal is to maximize collective impact and build a trustworthy and sustainabl
 
 ## ⚙️ Technologies Used
 
-Built with modern tools and a modular backend/frontend architecture:
+The platform is built with modern technologies, a decoupled architecture, and cloud-based deployment services.
 
-### 🔸 Frontend
-- Next.js  
-- Tailwind CSS  
-- Chart.js
+### 🔸 Main Language
+
+* **TypeScript** (on top of JavaScript)
 
 ### 🔹 Backend
-- Node.js + Express.js  
-- PostgreSQL  
-- Firebase (chat, authentication, file storage)
 
-### 🔧 External Services
-- RENAPER + ARCA (identity verification)  
-- SendGrid / Nodemailer (email notifications)  
-- Vercel (frontend) and Render (backend + database)
+* Node.js + Express.js
+* Layered architecture (routes, controllers, services, repositories)
+* Prisma ORM (PostgreSQL)
+* Axios (external API consumption)
+* Firebase: Authentication, Storage and Realtime Database
+* Integrations: RENAPER, ARCA, and SendGrid
+
+### 🔹 Database
+
+* PostgreSQL (hosted via Render)
+
+### 🔸 Frontend
+
+* React (SPA using Vite)
+* Tailwind CSS + clsx
+* React Router DOM (routing and role-based access)
+* React Hook Form + Yup (form handling and validation)
+* Zustand + Context API (state management)
+* Chart.js (data visualization)
+
+### 🧪 Testing
+
+* Vitest + Testing Library (unit and integration tests)
+* Playwright (end-to-end tests)
+* Supertest (HTTP request simulation)
+
+### ☁️ Deployment & Services
+
+* Vercel (frontend)
+* Render (backend and database)
+* Firebase (auth, file storage, real-time messaging)
+
+### 🧠 Smart Recommendations
+
+* PostgreSQL queries: project history, preferred categories, geo-based filtering
+* Support libraries: lodash, fastest-levenshtein, geo-distance
+
+### 🛡️ Security & Best Practices
+
+* Helmet, CORS, express-rate-limit (for backend protection)
+* Official validation with Argentine government APIs
+* Technical documentation via Swagger and [GitHub Wiki](../../wiki)
 
 > See `/frontend`, `/backend`, `/docs` and `/public` for structure.
 
