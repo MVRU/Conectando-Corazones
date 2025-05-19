@@ -1,5 +1,3 @@
-![Conectando Corazones – Plataforma solidaria](https://github.com/MVRU/Conectando-Corazones/blob/97a1424f034066140016cf79abf2a67225b20595/public/img/banner.png?raw=true)
-
 <h1 align="center">🔐 Security Policy</h1>
 
 <details open>
