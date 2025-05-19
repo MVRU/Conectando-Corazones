@@ -1,0 +1,49 @@
+# Node modules - NO ES NECESARIO YA QUE SE GENERA EN CADA INSTALL
+node_modules/
+
+# Build output - NO ES NECESARIO YA QUE SE GENERA EN CADA BUILD
+dist/
+
+# Environment variables - CONTIENEN INFORMACIÓN SENSIBLE QUE NO DEBE SUBIRSE A GITHUB
+.env
+.env.local
+.env.*.local
+
+# Firebase service account keys
+serviceAccountKey.json
+
+# Prisma generated files
+prisma/dev.db
+prisma/dev.db-journal
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# VSCode and IDE settings
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Testing outputs
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+*.spec.ts.snap
+
+# Others (optional, si usás GitHub Codespaces o Docker)
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# OS-specific
+*.log
+*.pid
