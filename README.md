@@ -82,7 +82,7 @@ El sistema está desarrollado con tecnologías modernas, arquitectura desacoplad
 - Validación oficial con APIs del Estado Argentino
 - Documentación técnica con Swagger y [GitHub Wiki](../../wiki)
 
-> La estructura del proyecto se encuentra organizada en `/frontend`, `/backend`, `/docs` y `/public`.
+> La estructura del proyecto se encuentra organizada en `/frontend`, `/backend` y `/docs`.
 
 ## 📖 Documentación
 
@@ -221,7 +221,7 @@ The platform is built with modern technologies, a decoupled architecture, and cl
 * Official validation with Argentine government APIs
 * Technical documentation via Swagger and [GitHub Wiki](../../wiki)
 
-> See `/frontend`, `/backend`, `/docs` and `/public` for structure.
+> See `/frontend`, `/backend` and `/docs` for structure.
 
 ## 📖 Documentation
 
