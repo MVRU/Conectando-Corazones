@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '../app.css';
 	import Header from '$lib/components/layout/Header.svelte';
+	import Footer from '$lib/components/layout/Footer.svelte';
 
 	let { children } = $props();
 </script>
@@ -8,6 +9,10 @@
 <!-- Agregar Header a todas las páginas -->
 <Header />
 
-<!-- TO-DO: agregar el componente Footer -->
+<!-- Contenido principal -->
+<main class="min-h-screen">
+	{@render children()}
+</main>
 
-{@render children()}
+<!-- Footer en todas las páginas -->
+<Footer />
