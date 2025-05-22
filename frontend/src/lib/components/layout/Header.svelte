@@ -25,7 +25,7 @@
 
 		<!-- Botón desktop -->
 		<div class="button-wrapper hidden md:flex">
-			<Button label="Registrarse" variant="primary" />
+			<Button label="Registrarse" href="/signin" />
 		</div>
 
 		<!-- Menú hamburguesa mobile -->

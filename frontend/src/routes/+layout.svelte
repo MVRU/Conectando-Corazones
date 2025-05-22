@@ -8,4 +8,6 @@
 <!-- Agregar Header a todas las páginas -->
 <Header />
 
+<!-- TO-DO: agregar el componente Footer -->
+
 {@render children()}

@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	export let label: string = 'Click me';
+	import { goto } from '$app/navigation';
+	export let label: string = 'Hacé clic!';
 	export let disabled = false;
+	export let href: string = '/';
+	export let external = false;
 </script>
 
 <button
+	on:click={() => {
+		if (external) window.location.href = href;
+		else if (!disabled) goto(href);
+	}}
 	class={clsx(
 		'rounded-4xl group relative cursor-pointer overflow-hidden px-6 py-3',
 		'flex items-center justify-center gap-2',
@@ -13,6 +20,9 @@
 		'h-12 md:h-14',
 		disabled && 'cursor-not-allowed opacity-50'
 	)}
+	role="link"
+	tabindex="0"
+	aria-label={`Ir a ${href}`}
 >
 	<!-- Fondo que sube desde abajo -->
 	<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
