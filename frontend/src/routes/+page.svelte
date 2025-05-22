@@ -2,6 +2,6 @@
 	import Button from '$lib/components/ui/Button.svelte';
 </script>
 
-<h1>Welcome to SvelteKit</h1>
-<Button label="Ver más" variant="primary"></Button>
-<Button label="Cancelar" variant="secondary"></Button>
+<h1>Conectando Corazones</h1>
+<Button label="Botón primario" variant="primary"></Button>
+<Button label="Botón secundario" variant="secondary"></Button>
