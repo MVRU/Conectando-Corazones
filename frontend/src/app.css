@@ -9,8 +9,8 @@
     --color-primary: 0 127 255;
     --color-primary-hover: 66 161 255;
 
-    /* Color para H2 y subtítulos*/
-    --subtitle-color: 15 16 41;
+    /* Color para fondo y subtítulos*/
+    --base-color: 15 16 41;
 
     /* Colores base */
     --white-color: 255 255 255;
@@ -80,7 +80,7 @@ h1 {
 
 h2 {
     font-size: 38px;
-    color: rgb(var(--subtitle-color));
+    color: rgb(var(--base-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);
@@ -100,7 +100,7 @@ h3 {
 
 h4 {
     font-size: 28px;
-    color: rgb(var(--subtitle-color));
+    color: rgb(var(--base-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);

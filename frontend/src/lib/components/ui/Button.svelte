@@ -7,7 +7,7 @@
 
 <button
 	class={clsx(
-		'rounded-4xl group relative cursor-pointer overflow-hidden px-6 py-3',
+		'rounded-4xl group relative cursor-pointer overflow-hidden px-6 py-3 ',
 		'flex items-center justify-center gap-2',
 		'h-14',
 		'transition-colors duration-300 ease-in-out',
@@ -47,6 +47,13 @@
 </button>
 
 <style>
+	:global(button) {
+		padding: 18px 29px;
+		min-width: 140px;
+		white-space: nowrap;
+		font-size: 16px;
+	}
+
 	/* Animaciones de entrada (hover) */
 	@keyframes background-up {
 		from {

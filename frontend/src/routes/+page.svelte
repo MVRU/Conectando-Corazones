@@ -2,6 +2,8 @@
 	import Button from '$lib/components/ui/Button.svelte';
 </script>
 
+<!-- TO-DO: borrar todo esto después, es solo de prueba -->
+
 <h1 class="text-title">Conectando Corazones</h1>
 
 <h1>Título H1</h1>
