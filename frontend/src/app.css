@@ -1,3 +1,27 @@
+/* Estas directivas son para Tailwind v4.x+ (más actual) */
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Paleta de colores */
+:root {
+    --color-primary: 0 127 255;
+    --color-primary-hover: 66 161 255;
+}
+
+/* Definir background colors */
+@layer utilities {
+    .bg-primary {
+        background-color: rgb(var(--color-primary));
+    }
+
+    .hover\:bg-primary-hover:hover {
+        background-color: rgb(var(--color-primary-hover));
+    }
+}
+
+@layer components {
+    .button-text {
+        @apply font-sans text-[18px] leading-[1.11] font-semibold;
+    }
+}
