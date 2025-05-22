@@ -23,7 +23,7 @@
 
 	<!-- Texto con estilo -->
 	<span
-		class="text-animation z-10 whitespace-nowrap font-[Inter] text-[18px] font-semibold leading-[1.11]"
+		class="text-animation font-inter z-10 whitespace-nowrap text-[18px] font-semibold leading-[1.11]"
 	>
 		{label}
 	</span>

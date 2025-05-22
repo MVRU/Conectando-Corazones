@@ -5,23 +5,140 @@
 
 /* Paleta de colores */
 :root {
+    /* Botón primario */
     --color-primary: 0 127 255;
     --color-primary-hover: 66 161 255;
+
+    /* Color para H2 y subtítulos*/
+    --subtitle-color: 15 16 41;
+
+    /* Colores base */
+    --white-color: 255 255 255;
+    --black-color: 0 0 0;
+    --gray-color: 243 244 246;
+
+    /* Márgenes y espaciados */
+    --spacing-2xs: 0.5em;
+    --spacing-xs: 0.6em;
+    --spacing-sm: 0.7em;
+    --spacing-md-sm: 0.8em;
+    --spacing-md: 0.9em;
+    --spacing-md-lg: 1em;
+    --spacing-lg: 1.1em;
+    --spacing-lg-xl: 1.2em;
+    --spacing-xl: 1.25em;
+    --spacing-xl-2xl: 1.3em;
+    --spacing-2xl: 1.4em;
+    --spacing-3xl: 1.5em;
 }
 
-/* Definir background colors */
-@layer utilities {
-    .bg-primary {
-        background-color: rgb(var(--color-primary));
-    }
-
-    .hover\:bg-primary-hover:hover {
-        background-color: rgb(var(--color-primary-hover));
-    }
+/* Limpiar estilos por defecto del navegador */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-@layer components {
-    .button-text {
-        @apply font-sans text-[18px] leading-[1.11] font-semibold;
-    }
+body {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: var(--spacing-3xl);
+    color: rgb(var(--white-color));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+p,
+ul,
+ol {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: var(--spacing-3xl);
+    color: rgb(var(--white-color));
+}
+
+
+/* Estilos globales personalizados */
+
+html {
+    font-family: Inter, system-ui, sans-serif;
+    scroll-behavior: smooth;
+}
+
+h1 {
+    font-size: 54px;
+    /* color: rgb(var(--white-color)); */
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: var(--spacing-lg);
+    margin-top: var(--spacing-lg-xl);
+    margin-bottom: var(--spacing-md-sm);
+}
+
+h2 {
+    font-size: 38px;
+    color: rgb(var(--subtitle-color));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: var(--spacing-xl-2xl);
+    margin-top: var(--spacing-lg);
+    margin-bottom: var(--spacing-md);
+}
+
+h3 {
+    font-size: 24px;
+    color: rgb(var(--black-color));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: var(--spacing-xl);
+    margin-top: var(--spacing-md-lg);
+    margin-bottom: var(--spacing-md-sm);
+}
+
+h4 {
+    font-size: 28px;
+    color: rgb(var(--subtitle-color));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: var(--spacing-xl-2xl);
+    margin-top: var(--spacing-md-lg);
+    margin-bottom: var(--spacing-sm);
+}
+
+h5 {
+    font-size: 20px;
+    color: rgb(var(--black-color));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 600;
+    line-height: var(--spacing-lg);
+    margin-top: var(--spacing-md-lg);
+    margin-bottom: var(--spacing-xs);
+}
+
+h6 {
+    font-size: 18px;
+    color: rgb(var(--black-color));
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: var(--spacing-2xl);
+    margin-top: var(--spacing-md-lg);
+    margin-bottom: var(--spacing-2xs);
+}
+
+/* Fuente personalizada (Inter) */
+.font-inter {
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Background colors */
+.bg-primary {
+    background-color: rgb(var(--color-primary));
+}
+
+.hover\:bg-primary-hover:hover {
+    background-color: rgb(var(--color-primary-hover));
 }
