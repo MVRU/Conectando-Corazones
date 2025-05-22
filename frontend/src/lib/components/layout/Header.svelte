@@ -27,36 +27,35 @@
 		<div class="button-wrapper hidden md:flex">
 			<Button label="Registrarse" href="/signin" />
 		</div>
-
-		<!-- Menú hamburguesa mobile -->
-		<div class="menu-icon z-50 flex items-center md:hidden">
-			<button
-				on:click={() => (menuOpen = !menuOpen)}
-				aria-label="Toggle navigation"
-				class="relative h-6 w-6 cursor-pointer"
+	</div>
+	<!-- Menú hamburguesa mobile -->
+	<div class="menu-icon menu-icon-mobile z-50 flex items-center p-0 md:hidden">
+		<button
+			on:click={() => (menuOpen = !menuOpen)}
+			aria-label="Toggle navigation"
+			class="relative m-0 flex h-6 w-6 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0"
+		>
+			<svg
+				class="hamburger-icon absolute inset-0 z-50 transition-transform duration-300 ease-in-out"
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				class:rotate-90={menuOpen}
 			>
-				<svg
-					class="hamburger-icon absolute inset-0 z-50 transition-transform duration-300 ease-in-out"
-					width="24"
-					height="24"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class:rotate-90={menuOpen}
-				>
-					{#if menuOpen}
-						<!-- Icono cerrar -->
-						<path d="M6 18L18 6M6 6l12 12" />
-					{:else}
-						<!-- Icono menú -->
-						<path d="M3 12h18M3 6h18M3 18h18" />
-					{/if}
-				</svg>
-			</button>
-		</div>
+				{#if menuOpen}
+					<!-- Icono cerrar -->
+					<path d="M6 18L18 6M6 6l12 12" />
+				{:else}
+					<!-- Icono menú -->
+					<path d="M3 12h18M3 6h18M3 18h18" />
+				{/if}
+			</svg>
+		</button>
 	</div>
 
 	<!-- Overlay negro para el menú mobile -->
@@ -108,7 +107,7 @@
 		align-items: center;
 		justify-content: center;
 		width: 100%;
-		padding: 30px 0;
+		padding: 30px 0px;
 		background-color: rgb(var(--base-color));
 		position: relative;
 		box-sizing: border-box;
@@ -216,5 +215,19 @@
 
 	.logo-wrapper:hover .logo {
 		animation: heartbeat 0.8s infinite ease-in-out;
+	}
+
+	.menu-icon-mobile {
+		position: absolute;
+		right: -4.5rem;
+		top: 50%;
+		padding: 0rem 0rem;
+		transform: translateY(-50%);
+		z-index: 50;
+	}
+	@media (min-width: 768px) {
+		.menu-icon-mobile {
+			display: none;
+		}
 	}
 </style>
