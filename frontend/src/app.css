@@ -1,3 +1,67 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@layer base {
+    :root {
+        --color-primary: 236 72 153;
+        /* Rosa cálido */
+        --color-secondary: 14 165 233;
+        /* Azul cielo */
+        --color-accent: 249 115 22;
+        /* Naranja */
+        --color-background: 255 255 255;
+        /* Blanco */
+        --color-text: 15 23 42;
+        /* Slate 900 */
+    }
+
+    body {
+        @apply bg-background text-text antialiased;
+        @apply min-h-screen;
+    }
+
+    h1 {
+        @apply text-4xl font-bold text-primary mb-6;
+    }
+
+    h2 {
+        @apply text-3xl font-semibold text-primary mb-4;
+    }
+
+    h3 {
+        @apply text-2xl font-medium text-primary mb-3;
+    }
+}
+
+@layer components {
+    .btn-primary {
+        @apply px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50;
+    }
+
+    .btn-secondary {
+        @apply px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary/50;
+    }
+
+    .card {
+        @apply bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow;
+    }
+
+    .input-field {
+        @apply w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent;
+    }
+
+    .container-custom {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    .gradient-text {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary;
+    }
+}
