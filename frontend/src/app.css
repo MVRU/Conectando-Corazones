@@ -32,14 +32,7 @@
     --spacing-3xl: 1.5em;
 }
 
-/* Limpiar estilos por defecto del navegador */
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+
 
 body {
     font-family: 'Inter', system-ui, sans-serif;
@@ -128,6 +121,7 @@ h6 {
     margin-top: var(--spacing-md-lg);
     margin-bottom: var(--spacing-2xs);
 }
+
 
 /* Fuente personalizada (Inter) */
 .font-inter {

@@ -1,18 +1,19 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
+	import Image from '$lib/components/ui/Image.svelte';
 	let menuOpen = false;
 </script>
 
 <div class="header-outer">
 	<div class="header-inner">
 		<!-- Logo -->
-		<a href="/" aria-label="Home" class="logo-wrapper">
-			<img
-				src="/logo-1.png"
-				alt="Logo de la aplicación"
-				class="logo transition-transform duration-300"
-			/>
-		</a>
+		<Image
+			src="/logo-1.png"
+			alt="Logo de Conectando Corazones"
+			width="50px"
+			animate="heartbeat"
+			href="/"
+		/>
 
 		<!-- Navbar Desktop -->
 		<nav class="navbar hidden gap-10 md:flex">
@@ -125,12 +126,6 @@
 		padding-left: 2rem;
 	}
 
-	.logo {
-		width: 50px;
-		height: 50px;
-		object-fit: contain;
-	}
-
 	.navbar a {
 		text-decoration: none;
 		color: rgb(var(--text-primary));
@@ -211,10 +206,6 @@
 		100% {
 			transform: scale(1);
 		}
-	}
-
-	.logo-wrapper:hover .logo {
-		animation: heartbeat 0.8s infinite ease-in-out;
 	}
 
 	.menu-icon-mobile {
