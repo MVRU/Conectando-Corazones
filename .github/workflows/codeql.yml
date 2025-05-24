@@ -1,1 +1,60 @@
-# TO-DO: terminar de configurar los Code Scanning Alerts (análisis de seguridad)
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ] # Ver si agregar otras ramas más adelante
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 2 * * 0' # Todos los domingos a las 2:00 UTC
+
+jobs:
+  codeql-analysis:
+    name: "CodeQL Security Scan"
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      matrix:
+        language: [ "javascript" ] # Incluye TypeScript automáticamente
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Backend
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      # Frontend
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      # Build frontend (es necesario para el análisis)
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild (CodeQL detecta automáticamente los builds)
+        uses: github/codeql-action/autobuild@v2
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
