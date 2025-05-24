@@ -1,44 +1,53 @@
 <script lang="ts">
-	export let size: number = 50; // Tamaño por defecto del logo
+	export let size: number = 50;
 	export let loading = false;
 </script>
 
-<div class="loader inset-0 z-50 flex items-center justify-center">
-	<div class="flex flex-col items-center justify-center space-y-0.5 pt-8 text-center">
-		<img
-			src="/logo-2.png"
-			alt="Cargando..."
-			class="loader-logo"
-			style={`width: ${size}px; height: ${size}px; opacity: 0.8;`}
-		/>
-
-		<!-- Texto -->
-		<h5 class="loader-text text-xl font-semibold opacity-80">Cargando...</h5>
+{#if loading}
+	<div
+		class="pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-30 flex items-center justify-center bg-white/60 backdrop-blur-sm"
+	>
+		<div class="pointer-events-auto relative flex flex-col items-center justify-center">
+			<img
+				src="/logo-2.png"
+				alt="Cargando..."
+				class="animate-pulse-soft"
+				style={`width: ${size}px; height: ${size}px; opacity: 0.85; filter: drop-shadow(0 0 5px rgba(0,0,0,0.1));`}
+			/>
+			<span class="animate-fade-in mt-2 text-sm text-gray-500">Cargando...</span>
+		</div>
 	</div>
-</div>
+{/if}
 
 <style>
-	@keyframes heartbeat {
-		0% {
-			transform: scale(1);
-			opacity: 0.8;
-		}
-		50% {
-			transform: scale(1.05);
-			opacity: 0.6;
-		}
+	@keyframes pulse-soft {
+		0%,
 		100% {
 			transform: scale(1);
-			opacity: 0.8;
+			opacity: 0.6;
+		}
+		50% {
+			transform: scale(1.1);
+			opacity: 1;
 		}
 	}
 
-	.loader-logo,
-	.loader-text {
-		animation: heartbeat 1s infinite ease-in-out both;
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 
-	.loader-text {
-		margin-top: 0.8rem;
+	.animate-pulse-soft {
+		animation: pulse-soft 1.8s ease-in-out infinite;
+	}
+
+	.animate-fade-in {
+		animation: fade-in 0.6s ease-out forwards;
 	}
 </style>

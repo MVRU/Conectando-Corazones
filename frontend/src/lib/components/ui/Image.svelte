@@ -58,21 +58,34 @@
 		border-radius: 9999px;
 	}
 
+	/* Animación de latido */
 	@keyframes heartbeat {
-		0% {
+		from {
 			transform: scale(1);
+			transform-origin: center center;
+			animation-timing-function: ease-out;
 		}
-		50% {
-			transform: scale(1.1);
+		10% {
+			transform: scale(0.91);
+			animation-timing-function: ease-in;
 		}
-		100% {
+		17% {
+			transform: scale(0.98);
+			animation-timing-function: ease-out;
+		}
+		33% {
+			transform: scale(0.87);
+			animation-timing-function: ease-in;
+		}
+		45% {
 			transform: scale(1);
+			animation-timing-function: ease-out;
 		}
 	}
 
 	/* Imágenes con animación de latido */
 	.animate-heartbeat:hover {
-		animation: heartbeat 0.8s infinite ease-in-out;
+		animation: heartbeat 1.5s ease-in-out infinite both;
 	}
 
 	/* Imágenes con zoom al hacer hover */

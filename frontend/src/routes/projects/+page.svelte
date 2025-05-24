@@ -1,7 +1,8 @@
-<!-- ESTA ES LA PÁGINA PROJECTS O PROYECTOS -->
 <script>
 	import Loader from '$lib/components/feedback/Loader.svelte';
 </script>
 
-<h2>Proyectos</h2>
-<Loader size={100} loading={true} />
+<main class="relative h-screen w-screen px-8">
+	<h2>Proyectos</h2>
+	<Loader size={100} loading={true} />
+</main>
