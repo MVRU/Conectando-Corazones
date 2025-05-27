@@ -2,16 +2,24 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import Image from '$lib/components/ui/Image.svelte';
 	import Bagde from '$lib/components/ui/Bagde.svelte';
+	import Ticker from '$lib/components/ui/Ticker.svelte';
+
+	const logos = [
+		'/instituciones/rotary.png',
+		'/instituciones/unicef.png',
+		'/instituciones/cruz-roja.png'
+	];
 </script>
 
-<!-- TO-DO: borrar todo esto después, es solo de prueba. Esta es la página HOME o INICIO -->
 <div class="m-4">
 	<h2 class="text-[rgb(var(--base-color))]">Inicio</h2>
 	<h6>Esto es de prueba...</h6>
 
-	<Bagde text="Cada acción cuenta, empezá la tuya"></Bagde>
+	<Ticker {logos} />
 
-	<Button label="Botón primario"></Button>
+	<Bagde text="Cada acción cuenta, empezá la tuya" />
+
+	<Button label="Botón primario" />
 
 	<div class="mt-4">
 		<Image
@@ -20,6 +28,6 @@
 			alt="Imagen de prueba"
 			animate="zoom"
 			variant="default"
-		></Image>
+		/>
 	</div>
 </div>
