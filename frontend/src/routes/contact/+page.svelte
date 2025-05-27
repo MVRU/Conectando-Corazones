@@ -3,6 +3,6 @@
 </script>
 
 <main class="relative h-screen w-screen px-8">
-	<h2>Contacto</h2>
+	<h2 class="text-[rgb(var(--base-color))]">Contacto</h2>
 	<Loader size={100} loading={true} />
 </main>

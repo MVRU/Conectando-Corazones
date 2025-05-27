@@ -5,7 +5,7 @@
 
 <!-- TO-DO: borrar todo esto después, es solo de prueba. Esta es la página HOME o INICIO -->
 <div class="m-4">
-	<h2>Inicio</h2>
+	<h2 class="text-[rgb(var(--base-color))]">Inicio</h2>
 	<h6>Esto es de prueba...</h6>
 
 	<Button label="Botón primario"></Button>

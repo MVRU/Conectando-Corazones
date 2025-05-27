@@ -16,7 +16,7 @@
 		/>
 
 		<!-- Navbar Desktop -->
-		<nav class="navbar hidden gap-10 md:flex">
+		<nav class="navbar hidden gap-10 text-white md:flex">
 			<a href="/">Inicio</a>
 			<a href="/about">Acerca de</a>
 			<a href="/projects">Proyectos</a>
@@ -30,7 +30,7 @@
 		</div>
 	</div>
 	<!-- Menú hamburguesa mobile -->
-	<div class="menu-icon menu-icon-mobile z-50 flex items-center p-0 md:hidden">
+	<div class="menu-icon menu-icon-mobile z-50 flex items-center p-0 text-white md:hidden">
 		<button
 			on:click={() => (menuOpen = !menuOpen)}
 			aria-label="Toggle navigation"
@@ -67,7 +67,7 @@
 	<!-- Menú mobile -->
 	{#if menuOpen}
 		<div
-			class="mobile-menu absolute left-0 right-0 top-full z-50 rounded-b-lg rounded-t-none px-8 py-6 shadow-lg"
+			class="mobile-menu absolute left-0 right-0 top-full z-50 rounded-b-lg rounded-t-none px-8 py-6 text-white shadow-lg"
 			class:slideDown={menuOpen}
 			class:slideUp={!menuOpen}
 		>

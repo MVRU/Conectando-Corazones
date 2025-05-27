@@ -38,7 +38,6 @@ body {
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 16px;
     line-height: var(--spacing-3xl);
-    color: rgb(var(--white-color));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -49,7 +48,6 @@ ol {
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 16px;
     line-height: var(--spacing-3xl);
-    color: rgb(var(--white-color));
 }
 
 
@@ -62,7 +60,6 @@ html {
 
 h1 {
     font-size: 54px;
-    /* color: rgb(var(--white-color)); */
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     letter-spacing: -0.03em;
@@ -73,7 +70,6 @@ h1 {
 
 h2 {
     font-size: 38px;
-    color: rgb(var(--base-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);
@@ -83,7 +79,6 @@ h2 {
 
 h3 {
     font-size: 24px;
-    color: rgb(var(--black-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl);
@@ -93,7 +88,6 @@ h3 {
 
 h4 {
     font-size: 28px;
-    color: rgb(var(--base-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);
@@ -103,7 +97,6 @@ h4 {
 
 h5 {
     font-size: 20px;
-    color: rgb(var(--black-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-lg);
@@ -113,7 +106,6 @@ h5 {
 
 h6 {
     font-size: 18px;
-    color: rgb(var(--black-color));
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: -0.04em;
@@ -135,4 +127,8 @@ h6 {
 
 .hover\:bg-primary-hover:hover {
     background-color: rgb(var(--color-primary-hover));
+}
+
+.bg-base-color {
+    background-color: rgb(var(--base-color));
 }
