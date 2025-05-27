@@ -1,3 +1,26 @@
+<!--
+* Componente: Image
+	-*- Descripción: muestra una imagen configurable con variantes de estilo, animación y envoltorio opcional con enlace.
+
+* Props:
+	-*- src (string): URL de la imagen. Obligatoria.
+	-*- alt (string): texto alternativo. Recomendado por accesibilidad.
+	-*- variant ('default' | 'circle' | 'card' | 'none'): estilo visual de la imagen. Por defecto: 'default'.
+	-*- animate ('none' | 'heartbeat' | 'zoom'): tipo de animación aplicada. Por defecto: 'none'.
+	-*- width (string): ancho de la imagen (CSS unit). Por defecto: '100%'.
+	-*- height (string): alto de la imagen (CSS unit). Por defecto: 'auto'.
+	-*- href (string): si se define, la imagen se envuelve en un link hacia esta ruta o URL.
+
+TODO:
+	- [ ] Soportar aspect-ratio responsivo directamente por prop.
+
+! WARNING:
+	-!- Si `href` está definido pero es una URL externa, el componente no distingue entre navegación interna y externa.
+
+? CUESTIONES ABIERTAS:
+	-?- ¿Conviene ofrecer un wrapper `<figure>` y prop opcional `caption`?
+-->
+
 <script lang="ts">
 	export let src: string = '';
 	export let alt: string = '';

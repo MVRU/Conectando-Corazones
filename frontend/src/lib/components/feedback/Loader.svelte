@@ -1,3 +1,25 @@
+<!--
+* Componente: Loader
+	-*- Descripción: muestra un indicador de carga superpuesto en pantalla.
+	-*- Utilidad: bloquea la interfaz y comunica visualmente que algo se está procesando.
+
+* Props:
+	-*- loading (boolean): determina si se muestra el loader. Por defecto: false.
+	-*- size (number): tamaño del logo/ícono cargando. Por defecto: 50px.
+
+TODO:
+	- [ ] Permitir personalizar el texto ("Cargando...").
+	- [ ] Soportar variantes de color y fondo para distintos contextos.
+	- [ ] Agregar prop para definir opacidad del overlay.
+
+! WARNING:
+	-!- Este componente cubre toda el área contenedora. Usar con precaución si no se encuentra en un wrapper de posición relativa.
+
+* DECISIÓN DE DISEÑO:
+	-*- Se utiliza una animación tipo "pulse" para transmitir actividad sin ser invasiva.
+	-*- Se implementa `backdrop-blur` para suavizar el fondo y centrar la atención.
+-->
+
 <script lang="ts">
 	export let size: number = 50;
 	export let loading = false;

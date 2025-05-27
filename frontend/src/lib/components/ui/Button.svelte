@@ -1,3 +1,28 @@
+<!--
+* Componente: Button
+	-*- Descripción: botón interactivo con animaciones visuales y navegación integrada.
+	-*- Funcionalidad: soporta navegación interna (mediante `goto`) o externa (`window.location.href`) según el caso.
+
+* Props:
+	-*- label (string): texto visible dentro del botón. Por defecto: 'Hacé clic!'.
+	-*- disabled (boolean): si está activado, el botón queda deshabilitado y atenuado.
+	-*- href (string): ruta o URL de destino al hacer clic.
+	-*- external (boolean): si es `true`, se navega usando `window.location.href` en lugar de `goto()`.
+
+TODO:
+	- [ ] Agregar variantes de estilo: `primary`, `secondary`, `outline`, `danger`.
+
+! WARNING:
+	-!- Este botón asume que `href` siempre es una URL válida. Validar si el string es vacío puede ser necesario.
+
+* DECISIÓN DE DISEÑO:
+	-*- Se optó por usar `goto()` de SvelteKit para navegación interna y `window.location.href` para externa, sin usar `<a>` para mayor control.
+
+? CUESTIONES ABIERTAS:
+	-?- ¿Debería usarse un `<a>` si `external === true` por accesibilidad semántica?
+	-?- ¿Conviene separar el componente en dos: Button + LinkButton?
+-->
+
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';

@@ -9,13 +9,13 @@ dotenv.config();
 
 const app = express();
 
-const PORT = process.env.PORT || 3000; // TO-DO: configurar el puerto
+const PORT = process.env.PORT || 3000; // TODO: configurar el puerto
 
 connectDB();
 
 // app.use(cors());
 app.use(helmet());
-// app.use(morgan('dev')); // TO-DO: configurar el logger
+// app.use(morgan('dev')); // TODO: configurar el logger
 app.use(express.json());
 
 // Rutas
