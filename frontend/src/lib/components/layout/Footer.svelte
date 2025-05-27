@@ -2,7 +2,7 @@
 	const year = new Date().getFullYear();
 </script>
 
-<footer class="bg-base-color w-full py-12 text-white">
+<footer class="bg-base-color w-full py-10 text-white sm:py-12">
 	<div class="mx-auto max-w-7xl px-6">
 		<div class="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-x-20">
 			<!-- Logo y descripción -->
@@ -100,8 +100,10 @@
 		<!-- Línea divisoria -->
 		<hr class="my-10 border-white/20" />
 
-		<div class=" flex flex-row items-center justify-between gap-4">
-			<p>
+		<div
+			class="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-center sm:text-left"
+		>
+			<p class="break-words text-sm sm:text-base">
 				&copy; {year} Conectando Corazones. Todos los derechos reservados.
 			</p>
 
