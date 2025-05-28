@@ -1,8 +1,22 @@
-<script>
-	import Loader from '$lib/components/feedback/Loader.svelte';
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import Projects from '$lib/components/sections/Projects.svelte';
+	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+
+	// Establecer breadcrumbs al montar la página
+	onMount(() => {
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.home,
+			{ label: 'Proyectos' } // Sin href porque es la página actual
+		]);
+	});
 </script>
 
-<main class="relative h-screen w-screen px-8">
-	<h2 class="text-[rgb(var(--base-color))]">Proyectos</h2>
-	<Loader size={100} loading={true} />
+<svelte:head>
+	<title>Proyectos - Conectando Corazones</title>
+	<meta name="description" content="Descubre todos los proyectos activos que necesitan tu colaboración" />
+</svelte:head>
+
+<main class="relative min-h-screen w-full bg-gray-50">
+	<Projects />
 </main>
