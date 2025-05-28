@@ -3,11 +3,11 @@
 // Componentes de UI
 export { default as Badge } from './components/ui/Badge.svelte';
 export { default as Button } from './components/ui/Button.svelte';
-export { default as ProyectoCard } from './components/ui/ProyectoCard.svelte';
+export { default as ProjectCard } from './components/ui/ProjectCard.svelte';
 export { default as Breadcrumbs } from './components/ui/Breadcrumbs.svelte';
 
 // Componentes de secciones
-export { default as Proyectos } from './components/sections/Proyectos.svelte';
+export { default as Projects } from './components/sections/Projects.svelte';
 
 // Reexport your entry components here
 export { default as Image } from './components/ui/Image.svelte';
