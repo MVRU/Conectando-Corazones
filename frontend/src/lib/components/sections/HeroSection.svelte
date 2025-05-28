@@ -79,7 +79,7 @@
 
 		<!-- Imágenes destacadas -->
 		<div
-			class="relative grid flex-1 grid-cols-2 gap-4 rounded-3xl shadow-xl shadow-black/30 transition-all duration-1000 ease-out"
+			class="relative grid flex-1 grid-cols-2 gap-4 rounded-3xl transition-all duration-1000 ease-out"
 			class:opacity-0={!showImages}
 			class:scale-90={!showImages}
 			class:blur-sm={!showImages}
