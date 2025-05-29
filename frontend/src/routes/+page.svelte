@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import HeroSection from '$lib/components/sections/HeroSection.svelte';
-	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import HowItWorks from '$lib/components/sections/HowItWorks.svelte';
 
 	const logos = [
 		'/instituciones/rotary.png',
@@ -20,3 +19,4 @@
 </script>
 
 <HeroSection />
+<HowItWorks />
