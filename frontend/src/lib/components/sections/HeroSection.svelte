@@ -56,7 +56,7 @@
 				Cambiá una vida<br />
 				<span class="text-white">con un clic.</span>
 			</h1>
-			<hp
+			<p
 				class="mx-auto max-w-xl text-xl font-semibold text-gray-200 transition-all duration-1000 sm:text-2xl lg:mx-0"
 				class:opacity-0={!showHero}
 				class:translate-y-6={!showHero}
@@ -64,7 +64,7 @@
 			>
 				Creamos puentes entre quienes tienen algo valioso para dar y quienes luchan por un mundo
 				mejor.
-			</hp>
+			</p>
 			<div
 				class="mt-8 flex justify-center transition-all duration-1000 lg:justify-start"
 				class:opacity-0={!showHero}
@@ -85,22 +85,22 @@
 			class:blur-sm={!showImages}
 		>
 			<div
-				class="aspect-square w-full -translate-y-2 translate-x-3 rotate-6 transform overflow-hidden rounded-2xl"
+				class="rounded-4xl aspect-square w-full -translate-y-2 translate-x-3 rotate-6 transform overflow-hidden"
 			>
 				<Image src="/img/plantando-arbol.jpg" alt="Manos plantando árbol" animate="zoom" />
 			</div>
 			<div
-				class="aspect-square w-full -translate-x-4 translate-y-2 -rotate-6 transform overflow-hidden rounded-2xl"
+				class="rounded-4xl aspect-square w-full -translate-x-4 translate-y-2 -rotate-6 transform overflow-hidden"
 			>
 				<Image src="/img/bomberos-solidarios.jpg" alt="Bomberos solidarios" animate="zoom" />
 			</div>
 			<div
-				class="aspect-square w-full -translate-y-8 -rotate-6 transform overflow-hidden rounded-2xl"
+				class="rounded-4xl aspect-square w-full -translate-y-8 -rotate-6 transform overflow-hidden"
 			>
 				<Image src="/img/profesional-salud.jpg" alt="Profesionales de salud" animate="zoom" />
 			</div>
 			<div
-				class="rotate-4 aspect-square w-full -translate-x-4 -translate-y-4 transform overflow-hidden rounded-2xl"
+				class="rotate-4 rounded-4xl aspect-square w-full -translate-x-4 -translate-y-4 transform overflow-hidden"
 			>
 				<Image src="/img/ninos-sonriendo.jpg" alt="Niños corriendo y sonriendo" animate="zoom" />
 			</div>

@@ -7,7 +7,7 @@
 	-*- logos (string[]): array de rutas a las imágenes de las instituciones.
 
 TODO:
-	- [ ] Permitir pasar links asociados a cada logo para hacerlos clickeables. -> cuando tengamos endpoints del backend.
+	- [ ] Permitir pasar links asociados a cada logo para hacerlos clickeables. -> cuando tengamos endpoints del backend tomaría las fotos de perfil de la institución.
 
 ! WARNING:
 	-!- Las imágenes deben tener fondo transparente o adaptarse visualmente al color `--base-color`.
@@ -50,11 +50,6 @@ TODO:
 	}
 
 	.ticker-track {
-		animation: ticker-scroll 40s linear infinite;
-	}
-
-	/* Pausar animación al hacer hover sobre el contenedor */
-	.group:hover .ticker-track {
-		animation-play-state: paused;
+		animation: ticker-scroll 80s linear infinite;
 	}
 </style>

@@ -22,5 +22,5 @@ TODO:
 		class:rounded-sm={shape === 'square'}
 		class:rounded-full={shape === 'circle'}
 	></span>
-	<p class="text-sm font-semibold text-[rgb(var(--color-primary))]">{text}</p>
+	<p class="text-m font-semibold text-[rgb(var(--color-primary))]">{text}</p>
 </div>

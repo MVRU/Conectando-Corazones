@@ -36,7 +36,6 @@
 
 body {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 16px;
     line-height: var(--spacing-3xl);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -46,7 +45,6 @@ p,
 ul,
 ol {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 16px;
     line-height: var(--spacing-3xl);
 }
 
