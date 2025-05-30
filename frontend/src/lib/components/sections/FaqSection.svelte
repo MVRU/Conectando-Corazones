@@ -1,72 +1,91 @@
 <!--
 * Componente: FaqSection
-    -*- Descripción: sección de preguntas frecuentes con acordeón y soporte para imagen.
-    -*- Funcionalidad: muestra preguntas frecuentes con respuestas expandibles y CTA de contacto.
-    -*- Props: contenido estático por ahora.
+	-*- Descripción: sección de preguntas frecuentes que aclara dudas comunes sobre el uso de la plataforma.
+	-*- Funcionalidad: muestra una lista de preguntas y respuestas con un diseño atractivo y una imagen relevante.
 
-TODO:
-    - [ ] Mejorar estilos y responsividad.
-    - [ ] Agregar animaciones al acordeón.
-    - [ ] Cargar preguntas desde models y data.
+* Props:
+	-*- No recibe props por ahora (contenido estático).
 -->
 
 <script lang="ts">
 	import FaqItem from '$lib/components/ui/FaqItem.svelte';
 	import Image from '$lib/components/ui/Image.svelte';
-
-	const faqs = [
-		{
-			question: '¿Quién puede registrarse en la plataforma?',
-			answer:
-				'Cualquier institución que necesite ayuda o cualquier organización interesada en colaborar.'
-		},
-		{
-			question: '¿Cómo se seleccionan las organizaciones para un proyecto?',
-			answer:
-				'Las instituciones revisan las solicitudes recibidas y eligen a las organizaciones que mejor se alinean con sus necesidades..'
-		},
-		{
-			question: '¿Es gratuito usar la plataforma?',
-			answer: 'Sí, el registro y uso de la plataforma son completamente gratuitos.'
-		},
-		{
-			question: '¿Qué tipo de ayuda puedo ofrecer?',
-			answer:
-				'Podés ofrecer recursos materiales, financiamiento, voluntariado u otros tipos de apoyo según el proyecto.'
-		}
-	];
+	import { faqs } from '$lib/data/faqs';
 </script>
 
-<section class="w-full bg-white px-4 py-20 md:px-8">
-	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-16 md:grid-cols-2">
-		<!-- Columna de FAQ -->
-		<div class="flex flex-col justify-center">
-			<h2 class="mb-4 text-2xl font-bold text-gray-900">
+<section class="w-full bg-gradient-to-b from-[#f7f8fd] to-white px-4 py-20 md:px-8">
+	<div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 md:grid-cols-2">
+		<!-- FAQ -->
+		<div class="animate-fadeInLeft flex flex-col justify-center">
+			<h2 class="mb-6 text-3xl font-extrabold leading-tight tracking-tight text-[--base-color]">
 				Respuestas claras y concisas para <span class="text-gray-500"
-					>empezar tu camino solidario.
-				</span>
+					>empezar tu camino solidario.</span
+				>
 			</h2>
 			<div class="space-y-4">
 				{#each faqs as faq, i}
 					<FaqItem question={faq.question} answer={faq.answer} initiallyOpen={i === 0} />
 				{/each}
 			</div>
-			<p class="mt-6 text-sm text-gray-600">
+			<p class="mt-8 text-center text-base text-gray-500 lg:text-left">
 				¿Tenés más preguntas?
-				<a href="/contacto" class=" underline transition"> ¡Contactanos! </a>
+				<a
+					href="/contacto"
+					class="ml-1 inline-block font-semibold text-blue-500 underline underline-offset-4 transition-colors hover:text-blue-600"
+					>¡Contactanos!</a
+				>
 			</p>
 		</div>
 
-		<!-- Columna de imagen -->
-		<div class="flex items-center justify-center">
-			<div class="w-full max-w-md overflow-hidden rounded-3xl shadow-lg">
-				<Image
-					src="/img/faq-1.jpg"
-					alt="Personas uniendo manos en señal de equipo y ayuda"
-					width="100%"
-					height="auto"
-				/>
+		<!-- Imagen -->
+		<div
+			class=" cta-img-outer animate-fadeInRight group relative mx-auto w-[80%] max-w-[340px] overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
+		>
+			<div
+				class=" left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
+				style="
+		will-change: transform;
+		transition: transform 0.85s cubic-bezier(.43,0,.15,1);
+	"
+				tabindex="-1"
+			>
+				<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
+					<Image
+						src="/img/faq-1.jpg"
+						alt="Personas uniendo manos en señal de equipo y ayuda"
+						variant="card"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>
 </section>
+
+<style>
+	@keyframes fadeInLeft {
+		0% {
+			opacity: 0;
+			transform: translateX(-40px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+	@keyframes fadeInRight {
+		0% {
+			opacity: 0;
+			transform: translateX(40px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+	.animate-fadeInLeft {
+		animation: fadeInLeft 1.2s cubic-bezier(0.46, 0.03, 0.52, 0.96) both;
+	}
+	.animate-fadeInRight {
+		animation: fadeInRight 1.2s cubic-bezier(0.46, 0.03, 0.52, 0.96) both;
+	}
+</style>

@@ -210,9 +210,8 @@
 
 	.menu-icon-mobile {
 		position: absolute;
-		right: -4.5rem;
+		right: 2rem;
 		top: 50%;
-		padding: 0rem 0rem;
 		transform: translateY(-50%);
 		z-index: 50;
 	}
