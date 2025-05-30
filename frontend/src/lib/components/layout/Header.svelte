@@ -1,223 +1,217 @@
+<!--
+* Componente: Header
+	-*- Descripción: barra de navegación superior con logo, enlaces y botón de registro.
+
+* Props:
+-*- `menuOpen`: Estado del menú móvil (abierto/cerrado).
+-*- `visible`: Indica si el header es visible en la pantalla.
+-*- `showHeader`: Controla la visibilidad del header al hacer scroll.
+-*- `lastScrollY`: Guarda la última posición del scroll para determinar si ocultar el header.
+-*- `navLinks`: Array de objetos con `label` y `href` para los enlaces de navegación.
+
+TODO:
+	- [ ] Agregar overlay oscuro al abrir el menú móvil.
+-->
+
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Image from '$lib/components/ui/Image.svelte';
+
 	let menuOpen = false;
+	let visible = false;
+	let showHeader = true;
+	let lastScrollY = 0;
+	let headerRef: HTMLElement;
+
+	// Rutas de navegación (esto permite agregar más en el futuro o cambiarlas sin modificar el código)
+	const navLinks = [
+		{ label: 'Inicio', href: '/' },
+		{ label: 'Acerca de', href: '/about' },
+		{ label: 'Proyectos', href: '/projects' },
+		{ label: 'FAQ', href: '/faq' },
+		{ label: 'Contacto', href: '/contact' }
+	];
+
+	onMount(() => {
+		const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.1 });
+		if (headerRef) io.observe(headerRef);
+
+		const onScroll = () => {
+			const currentScroll = window.scrollY;
+			if (currentScroll > 600 && currentScroll > lastScrollY) {
+				showHeader = false;
+			} else {
+				showHeader = true;
+			}
+			lastScrollY = currentScroll;
+		};
+		window.addEventListener('scroll', onScroll);
+
+		return () => {
+			io.disconnect();
+			window.removeEventListener('scroll', onScroll);
+		};
+	});
 </script>
 
-<div class="header-outer">
-	<div class="header-inner">
-		<!-- Logo -->
-		<Image
-			src="/logo-1.png"
-			alt="Logo de Conectando Corazones"
-			width="50px"
-			animate="heartbeat"
-			href="/"
-		/>
+<header
+	bind:this={headerRef}
+	class="sticky top-0 z-50 w-full bg-[rgb(var(--base-color))] text-white shadow-[0_2px_6px_rgba(0,0,0,.22)] transition-transform duration-500"
+	style="transform:translateY({showHeader ? 0 : -110}%);"
+>
+	<div class="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-4 md:px-8">
+		<!-- Logo animado -->
+		<div class="header-logo" style="animation:fadePop .8s .06s both; opacity:{visible ? 1 : 0};">
+			<Image
+				src="/logo-1.png"
+				alt="Logo de Conectando Corazones"
+				width="50px"
+				animate="heartbeat"
+				href="/"
+			/>
+		</div>
 
-		<!-- Navbar Desktop -->
-		<nav class="navbar hidden gap-10 text-white md:flex">
-			<a href="/">Inicio</a>
-			<a href="/about">Acerca de</a>
-			<a href="/projects">Proyectos</a>
-			<a href="/faq">FAQ</a>
-			<a href="/contact">Contacto</a>
+		<!-- Nav Desktop -->
+		<nav class="hidden items-center gap-8 text-[17px] font-semibold md:flex">
+			{#each navLinks as { label, href }, i}
+				<a
+					{href}
+					class="nav-link inline-block"
+					style="animation:fadeSlide .64s both;animation-delay:{(i + 1) * 90 +
+						100}ms; opacity:{visible ? 1 : 0};">{label}</a
+				>
+			{/each}
 		</nav>
 
-		<!-- Botón desktop -->
-		<div class="button-wrapper hidden md:flex">
+		<!-- CTA Desktop -->
+		<div
+			class="hidden md:block"
+			style="animation:fadeSlide .7s .54s both; opacity:{visible ? 1 : 0};"
+		>
 			<Button label="Registrarse" href="/signin" />
 		</div>
-	</div>
-	<!-- Menú hamburguesa mobile -->
-	<div class="menu-icon menu-icon-mobile z-50 flex items-center p-0 text-white md:hidden">
-		<button
-			on:click={() => (menuOpen = !menuOpen)}
-			aria-label="Toggle navigation"
-			class="relative m-0 flex h-6 w-6 cursor-pointer appearance-none items-center justify-center border-0 bg-transparent p-0"
-		>
-			<svg
-				class="hamburger-icon absolute inset-0 z-50 transition-transform duration-300 ease-in-out"
-				width="24"
-				height="24"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				class:rotate-90={menuOpen}
+
+		<!-- Hamburguesa Mobile -->
+		<div class="md:hidden">
+			<button
+				aria-label="Abrir menú"
+				class="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				on:click={() => (menuOpen = !menuOpen)}
+				style="animation:fadePop .7s .36s both; opacity:{visible ? 1 : 0};"
 			>
-				{#if menuOpen}
-					<!-- Icono cerrar -->
-					<path d="M6 18L18 6M6 6l12 12" />
-				{:else}
-					<!-- Icono menú -->
-					<path d="M3 12h18M3 6h18M3 18h18" />
-				{/if}
-			</svg>
-		</button>
+				<svg
+					class="h-7 w-7 transition-transform duration-300"
+					style="transform:rotate({menuOpen ? 180 : 0}deg)"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					{#if menuOpen}
+						<path d="M6 6l12 12M6 18L18 6" />
+					{:else}
+						<path d="M3 6h18M3 12h18M3 18h18" />
+					{/if}
+				</svg>
+			</button>
+		</div>
 	</div>
 
-	<!-- Overlay negro para el menú mobile -->
+	<!-- Menú Mobile -->
 	{#if menuOpen}
-		<div class="fixed inset-0 z-40 bg-black/30"></div>
-	{/if}
-
-	<!-- Menú mobile -->
-	{#if menuOpen}
-		<div
-			class="mobile-menu absolute left-0 right-0 top-full z-50 rounded-b-lg rounded-t-none px-8 py-6 text-white shadow-lg"
-			class:slideDown={menuOpen}
-			class:slideUp={!menuOpen}
+		<nav
+			class="mobile-menu absolute left-0 right-0 top-full z-50 flex flex-col gap-5
+			bg-[rgba(24,25,46,0.98)] px-8 py-8 shadow-2xl backdrop-blur-md"
+			style="animation:slideInDown 0.45s cubic-bezier(.4,0,.2,1) both"
 		>
-			<nav class="flex flex-col gap-4">
+			{#each navLinks as { label, href }, j}
 				<a
-					class="font-inter menu-link text-base font-semibold opacity-80 hover:opacity-100"
-					href="/"
-					on:click={() => (menuOpen = false)}>Inicio</a
+					{href}
+					class="mobile-link self-start"
+					style="animation:fadeSlide .6s both;animation-delay:{j * 100 + 120}ms"
+					on:click={() => (menuOpen = false)}>{label}</a
 				>
-				<a
-					class="font-inter menu-link text-base font-semibold opacity-80 hover:opacity-100"
-					href="/about"
-					on:click={() => (menuOpen = false)}>Acerca de</a
-				>
-				<a
-					class="font-inter menu-link text-base font-semibold opacity-80 hover:opacity-100"
-					href="/projects"
-					on:click={() => (menuOpen = false)}>Proyectos</a
-				>
-				<a
-					class="font-inter menu-link text-base font-semibold opacity-80 hover:opacity-100"
-					href="/faq"
-					on:click={() => (menuOpen = false)}>FAQ</a
-				>
-				<a
-					class="font-inter menu-link text-base font-semibold opacity-80 hover:opacity-100"
-					href="/contact"
-					on:click={() => (menuOpen = false)}>Contacto</a
-				>
-			</nav>
-		</div>
+			{/each}
+			<div style="animation:fadePop .65s .52s both;">
+				<Button label="Registrarse" href="/signin" variant="ghost" />
+			</div>
+		</nav>
 	{/if}
-</div>
+</header>
 
 <style>
-	.header-outer {
+	.header-logo {
 		display: flex;
 		align-items: center;
-		justify-content: center;
-		width: 100%;
-		padding: 30px 0px;
-		background-color: rgb(var(--base-color));
+	}
+
+	.nav-link,
+	.mobile-link {
 		position: relative;
-		box-sizing: border-box;
+		opacity: 0.85;
+		transition:
+			color 0.25s,
+			opacity 0.22s;
+		padding-bottom: 2px;
 	}
-
-	.header-inner {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 48px;
+	.nav-link::after,
+	.mobile-link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -2px;
+		height: 2px;
+		width: 0;
+		border-radius: 2px;
+		background: linear-gradient(90deg, #60a5fa 0%, #bae6fd 100%);
+		transition: width 0.34s cubic-bezier(0.42, 0, 0.18, 1);
+	}
+	.nav-link:hover::after,
+	.mobile-link:hover::after {
 		width: 100%;
-		max-width: 1366px;
-		margin: 0 auto;
-		height: min-content;
-		padding-left: 2rem;
 	}
-
-	.navbar a {
-		text-decoration: none;
-		color: rgb(var(--text-primary));
-		font-size: 1.125rem;
-		font-weight: 600;
-		opacity: 0.8;
-		transition: opacity 0.3s ease-in-out;
-		white-space: nowrap;
-	}
-
-	.navbar a:hover {
+	.nav-link:hover,
+	.mobile-link:hover {
+		color: #7dd3fc;
 		opacity: 1;
 	}
 
-	.mobile-menu {
-		display: flex;
-		flex-direction: column;
-		background-image: linear-gradient(to bottom, rgb(11, 11, 29), rgb(var(--base-color)));
-		padding: 1.5rem 1rem;
-		animation: slideDown 0.3s ease-in-out forwards;
-		position: absolute;
-		left: 0;
-		right: 0;
-		top: 100%;
-		z-index: 50;
-		box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-	}
-
-	@keyframes slideDown {
-		from {
-			transform: translateY(-10px);
-			opacity: 0;
-		}
-		to {
-			transform: translateY(0);
-			opacity: 1;
-		}
-	}
-
-	@keyframes slideUp {
-		from {
-			transform: translateY(0);
-			opacity: 1;
-		}
-		to {
-			transform: translateY(-10px);
-			opacity: 0;
-		}
-	}
-
-	.hamburger-icon {
-		position: absolute;
-		top: 0;
-		left: 0;
-		transition: all 0.3s ease-in-out;
-	}
-
-	.rotate-90 {
-		transform: rotate(90deg);
-	}
-
-	.menu-link {
-		opacity: 0.8;
-		transition: all 0.3s ease-in-out;
-	}
-
-	.menu-link:hover {
-		opacity: 1;
-	}
-
-	@keyframes heartbeat {
+	/* --- Animaciones personalizadas --- */
+	@keyframes fadeSlide {
 		0% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.1);
+			opacity: 0;
+			transform: translateY(-16px);
 		}
 		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	@keyframes fadePop {
+		0% {
+			opacity: 0;
+			transform: scale(0.85);
+		}
+		80% {
+			opacity: 1;
+			transform: scale(1.06);
+		}
+		100% {
+			opacity: 1;
 			transform: scale(1);
 		}
 	}
-
-	.menu-icon-mobile {
-		position: absolute;
-		right: 2rem;
-		top: 50%;
-		transform: translateY(-50%);
-		z-index: 50;
-	}
-	@media (min-width: 768px) {
-		.menu-icon-mobile {
-			display: none;
+	@keyframes slideInDown {
+		from {
+			opacity: 0;
+			transform: translateY(-28px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 </style>
