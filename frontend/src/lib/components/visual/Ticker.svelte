@@ -14,10 +14,24 @@ TODO:
 -->
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	export let logos: string[] = [];
+	let visible = false;
+	let tickerRef: HTMLElement;
+
+	onMount(() => {
+		const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.12 });
+		if (tickerRef) io.observe(tickerRef);
+		return () => io.disconnect();
+	});
 </script>
 
-<div class="group relative h-20 w-full overflow-hidden bg-[rgb(var(--base-color))]">
+<div
+	bind:this={tickerRef}
+	class="group relative h-20 w-full overflow-hidden bg-[rgb(var(--base-color))]
+		transition-all duration-1000"
+	class:ticker-fade-in={visible}
+>
 	<!-- Gradientes laterales -->
 	<div
 		class="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-[rgb(var(--base-color))] to-transparent"
@@ -40,6 +54,18 @@ TODO:
 </div>
 
 <style>
+	.ticker-fade-in {
+		opacity: 1;
+		transform: translateY(0);
+		transition:
+			opacity 0.85s cubic-bezier(0.42, 0, 0.18, 1),
+			transform 0.9s cubic-bezier(0.36, 0, 0.18, 1);
+	}
+	.group:not(.ticker-fade-in) {
+		opacity: 0;
+		transform: translateY(32px);
+	}
+
 	@keyframes ticker-scroll {
 		0% {
 			transform: translateX(0%);

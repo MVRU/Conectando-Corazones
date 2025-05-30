@@ -27,6 +27,6 @@
 <HowItWorksSection />
 <HistorySection />
 <CallToActionSection />
-<TestimonialsSection />
+<!-- <TestimonialsSection /> -->
 <FaqSection />
 <SupportSection />
