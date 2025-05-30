@@ -1,11 +1,21 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	let visible = false;
+	let hasAnimated = false; // bandera para animación única (solo se reproduce una vez)
 	let footerRef: HTMLElement;
 	const year = new Date().getFullYear();
 
 	onMount(() => {
-		const obs = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.1 });
+		const obs = new IntersectionObserver(
+			([e]) => {
+				if (e.isIntersecting && !hasAnimated) {
+					visible = true;
+					hasAnimated = true;
+					obs.disconnect();
+				}
+			},
+			{ threshold: 0.1 }
+		);
 		if (footerRef) obs.observe(footerRef);
 		return () => obs.disconnect();
 	});
