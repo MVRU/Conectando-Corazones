@@ -50,25 +50,62 @@ TODO:
 				¿Y si pudiéramos conectar a quienes necesitan ayuda con quienes desean brindarla?
 			</h2>
 		</div>
-
 		<!-- Imagen destacada -->
 		<div
-			class="history-img-animated group relative mx-auto mt-10 flex w-full max-w-3xl justify-center overflow-hidden rounded-[2.5rem]"
+			class="flex flex-1 items-end justify-center"
 			style="
-                opacity: {visible ? 1 : 0};
-                transform: scale({visible ? 1 : 0.92});
-                transition: opacity 0.85s 0.12s cubic-bezier(0.4,0,0.2,1), transform 0.85s 0.12s cubic-bezier(0.4,0,0.2,1);
-            "
+				opacity: {visible ? 1 : 0};
+				filter: blur({visible ? 0 : 10}px) brightness({visible ? 1 : 0.95});
+				transform: scale({visible ? 1 : 0.93});
+				transition: opacity 0.9s 0.19s, filter 1s 0.19s, transform 1s 0.19s;
+			"
 		>
-			<Image src="/img/historia-1.jpg" alt="Monje ofreciendo ayuda a niños" variant="card" />
+			<div
+				class="cta-img-outer group relative overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30"
+			>
+				<div
+					class=" left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
+					style="
+		will-change: transform;
+		transition: transform 0.85s cubic-bezier(.43,0,.15,1);
+	"
+					tabindex="-1"
+				>
+					<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
+						<Image src="/img/historia-1.jpg" alt="Monje ofreciendo ayuda a niños" variant="card" />
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </section>
 
 <style>
-	/* Animación de la sección al aparecer */
-	.history-img-animated {
-		backface-visibility: hidden;
-		will-change: opacity, transform, filter;
+	.cta-img-outer {
+		animation: fadeInScale 1.2s 0.26s cubic-bezier(0.45, 0, 0.18, 1) both;
+	}
+	@keyframes fadeInUp {
+		0% {
+			opacity: 0;
+			transform: translateY(60px);
+			filter: blur(6px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+			filter: blur(0);
+		}
+	}
+	@keyframes fadeInScale {
+		0% {
+			opacity: 0;
+			transform: scale(0.93) translateY(60px);
+			filter: blur(8px);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+			filter: blur(0);
+		}
 	}
 </style>
