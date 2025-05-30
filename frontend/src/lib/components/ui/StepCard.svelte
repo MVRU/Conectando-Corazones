@@ -19,10 +19,8 @@
 	export let details: string;
 	export let image: string;
 	export let delay: number = 0;
+	export let animate: boolean = false;
 
-	import { onMount } from 'svelte';
-	let cardRef: HTMLDivElement;
-	let visible = false;
 	let showDetails = false;
 
 	function handleStepClick(e: Event) {
@@ -30,34 +28,19 @@
 		showDetails = !showDetails;
 	}
 
-	let initialStyle = '';
 	$: initialStyle = `
-		opacity: ${visible ? 1 : 0};
-		transform: translateY(${visible ? '0px' : '30px'}) scale(${visible ? 1 : 0.97});
+		opacity: ${animate ? 1 : 0};
+		transform: translateY(${animate ? '0px' : '36px'}) scale(${animate ? 1 : 0.97});
 	`;
 
-	let transitionStyle = `
+	$: transitionStyle = `
 		transition:
-			opacity 0.7s cubic-bezier(0.4,0,0.2,1) ${delay}ms,
-			transform 0.7s cubic-bezier(0.4,0,0.2,1) ${delay}ms;
+			opacity 0.58s cubic-bezier(.4,0,.2,1) ${delay}ms,
+			transform 0.63s cubic-bezier(.47,1.54,.51,.82) ${delay}ms;
 	`;
-
-	onMount(() => {
-		const onScroll = () => {
-			const rect = cardRef.getBoundingClientRect();
-			if (rect.top < window.innerHeight - 60) {
-				visible = true;
-				window.removeEventListener('scroll', onScroll);
-			}
-		};
-		window.addEventListener('scroll', onScroll);
-		onScroll();
-		return () => window.removeEventListener('scroll', onScroll);
-	});
 </script>
 
 <div
-	bind:this={cardRef}
 	role="region"
 	aria-label="Paso {stepNumber}: {title}"
 	class="group relative h-[410px] select-none overflow-hidden rounded-2xl bg-white shadow-lg"
@@ -154,7 +137,6 @@
 			rgba(15, 16, 41, 0.01) 100%
 		);
 	}
-
 	@keyframes heartbeat {
 		0% {
 			transform: scale(1);
