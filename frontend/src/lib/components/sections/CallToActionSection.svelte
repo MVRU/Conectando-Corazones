@@ -18,16 +18,14 @@ TODO:
 	let sectionRef: HTMLDivElement;
 
 	onMount(() => {
-		const reveal = () => {
-			const rect = sectionRef.getBoundingClientRect();
-			if (rect.top < window.innerHeight - 50) {
-				visible = true;
-				window.removeEventListener('scroll', reveal);
-			}
-		};
-		window.addEventListener('scroll', reveal);
-		reveal();
-		return () => window.removeEventListener('scroll', reveal);
+		const io = new IntersectionObserver(
+			([e]) => {
+				visible = e.isIntersecting;
+			},
+			{ threshold: 0.13 }
+		);
+		if (sectionRef) io.observe(sectionRef);
+		return () => io.disconnect();
 	});
 </script>
 
@@ -35,21 +33,13 @@ TODO:
 	<div
 		bind:this={sectionRef}
 		class="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-10 lg:flex-row"
-		style="
-			opacity: {visible ? 1 : 0};
-			transform: translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.97});
-			filter: blur({visible ? 0 : 8}px);
-			transition: opacity 0.8s cubic-bezier(.42,0,.2,1), transform 1s cubic-bezier(.42,0,.2,1), filter 1s cubic-bezier(.42,0,.2,1);
-		"
 	>
 		<!-- Lado izquierdo: texto -->
 		<div
 			class="flex-1 space-y-5 text-center text-white lg:text-left"
-			style="
-				opacity: {visible ? 1 : 0};
-				transform: translateY({visible ? '0' : '24px'}) scale({visible ? 1 : 0.96});
-				transition: opacity 0.7s 0.09s cubic-bezier(.45,0,.18,1), transform 0.85s 0.09s cubic-bezier(.45,0,.18,1);
-			"
+			class:fade-in-left={visible}
+			class:fade-out-left={!visible}
+			style="transition-delay: .05s"
 		>
 			<div class="flex justify-center backdrop-blur lg:justify-start">
 				<Badge text="Beneficios que van más allá de la conexión" />
@@ -58,34 +48,35 @@ TODO:
 				Descubrí lo que ganás al<br />ser parte de esta red solidaria.
 			</h2>
 			<p
-				class="mb-12 max-w-lg text-base font-medium text-blue-100/85 drop-shadow-sm transition-opacity duration-500 {visible
-					? 'opacity-100'
-					: 'opacity-0'}"
+				class="mb-12 max-w-lg text-base font-medium text-blue-100/85 drop-shadow-sm transition-opacity duration-500"
+				class:fade-in-left={visible}
+				class:fade-out-left={!visible}
+				style="transition-delay: .18s"
 			>
 				Cada conexión puede transformar una vida, incluso la tuya.
 			</p>
-			<Button label="Registrate y empezá a generar impacto" href="/registro" variant="ghost" />
+			<div
+				class:fade-in-left={visible}
+				class:fade-out-left={!visible}
+				style="transition-delay: .3s"
+			>
+				<Button label="Registrate y empezá a generar impacto" href="/registro" variant="ghost" />
+			</div>
 		</div>
 
 		<!-- Lado derecho: imagen destacada con animación -->
 		<div
 			class="flex flex-1 items-end justify-center"
-			style="
-				opacity: {visible ? 1 : 0};
-				filter: blur({visible ? 0 : 10}px) brightness({visible ? 1 : 0.95});
-				transform: scale({visible ? 1 : 0.93});
-				transition: opacity 0.9s 0.19s, filter 1s 0.19s, transform 1s 0.19s;
-			"
+			class:fade-in-right={visible}
+			class:fade-out-right={!visible}
+			style="transition-delay: .23s"
 		>
 			<div
 				class="cta-img-outer group relative h-[430px] w-[290px] overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px]"
 			>
 				<div
 					class="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
-					style="
-		will-change: transform;
-		transition: transform 0.85s cubic-bezier(.43,0,.15,1);
-	"
+					style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 					tabindex="-1"
 				>
 					<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
@@ -102,33 +93,54 @@ TODO:
 </section>
 
 <style>
-	.cta-animate-title {
-		animation: fadeInUp 1s 0.18s cubic-bezier(0.45, 0, 0.18, 1) both;
+	.fade-in-left {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		filter: blur(0);
+		transition:
+			opacity 0.95s cubic-bezier(0.43, 0, 0.22, 1),
+			transform 1s cubic-bezier(0.43, 0, 0.22, 1),
+			filter 0.95s cubic-bezier(0.43, 0, 0.22, 1);
 	}
-	.cta-img-outer {
-		animation: fadeInScale 1.2s 0.26s cubic-bezier(0.45, 0, 0.18, 1) both;
+	.fade-out-left {
+		opacity: 0;
+		transform: translateY(60px) scale(0.96);
+		filter: blur(8px);
+		transition:
+			opacity 0.95s cubic-bezier(0.43, 0, 0.22, 1),
+			transform 1s cubic-bezier(0.43, 0, 0.22, 1),
+			filter 0.95s cubic-bezier(0.43, 0, 0.22, 1);
+	}
+	.fade-in-right {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+		filter: blur(0);
+		transition:
+			opacity 1.1s 0.18s cubic-bezier(0.45, 0, 0.18, 1),
+			transform 1s 0.18s cubic-bezier(0.45, 0, 0.18, 1),
+			filter 1s 0.18s cubic-bezier(0.45, 0, 0.18, 1);
+	}
+	.fade-out-right {
+		opacity: 0;
+		transform: translateY(60px) scale(0.95);
+		filter: blur(10px);
+		transition:
+			opacity 1.1s 0.18s cubic-bezier(0.45, 0, 0.18, 1),
+			transform 1s 0.18s cubic-bezier(0.45, 0, 0.18, 1),
+			filter 1s 0.18s cubic-bezier(0.45, 0, 0.18, 1);
+	}
+	.cta-animate-title {
+		animation: fadeInUp 1.1s 0.17s cubic-bezier(0.45, 0, 0.18, 1) both;
 	}
 	@keyframes fadeInUp {
 		0% {
 			opacity: 0;
 			transform: translateY(60px);
-			filter: blur(6px);
+			filter: blur(7px);
 		}
 		100% {
 			opacity: 1;
 			transform: translateY(0);
-			filter: blur(0);
-		}
-	}
-	@keyframes fadeInScale {
-		0% {
-			opacity: 0;
-			transform: scale(0.93) translateY(60px);
-			filter: blur(8px);
-		}
-		100% {
-			opacity: 1;
-			transform: scale(1) translateY(0);
 			filter: blur(0);
 		}
 	}
