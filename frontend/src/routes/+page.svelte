@@ -1,6 +1,6 @@
 <script lang="ts">
 	import HeroSection from '$lib/components/sections/HeroSection.svelte';
-	import HowItWorks from '$lib/components/sections/HowItWorks.svelte';
+	import HowItWorksSection from '$lib/components/sections/HowItWorksSection.svelte';
 	import HistorySection from '$lib/components/sections/HistorySection.svelte';
 	import CallToActionSection from '$lib/components/sections/CallToActionSection.svelte';
 	import TestimonialsSection from '$lib/components/sections/TestimonialsSection.svelte';
@@ -24,7 +24,7 @@
 </script>
 
 <HeroSection />
-<HowItWorks />
+<HowItWorksSection />
 <HistorySection />
 <CallToActionSection />
 <TestimonialsSection />

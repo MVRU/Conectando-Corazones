@@ -1,5 +1,5 @@
 <!--
-* Componente: HowItWorks
+* Componente: HowItWorksSection
 	-*- Descripción: sección informativa que explica en pasos cómo funciona la plataforma.
 	-*- Funcionalidad: presenta 6 pasos numerados con fondo visual, título y descripción. Cada paso usa el componente `StepCard`.
 
@@ -7,11 +7,7 @@
 	-*- No recibe props por ahora; los pasos están definidos internamente.
 
 TODO:
-	- [ ] Parametrizar pasos para admitir contenido dinámico en el futuro.
-
-* DECISIÓN DE DISEÑO:
-	-*- Se utiliza un grid de 3 columnas en desktop, 2 en tablet, 1 en mobile para máxima legibilidad.
-	-*- Se usa un overlay degradado para garantizar contraste legible sobre la imagen.
+	- [ ] Parametrizar pasos para admitir contenido dinámico en el futuro (de ser necesario).
 -->
 
 <script lang="ts">
@@ -33,8 +29,8 @@ TODO:
 	</div>
 
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-		{#each steps as step}
-			<StepCard {...step} />
+		{#each steps as step, i}
+			<StepCard {...step} delay={i * 120} />
 		{/each}
 	</div>
 

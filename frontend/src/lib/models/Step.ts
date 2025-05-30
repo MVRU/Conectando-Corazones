@@ -1,6 +1,7 @@
 export interface Step {
     stepNumber: number;
     title: string;
-    description: string;
+    summary: string;
+    details: string;
     image: string;
 }
