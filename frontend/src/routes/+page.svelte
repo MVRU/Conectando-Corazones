@@ -3,6 +3,7 @@
 	import HowItWorks from '$lib/components/sections/HowItWorks.svelte';
 	import HistorySection from '$lib/components/sections/HistorySection.svelte';
 	import CallToActionSection from '$lib/components/sections/CallToActionSection.svelte';
+	import TestimonialsSection from '$lib/components/sections/TestimonialsSection.svelte';
 
 	const logos = [
 		'/instituciones/rotary.png',
@@ -24,3 +25,4 @@
 <HowItWorks />
 <HistorySection />
 <CallToActionSection />
+<TestimonialsSection />
