@@ -1,133 +1,156 @@
 <!--
 * Componente: TestimonialsSection
-	-*- Descripción: sección de testimonios de usuarios reales que han utilizado la plataforma.
-
-* Props:
-	-*- No recibe props por ahora; contenido estático.
+* Descripción: sección de testimonios con carrusel responsivo y animación de entrada.
 
 TODO:
-    - [ ] Corregir lógica de botones de navegación del carrusel.
-	- [ ] Armar model y data para los testimonios -> código más limpio y reutilizable.
-	- [ ] Agregar animaciones al carrusel.
-	- [ ] Mejorar responsividad para móviles.
+	- [ ] Agregar indicadores de posición del carrusel.
+	- [ ] (Opcional) Agregar swipe para móviles.
 
-    -->
+-->
 
 <script lang="ts">
+	import { onMount, onDestroy } from 'svelte';
 	import TestimonialCard from '$lib/components/ui/TestimonialCard.svelte';
-	import CarouselNavButton from '$lib/components/ui/CarouselNavButton.svelte';
+	import { testimonials } from '$lib/data/testimonials';
 
-	const testimonials = [
-		{
-			stars: 5,
-			quote:
-				'Nuestro equipo ha podido colaborar en proyectos que antes ni conocíamos. La plataforma nos guía hacia oportunidades que realmente importan.',
-			author: 'Rotaract Club Local',
-			role: ''
-		},
-		{
-			stars: 5,
-			quote:
-				'Gracias a Conectando Corazones recibimos los libros que necesitábamos. Ahora nuestros niños pueden aprender con libros y sueños renovados.',
-			author: 'María G.',
-			role: 'Directora de una escuela rural'
-		},
-		{
-			stars: 5,
-			quote:
-				'Encontré una causa que realmente me apasiona. Esta plataforma me conectó con personas que, como yo, quieren hacer la diferencia.',
-			author: 'Juan P.',
-			role: 'Voluntario en un comedor comunitario'
-		},
-		{
-			stars: 5,
-			quote: 'Participar fue fácil y el impacto fue real. Lo recomiendo a todas las ONGs.',
-			author: 'Ana R.',
-			role: 'ONG Pequeños Corazones'
-		},
-		{
-			stars: 5,
-			quote: 'El sitio es súper simple y logramos sumar donaciones en poco tiempo.',
-			author: 'Carlos F.',
-			role: 'Referente barrial'
-		},
-		{
-			stars: 5,
-			quote: 'Siento que mis ganas de ayudar encontraron el mejor lugar posible.',
-			author: 'Lucía M.',
-			role: 'Voluntaria'
+	/* -------  Lógica del carrusel  -------- */
+	let centerIndex = 1;
+	let visibleCount = 3;
+
+	function clampCenter() {
+		if (centerIndex < 0) centerIndex = 0;
+		if (centerIndex > testimonials.length - visibleCount) {
+			centerIndex = testimonials.length - visibleCount;
 		}
-	];
-
-	let track!: HTMLDivElement;
-	let cards: HTMLDivElement[] = [];
-	let active = 0;
-
-	// Desplaza el carrusel y actualiza el testimonio activo
-	function go(dir: 'prev' | 'next') {
-		const max = testimonials.length - 1;
-		const step = dir === 'next' ? 1 : -1;
-		const next = Math.max(0, Math.min(active + step, max));
-		console.log('Prev/Next:', dir, 'active:', active, 'next:', next, 'cards:', cards.length);
-		active = next;
-		cards[active]?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
 	}
 
-	// Ajusta el activo cuando el usuario scrollea manualmente
-	function onScroll() {
-		if (!cards.length) return;
-		const middle = track.scrollLeft + track.clientWidth / 2;
-		let minDiff = Number.MAX_VALUE;
-		let idx = 0;
-		cards.forEach((c, i) => {
-			const center = c.offsetLeft + c.offsetWidth / 2;
-			const diff = Math.abs(center - middle);
-			if (diff < minDiff) {
-				minDiff = diff;
-				idx = i;
-			}
+	function updateVisibleCount() {
+		visibleCount = window.innerWidth < 768 ? 1 : 3;
+		clampCenter();
+	}
+	const showPrev = () => centerIndex > 0 && (centerIndex -= 1);
+	const showNext = () => centerIndex < testimonials.length - visibleCount && (centerIndex += 1);
+
+	$: visibleTestimonials = testimonials.slice(centerIndex, centerIndex + visibleCount);
+
+	/* -------  Animación de entrada  -------- */
+	let visible = false;
+	let sectionRef: HTMLElement;
+
+	onMount(() => {
+		updateVisibleCount();
+		window.addEventListener('resize', updateVisibleCount);
+
+		const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
+			threshold: 0.15
 		});
-		if (active !== idx) {
-			console.log('Scroll manual. Old active:', active, 'New active:', idx);
-			active = idx;
-		}
-	}
+		sectionRef && io.observe(sectionRef);
+
+		onDestroy(() => {
+			window.removeEventListener('resize', updateVisibleCount);
+			io.disconnect();
+		});
+	});
 </script>
 
-<section class="w-full bg-white px-4 py-20 md:px-8">
-	<div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 md:flex-row">
-		<h2 class="text-center text-3xl font-extrabold leading-snug md:text-left">
-			Experiencias reales, <span class="text-gray-500">resultados reales.</span>
+<section
+	bind:this={sectionRef}
+	class="w-full bg-gradient-to-b from-white to-[#f7f8fd] px-4 py-20 md:px-8"
+	style="
+		opacity:{visible ? 1 : 0};
+		transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});
+		filter:blur({visible ? 0 : 6}px);
+		transition:opacity .8s cubic-bezier(.45,0,.2,1),
+		          transform .8s cubic-bezier(.45,0,.2,1),
+		          filter   .8s cubic-bezier(.45,0,.2,1);
+	"
+>
+	<div
+		class="mx-auto mb-10 max-w-6xl text-center"
+		style="transition:opacity .9s .1s, transform .9s .1s; opacity:{visible
+			? 1
+			: 0}; transform:translateY({visible ? 0 : 24}px);"
+	>
+		<h2 class="mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+			Experiencias reales, <span class="text-[#63666d]">resultados reales.</span>
 		</h2>
-		<div class="flex flex-col items-center space-y-1">
-			<img src="/img/trustpilot.png" alt="Trustpilot logo" class="h-16 w-auto" />
-			<span class="text-sm text-gray-600">Calificada con 4,9 de 5 estrellas.</span>
-		</div>
+		<p class="mx-auto mb-3 max-w-2xl text-lg text-gray-500">
+			Lo que dicen quienes confiaron en
+			<span class="font-bold text-[rgb(var(--base-color))]">Conectando Corazones.</span>
+		</p>
 	</div>
 
-	<div class="relative mt-12">
-		<div
-			bind:this={track}
-			on:scroll={onScroll}
-			class="scrollbar-hide flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-2 pb-4 sm:px-0"
+	<!-- Carrusel -->
+	<div
+		class="relative mx-auto flex items-center justify-center md:gap-3"
+		style="transition:opacity 1s .25s, transform 1s .25s; opacity:{visible
+			? 1
+			: 0}; transform:translateY({visible ? 0 : 30}px);"
+	>
+		<!-- Flecha Izquierda -->
+		<button
+			on:click={showPrev}
+			class="nav-btn left-1.5 md:static md:translate-y-0"
+			disabled={centerIndex === 0}
+			aria-label="Ver testimonios anteriores"
 		>
-			{#each testimonials as t, i (i)}
-				<div bind:this={cards[i]} class="w-80 shrink-0 snap-start md:w-96">
-					<TestimonialCard {...t} active={i === active} />
-				</div>
+			<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+			</svg>
+		</button>
+
+		<!-- Tarjetas -->
+		<div class="flex flex-row gap-6 md:gap-8">
+			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
+				<TestimonialCard
+					{...testimonial}
+					active={i === (visibleCount === 3 ? 1 : 0)}
+					locked={visibleCount === 3 ? i !== 1 : false}
+				/>
 			{/each}
 		</div>
-		<CarouselNavButton direction="prev" on:click={() => go('prev')} />
-		<CarouselNavButton direction="next" on:click={() => go('next')} />
+
+		<!-- Flecha Derecha -->
+		<button
+			on:click={showNext}
+			class="nav-btn right-1.5 md:static md:translate-y-0"
+			disabled={centerIndex === testimonials.length - visibleCount}
+			aria-label="Ver testimonios siguientes"
+		>
+			<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+			</svg>
+		</button>
 	</div>
 </section>
 
 <style>
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
+	.nav-btn {
+		position: absolute; /* para mobile */
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 20;
+		background: #ffffff;
+		padding: 0.5rem;
+		border-radius: 9999px;
+		color: #3b82f6;
+		box-shadow: 0 2px 6px #0001;
+		transition:
+			background 0.2s,
+			box-shadow 0.2s;
 	}
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
+	.nav-btn:hover:not(:disabled) {
+		background: #e0ecff;
+		box-shadow: 0 4px 12px #3b82f622;
+	}
+	.nav-btn:disabled {
+		opacity: 0.4;
+		pointer-events: none;
+	}
+	@media (min-width: 768px) {
+		.nav-btn {
+			position: static; /* para desktop */
+			transform: none;
+		}
 	}
 </style>
