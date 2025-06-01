@@ -121,25 +121,25 @@
 			<div
 				class="rounded-4xl aspect-square w-full -translate-y-2 translate-x-3 rotate-6 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
-				<Image src="/img/plantando-arbol.jpg" alt="Manos plantando árbol" animate="zoom" />
+				<Image src="/img/hero-1.webp" alt="Manos plantando árbol" animate="zoom" />
 			</div>
 			<!-- Card 2 -->
 			<div
 				class="rounded-4xl aspect-square w-full -translate-x-4 translate-y-2 -rotate-6 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
-				<Image src="/img/bomberos-solidarios.jpg" alt="Bomberos solidarios" animate="zoom" />
+				<Image src="/img/hero-2.webp" alt="Bomberos solidarios" animate="zoom" />
 			</div>
 			<!-- Card 3 -->
 			<div
 				class="rounded-4xl aspect-square w-full -translate-y-8 -rotate-6 transform overflow-hidden shadow-lg ring-2 ring-sky-300/30"
 			>
-				<Image src="/img/profesional-salud.jpg" alt="Profesionales de salud" animate="zoom" />
+				<Image src="/img/hero-3.webp" alt="Profesionales de salud" animate="zoom" />
 			</div>
 			<!-- Card 4 -->
 			<div
 				class="rotate-4 rounded-4xl aspect-square w-full -translate-x-4 -translate-y-4 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
-				<Image src="/img/ninos-sonriendo.jpg" alt="Niños corriendo y sonriendo" animate="zoom" />
+				<Image src="/img/hero-4.webp" alt="Niños corriendo y sonriendo" animate="zoom" />
 			</div>
 			<!-- Sin overlay global, solo las imágenes y sus efectos -->
 		</div>

@@ -81,7 +81,7 @@ TODO:
 				>
 					<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
 						<Image
-							src="/img/cta-1.jpg"
+							src="/img/cta-1.webp"
 							alt="Persona sonriente representando impacto positivo"
 							variant="card"
 						/>

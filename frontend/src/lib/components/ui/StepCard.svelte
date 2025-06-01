@@ -18,125 +18,73 @@
 	export let summary: string;
 	export let details: string;
 	export let image: string;
-	export let delay: number = 0;
-	export let animate: boolean = false;
-
-	let showDetails = false;
-
-	function handleStepClick(e: Event) {
-		e.stopPropagation();
-		showDetails = !showDetails;
-	}
-
-	$: initialStyle = `
-		opacity: ${animate ? 1 : 0};
-		transform: translateY(${animate ? '0px' : '36px'}) scale(${animate ? 1 : 0.97});
-	`;
-
-	$: transitionStyle = `
-		transition:
-			opacity 0.58s cubic-bezier(.4,0,.2,1) ${delay}ms,
-			transform 0.63s cubic-bezier(.47,1.54,.51,.82) ${delay}ms;
-	`;
+	export let delay = 0;
+	export let animate = false;
 </script>
 
+<!-- *Contenedor -->
 <div
 	role="region"
-	aria-label="Paso {stepNumber}: {title}"
-	class="group relative h-[410px] select-none overflow-hidden rounded-2xl bg-white shadow-lg"
-	style={initialStyle + transitionStyle}
+	aria-label={`Paso ${stepNumber}: ${title}`}
+	class="group relative h-96 transform-gpu overflow-hidden rounded-3xl bg-white
+	       shadow-md transition-transform duration-300
+	       hover:-translate-y-1 hover:scale-[1.015]"
+	style={`transition-delay:${delay}ms`}
+	class:opacity-0={!animate}
+	class:translate-y-8={!animate}
 >
+	<!-- *Imagen -->
 	<img
 		src={image}
 		alt={title}
-		draggable="false"
-		class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:brightness-95"
+		loading="lazy"
+		class="absolute inset-0 h-full w-full object-cover
+		       transition-transform duration-700 group-hover:scale-105"
 	/>
-	<!-- Overlay con degradado animado -->
+
+	<!-- *Overlay -->
 	<div
-		class="stepcard-overlay relative z-10 flex h-full flex-col justify-end space-y-3 p-5 text-white transition-all duration-500"
-		class:stepcard-overlay-expanded={showDetails}
+		class="relative z-10 flex h-full flex-col justify-end bg-gradient-to-t
+		       from-[#0f1029]/60 via-[#0f1029]/35 to-transparent p-5
+		       transition-colors duration-500
+		       group-hover:from-[#0f1029]/75 group-hover:via-[#0f1029]/50"
 	>
-		<!-- Círculo interactivo -->
-		<button
-			type="button"
-			tabindex="0"
-			aria-label={showDetails
-				? `Ocultar detalle de paso ${stepNumber}`
-				: `Ver detalle de paso ${stepNumber}`}
-			on:click={handleStepClick}
-			on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleStepClick(e)}
-			class="relative mb-2 flex h-20 w-20 cursor-pointer select-none items-center justify-center rounded-full border-4 border-[#377cff] bg-white shadow-xl ring-pink-400 transition-all duration-300 focus:outline-none focus:ring-2 group-hover:scale-105 {showDetails
-				? 'animate-heartbeat'
-				: ''} self-start"
-			style="box-shadow: 0 2px 18px 0 #377cff11;"
-		>
-			<span
-				class="absolute inset-0 flex items-center justify-center text-[2.1rem] font-bold text-[#19318a] transition-all duration-300
-				{showDetails ? 'scale-50 opacity-0' : 'scale-100 opacity-100'}"
-			>
-				{stepNumber}
-			</span>
-			<span
-				class="absolute inset-0 flex items-center justify-center transition-all duration-300
-				{showDetails ? 'scale-110 opacity-100' : 'scale-75 opacity-0'}"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill={showDetails ? 'url(#heartGradient)' : 'none'}
-					stroke="#e64666"
-					stroke-width="2"
-					class="h-10 w-10 drop-shadow-xl"
-					style="filter: drop-shadow(0 0 6px #e6466688);"
-				>
-					<defs>
-						<linearGradient id="heartGradient" x1="0" y1="0" x2="1" y2="1">
-							<stop offset="0%" stop-color="#e64666" />
-							<stop offset="100%" stop-color="#ff8db5" />
-						</linearGradient>
-					</defs>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						d="M16.5 3.5c-1.74 0-3.41 1.06-4.5 2.73C10.91 4.56 9.24 3.5 7.5 3.5 4.42 3.5 2 6.19 2 9.25c0 5.36 10 11.25 10 11.25s10-5.89 10-11.25c0-3.06-2.42-5.75-5.5-5.75z"
-						fill={showDetails ? 'url(#heartGradient)' : 'none'}
-					/>
-				</svg>
-			</span>
-		</button>
-
-		<h3 class="text-xl font-semibold leading-tight drop-shadow-sm">{title}</h3>
-		<p class="text-base font-medium text-gray-100 drop-shadow">{summary}</p>
-
-		<!-- Detalle oculto -->
+		<!-- *Círculo con número (step) -->
 		<div
-			class="duration-400 pointer-events-none mt-2 overflow-hidden transition-all"
-			aria-hidden={!showDetails}
-			style="max-height: {showDetails ? '160px' : '0'}; opacity: {showDetails ? 1 : 0};"
+			class="flex h-16 w-16 items-center justify-center self-start
+			       rounded-full border-2 border-[#007fff] bg-white
+			       text-3xl font-bold text-[#0f1029] shadow-md"
 		>
-			<p class="text-sm text-gray-100 drop-shadow">{details}</p>
+			{stepNumber}
 		</div>
+
+		<!-- *Textos -->
+		<h3
+			class="mt-4 text-lg font-semibold text-white drop-shadow
+			       transition-transform duration-300
+			       group-hover:translate-y-6"
+		>
+			{title}
+		</h3>
+		<p
+			class="text-sm text-white/90 transition-all duration-300
+			       group-hover:translate-y-2 group-hover:opacity-0"
+		>
+			{summary}
+		</p>
+
+		<!-- *Detalles (fade on hover) -->
+		<p
+			class="translate-y-4 text-xs text-white/80 opacity-0
+			       transition-all duration-300
+			       group-hover:translate-y-0 group-hover:opacity-100"
+		>
+			{details}
+		</p>
 	</div>
 </div>
 
 <style>
-	.stepcard-overlay {
-		background: linear-gradient(
-			to top,
-			rgba(15, 16, 41, 0.5) 42%,
-			rgba(15, 16, 41, 0.34) 78%,
-			rgba(15, 16, 41, 0.01) 100%
-		);
-		transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	.stepcard-overlay-expanded {
-		background: linear-gradient(
-			to top,
-			rgba(15, 16, 41, 0.7) 52%,
-			rgba(15, 16, 41, 0.65) 90%,
-			rgba(15, 16, 41, 0.01) 100%
-		);
-	}
 	@keyframes heartbeat {
 		0% {
 			transform: scale(1);
@@ -153,9 +101,6 @@
 		70% {
 			transform: scale(1);
 		}
-	}
-	.animate-heartbeat {
-		animation: heartbeat 1s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 	}
 	.group:hover {
 		box-shadow:

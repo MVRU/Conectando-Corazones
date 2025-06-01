@@ -81,7 +81,7 @@
 			>
 				<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
 					<Image
-						src="/img/faq-1.jpg"
+						src="/img/faq-1.webp"
 						alt="Personas uniendo manos en señal de equipo y ayuda"
 						variant="card"
 					/>

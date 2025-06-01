@@ -82,7 +82,7 @@ TODO:
 					tabindex="-1"
 				>
 					<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
-						<Image src="/img/historia-1.jpg" alt="Monje ofreciendo ayuda a niños" variant="card" />
+						<Image src="/img/historia-1.webp" alt="Monje ofreciendo ayuda a niños" variant="card" />
 					</div>
 					<div
 						style="
