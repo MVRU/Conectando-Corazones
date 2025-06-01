@@ -12,11 +12,13 @@ TODO:
 -->
 
 <script lang="ts">
+	import clsx from 'clsx';
 	export let text: string;
 	export let shape: 'square' | 'circle' = 'square';
+	export let customClass = '';
 </script>
 
-<div class="flex items-center gap-2">
+<div class={clsx('flex items-center gap-2', customClass)}>
 	<span
 		class="h-3 w-3 bg-[rgb(var(--color-primary))]"
 		class:rounded-sm={shape === 'square'}

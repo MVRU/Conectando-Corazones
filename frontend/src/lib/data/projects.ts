@@ -21,8 +21,8 @@ export const projects: Project[] = [
         descripcion:
             'Un comedor comunitario en una zona urbana marginal requiere alimentos no perecederos para alimentar a más de 50 familias semanales. Tu contribución garantizará que nadie pase hambre.',
         imagen: '/img/proyectos-2.jpg',
-        actual: 18_000,
-        objetivo: 32_000,
+        actual: 180000,
+        objetivo: 320000,
         unidad: 'dinero',
         deadline: '2025-06-25',
         institucion: 'Comedor Los Pinos',
@@ -34,8 +34,8 @@ export const projects: Project[] = [
         descripcion:
             'Un hogar de niños con discapacidades necesita voluntarios para organizar talleres artísticos y recreativos. Tu tiempo y talento pueden marcar una diferencia significativa en sus vidas.',
         imagen: '/img/proyectos-3.jpg',
-        actual: 24,
-        objetivo: 40,
+        actual: 0,
+        objetivo: 20,
         unidad: 'voluntarios',
         deadline: '2025-07-15',
         institucion: 'Fundación Siempre',
