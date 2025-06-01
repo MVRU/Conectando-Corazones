@@ -47,11 +47,14 @@ TODO:
 			: 36}px) scale({animateSteps ? 1 : 0.96});"
 	>
 		<div class="flex justify-center">
-			<Badge text="¿Cómo funciona?" />
+			<Badge text="¿Cómo funciona?" customColor="#0066d5" />
 		</div>
 		<h2 class="mt-4 text-3xl font-extrabold leading-snug text-gray-900 sm:text-4xl">
 			Es simple,
-			<span class="text-gray-500">conectamos<br />necesidades con soluciones.</span>
+			<span class="text-gray-500"
+				>conectamos<br />
+				necesidades con soluciones.</span
+			>
 		</h2>
 	</div>
 

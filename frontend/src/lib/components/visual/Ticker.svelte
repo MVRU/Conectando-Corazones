@@ -14,10 +14,12 @@ TODO:
 -->
 
 <script lang="ts">
+	import clsx from 'clsx';
 	import { onMount } from 'svelte';
 	export let logos: string[] = [];
 	let visible = false;
 	let tickerRef: HTMLElement;
+	export let customClass: string = '';
 
 	onMount(() => {
 		const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.12 });
@@ -33,7 +35,12 @@ TODO:
 	class:ticker-fade-in={visible}
 >
 	<!-- *Contenedor deslizante -->
-	<div class=" ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32">
+	<div
+		class={clsx(
+			'ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32',
+			customClass
+		)}
+	>
 		{#each Array(6).fill(logos).flat() as logo, i}
 			<img
 				src={logo}
