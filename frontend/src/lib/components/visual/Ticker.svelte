@@ -1,7 +1,7 @@
 <!--
 * Componente: Ticker
 	-*- Descripción: carrusel horizontal que muestra logos de instituciones de forma animada.
-	-*- Funcionalidad: los logos se deslizan en bucle de derecha a izquierda; al hacer hover, se pausa la animación general y el logo individual recupera su color original y se agranda ligeramente.
+	-*- Funcionalidad: los logos se deslizan en bucle de derecha a izquierda; al hacer hover el logo individual recupera su color original y se agranda ligeramente.
 
 * Props:
 	-*- logos (string[]): array de rutas a las imágenes de las instituciones.
@@ -28,20 +28,12 @@ TODO:
 
 <div
 	bind:this={tickerRef}
-	class="group relative h-20 w-full overflow-hidden bg-[rgb(var(--base-color))]
+	class="group relative h-20 w-full overflow-hidden
 		transition-all duration-1000"
 	class:ticker-fade-in={visible}
 >
-	<!-- Gradientes laterales -->
-	<div
-		class="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-[rgb(var(--base-color))] to-transparent"
-	></div>
-	<div
-		class="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-[rgb(var(--base-color))] to-transparent"
-	></div>
-
-	<!-- Contenedor deslizante -->
-	<div class="ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32">
+	<!-- *Contenedor deslizante -->
+	<div class=" ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32">
 		{#each Array(6).fill(logos).flat() as logo, i}
 			<img
 				src={logo}
@@ -54,6 +46,8 @@ TODO:
 </div>
 
 <style>
+	/*Animaciones*/
+
 	.ticker-fade-in {
 		opacity: 1;
 		transform: translateY(0);
