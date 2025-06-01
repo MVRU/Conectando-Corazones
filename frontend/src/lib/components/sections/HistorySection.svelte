@@ -56,8 +56,15 @@ TODO:
 			"
 		>
 			<div class="flex justify-center">
-				<Badge text="De un sueño a una realidad: nuestra historia" />
+				<!-- Badge largo SOLO visible en sm (desktop) en adelante -->
+				<Badge
+					text="De un sueño a una realidad: nuestra historia"
+					customClass="hidden sm:inline-flex"
+				/>
+				<!-- Badge corto SOLO visible en mobile -->
+				<Badge text="Nuestra historia" customClass="inline-flex sm:hidden" />
 			</div>
+
 			<h2
 				class="mx-auto mt-4 max-w-xl text-2xl font-bold leading-tight drop-shadow-lg sm:text-3xl md:text-4xl"
 			>

@@ -51,7 +51,7 @@ TODO:
 
 		<h2 class="mt-4 text-3xl font-extrabold leading-snug text-gray-900 sm:text-4xl">
 			Es simple,
-			<span class="block text-gray-500"> conectamos necesidades con soluciones. </span>
+			<span class="text-gray-500"> conectamos <br />necesidades con soluciones. </span>
 		</h2>
 	</header>
 

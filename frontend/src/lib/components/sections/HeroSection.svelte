@@ -72,10 +72,11 @@
 				<Badge
 					text="Cada acción cuenta, empezá la tuya"
 					customClass="text-sky-200 shadow-sm backdrop-blur"
+					customColor="#dbe6e7"
 				/>
 			</div>
 			<h1
-				class="custom-margin text-5xl font-black leading-tight tracking-tight drop-shadow-[0_6px_32px_rgba(0,137,255,0.11)] transition-all duration-1000 sm:text-6xl"
+				class="custom-margin mb-4 mt-16 text-4xl font-black leading-tight tracking-tight drop-shadow-[0_6px_32px_rgba(0,137,255,0.11)] transition-all duration-1000 sm:text-5xl"
 				class:hero-fade={!showHero}
 				style="transition-delay: 180ms"
 			>
@@ -106,7 +107,7 @@
 						label="Registrarse"
 						variant="primary"
 						size="md"
-						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400"
+						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3"
 					/>
 				</div>
 			</div>
@@ -172,9 +173,5 @@
 			opacity 1.1s cubic-bezier(0.44, 0, 0.23, 1),
 			transform 1s cubic-bezier(0.43, 0, 0.15, 1),
 			filter 1s cubic-bezier(0.44, 0, 0.23, 1);
-	}
-
-	.custom-margin {
-		margin-bottom: 0.5rem;
 	}
 </style>

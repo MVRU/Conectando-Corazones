@@ -29,26 +29,37 @@ TODO:
 	});
 </script>
 
-<section class="w-full bg-gradient-to-br from-[#0f1029] to-[#1e2052] px-4 py-16 md:px-8">
+<section class="w-full bg-gradient-to-br from-[#0f1029] to-[#1e2052] px-2 py-14 sm:px-4 md:px-8">
 	<div
 		bind:this={sectionRef}
-		class="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-10 lg:flex-row"
+		class="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-8 md:gap-12 lg:flex-row"
 	>
-		<!-- Lado izquierdo: texto -->
+		<!-- *Lado izquierdo: texto -->
 		<div
 			class="flex-1 space-y-5 text-center text-white lg:text-left"
 			class:fade-in-left={visible}
 			class:fade-out-left={!visible}
 			style="transition-delay: .05s"
 		>
+			<!-- *Badge: variante corta en mobile, larga en desktop -->
 			<div class="flex justify-center backdrop-blur lg:justify-start">
-				<Badge text="Beneficios que van más allá de la conexión" />
+				<Badge text="Beneficios más allá de la conexión" customClass="inline-flex sm:hidden" />
+				<Badge
+					text="Beneficios que van más allá de la conexión"
+					customClass="hidden sm:inline-flex"
+				/>
 			</div>
-			<h2 class="cta-animate-title text-3xl font-extrabold leading-tight drop-shadow sm:text-4xl">
-				Descubrí lo que ganás al<br />ser parte de esta red solidaria.
+			<!-- *h2 (sin <br> en mobile, con <br> en desktop) -->
+			<h2
+				class="cta-animate-title text-2xl font-extrabold leading-tight drop-shadow sm:text-3xl md:text-4xl"
+			>
+				<span class="sm:hidden">Descubrí lo que ganás al ser parte de esta red solidaria.</span>
+				<span class="hidden sm:inline"
+					>Descubrí lo que ganás al<br />ser parte de esta red solidaria.</span
+				>
 			</h2>
 			<p
-				class="mb-12 max-w-lg text-base font-medium text-blue-100/85 drop-shadow-sm transition-opacity duration-500"
+				class="mx-auto mb-9 max-w-lg text-base font-medium text-blue-100/85 drop-shadow-sm transition-opacity duration-500 lg:mx-0"
 				class:fade-in-left={visible}
 				class:fade-out-left={!visible}
 				style="transition-delay: .18s"
@@ -60,11 +71,23 @@ TODO:
 				class:fade-out-left={!visible}
 				style="transition-delay: .3s"
 			>
-				<Button label="Registrate y empezá a generar impacto" href="/registro" variant="ghost" />
+				<!-- !Button solo visible en mobile -->
+				<div class="sm:hidden">
+					<Button label="Registrate y generá impacto" href="/registro" variant="ghost" size="sm" />
+				</div>
+				<!-- !Button solo visible en desktop -->
+				<div class="hidden sm:block">
+					<Button
+						label="Registrate y empezá a generar impacto"
+						href="/registro"
+						variant="ghost"
+						size="md"
+					/>
+				</div>
 			</div>
 		</div>
 
-		<!-- Lado derecho: imagen destacada con animación -->
+		<!-- *Lado derecho: imagen -->
 		<div
 			class="flex flex-1 items-end justify-center"
 			class:fade-in-right={visible}
@@ -72,7 +95,7 @@ TODO:
 			style="transition-delay: .23s"
 		>
 			<div
-				class="cta-img-outer group relative h-[430px] w-[290px] overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px]"
+				class="cta-img-outer group relative h-64 w-44 overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px] md:h-[480px] md:w-[350px]"
 			>
 				<div
 					class="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
