@@ -3,12 +3,10 @@
 	-*- Descripción: muestra un proyecto con su imagen, título, descripción corta, progreso y botón de leer más.
 -->
 
-<!-- ProjectCard2.svelte -->
 <script lang="ts">
 	/* ----------  PROPS & HELPERS  ---------- */
 	import type { Project } from '$lib/models/Project';
 	import ProgressBar from '$lib/components/ui/ProgressBar.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
 	export let project!: Project;
@@ -27,7 +25,6 @@
 	} = project;
 
 	const percent = Math.min(Math.round((actual / objetivo) * 100), 100);
-
 	const fmt = (v: number) =>
 		unidad === 'dinero' ? `$${v.toLocaleString('es-AR')}` : v.toLocaleString('es-AR');
 
@@ -43,7 +40,6 @@
 		year: 'numeric'
 	});
 
-	/* Texto mostrado sobre la meta */
 	const objetivoLabel =
 		unidad === 'dinero'
 			? fmt(objetivo)
@@ -61,51 +57,64 @@
 </script>
 
 <article
-	class="group flex h-full flex-col overflow-hidden rounded-3xl border border-transparent
-	       bg-white shadow-lg transition-all duration-500
-	       hover:-translate-y-2 hover:border-[rgb(147_197_253_/0.5)] hover:shadow-xl"
+	class="group relative flex h-full flex-col overflow-hidden rounded-3xl
+	       border border-sky-100 bg-white shadow-md transition-all duration-500
+	       hover:-translate-y-1 hover:border-sky-200 hover:shadow-xl"
 >
-	<!-- ░░ Banner ░░ -->
-	<div class="relative">
+	<!-- *Banner/Portada -->
+	<div class="relative aspect-[4/3] w-full overflow-hidden">
 		<img
 			src={imagen}
 			alt={titulo}
-			class="h-52 w-full object-cover transition-transform duration-500 group-hover:scale-105"
+			class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 			loading="lazy"
 		/>
 
-		<!-- Fecha -->
+		<!-- *Overlay degradé (en hover) -->
+		<span
+			class="pointer-events-none absolute inset-0 bg-gradient-to-t
+			       from-black/45 via-black/20 to-transparent
+			       opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+		></span>
+
+		<!-- *Fecha -->
 		<span
 			class="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-0.5
-			       text-[11px] font-medium text-gray-700 shadow"
+			       text-[11px] font-medium text-gray-700 shadow-sm backdrop-blur-sm"
 		>
 			{fecha}
 		</span>
 	</div>
 
-	<!-- ░░ Contenido ░░ -->
+	<!-- !Contenido -->
+
 	<div class="flex flex-1 flex-col gap-4 p-6">
-		<!-- Badges -->
+		<!-- *Institución y ubicación -->
+		<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+			<!-- TODO: corregir apariencia del enlace de institución -->
+			<a
+				class="text-[13px] font-semibold text-[rgb(var(--color-primary))]
+			       transition-colors duration-300 hover:text-[rgb(var(--color-primary-hover))] hover:underline"
+				href={`/institutions/${slug}`}
+			>
+				{institucion}
+			</a>
 
-		<!-- ! Lo comenté para que no abrume al usuario, pero se puede descomentar si se desea mostrar en un futuro
-		 <div class="flex flex-wrap items-center gap-2">
-			<Badge text={unitInfo.label} />
-			<span class="flex items-center gap-1 text-xs text-gray-500">📍 {ubicacion}</span>
-		</div> -->
+			{#if ubicacion}
+				<span class="flex items-center gap-1">📍 {ubicacion}</span>
+			{/if}
+		</div>
 
-		<!-- Título + institución -->
-		<h3 class="custom-margin text-[1.1rem] font-extrabold leading-snug text-gray-900">{titulo}</h3>
-		<a
-			class="text-[13px] font-semibold text-[rgb(var(--color-primary))] transition-colors duration-300 hover:text-[rgb(var(--color-primary-hover))]/90"
-			href={`/institutions/${slug}`}>{institucion}</a
-		>
-
-		<!-- *Descripción  -->
+		<!-- *Título -->
+		<h3 class="custom-margin mt-1 text-lg font-extrabold leading-snug text-gray-900">
+			{titulo}
+		</h3>
+		<!-- *Descripción truncada -->
 		<p class="truncate-description text-sm leading-relaxed text-gray-600">
 			{descripcion.length > 160 ? descripcion.slice(0, 157).trimEnd() + '…' : descripcion}
 		</p>
 
-		<!-- Progreso -->
+		<!-- *Progreso -->
 		<div class="mt-auto flex flex-col gap-1">
 			<p class="mb-0.5 flex justify-between text-xs font-semibold text-gray-700">
 				<span>{unitInfo.icon} Objetivo</span>
@@ -115,10 +124,15 @@
 			<ProgressBar {percent} color={unitInfo.color} />
 		</div>
 
-		<!-- CTA -->
-
-		<div class="flex justify-center">
-			<Button label="Leer más" variant="secondary" href={`/projects/${slug}`} size="sm" />
+		<!-- *CTA -->
+		<div class="pt-2">
+			<Button
+				label="Leer más"
+				variant="secondary"
+				href={`/projects/${slug}`}
+				size="sm"
+				customClass="w-full"
+			/>
 		</div>
 	</div>
 </article>
@@ -133,7 +147,7 @@
 	}
 
 	.custom-margin {
-		margin-top: 0.3rem;
+		margin-top: 0.2rem;
 		margin-bottom: 0.2rem;
 	}
 </style>
