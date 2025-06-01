@@ -9,6 +9,7 @@
 	import type { Project } from '$lib/models/Project';
 	import ProgressBar from '$lib/components/ui/ProgressBar.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	export let project!: Project;
 
@@ -115,17 +116,10 @@
 		</div>
 
 		<!-- CTA -->
-		<a
-			href={`/projects/${slug}`}
-			class="mt-1 inline-flex items-center gap-1 self-start rounded-full
-			       bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-600
-			       transition-all duration-300 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
-		>
-			Leer más
-			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
-		</a>
+
+		<div class="flex justify-center">
+			<Button label="Leer más" variant="secondary" href={`/projects/${slug}`} size="sm" />
+		</div>
 	</div>
 </article>
 

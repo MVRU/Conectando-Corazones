@@ -8,7 +8,7 @@
 	-*- disabled (boolean): si está activado, el botón queda deshabilitado y atenuado.
 	-*- href (string): ruta o URL de destino al hacer clic.
 	-*- external (boolean): si es `true`, se navega usando `window.location.href` en lugar de `goto()`.
-	-*- variant (string): tipo de botón, puede ser 'primary' o 'ghost'. Por defecto: 'primary'.
+	-*- variant (string): 'primary', 'secondary' o 'ghost'. Por defecto: 'primary'.
 
 TODO:
 	- [ ] Agregar otras variantes de estilo: `secondary`, `outline`, `danger`.
@@ -31,20 +31,29 @@ TODO:
 	export let disabled = false;
 	export let href: string = '/';
 	export let external = false;
-	export let variant: 'primary' | 'ghost' = 'primary';
+	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
+	export let size: 'md' | 'sm' = 'md';
+	export let customClass = '';
+
+	/* ---------- mapas de tamaño para size ---------- */
+	const rootSize = {
+		md: 'h-12 md:h-14 min-w-[140px] px-6 py-3',
+		sm: 'h-9  md:h-10 min-w-[100px] px-4 py-2'
+	};
+	const textSize = { md: 'text-[18px]', sm: 'text-[15px]' };
+	const iconSize = { md: 'w-5 h-5', sm: 'w-4 h-4' };
 </script>
 
+<!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
-		on:click={() => {
-			if (external) window.location.href = href;
-			else if (!disabled) goto(href);
-		}}
+		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
 		class={clsx(
-			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden px-6 py-3 transition-all duration-300',
-			'h-12 min-w-[140px] select-none text-[17px] font-semibold tracking-tight md:h-14',
+			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
+			rootSize[size],
 			'bg-primary hover:bg-primary-hover text-white',
-			disabled && 'cursor-not-allowed opacity-50'
+			disabled && 'cursor-not-allowed opacity-50',
+			customClass
 		)}
 		role="link"
 		tabindex="0"
@@ -52,15 +61,18 @@ TODO:
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
-			class="text-animation font-inter z-10 whitespace-nowrap text-[18px] font-semibold leading-[1.11]"
+			class={clsx(
+				'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+				textSize[size]
+			)}
 		>
 			{label}
 		</span>
-		<span class="icon-animation absolute z-10 flex h-full w-full items-center justify-center">
+		<span
+			class={clsx('icon-animation absolute z-10 flex items-center justify-center', iconSize[size])}
+		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
-				width="20"
-				height="20"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
@@ -72,16 +84,59 @@ TODO:
 			</svg>
 		</span>
 	</button>
-{:else}
-	<!-- GHOST VARIANT - con una iluminación leve en hover -->
+
+	<!-- ! Variante Secondary -->
+{:else if variant === 'secondary'}
 	<button
-		on:click={() => {
-			if (external) window.location.href = href;
-			else if (!disabled) goto(href);
-		}}
+		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
 		class={clsx(
-			'cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 text-[17px] font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14',
-			disabled && 'cursor-not-allowed opacity-50'
+			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
+			rootSize[size],
+			'bg-[#eff6ff] text-[rgb(var(--color-primary))] hover:bg-[#dbeafe]',
+			disabled && 'cursor-not-allowed opacity-50',
+			customClass
+		)}
+		role="link"
+		tabindex="0"
+		aria-label={`Ir a ${href}`}
+	>
+		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
+		<span
+			class={clsx(
+				'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+				textSize[size]
+			)}
+		>
+			{label}
+		</span>
+		<span
+			class={clsx('icon-animation absolute z-10 flex items-center justify-center', iconSize[size])}
+		>
+			<svg
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+			>
+				<path d="M5 12h14M12 5l7 7-7 7" />
+			</svg>
+		</span>
+	</button>
+
+	<!-- ! Variante Ghost -->
+{:else}
+	<button
+		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		class={clsx(
+			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
+			size === 'md'
+				? 'h-12 min-w-[140px] px-8 py-3 md:h-14'
+				: 'h-9 min-w-[100px]  px-5 py-2 md:h-10',
+			disabled && 'cursor-not-allowed opacity-50',
+			customClass
 		)}
 		role="link"
 		tabindex="0"
@@ -90,10 +145,8 @@ TODO:
 		<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 			{label}
 			<svg
-				class="ml-1 transition-transform duration-300 group-hover:translate-x-1"
+				class={clsx('transition-transform duration-300 group-hover:translate-x-1', iconSize[size])}
 				xmlns="http://www.w3.org/2000/svg"
-				width="21"
-				height="21"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="#3b82f6"
