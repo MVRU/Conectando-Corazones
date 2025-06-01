@@ -3,7 +3,7 @@
 * Descripción: sección de testimonios con carrusel responsivo y animación de entrada.
 
 TODO:
-	- [ ] Agregar indicadores de posición del carrusel.
+	- [ ] (Opcional) Agregar indicadores de posición del carrusel.
 	- [ ] (Opcional) Agregar swipe para móviles.
 
 -->
@@ -13,7 +13,6 @@ TODO:
 	import TestimonialCard from '$lib/components/ui/TestimonialCard.svelte';
 	import { testimonials } from '$lib/data/testimonials';
 
-	/* -------  Lógica del carrusel  -------- */
 	let centerIndex = 1;
 	let visibleCount = 3;
 
@@ -33,7 +32,6 @@ TODO:
 
 	$: visibleTestimonials = testimonials.slice(centerIndex, centerIndex + visibleCount);
 
-	/* -------  Animación de entrada  -------- */
 	let visible = false;
 	let sectionRef: HTMLElement;
 
@@ -80,17 +78,14 @@ TODO:
 		</p>
 	</div>
 
-	<!-- Carrusel -->
+	<!-- *Carrusel para desktop: flechas a los costados y cards en el centro -->
 	<div
-		class="relative mx-auto flex items-center justify-center md:gap-3"
-		style="transition:opacity 1s .25s, transform 1s .25s; opacity:{visible
-			? 1
-			: 0}; transform:translateY({visible ? 0 : 30}px);"
+		class="relative mx-auto hidden w-full max-w-5xl min-[1210px]:flex min-[1210px]:flex-row min-[1210px]:items-center min-[1210px]:justify-between min-[1210px]:gap-4"
 	>
-		<!-- Flecha Izquierda -->
+		<!-- -*- Flecha izquierda -->
 		<button
 			on:click={showPrev}
-			class="nav-btn left-1.5 md:static md:translate-y-0"
+			class="nav-btn min-[1210px]:-translate-x-6"
 			disabled={centerIndex === 0}
 			aria-label="Ver testimonios anteriores"
 		>
@@ -98,9 +93,8 @@ TODO:
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 			</svg>
 		</button>
-
-		<!-- Tarjetas -->
-		<div class="flex flex-row gap-6 md:gap-8">
+		<!-- -*- Cards -->
+		<div class="flex w-full flex-row items-center justify-center gap-6 md:gap-8">
 			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
 				<TestimonialCard
 					{...testimonial}
@@ -109,11 +103,10 @@ TODO:
 				/>
 			{/each}
 		</div>
-
-		<!-- Flecha Derecha -->
+		<!-- -*- Flecha derecha -->
 		<button
 			on:click={showNext}
-			class="nav-btn right-1.5 md:static md:translate-y-0"
+			class="nav-btn min-[1210px]:translate-x-6"
 			disabled={centerIndex === testimonials.length - visibleCount}
 			aria-label="Ver testimonios siguientes"
 		>
@@ -122,22 +115,65 @@ TODO:
 			</svg>
 		</button>
 	</div>
+
+	<!--* Carrusel para mobile: cards arriba, flechas debajo -->
+	<div class="relative mx-auto flex w-full max-w-5xl flex-col items-center min-[1210px]:hidden">
+		<!-- -*- Cards -->
+		<div class="flex w-full flex-row items-center justify-center gap-6 md:gap-8">
+			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
+				<TestimonialCard
+					{...testimonial}
+					active={i === (visibleCount === 3 ? 1 : 0)}
+					locked={visibleCount === 3 ? i !== 1 : false}
+				/>
+			{/each}
+		</div>
+		<!-- -*- Flechas debajo -->
+		<div class="mt-10 flex w-full items-center justify-center gap-6">
+			<button
+				on:click={showPrev}
+				class="nav-btn"
+				disabled={centerIndex === 0}
+				aria-label="Ver testimonios anteriores"
+			>
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
+				</svg>
+			</button>
+			<button
+				on:click={showNext}
+				class="nav-btn"
+				disabled={centerIndex === testimonials.length - visibleCount}
+				aria-label="Ver testimonios siguientes"
+			>
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+				</svg>
+			</button>
+		</div>
+	</div>
 </section>
 
 <style>
 	.nav-btn {
-		position: absolute; /* para mobile */
-		top: 50%;
-		transform: translateY(-50%);
-		z-index: 20;
 		background: #ffffff;
-		padding: 0.5rem;
+		padding: 0.6rem;
 		border-radius: 9999px;
 		color: #3b82f6;
 		box-shadow: 0 2px 6px #0001;
 		transition:
 			background 0.2s,
 			box-shadow 0.2s;
+		border: none;
+		outline: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	.nav-btn:hover:not(:disabled) {
 		background: #e0ecff;
@@ -147,10 +183,13 @@ TODO:
 		opacity: 0.4;
 		pointer-events: none;
 	}
-	@media (min-width: 768px) {
-		.nav-btn {
-			position: static; /* para desktop */
-			transform: none;
+
+	@media (min-width: 1210px) {
+		.min-\[1210px\]\:flex {
+			display: flex !important;
+		}
+		.min-\[1210px\]\:hidden {
+			display: none !important;
 		}
 	}
 </style>
