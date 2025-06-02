@@ -24,7 +24,6 @@ TODO:
 	let lastScrollY = 0;
 	let headerRef: HTMLElement;
 
-	// Rutas de navegación (esto permite agregar más en el futuro o cambiarlas sin modificar el código)
 	const navLinks = [
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Acerca de', href: '/about' },
@@ -55,13 +54,26 @@ TODO:
 	});
 </script>
 
+{#if menuOpen}
+	<div
+		class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+		role="button"
+		tabindex="0"
+		aria-label="Cerrar menú"
+		on:click={() => (menuOpen = false)}
+		on:keydown={(e) => {
+			if (e.key === 'Enter' || e.key === ' ') menuOpen = false;
+		}}
+	></div>
+{/if}
+
 <header
 	bind:this={headerRef}
 	class="sticky top-0 z-50 w-full bg-[rgb(var(--base-color))] text-white shadow-[0_2px_6px_rgba(0,0,0,.22)] transition-transform duration-500"
 	style="transform:translateY({showHeader ? 0 : -110}%);"
 >
 	<div class="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-4 md:px-8">
-		<!-- Logo animado -->
+		<!-- *Logo animado -->
 		<div class="header-logo" style="animation:fadePop .8s .06s both; opacity:{visible ? 1 : 0};">
 			<Image
 				src="/logo-1.png"
@@ -72,7 +84,7 @@ TODO:
 			/>
 		</div>
 
-		<!-- Nav Desktop -->
+		<!-- *Nav Desktop -->
 		<nav class="hidden items-center gap-8 text-[17px] font-semibold md:flex">
 			{#each navLinks as { label, href }, i}
 				<a
@@ -84,7 +96,7 @@ TODO:
 			{/each}
 		</nav>
 
-		<!-- CTA Desktop -->
+		<!-- *CTA Desktop -->
 		<div
 			class="hidden md:block"
 			style="animation:fadeSlide .7s .54s both; opacity:{visible ? 1 : 0};"
@@ -92,7 +104,7 @@ TODO:
 			<Button label="Registrarse" href="/signin" />
 		</div>
 
-		<!-- Hamburguesa Mobile -->
+		<!-- *Hamburguesa Mobile -->
 		<div class="md:hidden">
 			<button
 				aria-label="Abrir menú"
@@ -120,11 +132,11 @@ TODO:
 		</div>
 	</div>
 
-	<!-- Menú Mobile -->
 	{#if menuOpen}
+		<!-- *Menú Mobile -->
 		<nav
 			class="mobile-menu absolute left-0 right-0 top-full z-50 flex flex-col gap-5
-			bg-[rgba(24,25,46,0.98)] px-8 py-8 shadow-2xl backdrop-blur-md"
+			bg-[#0f1028] px-8 py-8 shadow-2xl backdrop-blur-md"
 			style="animation:slideInDown 0.45s cubic-bezier(.4,0,.2,1) both"
 		>
 			{#each navLinks as { label, href }, j}
@@ -135,7 +147,17 @@ TODO:
 					on:click={() => (menuOpen = false)}>{label}</a
 				>
 			{/each}
-			<div style="animation:fadePop .65s .52s both;">
+			<div
+				role="button"
+				tabindex="0"
+				on:click={() => (menuOpen = false)}
+				on:keydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						menuOpen = false;
+					}
+				}}
+				aria-label="Registrarse"
+			>
 				<Button label="Registrarse" href="/signin" variant="ghost" />
 			</div>
 		</nav>

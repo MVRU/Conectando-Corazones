@@ -12,7 +12,7 @@ export const projects: Project[] = [
         unidad: 'materiales',
         especie: 'libros',
         deadline: '2025-09-30',
-        institucion: 'Escuela Nº 123',
+        institucion: 'Escuela Esperanza',
         ubicacion: 'Rosario, Santa Fe'
     },
     {

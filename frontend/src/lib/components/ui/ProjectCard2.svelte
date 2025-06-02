@@ -91,10 +91,9 @@
 	<div class="flex flex-1 flex-col gap-4 p-6">
 		<!-- *Institución y ubicación -->
 		<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
-			<!-- TODO: corregir apariencia del enlace de institución -->
 			<a
-				class="text-[13px] font-semibold text-[rgb(var(--color-primary))]
-			       transition-colors duration-300 hover:text-[rgb(var(--color-primary-hover))] hover:underline"
+				class="nav-link inline-block text-[13px]
+			       font-semibold text-[rgb(var(--color-primary))] transition-colors duration-300 hover:text-[rgb(var(--color-primary-hover))]"
 				href={`/institutions/${slug}`}
 			>
 				{institucion}
@@ -149,5 +148,25 @@
 	.custom-margin {
 		margin-top: 0.2rem;
 		margin-bottom: 0.2rem;
+	}
+
+	.nav-link {
+		position: relative;
+		opacity: 0.85;
+		padding-bottom: 2px;
+	}
+	.nav-link::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		bottom: -2px;
+		height: 2px;
+		width: 0;
+		border-radius: 2px;
+		background: linear-gradient(90deg, #60a5fa 0%, #bae6fd 100%);
+		transition: width 0.34s cubic-bezier(0.42, 0, 0.18, 1);
+	}
+	.nav-link:hover::after {
+		width: 100%;
 	}
 </style>

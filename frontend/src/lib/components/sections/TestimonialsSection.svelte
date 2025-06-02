@@ -85,7 +85,7 @@ TODO:
 		<!-- -*- Flecha izquierda -->
 		<button
 			on:click={showPrev}
-			class="nav-btn min-[1210px]:-translate-x-6"
+			class="nav-btn cursor-pointer min-[1210px]:-translate-x-6"
 			disabled={centerIndex === 0}
 			aria-label="Ver testimonios anteriores"
 		>
@@ -106,7 +106,7 @@ TODO:
 		<!-- -*- Flecha derecha -->
 		<button
 			on:click={showNext}
-			class="nav-btn min-[1210px]:translate-x-6"
+			class="nav-btn cursor-pointer min-[1210px]:translate-x-6"
 			disabled={centerIndex === testimonials.length - visibleCount}
 			aria-label="Ver testimonios siguientes"
 		>
@@ -132,7 +132,7 @@ TODO:
 		<div class="mt-10 flex w-full items-center justify-center gap-6">
 			<button
 				on:click={showPrev}
-				class="nav-btn"
+				class="nav-btn cursor-pointer"
 				disabled={centerIndex === 0}
 				aria-label="Ver testimonios anteriores"
 			>
@@ -147,7 +147,7 @@ TODO:
 			</button>
 			<button
 				on:click={showNext}
-				class="nav-btn"
+				class="nav-btn cursor-pointer"
 				disabled={centerIndex === testimonials.length - visibleCount}
 				aria-label="Ver testimonios siguientes"
 			>
