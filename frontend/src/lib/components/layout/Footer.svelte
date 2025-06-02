@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	let visible = false;
-	let hasAnimated = false; // bandera para animación única (solo se reproduce una vez)
+	let hasAnimated = false;
 	let footerRef: HTMLElement;
 	const year = new Date().getFullYear();
 
@@ -23,7 +23,7 @@
 
 <footer
 	bind:this={footerRef}
-	class="w-full bg-[rgb(var(--base-color))] px-4 py-12 text-white transition-all sm:py-14"
+	class="w-full bg-[rgb(var(--base-color))] px-3 py-10 text-white transition-all sm:px-4 sm:py-14"
 	style="
 		opacity: {visible ? 1 : 0};
 		transform: scale({visible ? 1 : 0.98});
@@ -33,24 +33,29 @@
 >
 	<div class="mx-auto max-w-7xl px-2 md:px-6">
 		<div class="grid grid-cols-1 gap-12 md:grid-cols-3 md:gap-x-20">
-			<!-- Logo y descripción -->
-			<div class="flex flex-col gap-4">
-				<div class="mb-2 flex items-center gap-3">
+			<!-- *Logo y descripción -->
+			<div class="flex flex-col items-center gap-4 md:items-start">
+				<!-- !Responsive Logo y Nombre -->
+				<div
+					class="mb-2 flex flex-col items-center justify-center gap-1 min-[410px]:flex-row min-[410px]:gap-3 md:flex-row md:justify-start"
+				>
 					<img
 						src="/logo-1.png"
 						alt="Logo de Conectando Corazones"
 						class="h-10 w-10 rounded-xl object-contain shadow-md transition-transform duration-300 hover:scale-110"
 					/>
-					<h3 class="text-2xl font-extrabold tracking-tight text-white drop-shadow">
+					<h3
+						class="mt-1 text-center text-xl font-extrabold tracking-tight text-white drop-shadow min-[410px]:mt-0 sm:text-2xl md:text-left"
+					>
 						Conectando Corazones
 					</h3>
 				</div>
-				<p class="text-m mb-5 max-w-xs text-gray-200">
+				<p class="mb-5 max-w-xs text-center text-sm text-gray-200 md:text-left">
 					Uniendo personas a través de la generosidad y el apoyo mutuo. Juntos podemos hacer la
 					diferencia.
 				</p>
-				<div class="flex space-x-4 pt-1">
-					<!-- Redes sociales -->
+				<div class="flex justify-center space-x-4 pt-1 md:justify-start">
+					<!-- *Redes sociales -->
 					<a
 						href="https://facebook.com"
 						aria-label="Facebook"
@@ -87,17 +92,17 @@
 				</div>
 			</div>
 
-			<!-- Enlaces rápidos -->
-			<nav class="flex flex-col gap-1 md:pl-12">
+			<!-- *Enlaces rápidos -->
+			<nav class="flex flex-col items-center gap-1 md:items-start md:pl-12">
 				<h5 class="mb-2 text-lg font-bold text-white">Enlaces rápidos</h5>
-				<a href="/about" class="footer-link self-start">Sobre Nosotros</a>
-				<a href="/donate" class="footer-link self-start">Donar</a>
-				<a href="/projects" class="footer-link self-start">Proyectos</a>
-				<a href="/contact" class="footer-link self-start">Contacto</a>
+				<a href="/about" class="footer-link">Sobre Nosotros</a>
+				<a href="/donate" class="footer-link">Donar</a>
+				<a href="/projects" class="footer-link">Proyectos</a>
+				<a href="/contact" class="footer-link">Contacto</a>
 			</nav>
 
-			<!-- Contacto -->
-			<nav class="flex flex-col gap-2">
+			<!-- *Contacto -->
+			<nav class="flex flex-col items-center gap-2 md:items-start">
 				<h5 class="mb-2 text-lg font-bold text-white">Contacto</h5>
 				<div class="flex items-center gap-2">
 					<svg class="h-5 w-5 opacity-80" fill="currentColor" viewBox="0 0 20 20">
@@ -119,17 +124,20 @@
 			</nav>
 		</div>
 
-		<hr class="my-10 border-white/15" />
+		<hr class="my-8 border-white/15" />
 
-		<!-- Pie inferior -->
+		<!-- *Pie inferior -->
 		<div
 			class="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-center sm:text-left"
 		>
-			<p class="break-words text-sm text-gray-300 sm:text-base">
-				&copy; {year} <span class="font-bold">Conectando Corazones</span>. Todos los derechos
-				reservados.
+			<p class="break-words text-xs text-gray-300 sm:text-base">
+				&copy; {year} <span class="font-bold">Conectando Corazones</span>.
+				<span class="block sm:inline">Todos los derechos reservados.</span>
 			</p>
-			<nav aria-label="Soporte" class="flex flex-row gap-6 text-sm">
+			<nav
+				aria-label="Soporte"
+				class="footer-bottom-links flex flex-col gap-2 text-xs sm:flex-row sm:gap-6 sm:text-sm"
+			>
 				<a href="/faq" class="footer-link">Preguntas Frecuentes</a>
 				<a href="/privacy" class="footer-link">Política de Privacidad</a>
 				<a href="/terms" class="footer-link">Términos de Uso</a>
@@ -186,5 +194,29 @@
 		opacity: 1;
 		text-decoration: underline solid 2px #60a5fa;
 		text-shadow: 0 0 8px #7dd3fc55;
+	}
+
+	@media (max-width: 640px) {
+		.grid {
+			gap: 2.5rem !important;
+		}
+		hr {
+			margin: 2.5rem 0 !important;
+		}
+		.footer-bottom-links {
+			flex-direction: column !important;
+			align-items: center !important;
+			gap: 0.4rem !important;
+		}
+	}
+
+	@media (max-width: 410px) {
+		.min-\[410px\]\:flex-row {
+			flex-direction: column !important;
+			gap: 0.3rem !important;
+		}
+		.min-\[410px\]\:gap-3 {
+			gap: 0.3rem !important;
+		}
 	}
 </style>

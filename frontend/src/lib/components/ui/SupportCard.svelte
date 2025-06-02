@@ -19,15 +19,14 @@
 </script>
 
 <div
-	class="support-card group relative flex flex-col items-center rounded-3xl border border-blue-400/10 bg-gradient-to-b from-white/10 to-[#172040] p-8 text-center shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_8px_40px_0_#7dd3fc33] hover:ring-2 hover:ring-blue-300/20"
+	class="support-card group relative flex flex-col items-center rounded-2xl border border-blue-400/10 bg-gradient-to-b from-white/10 to-[#172040] p-6 text-center shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_8px_40px_0_#7dd3fc33] hover:ring-2 hover:ring-blue-300/20 sm:p-8"
 >
 	<div
-		class="icon-wrapper mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-400/10 transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-400/20"
+		class="icon-wrapper mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-400/10 transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-400/20 sm:h-16 sm:w-16"
 	>
 		{#if icon === 'user'}
-			<!-- icono de usuario -->
 			<svg
-				class="h-8 w-8 stroke-gray-300 transition-all group-hover:stroke-gray-200"
+				class="h-7 w-7 stroke-gray-300 transition-all group-hover:stroke-gray-200 sm:h-8 sm:w-8"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"
@@ -37,9 +36,8 @@
 				<path d="M4 20c0-3.31 3.58-6 8-6s8 2.69 8 6" />
 			</svg>
 		{:else if icon === 'support'}
-			<!-- icono de soporte -->
 			<svg
-				class="h-8 w-8 stroke-blue-400 transition-all group-hover:stroke-blue-300"
+				class="h-7 w-7 stroke-blue-400 transition-all group-hover:stroke-blue-300 sm:h-8 sm:w-8"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -51,9 +49,8 @@
 				<path d="M8 21h8" />
 			</svg>
 		{:else if icon === 'alert'}
-			<!-- icono de alerta -->
 			<svg
-				class="h-8 w-8 stroke-red-400 transition-all group-hover:stroke-red-300"
+				class="h-7 w-7 stroke-red-400 transition-all group-hover:stroke-red-300 sm:h-8 sm:w-8"
 				fill="none"
 				viewBox="0 0 24 24"
 				stroke="currentColor"
@@ -64,9 +61,15 @@
 			</svg>
 		{/if}
 	</div>
-	<h3 class="mb-1 text-lg font-bold text-white">{title}</h3>
-	<p class="mb-4 text-sm text-blue-100">{description}</p>
-	<div class="mt-6">
-		<Button href={link} label={linkText} variant="ghost" />
+	<h3 class="mb-1 text-base font-bold text-white sm:text-lg">{title}</h3>
+	<p class="mb-4 text-xs text-blue-100 sm:text-sm">{description}</p>
+	<div class="mt-5 flex w-full justify-center">
+		<Button
+			href={link}
+			label={linkText}
+			variant="ghost"
+			customClass="text-xs sm:text-sm"
+			size="sm"
+		/>
 	</div>
 </div>

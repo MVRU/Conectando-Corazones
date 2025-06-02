@@ -4,10 +4,7 @@
     -*- Props: por ahora, contenido estático.
 
 TODO:
-	- [ ] Implementar enlaces dinámicos para sugerencias, soporte y denuncias.
-	- [ ] Modificar iconos según el tipo de soporte y mejorar diseño.
-	- [ ] Agregar animaciones.
-	- [ ] Crear model y data para código más limpio.
+	- [ ] Corregir los enlaces de contacto.
 -->
 
 <script lang="ts">
@@ -15,12 +12,12 @@ TODO:
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SupportCard from '$lib/components/ui/SupportCard.svelte';
 
+	// Los agregué directamente acá porque son estáticos y no se usan en otros lugares -> no vale la pena crear modelo y data separada.
 	const supports = [
 		{
 			icon: 'user',
 			title: 'Sugerencias',
-			description:
-				'Tu opinión es muy valiosa. Si tenés ideas, sugerencias o propuestas, ¡queremos escucharlas!',
+			description: 'Tu opinión es muy valiosa. Si tenés ideas o propuestas, ¡queremos escucharlas!',
 			link: '/contact?sugerencia',
 			linkText: 'Enviar sugerencias'
 		},
@@ -37,7 +34,7 @@ TODO:
 			title: 'Denuncias y Reportes',
 			description: 'Nos tomamos muy en serio la seguridad y transparencia de nuestra comunidad.',
 			link: '/contact?denuncia',
-			linkText: 'Reportar una incidencia'
+			linkText: 'Reportar incidencia'
 		}
 	] as const;
 
@@ -58,7 +55,7 @@ TODO:
 
 <section
 	bind:this={sectionRef}
-	class="relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-4 py-40 md:px-8"
+	class="py-30 relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-2 sm:px-4 md:px-8"
 >
 	<div class="mx-auto flex max-w-7xl flex-col items-center">
 		<div
@@ -69,7 +66,7 @@ TODO:
 			<Badge text="Estamos aquí para ayudarte" />
 		</div>
 		<h2
-			class="mb-12 text-center text-4xl font-extrabold leading-tight text-white drop-shadow transition-all duration-1000"
+			class="mb-10 text-center text-2xl font-extrabold leading-tight text-white drop-shadow transition-all duration-1000 sm:text-3xl md:text-4xl"
 			class:fade-down={visible}
 			class:fade-initial-down={!visible}
 			style="transition-delay:80ms"
@@ -77,8 +74,8 @@ TODO:
 			¿Necesitás ayuda para empezar?<br />
 			<span class="text-blue-200">No dudes en contactarnos.</span>
 		</h2>
-		<!-- Tarjetas de soporte -->
-		<div class="grid w-full grid-cols-1 gap-8 md:grid-cols-3">
+		<!-- *Tarjetas de soporte -->
+		<div class="grid w-full grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
 			{#each supports as support, i}
 				<div
 					class="transition-all duration-1000"
