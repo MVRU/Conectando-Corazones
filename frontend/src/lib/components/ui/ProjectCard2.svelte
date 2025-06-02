@@ -54,6 +54,35 @@
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, '-')
 		.replace(/^-|-$/g, '');
+
+	// Calcula la diferencia entre la fecha actual y el deadline
+	function calcularTiempoRestante(fechaLimite: string): string {
+		const hoy = new Date();
+		const limite = new Date(fechaLimite);
+
+		// Normaliza las fechas eliminando horas para más precisión
+		hoy.setHours(0, 0, 0, 0);
+		limite.setHours(0, 0, 0, 0);
+
+		const diff = limite.getTime() - hoy.getTime();
+		const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+		if (dias < 0) return 'Finalizado';
+		if (dias === 0) return 'Último día';
+
+		if (dias === 1) return 'Queda 1 día';
+		if (dias < 7) return `Quedan ${dias} días`;
+
+		const semanas = Math.floor(dias / 7);
+		if (semanas === 1) return 'Queda 1 semana';
+		if (dias < 30) return `Quedan ${semanas} semanas`;
+
+		const meses = Math.floor(dias / 30);
+		if (meses === 1) return 'Queda 1 mes';
+		return `Quedan ${meses} meses`;
+	}
+
+	const tiempoRestante = calcularTiempoRestante(deadline);
 </script>
 
 <article
@@ -80,9 +109,9 @@
 		<!-- *Fecha -->
 		<span
 			class="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-0.5
-			       text-[11px] font-medium text-gray-700 shadow-sm backdrop-blur-sm"
+	       text-[11px] font-semibold text-gray-700 shadow-sm backdrop-blur-sm"
 		>
-			{fecha}
+			⏳ {tiempoRestante}
 		</span>
 	</div>
 
@@ -124,14 +153,37 @@
 		</div>
 
 		<!-- *CTA -->
-		<div class="pt-2">
+		<div class="flex items-center gap-2 pt-2">
+			<!-- ! Botón Leer más -->
 			<Button
 				label="Leer más"
 				variant="secondary"
 				href={`/projects/${slug}`}
 				size="sm"
-				customClass="w-full"
+				customClass="flex-1"
 			/>
+
+			<!-- ! Botón + expandible -->
+
+			<a
+				href={`/projects/${slug}#colaborar`}
+				aria-label="Colaborar ahora"
+				class="group/button relative flex h-9 w-9 items-center justify-start gap-2 overflow-hidden rounded-full bg-[rgb(var(--color-primary))] pl-3 pr-3 text-white transition-all duration-300 hover:w-44 hover:bg-[rgb(var(--color-primary-hover))]"
+			>
+				<!-- -!- Ícono "+" animado desplazado -->
+				<span
+					class="flex h-6 w-6 items-center justify-center text-lg font-bold transition-all duration-300 group-hover/button:rotate-90"
+				>
+					+
+				</span>
+
+				<!-- -!- Texto expandible -->
+				<span
+					class="whitespace-nowrap text-sm font-semibold opacity-0 transition-all duration-300 group-hover/button:opacity-100"
+				>
+					Colaborar ahora
+				</span>
+			</a>
 		</div>
 	</div>
 </article>
