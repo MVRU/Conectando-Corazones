@@ -33,7 +33,7 @@ TODO:
 	});
 </script>
 
-<section class="w-full bg-white px-4 py-20 md:px-8">
+<section class="pb-70 w-full bg-white px-4 pt-20 md:px-8">
 	<div
 		bind:this={sectionRef}
 		class="rounded-4xl relative mx-auto max-w-5xl overflow-hidden bg-gradient-to-b from-[rgb(var(--base-color))] to-[#27273e] px-6 pt-12 text-white shadow-2xl sm:px-10 sm:pt-16"

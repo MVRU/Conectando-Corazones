@@ -10,11 +10,11 @@
 >
 	<button
 		type="button"
-		class="flex w-full items-center justify-between px-6 py-4 text-left focus:outline-none"
+		class="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none sm:px-6 sm:py-4"
 		aria-expanded={open}
 		on:click={() => (open = !open)}
 	>
-		<span class="text-lg font-medium text-[#2e386b]">{question}</span>
+		<span class="text-base font-medium text-[#2e386b] sm:text-lg">{question}</span>
 		<span class="duration-400 transition-transform" style="will-change: transform;">
 			<svg
 				class="duration-400 h-6 w-6 text-blue-400 transition-transform group-hover:scale-110"
@@ -32,10 +32,10 @@
 	</button>
 	<div
 		class="accordion-answer overflow-hidden transition-all duration-500"
-		style="max-height: {open ? '180px' : '0'}; opacity: {open ? 1 : 0}; padding-bottom: {open
+		style="max-height: {open ? '220px' : '0'}; opacity: {open ? 1 : 0}; padding-bottom: {open
 			? '1.1rem'
 			: '0'};"
 	>
-		<p class="px-6 text-base text-gray-600">{answer}</p>
+		<p class="px-4 py-1 text-sm text-gray-600 sm:px-6 sm:text-base">{answer}</p>
 	</div>
 </div>

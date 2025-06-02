@@ -29,7 +29,7 @@ TODO:
 	});
 </script>
 
-<section class="w-full bg-gradient-to-br from-[#0f1029] to-[#1e2052] px-2 py-14 sm:px-4 md:px-8">
+<section class="w-full bg-gradient-to-br from-[#0f1029] to-[#1e2052] px-2 py-10 sm:px-4 md:px-8">
 	<div
 		bind:this={sectionRef}
 		class="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-8 md:gap-12 lg:flex-row"

@@ -36,25 +36,27 @@
 	});
 </script>
 
-<section class="w-full bg-gradient-to-b from-[#f7f8fd] to-white px-4 py-20 md:px-8">
-	<div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 md:grid-cols-2">
-		<!-- FAQ -->
+<section class="py-50 w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 sm:px-4 md:px-8">
+	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
+		<!-- *Contenido -->
 		<div
 			bind:this={faqRef}
 			class="flex flex-col justify-center transition-all duration-1000"
 			class:faq-appear={visibleFaq}
 			class:faq-hidden={!visibleFaq}
 		>
-			<h2 class="mb-6 text-3xl font-extrabold leading-tight tracking-tight text-[--base-color]">
-				Respuestas claras y concisas para
-				<span class="text-gray-500">empezar tu camino solidario.</span>
+			<h2
+				class="mb-6 text-center text-2xl font-extrabold leading-tight tracking-tight text-[--base-color] sm:text-3xl md:text-left"
+			>
+				Respuestas claras y concisas<br class="hidden sm:inline" />
+				<span class="block text-gray-500">para empezar tu camino solidario.</span>
 			</h2>
-			<div class="space-y-4">
+			<div class="space-y-3">
 				{#each faqs as faq, i}
 					<FaqItem question={faq.question} answer={faq.answer} initiallyOpen={i === 0} />
 				{/each}
 			</div>
-			<p class="mt-8 text-center text-base text-gray-500 lg:text-left">
+			<p class="mt-7 text-center text-sm text-gray-500 sm:mt-8 sm:text-base lg:text-left">
 				¿Tenés más preguntas?
 				<a
 					href="/contact"
@@ -64,22 +66,19 @@
 			</p>
 		</div>
 
-		<!-- Imagen -->
+		<!-- *Imagen aparece debajo en mobile -->
 		<div
 			bind:this={imgRef}
-			class="duration-800 group relative mx-auto w-[80%] max-w-[340px] overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30 md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
+			class="duration-800 group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
 			class:img-appear={visibleImg}
 			class:img-hidden={!visibleImg}
 		>
 			<div
-				class="left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
-				style="
-					will-change: transform;
-					transition: transform 0.85s cubic-bezier(.43,0,.15,1);
-				"
+				class="left-0 top-0 h-full w-full overflow-hidden rounded-[1.6rem]"
+				style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 				tabindex="-1"
 			>
-				<div class="h-full w-full transition-transform duration-700 group-hover:scale-105">
+				<div class="aspect-[6/5] w-full transition-transform duration-700 group-hover:scale-105">
 					<Image
 						src="/img/faq-1.webp"
 						alt="Personas uniendo manos en señal de equipo y ayuda"

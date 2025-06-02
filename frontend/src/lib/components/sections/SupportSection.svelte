@@ -58,7 +58,7 @@ TODO:
 
 <section
 	bind:this={sectionRef}
-	class="relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-4 py-24 md:px-8"
+	class="relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-4 py-40 md:px-8"
 >
 	<div class="mx-auto flex max-w-7xl flex-col items-center">
 		<div

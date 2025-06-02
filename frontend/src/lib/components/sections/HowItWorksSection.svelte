@@ -30,7 +30,7 @@ TODO:
 
 <section
 	bind:this={holder}
-	class="relative isolate w-full overflow-hidden bg-white px-4 py-20 md:px-8"
+	class="py-50 relative isolate w-full overflow-hidden bg-white px-4 md:px-8"
 >
 	<span
 		class="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full

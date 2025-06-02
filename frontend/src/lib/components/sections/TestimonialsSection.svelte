@@ -53,7 +53,7 @@ TODO:
 
 <section
 	bind:this={sectionRef}
-	class="w-full bg-gradient-to-b from-white to-[#f7f8fd] px-4 py-20 md:px-8"
+	class="pt-50 w-full bg-gradient-to-b from-white to-[#f7f8fd] px-4 pb-20 md:px-8"
 	style="
 		opacity:{visible ? 1 : 0};
 		transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});

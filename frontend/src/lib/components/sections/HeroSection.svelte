@@ -44,7 +44,7 @@
 
 <section
 	bind:this={sectionRef}
-	class="relative w-full overflow-hidden bg-[rgb(var(--base-color))] px-4 pb-24 pt-28 text-white md:px-8"
+	class="relative w-full overflow-hidden bg-[rgb(var(--base-color))] px-4 py-20 text-white md:px-8"
 >
 	<!-- -*-Fondo radial y líneas decorativas -->
 	<span
