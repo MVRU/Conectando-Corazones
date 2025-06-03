@@ -17,6 +17,7 @@ TODO:
 
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
+	let validationErrors: string[] = [];
 
 	// Establecer breadcrumbs al montar la página
 	onMount(() => {
@@ -45,34 +46,33 @@ TODO:
 	];
 
 	// Función para enviar formulario
-async function enviarFormulario(event: Event) {
- 	event.preventDefault();
-	
-	const formData = new FormData(event.target as HTMLFormElement);
-	const datos = {
-		nombre: formData.get('nombre') as string,
-		email: formData.get('email') as string,
-		asunto: formData.get('asunto') as string,
-		mensaje: formData.get('mensaje') as string
-	};
-// Add to script section:
-let validationErrors: string[] = [];
+	async function enviarFormulario(event: Event) {
+		event.preventDefault();
+		
+		const formData = new FormData(event.target as HTMLFormElement);
+		const datos = {
+			nombre: (formData.get('nombre') || '').toString().trim(),
+			email: (formData.get('email') || '').toString().trim(),
+			asunto: (formData.get('asunto') || '').toString().trim(),
+			mensaje: (formData.get('mensaje') || '').toString().trim()
+		};
 
-// Replace the alert validation:
-validationErrors = [];
-if (!datos.nombre) validationErrors.push('El nombre es requerido');
-if (!datos.email) validationErrors.push('El email es requerido');
-if (!datos.asunto) validationErrors.push('El asunto es requerido');
-if (!datos.mensaje) validationErrors.push('El mensaje es requerido');
+		// Validar campos
+		validationErrors = [];
+		if (!datos.nombre) validationErrors.push('El nombre es requerido');
+		if (!datos.email) validationErrors.push('El email es requerido');
+		if (!datos.asunto) validationErrors.push('El asunto es requerido');
+		if (!datos.mensaje) validationErrors.push('El mensaje es requerido');
 
-if (validationErrors.length > 0) {
-    return;
-}
- 	enviandoFormulario = true;
- 
-	// TODO: Enviar datos al backend
-	console.log('Datos del formulario:', datos);
- 	setTimeout(() => {
+		if (validationErrors.length > 0) {
+			return;
+		}
+
+		enviandoFormulario = true;
+
+		// TODO: Enviar datos al backend
+		console.log('Datos del formulario:', datos);
+		setTimeout(() => {
 			enviandoFormulario = false;
 			formularioEnviado = true;
 			
@@ -189,6 +189,17 @@ if (validationErrors.length > 0) {
 					📩 Envianos un Mensaje
 				</h2>
 
+				{#if validationErrors.length > 0}
+					<div class="mb-6 p-4 bg-red-100 border border-red-200 rounded-lg">
+						<p class="text-red-700 font-medium mb-2">Por favor corrige los siguientes errores:</p>
+						<ul class="text-red-600 text-sm list-disc list-inside">
+							{#each validationErrors as error}
+								<li>{error}</li>
+							{/each}
+						</ul>
+					</div>
+				{/if}
+
 				{#if formularioEnviado}
 					<div class="mb-6 p-4 bg-green-100 border border-green-200 rounded-lg">
 						<p class="text-green-700 font-medium">
@@ -203,39 +214,39 @@ if (validationErrors.length > 0) {
 									Nombre completo *
 								</label>
 								<input 
-// Add name attributes to the form inputs (around lines 200, 213, 227):
- <input 
-     id="nombre"
-    name="nombre"
-     type="text" 
-     required 
-     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
-     placeholder="Tu nombre completo"
- />
+									id="nombre"
+									name="nombre"
+									type="text" 
+									required 
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									placeholder="Tu nombre completo"
+								/>
+							</div>
 
- <input 
-     id="email"
-    name="email"
-     type="email" 
-     required 
-     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
-     placeholder="tu.email@ejemplo.com"
- />
+							<div>
+								<label for="email" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+									Email *
+								</label>
+								<input 
+									id="email"
+									name="email"
+									type="email" 
+									required 
+									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									placeholder="tu.email@ejemplo.com"
+								/>
+							</div>
+						</div>
 
- <select 
-     id="asunto"
-    name="asunto"
-     required 
-     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
- >
-
-// Improve the function with better type safety and UX:
-const datos = {
-    nombre: (formData.get('nombre') || '').toString().trim(),
-    email: (formData.get('email') || '').toString().trim(),
-    asunto: (formData.get('asunto') || '').toString().trim(),
-    mensaje: (formData.get('mensaje') || '').toString().trim()
-};
+						<div>
+							<label for="asunto" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+								Asunto *
+							</label>
+							<select 
+								id="asunto"
+								name="asunto"
+								required 
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
 							>
 								<option value="">Seleccionar asunto</option>
 								<option value="consulta-general">Consulta general</option>
@@ -251,14 +262,14 @@ const datos = {
 							<label for="mensaje" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
 								Mensaje *
 							</label>
-<textarea 
- 	id="mensaje"
-	name="mensaje"
- 	required 
- 	rows="6"
- 	class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
- 	placeholder="Escribí tu mensaje aquí..."
- ></textarea>
+							<textarea 
+								id="mensaje"
+								name="mensaje"
+								required 
+								rows="6"
+								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+								placeholder="Escribí tu mensaje aquí..."
+							></textarea>
 						</div>
 
 						<button 
