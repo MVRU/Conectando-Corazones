@@ -73,6 +73,9 @@ TODO:
 		class="duration-600 relative mt-12 flex justify-center transition-opacity"
 		class:opacity-0={!inView}
 	>
-		<Button label="Empezá a conectar hoy" />
+		<Button
+			label="Empezá a conectar hoy"
+			customClass="hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition duration-200 shadow-md"
+		/>
 	</div>
 </section>

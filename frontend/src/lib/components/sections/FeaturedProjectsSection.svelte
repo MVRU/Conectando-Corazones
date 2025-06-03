@@ -57,12 +57,14 @@
 			>
 				Historias reales
 			</span>
-			de impacto social
+			<!-- -*- <br> visible solo en <508px, oculto si >=508px -->
+			<br class="block min-[508px]:hidden" />
+			<span class="inline min-[508px]:inline"> de impacto social </span>
 		</h2>
 	</div>
 
 	<!-- *Grid de Proyectos -->
-	<div class="mx-auto grid max-w-7xl gap-10 md:grid-cols-3">
+	<div class="mx-auto grid max-w-7xl gap-10 max-[1049px]:grid-cols-1 min-[1050px]:grid-cols-3">
 		{#each projects.slice(0, 3) as proj (proj.id)}
 			<ProjectCard2 project={proj} />
 		{/each}
@@ -70,6 +72,11 @@
 
 	<!-- *CTA -->
 	<div class="mt-16 flex justify-center">
-		<Button label="Descubrí más proyectos" href="/projects" size="md" />
+		<Button
+			label="Descubrí más proyectos"
+			href="/projects"
+			size="md"
+			customClass="hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition duration-200 shadow-md"
+		/>
 	</div>
 </section>

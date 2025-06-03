@@ -107,7 +107,7 @@
 						label="Registrarse"
 						variant="primary"
 						size="md"
-						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3"
+						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
 					/>
 				</div>
 			</div>
