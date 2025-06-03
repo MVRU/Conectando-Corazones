@@ -45,12 +45,28 @@ TODO:
 	];
 
 	// Función para enviar formulario
-	async function enviarFormulario(event: Event) {
-		event.preventDefault();
-		enviandoFormulario = true;
-
-		// Simular envío (en producción se conectaría con backend)
-		setTimeout(() => {
+async function enviarFormulario(event: Event) {
+ 	event.preventDefault();
+	
+	const formData = new FormData(event.target as HTMLFormElement);
+	const datos = {
+		nombre: formData.get('nombre') as string,
+		email: formData.get('email') as string,
+		asunto: formData.get('asunto') as string,
+		mensaje: formData.get('mensaje') as string
+	};
+	
+	// Validar datos antes del envío
+	if (!datos.nombre || !datos.email || !datos.asunto || !datos.mensaje) {
+		alert('Por favor completá todos los campos requeridos');
+		return;
+	}
+	
+ 	enviandoFormulario = true;
+ 
+	// TODO: Enviar datos al backend
+	console.log('Datos del formulario:', datos);
+ 	setTimeout(() => {
 			enviandoFormulario = false;
 			formularioEnviado = true;
 			
@@ -226,13 +242,14 @@ TODO:
 							<label for="mensaje" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
 								Mensaje *
 							</label>
-							<textarea 
-								id="mensaje"
-								required 
-								rows="6"
-								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
-								placeholder="Escribí tu mensaje aquí..."
-							></textarea>
+<textarea 
+ 	id="mensaje"
+	name="mensaje"
+ 	required 
+ 	rows="6"
+ 	class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+ 	placeholder="Escribí tu mensaje aquí..."
+ ></textarea>
 						</div>
 
 						<button 
