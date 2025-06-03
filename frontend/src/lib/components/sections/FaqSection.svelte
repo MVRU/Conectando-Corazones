@@ -36,7 +36,10 @@
 	});
 </script>
 
-<section class="py-50 w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 sm:px-4 md:px-8">
+<section
+	id="faq"
+	class="py-50 w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 sm:px-4 md:px-8"
+>
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
 		<!-- *Contenido -->
 		<div

@@ -108,7 +108,7 @@
 				⏳ {tiempoRestante}
 			</span>
 		</div>
-		<div class="flex flex-1 flex-col gap-4 p-4">
+		<div class="flex flex-1 flex-col gap-4 px-5 py-6 min-[510px]:px-6 min-[510px]:py-6">
 			<div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
 				<span
 					class="inline-block text-[13px] font-semibold text-[rgb(var(--color-primary))] opacity-85"

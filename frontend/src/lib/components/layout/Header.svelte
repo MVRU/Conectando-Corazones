@@ -8,15 +8,13 @@
 -*- `showHeader`: Controla la visibilidad del header al hacer scroll.
 -*- `lastScrollY`: Guarda la última posición del scroll para determinar si ocultar el header.
 -*- `navLinks`: Array de objetos con `label` y `href` para los enlaces de navegación.
-
-TODO:
-	- [ ] Agregar overlay oscuro al abrir el menú móvil.
 -->
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Image from '$lib/components/ui/Image.svelte';
+	import { page } from '$app/stores';
 
 	let menuOpen = false;
 	let visible = false;
@@ -24,12 +22,14 @@ TODO:
 	let lastScrollY = 0;
 	let headerRef: HTMLElement;
 
-	const navLinks = [
+	$: isHome = $page.url.pathname === '/';
+
+	$: navLinks = [
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Acerca de', href: '/about' },
 		{ label: 'Proyectos', href: '/projects' },
-		{ label: 'FAQ', href: '/faq' },
-		{ label: 'Contacto', href: '/contact' }
+		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
+		{ label: 'Contacto', href: isHome ? '#support' : '/contact' }
 	];
 
 	onMount(() => {

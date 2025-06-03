@@ -54,8 +54,9 @@ TODO:
 </script>
 
 <section
+	id="support"
 	bind:this={sectionRef}
-	class="py-30 relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-2 sm:px-4 md:px-8"
+	class="relative w-full overflow-x-hidden bg-gradient-to-br from-[#0f1029] to-[#1e223f] px-2 py-60 sm:px-4 md:px-8"
 >
 	<div class="mx-auto flex max-w-7xl flex-col items-center">
 		<div
