@@ -34,6 +34,7 @@ TODO:
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
+	export let customAriaLabel: string = `Ir a ${href}`; // Para accesibilidad
 
 	/* ---------- mapas de tamaño para size ---------- */
 	const rootSize = {
@@ -57,7 +58,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`Ir a ${href}`}
+		aria-label={`${customAriaLabel}`}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -98,7 +99,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`Ir a ${href}`}
+		aria-label={`${customAriaLabel}`}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -140,7 +141,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`Ir a ${href}`}
+		aria-label={`${customAriaLabel}`}
 	>
 		<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 			{label}
