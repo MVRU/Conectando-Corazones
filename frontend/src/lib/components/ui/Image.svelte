@@ -36,7 +36,7 @@ TODO:
 		<img
 			{src}
 			{alt}
-			style={`width: ${width}; height: ${height};`}
+			style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''}`}
 			class="
          block cursor-pointer object-cover
         {variant === 'default' ? ' rounded-lg shadow-md' : ''}
@@ -53,7 +53,7 @@ TODO:
 	<img
 		{src}
 		{alt}
-		style={`width: ${width}; height: ${height};`}
+		style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''}`}
 		class="
        block object-cover
       {variant === 'default' ? ' rounded-lg shadow-md' : ''}

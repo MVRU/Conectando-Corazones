@@ -1,10 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Image from '$lib/components/ui/Image.svelte';
-	import Bagde from '$lib/components/ui/Badge.svelte';
-	import Ticker from '$lib/components/visual/Ticker.svelte';
-	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import HeroSection from '$lib/components/sections/HeroSection.svelte';
+	import HowItWorksSection from '$lib/components/sections/HowItWorksSection.svelte';
+	import HistorySection from '$lib/components/sections/HistorySection.svelte';
+	import CallToActionSection from '$lib/components/sections/CallToActionSection.svelte';
+	import TestimonialsSection from '$lib/components/sections/TestimonialsSection.svelte';
+	import FaqSection from '$lib/components/sections/FaqSection.svelte';
+	import SupportSection from '$lib/components/sections/SupportSection.svelte';
+	import FeaturedProjectsSection from '$lib/components/sections/FeaturedProjectsSection.svelte';
 
 	const logos = [
 		'/instituciones/rotary.png',
@@ -12,31 +14,21 @@
 		'/instituciones/cruz-roja.png'
 	];
 
-	// Establecer breadcrumbs al montar la página
-	onMount(() => {
-		setBreadcrumbs([
-			{ label: 'Inicio' } // Sin href porque es la página actual
-		]);
-	});
+	// ! No colocaría un breadcrumb en inicio, ya que es la página principal
+
+	// stablecer breadcrumbs al montar la página
+	// onMount(() => {
+	// 	setBreadcrumbs([
+	// 		{ label: 'Inicio' } // Sin href porque es la página actual
+	// 	]);
+	// });
 </script>
 
-<div class="m-4">
-	<h2 class="text-[rgb(var(--base-color))]">Inicio</h2>
-	<h6>Esto es de prueba...</h6>
-
-	<Ticker {logos} />
-
-	<Bagde text="Cada acción cuenta, empezá la tuya" />
-
-	<Button label="Botón primario" />
-
-	<div class="mt-4">
-		<Image
-			src="https://framerusercontent.com/images/dwZui6vRJBZAaMuIKjbS43NrTI.jpg"
-			width="200px"
-			alt="Imagen de prueba"
-			animate="zoom"
-			variant="default"
-		/>
-	</div>
-</div>
+<HeroSection />
+<HowItWorksSection />
+<HistorySection />
+<CallToActionSection />
+<TestimonialsSection />
+<FaqSection />
+<FeaturedProjectsSection />
+<SupportSection />

@@ -12,15 +12,17 @@ TODO:
 -->
 
 <script lang="ts">
+	import clsx from 'clsx';
 	export let text: string;
 	export let shape: 'square' | 'circle' = 'square';
+	export let customClass = '';
+	export let customColor: string = 'rgb(var(--color-primary))';
 </script>
 
-<div class="flex items-center gap-2">
+<div class={clsx('flex items-center gap-2', customClass)}>
 	<span
-		class="h-3 w-3 bg-[rgb(var(--color-primary))]"
-		class:rounded-sm={shape === 'square'}
-		class:rounded-full={shape === 'circle'}
+		class={clsx('h-3 w-3', shape === 'square' ? 'rounded-sm' : 'rounded-full')}
+		style={`background-color: ${customColor};`}
 	></span>
-	<p class="text-sm font-semibold text-[rgb(var(--color-primary))]">{text}</p>
+	<p class="text-m font-semibold" style={`color: ${customColor};`}>{text}</p>
 </div>

@@ -16,6 +16,7 @@
     --white-color: 255 255 255;
     --black-color: 0 0 0;
     --gray-color: 243 244 246;
+    --accent: 222 28 56;
 
     /* Márgenes y espaciados */
     --spacing-2xs: 0.5em;
@@ -36,7 +37,6 @@
 
 body {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 16px;
     line-height: var(--spacing-3xl);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -46,7 +46,6 @@ p,
 ul,
 ol {
     font-family: 'Inter', system-ui, sans-serif;
-    font-size: 16px;
     line-height: var(--spacing-3xl);
 }
 
@@ -59,17 +58,11 @@ html {
 }
 
 h1 {
-    font-size: 54px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: var(--spacing-lg);
-    margin-top: var(--spacing-lg-xl);
-    margin-bottom: var(--spacing-md-sm);
 }
 
 h2 {
-    font-size: 38px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);
@@ -78,7 +71,6 @@ h2 {
 }
 
 h3 {
-    font-size: 24px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl);
@@ -87,7 +79,6 @@ h3 {
 }
 
 h4 {
-    font-size: 28px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-xl-2xl);
@@ -96,7 +87,6 @@ h4 {
 }
 
 h5 {
-    font-size: 20px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 600;
     line-height: var(--spacing-lg);
@@ -105,7 +95,6 @@ h5 {
 }
 
 h6 {
-    font-size: 18px;
     font-family: 'Inter', system-ui, sans-serif;
     font-weight: 700;
     letter-spacing: -0.04em;
@@ -113,7 +102,6 @@ h6 {
     margin-top: var(--spacing-md-lg);
     margin-bottom: var(--spacing-2xs);
 }
-
 
 /* Fuente personalizada (Inter) */
 .font-inter {
