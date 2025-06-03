@@ -55,13 +55,19 @@ async function enviarFormulario(event: Event) {
 		asunto: formData.get('asunto') as string,
 		mensaje: formData.get('mensaje') as string
 	};
-	
-	// Validar datos antes del envío
-	if (!datos.nombre || !datos.email || !datos.asunto || !datos.mensaje) {
-		alert('Por favor completá todos los campos requeridos');
-		return;
-	}
-	
+// Add to script section:
+let validationErrors: string[] = [];
+
+// Replace the alert validation:
+validationErrors = [];
+if (!datos.nombre) validationErrors.push('El nombre es requerido');
+if (!datos.email) validationErrors.push('El email es requerido');
+if (!datos.asunto) validationErrors.push('El asunto es requerido');
+if (!datos.mensaje) validationErrors.push('El mensaje es requerido');
+
+if (validationErrors.length > 0) {
+    return;
+}
  	enviandoFormulario = true;
  
 	// TODO: Enviar datos al backend
@@ -197,36 +203,39 @@ async function enviarFormulario(event: Event) {
 									Nombre completo *
 								</label>
 								<input 
-									id="nombre"
-									type="text" 
-									required 
-									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
-									placeholder="Tu nombre completo"
-								/>
-							</div>
+// Add name attributes to the form inputs (around lines 200, 213, 227):
+ <input 
+     id="nombre"
+    name="nombre"
+     type="text" 
+     required 
+     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+     placeholder="Tu nombre completo"
+ />
 
-							<div>
-								<label for="email" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
-									Email *
-								</label>
-								<input 
-									id="email"
-									type="email" 
-									required 
-									class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
-									placeholder="tu.email@ejemplo.com"
-								/>
-							</div>
-						</div>
+ <input 
+     id="email"
+    name="email"
+     type="email" 
+     required 
+     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+     placeholder="tu.email@ejemplo.com"
+ />
 
-						<div>
-							<label for="asunto" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
-								Asunto *
-							</label>
-							<select 
-								id="asunto"
-								required 
-								class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+ <select 
+     id="asunto"
+    name="asunto"
+     required 
+     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+ >
+
+// Improve the function with better type safety and UX:
+const datos = {
+    nombre: (formData.get('nombre') || '').toString().trim(),
+    email: (formData.get('email') || '').toString().trim(),
+    asunto: (formData.get('asunto') || '').toString().trim(),
+    mensaje: (formData.get('mensaje') || '').toString().trim()
+};
 							>
 								<option value="">Seleccionar asunto</option>
 								<option value="consulta-general">Consulta general</option>
