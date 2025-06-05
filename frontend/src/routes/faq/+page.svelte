@@ -3,6 +3,6 @@
 </script>
 
 <main class="relative h-screen w-screen px-8">
-	<h2 class="text-[rgb(var(--base-color))]">Preguntas Frecuentes</h2>
+	<h2 class="text-4xl text-[rgb(var(--base-color))]">Preguntas Frecuentes</h2>
 	<Loader size={100} loading={true} />
 </main>

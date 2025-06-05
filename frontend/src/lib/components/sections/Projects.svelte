@@ -19,12 +19,7 @@ TODO:
 	import Button from '$lib/components/ui/Button.svelte';
 
 	// Tipos de participación disponibles
-	const tiposParticipacion = [
-		'Todos',
-		'Monetaria',
-		'Voluntariado',
-		'Materiales'
-	];
+	const tiposParticipacion = ['Todos', 'Monetaria', 'Voluntariado', 'Materiales'];
 
 	// Estado reactivo para el filtro
 	let filtroSeleccionado = 'Todos';
@@ -35,7 +30,8 @@ TODO:
 		{
 			id: 1,
 			nombre: 'Centro de Rehabilitación Infantil',
-			descripcion: 'Construcción de un centro especializado para la rehabilitación de niños con discapacidades motoras. Necesitamos fondos para equipamiento médico y acondicionamiento de las instalaciones.',
+			descripcion:
+				'Construcción de un centro especializado para la rehabilitación de niños con discapacidades motoras. Necesitamos fondos para equipamiento médico y acondicionamiento de las instalaciones.',
 			institucion: 'Fundación Sonrisas',
 			fechaInicio: '2024-01-15',
 			fechaCierre: '2024-06-30',
@@ -54,7 +50,8 @@ TODO:
 		{
 			id: 2,
 			nombre: 'Colchones para Refugio Temporal',
-			descripcion: 'Se necesitan colchones nuevos y en buen estado para el refugio de familias desplazadas por la emergencia climática.',
+			descripcion:
+				'Se necesitan colchones nuevos y en buen estado para el refugio de familias desplazadas por la emergencia climática.',
 			institucion: 'ONG Manos Solidarias',
 			fechaInicio: '2024-02-01',
 			fechaCierre: '2024-04-30',
@@ -73,7 +70,8 @@ TODO:
 		{
 			id: 3,
 			nombre: 'Programa de Alfabetización Digital',
-			descripcion: 'Enseñanza de habilidades digitales básicas para adultos mayores. Buscamos voluntarios con conocimientos en informática para dictar clases personalizadas.',
+			descripcion:
+				'Enseñanza de habilidades digitales básicas para adultos mayores. Buscamos voluntarios con conocimientos en informática para dictar clases personalizadas.',
 			institucion: 'Centro Educativo Digital',
 			fechaInicio: '2024-03-01',
 			fechaCierre: '2024-08-15',
@@ -92,7 +90,8 @@ TODO:
 		{
 			id: 4,
 			nombre: 'Equipamiento Médico Hospitalario',
-			descripcion: 'Adquisición de equipos médicos esenciales para el hospital público de la comunidad: desfibrilador, monitor multiparamétrico y bomba de infusión.',
+			descripcion:
+				'Adquisición de equipos médicos esenciales para el hospital público de la comunidad: desfibrilador, monitor multiparamétrico y bomba de infusión.',
 			institucion: 'Hospital General San José',
 			fechaInicio: '2024-01-01',
 			fechaCierre: '2024-05-31',
@@ -111,7 +110,8 @@ TODO:
 		{
 			id: 5,
 			nombre: 'Apoyo Escolar Comunitario',
-			descripcion: 'Necesitamos docentes y estudiantes universitarios para dar clases de apoyo en matemática, lengua y ciencias a niños en situación de vulnerabilidad social.',
+			descripcion:
+				'Necesitamos docentes y estudiantes universitarios para dar clases de apoyo en matemática, lengua y ciencias a niños en situación de vulnerabilidad social.',
 			institucion: 'Instituto de Formación Laboral',
 			fechaInicio: '2024-04-01',
 			fechaCierre: '2024-10-30',
@@ -130,7 +130,8 @@ TODO:
 		{
 			id: 6,
 			nombre: 'Alimentos No Perecederos',
-			descripcion: 'Recolección de alimentos no perecederos (arroz, fideos, aceite, conservas) para abastecer comedores comunitarios durante el invierno.',
+			descripcion:
+				'Recolección de alimentos no perecederos (arroz, fideos, aceite, conservas) para abastecer comedores comunitarios durante el invierno.',
 			institucion: 'Red de Comedores Unidos',
 			fechaInicio: '2024-02-15',
 			fechaCierre: '2024-12-31',
@@ -149,7 +150,8 @@ TODO:
 		{
 			id: 7,
 			nombre: 'Ropa de Abrigo Invernal',
-			descripcion: 'Se solicitan camperas, buzos, mantas y frazadas en buen estado para personas en situación de calle durante los meses de frío.',
+			descripcion:
+				'Se solicitan camperas, buzos, mantas y frazadas en buen estado para personas en situación de calle durante los meses de frío.',
 			institucion: 'Fundación Calor Humano',
 			fechaInicio: '2024-03-15',
 			fechaCierre: '2024-06-30',
@@ -168,7 +170,8 @@ TODO:
 		{
 			id: 8,
 			nombre: 'Cuidadores de Adultos Mayores',
-			descripcion: 'Buscamos voluntarios para acompañar y brindar cuidados básicos a adultos mayores en hogar geriátrico. Se requiere disponibilidad de tiempo y paciencia.',
+			descripcion:
+				'Buscamos voluntarios para acompañar y brindar cuidados básicos a adultos mayores en hogar geriátrico. Se requiere disponibilidad de tiempo y paciencia.',
 			institucion: 'Hogar Santa Teresa',
 			fechaInicio: '2024-01-20',
 			fechaCierre: '2024-12-20',
@@ -187,7 +190,8 @@ TODO:
 		{
 			id: 9,
 			nombre: 'Computadoras para Escuela Rural',
-			descripcion: 'La escuela rural necesita equipos informáticos para que los alumnos puedan acceder a herramientas digitales. Buscamos computadoras en buen estado.',
+			descripcion:
+				'La escuela rural necesita equipos informáticos para que los alumnos puedan acceder a herramientas digitales. Buscamos computadoras en buen estado.',
 			institucion: 'Escuela Rural N° 123',
 			fechaInicio: '2024-03-10',
 			fechaCierre: '2024-07-15',
@@ -206,7 +210,8 @@ TODO:
 		{
 			id: 10,
 			nombre: 'Becas Universitarias',
-			descripcion: 'Programa de becas para estudiantes de bajos recursos que desean acceder a la educación superior. Cada beca cubre matrícula y materiales por un año.',
+			descripcion:
+				'Programa de becas para estudiantes de bajos recursos que desean acceder a la educación superior. Cada beca cubre matrícula y materiales por un año.',
 			institucion: 'Fundación Educación para Todos',
 			fechaInicio: '2024-02-20',
 			fechaCierre: '2024-11-30',
@@ -229,7 +234,9 @@ TODO:
 		if (filtroSeleccionado === 'Todos') {
 			proyectosVisibles = proyectos;
 		} else {
-			proyectosVisibles = proyectos.filter(proyecto => proyecto.tipoParticipacion === filtroSeleccionado);
+			proyectosVisibles = proyectos.filter(
+				(proyecto) => proyecto.tipoParticipacion === filtroSeleccionado
+			);
 		}
 	}
 
@@ -247,9 +254,11 @@ TODO:
 <section class="w-full px-8 py-12">
 	<!-- Título de la sección -->
 	<div style="margin-bottom: var(--spacing-3xl);">
-		<h2 class="text-[rgb(var(--base-color))]">Proyectos Activos</h2>
-		<p class="font-inter text-lg text-gray-600 max-w-3xl">
-			Descubrí los proyectos que necesitan tu colaboración. Cada iniciativa busca generar un impacto positivo en nuestra comunidad. Podés participar con donaciones monetarias, materiales específicos o como voluntario.
+		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>
+		<p class="font-inter max-w-3xl text-lg text-gray-600">
+			Descubrí los proyectos que necesitan tu colaboración. Cada iniciativa busca generar un impacto
+			positivo en nuestra comunidad. Podés participar con donaciones monetarias, materiales
+			específicos o como voluntario.
 		</p>
 	</div>
 
@@ -259,8 +268,8 @@ TODO:
 		<div class="flex flex-wrap" style="gap: var(--spacing-md);">
 			{#each tiposParticipacion as tipo}
 				<button
-					on:click={() => filtroSeleccionado = tipo}
-					class="font-inter rounded-lg transition-all duration-200 font-medium border-2"
+					on:click={() => (filtroSeleccionado = tipo)}
+					class="font-inter rounded-lg border-2 font-medium transition-all duration-200"
 					style="padding: var(--spacing-md-sm) var(--spacing-lg);"
 					class:bg-primary={filtroSeleccionado === tipo}
 					class:text-white={filtroSeleccionado === tipo}
@@ -279,7 +288,7 @@ TODO:
 
 	<!-- Contador de proyectos -->
 	<div style="margin-bottom: var(--spacing-2xl);">
-		<p class="font-inter text-[rgb(var(--base-color))] font-medium">
+		<p class="font-inter font-medium text-[rgb(var(--base-color))]">
 			Mostrando {proyectosVisibles.length} proyecto{proyectosVisibles.length !== 1 ? 's' : ''}
 			{#if filtroSeleccionado !== 'Todos'}
 				de tipo {filtroSeleccionado}
@@ -296,19 +305,13 @@ TODO:
 
 	<!-- Mensaje cuando no hay proyectos -->
 	{#if proyectosVisibles.length === 0}
-		<div class="text-center py-12">
-			<h3 class="text-[rgb(var(--base-color))] mb-4">No hay proyectos disponibles</h3>
-			<p class="font-inter text-gray-600 mb-6">
-				No se encontraron proyectos para el filtro seleccionado. 
-				Intentá con otro tipo de participación.
+		<div class="py-12 text-center">
+			<h3 class="mb-4 text-[rgb(var(--base-color))]">No hay proyectos disponibles</h3>
+			<p class="font-inter mb-6 text-gray-600">
+				No se encontraron proyectos para el filtro seleccionado. Intentá con otro tipo de
+				participación.
 			</p>
-			<Button 
-				label="Ver todos los proyectos" 
-				href="/projects"
-				disabled={false}
-			/>
+			<Button label="Ver todos los proyectos" href="/projects" disabled={false} />
 		</div>
 	{/if}
 </section>
-
- 
