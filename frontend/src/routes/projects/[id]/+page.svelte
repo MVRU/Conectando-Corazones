@@ -16,14 +16,13 @@ TODO:
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import ProjectCard from '$lib/components/ui/ProjectCard.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	// Obtener ID del proyecto desde la URL
 	$: proyectoId = parseInt($page.params.id);
-	
+
 	let proyecto: any = null;
 	let mostrarFormularioColaboracion = false;
 	let solicitudEnviada = false;
@@ -33,7 +32,8 @@ TODO:
 		{
 			id: 1,
 			nombre: 'Centro de Rehabilitación Infantil',
-			descripcion: 'Construcción de un centro especializado para la rehabilitación de niños con discapacidades motoras. El centro contará con equipamiento de última generación para terapias físicas, ocupacionales y del habla. Necesitamos fondos para equipamiento médico y acondicionamiento de las instalaciones.',
+			descripcion:
+				'Construcción de un centro especializado para la rehabilitación de niños con discapacidades motoras. El centro contará con equipamiento de última generación para terapias físicas, ocupacionales y del habla. Necesitamos fondos para equipamiento médico y acondicionamiento de las instalaciones.',
 			institucion: 'Fundación Sonrisas',
 			fechaInicio: '2024-01-15',
 			fechaCierre: '2024-06-30',
@@ -83,14 +83,16 @@ TODO:
 					id: 2,
 					fecha: '2024-02-28',
 					titulo: 'Permisos obtenidos',
-					descripcion: 'Se obtuvieron todos los permisos municipales necesarios para la construcción.'
+					descripcion:
+						'Se obtuvieron todos los permisos municipales necesarios para la construcción.'
 				}
 			]
 		},
 		{
 			id: 2,
 			nombre: 'Colchones para Refugio Temporal',
-			descripcion: 'Se necesitan colchones nuevos y en buen estado para el refugio de familias desplazadas por la emergencia climática. Los colchones deben ser de plaza y media o matrimoniales, en condiciones óptimas de higiene.',
+			descripcion:
+				'Se necesitan colchones nuevos y en buen estado para el refugio de familias desplazadas por la emergencia climática. Los colchones deben ser de plaza y media o matrimoniales, en condiciones óptimas de higiene.',
 			institucion: 'ONG Manos Solidarias',
 			fechaInicio: '2024-02-01',
 			fechaCierre: '2024-04-30',
@@ -126,7 +128,8 @@ TODO:
 					id: 1,
 					fecha: '2024-03-10',
 					titulo: 'Primera entrega',
-					descripcion: 'Recibimos 8 colchones en perfectas condiciones, muchas gracias a los donantes.'
+					descripcion:
+						'Recibimos 8 colchones en perfectas condiciones, muchas gracias a los donantes.'
 				}
 			]
 		}
@@ -134,8 +137,8 @@ TODO:
 
 	// Función para cargar proyecto
 	function cargarProyecto() {
-		proyecto = proyectos.find(p => p.id === proyectoId);
-		
+		proyecto = proyectos.find((p) => p.id === proyectoId);
+
 		// Establecer breadcrumbs con el nombre del proyecto
 		if (proyecto) {
 			setBreadcrumbs([
@@ -172,31 +175,44 @@ TODO:
 	// Función para obtener color de progreso
 	function getColorProgreso(tipo: string) {
 		switch (tipo) {
-			case 'Monetaria': return 'bg-[rgb(var(--color-primary))]';
-			case 'Voluntariado': return 'bg-purple-500';
-			case 'Materiales': return 'bg-green-500';
-			default: return 'bg-gray-400';
+			case 'Monetaria':
+				return 'bg-[rgb(var(--color-primary))]';
+			case 'Voluntariado':
+				return 'bg-purple-500';
+			case 'Materiales':
+				return 'bg-green-500';
+			default:
+				return 'bg-gray-400';
 		}
 	}
 
 	// Función para obtener color del badge
 	function getColorUrgencia(urgencia: string) {
 		switch (urgencia) {
-			case 'Alta': return 'text-red-600 bg-red-100';
-			case 'Media': return 'text-yellow-600 bg-yellow-100';
-			case 'Baja': return 'text-green-600 bg-green-100';
-			default: return 'text-gray-600 bg-gray-100';
+			case 'Alta':
+				return 'text-red-600 bg-red-100';
+			case 'Media':
+				return 'text-yellow-600 bg-yellow-100';
+			case 'Baja':
+				return 'text-green-600 bg-green-100';
+			default:
+				return 'text-gray-600 bg-gray-100';
 		}
 	}
 
 	// Función para obtener color del estado
 	function getColorEstado(estado: string) {
 		switch (estado) {
-			case 'Activo': return 'text-green-600 bg-green-100';
-			case 'Próximo a cerrar': return 'text-orange-600 bg-orange-100';
-			case 'Cerrado': return 'text-gray-600 bg-gray-100';
-			case 'Completado': return 'text-blue-600 bg-blue-100';
-			default: return 'text-gray-600 bg-gray-100';
+			case 'Activo':
+				return 'text-green-600 bg-green-100';
+			case 'Próximo a cerrar':
+				return 'text-orange-600 bg-orange-100';
+			case 'Cerrado':
+				return 'text-gray-600 bg-gray-100';
+			case 'Completado':
+				return 'text-blue-600 bg-blue-100';
+			default:
+				return 'text-gray-600 bg-gray-100';
 		}
 	}
 
@@ -211,7 +227,7 @@ TODO:
 		// Aquí se enviaría la solicitud al backend
 		solicitudEnviada = true;
 		mostrarFormularioColaboracion = false;
-		
+
 		setTimeout(() => {
 			solicitudEnviada = false;
 		}, 5000);
@@ -230,33 +246,44 @@ TODO:
 
 {#if proyecto}
 	<main class="min-h-screen bg-gray-50 py-8">
-		<div class="max-w-7xl mx-auto px-8">
+		<div class="mx-auto max-w-7xl px-8">
 			<!-- Notificación de solicitud enviada -->
 			{#if solicitudEnviada}
-				<div class="mb-8 p-4 bg-green-100 border border-green-200 rounded-lg">
-					<p class="text-green-700 font-medium">✅ Tu solicitud de colaboración fue enviada correctamente. La institución la revisará y te contactará pronto.</p>
+				<div class="mb-8 rounded-lg border border-green-200 bg-green-100 p-4">
+					<p class="font-medium text-green-700">
+						✅ Tu solicitud de colaboración fue enviada correctamente. La institución la revisará y
+						te contactará pronto.
+					</p>
 				</div>
 			{/if}
 
-			<div class="grid lg:grid-cols-3 gap-8">
+			<div class="grid gap-8 lg:grid-cols-3">
 				<!-- Contenido principal -->
-				<div class="lg:col-span-2 space-y-8">
+				<div class="space-y-8 lg:col-span-2">
 					<!-- Header del proyecto -->
-					<div class="bg-white rounded-2xl shadow-lg p-8">
-						<div class="flex flex-wrap justify-between items-start mb-6">
+					<div class="rounded-2xl bg-white p-8 shadow-lg">
+						<div class="mb-6 flex flex-wrap items-start justify-between">
 							<div>
-								<h1 class="text-3xl font-bold text-[rgb(var(--base-color))] mb-2">
+								<h1 class="mb-2 text-3xl font-bold text-[rgb(var(--base-color))]">
 									{proyecto.nombre}
 								</h1>
-								<p class="text-lg text-gray-600 mb-4">
+								<p class="mb-4 text-lg text-gray-600">
 									📍 {proyecto.ciudad}, {proyecto.provincia}
 								</p>
 								<div class="flex items-center gap-3">
 									<Badge text={proyecto.tipoParticipacion} shape="square" />
-									<span class="px-2 py-1 rounded-full text-xs font-medium {getColorUrgencia(proyecto.urgencia)}">
+									<span
+										class="rounded-full px-2 py-1 text-xs font-medium {getColorUrgencia(
+											proyecto.urgencia
+										)}"
+									>
 										{proyecto.urgencia}
 									</span>
-									<span class="px-2 py-1 rounded-full text-xs font-medium {getColorEstado(proyecto.estado)}">
+									<span
+										class="rounded-full px-2 py-1 text-xs font-medium {getColorEstado(
+											proyecto.estado
+										)}"
+									>
 										{proyecto.estado}
 									</span>
 								</div>
@@ -265,15 +292,19 @@ TODO:
 
 						<!-- Progreso del proyecto -->
 						<div class="mb-8">
-							<div class="flex justify-between items-center mb-3">
-								<h3 class="text-xl font-semibold text-[rgb(var(--base-color))]">Progreso del Objetivo</h3>
+							<div class="mb-3 flex items-center justify-between">
+								<h3 class="text-xl font-semibold text-[rgb(var(--base-color))]">
+									Progreso del Objetivo
+								</h3>
 								<span class="text-2xl font-bold text-[rgb(var(--color-primary))]">
 									{formatearMonto(proyecto.progreso)} / {proyecto.objetivo}
 								</span>
 							</div>
-							<div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-								<div 
-									class="h-4 rounded-full transition-all duration-300 {getColorProgreso(proyecto.tipoParticipacion)}" 
+							<div class="mb-2 h-4 w-full rounded-full bg-gray-200">
+								<div
+									class="h-4 rounded-full transition-all duration-300 {getColorProgreso(
+										proyecto.tipoParticipacion
+									)}"
 									style="width: {calcularPorcentajeProgreso()}%"
 								></div>
 							</div>
@@ -285,28 +316,30 @@ TODO:
 
 						<!-- Descripción completa -->
 						<div class="mb-8">
-							<h3 class="text-xl font-semibold text-[rgb(var(--base-color))] mb-4">Descripción del Proyecto</h3>
-							<p class="text-gray-700 leading-relaxed text-lg">
+							<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+								Descripción del Proyecto
+							</h3>
+							<p class="text-lg leading-relaxed text-gray-700">
 								{proyecto.descripcion}
 							</p>
 						</div>
 
 						<!-- Información del proyecto -->
-						<div class="grid md:grid-cols-2 gap-6 mb-8">
-							<div class="bg-gray-50 rounded-lg p-4">
-								<h4 class="font-semibold text-[rgb(var(--base-color))] mb-2">Institución</h4>
+						<div class="mb-8 grid gap-6 md:grid-cols-2">
+							<div class="rounded-lg bg-gray-50 p-4">
+								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Institución</h4>
 								<p class="text-gray-700">{proyecto.institucion}</p>
 							</div>
-							<div class="bg-gray-50 rounded-lg p-4">
-								<h4 class="font-semibold text-[rgb(var(--base-color))] mb-2">Beneficiarios</h4>
+							<div class="rounded-lg bg-gray-50 p-4">
+								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Beneficiarios</h4>
 								<p class="text-gray-700">{proyecto.beneficiarios} personas</p>
 							</div>
-							<div class="bg-gray-50 rounded-lg p-4">
-								<h4 class="font-semibold text-[rgb(var(--base-color))] mb-2">Fecha de inicio</h4>
+							<div class="rounded-lg bg-gray-50 p-4">
+								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de inicio</h4>
 								<p class="text-gray-700">{formatearFecha(proyecto.fechaInicio)}</p>
 							</div>
-							<div class="bg-gray-50 rounded-lg p-4">
-								<h4 class="font-semibold text-[rgb(var(--base-color))] mb-2">Fecha de cierre</h4>
+							<div class="rounded-lg bg-gray-50 p-4">
+								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de cierre</h4>
 								<p class="text-gray-700">{formatearFecha(proyecto.fechaCierre)}</p>
 							</div>
 						</div>
@@ -314,13 +347,21 @@ TODO:
 						<!-- Actualizaciones del proyecto -->
 						{#if proyecto.actualizaciones && proyecto.actualizaciones.length > 0}
 							<div class="mb-8">
-								<h3 class="text-xl font-semibold text-[rgb(var(--base-color))] mb-4">Actualizaciones del Proyecto</h3>
+								<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+									Actualizaciones del Proyecto
+								</h3>
 								<div class="space-y-4">
 									{#each proyecto.actualizaciones as actualizacion}
-										<div class="border-l-4 border-[rgb(var(--color-primary))] bg-blue-50 p-4 rounded-r-lg">
-											<div class="flex justify-between items-start mb-2">
-												<h4 class="font-semibold text-[rgb(var(--base-color))]">{actualizacion.titulo}</h4>
-												<span class="text-sm text-gray-500">{formatearFecha(actualizacion.fecha)}</span>
+										<div
+											class="rounded-r-lg border-l-4 border-[rgb(var(--color-primary))] bg-blue-50 p-4"
+										>
+											<div class="mb-2 flex items-start justify-between">
+												<h4 class="font-semibold text-[rgb(var(--base-color))]">
+													{actualizacion.titulo}
+												</h4>
+												<span class="text-sm text-gray-500"
+													>{formatearFecha(actualizacion.fecha)}</span
+												>
 											</div>
 											<p class="text-gray-700">{actualizacion.descripcion}</p>
 										</div>
@@ -331,31 +372,43 @@ TODO:
 
 						<!-- Sección de Evidencia (preparada para roles futuros) -->
 						<div class="mb-8">
-							<h3 class="text-xl font-semibold text-[rgb(var(--base-color))] mb-4">Evidencia del Proyecto</h3>
+							<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+								Evidencia del Proyecto
+							</h3>
 							{#if proyecto.evidencia && proyecto.evidencia.length > 0}
 								<div class="space-y-3">
 									{#each proyecto.evidencia as evidencia}
-										<div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+										<div class="flex items-center justify-between rounded-lg border bg-gray-50 p-4">
 											<div class="flex items-center gap-3">
 												<span class="text-2xl">
 													{evidencia.tipo === 'Imagen' ? '🖼️' : '📄'}
 												</span>
 												<div>
-													<h5 class="font-medium text-[rgb(var(--base-color))]">{evidencia.titulo}</h5>
+													<h5 class="font-medium text-[rgb(var(--base-color))]">
+														{evidencia.titulo}
+													</h5>
 													<p class="text-sm text-gray-600">{evidencia.descripcion}</p>
-													<span class="text-xs text-gray-500">{formatearFecha(evidencia.fecha)}</span>
+													<span class="text-xs text-gray-500"
+														>{formatearFecha(evidencia.fecha)}</span
+													>
 												</div>
 											</div>
-											<button class="text-[rgb(var(--color-primary))] hover:underline text-sm font-medium">
+											<button
+												class="text-sm font-medium text-[rgb(var(--color-primary))] hover:underline"
+											>
 												Ver archivo
 											</button>
 										</div>
 									{/each}
 								</div>
 							{:else}
-								<div class="text-center py-8 bg-gray-50 rounded-lg">
-									<p class="text-gray-500">La institución aún no ha subido evidencia para este proyecto.</p>
-									<p class="text-sm text-gray-400 mt-2">Los archivos de evidencia aparecerán aquí una vez que sean publicados.</p>
+								<div class="rounded-lg bg-gray-50 py-8 text-center">
+									<p class="text-gray-500">
+										La institución aún no ha subido evidencia para este proyecto.
+									</p>
+									<p class="mt-2 text-sm text-gray-400">
+										Los archivos de evidencia aparecerán aquí una vez que sean publicados.
+									</p>
 								</div>
 							{/if}
 						</div>
@@ -365,23 +418,26 @@ TODO:
 				<!-- Sidebar -->
 				<div class="space-y-6">
 					<!-- Card de acción -->
-					<div class="bg-white rounded-2xl shadow-lg p-6">
-						<h3 class="text-xl font-semibold text-[rgb(var(--base-color))] mb-4">¿Querés colaborar?</h3>
-						
+					<div class="rounded-2xl bg-white p-6 shadow-lg">
+						<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+							¿Querés colaborar?
+						</h3>
+
 						{#if proyecto.tipoParticipacion === 'Monetaria'}
-							<div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+							<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
 								<p class="text-sm text-blue-700">
-									💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución ayudará a alcanzar el objetivo.
+									💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución
+									ayudará a alcanzar el objetivo.
 								</p>
 							</div>
 						{:else if proyecto.tipoParticipacion === 'Materiales'}
-							<div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+							<div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
 								<p class="text-sm text-green-700">
 									📦 Este proyecto necesita <strong>donaciones específicas</strong>: {proyecto.objetivo}.
 								</p>
 							</div>
 						{:else if proyecto.tipoParticipacion === 'Voluntariado'}
-							<div class="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+							<div class="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-3">
 								<p class="text-sm text-purple-700">
 									🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo}</strong> para actividades específicas.
 								</p>
@@ -389,9 +445,9 @@ TODO:
 						{/if}
 
 						{#if proyecto.estado === 'Activo'}
-							<button 
+							<button
 								on:click={mostrarFormulario}
-								class="w-full bg-[rgb(var(--color-primary))] text-white px-6 py-3 rounded-lg hover:bg-[rgb(var(--color-primary-hover))] transition-colors duration-200 font-medium mb-3"
+								class="mb-3 w-full rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))]"
 							>
 								{#if proyecto.tipoParticipacion === 'Monetaria'}
 									Enviar donación
@@ -404,21 +460,19 @@ TODO:
 								{/if}
 							</button>
 						{:else}
-							<div class="text-center py-4 bg-gray-100 rounded-lg">
+							<div class="rounded-lg bg-gray-100 py-4 text-center">
 								<p class="text-gray-600">Este proyecto ya no está activo</p>
 							</div>
 						{/if}
 
-						<Button 
-							label="Compartir proyecto" 
-							href="#"
-							disabled={false}
-						/>
+						<Button label="Compartir proyecto" href="#" disabled={false} />
 					</div>
 
 					<!-- Información de contacto -->
-					<div class="bg-white rounded-2xl shadow-lg p-6">
-						<h3 class="text-xl font-semibold text-[rgb(var(--base-color))] mb-4">Información de Contacto</h3>
+					<div class="rounded-2xl bg-white p-6 shadow-lg">
+						<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+							Información de Contacto
+						</h3>
 						<div class="space-y-3 text-sm">
 							<div>
 								<span class="font-medium text-[rgb(var(--base-color))]">Responsable:</span>
@@ -431,7 +485,10 @@ TODO:
 							<div>
 								<span class="font-medium text-[rgb(var(--base-color))]">Email:</span>
 								<p class="text-gray-700">
-									<a href="mailto:{proyecto.contacto.email}" class="text-[rgb(var(--color-primary))] hover:underline">
+									<a
+										href="mailto:{proyecto.contacto.email}"
+										class="text-[rgb(var(--color-primary))] hover:underline"
+									>
 										{proyecto.contacto.email}
 									</a>
 								</p>
@@ -439,7 +496,11 @@ TODO:
 							<div>
 								<span class="font-medium text-[rgb(var(--base-color))]">Sitio web:</span>
 								<p class="text-gray-700">
-									<a href="https://{proyecto.contacto.sitioWeb}" target="_blank" class="text-[rgb(var(--color-primary))] hover:underline">
+									<a
+										href="https://{proyecto.contacto.sitioWeb}"
+										target="_blank"
+										class="text-[rgb(var(--color-primary))] hover:underline"
+									>
 										{proyecto.contacto.sitioWeb}
 									</a>
 								</p>
@@ -452,16 +513,16 @@ TODO:
 
 		<!-- Modal de formulario de colaboración -->
 		{#if mostrarFormularioColaboracion}
-			<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-				<div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+			<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+				<div class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white shadow-xl">
 					<div class="p-6">
-						<div class="flex justify-between items-center mb-6">
+						<div class="mb-6 flex items-center justify-between">
 							<h3 class="text-xl font-semibold text-[rgb(var(--base-color))]">
 								Solicitud de Colaboración
 							</h3>
-							<button 
-								on:click={() => mostrarFormularioColaboracion = false}
-								class="text-gray-400 hover:text-gray-600 text-2xl"
+							<button
+								on:click={() => (mostrarFormularioColaboracion = false)}
+								class="text-2xl text-gray-400 hover:text-gray-600"
 							>
 								×
 							</button>
@@ -469,80 +530,98 @@ TODO:
 
 						<form on:submit={enviarSolicitud} class="space-y-4">
 							<div>
-								<label for="nombre" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+								<label
+									for="nombre"
+									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+								>
 									Nombre completo
 								</label>
-								<input 
+								<input
 									id="nombre"
-									type="text" 
-									required 
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									type="text"
+									required
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 									placeholder="Tu nombre completo"
 								/>
 							</div>
 
 							<div>
-								<label for="email" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+								<label
+									for="email"
+									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+								>
 									Email
 								</label>
-								<input 
+								<input
 									id="email"
-									type="email" 
-									required 
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									type="email"
+									required
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 									placeholder="tu.email@ejemplo.com"
 								/>
 							</div>
 
 							<div>
-								<label for="telefono" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+								<label
+									for="telefono"
+									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+								>
 									Teléfono
 								</label>
-								<input 
+								<input
 									id="telefono"
-									type="tel" 
-									required 
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									type="tel"
+									required
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 									placeholder="+54 9 11 1234-5678"
 								/>
 							</div>
 
 							{#if proyecto.tipoParticipacion === 'Monetaria'}
 								<div>
-									<label for="monto" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+									<label
+										for="monto"
+										class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+									>
 										Monto a donar
 									</label>
-									<input 
+									<input
 										id="monto"
-										type="number" 
-										required 
+										type="number"
+										required
 										min="1"
-										class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+										class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 										placeholder="10000"
 									/>
 								</div>
 							{:else if proyecto.tipoParticipacion === 'Materiales'}
 								<div>
-									<label for="materiales" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+									<label
+										for="materiales"
+										class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+									>
 										¿Qué podés donar?
 									</label>
-									<textarea 
+									<textarea
 										id="materiales"
-										required 
+										required
 										rows="3"
-										class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+										class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 										placeholder="Describe lo que podés donar (cantidad, estado, etc.)"
 									></textarea>
 								</div>
 							{:else if proyecto.tipoParticipacion === 'Voluntariado'}
 								<div>
-									<label for="disponibilidad" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+									<label
+										for="disponibilidad"
+										class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+									>
 										Disponibilidad horaria
 									</label>
-									<select 
+									<select
 										id="disponibilidad"
-										required 
-										class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+										required
+										class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 									>
 										<option value="">Seleccionar disponibilidad</option>
 										<option value="mañana">Mañana (8:00 - 12:00)</option>
@@ -554,28 +633,31 @@ TODO:
 							{/if}
 
 							<div>
-								<label for="mensaje" class="block text-sm font-medium text-[rgb(var(--base-color))] mb-2">
+								<label
+									for="mensaje"
+									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+								>
 									Mensaje adicional
 								</label>
-								<textarea 
+								<textarea
 									id="mensaje"
 									rows="4"
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:border-transparent"
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 									placeholder="Contanos por qué querés colaborar con este proyecto o cualquier información adicional..."
 								></textarea>
 							</div>
 
 							<div class="flex gap-3 pt-4">
-								<button 
+								<button
 									type="submit"
-									class="flex-1 bg-[rgb(var(--color-primary))] text-white px-6 py-3 rounded-lg hover:bg-[rgb(var(--color-primary-hover))] transition-colors duration-200 font-medium"
+									class="flex-1 rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))]"
 								>
 									Enviar solicitud
 								</button>
-								<button 
+								<button
 									type="button"
-									on:click={() => mostrarFormularioColaboracion = false}
-									class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+									on:click={() => (mostrarFormularioColaboracion = false)}
+									class="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition-colors duration-200 hover:bg-gray-50"
 								>
 									Cancelar
 								</button>
@@ -588,14 +670,10 @@ TODO:
 	</main>
 {:else}
 	<main class="min-h-screen bg-gray-50 py-8">
-		<div class="max-w-4xl mx-auto px-8 text-center">
-			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))] mb-4">Proyecto no encontrado</h1>
-			<p class="text-gray-600 mb-8">El proyecto que buscás no existe o ha sido eliminado.</p>
-			<Button 
-				label="Volver a proyectos" 
-				href="/projects"
-				disabled={false}
-			/>
+		<div class="mx-auto max-w-4xl px-8 text-center">
+			<h1 class="mb-4 text-3xl font-bold text-[rgb(var(--base-color))]">Proyecto no encontrado</h1>
+			<p class="mb-8 text-gray-600">El proyecto que buscás no existe o ha sido eliminado.</p>
+			<Button label="Volver a proyectos" href="/projects" disabled={false} />
 		</div>
 	</main>
-{/if} 
+{/if}
