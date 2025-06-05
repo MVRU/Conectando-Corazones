@@ -3,11 +3,11 @@
 import axios from 'axios';
 
 export const renaperAPI = axios.create({
-    baseURL: 'https://api.renaper.gob.ar ',
+    baseURL: 'https://api.renaper.gob.ar',
     timeout: 10000,
 });
 
 export const arcaAPI = axios.create({
-    baseURL: 'https://api.arca.gob.ar ',
+    baseURL: 'https://api.arca.gob.ar',
     timeout: 10000,
 });

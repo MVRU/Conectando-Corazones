@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "desciption": "Backend de Conectando Corazones - Plataforma para vincular instituciones con colaboradores sociales.",
+  "description": "Backend de Conectando Corazones - Plataforma para vincular instituciones con colaboradores sociales.",
   "main": "dist/index.js",
   "directories": {
     "test": "tests"
