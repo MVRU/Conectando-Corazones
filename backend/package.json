@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "desciption": "Backend de Conectando Corazones - Plataforma para vincular instituciones con colaboradores sociales.",
+  "description": "Backend de Conectando Corazones - Plataforma para vincular instituciones con colaboradores sociales.",
   "main": "dist/index.js",
   "directories": {
     "test": "tests"
@@ -20,13 +20,13 @@
   "keywords": [],
   "author": "Martín Alvarez, Marina Milo, Alexis Sklate <UTN FRRo - 2025>",
   "license": "AGPL-3.0-only",
-  "homepage": "https://github.com/MVRU/conectando-corazones #readme",
+  "homepage": "https://github.com/MVRU/conectando-corazones#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/MVRU/conectando-corazones.git "
+    "url": "https://github.com/MVRU/conectando-corazones.git"
   },
   "bugs": {
-    "url": "https://github.com/MVRU/conectando-corazones/issues "
+    "url": "https://github.com/MVRU/conectando-corazones/issues"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
