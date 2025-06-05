@@ -1,11 +1,5 @@
 <script lang="ts">
 	import Projects from '$lib/components/sections/Projects.svelte';
-	import { onMount } from 'svelte';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-
-	onMount(() => {
-		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Proyectos' }]);
-	});
 </script>
 
 <svelte:head>

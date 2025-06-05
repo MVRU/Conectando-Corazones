@@ -12,16 +12,10 @@ TODO:
 
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
-	import { onMount } from 'svelte';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
 	let validationErrors: string[] = [];
-
-	onMount(() => {
-		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Contacto' }]);
-	});
 
 	// Información del equipo
 	const equipoCreadores = [

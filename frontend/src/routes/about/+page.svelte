@@ -1,3 +1,5 @@
+<!-- TODO: sacar el test de breadcrumbs, es solo de muestra -->
+
 <script>
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import { onMount } from 'svelte';
@@ -8,10 +10,10 @@
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Proyectos', href: '/proyectos' },
 		{ label: 'Solidaridad', href: '/proyectos/solidaridad' },
-		{ label: 'Internacionales', href: '/proyectos/solidaridad/internacionales' },
+		{ label: 'Rosario', href: '/proyectos/solidaridad/internacionales' },
 		{ label: 'Proyecto A', href: '/proyectos/solidaridad/internacionales/proyecto-a' },
 		{
-			label: 'Donaciones 2024',
+			label: 'Donaciones 2025',
 			href: '/proyectos/solidaridad/internacionales/proyecto-a/donaciones-2024'
 		}
 	];
