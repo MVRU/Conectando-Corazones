@@ -5,14 +5,15 @@
 	import Breadcrumbs from '$lib/components/ui/Breadcrumbs.svelte';
 	import { breadcrumbs } from '$lib/stores/breadcrumbs';
 	import ScrollToTop from '$lib/components/ui/ScrollToTop.svelte';
-	import { page } from '$app/stores';
+
+	const showBreadcrumb = $derived(() => $breadcrumbs.length > 2);
 
 	let { children } = $props();
 </script>
 
 <Header />
 
-{#if $page.url.pathname !== '/'}
+{#if showBreadcrumb()}
 	<Breadcrumbs items={$breadcrumbs} />
 {/if}
 

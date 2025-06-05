@@ -7,21 +7,12 @@
 	import FaqSection from '$lib/components/sections/FaqSection.svelte';
 	import SupportSection from '$lib/components/sections/SupportSection.svelte';
 	import FeaturedProjectsSection from '$lib/components/sections/FeaturedProjectsSection.svelte';
+	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import { onMount } from 'svelte';
 
-	const logos = [
-		'/instituciones/rotary.png',
-		'/instituciones/unicef.png',
-		'/instituciones/cruz-roja.png'
-	];
-
-	// ! No colocaría un breadcrumb en inicio, ya que es la página principal
-
-	// stablecer breadcrumbs al montar la página
-	// onMount(() => {
-	// 	setBreadcrumbs([
-	// 		{ label: 'Inicio' } // Sin href porque es la página actual
-	// 	]);
-	// });
+	onMount(() => {
+		clearBreadcrumbs(); // Limpia los breadcrumbs al cargar la home
+	});
 </script>
 
 <HeroSection />

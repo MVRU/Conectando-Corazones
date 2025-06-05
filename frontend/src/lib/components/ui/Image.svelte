@@ -3,16 +3,14 @@
 	-*- Descripción: muestra una imagen configurable con variantes de estilo, animación y envoltorio opcional con enlace.
 
 * Props:
-	-*- src (string): URL de la imagen. Obligatoria.
-	-*- alt (string): texto alternativo. Recomendado por accesibilidad.
-	-*- variant ('default' | 'circle' | 'card' | 'none'): estilo visual de la imagen. Por defecto: 'default'.
-	-*- animate ('none' | 'heartbeat' | 'zoom'): tipo de animación aplicada. Por defecto: 'none'.
-	-*- width (string): ancho de la imagen (CSS unit). Por defecto: '100%'.
-	-*- height (string): alto de la imagen (CSS unit). Por defecto: 'auto'.
-	-*- href (string): si se define, la imagen se envuelve en un link hacia esta ruta o URL.
-
-TODO:
-	- [ ] Soportar aspect-ratio responsivo directamente por prop.
+        -*- src (string): URL de la imagen. Obligatoria.
+        -*- alt (string): texto alternativo. Recomendado por accesibilidad.
+        -*- variant ('default' | 'circle' | 'card' | 'none'): estilo visual de la imagen. Por defecto: 'default'.
+        -*- animate ('none' | 'heartbeat' | 'zoom'): tipo de animación aplicada. Por defecto: 'none'.
+        -*- width (string): ancho de la imagen (CSS unit). Por defecto: '100%'.
+        -*- height (string): alto de la imagen (CSS unit). Por defecto: 'auto'.
+        -*- href (string): si se define, la imagen se envuelve en un link hacia esta ruta o URL.
+        -*- aspectRatio (string): proporción ancho/alto de la imagen usando la propiedad CSS `aspect-ratio`.
 
 ! WARNING:
 	-!- Si `href` está definido pero es una URL externa, el componente no distingue entre navegación interna y externa.
@@ -26,9 +24,10 @@ TODO:
 	export let alt: string = '';
 	export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
 	export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
-	export let width: string = '100%';
-	export let height: string = 'auto';
-	export let href: string = '';
+        export let width: string = '100%';
+        export let height: string = 'auto';
+        export let href: string = '';
+        export let aspectRatio: string = '';
 </script>
 
 {#if href}
@@ -36,7 +35,7 @@ TODO:
 		<img
 			{src}
 			{alt}
-			style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''}`}
+                        style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
 			class="
          block cursor-pointer object-cover
         {variant === 'default' ? ' rounded-lg shadow-md' : ''}
@@ -53,7 +52,7 @@ TODO:
 	<img
 		{src}
 		{alt}
-		style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''}`}
+                style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
 		class="
        block object-cover
       {variant === 'default' ? ' rounded-lg shadow-md' : ''}

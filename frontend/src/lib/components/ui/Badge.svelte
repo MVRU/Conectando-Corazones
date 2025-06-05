@@ -4,11 +4,9 @@
 	-*- Utilidad: para representar estados, roles o categorías.
 
 * Props:
-	-*- text (string): texto que se mostrará.
-	-*- shape ('square' | 'circle'): forma del ícono (cuadrado/círculo). Por defecto: 'square'.
-
-TODO:
-	- [ ] Permitir pasar un color personalizado mediante prop.
+        -*- text (string): texto que se mostrará.
+        -*- shape ('square' | 'circle'): forma del ícono (cuadrado/círculo). Por defecto: 'square'.
+        -*- customColor (string): color del texto e ícono.
 -->
 
 <script lang="ts">

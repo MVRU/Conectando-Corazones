@@ -1,5 +1,6 @@
 <script>
 	import Loader from '$lib/components/feedback/Loader.svelte';
+	import { onMount } from 'svelte';
 </script>
 
 <main class="relative h-screen w-screen px-8">
