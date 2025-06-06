@@ -2,26 +2,18 @@
 * Componente: CollaboratorForm
         -*- Descripción: formulario de registro de colaboradores.
         -*- Soporta registro individual u organización con representante.
+        -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
 -->
 <script lang="ts">
-        import Button from '../ui/Button.svelte';
-        import DatePicker from './DatePicker.svelte';
-        import Input from '../ui/Input.svelte';
-        import { clsx } from 'clsx';
+import Button from '../ui/Button.svelte';
+import DatePicker from './DatePicker.svelte';
+import Input from '../ui/Input.svelte';
+import { clsx } from 'clsx';
+import { isAdult, isValidEmail } from '$lib/utils/validation';
 
         let sending = false;
         let tipo: 'persona' | 'organizacion' = 'persona';
         let errors: Record<string, string> = {};
-        const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
-
-        function esMayorDeEdad(fecha: string) {
-                const nacimiento = new Date(fecha);
-                const hoy = new Date();
-                let edad = hoy.getFullYear() - nacimiento.getFullYear();
-                const m = hoy.getMonth() - nacimiento.getMonth();
-                if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-                return edad >= 18;
-        }
 
         function handleSubmit(event: Event) {
                 event.preventDefault();
@@ -33,8 +25,8 @@
                 const password = (data.get('password') || '').toString();
                 const repassword = (data.get('repassword') || '').toString();
 
-                if (!username) errors.username = 'Requerido';
-                if (!email || !emailRegex.test(email)) errors.email = 'Email inválido';
+               if (!username) errors.username = 'Requerido';
+               if (!email || !isValidEmail(email)) errors.email = 'Email inválido';
                 if (!password) errors.password = 'Requerido';
                 if (password !== repassword) errors.repassword = 'Las contraseñas no coinciden';
 
@@ -48,7 +40,7 @@
                         if (!nombre) errors.nombre = 'Requerido';
                         if (!apellido) errors.apellido = 'Requerido';
                         if (!docTipo || !docNumero) errors.docNumero = 'Documento obligatorio';
-                        if (!nacimiento || !esMayorDeEdad(nacimiento)) errors.nacimiento = 'Debe ser mayor de 18 años';
+                       if (!nacimiento || !isAdult(nacimiento)) errors.nacimiento = 'Debe ser mayor de 18 años';
                         if (!cuil) errors.cuil = 'CUIL obligatorio';
                 } else {
                         const razonSocial = (data.get('razonSocial') || '').toString().trim();
@@ -63,7 +55,7 @@
                         if (!repNombre) errors.repNombre = 'Requerido';
                         if (!repApellido) errors.repApellido = 'Requerido';
                         if (!repDocTipo || !repDocNumero) errors.repDocNumero = 'Documento obligatorio';
-                        if (!repNacimiento || !esMayorDeEdad(repNacimiento)) errors.repNacimiento = 'Debe ser mayor de 18 años';
+                       if (!repNacimiento || !isAdult(repNacimiento)) errors.repNacimiento = 'Debe ser mayor de 18 años';
                 }
 
                 if (Object.keys(errors).length > 0) return;

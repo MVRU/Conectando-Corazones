@@ -2,6 +2,7 @@
 * Página: Signin
         -*- Descripción: permite crear cuentas para instituciones o colaboradores.
         -*- Dependiendo del rol seleccionado se muestra un formulario u otro.
+        -*- Incluye paso inicial de selección de rol antes de mostrar el formulario.
 -->
 <script lang="ts">
         import { onMount } from 'svelte';

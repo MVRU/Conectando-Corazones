@@ -2,6 +2,7 @@
 * Componente: Input
         -*- Descripción: campo de texto reutilizable con estilos consistentes.
         -*- Permite indicar mensajes de error para accesibilidad.
+        -*- Los mensajes de error se anuncian con role="alert".
 -->
 <script lang="ts">
         import { clsx } from 'clsx';
@@ -32,7 +33,11 @@
                 aria-invalid={error ? 'true' : 'false'}
                 aria-describedby={error ? `${id}-error` : undefined}
         />
-        {#if error}
-                <p id={`${id}-error`} class="text-sm text-red-600">{error}</p>
-        {/if}
+       {#if error}
+               <p
+                       id={`${id}-error`}
+                       role="alert"
+                       class="text-sm text-red-600"
+               >{error}</p>
+       {/if}
 </div>

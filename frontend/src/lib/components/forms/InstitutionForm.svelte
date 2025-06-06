@@ -2,26 +2,17 @@
 * Componente: InstitutionForm
         -*- Descripción: formulario de registro para instituciones.
         -*- Incluye datos de representante legal y validación básica.
+        -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
 -->
-<script lang="ts">
-        import Button from '../ui/Button.svelte';
-        import DatePicker from './DatePicker.svelte';
-        import Input from '../ui/Input.svelte';
+import Button from "../ui/Button.svelte";
+import DatePicker from './DatePicker.svelte';
+import Input from '../ui/Input.svelte';
+import { isAdult, isValidEmail } from '$lib/utils/validation';
 
         let sending = false;
         let tipo = 'Escuela';
         let otroTipo = '';
-        let errors: Record<string, string> = {};
-        const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
-
-        function esMayorDeEdad(fecha: string) {
-                const nacimiento = new Date(fecha);
-                const hoy = new Date();
-                let edad = hoy.getFullYear() - nacimiento.getFullYear();
-                const m = hoy.getMonth() - nacimiento.getMonth();
-                if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-                return edad >= 18;
-        }
+       let errors: Record<string, string> = {};
 
         function handleSubmit(event: Event) {
                 event.preventDefault();
@@ -45,12 +36,12 @@
                 if (!nombre) errors.nombre = 'Requerido';
                 if (tipoSel === 'Otro' && !otro) errors.otroTipo = 'Especifique el tipo';
                 if (!username) errors.username = 'Requerido';
-                if (!email || !emailRegex.test(email)) errors.email = 'Email inválido';
+               if (!email || !isValidEmail(email)) errors.email = 'Email inválido';
                 if (!cuit) errors.cuit = 'CUIT obligatorio';
                 if (!repNombre) errors.repNombre = 'Requerido';
                 if (!repApellido) errors.repApellido = 'Requerido';
                 if (!repDocTipo || !repDocNumero) errors.repDocNumero = 'Documento obligatorio';
-                if (!repNacimiento || !esMayorDeEdad(repNacimiento)) errors.repNacimiento = 'Debe ser mayor de 18 años';
+               if (!repNacimiento || !isAdult(repNacimiento)) errors.repNacimiento = 'Debe ser mayor de 18 años';
                 if (!password) errors.password = 'Requerido';
                 if (password !== repassword) errors.repassword = 'Las contraseñas no coinciden';
 
