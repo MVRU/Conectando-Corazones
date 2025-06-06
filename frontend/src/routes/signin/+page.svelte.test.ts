@@ -3,12 +3,15 @@ import { describe, expect, test } from 'vitest';
 import Page from './+page.svelte';
 
 describe('signin page', () => {
-        test('muestra formulario de institución por defecto y cambia a colaborador', async () => {
+        test('permite elegir rol y muestra formulario correspondiente', async () => {
                 render(Page);
                 expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Registrarse');
+                const instBtn = screen.getByRole('button', { name: /institución/i });
+                const colabBtn = screen.getByRole('button', { name: /colaborador/i });
+                await fireEvent.click(instBtn);
                 expect(screen.getByLabelText('Nombre de la institución *')).toBeInTheDocument();
-                const colaboradorRadio = screen.getByLabelText('Colaborador');
-                await fireEvent.click(colaboradorRadio);
+                await fireEvent.click(screen.getByRole('button', { name: /elegir otro tipo/i }));
+                await fireEvent.click(colabBtn);
                 expect(screen.getByLabelText('Nombre *')).toBeInTheDocument();
         });
 });
