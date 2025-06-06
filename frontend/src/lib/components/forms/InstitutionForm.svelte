@@ -4,10 +4,11 @@
         -*- Incluye datos de representante legal y validación básica.
         -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
 -->
-
 <script lang="ts">
-	import Button from '../ui/Button.svelte';
-	import DatePicker from './DatePicker.svelte';
+
+       let sending = false;
+       let tipo = 'Escuela';
+       let otroTipo = '';
 	import Input from '../ui/Input.svelte';
 	import { isAdult, isValidEmail } from '$lib/utils/validation';
 
