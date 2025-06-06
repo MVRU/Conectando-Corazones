@@ -6,9 +6,10 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
-	export let title: string;
-	export let description: string;
-	export let icon: 'institution' | 'collaborator' = 'institution';
+                        <path d="M17 20h5v-2a4 4 0 00-5-4" />
+                        <path d="M7 20H2v-2a4 4 0 015-4" />
+                        <circle cx="9" cy="7" r="4" />
+                        <circle cx="17" cy="7" r="4" />
 	export let selected = false;
 	const dispatch = createEventDispatcher();
 </script>

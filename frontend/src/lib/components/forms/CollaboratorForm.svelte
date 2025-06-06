@@ -5,86 +5,114 @@
         -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
 -->
 <script lang="ts">
-	import Button from '../ui/Button.svelte';
-	import DatePicker from './DatePicker.svelte';
-	import Input from '../ui/Input.svelte';
-	import { clsx } from 'clsx';
-	import { isAdult, isValidEmail } from '$lib/utils/validation';
+        // Datos persona
+        let nombre = '';
+        let apellido = '';
+        let docTipo = 'DNI';
+        let docOtro = '';
+        let docNumero = '';
+        let nacimiento = '';
+        let cuil = '';
 
-	let sending = false;
-	let tipo: 'persona' | 'organizacion' = 'persona';
-	let errors: Record<string, string> = {};
+        // Datos organización
+        let razonSocial = '';
+        let cuit = '';
+        let repNombre = '';
+        let repApellido = '';
+        let repDocTipo = 'DNI';
+        let repDocOtro = '';
+        let repDocNumero = '';
+        let repNacimiento = '';
+        // Datos comunes
+        let username = '';
+        let email = '';
+        let password = '';
+        let repassword = '';
 
-	function handleSubmit(event: Event) {
-		event.preventDefault();
-		const data = new FormData(event.target as HTMLFormElement);
-		errors = {};
+        let errors: Record<string, string> = {};
 
-		const username = (data.get('username') || '').toString().trim();
-		const email = (data.get('email') || '').toString().trim();
-		const password = (data.get('password') || '').toString();
-		const repassword = (data.get('repassword') || '').toString();
-
-		if (!username) errors.username = 'Requerido';
-		if (!email || !isValidEmail(email)) errors.email = 'Email inválido';
-		if (!password) errors.password = 'Requerido';
-		if (password !== repassword) errors.repassword = 'Las contraseñas no coinciden';
-
-		if (tipo === 'persona') {
-			const nombre = (data.get('nombre') || '').toString().trim();
-			const apellido = (data.get('apellido') || '').toString().trim();
-			const docTipo = (data.get('docTipo') || '').toString();
-			const docNumero = (data.get('docNumero') || '').toString().trim();
-			const nacimiento = (data.get('nacimiento') || '').toString();
-			const cuil = (data.get('cuil') || '').toString().trim();
-			if (!nombre) errors.nombre = 'Requerido';
-			if (!apellido) errors.apellido = 'Requerido';
-			if (!docTipo || !docNumero) errors.docNumero = 'Documento obligatorio';
-			if (!nacimiento || !isAdult(nacimiento)) errors.nacimiento = 'Debe ser mayor de 18 años';
-			if (!cuil) errors.cuil = 'CUIL obligatorio';
-		} else {
-			const razonSocial = (data.get('razonSocial') || '').toString().trim();
-			const cuit = (data.get('cuit') || '').toString().trim();
-			const repNombre = (data.get('repNombre') || '').toString().trim();
-			const repApellido = (data.get('repApellido') || '').toString().trim();
-			const repDocTipo = (data.get('repDocTipo') || '').toString();
-			const repDocNumero = (data.get('repDocNumero') || '').toString().trim();
-			const repNacimiento = (data.get('repNacimiento') || '').toString();
-			if (!razonSocial) errors.razonSocial = 'Requerido';
-			if (!cuit) errors.cuit = 'CUIT obligatorio';
-			if (!repNombre) errors.repNombre = 'Requerido';
-			if (!repApellido) errors.repApellido = 'Requerido';
-			if (!repDocTipo || !repDocNumero) errors.repDocNumero = 'Documento obligatorio';
-			if (!repNacimiento || !isAdult(repNacimiento))
-				errors.repNacimiento = 'Debe ser mayor de 18 años';
-		}
-
-		if (Object.keys(errors).length > 0) return;
-
-		sending = true;
-		setTimeout(() => {
-			sending = false;
-			console.log('Colaborador registrado');
-		}, 1000);
-	}
-</script>
-
-<form on:submit={handleSubmit} class="space-y-6 rounded-2xl bg-white p-8 shadow">
-	<div>
-		<label for="tipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Tipo de colaborador *</label
-		>
-		<select
-			id="tipo"
-			bind:value={tipo}
-			class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
-		>
-			<option value="persona">Persona</option>
-			<option value="organizacion">Organización</option>
-		</select>
-	</div>
-	{#if tipo === 'persona'}
-		<div class="grid gap-4 md:grid-cols-2">
+        $: errors = tipo === 'persona'
+                ? {
+                                nombre: nombre.trim() ? '' : 'Requerido',
+                                apellido: apellido.trim() ? '' : 'Requerido',
+                                docOtro: docTipo === 'Otro' && !docOtro.trim() ? 'Especifique el documento' : '',
+                                docNumero: docNumero.trim() ? '' : 'Documento obligatorio',
+                                nacimiento: nacimiento && isAdult(nacimiento) ? '' : 'Debe ser mayor de 18 años',
+                                cuil: cuil.trim() ? '' : 'CUIL obligatorio',
+                                username: username.trim() ? '' : 'Requerido',
+                                email: email && isValidEmail(email) ? '' : 'Email inválido',
+                                password: password ? '' : 'Requerido',
+                                repassword: repassword && repassword === password ? '' : 'Las contraseñas no coinciden'
+                        }
+                : {
+                                razonSocial: razonSocial.trim() ? '' : 'Requerido',
+                                cuit: cuit.trim() ? '' : 'CUIT obligatorio',
+                                repNombre: repNombre.trim() ? '' : 'Requerido',
+                                repApellido: repApellido.trim() ? '' : 'Requerido',
+                                repDocOtro: repDocTipo === 'Otro' && !repDocOtro.trim() ? 'Especifique el documento' : '',
+                                repDocNumero: repDocNumero.trim() ? '' : 'Documento obligatorio',
+                                repNacimiento: repNacimiento && isAdult(repNacimiento) ? '' : 'Debe ser mayor de 18 años',
+                                username: username.trim() ? '' : 'Requerido',
+                                email: email && isValidEmail(email) ? '' : 'Email inválido',
+                                password: password ? '' : 'Requerido',
+                                repassword: repassword && repassword === password ? '' : 'Las contraseñas no coinciden'
+                        };
+        function handleSubmit(event: Event) {
+                event.preventDefault();
+                if (Object.values(errors).some(Boolean)) return;
+                <label for="tipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de colaborador <span class="text-red-600">*</span></label>
+                                <label for="nombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre <span class="text-red-600">*</span></label>
+                                <Input id="nombre" name="nombre" bind:value={nombre} required error={errors.nombre} />
+                                <label for="apellido" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Apellido <span class="text-red-600">*</span></label>
+                                <Input id="apellido" name="apellido" bind:value={apellido} required error={errors.apellido} />
+                                <label for="docTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de documento <span class="text-red-600">*</span></label>
+                                <select id="docTipo" bind:value={docTipo} class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
+                        {#if docTipo === 'Otro'}
+                                <div>
+                                        <label for="docOtro" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Especifique <span class="text-red-600">*</span></label>
+                                        <Input id="docOtro" name="docOtro" bind:value={docOtro} required error={errors.docOtro} />
+                                </div>
+                        {/if}
+                                <label for="docNumero" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Número <span class="text-red-600">*</span></label>
+                                <Input id="docNumero" name="docNumero" bind:value={docNumero} required error={errors.docNumero} />
+                                <label for="nacimiento" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Fecha de nacimiento <span class="text-red-600">*</span></label>
+                                <DatePicker id="nacimiento" name="nacimiento" bind:value={nacimiento} required error={errors.nacimiento} />
+                                <label for="cuil" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">CUIL <span class="text-red-600">*</span></label>
+                                <Input id="cuil" name="cuil" bind:value={cuil} required error={errors.cuil} />
+                                <label for="razonSocial" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Razón social <span class="text-red-600">*</span></label>
+                                <Input id="razonSocial" name="razonSocial" bind:value={razonSocial} required error={errors.razonSocial} />
+                                <label for="cuit" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">CUIT <span class="text-red-600">*</span></label>
+                                <Input id="cuit" name="cuit" bind:value={cuit} required error={errors.cuit} />
+                <fieldset class="mt-4 space-y-4">
+                        <legend class="mb-2 text-sm font-semibold">Representante legal</legend>
+                        <div class="grid gap-4 md:grid-cols-2">
+                                <div>
+                                <label for="repNombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre <span class="text-red-600">*</span></label>
+                                <Input id="repNombre" name="repNombre" bind:value={repNombre} required error={errors.repNombre} />
+                                <label for="repApellido" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Apellido <span class="text-red-600">*</span></label>
+                                <Input id="repApellido" name="repApellido" bind:value={repApellido} required error={errors.repApellido} />
+                                <label for="repDocTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de documento <span class="text-red-600">*</span></label>
+                                <select id="repDocTipo" bind:value={repDocTipo} class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
+                        {#if repDocTipo === 'Otro'}
+                                <div>
+                                        <label for="repDocOtro" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Especifique <span class="text-red-600">*</span></label>
+                                        <Input id="repDocOtro" name="repDocOtro" bind:value={repDocOtro} required error={errors.repDocOtro} />
+                                </div>
+                        {/if}
+                                <label for="repDocNumero" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Número <span class="text-red-600">*</span></label>
+                                <Input id="repDocNumero" name="repDocNumero" bind:value={repDocNumero} required error={errors.repDocNumero} />
+                                <label for="repNacimiento" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Fecha de nacimiento <span class="text-red-600">*</span></label>
+                                <DatePicker id="repNacimiento" name="repNacimiento" bind:value={repNacimiento} required error={errors.repNacimiento} />
+                        </div>
+                </fieldset>
+                <label for="username" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre de usuario <span class="text-red-600">*</span></label>
+                <Input id="username" name="username" bind:value={username} required error={errors.username} />
+                <label for="email" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Email <span class="text-red-600">*</span></label>
+                <Input id="email" name="email" type="email" bind:value={email} required error={errors.email} />
+                        <label for="password" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Contraseña <span class="text-red-600">*</span></label>
+                        <Input id="password" name="password" type="password" bind:value={password} required error={errors.password} />
+                        <label for="repassword" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Confirmar contraseña <span class="text-red-600">*</span></label>
+                        <Input id="repassword" name="repassword" type="password" bind:value={repassword} required error={errors.repassword} />
 			<div>
 				<label for="nombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
 					>Nombre *</label
