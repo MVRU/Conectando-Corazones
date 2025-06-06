@@ -1,19 +1,14 @@
 <!--
 * Componente: DatePicker
-        -*- Descripción: Input de fecha simple reutilizable.
-        -*- Se usa para capturar fechas de nacimiento.
+        -*- Descripción: selector de fecha reutilizable.
+        -*- Utiliza Input para mantener consistencia visual.
 -->
 <script lang="ts">
+        import Input from '../ui/Input.svelte';
         export let id = '';
         export let name = '';
         export let required = false;
         export let value = '';
+        export let error = '';
 </script>
-<input
-        {id}
-        {name}
-        bind:value
-        type="date"
-        class="w-full rounded-md border border-gray-300 px-3 py-2"
-        {required}
-/>
+<Input {id} {name} bind:value type="date" {required} {error} />

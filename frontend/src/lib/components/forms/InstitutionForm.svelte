@@ -1,15 +1,18 @@
 <!--
 * Componente: InstitutionForm
         -*- Descripción: formulario de registro para instituciones.
-        -*- Incluye datos de representante legal y validación mínima.
+        -*- Incluye datos de representante legal y validación básica.
 -->
 <script lang="ts">
         import Button from '../ui/Button.svelte';
         import DatePicker from './DatePicker.svelte';
+        import Input from '../ui/Input.svelte';
+
         let sending = false;
-        let errors: string[] = [];
         let tipo = 'Escuela';
         let otroTipo = '';
+        let errors: Record<string, string> = {};
+        const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
 
         function esMayorDeEdad(fecha: string) {
                 const nacimiento = new Date(fecha);
@@ -23,49 +26,52 @@
         function handleSubmit(event: Event) {
                 event.preventDefault();
                 const data = new FormData(event.target as HTMLFormElement);
-                const datos = {
-                        nombre: (data.get('nombre') || '').toString().trim(),
-                        tipo: (data.get('tipo') || '').toString(),
-                        otroTipo: (data.get('otroTipo') || '').toString().trim(),
-                        username: (data.get('username') || '').toString().trim(),
-                        email: (data.get('email') || '').toString().trim(),
-                        cuit: (data.get('cuit') || '').toString().trim(),
-                        repNombre: (data.get('repNombre') || '').toString().trim(),
-                        repApellido: (data.get('repApellido') || '').toString().trim(),
-                        repDocTipo: (data.get('repDocTipo') || '').toString(),
-                        repDocNumero: (data.get('repDocNumero') || '').toString().trim(),
-                        repNacimiento: (data.get('repNacimiento') || '').toString(),
-                        password: (data.get('password') || '').toString(),
-                        repassword: (data.get('repassword') || '').toString()
-                };
-                errors = [];
-                if (!datos.nombre) errors.push('El nombre de la institución es obligatorio');
-                if (datos.tipo === 'Otro' && !datos.otroTipo) errors.push('Debe especificar el tipo de institución');
-                if (!datos.username) errors.push('El nombre de usuario es obligatorio');
-                if (!datos.email) errors.push('El email es obligatorio');
-                if (!datos.cuit) errors.push('El CUIT es obligatorio');
-                if (!datos.repNombre) errors.push('Nombre del representante requerido');
-                if (!datos.repApellido) errors.push('Apellido del representante requerido');
-                if (!datos.repDocTipo || !datos.repDocNumero) errors.push('Documento del representante requerido');
-                if (!datos.repNacimiento || !esMayorDeEdad(datos.repNacimiento)) errors.push('El representante debe ser mayor de 18 años');
-                if (datos.password !== datos.repassword) errors.push('Las contraseñas no coinciden');
-                if (errors.length > 0) return;
+                errors = {};
+
+                const nombre = (data.get('nombre') || '').toString().trim();
+                const tipoSel = (data.get('tipo') || '').toString();
+                const otro = (data.get('otroTipo') || '').toString().trim();
+                const username = (data.get('username') || '').toString().trim();
+                const email = (data.get('email') || '').toString().trim();
+                const cuit = (data.get('cuit') || '').toString().trim();
+                const repNombre = (data.get('repNombre') || '').toString().trim();
+                const repApellido = (data.get('repApellido') || '').toString().trim();
+                const repDocTipo = (data.get('repDocTipo') || '').toString();
+                const repDocNumero = (data.get('repDocNumero') || '').toString().trim();
+                const repNacimiento = (data.get('repNacimiento') || '').toString();
+                const password = (data.get('password') || '').toString();
+                const repassword = (data.get('repassword') || '').toString();
+
+                if (!nombre) errors.nombre = 'Requerido';
+                if (tipoSel === 'Otro' && !otro) errors.otroTipo = 'Especifique el tipo';
+                if (!username) errors.username = 'Requerido';
+                if (!email || !emailRegex.test(email)) errors.email = 'Email inválido';
+                if (!cuit) errors.cuit = 'CUIT obligatorio';
+                if (!repNombre) errors.repNombre = 'Requerido';
+                if (!repApellido) errors.repApellido = 'Requerido';
+                if (!repDocTipo || !repDocNumero) errors.repDocNumero = 'Documento obligatorio';
+                if (!repNacimiento || !esMayorDeEdad(repNacimiento)) errors.repNacimiento = 'Debe ser mayor de 18 años';
+                if (!password) errors.password = 'Requerido';
+                if (password !== repassword) errors.repassword = 'Las contraseñas no coinciden';
+
+                if (Object.keys(errors).length > 0) return;
+
                 sending = true;
                 setTimeout(() => {
                         sending = false;
-                        console.log('Institución registrada', datos);
+                        console.log('Institución registrada');
                 }, 1000);
         }
 </script>
 
-<form on:submit={handleSubmit} class="space-y-4">
+<form on:submit={handleSubmit} class="space-y-6 rounded-2xl bg-white p-8 shadow">
         <div>
                 <label for="nombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre de la institución *</label>
-                <input id="nombre" name="nombre" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="nombre" name="nombre" required error={errors.nombre} />
         </div>
         <div>
                 <label for="tipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de institución *</label>
-                <select id="tipo" name="tipo" bind:value={tipo} required class="w-full rounded-md border border-gray-300 px-3 py-2">
+                <select id="tipo" name="tipo" bind:value={tipo} required class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
                         <option>Escuela</option>
                         <option>Hospital</option>
                         <option>Comedor</option>
@@ -75,35 +81,35 @@
         {#if tipo === 'Otro'}
                 <div>
                         <label for="otroTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Especifique *</label>
-                        <input id="otroTipo" name="otroTipo" type="text" bind:value={otroTipo} class="w-full rounded-md border border-gray-300 px-3 py-2" required />
+                        <Input id="otroTipo" name="otroTipo" bind:value={otroTipo} required error={errors.otroTipo} />
                 </div>
         {/if}
         <div>
                 <label for="username" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre de usuario *</label>
-                <input id="username" name="username" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="username" name="username" required error={errors.username} />
         </div>
         <div>
                 <label for="email" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Email *</label>
-                <input id="email" name="email" type="email" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="email" name="email" type="email" required error={errors.email} />
         </div>
         <div>
                 <label for="cuit" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">CUIT *</label>
-                <input id="cuit" name="cuit" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="cuit" name="cuit" required error={errors.cuit} />
         </div>
         <fieldset class="border-t pt-4">
                 <legend class="mb-2 text-sm font-semibold">Representante legal</legend>
                 <div class="grid gap-4 md:grid-cols-2">
                         <div>
                                 <label for="repNombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre *</label>
-                                <input id="repNombre" name="repNombre" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                                <Input id="repNombre" name="repNombre" required error={errors.repNombre} />
                         </div>
                         <div>
                                 <label for="repApellido" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Apellido *</label>
-                                <input id="repApellido" name="repApellido" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                                <Input id="repApellido" name="repApellido" required error={errors.repApellido} />
                         </div>
                         <div>
                                 <label for="repDocTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de documento *</label>
-                                <select id="repDocTipo" name="repDocTipo" required class="w-full rounded-md border border-gray-300 px-3 py-2">
+                                <select id="repDocTipo" name="repDocTipo" required class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
                                         <option>DNI</option>
                                         <option>Pasaporte</option>
                                         <option>Otro</option>
@@ -111,28 +117,21 @@
                         </div>
                         <div>
                                 <label for="repDocNumero" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Número *</label>
-                                <input id="repDocNumero" name="repDocNumero" type="text" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                                <Input id="repDocNumero" name="repDocNumero" required error={errors.repDocNumero} />
                         </div>
                         <div class="md:col-span-2">
                                 <label for="repNacimiento" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Fecha de nacimiento *</label>
-                                <DatePicker id="repNacimiento" name="repNacimiento" required />
+                                <DatePicker id="repNacimiento" name="repNacimiento" required error={errors.repNacimiento} />
                         </div>
                 </div>
         </fieldset>
         <div>
                 <label for="password" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Contraseña *</label>
-                <input id="password" name="password" type="password" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="password" name="password" type="password" required error={errors.password} />
         </div>
         <div>
                 <label for="repassword" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Confirmar contraseña *</label>
-                <input id="repassword" name="repassword" type="password" required class="w-full rounded-md border border-gray-300 px-3 py-2" />
+                <Input id="repassword" name="repassword" type="password" required error={errors.repassword} />
         </div>
-        {#if errors.length > 0}
-                <ul class="text-sm text-red-600">
-                        {#each errors as err}
-                                <li>{err}</li>
-                        {/each}
-                </ul>
-        {/if}
         <Button label="Crear cuenta" disabled={sending} customClass="w-full" />
 </form>
