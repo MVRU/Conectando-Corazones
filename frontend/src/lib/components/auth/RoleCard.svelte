@@ -1,16 +1,18 @@
 <!--
 * Componente: RoleCard
-        -*- Opción visual para elegir tipo de registro.
-        -*- Favorece accesibilidad y consistencia visual.
+  -*- Opción visual para elegir tipo de registro.
+  -*- Favorece accesibilidad y consistencia visual.
 -->
+
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
-                        <path d="M17 20h5v-2a4 4 0 00-5-4" />
-                        <path d="M7 20H2v-2a4 4 0 015-4" />
-                        <circle cx="9" cy="7" r="4" />
-                        <circle cx="17" cy="7" r="4" />
-	export let selected = false;
+
+	export let selected: boolean = false;
+	export let icon: 'institution' | 'collaborator' | 'user' = 'user';
+	export let title: string = '';
+	export let description: string = '';
+
 	const dispatch = createEventDispatcher();
 </script>
 
@@ -25,6 +27,7 @@
 	)}
 >
 	{#if icon === 'institution'}
+		<!-- Icono institución: Edificio -->
 		<svg
 			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
 			viewBox="0 0 24 24"
@@ -38,7 +41,8 @@
 			<path d="M9 22V12h6v10" />
 			<path d="M2 22h20" />
 		</svg>
-	{:else}
+	{:else if icon === 'collaborator'}
+		<!-- Icono colaborador: Usuario individual -->
 		<svg
 			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
 			viewBox="0 0 24 24"
@@ -48,11 +52,27 @@
 			stroke-linecap="round"
 			stroke-linejoin="round"
 		>
-			<path d="M5 13l4 4L19 7" />
-			<path d="M12 20h9" />
-			<path d="M3 10h9" />
+			<circle cx="12" cy="7" r="4" />
+			<path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
+		</svg>
+	{:else}
+		<!-- Icono usuario: Dos personas -->
+		<svg
+			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="9" cy="7" r="4" />
+			<circle cx="17" cy="7" r="4" />
+			<path d="M17 20h5v-2a4 4 0 00-5-4" />
+			<path d="M7 20H2v-2a4 4 0 015-4" />
 		</svg>
 	{/if}
+
 	<span class="text-lg font-semibold text-[rgb(var(--base-color))]">{title}</span>
 	<span class="text-sm text-gray-600">{description}</span>
 </button>

@@ -1,188 +1,429 @@
 <!--
 * Componente: InstitutionForm
-        -*- Descripción: formulario de registro para instituciones.
-        -*- Incluye datos de representante legal y validación básica.
-        -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
+  -*- Mejora: UX profesional y validaciones modernas.
+  -*- Errores solo al interactuar/tocar campos.
 -->
+
 <script lang="ts">
-import Button from '../ui/Button.svelte';
-       let sending = false;
+	import Input from '../ui/Input.svelte';
+	import DatePicker from './DatePicker.svelte';
+	import Button from '../ui/Button.svelte';
 
-       // Datos de la institución
-       let nombre = '';
-       let tipo = 'Escuela';
-       let otroTipo = '';
-       let username = '';
-       let email = '';
-       let cuit = '';
-       // Datos del representante
-       let repNombre = '';
-       let repApellido = '';
-       let repDocTipo = 'DNI';
-       let repDocOtro = '';
-       let repDocNumero = '';
-       let repNacimiento = '';
-       // Contraseñas
-       let password = '';
-       let repassword = '';
+	function isValidEmail(email: string): boolean {
+		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+	}
+	function isAdult(date: string): boolean {
+		if (!date) return false;
+		const birth = new Date(date);
+		const today = new Date();
+		const age = today.getFullYear() - birth.getFullYear();
+		const m = today.getMonth() - birth.getMonth();
+		return age > 18 || (age === 18 && m >= 0 && today.getDate() >= birth.getDate());
+	}
+	function isValidUsername(username: string): boolean {
+		return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
+	}
 
-       // Errores reactivos
-       let errors: Record<string, string> = {};
-       $: errors = {
-               nombre: nombre.trim() ? '' : 'Requerido',
-               otroTipo: tipo === 'Otro' && !otroTipo.trim() ? 'Especifique el tipo' : '',
-               username: username.trim() ? '' : 'Requerido',
-               email: email && isValidEmail(email) ? '' : 'Email inválido',
-               cuit: cuit.trim() ? '' : 'CUIT obligatorio',
-               repNombre: repNombre.trim() ? '' : 'Requerido',
-               repApellido: repApellido.trim() ? '' : 'Requerido',
-               repDocOtro: repDocTipo === 'Otro' && !repDocOtro.trim() ? 'Especifique el documento' : '',
-               repDocNumero: repDocNumero.trim() ? '' : 'Documento obligatorio',
-               repNacimiento: repNacimiento && isAdult(repNacimiento) ? '' : 'Debe ser mayor de 18 años',
-               password: password ? '' : 'Requerido',
-               repassword: repassword && repassword === password ? '' : 'Las contraseñas no coinciden'
-       };
-       function handleSubmit(event: Event) {
-               event.preventDefault();
-                if (Object.values(errors).some(Boolean)) return;
-                <label for="nombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre de la institución <span class="text-red-600">*</span></label>
-                <Input id="nombre" name="nombre" bind:value={nombre} required error={errors.nombre} />
-                <label for="tipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de institución <span class="text-red-600">*</span></label>
-                <select id="tipo" bind:value={tipo} required class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
-                        <option>Fundación</option>
-                        <option>Asociación</option>
-                        <option>Parroquia</option>
-                        <label for="otroTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Especifique <span class="text-red-600">*</span></label>
-                <label for="username" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre de usuario <span class="text-red-600">*</span></label>
-                <Input id="username" name="username" bind:value={username} required error={errors.username} />
-                <label for="email" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Email <span class="text-red-600">*</span></label>
-                <Input id="email" name="email" type="email" bind:value={email} required error={errors.email} />
-                <label for="cuit" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">CUIT <span class="text-red-600">*</span></label>
-                <Input id="cuit" name="cuit" bind:value={cuit} required error={errors.cuit} />
-                                <label for="repNombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Nombre <span class="text-red-600">*</span></label>
-                                <Input id="repNombre" name="repNombre" bind:value={repNombre} required error={errors.repNombre} />
-                                <label for="repApellido" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Apellido <span class="text-red-600">*</span></label>
-                                <Input id="repApellido" name="repApellido" bind:value={repApellido} required error={errors.repApellido} />
-                                <label for="repDocTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Tipo de documento <span class="text-red-600">*</span></label>
-                                <select id="repDocTipo" bind:value={repDocTipo} class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]">
-                        {#if repDocTipo === 'Otro'}
-                                <div>
-                                        <label for="repDocOtro" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Especifique <span class="text-red-600">*</span></label>
-                                        <Input id="repDocOtro" name="repDocOtro" bind:value={repDocOtro} required error={errors.repDocOtro} />
-                                </div>
-                        {/if}
-                                <label for="repDocNumero" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Número <span class="text-red-600">*</span></label>
-                                <Input id="repDocNumero" name="repDocNumero" bind:value={repDocNumero} required error={errors.repDocNumero} />
-                                <label for="repNacimiento" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Fecha de nacimiento <span class="text-red-600">*</span></label>
-                                <DatePicker id="repNacimiento" name="repNacimiento" bind:value={repNacimiento} required error={errors.repNacimiento} />
-                <label for="password" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Contraseña <span class="text-red-600">*</span></label>
-                <Input id="password" name="password" type="password" bind:value={password} required error={errors.password} />
-                <label for="repassword" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Confirmar contraseña <span class="text-red-600">*</span></label>
-                <Input id="repassword" name="repassword" type="password" bind:value={repassword} required error={errors.repassword} />
-		<Input id="nombre" name="nombre" required error={errors.nombre} />
-	</div>
-	<div>
-		<label for="tipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Tipo de institución *</label
-		>
-		<select
-			id="tipo"
-			name="tipo"
-			bind:value={tipo}
-			required
-			class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
-		>
-			<option>Escuela</option>
-			<option>Hospital</option>
-			<option>Comedor</option>
-			<option>Otro</option>
-		</select>
-	</div>
-	{#if tipo === 'Otro'}
+	let sending = false;
+	let nombre = '';
+	let tipo = 'Escuela';
+	let otroTipo = '';
+	let username = '';
+	let email = '';
+	let cuit = '';
+	let password = '';
+	let repassword = '';
+	let repNombre = '';
+	let repApellido = '';
+	let repDocTipo = 'DNI';
+	let repDocOtro = '';
+	let repDocNumero = '';
+	let repNacimiento = '';
+
+	// Campos que el usuario ya tocó/interactuó
+	let touched: Record<string, boolean> = {};
+
+	// Para marcar el campo como "touched" cuando pierde foco
+	function setTouched(field: string) {
+		touched = { ...touched, [field]: true };
+	}
+
+	// Para marcar el campo como "touched" cuando el usuario escribe después de haberlo tocado
+	function onInput(field: string) {
+		if (!touched[field]) touched = { ...touched, [field]: true };
+	}
+
+	$: errors = {
+		nombre: touched.nombre ? (nombre.trim() ? '' : 'El nombre es obligatorio') : '',
+		otroTipo:
+			tipo === 'Otro' && touched.otroTipo
+				? otroTipo.trim()
+					? ''
+					: 'Debe especificar el tipo'
+				: '',
+		username: touched.username
+			? !username.trim()
+				? 'El nombre de usuario es obligatorio'
+				: !isValidUsername(username)
+					? 'Solo letras, números, ".", "-", "_" (3-30 caracteres)'
+					: ''
+			: '',
+		email: touched.email
+			? !email.trim()
+				? 'El email es obligatorio'
+				: !isValidEmail(email)
+					? 'Email inválido'
+					: ''
+			: '',
+		cuit: touched.cuit ? (cuit.trim() ? '' : 'El CUIT es obligatorio') : '',
+		password: touched.password
+			? password.length < 8
+				? 'Debe tener al menos 8 caracteres'
+				: ''
+			: '',
+		repassword:
+			touched.repassword || (touched.password && repassword)
+				? repassword !== password
+					? 'Las contraseñas no coinciden'
+					: ''
+				: '',
+		repNombre: touched.repNombre ? (repNombre.trim() ? '' : 'El nombre es obligatorio') : '',
+		repApellido: touched.repApellido
+			? repApellido.trim()
+				? ''
+				: 'El apellido es obligatorio'
+			: '',
+		repDocOtro:
+			repDocTipo === 'Otro' && touched.repDocOtro
+				? repDocOtro.trim()
+					? ''
+					: 'Debe especificar el documento'
+				: '',
+		repDocNumero: touched.repDocNumero
+			? repDocNumero.trim()
+				? ''
+				: 'El número es obligatorio'
+			: '',
+		repNacimiento: touched.repNacimiento
+			? repNacimiento && isAdult(repNacimiento)
+				? ''
+				: 'Debe ser mayor de 18 años'
+			: ''
+	};
+
+	$: hasErrors = Object.values(errors).some(Boolean);
+
+	function handleSubmit(event: Event) {
+		event.preventDefault();
+		// Marca todos los campos como "touched"
+		for (const key in errors) touched[key] = true;
+		if (hasErrors) return;
+		sending = true;
+		setTimeout(() => {
+			sending = false;
+		}, 1200);
+	}
+</script>
+
+<form
+	on:submit={handleSubmit}
+	class="
+		mx-auto
+		w-full
+		max-w-5xl
+		py-4 shadow-xl
+		transition-all md:rounded-[2rem]
+		md:border
+		md:border-blue-200
+		md:px-16
+		md:py-14
+		md:shadow-2xl
+	"
+>
+	<h2 class="mb-6 text-3xl font-bold tracking-tight text-blue-900 drop-shadow-sm md:text-4xl">
+		Registro de Institución
+	</h2>
+
+	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+		<!-- Nombre -->
 		<div>
-			<label for="otroTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-				>Especifique *</label
+			<label for="nombre" class="font-medium text-[rgb(15,16,41)]"
+				>Nombre de la institución <span class="text-red-600">*</span></label
 			>
-			<Input id="otroTipo" name="otroTipo" bind:value={otroTipo} required error={errors.otroTipo} />
+			<Input
+				id="nombre"
+				name="nombre"
+				bind:value={nombre}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="Ej: Fundación Sembrar"
+				on:blur={() => setTouched('nombre')}
+				on:input={() => onInput('nombre')}
+				error={errors.nombre}
+			/>
+			{#if errors.nombre}
+				<div class="mt-1 text-xs text-red-600">{errors.nombre}</div>
+			{/if}
 		</div>
-	{/if}
-	<div>
-		<label for="username" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Nombre de usuario *</label
-		>
-		<Input id="username" name="username" required error={errors.username} />
-	</div>
-	<div>
-		<label for="email" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Email *</label
-		>
-		<Input id="email" name="email" type="email" required error={errors.email} />
-	</div>
-	<div>
-		<label for="cuit" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>CUIT *</label
-		>
-		<Input id="cuit" name="cuit" required error={errors.cuit} />
-	</div>
-	<fieldset class="border-t pt-4">
-		<legend class="mb-2 text-sm font-semibold">Representante legal</legend>
-		<div class="grid gap-4 md:grid-cols-2">
+		<!-- Tipo de institución -->
+		<div>
+			<label for="tipo" class="font-medium text-[rgb(15,16,41)]"
+				>Tipo de institución <span class="text-red-600">*</span></label
+			>
+			<select
+				id="tipo"
+				name="tipo"
+				bind:value={tipo}
+				on:blur={() => setTouched('tipo')}
+				class="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+			>
+				<option>Escuela</option>
+				<option>Hospital</option>
+				<option>Comedor</option>
+				<option>Fundación</option>
+				<option>Asociación</option>
+				<option>Parroquia</option>
+				<option>Otro</option>
+			</select>
+		</div>
+		<!-- Otro tipo -->
+		{#if tipo === 'Otro'}
 			<div>
-				<label for="repNombre" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-					>Nombre *</label
+				<label for="otroTipo" class="font-medium text-[rgb(15,16,41)]"
+					>Especifique <span class="text-red-600">*</span></label
 				>
-				<Input id="repNombre" name="repNombre" required error={errors.repNombre} />
+				<Input
+					id="otroTipo"
+					name="otroTipo"
+					bind:value={otroTipo}
+					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+					placeholder="Tipo de institución"
+					on:blur={() => setTouched('otroTipo')}
+					on:input={() => onInput('otroTipo')}
+					error={errors.otroTipo}
+				/>
+				{#if errors.otroTipo}
+					<div class="mt-1 text-xs text-red-600">{errors.otroTipo}</div>
+				{/if}
+			</div>
+		{/if}
+		<!-- Username -->
+		<div>
+			<label for="username" class="font-medium text-[rgb(15,16,41)]"
+				>Nombre de usuario <span class="text-red-600">*</span></label
+			>
+			<Input
+				id="username"
+				name="username"
+				bind:value={username}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="Ej: fundacion123"
+				on:blur={() => setTouched('username')}
+				on:input={() => onInput('username')}
+				error={errors.username}
+			/>
+			{#if errors.username}
+				<div class="mt-1 text-xs text-red-600">{errors.username}</div>
+			{/if}
+		</div>
+		<!-- Email -->
+		<div>
+			<label for="email" class="font-medium text-[rgb(15,16,41)]"
+				>Email <span class="text-red-600">*</span></label
+			>
+			<Input
+				id="email"
+				name="email"
+				type="email"
+				bind:value={email}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="institucion@email.com"
+				on:blur={() => setTouched('email')}
+				on:input={() => onInput('email')}
+				error={errors.email}
+			/>
+			{#if errors.email}
+				<div class="mt-1 text-xs text-red-600">{errors.email}</div>
+			{/if}
+		</div>
+		<!-- CUIT -->
+		<div>
+			<label for="cuit" class="font-medium text-[rgb(15,16,41)]"
+				>CUIT <span class="text-red-600">*</span></label
+			>
+			<Input
+				id="cuit"
+				name="cuit"
+				bind:value={cuit}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="Ej: 30-12345678-9"
+				on:blur={() => setTouched('cuit')}
+				on:input={() => onInput('cuit')}
+				error={errors.cuit}
+			/>
+			{#if errors.cuit}
+				<div class="mt-1 text-xs text-red-600">{errors.cuit}</div>
+			{/if}
+		</div>
+		<!-- Contraseña -->
+		<div>
+			<label for="password" class="font-medium text-[rgb(15,16,41)]"
+				>Contraseña <span class="text-red-600">*</span></label
+			>
+			<Input
+				id="password"
+				name="password"
+				type="password"
+				bind:value={password}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="********"
+				on:blur={() => setTouched('password')}
+				on:input={() => onInput('password')}
+				error={errors.password}
+			/>
+			{#if errors.password}
+				<div class="mt-1 text-xs text-red-600">{errors.password}</div>
+			{/if}
+		</div>
+		<!-- Confirmar contraseña -->
+		<div>
+			<label for="repassword" class="font-medium text-[rgb(15,16,41)]"
+				>Confirmar contraseña <span class="text-red-600">*</span></label
+			>
+			<Input
+				id="repassword"
+				name="repassword"
+				type="password"
+				bind:value={repassword}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				placeholder="********"
+				on:blur={() => setTouched('repassword')}
+				on:input={() => onInput('repassword')}
+				error={errors.repassword}
+			/>
+			{#if errors.repassword}
+				<div class="mt-1 text-xs text-red-600">{errors.repassword}</div>
+			{/if}
+		</div>
+	</div>
+
+	<!-- REPRESENTANTE LEGAL AL FINAL -->
+	<fieldset class="mt-6 rounded-2xl border border-blue-100 bg-blue-50 px-6 py-5">
+		<legend class="text-base font-semibold text-blue-700">Datos del representante legal</legend>
+		<div class="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2">
+			<div>
+				<label for="repNombre" class="font-medium text-[rgb(15,16,41)]"
+					>Nombre <span class="text-red-600">*</span></label
+				>
+				<Input
+					id="repNombre"
+					name="repNombre"
+					bind:value={repNombre}
+					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+					placeholder="Nombre del representante"
+					on:blur={() => setTouched('repNombre')}
+					on:input={() => onInput('repNombre')}
+					error={errors.repNombre}
+				/>
+				{#if errors.repNombre}
+					<div class="mt-1 text-xs text-red-600">{errors.repNombre}</div>
+				{/if}
 			</div>
 			<div>
-				<label
-					for="repApellido"
-					class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Apellido *</label
+				<label for="repApellido" class="font-medium text-[rgb(15,16,41)]"
+					>Apellido <span class="text-red-600">*</span></label
 				>
-				<Input id="repApellido" name="repApellido" required error={errors.repApellido} />
+				<Input
+					id="repApellido"
+					name="repApellido"
+					bind:value={repApellido}
+					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+					placeholder="Apellido del representante"
+					on:blur={() => setTouched('repApellido')}
+					on:input={() => onInput('repApellido')}
+					error={errors.repApellido}
+				/>
+				{#if errors.repApellido}
+					<div class="mt-1 text-xs text-red-600">{errors.repApellido}</div>
+				{/if}
 			</div>
 			<div>
-				<label for="repDocTipo" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-					>Tipo de documento *</label
+				<label for="repDocTipo" class="font-medium text-[rgb(15,16,41)]"
+					>Tipo de documento <span class="text-red-600">*</span></label
 				>
 				<select
 					id="repDocTipo"
 					name="repDocTipo"
-					required
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
+					bind:value={repDocTipo}
+					on:blur={() => setTouched('repDocTipo')}
+					class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				>
 					<option>DNI</option>
 					<option>Pasaporte</option>
 					<option>Otro</option>
 				</select>
 			</div>
+			{#if repDocTipo === 'Otro'}
+				<div>
+					<label for="repDocOtro" class="font-medium text-[rgb(15,16,41)]"
+						>Especifique <span class="text-red-600">*</span></label
+					>
+					<Input
+						id="repDocOtro"
+						name="repDocOtro"
+						bind:value={repDocOtro}
+						customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+						placeholder="Tipo de documento"
+						on:blur={() => setTouched('repDocOtro')}
+						on:input={() => onInput('repDocOtro')}
+						error={errors.repDocOtro}
+					/>
+					{#if errors.repDocOtro}
+						<div class="mt-1 text-xs text-red-600">{errors.repDocOtro}</div>
+					{/if}
+				</div>
+			{/if}
 			<div>
-				<label
-					for="repDocNumero"
-					class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]">Número *</label
+				<label for="repDocNumero" class="font-medium text-[rgb(15,16,41)]"
+					>Número de documento <span class="text-red-600">*</span></label
 				>
-				<Input id="repDocNumero" name="repDocNumero" required error={errors.repDocNumero} />
+				<Input
+					id="repDocNumero"
+					name="repDocNumero"
+					bind:value={repDocNumero}
+					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+					placeholder="Ej: 12345678"
+					on:blur={() => setTouched('repDocNumero')}
+					on:input={() => onInput('repDocNumero')}
+					error={errors.repDocNumero}
+				/>
+				{#if errors.repDocNumero}
+					<div class="mt-1 text-xs text-red-600">{errors.repDocNumero}</div>
+				{/if}
 			</div>
-			<div class="md:col-span-2">
-				<label
-					for="repNacimiento"
-					class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-					>Fecha de nacimiento *</label
+			<div>
+				<label for="repNacimiento" class="font-medium text-[rgb(15,16,41)]"
+					>Fecha de nacimiento <span class="text-red-600">*</span></label
 				>
-				<DatePicker id="repNacimiento" name="repNacimiento" required error={errors.repNacimiento} />
+				<DatePicker
+					id="repNacimiento"
+					name="repNacimiento"
+					bind:value={repNacimiento}
+					on:blur={() => setTouched('repNacimiento')}
+					on:input={() => onInput('repNacimiento')}
+					error={errors.repNacimiento}
+				/>
+				{#if errors.repNacimiento}
+					<div class="mt-1 text-xs text-red-600">{errors.repNacimiento}</div>
+				{/if}
 			</div>
 		</div>
 	</fieldset>
-	<div>
-		<label for="password" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Contraseña *</label
-		>
-		<Input id="password" name="password" type="password" required error={errors.password} />
+	<!-- Botón -->
+	<div class="pt-6">
+		<Button
+			label={sending ? 'Enviando...' : 'Continuar'}
+			disabled={sending || hasErrors}
+			customClass="w-full shadow-lg"
+		/>
 	</div>
-	<div>
-		<label for="repassword" class="mb-1 block text-sm font-medium text-[rgb(var(--base-color))]"
-			>Confirmar contraseña *</label
-		>
-		<Input id="repassword" name="repassword" type="password" required error={errors.repassword} />
-	</div>
-	<Button label="Continuar" disabled={sending} customClass="w-full" />
 </form>
