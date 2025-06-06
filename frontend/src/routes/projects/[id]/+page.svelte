@@ -16,9 +16,16 @@ TODO:
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+        import Button from '$lib/components/ui/Button.svelte';
+        import Badge from '$lib/components/ui/Badge.svelte';
+        import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+        import {
+                formatDate,
+                formatAmount,
+                progressColor,
+                urgencyColor,
+                statusColor
+        } from '$lib/utils/projectHelpers';
 
 	// Obtener ID del proyecto desde la URL
 	$: proyectoId = parseInt($page.params.id);
@@ -149,72 +156,11 @@ TODO:
 		}
 	}
 
-	// Función para formatear fechas
-	function formatearFecha(fecha: string) {
-		return new Date(fecha).toLocaleDateString('es-ES', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
-	}
-
-	// Función para calcular porcentaje de progreso
-	function calcularPorcentajeProgreso() {
-		if (!proyecto) return 0;
-		return Math.min((proyecto.progreso / proyecto.objetivoNumerico) * 100, 100);
-	}
-
-	// Función para formatear montos
-	function formatearMonto(cantidad: number) {
-		if (proyecto?.tipoParticipacion === 'Monetaria') {
-			return `$${cantidad.toLocaleString()}`;
-		}
-		return cantidad.toString();
-	}
-
-	// Función para obtener color de progreso
-	function getColorProgreso(tipo: string) {
-		switch (tipo) {
-			case 'Monetaria':
-				return 'bg-[rgb(var(--color-primary))]';
-			case 'Voluntariado':
-				return 'bg-purple-500';
-			case 'Materiales':
-				return 'bg-green-500';
-			default:
-				return 'bg-gray-400';
-		}
-	}
-
-	// Función para obtener color del badge
-	function getColorUrgencia(urgencia: string) {
-		switch (urgencia) {
-			case 'Alta':
-				return 'text-red-600 bg-red-100';
-			case 'Media':
-				return 'text-yellow-600 bg-yellow-100';
-			case 'Baja':
-				return 'text-green-600 bg-green-100';
-			default:
-				return 'text-gray-600 bg-gray-100';
-		}
-	}
-
-	// Función para obtener color del estado
-	function getColorEstado(estado: string) {
-		switch (estado) {
-			case 'Activo':
-				return 'text-green-600 bg-green-100';
-			case 'Próximo a cerrar':
-				return 'text-orange-600 bg-orange-100';
-			case 'Cerrado':
-				return 'text-gray-600 bg-gray-100';
-			case 'Completado':
-				return 'text-blue-600 bg-blue-100';
-			default:
-				return 'text-gray-600 bg-gray-100';
-		}
-	}
+        // Función para calcular porcentaje de progreso
+        function calcularPorcentajeProgreso() {
+                if (!proyecto) return 0;
+                return Math.min((proyecto.progreso / proyecto.objetivoNumerico) * 100, 100);
+        }
 
 	// Función para mostrar formulario de colaboración
 	function mostrarFormulario() {
@@ -273,14 +219,14 @@ TODO:
 								<div class="flex items-center gap-3">
 									<Badge text={proyecto.tipoParticipacion} shape="square" />
 									<span
-										class="rounded-full px-2 py-1 text-xs font-medium {getColorUrgencia(
+										class="rounded-full px-2 py-1 text-xs font-medium {urgencyColor(
 											proyecto.urgencia
 										)}"
 									>
 										{proyecto.urgencia}
 									</span>
 									<span
-										class="rounded-full px-2 py-1 text-xs font-medium {getColorEstado(
+										class="rounded-full px-2 py-1 text-xs font-medium {statusColor(
 											proyecto.estado
 										)}"
 									>
@@ -297,12 +243,12 @@ TODO:
 									Progreso del Objetivo
 								</h3>
 								<span class="text-2xl font-bold text-[rgb(var(--color-primary))]">
-									{formatearMonto(proyecto.progreso)} / {proyecto.objetivo}
+									{formatAmount(proyecto.progreso)} / {proyecto.objetivo}
 								</span>
 							</div>
 							<div class="mb-2 h-4 w-full rounded-full bg-gray-200">
 								<div
-									class="h-4 rounded-full transition-all duration-300 {getColorProgreso(
+									class="h-4 rounded-full transition-all duration-300 {progressColor(
 										proyecto.tipoParticipacion
 									)}"
 									style="width: {calcularPorcentajeProgreso()}%"
@@ -336,11 +282,11 @@ TODO:
 							</div>
 							<div class="rounded-lg bg-gray-50 p-4">
 								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de inicio</h4>
-								<p class="text-gray-700">{formatearFecha(proyecto.fechaInicio)}</p>
+								<p class="text-gray-700">{formatDate(proyecto.fechaInicio)}</p>
 							</div>
 							<div class="rounded-lg bg-gray-50 p-4">
 								<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de cierre</h4>
-								<p class="text-gray-700">{formatearFecha(proyecto.fechaCierre)}</p>
+								<p class="text-gray-700">{formatDate(proyecto.fechaCierre)}</p>
 							</div>
 						</div>
 
@@ -360,7 +306,7 @@ TODO:
 													{actualizacion.titulo}
 												</h4>
 												<span class="text-sm text-gray-500"
-													>{formatearFecha(actualizacion.fecha)}</span
+													>{formatDate(actualizacion.fecha)}</span
 												>
 											</div>
 											<p class="text-gray-700">{actualizacion.descripcion}</p>
@@ -389,7 +335,7 @@ TODO:
 													</h5>
 													<p class="text-sm text-gray-600">{evidencia.descripcion}</p>
 													<span class="text-xs text-gray-500"
-														>{formatearFecha(evidencia.fecha)}</span
+														>{formatDate(evidencia.fecha)}</span
 													>
 												</div>
 											</div>

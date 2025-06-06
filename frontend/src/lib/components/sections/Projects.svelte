@@ -14,16 +14,18 @@ TODO:
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import ProjectCard from '$lib/components/ui/ProjectCard.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+        import { onMount } from 'svelte';
+        import ProjectCard from '$lib/components/ui/ProjectCard.svelte';
+        import Button from '$lib/components/ui/Button.svelte';
 
 	// Tipos de participación disponibles
 	const tiposParticipacion = ['Todos', 'Monetaria', 'Voluntariado', 'Materiales'];
 
 	// Estado reactivo para el filtro
 	let filtroSeleccionado = 'Todos';
-	let proyectosVisibles: any[] = [];
+        let proyectosVisibles: any[] = [];
+        let visible = false;
+        let sectionRef: HTMLElement;
 
 	// Datos de ejemplo de proyectos con estructura argentina
 	const proyectos = [
@@ -240,10 +242,15 @@ TODO:
 		}
 	}
 
-	// Inicializar al montar el componente
-	onMount(() => {
-		filtrarProyectos();
-	});
+        // Inicializar al montar el componente y animar la entrada
+        onMount(() => {
+                filtrarProyectos();
+                const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), {
+                        threshold: 0.15
+                });
+                if (sectionRef) io.observe(sectionRef);
+                return () => io.disconnect();
+        });
 
 	// Reactividad para el filtro
 	$: if (filtroSeleccionado) {
@@ -251,7 +258,12 @@ TODO:
 	}
 </script>
 
-<section class="w-full px-8 py-12">
+<section
+        bind:this={sectionRef}
+        class="w-full px-8 py-12"
+        class:fade-up={visible}
+        class:fade-initial-up={!visible}
+>
 	<!-- Título de la sección -->
 	<div style="margin-bottom: var(--spacing-3xl);">
 		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>
@@ -315,3 +327,17 @@ TODO:
 		</div>
 	{/if}
 </section>
+
+<style>
+.fade-initial-up {
+    opacity: 0;
+    transform: translateY(52px) scale(0.97);
+    filter: blur(6px);
+}
+.fade-up {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    transition: opacity 1.05s cubic-bezier(0.39,0,0.19,1), transform 1.05s cubic-bezier(0.39,0,0.19,1), filter 0.95s cubic-bezier(0.39,0,0.19,1);
+}
+</style>
