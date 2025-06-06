@@ -3,7 +3,13 @@
         -*- Descripción: permite crear cuentas para instituciones o colaboradores.
         -*- Dependiendo del rol seleccionado se muestra un formulario u otro.
         -*- Incluye paso inicial de selección de rol antes de mostrar el formulario.
+
+TODOS:
+- [ ] Agregar validación de formulario y manejo de errores.
+- [ ] Implementar lógica de registro en el backend.
+- [ ] Mejorar diseño, accesibilidad y usabilidad del formulario -> todavía está muy fiero
 -->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import InstitutionForm from '$lib/components/forms/InstitutionForm.svelte';

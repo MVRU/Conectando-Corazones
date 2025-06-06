@@ -3,6 +3,14 @@
   -*- Descripción: formulario de registro de colaboradores.
   -*- Soporta registro individual u organización con representante.
   -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
+
+TODOS:
+	- [ ] Validar CUIT/CUIL con regex (opcional).
+	- [ ] Mejorar accesibilidad (roles ARIA, etiquetas).
+  	- [ ] Manejo de errores más robusto (backend).
+  	- [ ] Integración con API para registro.
+  	- [ ] Estilos y diseño responsivo -> mejorar todavía está fiero
+  	- [ ] Pruebas unitarias y de integración.
 -->
 
 <script lang="ts">

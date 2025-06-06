@@ -2,6 +2,13 @@
 * Componente: InstitutionForm
   -*- Mejora: UX profesional y validaciones modernas.
   -*- Errores solo al interactuar/tocar campos.
+
+TODOS:
+  - [ ] Validar CUIT con regex (formato argentino)
+  - [ ] Validar fecha de nacimiento (mayor de 18 años)
+  - [ ] Mejorar estilos y accesibilidad -> todavía está muy fiero
+  - [ ] Agregar animaciones sutiles al enviar formulario
+  - [ ] Implementar lógica de envío real (API)
 -->
 
 <script lang="ts">
@@ -129,22 +136,25 @@
 	on:submit={handleSubmit}
 	class="
 		mx-auto
+		flex
 		w-full
-		max-w-5xl
-		py-4 shadow-xl
-		transition-all md:rounded-[2rem]
-		md:border
-		md:border-blue-200
-		md:px-16
+		max-w-[1100px]
+		flex-col
+		gap-8
+		rounded-3xl border
+		border-blue-50 bg-white
+		px-8 py-10
+		shadow-xl md:gap-10 md:px-16
 		md:py-14
-		md:shadow-2xl
 	"
 >
-	<h2 class="mb-6 text-3xl font-bold tracking-tight text-blue-900 drop-shadow-sm md:text-4xl">
-		Registro de Institución
-	</h2>
+	<div class="mb-2 flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
+		<h2 class="text-3xl font-bold tracking-tight text-blue-900 drop-shadow-sm md:text-4xl">
+			Registro de Institución
+		</h2>
+	</div>
 
-	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6">
 		<!-- Nombre -->
 		<div>
 			<label for="nombre" class="font-medium text-[rgb(15,16,41)]"
@@ -307,9 +317,21 @@
 	</div>
 
 	<!-- REPRESENTANTE LEGAL AL FINAL -->
-	<fieldset class="mt-6 rounded-2xl border border-blue-100 bg-blue-50 px-6 py-5">
-		<legend class="text-base font-semibold text-blue-700">Datos del representante legal</legend>
-		<div class="mt-2 grid grid-cols-1 gap-6 md:grid-cols-2">
+	<div
+		class="mt-4 flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 px-6 py-7 shadow-sm"
+	>
+		<legend class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800">
+			<svg
+				class="h-5 w-5 text-blue-500"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				viewBox="0 0 24 24"
+				><circle cx="12" cy="7" r="4" /><path d="M5.5 21v-2a6.5 6.5 0 0113 0v2" /></svg
+			>
+			Datos del representante legal
+		</legend>
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 			<div>
 				<label for="repNombre" class="font-medium text-[rgb(15,16,41)]"
 					>Nombre <span class="text-red-600">*</span></label
@@ -417,13 +439,13 @@
 				{/if}
 			</div>
 		</div>
-	</fieldset>
+	</div>
 	<!-- Botón -->
-	<div class="pt-6">
+	<div class="flex justify-end pt-6">
 		<Button
 			label={sending ? 'Enviando...' : 'Continuar'}
 			disabled={sending || hasErrors}
-			customClass="w-full shadow-lg"
+			customClass="px-8 py-3 rounded-xl  shadow-lg w-full md:w-auto"
 		/>
 	</div>
 </form>
