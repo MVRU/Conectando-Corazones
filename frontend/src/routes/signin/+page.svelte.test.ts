@@ -9,6 +9,6 @@ describe('signin page', () => {
                 expect(screen.getByLabelText('Nombre de la institución *')).toBeInTheDocument();
                 const colaboradorRadio = screen.getByLabelText('Colaborador');
                 await fireEvent.click(colaboradorRadio);
-                expect(screen.getByLabelText('Tipo de colaborador *')).toBeInTheDocument();
+                expect(screen.getByLabelText('Nombre *')).toBeInTheDocument();
         });
 });
