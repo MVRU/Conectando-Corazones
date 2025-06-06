@@ -1,17 +1,21 @@
 name: "CodeQL"
+# ! Corre escaneos de seguridad y pruebas básicas
+# -*- Mantener la configuración alineada con la estructura actual del proyecto -*-
 
 on:
   push:
-    branches: [ "main" ] # Ver si agregar otras ramas más adelante
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   schedule:
-    - cron: '0 2 * * 0' # Todos los domingos a las 2:00 UTC
+    - cron: '0 2 * * 0'
 
 jobs:
   codeql-analysis:
     name: "CodeQL Security Scan"
     runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: '20'
     permissions:
       actions: read
       contents: read
@@ -28,25 +32,34 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       # Backend
       - name: Install backend dependencies
-        run: |
-          cd backend
-          npm ci
+        run: npm ci
+        working-directory: backend
+      - name: Build backend
+        run: npm run build
+        working-directory: backend
 
       # Frontend
       - name: Install frontend dependencies
-        run: |
-          cd frontend
-          npm ci
+        run: npm ci
+        working-directory: frontend
 
       # Build frontend (es necesario para el análisis)
       - name: Build frontend
-        run: |
-          cd frontend
-          npm run build
+        run: npm run build
+        working-directory: frontend
+
+      - name: Test backend
+        run: npm test --if-present
+        working-directory: backend
+
+      - name: Test frontend
+        run: npm run test:unit -- --run
+        working-directory: frontend
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
