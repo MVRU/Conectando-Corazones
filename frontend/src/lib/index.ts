@@ -19,3 +19,6 @@ export { default as Ticker } from './components/visual/Ticker.svelte';
 
 // Export stores
 export * from './stores/breadcrumbs';
+
+// Utils
+export * from './utils/projectHelpers';
