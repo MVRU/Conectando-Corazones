@@ -1,0 +1,78 @@
+<!--
+* Componente: RoleCard
+  -*- Opción visual para elegir tipo de registro.
+  -*- Favorece accesibilidad y consistencia visual.
+-->
+
+<script lang="ts">
+	import { createEventDispatcher } from 'svelte';
+	import { clsx } from 'clsx';
+
+	export let selected: boolean = false;
+	export let icon: 'institution' | 'collaborator' | 'user' = 'user';
+	export let title: string = '';
+	export let description: string = '';
+
+	const dispatch = createEventDispatcher();
+</script>
+
+<button
+	type="button"
+	aria-pressed={selected}
+	on:click={() => dispatch('select')}
+	class={clsx(
+		'flex flex-col items-start gap-2 rounded-2xl border border-gray-300 bg-white/70 p-6 text-left shadow-md transition-all duration-300',
+		'cursor-pointer hover:-translate-y-1 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]',
+		selected && 'ring-2 ring-[rgb(var(--color-primary))]'
+	)}
+>
+	{#if icon === 'institution'}
+		<!-- Icono institución: Edificio -->
+		<svg
+			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<path d="M3 10l9-7 9 7" />
+			<path d="M9 22V12h6v10" />
+			<path d="M2 22h20" />
+		</svg>
+	{:else if icon === 'collaborator'}
+		<!-- Icono colaborador: Usuario individual -->
+		<svg
+			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="12" cy="7" r="4" />
+			<path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
+		</svg>
+	{:else}
+		<!-- Icono usuario: Dos personas -->
+		<svg
+			class="mb-2 h-8 w-8 text-[rgb(var(--color-primary))]"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="2"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="9" cy="7" r="4" />
+			<circle cx="17" cy="7" r="4" />
+			<path d="M17 20h5v-2a4 4 0 00-5-4" />
+			<path d="M7 20H2v-2a4 4 0 015-4" />
+		</svg>
+	{/if}
+
+	<span class="text-lg font-semibold text-[rgb(var(--base-color))]">{title}</span>
+	<span class="text-sm text-gray-600">{description}</span>
+</button>
