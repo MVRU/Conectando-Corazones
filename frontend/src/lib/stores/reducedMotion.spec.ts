@@ -26,4 +26,10 @@ describe('reducedMotion store', () => {
         reducedMotion.set(false);
         expect(document.documentElement.classList.contains('reduced-motion')).toBe(false);
     });
+
+    it('does not hide notice when toggling', () => {
+        motionNoticeVisible.set(true);
+        reducedMotion.set(false);
+        expect(getValue(motionNoticeVisible)).toBe(true);
+    });
 });

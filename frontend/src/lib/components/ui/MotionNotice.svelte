@@ -13,7 +13,6 @@
 
     function toggle() {
         reducedMotion.toggle();
-        close();
     }
 
     function close() {
@@ -30,13 +29,17 @@
         aria-live="polite"
         class="fixed left-0 right-0 top-0 z-50 flex items-center justify-between bg-blue-900 px-4 py-2 text-sm text-white shadow-md"
     >
-        <span class="mr-4">Las animaciones se deshabilitaron para mejorar el rendimiento.</span>
+        <span class="mr-4">
+            {$reducedMotion
+                ? 'Las animaciones se deshabilitaron para mejorar el rendimiento.'
+                : 'Las animaciones están habilitadas.'}
+        </span>
         <div class="flex gap-3">
             <button
                 class="rounded-md bg-white px-3 py-1 text-blue-900 transition-colors hover:bg-blue-100"
                 on:click={toggle}
             >
-                {$reducedMotion ? 'Habilitar animaciones' : 'Deshabilitarlas'}
+                {$reducedMotion ? 'Habilitar animaciones' : 'Deshabilitar animaciones'}
             </button>
             <button
                 aria-label="Cerrar aviso"

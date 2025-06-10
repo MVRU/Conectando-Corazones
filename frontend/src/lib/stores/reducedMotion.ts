@@ -58,8 +58,10 @@ export const motionNoticeVisible = writable(false);
 if (browser) {
     const hidden = localStorage.getItem('hideMotionNotice') === '1';
     motionNoticeVisible.set(hidden ? false : get(autoReducedMotion));
+
+    // * Muestra el aviso solo cuando el dispositivo lo solicita
     autoReducedMotion.subscribe((auto) => {
-        if (!hidden) motionNoticeVisible.set(auto);
+        if (!hidden && auto) motionNoticeVisible.set(true);
     });
 }
 
