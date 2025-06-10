@@ -1,25 +1,65 @@
-import { readable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { isLowEndDevice } from '../utils/device';
 
 /**
- * Indica si el usuario prefiere reducir las animaciones
- * y sirve para desactivar efectos pesados en dispositivos con poca potencia.
+ * DECISIÓN DE DISEÑO:
+ * Cambiamos a `writable` para permitir que el usuario modifique la preferencia
+ * y persistimos el valor en `localStorage`.
  */
-export const reducedMotion = readable(false, (set) => {
-    if (!browser) return;
 
-    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+// -* Indica si la reducción se activó automáticamente por el dispositivo *-
+export const autoReducedMotion = writable(false);
 
-    const evaluate = (matches: boolean) => {
-        const value = matches || isLowEndDevice();
-        document.documentElement.classList.toggle('reduced-motion', value);
-        set(value);
-    };
+function createReducedMotion() {
+    const store = writable(false);
 
-    evaluate(query.matches);
-    const handler = (e: MediaQueryListEvent) => evaluate(e.matches);
-    query.addEventListener('change', handler);
-    return () => query.removeEventListener('change', handler);
-});
+    if (browser) {
+        const stored = localStorage.getItem('reducedMotion');
+        const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+        const auto = stored === null && isLowEndDevice();
+        autoReducedMotion.set(auto);
+
+        const initial = stored !== null ? JSON.parse(stored) : query.matches || auto;
+        document.documentElement.classList.toggle('reduced-motion', initial);
+        store.set(initial);
+
+        const handler = (e: MediaQueryListEvent) => {
+            if (stored === null) {
+                const val = e.matches || isLowEndDevice();
+                document.documentElement.classList.toggle('reduced-motion', val);
+                store.set(val);
+                autoReducedMotion.set(isLowEndDevice());
+            }
+        };
+        query.addEventListener('change', handler);
+    }
+
+    function set(value: boolean) {
+        store.set(value);
+        if (browser) {
+            localStorage.setItem('reducedMotion', JSON.stringify(value));
+            document.documentElement.classList.toggle('reduced-motion', value);
+            autoReducedMotion.set(false);
+        }
+    }
+
+    function toggle() {
+        set(!get(store));
+    }
+
+    return { subscribe: store.subscribe, set, toggle };
+}
+
+export const reducedMotion = createReducedMotion();
+
+// -* Indica si el aviso de animaciones debería mostrarse *-
+export const motionNoticeVisible = writable(false);
+if (browser) {
+    const hidden = localStorage.getItem('hideMotionNotice') === '1';
+    motionNoticeVisible.set(hidden ? false : get(autoReducedMotion));
+    autoReducedMotion.subscribe((auto) => {
+        if (!hidden) motionNoticeVisible.set(auto);
+    });
+}
 
