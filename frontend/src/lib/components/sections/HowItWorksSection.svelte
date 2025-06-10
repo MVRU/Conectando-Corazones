@@ -10,27 +10,19 @@ TODO:
 	- [ ] Parametrizar pasos para admitir contenido dinámico en el futuro (de ser necesario).
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import StepCard from '$lib/components/ui/StepCard.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { steps } from '$lib/data/how-it-works';
+       import StepCard from '$lib/components/ui/StepCard.svelte';
+       import Badge from '$lib/components/ui/Badge.svelte';
+       import Button from '$lib/components/ui/Button.svelte';
+       import { steps } from '$lib/data/how-it-works';
+       import { inView } from '$lib/actions/inView';
+       import { reducedMotion } from '$lib/stores/reducedMotion';
 
-	let inView = false;
-	let holder: HTMLElement;
-
-	onMount(() => {
-		const io = new IntersectionObserver(([entry]) => (inView = entry.isIntersecting), {
-			rootMargin: '0px 0px -15% 0px',
-			threshold: 0.1
-		});
-		io.observe(holder);
-	});
+       let inViewSection = false;
 </script>
 
 <section
-	bind:this={holder}
-	class="py-50 relative isolate w-full overflow-hidden bg-white px-4 md:px-8"
+        class="py-50 relative isolate w-full overflow-hidden bg-white px-4 md:px-8"
+        use:inView={{ onChange: (v) => (inViewSection = v), rootMargin: '0px 0px -15% 0px', threshold: 0.1 }}
 >
 	<span
 		class="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full
@@ -38,13 +30,14 @@ TODO:
 	></span>
 
 	<!-- *Encabezado -->
-	<header
-		class="duration-600 relative mx-auto mb-12 max-w-4xl
-		       text-center transition-transform ease-out
-		       md:max-w-3xl"
-		class:opacity-0={!inView}
-		class:translate-y-8={!inView}
-	>
+        <header
+                class="duration-600 relative mx-auto mb-12 max-w-4xl
+                       text-center transition-transform ease-out
+                       md:max-w-3xl"
+                class:duration-0={$reducedMotion}
+                class:opacity-0={!inViewSection}
+                class:translate-y-8={!inViewSection}
+        >
 		<div class="flex justify-center">
 			<Badge text="¿Cómo funciona?" customColor="#0066d5" />
 		</div>
@@ -56,23 +49,25 @@ TODO:
 	</header>
 
 	<!-- *Grid de pasos -->
-	<div
-		class="duration-600 relative mx-auto grid max-w-7xl
-		       gap-8 transition-opacity
-		       ease-out sm:grid-cols-2 lg:grid-cols-3"
-		class:opacity-0={!inView}
-		class:translate-y-6={!inView}
-	>
+        <div
+                class="duration-600 relative mx-auto grid max-w-7xl
+                       gap-8 transition-opacity
+                       ease-out sm:grid-cols-2 lg:grid-cols-3"
+                class:duration-0={$reducedMotion}
+                class:opacity-0={!inViewSection}
+                class:translate-y-6={!inViewSection}
+        >
 		{#each steps as step (step)}
-			<StepCard {...step} animate={inView} />
+                        <StepCard {...step} />
 		{/each}
 	</div>
 
 	<!-- *CTA -->
-	<div
-		class="duration-600 relative mt-12 flex justify-center transition-opacity"
-		class:opacity-0={!inView}
-	>
+        <div
+                class="duration-600 relative mt-12 flex justify-center transition-opacity"
+                class:duration-0={$reducedMotion}
+                class:opacity-0={!inViewSection}
+        >
 		<Button
 			label="Empezá a conectar hoy"
 			customClass="hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition duration-200 shadow-md"

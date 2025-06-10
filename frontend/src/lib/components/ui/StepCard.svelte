@@ -13,25 +13,31 @@
 -->
 
 <script lang="ts">
-	export let stepNumber: number;
-	export let title: string;
-	export let summary: string;
-	export let details: string;
-	export let image: string;
-	export let delay = 0;
-	export let animate = false;
+       import { inView } from '$lib/actions/inView';
+       import { reducedMotion } from '$lib/stores/reducedMotion';
+
+       export let stepNumber: number;
+       export let title: string;
+       export let summary: string;
+       export let details: string;
+       export let image: string;
+       export let delay = 0;
+       export let animate = false;
 </script>
 
 <!-- *Contenedor -->
 <div
-	role="region"
-	aria-label={`Paso ${stepNumber}: ${title}`}
-	class="group relative h-96 transform-gpu overflow-hidden rounded-3xl bg-white
-	       shadow-md transition-transform duration-300
-	       hover:-translate-y-1 hover:scale-[1.015]"
-	style={`transition-delay:${delay}ms`}
-	class:opacity-0={!animate}
-	class:translate-y-8={!animate}
+        role="region"
+        aria-label={`Paso ${stepNumber}: ${title}`}
+        class="group relative h-96 transform-gpu overflow-hidden rounded-3xl bg-white
+               shadow-md transition-transform duration-300"
+        class:duration-0={$reducedMotion}
+        class:hover:-translate-y-1={!$reducedMotion}
+        class:hover:scale-[1.015]={!$reducedMotion}
+        style={`transition-delay:${delay}ms`}
+        class:opacity-0={!animate}
+        class:translate-y-8={!animate}
+        use:inView={{ onChange: (v) => (animate = v), once: true, threshold: 0.2 }}
 >
 	<!-- *Imagen -->
 	<img
@@ -60,24 +66,29 @@
 
 		<!-- *Textos -->
 		<h3
-			class="mt-4 text-lg font-semibold text-white drop-shadow
-			       transition-transform duration-300
-			       group-hover:translate-y-6"
+                        class="mt-4 text-lg font-semibold text-white drop-shadow
+                               transition-transform duration-300"
+                        class:duration-0={$reducedMotion}
+                        class:group-hover:translate-y-6={!$reducedMotion}
 		>
 			{title}
 		</h3>
 		<p
-			class="text-sm text-white/90 transition-all duration-300
-			       group-hover:translate-y-2 group-hover:opacity-0"
+                        class="text-sm text-white/90 transition-all duration-300"
+                        class:duration-0={$reducedMotion}
+                        class:group-hover:translate-y-2={!$reducedMotion}
+                        class:group-hover:opacity-0={!$reducedMotion}
 		>
 			{summary}
 		</p>
 
 		<!-- *Detalles (fade on hover) -->
 		<p
-			class="translate-y-4 text-xs text-white/80 opacity-0
-			       transition-all duration-300
-			       group-hover:translate-y-0 group-hover:opacity-100"
+                        class="translate-y-4 text-xs text-white/80 opacity-0
+                               transition-all duration-300"
+                        class:duration-0={$reducedMotion}
+                        class:group-hover:translate-y-0={!$reducedMotion}
+                        class:group-hover:opacity-100={!$reducedMotion}
 		>
 			{details}
 		</p>
@@ -109,3 +120,4 @@
 		transform: translateY(-3px) scale(1.02);
 	}
 </style>
+
