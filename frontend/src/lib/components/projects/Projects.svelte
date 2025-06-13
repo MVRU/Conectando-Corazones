@@ -1,23 +1,19 @@
 <!--
 * Componente: Projects
-        -*- Descripción: Muestra una lista de proyectos con información detallada y filtros
-        -*- Funcionalidad: Filtros por tipo de participación, búsqueda y paginación
-        -*- DECISIÓN DE DISEÑO: Se consume un único listado unificado (`projects.ts`) y
-        se mapea la propiedad `unidad` a etiquetas de participación para simplificar
-        la lógica de filtrado.
+        -*- Descripción: Muestra y filtra una lista de proyectos
+        -*- DECISIÓN DE DISEÑO: Se unificó el origen de datos en `projects.ts` y se simplificó el filtrado mediante un mapa de etiquetas.
 
 * Props:
-	-*- proyectos (array): lista de proyectos a mostrar
+        -*- proyectos (Project[]): listado de proyectos a mostrar
 
 TODO:
-	- [ ] Implementar paginación
-	- [ ] Agregar búsqueda por texto
-	- [ ] Conectar con backend para datos reales
-	- [ ] Implementar ordenamiento por diferentes criterios
+        - [ ] Implementar paginación
+        - [ ] Agregar búsqueda por texto
+        - [ ] Conectar con backend para datos reales
+        - [ ] Implementar ordenamiento por diferentes criterios
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
        import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
        import Button from '$lib/components/ui/elements/Button.svelte';
        import { projects as demoProjects } from '$lib/data/projects';
@@ -27,29 +23,15 @@ TODO:
                 materiales: 'Materiales'
         } as const;
        const tiposParticipacion = ['Todos', ...Object.values(participacionMap)];
-       let filtroSeleccionado = 'Todos';
-       let proyectosVisibles: Project[] = [];
+       let filtroSeleccionado: keyof typeof participacionMap | 'Todos' = 'Todos';
+       let proyectosVisibles: Project[] = demoProjects;
        // Datos de ejemplo centralizados en $lib/data
        export let proyectos: Project[] = demoProjects;
-               const unidad = (Object.entries(participacionMap).find(([_, v]) => v === filtroSeleccionado)?.[0]) as keyof typeof participacionMap;
-	let filtroSeleccionado = 'Todos';
-	let proyectosVisibles: any[] = [];
-
-	// Datos de ejemplo centralizados en $lib/data
-	const proyectos = proyectosDemo;
-
-	// Función para filtrar proyectos
-	function filtrarProyectos() {
-		if (filtroSeleccionado === 'Todos') {
-			proyectosVisibles = proyectos;
-		} else {
-			proyectosVisibles = proyectos.filter(
-				(proyecto) => proyecto.tipoParticipacion === filtroSeleccionado
-			);
-		}
-	}
-
-	// Inicializar al montar el componente
+       // Reactividad para el filtro
+       $: proyectosVisibles =
+               filtroSeleccionado === 'Todos'
+                       ? proyectos
+                       : proyectos.filter((p) => participacionMap[p.unidad] === filtroSeleccionado);
 	onMount(() => {
 		filtrarProyectos();
 	});
