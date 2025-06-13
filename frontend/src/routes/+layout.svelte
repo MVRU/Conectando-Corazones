@@ -4,6 +4,7 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/Breadcrumbs.svelte';
 	import MotionNotice from '$lib/components/ui/MotionNotice.svelte';
+	import '$lib/stores/reducedMotion';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import ScrollToTop from '$lib/components/ui/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
