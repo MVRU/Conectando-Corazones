@@ -8,14 +8,14 @@
 -->
 
 <script lang="ts">
-       import FaqItem from '$lib/components/ui/FaqItem.svelte';
-       import Image from '$lib/components/ui/Image.svelte';
-       import { faqs } from '$lib/data/faqs';
-       import { inView } from '$lib/actions/inView';
-       import { reducedMotion } from '$lib/stores/reducedMotion';
+	import FaqItem from '$lib/components/ui/FaqItem.svelte';
+	import Image from '$lib/components/ui/Image.svelte';
+	import { faqs } from '$lib/data/faqs';
+	import { inView } from '$lib/actions/inView';
+	import { reducedMotion } from '$lib/stores/reducedMotion';
 
-       let visibleFaq = false;
-       let visibleImg = false;
+	let visibleFaq = false;
+	let visibleImg = false;
 </script>
 
 <section
@@ -24,13 +24,13 @@
 >
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
 		<!-- *Contenido -->
-               <div
-                        class="flex flex-col justify-center transition-all duration-1000"
-                        class:duration-0={$reducedMotion}
-                        class:faq-appear={visibleFaq}
-                        class:faq-hidden={!visibleFaq}
-                        use:inView={{ onChange: (v) => (visibleFaq = v), threshold: 0.12 }}
-                >
+		<div
+			class="flex flex-col justify-center transition-all duration-1000"
+			class:duration-0={$reducedMotion}
+			class:faq-appear={visibleFaq}
+			class:faq-hidden={!visibleFaq}
+			use:inView={{ onChange: (v) => (visibleFaq = v), threshold: 0.12 }}
+		>
 			<h2
 				class="mb-6 text-center text-2xl font-extrabold leading-tight tracking-tight text-[--base-color] sm:text-3xl md:text-left"
 			>
@@ -53,13 +53,13 @@
 		</div>
 
 		<!-- *Imagen aparece debajo en mobile -->
-               <div
-                        class="duration-800 group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
-                        class:duration-0={$reducedMotion}
-                        class:img-appear={visibleImg}
-                        class:img-hidden={!visibleImg}
-                        use:inView={{ onChange: (v) => (visibleImg = v), threshold: 0.12 }}
-                >
+		<div
+			class="duration-800 group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
+			class:duration-0={$reducedMotion}
+			class:img-appear={visibleImg}
+			class:img-hidden={!visibleImg}
+			use:inView={{ onChange: (v) => (visibleImg = v), threshold: 0.12 }}
+		>
 			<div
 				class="left-0 top-0 h-full w-full overflow-hidden rounded-[1.6rem]"
 				style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"

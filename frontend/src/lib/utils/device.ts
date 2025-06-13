@@ -1,10 +1,10 @@
 /**
- * DECISIÓN DE DISEÑO:
- * Se centraliza la detección de dispositivos poco potentes
- * para reutilizar la lógica y facilitar las pruebas unitarias.
+ * * DECISIÓN DE DISEÑO:
+ * -*- Se centraliza la detección de dispositivos poco potentes para reutilizar la lógica y facilitar las pruebas unitarias.
  */
+
 export function isLowEndDevice(navigatorObject: Navigator = navigator): boolean {
-    // ? Heurísticas simples: núcleos, memoria, conexión lenta o móvil
+    // ! Heurísticas simples: núcleos, memoria, conexión lenta o móvil
     const nav = navigatorObject as any;
     const cores = nav.hardwareConcurrency ?? 8;
     const memory = nav.deviceMemory ?? 8;
