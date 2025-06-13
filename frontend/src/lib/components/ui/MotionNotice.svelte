@@ -38,7 +38,7 @@
 
 {#if show}
 	<div
-		class="fixed bottom-5 left-5 z-50 cursor-pointer"
+		class="fixed bottom-5 left-5 z-[130] cursor-pointer"
 		role="button"
 		tabindex="0"
 		aria-live="polite"
