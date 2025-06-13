@@ -29,9 +29,9 @@
 	function handleScroll() {
 		if (!expanded && window.innerWidth < 640) {
 			const currentY = window.scrollY;
-			if (currentY > 150 && show) {
+			if (currentY > 300 && show) {
 				show = false;
-			} else if (currentY < 100 && !show) {
+			} else if (currentY < 150 && !show) {
 				show = true;
 			}
 			previousScrollY = currentY;
