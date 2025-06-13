@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { reducedMotion, motionNoticeVisible } from './reducedMotion';
-import * as device from '../utils/device';
+import { describe, it, expect, vi } from "vitest";
+import { reducedMotion, motionNoticeVisible } from "./reducedMotion";
+import * as device from "../utils/device";
 
 /**
  * ! Utilidad para obtener el valor actual de un store Svelte.
@@ -10,10 +10,10 @@ import * as device from '../utils/device';
  */
 
 function getValue(store: any) {
-    let value: any;
-    const unsubscribe = store.subscribe((v: any) => (value = v));
-    unsubscribe();
-    return value;
+  let value: any;
+  const unsubscribe = store.subscribe((v: any) => (value = v));
+  unsubscribe();
+  return value;
 }
 
 /**
@@ -25,29 +25,45 @@ function getValue(store: any) {
  * - Verifica que el aviso no se oculte al cambiar la preferencia de animaciones.
  */
 
-describe('reducedMotion store', () => {
-    // Simula un dispositivo de bajo rendimiento y verifica el comportamiento esperado
-    it('activates and shows notice on low-end device', () => {
-        vi.spyOn(device, 'isLowEndDevice').mockReturnValue(true);
-        const html = document.documentElement;
-        html.classList.remove('reduced-motion');
+describe("reducedMotion store", () => {
+  // Simula un dispositivo de bajo rendimiento y verifica el comportamiento esperado
+  it("activates and shows notice on low-end device", () => {
+    vi.spyOn(device, "isLowEndDevice").mockReturnValue(true);
+    vi.spyOn(device, "hasSlowConnection").mockReturnValue(false);
+    const html = document.documentElement;
+    html.classList.remove("reduced-motion");
 
-        const val = getValue(reducedMotion);
-        expect(val).toBe(true); // reducedMotion debe estar activo
-        expect(getValue(motionNoticeVisible)).toBe(true); // El aviso debe mostrarse
-        expect(html.classList.contains('reduced-motion')).toBe(true); // La clase debe estar en <html>
-    });
+    const val = getValue(reducedMotion);
+    expect(val).toBe(true); // reducedMotion debe estar activo
+    expect(getValue(motionNoticeVisible)).toBe(true); // El aviso debe mostrarse
+    expect(html.classList.contains("reduced-motion")).toBe(true); // La clase debe estar en <html>
+  });
 
-    // Verifica que al cambiar el store se actualice la clase en <html>
-    it('toggle updates class', () => {
-        reducedMotion.set(false);
-        expect(document.documentElement.classList.contains('reduced-motion')).toBe(false);
-    });
+  // Verifica que al cambiar el store se actualice la clase en <html>
+  it("toggle updates class", () => {
+    reducedMotion.set(false);
+    expect(document.documentElement.classList.contains("reduced-motion")).toBe(
+      false,
+    );
+  });
 
-    // Verifica que el aviso no se oculte al cambiar la preferencia de animaciones
-    it('does not hide notice when toggling', () => {
-        motionNoticeVisible.set(true);
-        reducedMotion.set(false);
-        expect(getValue(motionNoticeVisible)).toBe(true);
-    });
+  // Simula una conexión lenta y verifica que se active la reducción de animaciones
+  it("activates on slow connection", () => {
+    vi.spyOn(device, "isLowEndDevice").mockReturnValue(false);
+    vi.spyOn(device, "hasSlowConnection").mockReturnValue(true);
+    document.documentElement.classList.remove("reduced-motion");
+
+    const val = getValue(reducedMotion);
+    expect(val).toBe(true);
+    expect(document.documentElement.classList.contains("reduced-motion")).toBe(
+      true,
+    );
+  });
+
+  // Verifica que el aviso no se oculte al cambiar la preferencia de animaciones
+  it("does not hide notice when toggling", () => {
+    motionNoticeVisible.set(true);
+    reducedMotion.set(false);
+    expect(getValue(motionNoticeVisible)).toBe(true);
+  });
 });
