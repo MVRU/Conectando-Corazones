@@ -1,5 +1,10 @@
-// -*- DECISIÓN DE DISEÑO -*-
-// Modelo único para proyectos utilizado en toda la app.
+export interface Contacto {
+    responsable: string;
+    telefono: string;
+    email: string;
+    sitioWeb: string;
+}
+
 export interface Project {
     id?: number;
     titulo: string;
@@ -20,4 +25,5 @@ export interface Project {
     urgencia?: string;
     beneficiarios?: number;
     solicitudesColaboracion?: number;
+    contacto?: Contacto;
 }

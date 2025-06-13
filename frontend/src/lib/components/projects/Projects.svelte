@@ -14,29 +14,48 @@ TODO:
 -->
 
 <script lang="ts">
-       import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
-       import Button from '$lib/components/ui/elements/Button.svelte';
-       import { projects as demoProjects } from '$lib/data/projects';
-       import type { Project } from '$lib/models/Project';
-                dinero: 'Monetaria',
-                voluntarios: 'Voluntariado',
-                materiales: 'Materiales'
-        } as const;
-       const tiposParticipacion = ['Todos', ...Object.values(participacionMap)];
-       let filtroSeleccionado: keyof typeof participacionMap | 'Todos' = 'Todos';
-       let proyectosVisibles: Project[] = demoProjects;
-       // Datos de ejemplo centralizados en $lib/data
-       export let proyectos: Project[] = demoProjects;
-       // Reactividad para el filtro
-       $: proyectosVisibles =
-               filtroSeleccionado === 'Todos'
-                       ? proyectos
-                       : proyectos.filter((p) => participacionMap[p.unidad] === filtroSeleccionado);
+	import { onMount } from 'svelte';
+	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import { projects } from '$lib/data/projects';
+	import type { Project } from '$lib/models/Project';
+
+	const participacionMap = {
+		dinero: 'Monetaria',
+		voluntarios: 'Voluntariado',
+		materiales: 'Materiales'
+	} as const;
+
+	type ParticipacionLabel = (typeof participacionMap)[keyof typeof participacionMap];
+	const tiposParticipacion: ('Todos' | ParticipacionLabel)[] = [
+		'Todos',
+		...Object.values(participacionMap)
+	];
+
+	const reverseMap: Record<ParticipacionLabel, keyof typeof participacionMap> = {
+		Monetaria: 'dinero',
+		Voluntariado: 'voluntarios',
+		Materiales: 'materiales'
+	};
+
+	let filtroSeleccionado: ParticipacionLabel | 'Todos' = 'Todos';
+
+	export let proyectos: Project[] = projects;
+	let proyectosVisibles: Project[] = [];
+
+	function filtrarProyectos() {
+		if (filtroSeleccionado === 'Todos') {
+			proyectosVisibles = proyectos;
+		} else {
+			const unidad = reverseMap[filtroSeleccionado];
+			proyectosVisibles = proyectos.filter((p) => p.unidad === unidad);
+		}
+	}
+
 	onMount(() => {
 		filtrarProyectos();
 	});
 
-	// Reactividad para el filtro
 	$: if (filtroSeleccionado) {
 		filtrarProyectos();
 	}

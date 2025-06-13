@@ -16,7 +16,7 @@
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
 
 	/* -------- props -------- */
-	export let items: BreadcrumbItem[] | undefined = undefined;
+	export let items: BreadcrumbItem[] = [];
 	export let useIconSeparator = true;
 
 	/* -------- constantes de diseño -------- */
@@ -26,6 +26,7 @@
 	const SEPARATOR_WIDTH = 32;
 
 	/* -------- estado -------- */
+	let breadcrumbs: BreadcrumbItem[] = [];
 	let showPopover = false;
 	let navRef: HTMLElement | null = null;
 	let containerWidth = 0;
@@ -45,11 +46,11 @@
 			};
 		});
 	});
-	$: breadcrumbs = items && items.length ? items : $autoBreadcrumbs;
+	$: breadcrumbs = Array.isArray(items) && items.length > 0 ? items : ($autoBreadcrumbs ?? []);
 
 	/* -------- utils -------- */
 	const truncate = (label: string, max: number) =>
-		label.length > max ? label.slice(0, max - 1).trimEnd() + '…' : label;
+		label && label.length > max ? label.slice(0, max - 1).trimEnd() + '…' : (label ?? '');
 
 	/* -------- medir ancho para desktop -------- */
 	function observeNavWidth() {

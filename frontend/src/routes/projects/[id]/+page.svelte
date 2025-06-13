@@ -14,137 +14,33 @@ TODO:
 -->
 
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-        import Button from '$lib/components/ui/elements/Button.svelte';
-        import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Badge from '$lib/components/ui/elements/Badge.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { projects } from '$lib/data/projects';
+	import { page } from '$app/stores';
 
-	// Obtener ID del proyecto desde la URL
-	$: proyectoId = parseInt($page.params.id);
+	let proyectoId: number;
+
+	$: {
+		const id = $page.params.id;
+		proyectoId = parseInt(id);
+		cargarProyecto();
+	}
 
 	let proyecto: any = null;
 	let mostrarFormularioColaboracion = false;
 	let solicitudEnviada = false;
 
-	// Datos de ejemplo - en producción vendría del backend
-	const proyectos = [
-		{
-			id: 1,
-			nombre: 'Centro de Rehabilitación Infantil',
-			descripcion:
-				'Construcción de un centro especializado para la rehabilitación de niños con discapacidades motoras. El centro contará con equipamiento de última generación para terapias físicas, ocupacionales y del habla. Necesitamos fondos para equipamiento médico y acondicionamiento de las instalaciones.',
-			institucion: 'Fundación Sonrisas',
-			fechaInicio: '2024-01-15',
-			fechaCierre: '2024-06-30',
-			provincia: 'Buenos Aires',
-			ciudad: 'La Plata',
-			tipoParticipacion: 'Monetaria',
-			objetivo: '$50.000.000',
-			progreso: 32000000,
-			objetivoNumerico: 50000000,
-			unidadMedida: 'pesos',
-			estado: 'Activo',
-			urgencia: 'Alta',
-			beneficiarios: 150,
-			solicitudesColaboracion: 12,
-			contacto: {
-				responsable: 'María González',
-				telefono: '+54 221 456-7890',
-				email: 'contacto@fundacionsonrisas.org',
-				sitioWeb: 'www.fundacionsonrisas.org'
-			},
-			evidencia: [
-				{
-					id: 1,
-					titulo: 'Planos del centro',
-					descripcion: 'Diseños arquitectónicos aprobados por el municipio',
-					fecha: '2024-01-10',
-					tipo: 'Documento',
-					url: '#'
-				},
-				{
-					id: 2,
-					titulo: 'Terreno adquirido',
-					descripcion: 'Escritura del terreno donde se construirá el centro',
-					fecha: '2024-01-20',
-					tipo: 'Documento',
-					url: '#'
-				}
-			],
-			actualizaciones: [
-				{
-					id: 1,
-					fecha: '2024-03-15',
-					titulo: 'Inicio de obra',
-					descripcion: 'Comenzaron los trabajos de excavación y preparación del terreno.'
-				},
-				{
-					id: 2,
-					fecha: '2024-02-28',
-					titulo: 'Permisos obtenidos',
-					descripcion:
-						'Se obtuvieron todos los permisos municipales necesarios para la construcción.'
-				}
-			]
-		},
-		{
-			id: 2,
-			nombre: 'Colchones para Refugio Temporal',
-			descripcion:
-				'Se necesitan colchones nuevos y en buen estado para el refugio de familias desplazadas por la emergencia climática. Los colchones deben ser de plaza y media o matrimoniales, en condiciones óptimas de higiene.',
-			institucion: 'ONG Manos Solidarias',
-			fechaInicio: '2024-02-01',
-			fechaCierre: '2024-04-30',
-			provincia: 'Santa Fe',
-			ciudad: 'Rosario',
-			tipoParticipacion: 'Materiales',
-			objetivo: '25 colchones',
-			progreso: 18,
-			objetivoNumerico: 25,
-			unidadMedida: 'colchones',
-			estado: 'Activo',
-			urgencia: 'Media',
-			beneficiarios: 75,
-			solicitudesColaboracion: 8,
-			contacto: {
-				responsable: 'Carlos Rodríguez',
-				telefono: '+54 341 123-4567',
-				email: 'voluntarios@manossolidarias.org',
-				sitioWeb: 'www.manossolidarias.org'
-			},
-			evidencia: [
-				{
-					id: 1,
-					titulo: 'Estado del refugio',
-					descripcion: 'Fotos del refugio donde se ubicarán los colchones',
-					fecha: '2024-02-05',
-					tipo: 'Imagen',
-					url: '#'
-				}
-			],
-			actualizaciones: [
-				{
-					id: 1,
-					fecha: '2024-03-10',
-					titulo: 'Primera entrega',
-					descripcion:
-						'Recibimos 8 colchones en perfectas condiciones, muchas gracias a los donantes.'
-				}
-			]
-		}
-	];
-
-	// Función para cargar proyecto
 	function cargarProyecto() {
-		proyecto = proyectos.find((p) => p.id === proyectoId);
+		proyecto = projects.find((p) => p.id === proyectoId);
 
 		// Establecer breadcrumbs con el nombre del proyecto
 		if (proyecto) {
 			setBreadcrumbs([
 				BREADCRUMB_ROUTES.home,
 				BREADCRUMB_ROUTES.projects,
-				{ label: proyecto.nombre } // Sin href porque es la página actual
+				{ label: proyecto.titulo }
 			]);
 		}
 	}
@@ -161,12 +57,13 @@ TODO:
 	// Función para calcular porcentaje de progreso
 	function calcularPorcentajeProgreso() {
 		if (!proyecto) return 0;
-		return Math.min((proyecto.progreso / proyecto.objetivoNumerico) * 100, 100);
+		return Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
 	}
 
 	// Función para formatear montos
 	function formatearMonto(cantidad: number) {
-		if (proyecto?.tipoParticipacion === 'Monetaria') {
+		if (!proyecto || !proyecto.unidad) return cantidad?.toString?.() || '';
+		if (proyecto.unidad === 'dinero') {
 			return `$${cantidad.toLocaleString()}`;
 		}
 		return cantidad.toString();
@@ -175,11 +72,11 @@ TODO:
 	// Función para obtener color de progreso
 	function getColorProgreso(tipo: string) {
 		switch (tipo) {
-			case 'Monetaria':
+			case 'dinero':
 				return 'bg-[rgb(var(--color-primary))]';
-			case 'Voluntariado':
+			case 'voluntarios':
 				return 'bg-purple-500';
-			case 'Materiales':
+			case 'materiales':
 				return 'bg-green-500';
 			default:
 				return 'bg-gray-400';
@@ -232,15 +129,10 @@ TODO:
 			solicitudEnviada = false;
 		}, 5000);
 	}
-
-	// Cargar proyecto al montar
-	onMount(() => {
-		cargarProyecto();
-	});
 </script>
 
 <svelte:head>
-	<title>{proyecto?.nombre || 'Proyecto'} - Conectando Corazones</title>
+	<title>{proyecto?.titulo || 'Proyecto'} - Conectando Corazones</title>
 	<meta name="description" content={proyecto?.descripcion || 'Detalle del proyecto'} />
 </svelte:head>
 
@@ -265,13 +157,13 @@ TODO:
 						<div class="mb-6 flex flex-wrap items-start justify-between">
 							<div>
 								<h1 class="mb-2 text-3xl font-bold text-[rgb(var(--base-color))]">
-									{proyecto.nombre}
+									{proyecto.titulo}
 								</h1>
 								<p class="mb-4 text-lg text-gray-600">
 									📍 {proyecto.ciudad}, {proyecto.provincia}
 								</p>
 								<div class="flex items-center gap-3">
-									<Badge text={proyecto.tipoParticipacion} shape="square" />
+									<Badge text={proyecto.unidad} shape="square" />
 									<span
 										class="rounded-full px-2 py-1 text-xs font-medium {getColorUrgencia(
 											proyecto.urgencia
@@ -297,13 +189,13 @@ TODO:
 									Progreso del Objetivo
 								</h3>
 								<span class="text-2xl font-bold text-[rgb(var(--color-primary))]">
-									{formatearMonto(proyecto.progreso)} / {proyecto.objetivo}
+									{formatearMonto(proyecto.actual)} / {proyecto.objetivo}
 								</span>
 							</div>
 							<div class="mb-2 h-4 w-full rounded-full bg-gray-200">
 								<div
 									class="h-4 rounded-full transition-all duration-300 {getColorProgreso(
-										proyecto.tipoParticipacion
+										proyecto.unidad
 									)}"
 									style="width: {calcularPorcentajeProgreso()}%"
 								></div>
@@ -423,20 +315,20 @@ TODO:
 							¿Querés colaborar?
 						</h3>
 
-						{#if proyecto.tipoParticipacion === 'Monetaria'}
+						{#if proyecto.unidad === 'dinero'}
 							<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
 								<p class="text-sm text-blue-700">
 									💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución
 									ayudará a alcanzar el objetivo.
 								</p>
 							</div>
-						{:else if proyecto.tipoParticipacion === 'Materiales'}
+						{:else if proyecto.unidad === 'materiales'}
 							<div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
 								<p class="text-sm text-green-700">
 									📦 Este proyecto necesita <strong>donaciones específicas</strong>: {proyecto.objetivo}.
 								</p>
 							</div>
-						{:else if proyecto.tipoParticipacion === 'Voluntariado'}
+						{:else if proyecto.unidad === 'voluntarios'}
 							<div class="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-3">
 								<p class="text-sm text-purple-700">
 									🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo}</strong> para actividades específicas.
@@ -449,11 +341,11 @@ TODO:
 								on:click={mostrarFormulario}
 								class="mb-3 w-full rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))]"
 							>
-								{#if proyecto.tipoParticipacion === 'Monetaria'}
+								{#if proyecto.unidad === 'dinero'}
 									Enviar donación
-								{:else if proyecto.tipoParticipacion === 'Materiales'}
+								{:else if proyecto.unidad === 'materiales'}
 									Donar materiales
-								{:else if proyecto.tipoParticipacion === 'Voluntariado'}
+								{:else if proyecto.unidad === 'voluntarios'}
 									Postularme como voluntario
 								{:else}
 									Colaborar
@@ -469,44 +361,56 @@ TODO:
 					</div>
 
 					<!-- Información de contacto -->
-					<div class="rounded-2xl bg-white p-6 shadow-lg">
-						<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
-							Información de Contacto
-						</h3>
-						<div class="space-y-3 text-sm">
-							<div>
-								<span class="font-medium text-[rgb(var(--base-color))]">Responsable:</span>
-								<p class="text-gray-700">{proyecto.contacto.responsable}</p>
-							</div>
-							<div>
-								<span class="font-medium text-[rgb(var(--base-color))]">Teléfono:</span>
-								<p class="text-gray-700">{proyecto.contacto.telefono}</p>
-							</div>
-							<div>
-								<span class="font-medium text-[rgb(var(--base-color))]">Email:</span>
-								<p class="text-gray-700">
-									<a
-										href="mailto:{proyecto.contacto.email}"
-										class="text-[rgb(var(--color-primary))] hover:underline"
-									>
-										{proyecto.contacto.email}
-									</a>
-								</p>
-							</div>
-							<div>
-								<span class="font-medium text-[rgb(var(--base-color))]">Sitio web:</span>
-								<p class="text-gray-700">
-									<a
-										href="https://{proyecto.contacto.sitioWeb}"
-										target="_blank"
-										class="text-[rgb(var(--color-primary))] hover:underline"
-									>
-										{proyecto.contacto.sitioWeb}
-									</a>
-								</p>
+					{#if proyecto.contacto}
+						<!-- Información de contacto -->
+						<div class="rounded-2xl bg-white p-6 shadow-lg">
+							<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
+								Información de Contacto
+							</h3>
+							<div class="space-y-3 text-sm">
+								{#if proyecto.contacto.responsable}
+									<div>
+										<span class="font-medium text-[rgb(var(--base-color))]">Responsable:</span>
+										<p class="text-gray-700">{proyecto.contacto.responsable}</p>
+									</div>
+								{/if}
+								{#if proyecto.contacto.telefono}
+									<div>
+										<span class="font-medium text-[rgb(var(--base-color))]">Teléfono:</span>
+										<p class="text-gray-700">{proyecto.contacto.telefono}</p>
+									</div>
+								{/if}
+								{#if proyecto.contacto.email}
+									<div>
+										<span class="font-medium text-[rgb(var(--base-color))]">Email:</span>
+										<p class="text-gray-700">
+											<a
+												href="mailto:{proyecto.contacto.email}"
+												class="text-[rgb(var(--color-primary))] hover:underline"
+											>
+												{proyecto.contacto.email}
+											</a>
+										</p>
+									</div>
+								{/if}
+								{#if proyecto.contacto.sitioWeb}
+									<div>
+										<span class="font-medium text-[rgb(var(--base-color))]">Sitio web:</span>
+										<p class="text-gray-700">
+											<a
+												href="https://{proyecto.contacto.sitioWeb}"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="text-[rgb(var(--color-primary))] hover:underline"
+											>
+												{proyecto.contacto.sitioWeb}
+											</a>
+										</p>
+									</div>
+								{/if}
 							</div>
 						</div>
-					</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -577,7 +481,7 @@ TODO:
 								/>
 							</div>
 
-							{#if proyecto.tipoParticipacion === 'Monetaria'}
+							{#if proyecto.unidad === 'dinero'}
 								<div>
 									<label
 										for="monto"
@@ -594,7 +498,7 @@ TODO:
 										placeholder="10000"
 									/>
 								</div>
-							{:else if proyecto.tipoParticipacion === 'Materiales'}
+							{:else if proyecto.unidad === 'materiales'}
 								<div>
 									<label
 										for="materiales"
@@ -610,7 +514,7 @@ TODO:
 										placeholder="Describe lo que podés donar (cantidad, estado, etc.)"
 									></textarea>
 								</div>
-							{:else if proyecto.tipoParticipacion === 'Voluntariado'}
+							{:else if proyecto.unidad === 'voluntarios'}
 								<div>
 									<label
 										for="disponibilidad"
@@ -673,7 +577,9 @@ TODO:
 		<div class="mx-auto max-w-4xl px-8 text-center">
 			<h1 class="mb-4 text-3xl font-bold text-[rgb(var(--base-color))]">Proyecto no encontrado</h1>
 			<p class="mb-8 text-gray-600">El proyecto que buscás no existe o ha sido eliminado.</p>
-			<Button label="Volver a proyectos" href="/projects" disabled={false} />
+			<div class="flex items-center justify-center">
+				<Button label="Volver a proyectos" href="/projects" disabled={false} />
+			</div>
 		</div>
 	</main>
 {/if}
