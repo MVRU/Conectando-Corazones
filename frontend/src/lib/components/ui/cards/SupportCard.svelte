@@ -15,7 +15,7 @@
 	export let description = '';
 	export let link = '';
 	export let linkText = '';
-	import Button from './Button.svelte';
+	import Button from '../elements/Button.svelte';
 </script>
 
 <div

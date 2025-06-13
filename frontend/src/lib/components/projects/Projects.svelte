@@ -15,8 +15,9 @@ TODO:
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-        import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
-        import Button from '$lib/components/ui/elements/Button.svelte';
+	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import { proyectosDemo } from '$lib/data/demo-projects';
 
 	// Tipos de participación disponibles
 	const tiposParticipacion = ['Todos', 'Monetaria', 'Voluntariado', 'Materiales'];
@@ -25,8 +26,8 @@ TODO:
 	let filtroSeleccionado = 'Todos';
 	let proyectosVisibles: any[] = [];
 
-        // Datos de ejemplo centralizados en $lib/data
-        const proyectos = proyectosDemo;
+	// Datos de ejemplo centralizados en $lib/data
+	const proyectos = proyectosDemo;
 
 	// Función para filtrar proyectos
 	function filtrarProyectos() {

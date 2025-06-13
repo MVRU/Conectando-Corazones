@@ -14,8 +14,8 @@ TODO:
 -->
 
 <script lang="ts">
-	import Badge from './Badge.svelte';
-	import Button from './Button.svelte';
+	import Badge from '../elements/Badge.svelte';
+	import Button from '../elements/Button.svelte';
 
 	export let proyecto: {
 		id: number;
@@ -36,7 +36,7 @@ TODO:
 		beneficiarios: number;
 		solicitudesColaboracion?: number; // cantidad de solicitudes pendientes
 	};
-	
+
 	export let mostrarBotones: boolean = true;
 
 	// Función para formatear fechas
@@ -64,73 +64,100 @@ TODO:
 	// Función para obtener color del badge según urgencia
 	function getColorUrgencia(urgencia: string) {
 		switch (urgencia) {
-			case 'Alta': return 'text-red-600 bg-red-100';
-			case 'Media': return 'text-yellow-600 bg-yellow-100';
-			case 'Baja': return 'text-green-600 bg-green-100';
-			default: return 'text-gray-600 bg-gray-100';
+			case 'Alta':
+				return 'text-red-600 bg-red-100';
+			case 'Media':
+				return 'text-yellow-600 bg-yellow-100';
+			case 'Baja':
+				return 'text-green-600 bg-green-100';
+			default:
+				return 'text-gray-600 bg-gray-100';
 		}
 	}
 
 	// Función para obtener color del estado
 	function getColorEstado(estado: string) {
 		switch (estado) {
-			case 'Activo': return 'text-green-600 bg-green-100';
-			case 'Próximo a cerrar': return 'text-orange-600 bg-orange-100';
-			case 'Cerrado': return 'text-gray-600 bg-gray-100';
-			case 'Completado': return 'text-blue-600 bg-blue-100';
-			default: return 'text-gray-600 bg-gray-100';
+			case 'Activo':
+				return 'text-green-600 bg-green-100';
+			case 'Próximo a cerrar':
+				return 'text-orange-600 bg-orange-100';
+			case 'Cerrado':
+				return 'text-gray-600 bg-gray-100';
+			case 'Completado':
+				return 'text-blue-600 bg-blue-100';
+			default:
+				return 'text-gray-600 bg-gray-100';
 		}
 	}
 
 	// Función para obtener color de la barra de progreso según tipo
 	function getColorProgreso(tipo: string) {
 		switch (tipo) {
-			case 'Monetaria': return 'bg-[rgb(var(--color-primary))]';
-			case 'Voluntariado': return 'bg-purple-500';
-			case 'Materiales': return 'bg-green-500';
-			default: return 'bg-gray-400';
+			case 'Monetaria':
+				return 'bg-[rgb(var(--color-primary))]';
+			case 'Voluntariado':
+				return 'bg-purple-500';
+			case 'Materiales':
+				return 'bg-green-500';
+			default:
+				return 'bg-gray-400';
 		}
 	}
 
 	// Función para obtener icono según tipo de participación
 	function getIconoTipo(tipo: string) {
 		switch (tipo) {
-			case 'Monetaria': return '💰';
-			case 'Voluntariado': return '🙋‍♀️';
-			case 'Materiales': return '📦';
-			default: return '🤝';
+			case 'Monetaria':
+				return '💰';
+			case 'Voluntariado':
+				return '🙋‍♀️';
+			case 'Materiales':
+				return '📦';
+			default:
+				return '🤝';
 		}
 	}
 
 	// Función para obtener texto de llamada a la acción
 	function getTextoBoton(tipo: string) {
 		switch (tipo) {
-			case 'Monetaria': return 'Enviar donación';
-			case 'Voluntariado': return 'Postularme como voluntario';
-			case 'Materiales': return 'Donar materiales';
-			default: return 'Colaborar';
+			case 'Monetaria':
+				return 'Enviar donación';
+			case 'Voluntariado':
+				return 'Postularme como voluntario';
+			case 'Materiales':
+				return 'Donar materiales';
+			default:
+				return 'Colaborar';
 		}
 	}
 </script>
 
-<article class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-300 hover:shadow-xl transition-shadow duration-300">
+<article
+	class="overflow-hidden rounded-2xl border border-gray-300 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
+>
 	<!-- Header del proyecto -->
-	<div class="p-6 border-b border-gray-100">
-		<div class="flex justify-between items-start mb-3 ">
-			<h4 class="text-[rgb(var(--base-color))] font-semibold text-xl leading-tight">
+	<div class="border-b border-gray-100 p-6">
+		<div class="mb-3 flex items-start justify-between">
+			<h4 class="text-xl font-semibold leading-tight text-[rgb(var(--base-color))]">
 				{proyecto.nombre}
 			</h4>
 			<div class="flex gap-2">
-				<span class="px-2 py-2 rounded-full text-xs font-medium flex items-center justify-center {getColorUrgencia(proyecto.urgencia)}">
+				<span
+					class="flex items-center justify-center rounded-full px-2 py-2 text-xs font-medium {getColorUrgencia(
+						proyecto.urgencia
+					)}"
+				>
 					{proyecto.urgencia}
 				</span>
-				<span class="px-2 py-1 rounded-full text-xs font-medium {getColorEstado(proyecto.estado)}">
+				<span class="rounded-full px-2 py-1 text-xs font-medium {getColorEstado(proyecto.estado)}">
 					{proyecto.estado}
 				</span>
 			</div>
 		</div>
-		
-		<div class="flex items-center gap-3 mb-3">
+
+		<div class="mb-3 flex items-center gap-3">
 			<Badge text={proyecto.tipoParticipacion} shape="square" />
 			<span class="text-sm text-gray-500">
 				📍 {proyecto.ciudad}, {proyecto.provincia}
@@ -140,33 +167,35 @@ TODO:
 
 	<!-- Contenido del proyecto -->
 	<div class="p-6">
-		<p class="text-gray-600 mb-4 line-clamp-3">
+		<p class="mb-4 line-clamp-3 text-gray-600">
 			{proyecto.descripcion}
 		</p>
 
 		<!-- Información de la institución -->
-		<div class="mb-4 p-3 bg-gray-50 rounded-lg">
-			<h5 class="font-medium text-[rgb(var(--base-color))] mb-1">Institución</h5>
+		<div class="mb-4 rounded-lg bg-gray-50 p-3">
+			<h5 class="mb-1 font-medium text-[rgb(var(--base-color))]">Institución</h5>
 			<p class="text-sm text-gray-600">{proyecto.institucion}</p>
 		</div>
 
 		<!-- Objetivo y progreso -->
 		<div class="mb-4">
-			<div class="flex justify-between items-center mb-2">
-				<span class="font-medium text-[rgb(var(--base-color))] text-sm">
+			<div class="mb-2 flex items-center justify-between">
+				<span class="text-sm font-medium text-[rgb(var(--base-color))]">
 					{getIconoTipo(proyecto.tipoParticipacion)} Objetivo
 				</span>
-				<span class="text-[rgb(var(--color-primary))] font-semibold">
+				<span class="font-semibold text-[rgb(var(--color-primary))]">
 					{formatearMonto(proyecto.progreso)} / {proyecto.objetivo}
 				</span>
 			</div>
-			<div class="w-full bg-gray-200 rounded-full h-3">
-				<div 
-					class="h-3 rounded-full transition-all duration-300 {getColorProgreso(proyecto.tipoParticipacion)}" 
+			<div class="h-3 w-full rounded-full bg-gray-200">
+				<div
+					class="h-3 rounded-full transition-all duration-300 {getColorProgreso(
+						proyecto.tipoParticipacion
+					)}"
 					style="width: {calcularPorcentajeProgreso()}%"
 				></div>
 			</div>
-			<div class="flex justify-between items-center mt-2">
+			<div class="mt-2 flex items-center justify-between">
 				<p class="text-xs text-gray-500">
 					{calcularPorcentajeProgreso().toFixed(1)}% del objetivo alcanzado
 				</p>
@@ -179,7 +208,7 @@ TODO:
 		</div>
 
 		<!-- Información adicional -->
-		<div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+		<div class="mb-4 grid grid-cols-2 gap-4 text-sm">
 			<div>
 				<span class="font-medium text-[rgb(var(--base-color))]">Beneficiarios:</span>
 				<p class="text-gray-600">{proyecto.beneficiarios} personas</p>
@@ -192,19 +221,20 @@ TODO:
 
 		<!-- Información específica del tipo de participación -->
 		{#if proyecto.tipoParticipacion === 'Monetaria'}
-			<div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+			<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
 				<p class="text-sm text-blue-700">
-					💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución ayudará a alcanzar el objetivo de {proyecto.objetivo}.
+					💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución ayudará
+					a alcanzar el objetivo de {proyecto.objetivo}.
 				</p>
 			</div>
 		{:else if proyecto.tipoParticipacion === 'Materiales'}
-			<div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+			<div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
 				<p class="text-sm text-green-700">
 					📦 Este proyecto necesita <strong>donaciones de materiales específicos</strong>: {proyecto.objetivo}.
 				</p>
 			</div>
 		{:else if proyecto.tipoParticipacion === 'Voluntariado'}
-			<div class="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+			<div class="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-3">
 				<p class="text-sm text-purple-700">
 					🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo}</strong> para actividades específicas.
 				</p>
@@ -213,20 +243,18 @@ TODO:
 
 		<!-- Fecha de cierre -->
 		<div class="mb-6">
-			<span class="font-medium text-[rgb(var(--base-color))] text-sm">Cierre:</span>
-			<p class="text-gray-600 text-sm">{formatearFecha(proyecto.fechaCierre)}</p>
+			<span class="text-sm font-medium text-[rgb(var(--base-color))]">Cierre:</span>
+			<p class="text-sm text-gray-600">{formatearFecha(proyecto.fechaCierre)}</p>
 		</div>
 
 		<!-- Botones de acción -->
 		{#if mostrarBotones}
 			<div class="flex gap-3">
-				<Button 
-					label="Ver detalles" 
-					href="/projects/{proyecto.id}"
-					disabled={false}
-				/>
+				<Button label="Ver detalles" href="/projects/{proyecto.id}" disabled={false} />
 				{#if proyecto.estado === 'Activo'}
-					<button class="px-4 py-2 border-2 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] rounded-lg hover:bg-[rgb(var(--color-primary))] hover:text-white transition-colors duration-200 font-medium text-sm">
+					<button
+						class="rounded-lg border-2 border-[rgb(var(--color-primary))] px-4 py-2 text-sm font-medium text-[rgb(var(--color-primary))] transition-colors duration-200 hover:bg-[rgb(var(--color-primary))] hover:text-white"
+					>
 						{getTextoBoton(proyecto.tipoParticipacion)}
 					</button>
 				{/if}
@@ -242,4 +270,4 @@ TODO:
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
-</style> 
+</style>
