@@ -9,8 +9,8 @@ TODO:
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import SupportCard from '$lib/components/ui/SupportCard.svelte';
+       import Badge from '$lib/components/ui/elements/Badge.svelte';
+       import SupportCard from '$lib/components/ui/cards/SupportCard.svelte';
 
 	// Los agregué directamente acá porque son estáticos y no se usan en otros lugares -> no vale la pena crear modelo y data separada.
 	const supports = [

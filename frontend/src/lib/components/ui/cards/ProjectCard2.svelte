@@ -6,8 +6,8 @@
 <script lang="ts">
 	/* ----------  PROPS & HELPERS  ---------- */
 	import type { Project } from '$lib/models/Project';
-	import ProgressBar from '$lib/components/ui/ProgressBar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+        import ProgressBar from '$lib/components/ui/elements/ProgressBar.svelte';
+        import Button from '$lib/components/ui/elements/Button.svelte';
 
 	export let project!: Project;
 

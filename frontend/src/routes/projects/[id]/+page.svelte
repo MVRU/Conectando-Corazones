@@ -16,8 +16,8 @@ TODO:
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+        import Button from '$lib/components/ui/elements/Button.svelte';
+        import Badge from '$lib/components/ui/elements/Badge.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	// Obtener ID del proyecto desde la URL

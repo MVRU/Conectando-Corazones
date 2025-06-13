@@ -5,9 +5,9 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ProjectCard2 from '$lib/components/ui/ProjectCard2.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+       import ProjectCard2 from '$lib/components/ui/cards/ProjectCard2.svelte';
+       import Button from '$lib/components/ui/elements/Button.svelte';
+       import Badge from '$lib/components/ui/elements/Badge.svelte';
 	import { projects } from '$lib/data/projects';
 
 	let visible = false;

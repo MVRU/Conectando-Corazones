@@ -10,9 +10,9 @@ TODO:
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import Image from '$lib/components/ui/Image.svelte';
-	import Button from '../ui/Button.svelte';
+       import Badge from '$lib/components/ui/elements/Badge.svelte';
+       import Image from '$lib/components/ui/elements/Image.svelte';
+       import Button from '$lib/components/ui/elements/Button.svelte';
 
 	let visible = false;
 	let sectionRef: HTMLDivElement;

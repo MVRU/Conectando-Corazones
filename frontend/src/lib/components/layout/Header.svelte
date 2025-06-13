@@ -12,8 +12,8 @@
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Image from '$lib/components/ui/Image.svelte';
+        import Button from '$lib/components/ui/elements/Button.svelte';
+        import Image from '$lib/components/ui/elements/Image.svelte';
 	import { page } from '$app/stores';
 
 	let menuOpen = false;
