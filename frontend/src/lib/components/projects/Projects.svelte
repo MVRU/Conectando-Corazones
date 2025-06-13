@@ -18,19 +18,20 @@ TODO:
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-        import { projects } from '$lib/data/projects';
-        // Tipos de participación y su equivalencia con la propiedad `unidad`
-        const participacionMap = {
+       import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
+       import Button from '$lib/components/ui/elements/Button.svelte';
+       import { projects as demoProjects } from '$lib/data/projects';
+       import type { Project } from '$lib/models/Project';
                 dinero: 'Monetaria',
                 voluntarios: 'Voluntariado',
                 materiales: 'Materiales'
         } as const;
-        const tiposParticipacion = ['Todos', ...Object.values(participacionMap)];
-        const proyectos = projects;
-
-                        const unidad = (Object.entries(participacionMap).find(([, v]) => v === filtroSeleccionado)?.[0]) as keyof typeof participacionMap;
-                        proyectosVisibles = proyectos.filter((proyecto) => proyecto.unidad === unidad);
-	// Estado reactivo para el filtro
+       const tiposParticipacion = ['Todos', ...Object.values(participacionMap)];
+       let filtroSeleccionado = 'Todos';
+       let proyectosVisibles: Project[] = [];
+       // Datos de ejemplo centralizados en $lib/data
+       export let proyectos: Project[] = demoProjects;
+               const unidad = (Object.entries(participacionMap).find(([_, v]) => v === filtroSeleccionado)?.[0]) as keyof typeof participacionMap;
 	let filtroSeleccionado = 'Todos';
 	let proyectosVisibles: any[] = [];
 
