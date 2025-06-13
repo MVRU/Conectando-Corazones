@@ -1,18 +1,18 @@
 <!--
 * Componente: MotionNotice
-        -*- Descripción: aviso que informa cuando las animaciones se deshabilitan automáticamente.
-        -*- Funcionalidad: permite al usuario habilitar o deshabilitar animaciones y minimizar el aviso.
+  -*- Descripción: aviso que informa cuando las animaciones se deshabilitan automáticamente.
+  -*- Funcionalidad: permite al usuario habilitar o deshabilitar animaciones y minimizar el aviso.
 -->
 
 <script lang="ts">
 	import { reducedMotion, motionNoticeVisible } from '$lib/stores/reducedMotion';
-	import { onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
 
 	let show = false;
 	let expanded = false;
 	let animateIcon = true;
+	let previousScrollY = 0;
 
 	const unsubscribe = motionNoticeVisible.subscribe((v) => (show = v));
 	onDestroy(unsubscribe);
@@ -21,19 +21,39 @@
 		reducedMotion.toggle();
 	}
 
-	// Evita que el clic sobre el botón dispare el expand/collapse
 	function handleClick(event: Event) {
 		if ((event.target as HTMLElement).closest('button')) return;
 		expanded = !expanded;
 	}
 
-	if (browser) {
-		tick().then(() => {
-			setTimeout(() => {
-				animateIcon = false;
-			}, 1000);
-		});
+	function handleScroll() {
+		if (!expanded && window.innerWidth < 640) {
+			const currentY = window.scrollY;
+			if (currentY > 150 && show) {
+				show = false;
+			} else if (currentY < 100 && !show) {
+				show = true;
+			}
+			previousScrollY = currentY;
+		}
 	}
+
+	onMount(() => {
+		if (browser) {
+			const scrollListener = () => handleScroll();
+			window.addEventListener('scroll', scrollListener);
+
+			tick().then(() => {
+				setTimeout(() => {
+					animateIcon = false;
+				}, 1000);
+			});
+
+			return () => {
+				window.removeEventListener('scroll', scrollListener);
+			};
+		}
+	});
 </script>
 
 {#if show}
@@ -52,7 +72,7 @@
 	>
 		<div
 			class={`flex items-center gap-3 overflow-hidden transition-all duration-700 ease-in-out
-			${expanded ? 'max-w-full pr-4 sm:max-w-[24rem]' : 'h-14 w-14 justify-center'}
+			${expanded ? 'max-w-[calc(100vw-2.5rem)] pr-4 sm:max-w-[24rem]' : 'h-14 w-14 justify-center'}
 			border-2 border-red-200 bg-gradient-to-br from-white/90 to-red-50 p-2 shadow-xl ring-1 ring-red-300 backdrop-blur-sm
 			${animateIcon ? 'animate-entry' : ''}
 			hover:shadow-red-pulse`}
@@ -77,14 +97,13 @@
 
 			{#if expanded}
 				<span
-					class="w-full flex-1 text-balance text-sm leading-snug text-red-900 sm:whitespace-normal"
+					class="w-full flex-1 whitespace-normal text-balance break-words text-sm leading-snug text-red-900"
 				>
 					Las animaciones se deshabilitaron para mejorar el rendimiento.
 				</span>
 
-				<!-- Botón toggle -->
 				<button
-					class="shrink-0 cursor-pointer rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-900 transition hover:bg-red-200"
+					class="shrink-0 rounded-md bg-red-100 px-3 py-1 text-xs font-medium text-red-900 transition hover:bg-red-200"
 					on:click={toggle}
 				>
 					{$reducedMotion ? 'Habilitar' : 'Deshabilitar'}
@@ -112,12 +131,9 @@
 	.animate-entry {
 		animation: entry 0.9s ease-out 1;
 	}
-
-	/* Animación sutil para el ícono en hover cuando está minimizado */
 	.motion-icon-hover:hover {
 		animation: warning-pulse 0.6s ease-in-out 1;
 	}
-
 	@keyframes warning-pulse {
 		0% {
 			transform: rotate(0deg) scale(1);
