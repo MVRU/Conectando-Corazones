@@ -4,8 +4,10 @@
 	-*- Funcionalidad: Muestra detalles, progreso y botones de acción
 
 * Props:
-	-*- proyecto (object): objeto con información del proyecto
-	-*- mostrarBotones (boolean): si mostrar botones de acción
+        -*- proyecto (object): objeto con información del proyecto
+        -*- mostrarBotones (boolean): si mostrar botones de acción
+        -*- DECISIÓN DE DISEÑO: Este componente usa la interfaz `Project` unificada
+        para mantener consistencia en toda la aplicación.
 
 TODO:
 	- [ ] Agregar animaciones de hover
@@ -14,112 +16,101 @@ TODO:
 -->
 
 <script lang="ts">
-	import Badge from '../elements/Badge.svelte';
-	import Button from '../elements/Button.svelte';
+        import Badge from './Badge.svelte';
+        import Button from './Button.svelte';
+        import type { Project } from '$lib/models/Project';
 
-	export let proyecto: {
-		id: number;
-		nombre: string;
-		descripcion: string;
-		institucion: string;
-		fechaInicio: string;
-		fechaCierre: string;
-		provincia: string;
-		ciudad: string;
-		tipoParticipacion: 'Monetaria' | 'Voluntariado' | 'Materiales';
-		objetivo: string; // ej: "34 colchones", "$33.000", "15 voluntarios"
-		progreso: number; // cantidad actual conseguida
-		objetivoNumerico: number; // número objetivo (34, 33000, 15)
-		unidadMedida: string; // "colchones", "pesos", "voluntarios"
-		estado: string;
-		urgencia: string;
-		beneficiarios: number;
-		solicitudesColaboracion?: number; // cantidad de solicitudes pendientes
-	};
+        export let proyecto!: Project;
 
-	export let mostrarBotones: boolean = true;
+        const labelMap = {
+                dinero: 'Monetaria',
+                voluntarios: 'Voluntariado',
+                materiales: 'Materiales'
+        } as const;
 
-	// Función para formatear fechas
-	function formatearFecha(fecha: string) {
-		return new Date(fecha).toLocaleDateString('es-ES', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
-	}
+        // Función para calcular el porcentaje de progreso
+        function calcularPorcentajeProgreso() {
+                return Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
+        }
+        // Función para formatear montos monetarios
+        function formatearMonto(cantidad: number) {
+                if (proyecto.unidad === 'dinero') {
+                        return `$${cantidad.toLocaleString('es-AR')}`;
+                }
+                return cantidad.toString();
+        }
+        function getColorProgreso(tipo: Project['unidad']) {
+                switch (tipo) {
+                        case 'dinero': return 'bg-[rgb(var(--color-primary))]';
+                        case 'voluntarios': return 'bg-purple-500';
+                        case 'materiales': return 'bg-green-500';
+                        default: return 'bg-gray-400';
+                }
+        }
 
-	// Función para calcular el porcentaje de progreso
-	function calcularPorcentajeProgreso() {
-		return Math.min((proyecto.progreso / proyecto.objetivoNumerico) * 100, 100);
-	}
+        // Función para obtener icono según tipo de participación
+        function getIconoTipo(tipo: Project['unidad']) {
+                switch (tipo) {
+                        case 'dinero': return '💰';
+                        case 'voluntarios': return '🙋‍♀️';
+                        case 'materiales': return '📦';
+                        default: return '🤝';
+                }
+        }
 
-	// Función para formatear montos monetarios
-	function formatearMonto(cantidad: number) {
-		if (proyecto.tipoParticipacion === 'Monetaria') {
-			return `$${cantidad.toLocaleString()}`;
-		}
-		return cantidad.toString();
-	}
-
-	// Función para obtener color del badge según urgencia
-	function getColorUrgencia(urgencia: string) {
-		switch (urgencia) {
-			case 'Alta':
-				return 'text-red-600 bg-red-100';
-			case 'Media':
-				return 'text-yellow-600 bg-yellow-100';
-			case 'Baja':
-				return 'text-green-600 bg-green-100';
-			default:
-				return 'text-gray-600 bg-gray-100';
-		}
-	}
-
-	// Función para obtener color del estado
-	function getColorEstado(estado: string) {
-		switch (estado) {
-			case 'Activo':
-				return 'text-green-600 bg-green-100';
-			case 'Próximo a cerrar':
-				return 'text-orange-600 bg-orange-100';
-			case 'Cerrado':
-				return 'text-gray-600 bg-gray-100';
-			case 'Completado':
-				return 'text-blue-600 bg-blue-100';
-			default:
-				return 'text-gray-600 bg-gray-100';
-		}
-	}
-
-	// Función para obtener color de la barra de progreso según tipo
-	function getColorProgreso(tipo: string) {
-		switch (tipo) {
-			case 'Monetaria':
-				return 'bg-[rgb(var(--color-primary))]';
-			case 'Voluntariado':
-				return 'bg-purple-500';
-			case 'Materiales':
-				return 'bg-green-500';
-			default:
-				return 'bg-gray-400';
-		}
-	}
-
-	// Función para obtener icono según tipo de participación
-	function getIconoTipo(tipo: string) {
-		switch (tipo) {
-			case 'Monetaria':
-				return '💰';
-			case 'Voluntariado':
-				return '🙋‍♀️';
-			case 'Materiales':
-				return '📦';
-			default:
-				return '🤝';
-		}
-	}
-
-	// Función para obtener texto de llamada a la acción
+        // Función para obtener texto de llamada a la acción
+        function getTextoBoton(tipo: Project['unidad']) {
+                switch (tipo) {
+                        case 'dinero': return 'Enviar donación';
+                        case 'voluntarios': return 'Postularme como voluntario';
+                        case 'materiales': return 'Donar materiales';
+                        default: return 'Colaborar';
+                }
+        }
+                        <h4 class="text-[rgb(var(--base-color))] font-semibold text-xl leading-tight">
+                                {proyecto.titulo}
+                        </h4>
+                <div class="flex items-center gap-3 mb-3">
+                        <Badge text={labelMap[proyecto.unidad]} shape="square" />
+                        <span class="text-sm text-gray-500">
+                                📍 {proyecto.ciudad}, {proyecto.provincia}
+                        </span>
+                </div>
+                                <span class="font-medium text-[rgb(var(--base-color))] text-sm">
+                                        {getIconoTipo(proyecto.unidad)} Objetivo
+                                </span>
+                                <span class="text-[rgb(var(--color-primary))] font-semibold">
+                                        {formatearMonto(proyecto.actual)} / {proyecto.objetivo}
+                                </span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div
+                                        class="h-3 rounded-full transition-all duration-300 {getColorProgreso(proyecto.unidad)}"
+                                        style="width: {calcularPorcentajeProgreso()}%"
+                                ></div>
+                <!-- Información específica del tipo de participación -->
+                {#if proyecto.unidad === 'dinero'}
+                        <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <p class="text-sm text-blue-700">
+                                        💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución ayudará a alcanzar el objetivo de {proyecto.objetivo} {proyecto.especie}.
+                                </p>
+                        </div>
+                {:else if proyecto.unidad === 'materiales'}
+                        <div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-green-700">
+                                        📦 Este proyecto necesita <strong>donaciones de materiales específicos</strong>: {proyecto.objetivo} {proyecto.especie}.
+                                </p>
+                        </div>
+                {:else if proyecto.unidad === 'voluntarios'}
+                        <div class="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <p class="text-sm text-purple-700">
+                                        🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo} voluntarios</strong> para actividades específicas.
+                                </p>
+                        </div>
+                {/if}
+                                        <button class="px-4 py-2 border-2 border-[rgb(var(--color-primary))] text-[rgb(var(--color-primary))] rounded-lg hover:bg-[rgb(var(--color-primary))] hover:text-white transition-colors duration-200 font-medium text-sm">
+                                                {getTextoBoton(proyecto.unidad)}
+                                        </button>
 	function getTextoBoton(tipo: string) {
 		switch (tipo) {
 			case 'Monetaria':

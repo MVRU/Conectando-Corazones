@@ -1,7 +1,10 @@
 <!--
 * Componente: Projects
-	-*- Descripción: Muestra una lista de proyectos con información detallada y filtros
-	-*- Funcionalidad: Filtros por tipo de participación, búsqueda y paginación
+        -*- Descripción: Muestra una lista de proyectos con información detallada y filtros
+        -*- Funcionalidad: Filtros por tipo de participación, búsqueda y paginación
+        -*- DECISIÓN DE DISEÑO: Se consume un único listado unificado (`projects.ts`) y
+        se mapea la propiedad `unidad` a etiquetas de participación para simplificar
+        la lógica de filtrado.
 
 * Props:
 	-*- proyectos (array): lista de proyectos a mostrar
@@ -15,13 +18,18 @@ TODO:
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
-	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { proyectosDemo } from '$lib/data/demo-projects';
+        import { projects } from '$lib/data/projects';
+        // Tipos de participación y su equivalencia con la propiedad `unidad`
+        const participacionMap = {
+                dinero: 'Monetaria',
+                voluntarios: 'Voluntariado',
+                materiales: 'Materiales'
+        } as const;
+        const tiposParticipacion = ['Todos', ...Object.values(participacionMap)];
+        const proyectos = projects;
 
-	// Tipos de participación disponibles
-	const tiposParticipacion = ['Todos', 'Monetaria', 'Voluntariado', 'Materiales'];
-
+                        const unidad = (Object.entries(participacionMap).find(([, v]) => v === filtroSeleccionado)?.[0]) as keyof typeof participacionMap;
+                        proyectosVisibles = proyectos.filter((proyecto) => proyecto.unidad === unidad);
 	// Estado reactivo para el filtro
 	let filtroSeleccionado = 'Todos';
 	let proyectosVisibles: any[] = [];

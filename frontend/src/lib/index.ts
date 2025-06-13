@@ -23,4 +23,4 @@ export * from './stores/breadcrumbs';
 export * from './stores/reducedMotion';
 export * from './actions/inView';
 export * from './utils/device';
-export * from './data/demo-projects';
+export * from './data/projects';
