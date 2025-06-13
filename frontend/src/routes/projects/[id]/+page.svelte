@@ -19,6 +19,9 @@ TODO:
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { projects } from '$lib/data/projects';
 	import { page } from '$app/stores';
+	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
+	import ProjectContact from '$lib/components/projects/ProjectContact.svelte';
+	import SidebarCard from '$lib/components/projects/SidebarCard.svelte';
 
 	let proyectoId: number;
 
@@ -154,33 +157,7 @@ TODO:
 				<div class="space-y-8 lg:col-span-2">
 					<!-- Header del proyecto -->
 					<div class="rounded-2xl bg-white p-8 shadow-lg">
-						<div class="mb-6 flex flex-wrap items-start justify-between">
-							<div>
-								<h1 class="mb-2 text-3xl font-bold text-[rgb(var(--base-color))]">
-									{proyecto.titulo}
-								</h1>
-								<p class="mb-4 text-lg text-gray-600">
-									📍 {proyecto.ciudad}, {proyecto.provincia}
-								</p>
-								<div class="flex items-center gap-3">
-									<Badge text={proyecto.unidad} shape="square" />
-									<span
-										class="rounded-full px-2 py-1 text-xs font-medium {getColorUrgencia(
-											proyecto.urgencia
-										)}"
-									>
-										{proyecto.urgencia}
-									</span>
-									<span
-										class="rounded-full px-2 py-1 text-xs font-medium {getColorEstado(
-											proyecto.estado
-										)}"
-									>
-										{proyecto.estado}
-									</span>
-								</div>
-							</div>
-						</div>
+						<ProjectHeader {proyecto} {getColorUrgencia} {getColorEstado} />
 
 						<!-- Progreso del proyecto -->
 						<div class="mb-8">
@@ -310,106 +287,11 @@ TODO:
 				<!-- Sidebar -->
 				<div class="space-y-6">
 					<!-- Card de acción -->
-					<div class="rounded-2xl bg-white p-6 shadow-lg">
-						<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
-							¿Querés colaborar?
-						</h3>
-
-						{#if proyecto.unidad === 'dinero'}
-							<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-								<p class="text-sm text-blue-700">
-									💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución
-									ayudará a alcanzar el objetivo.
-								</p>
-							</div>
-						{:else if proyecto.unidad === 'materiales'}
-							<div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
-								<p class="text-sm text-green-700">
-									📦 Este proyecto necesita <strong>donaciones específicas</strong>: {proyecto.objetivo}.
-								</p>
-							</div>
-						{:else if proyecto.unidad === 'voluntarios'}
-							<div class="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-3">
-								<p class="text-sm text-purple-700">
-									🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo}</strong> para actividades específicas.
-								</p>
-							</div>
-						{/if}
-
-						{#if proyecto.estado === 'Activo'}
-							<button
-								on:click={mostrarFormulario}
-								class="mb-3 w-full rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))]"
-							>
-								{#if proyecto.unidad === 'dinero'}
-									Enviar donación
-								{:else if proyecto.unidad === 'materiales'}
-									Donar materiales
-								{:else if proyecto.unidad === 'voluntarios'}
-									Postularme como voluntario
-								{:else}
-									Colaborar
-								{/if}
-							</button>
-						{:else}
-							<div class="rounded-lg bg-gray-100 py-4 text-center">
-								<p class="text-gray-600">Este proyecto ya no está activo</p>
-							</div>
-						{/if}
-
-						<Button label="Compartir proyecto" href="#" disabled={false} />
-					</div>
+					<SidebarCard {proyecto} {mostrarFormulario} />
 
 					<!-- Información de contacto -->
 					{#if proyecto.contacto}
-						<!-- Información de contacto -->
-						<div class="rounded-2xl bg-white p-6 shadow-lg">
-							<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">
-								Información de Contacto
-							</h3>
-							<div class="space-y-3 text-sm">
-								{#if proyecto.contacto.responsable}
-									<div>
-										<span class="font-medium text-[rgb(var(--base-color))]">Responsable:</span>
-										<p class="text-gray-700">{proyecto.contacto.responsable}</p>
-									</div>
-								{/if}
-								{#if proyecto.contacto.telefono}
-									<div>
-										<span class="font-medium text-[rgb(var(--base-color))]">Teléfono:</span>
-										<p class="text-gray-700">{proyecto.contacto.telefono}</p>
-									</div>
-								{/if}
-								{#if proyecto.contacto.email}
-									<div>
-										<span class="font-medium text-[rgb(var(--base-color))]">Email:</span>
-										<p class="text-gray-700">
-											<a
-												href="mailto:{proyecto.contacto.email}"
-												class="text-[rgb(var(--color-primary))] hover:underline"
-											>
-												{proyecto.contacto.email}
-											</a>
-										</p>
-									</div>
-								{/if}
-								{#if proyecto.contacto.sitioWeb}
-									<div>
-										<span class="font-medium text-[rgb(var(--base-color))]">Sitio web:</span>
-										<p class="text-gray-700">
-											<a
-												href="https://{proyecto.contacto.sitioWeb}"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="text-[rgb(var(--color-primary))] hover:underline"
-											>
-												{proyecto.contacto.sitioWeb}
-											</a>
-										</p>
-									</div>
-								{/if}
-							</div>
-						</div>
+						<ProjectContact contacto={proyecto.contacto} />
 					{/if}
 				</div>
 			</div>
