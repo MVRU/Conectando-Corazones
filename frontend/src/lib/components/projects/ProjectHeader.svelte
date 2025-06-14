@@ -6,18 +6,37 @@
 	export let getColorEstado;
 </script>
 
-<div class="mb-6 flex flex-wrap items-start justify-between">
-	<div>
-		<h1 class="mb-2 text-3xl font-bold text-[rgb(var(--base-color))]">{proyecto.titulo}</h1>
-		<p class="mb-4 text-lg text-gray-600">📍 {proyecto.ciudad}, {proyecto.provincia}</p>
-		<div class="flex items-center gap-3">
-			<Badge text={proyecto.unidad} shape="square" />
-			<span class="rounded-full px-2 py-1 text-xs font-medium {getColorUrgencia(proyecto.urgencia)}"
-				>{proyecto.urgencia}</span
-			>
-			<span class="rounded-full px-2 py-1 text-xs font-medium {getColorEstado(proyecto.estado)}"
-				>{proyecto.estado}</span
-			>
+{#if proyecto.imagen}
+	<div class="relative overflow-hidden rounded-2xl shadow-lg">
+		<img
+			src={proyecto.imagen}
+			alt="Imagen del proyecto"
+			class="h-64 w-full object-cover sm:h-80 lg:h-96"
+			loading="lazy"
+		/>
+
+		<!-- Overlay con degradado para contraste -->
+		<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent"></div>
+
+		<!-- Contenido superpuesto -->
+		<div class="absolute bottom-0 left-0 right-0 p-6 text-white">
+			<h1 class="text-2xl font-bold drop-shadow-md sm:text-3xl">{proyecto.titulo}</h1>
+
+			<div class="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium">
+				<span class="flex items-center gap-1 text-pink-200 drop-shadow-sm">
+					📍 {proyecto.ciudad}, {proyecto.provincia}
+				</span>
+				<span
+					class={`rounded-full bg-white/80 px-2 py-0.5 text-xs ${getColorUrgencia(proyecto.urgencia)}`}
+				>
+					{proyecto.urgencia}
+				</span>
+				<span
+					class={`rounded-full bg-white/80 px-2 py-0.5 text-xs ${getColorEstado(proyecto.estado)}`}
+				>
+					{proyecto.estado}
+				</span>
+			</div>
 		</div>
 	</div>
-</div>
+{/if}

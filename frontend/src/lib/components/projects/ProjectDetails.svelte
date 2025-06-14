@@ -3,26 +3,37 @@
 	export let formatearFecha;
 </script>
 
-<div class="mb-8">
-	<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">Descripción del Proyecto</h3>
-	<p class="text-lg leading-relaxed text-gray-700">{proyecto.descripcion}</p>
-</div>
+<!-- Descripción -->
+<section class="mb-10">
+	<h3 class="mb-3 text-xl font-bold text-[rgb(var(--base-color))]">Descripción del Proyecto</h3>
+	<p class="text-base leading-relaxed text-gray-700 sm:text-lg sm:leading-8">
+		{proyecto.descripcion}
+	</p>
+</section>
 
-<div class="mb-8 grid gap-6 md:grid-cols-2">
-	<div class="rounded-lg bg-gray-50 p-4">
-		<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Institución</h4>
-		<p class="text-gray-700">{proyecto.institucion}</p>
+<!-- Detalles del proyecto -->
+<section class="mb-10 grid gap-4 sm:grid-cols-2">
+	<!-- Card: Institución -->
+	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
+		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Institución</h4>
+		<p class="text-base font-semibold text-gray-800">{proyecto.institucion}</p>
 	</div>
-	<div class="rounded-lg bg-gray-50 p-4">
-		<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Beneficiarios</h4>
-		<p class="text-gray-700">{proyecto.beneficiarios} personas</p>
+
+	<!-- Card: Beneficiarios -->
+	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
+		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Beneficiarios</h4>
+		<p class="text-base font-semibold text-gray-800">{proyecto.beneficiarios} personas</p>
 	</div>
-	<div class="rounded-lg bg-gray-50 p-4">
-		<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de inicio</h4>
-		<p class="text-gray-700">{formatearFecha(proyecto.fechaInicio)}</p>
+
+	<!-- Card: Fecha de inicio -->
+	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
+		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Inicio</h4>
+		<p class="text-base font-semibold text-gray-800">{formatearFecha(proyecto.fechaInicio)}</p>
 	</div>
-	<div class="rounded-lg bg-gray-50 p-4">
-		<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Fecha de cierre</h4>
-		<p class="text-gray-700">{formatearFecha(proyecto.fechaCierre)}</p>
+
+	<!-- Card: Fecha de cierre -->
+	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
+		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Cierre</h4>
+		<p class="text-base font-semibold text-gray-800">{formatearFecha(proyecto.fechaCierre)}</p>
 	</div>
-</div>
+</section>

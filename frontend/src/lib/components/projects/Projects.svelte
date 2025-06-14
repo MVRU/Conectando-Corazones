@@ -75,7 +75,7 @@
 	$: proyectosVisibles = filtrarProyectos(proyectos, filtroSeleccionado);
 </script>
 
-<section class="w-full px-8 py-12">
+<section class="w-full px-8 py-8">
 	<!-- Título -->
 	<div style="margin-bottom: var(--spacing-3xl);">
 		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>

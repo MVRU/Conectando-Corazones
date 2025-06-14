@@ -54,31 +54,38 @@
 	}[proyecto.unidad];
 </script>
 
-<div class="rounded-2xl bg-white p-6 shadow-lg">
-	<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--base-color))]">¿Querés colaborar?</h3>
+<!-- Card principal -->
+<div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-100">
+	<!-- Título -->
+	<h3 class="mb-5 text-lg font-bold text-[rgb(var(--base-color))]">¿Querés colaborar?</h3>
 
 	<!-- Tipo de colaboración -->
-	<div class={`mb-4 rounded-lg ${unidadInfo.border} ${unidadInfo.bg} p-3`}>
+	<div class={`mb-5 flex items-start gap-3 rounded-xl ${unidadInfo.bg} ${unidadInfo.border} p-4`}>
+		<span class="text-xl">{unidadInfo.icon}</span>
 		<p class={`text-sm ${unidadInfo.text}`}>
-			{unidadInfo.icon} Este proyecto necesita <strong>{unidadInfo.label}</strong>.
+			Este proyecto necesita <strong class="font-semibold">{unidadInfo.label}</strong>.
 		</p>
 	</div>
 
-	<!-- Botón de acción o mensaje si está inactivo -->
+	<!-- Acción -->
 	{#if proyecto.estado === 'Activo'}
-		<Button label={unidadInfo.button} on:click={mostrarFormulario} customClass="mb-3 w-full" />
+		<Button
+			label={unidadInfo.button}
+			on:click={mostrarFormulario}
+			customClass="mb-3 w-full font-medium text-white"
+		/>
 	{:else}
-		<div class="rounded-lg bg-gray-100 py-4 text-center">
-			<p class="text-gray-600">Este proyecto ya no está activo</p>
+		<div class="mb-4 rounded-lg bg-gray-100 py-4 text-center">
+			<p class="text-sm text-gray-500">Este proyecto ya no está activo</p>
 		</div>
 	{/if}
 
-	<!-- Botón para compartir -->
+	<!-- Compartir -->
 	<Button
 		label="Compartir proyecto"
 		href="#"
 		variant="secondary"
 		disabled={false}
-		customClass="w-full"
+		customClass="w-full font-medium"
 	/>
 </div>

@@ -24,6 +24,5 @@ export interface Project {
     estado?: string;
     urgencia?: string;
     beneficiarios?: number;
-    solicitudesColaboracion?: number;
     contacto?: Contacto;
 }

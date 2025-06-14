@@ -18,7 +18,6 @@ export const projects: Project[] = [
     estado: 'Activo',
     urgencia: 'Alta',
     beneficiarios: 150,
-    solicitudesColaboracion: 12,
     deadline: '2025-06-30',
     imagen: '/img/proyectos-1.webp',
     ubicacion: 'Rosario, Santa Fe',
@@ -47,7 +46,6 @@ export const projects: Project[] = [
     estado: 'Activo',
     urgencia: 'Media',
     beneficiarios: 75,
-    solicitudesColaboracion: 8,
     deadline: '2025-07-30',
     imagen: '/img/proyectos-2.webp',
     ubicacion: 'La Plata, Buenos Aires'
@@ -69,7 +67,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Baja',
     beneficiarios: 80,
-    solicitudesColaboracion: 5,
     deadline: '2025-08-15',
     imagen: '/img/proyectos-3.webp',
     ubicacion: 'Córdoba Capital, Córdoba'
@@ -91,7 +88,6 @@ export const projects: Project[] = [
     estado: 'Finalizado',
     urgencia: 'Alta',
     beneficiarios: 500,
-    solicitudesColaboracion: 25,
     deadline: '2024-05-31',
     imagen: '/img/proyectos-4.webp',
     ubicacion: 'Mendoza Capital, Mendoza'
@@ -113,7 +109,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Media',
     beneficiarios: 60,
-    solicitudesColaboracion: 3,
     deadline: '2024-10-30',
     imagen: '/img/proyectos-5.webp',
     ubicacion: 'San Miguel de Tucumán, Tucumán'
@@ -135,7 +130,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Alta',
     beneficiarios: 200,
-    solicitudesColaboracion: 15,
     deadline: '2024-12-31',
     imagen: '/img/proyectos-6.webp',
     ubicacion: 'Quilmes, Buenos Aires'
@@ -157,7 +151,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Alta',
     beneficiarios: 100,
-    solicitudesColaboracion: 7,
     deadline: '2024-06-30',
     imagen: '/img/proyectos-7.webp',
     ubicacion: 'CABA, Buenos Aires'
@@ -179,7 +172,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Media',
     beneficiarios: 45,
-    solicitudesColaboracion: 4,
     deadline: '2024-12-20',
     imagen: '/img/proyectos-8.webp',
     ubicacion: 'Santa Fe Capital, Santa Fe'
@@ -201,7 +193,6 @@ export const projects: Project[] = [
     estado: 'Finalizado',
     urgencia: 'Media',
     beneficiarios: 85,
-    solicitudesColaboracion: 3,
     deadline: '2024-07-15',
     imagen: '/img/proyectos-9.webp',
     ubicacion: 'Cafayate, Salta'
@@ -223,7 +214,6 @@ export const projects: Project[] = [
     estado: 'En ejecución',
     urgencia: 'Baja',
     beneficiarios: 24,
-    solicitudesColaboracion: 18,
     deadline: '2024-11-30',
     imagen: '/img/proyectos-10.webp',
     ubicacion: 'Neuquén Capital, Neuquén'
