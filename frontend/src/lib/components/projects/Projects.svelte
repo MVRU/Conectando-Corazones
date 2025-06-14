@@ -1,23 +1,8 @@
-<!--
-* Componente: Projects
-        -*- Descripción: Muestra y filtra una lista de proyectos
-        -*- DECISIÓN DE DISEÑO: Se unificó el origen de datos en `projects.ts` y se simplificó el filtrado mediante un mapa de etiquetas.
-
-* Props:
-        -*- proyectos (Project[]): listado de proyectos a mostrar
-
-TODO:
-        - [ ] Implementar paginación
-        - [ ] Agregar búsqueda por texto
-        - [ ] Conectar con backend para datos reales
-        - [ ] Implementar ordenamiento por diferentes criterios
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { projects } from '$lib/data/projects';
+	import { projects as defaultProjects } from '$lib/data/projects';
 	import type { Project } from '$lib/models/Project';
 
 	const participacionMap = {
@@ -39,36 +24,31 @@ TODO:
 	};
 
 	let filtroSeleccionado: ParticipacionLabel | 'Todos' = 'Todos';
-
-	export let proyectos: Project[] = projects;
+	export let proyectos: Project[] = defaultProjects;
 	let proyectosVisibles: Project[] = [];
 
-	function filtrarProyectos() {
-		if (filtroSeleccionado === 'Todos') {
-			proyectosVisibles = proyectos;
-		} else {
-			const unidad = reverseMap[filtroSeleccionado];
-			proyectosVisibles = proyectos.filter((p) => p.unidad === unidad);
-		}
+	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
+		if (filtro === 'Todos') return proyectos;
+
+		const unidadEsperada = reverseMap[filtro];
+		const resultado = proyectos.filter((p) => {
+			const unidad = (p.unidad || '').trim().toLowerCase();
+			return unidad === unidadEsperada;
+		});
+
+		return resultado;
 	}
 
-	onMount(() => {
-		filtrarProyectos();
-	});
-
-	$: if (filtroSeleccionado) {
-		filtrarProyectos();
-	}
+	$: proyectosVisibles = filtrarProyectos(proyectos, filtroSeleccionado);
 </script>
 
 <section class="w-full px-8 py-12">
-	<!-- Título de la sección -->
+	<!-- Título -->
 	<div style="margin-bottom: var(--spacing-3xl);">
 		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>
 		<p class="font-inter max-w-3xl text-lg text-gray-600">
-			Descubrí los proyectos que necesitan tu colaboración. Cada iniciativa busca generar un impacto
-			positivo en nuestra comunidad. Podés participar con donaciones monetarias, materiales
-			específicos o como voluntario.
+			Descubrí los proyectos que necesitan tu colaboración. Podés participar con donaciones
+			monetarias, materiales específicos o como voluntario.
 		</p>
 	</div>
 
@@ -96,7 +76,7 @@ TODO:
 		</div>
 	</div>
 
-	<!-- Contador de proyectos -->
+	<!-- Contador -->
 	<div style="margin-bottom: var(--spacing-2xl);">
 		<p class="font-inter font-medium text-[rgb(var(--base-color))]">
 			Mostrando {proyectosVisibles.length} proyecto{proyectosVisibles.length !== 1 ? 's' : ''}
@@ -106,14 +86,14 @@ TODO:
 		</p>
 	</div>
 
-	<!-- Lista de proyectos -->
+	<!-- Lista -->
 	<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-		{#each proyectosVisibles as proyecto}
+		{#each proyectosVisibles as proyecto (proyecto.id)}
 			<ProjectCard {proyecto} mostrarBotones={true} />
 		{/each}
 	</div>
 
-	<!-- Mensaje cuando no hay proyectos -->
+	<!-- Sin resultados -->
 	{#if proyectosVisibles.length === 0}
 		<div class="py-12 text-center">
 			<h3 class="mb-4 text-[rgb(var(--base-color))]">No hay proyectos disponibles</h3>
@@ -121,7 +101,7 @@ TODO:
 				No se encontraron proyectos para el filtro seleccionado. Intentá con otro tipo de
 				participación.
 			</p>
-			<Button label="Ver todos los proyectos" href="/projects" disabled={false} />
+			<Button label="Ver todos los proyectos" href="/projects" />
 		</div>
 	{/if}
 </section>

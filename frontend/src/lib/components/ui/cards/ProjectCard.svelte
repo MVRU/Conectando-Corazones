@@ -20,51 +20,56 @@
 
 	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
 
-	const icono =
-		proyecto.unidad === 'materiales'
-			? getEmojiEspecie(proyecto.especie)
-			: proyecto.unidad === 'dinero'
-				? '💰'
-				: proyecto.unidad === 'voluntarios'
-					? '🙋‍♀️'
-					: '🤝';
+	// Variables reactivas para valores dependientes de "proyecto"
+	let actual: number;
+	let objetivo: number;
+	let unidad: string;
+	let especie: string;
+	let percent: number;
+	let actualLabel: string;
+	let objetivoLabel: string;
+	let color: 'green' | 'blue' | 'purple';
+	let icono: string;
 
-	const color =
-		proyecto.unidad === 'dinero'
-			? 'green'
-			: proyecto.unidad === 'voluntarios'
-				? 'purple'
-				: proyecto.unidad === 'materiales'
-					? 'blue'
-					: 'gray';
+	$: {
+		actual = Number(proyecto.actual);
+		objetivo = Number(proyecto.objetivo);
+		unidad = proyecto.unidad;
+		especie = (proyecto.especie || '').trim();
 
-	const percent = Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
+		percent = objetivo > 0 ? Math.min((actual / objetivo) * 100, 100) : 0;
 
-	const actualLabel =
-		proyecto.unidad === 'dinero'
-			? `$${proyecto.actual.toLocaleString('es-AR')}`
-			: `${proyecto.actual} ${proyecto.especie || 'unidades'}`;
+		actualLabel =
+			unidad === 'dinero'
+				? `$${actual.toLocaleString('es-AR')}`
+				: unidad === 'voluntarios'
+					? `${actual} voluntarios`
+					: `${actual} ${especie || 'unidades'}`;
 
-	const objetivoLabel =
-		proyecto.unidad === 'dinero'
-			? `$${proyecto.objetivo.toLocaleString('es-AR')}`
-			: `${proyecto.objetivo} ${
-					proyecto.unidad === 'voluntarios' ? 'voluntarios' : proyecto.especie || 'unidades'
-				}`;
+		objetivoLabel =
+			unidad === 'dinero'
+				? `$${objetivo.toLocaleString('es-AR')}`
+				: unidad === 'voluntarios'
+					? `${objetivo} voluntarios`
+					: `${objetivo} ${especie || 'unidades'}`;
 
-	const slug = proyecto.titulo
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-|-$/g, '');
+		color = unidad === 'dinero' ? 'green' : unidad === 'voluntarios' ? 'purple' : 'blue';
+
+		icono =
+			unidad === 'materiales'
+				? getEmojiEspecie(especie)
+				: unidad === 'dinero'
+					? '💰'
+					: unidad === 'voluntarios'
+						? '🙋‍♀️'
+						: '🤝';
+	}
 
 	const formatearFechaCorta = (fecha?: string) => {
 		if (!fecha) return '—';
 		const f = new Date(fecha);
 		return `${f.getDate()}/${f.getMonth() + 1}`;
 	};
-
-	const formatearFecha = (fecha?: string) =>
-		fecha ? new Date(fecha).toLocaleDateString('es-AR') : '—';
 
 	const getBadgeColor = (valor: string) => {
 		switch (valor) {
@@ -87,27 +92,37 @@
 	const inicio = proyecto.fechaInicio ? new Date(proyecto.fechaInicio) : null;
 	const cierre = proyecto.fechaCierre ? new Date(proyecto.fechaCierre) : null;
 
-	let estadoTemporizador: string = '—';
+	let estadoTemporizador = '—';
+	let emojiTemporizador = '⌛';
+
 	if (inicio && cierre) {
 		if (hoy > cierre) {
 			estadoTemporizador = 'Finalizado';
+			emojiTemporizador = '✅';
 		} else if (hoy >= inicio && hoy <= cierre) {
 			estadoTemporizador = 'En ejecución';
+			emojiTemporizador = '🟢';
 		} else {
 			const diff = inicio.getTime() - hoy.getTime();
 			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
 			if (dias <= 0) {
 				estadoTemporizador = 'Hoy comienza';
+				emojiTemporizador = '⏱️';
 			} else if (dias === 1) {
 				estadoTemporizador = 'Comienza mañana';
+				emojiTemporizador = '📆';
 			} else if (dias < 7) {
 				estadoTemporizador = `En ${dias} días`;
+				emojiTemporizador = '⏳';
 			} else {
 				const semanas = Math.floor(dias / 7);
 				estadoTemporizador = semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
+				emojiTemporizador = '⏳';
 			}
 		}
 	}
+
+	const disabled = estadoTemporizador === 'En ejecución' || estadoTemporizador === 'Finalizado';
 </script>
 
 <article
@@ -126,7 +141,7 @@
 		<div
 			class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-gray-700 shadow backdrop-blur-sm"
 		>
-			<span>⏳ {estadoTemporizador}</span>
+			<span>{emojiTemporizador} {estadoTemporizador}</span>
 			<span class="text-gray-400">•</span>
 			<span
 				>{formatearFechaCorta(proyecto.fechaInicio)} → {formatearFechaCorta(
@@ -135,7 +150,7 @@
 			>
 		</div>
 
-		<!-- Badges superpuestos -->
+		<!-- Badges -->
 		<div class="absolute right-3 top-3 flex flex-row items-end gap-2 text-xs">
 			{#if proyecto.urgencia}
 				<span
@@ -157,16 +172,12 @@
 	<!-- Contenido -->
 	<div class="flex flex-1 flex-col justify-between gap-5 p-6">
 		<div class="space-y-3">
-			<!-- Institución y ubicación -->
 			<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
 				<span class="font-semibold text-[rgb(var(--color-primary))]">{proyecto.institucion}</span>
 				<span>📍 {proyecto.ciudad}, {proyecto.provincia}</span>
 			</div>
 
-			<!-- Título -->
 			<h3 class="text-lg font-bold leading-tight text-gray-800">{proyecto.titulo}</h3>
-
-			<!-- Descripción -->
 			<p class="line-clamp-3 text-sm text-gray-600">{proyecto.descripcion}</p>
 		</div>
 
@@ -176,7 +187,7 @@
 				<span>{icono} Objetivo</span>
 				<span>{actualLabel} / {objetivoLabel}</span>
 			</div>
-			<ProgressBar {percent} />
+			<ProgressBar {percent} {color} />
 		</div>
 
 		<!-- Botones -->
@@ -190,13 +201,14 @@
 					customClass="flex-1"
 				/>
 				<Button
-					label={proyecto.unidad === 'dinero'
+					label={unidad === 'dinero'
 						? 'Enviar donación'
-						: proyecto.unidad === 'materiales'
+						: unidad === 'materiales'
 							? 'Donar materiales'
 							: 'Postularme como voluntario'}
 					href={`/projects/${proyecto.id}#colaborar`}
 					size="sm"
+					{disabled}
 					customClass="flex-1"
 				/>
 			</div>
@@ -208,6 +220,7 @@
 	.line-clamp-3 {
 		display: -webkit-box;
 		-webkit-line-clamp: 3;
+		line-clamp: 3;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
 	}
