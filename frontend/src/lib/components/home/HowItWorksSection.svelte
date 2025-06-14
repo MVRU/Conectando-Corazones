@@ -10,9 +10,9 @@ TODO:
 	- [ ] Parametrizar pasos para admitir contenido dinámico en el futuro (de ser necesario).
 -->
 <script lang="ts">
-       import StepCard from '$lib/components/ui/StepCard.svelte';
-       import Badge from '$lib/components/ui/Badge.svelte';
-       import Button from '$lib/components/ui/Button.svelte';
+       import StepCard from '$lib/components/ui/cards/StepCard.svelte';
+       import Badge from '$lib/components/ui/elements/Badge.svelte';
+       import Button from '$lib/components/ui/elements/Button.svelte';
        import { steps } from '$lib/data/how-it-works';
        import { inView } from '$lib/actions/inView';
        import { reducedMotion } from '$lib/stores/reducedMotion';

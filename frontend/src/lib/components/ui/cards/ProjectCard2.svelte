@@ -6,8 +6,8 @@
 <script lang="ts">
 	/* ----------  PROPS & HELPERS  ---------- */
 	import type { Project } from '$lib/models/Project';
-	import ProgressBar from '$lib/components/ui/ProgressBar.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import ProgressBar from '$lib/components/ui/elements/ProgressBar.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 
 	export let project!: Project;
 
@@ -205,14 +205,14 @@
 			<Button
 				label="Leer más"
 				variant="secondary"
-				href={`/projects/${slug}`}
+				href={`/projects/${project.id}`}
 				size="sm"
 				customClass="flex-1"
 				customAriaLabel="Leer más sobre el proyecto ${titulo}"
 			/>
 			<!-- ! Botón + expandible -->
 			<a
-				href={`/projects/${slug}#colaborar`}
+				href={`/projects/${project.id}#colaborar`}
 				aria-label="Colaborar ahora en el proyecto ${titulo}"
 				class="group/button relative flex h-9 w-9 items-center justify-start gap-2 overflow-hidden rounded-full bg-[rgb(var(--color-primary))] pl-3 pr-3 text-white transition-all duration-300 hover:w-44 hover:bg-[rgb(var(--color-primary-hover))]"
 			>

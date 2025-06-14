@@ -10,7 +10,7 @@ TODO:
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import TestimonialCard from '$lib/components/ui/TestimonialCard.svelte';
+       import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
 	import { testimonials } from '$lib/data/testimonials';
 
 	let centerIndex = 1;

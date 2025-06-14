@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Image from '$lib/components/ui/Image.svelte';
+       import Button from '$lib/components/ui/elements/Button.svelte';
+       import Image from '$lib/components/ui/elements/Image.svelte';
 	import Ticker from '$lib/components/visual/Ticker.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+       import Badge from '$lib/components/ui/elements/Badge.svelte';
 
 	const logos = [
 		'/instituciones/rotary.png',
