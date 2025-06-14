@@ -1,198 +1,204 @@
-<!--
-* Componente: ProjectCard
-	-*- Descripción: Tarjeta que muestra información de un proyecto
-	-*- Funcionalidad: Muestra detalles, progreso y botones de acción
-
-* Props:
-        -*- proyecto (object): objeto con información del proyecto
-        -*- mostrarBotones (boolean): si mostrar botones de acción
-        -*- DECISIÓN DE DISEÑO: Este componente usa la interfaz `Project` unificada
-        para mantener consistencia en toda la aplicación.
-
-TODO:
-	- [ ] Agregar animaciones de hover
-	- [ ] Implementar estados de carga
-	- [ ] Optimizar para diferentes tamaños de pantalla
--->
-
 <script lang="ts">
-	import Badge from '../elements/Badge.svelte';
-	import Button from '../elements/Button.svelte';
 	import type { Project } from '$lib/models/Project';
+	import Button from '../elements/Button.svelte';
+	import ProgressBar from '../elements/ProgressBar.svelte';
 
 	export let proyecto!: Project;
 	export let mostrarBotones: boolean = false;
 
-	const labelMap = {
-		dinero: 'Monetaria',
-		voluntarios: 'Voluntariado',
-		materiales: 'Materiales'
-	} as const;
+	const especieEmoji: Record<string, string> = {
+		libros: '📚',
+		colchones: '🛏️',
+		alimentos: '🍽️',
+		juguetes: '🧸',
+		computadoras: '💻',
+		prendas: '👕',
+		medicamentos: '💊',
+		herramientas: '🔧',
+		utiles: '✏️'
+	};
 
-	function calcularPorcentajeProgreso() {
-		return Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
-	}
+	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
 
-	function formatearMonto(cantidad: number) {
-		return proyecto.unidad === 'dinero'
-			? `$${cantidad.toLocaleString('es-AR')}`
-			: cantidad.toString();
-	}
+	const icono =
+		proyecto.unidad === 'materiales'
+			? getEmojiEspecie(proyecto.especie)
+			: proyecto.unidad === 'dinero'
+				? '💰'
+				: proyecto.unidad === 'voluntarios'
+					? '🙋‍♀️'
+					: '🤝';
 
-	function getColorProgreso(tipo: Project['unidad']) {
-		switch (tipo) {
-			case 'dinero':
-				return 'bg-[rgb(var(--color-primary))]';
-			case 'voluntarios':
-				return 'bg-purple-500';
-			case 'materiales':
-				return 'bg-green-500';
+	const color =
+		proyecto.unidad === 'dinero'
+			? 'green'
+			: proyecto.unidad === 'voluntarios'
+				? 'purple'
+				: proyecto.unidad === 'materiales'
+					? 'blue'
+					: 'gray';
+
+	const percent = Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
+
+	const actualLabel =
+		proyecto.unidad === 'dinero'
+			? `$${proyecto.actual.toLocaleString('es-AR')}`
+			: `${proyecto.actual} ${proyecto.especie || 'unidades'}`;
+
+	const objetivoLabel =
+		proyecto.unidad === 'dinero'
+			? `$${proyecto.objetivo.toLocaleString('es-AR')}`
+			: `${proyecto.objetivo} ${
+					proyecto.unidad === 'voluntarios' ? 'voluntarios' : proyecto.especie || 'unidades'
+				}`;
+
+	const slug = proyecto.titulo
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, '-')
+		.replace(/^-|-$/g, '');
+
+	const formatearFechaCorta = (fecha?: string) => {
+		if (!fecha) return '—';
+		const f = new Date(fecha);
+		return `${f.getDate()}/${f.getMonth() + 1}`;
+	};
+
+	const formatearFecha = (fecha?: string) =>
+		fecha ? new Date(fecha).toLocaleDateString('es-AR') : '—';
+
+	const getBadgeColor = (valor: string) => {
+		switch (valor) {
+			case 'Alta':
+				return 'bg-red-100 text-red-700';
+			case 'Media':
+				return 'bg-yellow-100 text-yellow-700';
+			case 'Baja':
+				return 'bg-green-100 text-green-700';
+			case 'Activo':
+				return 'bg-green-100 text-green-700';
+			case 'Cerrado':
+				return 'bg-gray-100 text-gray-500';
 			default:
-				return 'bg-gray-400';
+				return 'bg-gray-100 text-gray-700';
 		}
-	}
+	};
 
-	function getIconoTipo(tipo: Project['unidad']) {
-		switch (tipo) {
-			case 'dinero':
-				return '💰';
-			case 'voluntarios':
-				return '🙋‍♀️';
-			case 'materiales':
-				return '📦';
-			default:
-				return '🤝';
+	const hoy = new Date();
+	const inicio = proyecto.fechaInicio ? new Date(proyecto.fechaInicio) : null;
+	const cierre = proyecto.fechaCierre ? new Date(proyecto.fechaCierre) : null;
+
+	let estadoTemporizador: string = '—';
+	if (inicio && cierre) {
+		if (hoy > cierre) {
+			estadoTemporizador = 'Finalizado';
+		} else if (hoy >= inicio && hoy <= cierre) {
+			estadoTemporizador = 'En ejecución';
+		} else {
+			const diff = inicio.getTime() - hoy.getTime();
+			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
+			if (dias <= 0) {
+				estadoTemporizador = 'Hoy comienza';
+			} else if (dias === 1) {
+				estadoTemporizador = 'Comienza mañana';
+			} else if (dias < 7) {
+				estadoTemporizador = `En ${dias} días`;
+			} else {
+				const semanas = Math.floor(dias / 7);
+				estadoTemporizador = semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
+			}
 		}
-	}
-
-	function getTextoBoton(tipo: Project['unidad']) {
-		switch (tipo) {
-			case 'dinero':
-				return 'Enviar donación';
-			case 'voluntarios':
-				return 'Postularme como voluntario';
-			case 'materiales':
-				return 'Donar materiales';
-			default:
-				return 'Colaborar';
-		}
-	}
-
-	function getColorUrgencia(urg?: string) {
-		return 'bg-red-100 text-red-700';
-	}
-	function getColorEstado(est?: string) {
-		return 'bg-green-100 text-green-700';
-	}
-	function formatearFecha(f?: string) {
-		return f ? new Date(f).toLocaleDateString('es-AR') : '—';
 	}
 </script>
 
 <article
-	class="overflow-hidden rounded-2xl border border-gray-300 bg-white shadow-lg transition-shadow duration-300 hover:shadow-xl"
+	class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
 >
-	<div class="border-b border-gray-100 p-6">
-		<div class="mb-3 flex items-start justify-between">
-			<h4 class="text-xl font-semibold leading-tight text-[rgb(var(--base-color))]">
-				{proyecto.titulo}
-			</h4>
-			<div class="flex gap-2">
-				{#if proyecto.urgencia}
-					<span
-						class={`flex items-center justify-center rounded-full px-2 py-2 text-xs font-medium ${getColorUrgencia(proyecto.urgencia)}`}
-					>
-						{proyecto.urgencia}
-					</span>
-				{/if}
-				{#if proyecto.estado}
-					<span
-						class={`rounded-full px-2 py-1 text-xs font-medium ${getColorEstado(proyecto.estado)}`}
-					>
-						{proyecto.estado}
-					</span>
-				{/if}
-			</div>
+	<!-- Imagen destacada -->
+	<div class="relative aspect-[4/3] w-full overflow-hidden">
+		<img
+			src={proyecto.imagen}
+			alt={proyecto.titulo}
+			class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+			loading="lazy"
+		/>
+
+		<!-- Estado temporal y fechas -->
+		<div
+			class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-gray-700 shadow backdrop-blur-sm"
+		>
+			<span>⏳ {estadoTemporizador}</span>
+			<span class="text-gray-400">•</span>
+			<span
+				>{formatearFechaCorta(proyecto.fechaInicio)} → {formatearFechaCorta(
+					proyecto.fechaCierre
+				)}</span
+			>
 		</div>
 
-		<div class="mb-3 flex items-center gap-3">
-			<Badge text={labelMap[proyecto.unidad]} shape="square" />
-			<span class="text-sm text-gray-500">
-				📍 {proyecto.ciudad ?? '—'}, {proyecto.provincia ?? '—'}
-			</span>
+		<!-- Badges superpuestos -->
+		<div class="absolute right-3 top-3 flex flex-row items-end gap-2 text-xs">
+			{#if proyecto.urgencia}
+				<span
+					class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.urgencia)} bg-white/90`}
+				>
+					{proyecto.urgencia}
+				</span>
+			{/if}
+			{#if proyecto.estado}
+				<span
+					class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.estado)} bg-white/90`}
+				>
+					{proyecto.estado}
+				</span>
+			{/if}
 		</div>
 	</div>
 
-	<div class="p-6">
-		<p class="mb-4 line-clamp-3 text-gray-600">{proyecto.descripcion}</p>
+	<!-- Contenido -->
+	<div class="flex flex-1 flex-col justify-between gap-5 p-6">
+		<div class="space-y-3">
+			<!-- Institución y ubicación -->
+			<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
+				<span class="font-semibold text-[rgb(var(--color-primary))]">{proyecto.institucion}</span>
+				<span>📍 {proyecto.ciudad}, {proyecto.provincia}</span>
+			</div>
 
-		<div class="mb-4 rounded-lg bg-gray-50 p-3">
-			<h5 class="mb-1 font-medium text-[rgb(var(--base-color))]">Institución</h5>
-			<p class="text-sm text-gray-600">{proyecto.institucion}</p>
+			<!-- Título -->
+			<h3 class="text-lg font-bold leading-tight text-gray-800">{proyecto.titulo}</h3>
+
+			<!-- Descripción -->
+			<p class="line-clamp-3 text-sm text-gray-600">{proyecto.descripcion}</p>
 		</div>
 
-		<div class="mb-4">
-			<div class="mb-2 flex items-center justify-between">
-				<span class="text-sm font-medium text-[rgb(var(--base-color))]">
-					{getIconoTipo(proyecto.unidad)} Objetivo
-				</span>
-				<span class="font-semibold text-[rgb(var(--color-primary))]">
-					{formatearMonto(proyecto.actual)} / {proyecto.objetivo}
-				</span>
+		<!-- Progreso -->
+		<div class="mt-2 flex flex-col gap-2">
+			<div class="flex justify-between text-xs font-medium text-gray-700">
+				<span>{icono} Objetivo</span>
+				<span>{actualLabel} / {objetivoLabel}</span>
 			</div>
-			<div class="h-3 w-full rounded-full bg-gray-200">
-				<div
-					class={`h-3 rounded-full transition-all duration-300 ${getColorProgreso(proyecto.unidad)}`}
-					style="width: {calcularPorcentajeProgreso()}%"
-				></div>
-			</div>
-			<div class="mt-2 flex items-center justify-between">
-				<p class="text-xs text-gray-500">
-					{calcularPorcentajeProgreso().toFixed(1)}% del objetivo alcanzado
-				</p>
-			</div>
+			<ProgressBar {percent} />
 		</div>
 
-		<!-- Texto según unidad -->
-		{#if proyecto.unidad === 'dinero'}
-			<div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
-				<p class="text-sm text-blue-700">
-					💰 Este proyecto necesita <strong>donaciones monetarias</strong>. Tu contribución ayudará
-					a alcanzar el objetivo de {proyecto.objetivo}
-					{proyecto.especie}.
-				</p>
-			</div>
-		{:else if proyecto.unidad === 'materiales'}
-			<div class="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
-				<p class="text-sm text-green-700">
-					📦 Este proyecto necesita <strong>donaciones de materiales específicos</strong>: {proyecto.objetivo}
-					{proyecto.especie}.
-				</p>
-			</div>
-		{:else if proyecto.unidad === 'voluntarios'}
-			<div class="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-3">
-				<p class="text-sm text-purple-700">
-					🙋‍♀️ Este proyecto necesita <strong>{proyecto.objetivo} voluntarios</strong> para actividades
-					específicas.
-				</p>
-			</div>
-		{/if}
-
-		<div class="mb-6">
-			<span class="text-sm font-medium text-[rgb(var(--base-color))]">Cierre:</span>
-			<p class="text-sm text-gray-600">{formatearFecha(proyecto.fechaCierre)}</p>
-		</div>
-
+		<!-- Botones -->
 		{#if mostrarBotones}
-			<div class="flex gap-3">
-				<Button label="Ver detalles" href={`/projects/${proyecto.id}`} disabled={false} />
-				{#if proyecto.estado === 'Activo'}
-					<button
-						class="rounded-lg border-2 border-[rgb(var(--color-primary))] px-4 py-2 text-sm font-medium text-[rgb(var(--color-primary))] transition-colors duration-200 hover:bg-[rgb(var(--color-primary))] hover:text-white"
-					>
-						{getTextoBoton(proyecto.unidad)}
-					</button>
-				{/if}
+			<div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
+				<Button
+					label="Ver detalles"
+					href={`/projects/${proyecto.id}`}
+					variant="secondary"
+					size="sm"
+					customClass="flex-1"
+				/>
+				<Button
+					label={proyecto.unidad === 'dinero'
+						? 'Enviar donación'
+						: proyecto.unidad === 'materiales'
+							? 'Donar materiales'
+							: 'Postularme como voluntario'}
+					href={`/projects/${proyecto.id}#colaborar`}
+					size="sm"
+					customClass="flex-1"
+				/>
 			</div>
 		{/if}
 	</div>
@@ -204,6 +210,5 @@ TODO:
 		-webkit-line-clamp: 3;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
-		line-clamp: 3;
 	}
 </style>

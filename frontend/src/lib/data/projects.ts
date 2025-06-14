@@ -80,20 +80,20 @@ export const projects: Project[] = [
     descripcion:
       'Adquisición de equipos médicos esenciales para el hospital público de la comunidad: desfibrilador, monitor multiparamétrico y bomba de infusión.',
     institucion: 'Hospital General San José',
-    fechaInicio: '2024-01-01',
-    fechaCierre: '2024-05-31',
+    fechaInicio: '2025-01-01',
+    fechaCierre: '2025-05-31',
     provincia: 'Mendoza',
     ciudad: 'Mendoza Capital',
     unidad: 'dinero',
     objetivo: 75000000,
     actual: 68000000,
     especie: 'pesos',
-    estado: 'Próximo a cerrar',
+    estado: 'Finalizado',
     urgencia: 'Alta',
     beneficiarios: 500,
     solicitudesColaboracion: 25,
     deadline: '2024-05-31',
-    imagen: '/img/proyectos-1.webp',
+    imagen: '/img/proyectos-4.webp',
     ubicacion: 'Mendoza Capital, Mendoza'
   },
   {
@@ -102,8 +102,8 @@ export const projects: Project[] = [
     descripcion:
       'Necesitamos docentes y estudiantes universitarios para dar clases de apoyo en matemática, lengua y ciencias a niños en situación de vulnerabilidad social.',
     institucion: 'Instituto de Formación Laboral',
-    fechaInicio: '2024-04-01',
-    fechaCierre: '2024-10-30',
+    fechaInicio: '2025-04-01',
+    fechaCierre: '2025-10-30',
     provincia: 'Tucumán',
     ciudad: 'San Miguel de Tucumán',
     unidad: 'voluntarios',
@@ -115,7 +115,7 @@ export const projects: Project[] = [
     beneficiarios: 60,
     solicitudesColaboracion: 3,
     deadline: '2024-10-30',
-    imagen: '/img/proyectos-2.webp',
+    imagen: '/img/proyectos-5.webp',
     ubicacion: 'San Miguel de Tucumán, Tucumán'
   },
   {
@@ -124,8 +124,8 @@ export const projects: Project[] = [
     descripcion:
       'Recolección de alimentos no perecederos (arroz, fideos, aceite, conservas) para abastecer comedores comunitarios durante el invierno.',
     institucion: 'Red de Comedores Unidos',
-    fechaInicio: '2024-02-15',
-    fechaCierre: '2024-12-31',
+    fechaInicio: '2025-02-15',
+    fechaCierre: '2025-12-31',
     provincia: 'Buenos Aires',
     ciudad: 'Quilmes',
     unidad: 'materiales',
@@ -137,7 +137,7 @@ export const projects: Project[] = [
     beneficiarios: 200,
     solicitudesColaboracion: 15,
     deadline: '2024-12-31',
-    imagen: '/img/proyectos-3.webp',
+    imagen: '/img/proyectos-6.webp',
     ubicacion: 'Quilmes, Buenos Aires'
   },
   {
@@ -146,8 +146,8 @@ export const projects: Project[] = [
     descripcion:
       'Se solicitan camperas, buzos, mantas y frazadas en buen estado para personas en situación de calle durante los meses de frío.',
     institucion: 'Fundación Calor Humano',
-    fechaInicio: '2024-03-15',
-    fechaCierre: '2024-06-30',
+    fechaInicio: '2025-03-15',
+    fechaCierre: '2025-06-30',
     provincia: 'Buenos Aires',
     ciudad: 'CABA',
     unidad: 'materiales',
@@ -159,7 +159,7 @@ export const projects: Project[] = [
     beneficiarios: 100,
     solicitudesColaboracion: 7,
     deadline: '2024-06-30',
-    imagen: '/img/proyectos-1.webp',
+    imagen: '/img/proyectos-7.webp',
     ubicacion: 'CABA, Buenos Aires'
   },
   {
@@ -168,8 +168,8 @@ export const projects: Project[] = [
     descripcion:
       'Buscamos voluntarios para acompañar y brindar cuidados básicos a adultos mayores en hogar geriátrico. Se requiere disponibilidad de tiempo y paciencia.',
     institucion: 'Hogar Santa Teresa',
-    fechaInicio: '2024-01-20',
-    fechaCierre: '2024-12-20',
+    fechaInicio: '2025-01-20',
+    fechaCierre: '2025-12-20',
     provincia: 'Santa Fe',
     ciudad: 'Santa Fe Capital',
     unidad: 'voluntarios',
@@ -181,7 +181,7 @@ export const projects: Project[] = [
     beneficiarios: 45,
     solicitudesColaboracion: 4,
     deadline: '2024-12-20',
-    imagen: '/img/proyectos-2.webp',
+    imagen: '/img/proyectos-8.webp',
     ubicacion: 'Santa Fe Capital, Santa Fe'
   },
   {
@@ -190,20 +190,20 @@ export const projects: Project[] = [
     descripcion:
       'La escuela rural necesita equipos informáticos para que los alumnos puedan acceder a herramientas digitales. Buscamos computadoras en buen estado.',
     institucion: 'Escuela Rural N° 123',
-    fechaInicio: '2024-03-10',
-    fechaCierre: '2024-07-15',
+    fechaInicio: '2025-02-10',
+    fechaCierre: '2025-05-15',
     provincia: 'Salta',
     ciudad: 'Cafayate',
     unidad: 'materiales',
     objetivo: 20,
     actual: 6,
     especie: 'computadoras',
-    estado: 'Activo',
+    estado: 'Finalizado',
     urgencia: 'Media',
     beneficiarios: 85,
     solicitudesColaboracion: 3,
     deadline: '2024-07-15',
-    imagen: '/img/proyectos-3.webp',
+    imagen: '/img/proyectos-9.webp',
     ubicacion: 'Cafayate, Salta'
   },
   {
@@ -212,8 +212,8 @@ export const projects: Project[] = [
     descripcion:
       'Programa de becas para estudiantes de bajos recursos que desean acceder a la educación superior. Cada beca cubre matrícula y materiales por un año.',
     institucion: 'Fundación Educación para Todos',
-    fechaInicio: '2024-02-20',
-    fechaCierre: '2024-11-30',
+    fechaInicio: '2025-02-20',
+    fechaCierre: '2025-11-30',
     provincia: 'Neuquén',
     ciudad: 'Neuquén Capital',
     unidad: 'dinero',
@@ -225,7 +225,7 @@ export const projects: Project[] = [
     beneficiarios: 24,
     solicitudesColaboracion: 18,
     deadline: '2024-11-30',
-    imagen: '/img/proyectos-1.webp',
+    imagen: '/img/proyectos-10.webp',
     ubicacion: 'Neuquén Capital, Neuquén'
   }
 ];
