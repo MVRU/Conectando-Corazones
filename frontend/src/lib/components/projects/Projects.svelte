@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { projects as defaultProjects } from '$lib/data/projects';
@@ -27,13 +26,47 @@
 	export let proyectos: Project[] = defaultProjects;
 	let proyectosVisibles: Project[] = [];
 
-	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
-		if (filtro === 'Todos') return proyectos;
+	const ESTADO_PRIORIDAD: Record<string, number> = {
+		Activo: 0,
+		'En ejecución': 1,
+		Finalizado: 2
+	};
 
-		const unidadEsperada = reverseMap[filtro];
-		const resultado = proyectos.filter((p) => {
-			const unidad = (p.unidad || '').trim().toLowerCase();
-			return unidad === unidadEsperada;
+	function estadoTemporizadorProyecto(p: Project): string {
+		const hoy = new Date();
+		const inicio = p.fechaInicio ? new Date(p.fechaInicio) : null;
+		const cierre = p.fechaCierre ? new Date(p.fechaCierre) : null;
+
+		if (!inicio || !cierre) return 'Activo';
+
+		if (hoy > cierre) return 'Finalizado';
+		if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
+		return 'Activo';
+	}
+
+	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
+		let resultado = [...proyectos];
+
+		if (filtro !== 'Todos') {
+			const unidadEsperada = reverseMap[filtro];
+			resultado = resultado.filter((p) => (p.unidad || '').trim().toLowerCase() === unidadEsperada);
+		}
+
+		// Ordenar primero por estado (Activo < En ejecución < Finalizado) y después por fechaInicio asc
+		resultado.sort((a, b) => {
+			const estadoA = estadoTemporizadorProyecto(a);
+			const estadoB = estadoTemporizadorProyecto(b);
+			const prioridadEstadoA = ESTADO_PRIORIDAD[estadoA] ?? 3;
+			const prioridadEstadoB = ESTADO_PRIORIDAD[estadoB] ?? 3;
+
+			if (prioridadEstadoA !== prioridadEstadoB) {
+				return prioridadEstadoA - prioridadEstadoB;
+			}
+
+			// Si los estados son iguales, ordenar por fechaInicio asc
+			const fechaA = new Date(a.fechaInicio || '').getTime();
+			const fechaB = new Date(b.fechaInicio || '').getTime();
+			return fechaA - fechaB;
 		});
 
 		return resultado;
