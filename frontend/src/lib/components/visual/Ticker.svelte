@@ -12,8 +12,9 @@
 -->
 
 <script lang="ts">
-	import clsx from 'clsx';
-	import { onMount } from 'svelte';
+        import clsx from 'clsx';
+        import { onMount } from 'svelte';
+        import { Motion } from '@motionone/svelte';
         export let logos: Array<string | { src: string; href?: string }> = [];
 	let visible = false;
 	let tickerRef: HTMLElement;
@@ -26,19 +27,21 @@
 	});
 </script>
 
-<div
-	bind:this={tickerRef}
-	class="group relative h-20 w-full overflow-hidden
-		transition-all duration-1000"
-	class:ticker-fade-in={visible}
+<Motion.div
+        bind:this={tickerRef}
+        class="group relative h-20 w-full overflow-hidden"
+        animate={{ opacity: visible ? 1 : 0, translateY: visible ? 0 : 32 }}
+        transition={{ duration: 0.9 }}
 >
 	<!-- *Contenedor deslizante -->
-	<div
-		class={clsx(
-			'ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32',
-			customClass
-		)}
-	>
+        <Motion.div
+                class={clsx(
+                        'ticker-track group-hover:pause-animation flex h-full w-max items-center gap-32',
+                        customClass
+                )}
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 80, repeat: Infinity, ease: 'linear' }}
+        >
                 {#each Array(6).fill(logos).flat() as logo, i}
                         {#if typeof logo === 'string'}
                                 <img
@@ -67,34 +70,11 @@
                                 {/if}
                         {/if}
                 {/each}
-        </div>
-</div>
+        </Motion.div>
+</Motion.div>
 
 <style>
 	/*Animaciones*/
 
-	.ticker-fade-in {
-		opacity: 1;
-		transform: translateY(0);
-		transition:
-			opacity 0.85s cubic-bezier(0.42, 0, 0.18, 1),
-			transform 0.9s cubic-bezier(0.36, 0, 0.18, 1);
-	}
-	.group:not(.ticker-fade-in) {
-		opacity: 0;
-		transform: translateY(32px);
-	}
-
-	@keyframes ticker-scroll {
-		0% {
-			transform: translateX(0%);
-		}
-		100% {
-			transform: translateX(-50%);
-		}
-	}
-
-	.ticker-track {
-		animation: ticker-scroll 80s linear infinite;
-	}
+        /* Animaciones reemplazadas por MotionOne */
 </style>

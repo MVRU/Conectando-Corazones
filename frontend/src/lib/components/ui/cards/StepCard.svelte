@@ -15,6 +15,7 @@
 <script lang="ts">
        import { inView } from '$lib/actions/inView';
        import { reducedMotion } from '$lib/stores/reducedMotion';
+       import { Motion } from '@motionone/svelte';
 
        export let stepNumber: number;
        export let title: string;
@@ -26,7 +27,7 @@
 </script>
 
 <!-- *Contenedor -->
-<div
+<Motion.div
         role="region"
         aria-label={`Paso ${stepNumber}: ${title}`}
         class="group relative h-96 transform-gpu overflow-hidden rounded-3xl bg-white
@@ -35,8 +36,8 @@
         class:hover:-translate-y-1={!$reducedMotion}
         class:hover:scale-[1.015]={!$reducedMotion}
         style={`transition-delay:${delay}ms`}
-        class:opacity-0={!animate}
-        class:translate-y-8={!animate}
+        animate={{ opacity: animate ? 1 : 0, translateY: animate ? 0 : 32 }}
+        transition={{ duration: 0.6, delay: delay / 1000 }}
         use:inView={{ onChange: (v) => (animate = v), once: true, threshold: 0.2 }}
 >
 	<!-- *Imagen -->
@@ -93,31 +94,15 @@
 			{details}
 		</p>
 	</div>
-</div>
+</Motion.div>
 
 <style>
-	@keyframes heartbeat {
-		0% {
-			transform: scale(1);
-		}
-		14% {
-			transform: scale(1.16);
-		}
-		28% {
-			transform: scale(1);
-		}
-		42% {
-			transform: scale(1.16);
-		}
-		70% {
-			transform: scale(1);
-		}
-	}
-	.group:hover {
-		box-shadow:
-			0 10px 32px 0 #19318a1a,
-			0 1.5px 10px 0 #e6466611;
-		transform: translateY(-3px) scale(1.02);
-	}
+        /* Animaciones reemplazadas por MotionOne */
+        .group:hover {
+                box-shadow:
+                        0 10px 32px 0 #19318a1a,
+                        0 1.5px 10px 0 #e6466611;
+                transform: translateY(-3px) scale(1.02);
+        }
 </style>
 

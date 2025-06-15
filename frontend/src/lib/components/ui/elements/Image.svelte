@@ -22,57 +22,58 @@
 -->
 
 <script lang="ts">
-	export let src: string = '';
-	export let alt: string = '';
-       export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
-       export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
-       export let width: string = '100%';
-       export let height: string = 'auto';
-       export let href: string = '';
-       export let aspectRatio: string = '';
-       // -* Propiedades para imágenes responsivas *-
-       export let srcset: string = '';
-       export let sizes: string = '';
+  import { Motion } from '@motionone/svelte';
+
+  export let src: string = '';
+  export let alt: string = '';
+  export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
+  export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
+  export let width: string = '100%';
+  export let height: string = 'auto';
+  export let href: string = '';
+  export let aspectRatio: string = '';
+  // -* Propiedades para imágenes responsivas *-
+  export let srcset: string = '';
+  export let sizes: string = '';
+
+  const heartbeat = {
+    scale: [1, 0.91, 0.98, 0.87, 1],
+    transition: { duration: 1.5, repeat: Infinity }
+  };
 </script>
 
 {#if href}
-	<a {href} class="cursor-pointer">
-                <img
-                        {src}
-                        {alt}
-                        {srcset}
-                        {sizes}
-                        style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
-			class="
-         block cursor-pointer object-cover
+  <a {href} class="cursor-pointer">
+    <Motion.img
+      {src}
+      {alt}
+      {srcset}
+      {sizes}
+      style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
+      class="block cursor-pointer object-cover
         {variant === 'default' ? ' rounded-lg shadow-md' : ''}
         {variant === 'circle' ? 'rounded-full' : ''}
-        {variant === 'card' ? 'rounded-xl shadow-sm' : ''}
-        {animate === 'heartbeat' ? 'animate-heartbeat' : ''}
-        {animate === 'zoom' ? 'zoom-on-hover' : ''}
-      "
-			decoding="async"
-			loading="lazy"
-		/>
-	</a>
+        {variant === 'card' ? 'rounded-xl shadow-sm' : ''}"
+      whileHover={animate === 'heartbeat' ? heartbeat : animate === 'zoom' ? { scale: 1.05 } : undefined}
+      decoding="async"
+      loading="lazy"
+    />
+  </a>
 {:else}
-        <img
-                {src}
-                {alt}
-                {srcset}
-                {sizes}
-                style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
-		class="
-       block object-cover
+  <Motion.img
+    {src}
+    {alt}
+    {srcset}
+    {sizes}
+    style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
+    class="block object-cover
       {variant === 'default' ? ' rounded-lg shadow-md' : ''}
       {variant === 'circle' ? 'rounded-full' : ''}
-      {variant === 'card' ? 'rounded-xl shadow-sm' : ''}
-      {animate === 'heartbeat' ? 'animate-heartbeat' : ''}
-      {animate === 'zoom' ? 'zoom-on-hover' : ''}
-    "
-		decoding="async"
-		loading="lazy"
-	/>
+      {variant === 'card' ? 'rounded-xl shadow-sm' : ''}"
+    whileHover={animate === 'heartbeat' ? heartbeat : animate === 'zoom' ? { scale: 1.05 } : undefined}
+    decoding="async"
+    loading="lazy"
+  />
 {/if}
 
 <style>
@@ -89,39 +90,5 @@
 		border-radius: 9999px;
 	}
 
-	/* Animación de latido */
-	@keyframes heartbeat {
-		from {
-			transform: scale(1);
-			transform-origin: center center;
-			animation-timing-function: ease-out;
-		}
-		10% {
-			transform: scale(0.91);
-			animation-timing-function: ease-in;
-		}
-		17% {
-			transform: scale(0.98);
-			animation-timing-function: ease-out;
-		}
-		33% {
-			transform: scale(0.87);
-			animation-timing-function: ease-in;
-		}
-		45% {
-			transform: scale(1);
-			animation-timing-function: ease-out;
-		}
-	}
-
-	/* Imágenes con animación de latido */
-	.animate-heartbeat:hover {
-		animation: heartbeat 1.5s ease-in-out infinite both;
-	}
-
-	/* Imágenes con zoom al hacer hover */
-	.zoom-on-hover:hover {
-		transform: scale(1.05);
-		transition: transform 0.3s ease-in-out;
-	}
+        /* Animaciones reemplazadas por MotionOne */
 </style>
