@@ -29,7 +29,7 @@ TODO:
 	import { goto } from '$app/navigation';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
-	export let href: string = '/';
+	export let href: string = '';
 	export let external = false;
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';

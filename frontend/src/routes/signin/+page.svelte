@@ -35,11 +35,9 @@
 ></div>
 
 <main class="relative z-10 mx-auto min-h-screen w-full max-w-5xl px-6 py-20 sm:px-10">
-	<section class="rounded-3xl bg-white p-10 shadow-xl ring-1 ring-gray-200 sm:p-12">
+	<section class="p-8 sm:p-12">
 		{#if stage === 'select'}
-			<h1
-				class="mb-4 text-center text-4xl font-extrabold tracking-tight text-[rgb(var(--base-color))]"
-			>
+			<h1 class="mb-4 text-center text-4xl font-semibold text-gray-800">
 				Unite a <span class="whitespace-nowrap">Conectando Corazones</span>
 			</h1>
 			<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
@@ -49,22 +47,27 @@
 
 			<p class="mb-6 text-center text-base font-medium text-gray-700">¿Cómo querés registrarte?</p>
 
-			<div class="grid gap-6 sm:grid-cols-2">
+			<div class="grid gap-8 sm:grid-cols-2">
 				<RoleCard
 					title="Soy una institución"
-					description="Quiero publicar, administrar y visibilizar proyectos solidarios."
+					description="Quiero publicar, administrar y visibilizar proyectos solidarios para recibir ayuda."
 					icon="institution"
-					on:select={() => choose('institucion')}
+					onSelect={() => choose('institucion')}
 				/>
 				<RoleCard
 					title="Soy colaborador/a"
-					description="Quiero participar, ayudar o sumarme a iniciativas solidarias."
+					description="Quiero ayudar o participar en proyectos como organización o entidad unipersonal."
 					icon="collaborator"
-					on:select={() => choose('colaborador')}
+					onSelect={() => choose('colaborador')}
 				/>
 			</div>
+
+			<!-- Aclaración adicional para el rol colaborador -->
+			<p class="mt-6 text-center text-sm text-gray-500">
+				Si sos una organización —con o sin fines de lucro—, seleccioná "Colaborador/a" para ayudar a
+				las instituciones.
+			</p>
 		{:else if ready}
-			<!-- Ocultamos el título y subtítulo tras elegir el rol -->
 			<button
 				class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
 				type="button"
