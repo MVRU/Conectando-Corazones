@@ -62,7 +62,7 @@
 		<h2 class="mt-6 text-3xl font-bold text-green-700">¡Identidad verificada!</h2>
 		<p class="mt-3 max-w-xs text-gray-600">Tu identidad ha sido validada correctamente.</p>
 		<div class="mt-8">
-			<Button label="Continuar" />
+			<Button label="Continuar" href="address" />
 		</div>
 	</div>
 {/if}
