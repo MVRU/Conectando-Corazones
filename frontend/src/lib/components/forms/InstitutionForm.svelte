@@ -16,6 +16,7 @@ TODOS:
 	import DatePicker from './DatePicker.svelte';
 	import Button from '../ui/Button.svelte';
 
+	// Validaciones
 	function isValidEmail(email: string): boolean {
 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	}
@@ -31,6 +32,7 @@ TODOS:
 		return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
 	}
 
+	// Estados
 	let sending = false;
 	let nombre = '';
 	let tipo = 'Escuela';
@@ -46,16 +48,11 @@ TODOS:
 	let repDocOtro = '';
 	let repDocNumero = '';
 	let repNacimiento = '';
-
-	// Campos que el usuario ya tocó/interactuó
 	let touched: Record<string, boolean> = {};
 
-	// Para marcar el campo como "touched" cuando pierde foco
 	function setTouched(field: string) {
 		touched = { ...touched, [field]: true };
 	}
-
-	// Para marcar el campo como "touched" cuando el usuario escribe después de haberlo tocado
 	function onInput(field: string) {
 		if (!touched[field]) touched = { ...touched, [field]: true };
 	}
@@ -122,7 +119,6 @@ TODOS:
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-		// Marca todos los campos como "touched"
 		for (const key in errors) touched[key] = true;
 		if (hasErrors) return;
 		sending = true;
@@ -132,51 +128,41 @@ TODOS:
 	}
 </script>
 
-<form
-	on:submit={handleSubmit}
-	class="
-		mx-auto
-		flex
-		w-full
-		max-w-[1100px]
-		flex-col
-		gap-8
-		rounded-3xl border
-		border-blue-50 bg-white
-		px-8 py-10
-		shadow-xl md:gap-10 md:px-16
-		md:py-14
-	"
->
-	<div class="mb-2 flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between">
-		<h2 class="text-3xl font-bold tracking-tight text-blue-900 drop-shadow-sm md:text-4xl">
-			Registro de Institución
-		</h2>
-	</div>
+<form on:submit={handleSubmit} class="mx-auto max-w-4xl">
+	<h2
+		class="text-center text-3xl font-extrabold tracking-tight text-[rgb(var(--base-color))] md:text-4xl"
+	>
+		Registro de institución
+	</h2>
+	<p class="mx-auto mb-10 mt-2 max-w-2xl text-center text-base text-gray-600">
+		Completá los datos de tu organización para comenzar a publicar proyectos solidarios.
+	</p>
 
-	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6">
-		<!-- Nombre -->
+	<!-- DATOS DE LA INSTITUCIÓN -->
+	<fieldset class="grid grid-cols-1 gap-8 md:grid-cols-2">
+		<!-- Nombre institución -->
 		<div>
-			<label for="nombre" class="font-medium text-[rgb(15,16,41)]"
+			<label for="nombre" class="font-semibold text-gray-800"
 				>Nombre de la institución <span class="text-red-600">*</span></label
 			>
 			<Input
 				id="nombre"
 				name="nombre"
 				bind:value={nombre}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 shadow-sm transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: Fundación Sembrar"
 				on:blur={() => setTouched('nombre')}
 				on:input={() => onInput('nombre')}
 				error={errors.nombre}
 			/>
 			{#if errors.nombre}
-				<div class="mt-1 text-xs text-red-600">{errors.nombre}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.nombre}</p>
 			{/if}
 		</div>
+
 		<!-- Tipo de institución -->
 		<div>
-			<label for="tipo" class="font-medium text-[rgb(15,16,41)]"
+			<label for="tipo" class="font-semibold text-gray-800"
 				>Tipo de institución <span class="text-red-600">*</span></label
 			>
 			<select
@@ -184,7 +170,7 @@ TODOS:
 				name="tipo"
 				bind:value={tipo}
 				on:blur={() => setTouched('tipo')}
-				class="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 			>
 				<option>Escuela</option>
 				<option>Hospital</option>
@@ -195,49 +181,51 @@ TODOS:
 				<option>Otro</option>
 			</select>
 		</div>
-		<!-- Otro tipo -->
+
 		{#if tipo === 'Otro'}
 			<div>
-				<label for="otroTipo" class="font-medium text-[rgb(15,16,41)]"
-					>Especifique <span class="text-red-600">*</span></label
+				<label for="otroTipo" class="font-semibold text-gray-800"
+					>Especificar tipo <span class="text-red-600">*</span></label
 				>
 				<Input
 					id="otroTipo"
 					name="otroTipo"
 					bind:value={otroTipo}
-					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Tipo de institución"
 					on:blur={() => setTouched('otroTipo')}
 					on:input={() => onInput('otroTipo')}
 					error={errors.otroTipo}
 				/>
 				{#if errors.otroTipo}
-					<div class="mt-1 text-xs text-red-600">{errors.otroTipo}</div>
+					<p class="mt-1 text-sm text-red-600">{errors.otroTipo}</p>
 				{/if}
 			</div>
 		{/if}
+
 		<!-- Username -->
 		<div>
-			<label for="username" class="font-medium text-[rgb(15,16,41)]"
-				>Nombre de usuario <span class="text-red-600">*</span></label
+			<label for="username" class="font-semibold text-gray-800"
+				>Usuario <span class="text-red-600">*</span></label
 			>
 			<Input
 				id="username"
 				name="username"
 				bind:value={username}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
-				placeholder="Ej: fundacion123"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+				placeholder="fundacion123"
 				on:blur={() => setTouched('username')}
 				on:input={() => onInput('username')}
 				error={errors.username}
 			/>
 			{#if errors.username}
-				<div class="mt-1 text-xs text-red-600">{errors.username}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.username}</p>
 			{/if}
 		</div>
+
 		<!-- Email -->
 		<div>
-			<label for="email" class="font-medium text-[rgb(15,16,41)]"
+			<label for="email" class="font-semibold text-gray-800"
 				>Email <span class="text-red-600">*</span></label
 			>
 			<Input
@@ -245,38 +233,40 @@ TODOS:
 				name="email"
 				type="email"
 				bind:value={email}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black placeholder-gray-400 shadow-sm transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="institucion@email.com"
 				on:blur={() => setTouched('email')}
 				on:input={() => onInput('email')}
 				error={errors.email}
 			/>
 			{#if errors.email}
-				<div class="mt-1 text-xs text-red-600">{errors.email}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.email}</p>
 			{/if}
 		</div>
+
 		<!-- CUIT -->
 		<div>
-			<label for="cuit" class="font-medium text-[rgb(15,16,41)]"
+			<label for="cuit" class="font-semibold text-gray-800"
 				>CUIT <span class="text-red-600">*</span></label
 			>
 			<Input
 				id="cuit"
 				name="cuit"
 				bind:value={cuit}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: 30-12345678-9"
 				on:blur={() => setTouched('cuit')}
 				on:input={() => onInput('cuit')}
 				error={errors.cuit}
 			/>
 			{#if errors.cuit}
-				<div class="mt-1 text-xs text-red-600">{errors.cuit}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.cuit}</p>
 			{/if}
 		</div>
+
 		<!-- Contraseña -->
 		<div>
-			<label for="password" class="font-medium text-[rgb(15,16,41)]"
+			<label for="password" class="font-semibold text-gray-800"
 				>Contraseña <span class="text-red-600">*</span></label
 			>
 			<Input
@@ -284,37 +274,38 @@ TODOS:
 				name="password"
 				type="password"
 				bind:value={password}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
 				on:blur={() => setTouched('password')}
 				on:input={() => onInput('password')}
 				error={errors.password}
 			/>
 			{#if errors.password}
-				<div class="mt-1 text-xs text-red-600">{errors.password}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.password}</p>
 			{/if}
 		</div>
+
 		<!-- Confirmar contraseña -->
 		<div>
-			<label for="repassword" class="font-medium text-[rgb(15,16,41)]"
-				>Confirmar contraseña <span class="text-red-600">*</span></label
+			<label for="repassword" class="font-semibold text-gray-800"
+				>Repetir contraseña <span class="text-red-600">*</span></label
 			>
 			<Input
 				id="repassword"
 				name="repassword"
 				type="password"
 				bind:value={repassword}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-blue-50 px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-300"
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
 				on:blur={() => setTouched('repassword')}
 				on:input={() => onInput('repassword')}
 				error={errors.repassword}
 			/>
 			{#if errors.repassword}
-				<div class="mt-1 text-xs text-red-600">{errors.repassword}</div>
+				<p class="mt-1 text-sm text-red-600">{errors.repassword}</p>
 			{/if}
 		</div>
-	</div>
+	</fieldset>
 
 	<!-- REPRESENTANTE LEGAL AL FINAL -->
 	<div
@@ -440,12 +431,12 @@ TODOS:
 			</div>
 		</div>
 	</div>
-	<!-- Botón -->
-	<div class="flex justify-end pt-6">
+	<!-- Botón de envío -->
+	<div class="mt-10 flex justify-end">
 		<Button
-			label={sending ? 'Enviando...' : 'Continuar'}
+			label={sending ? 'Enviando...' : 'Crear cuenta'}
 			disabled={sending || hasErrors}
-			customClass="px-8 py-3 rounded-xl  shadow-lg w-full md:w-auto"
+			customClass="w-full md:w-auto rounded-xl bg-[rgb(var(--base-color))] text-white font-semibold px-8 py-3 shadow-md hover:shadow-xl transition-all duration-300 disabled:opacity-60"
 		/>
 	</div>
 </form>

@@ -1,15 +1,3 @@
-<!--
-* Página: Signin
-        -*- Descripción: permite crear cuentas para instituciones o colaboradores.
-        -*- Dependiendo del rol seleccionado se muestra un formulario u otro.
-        -*- Incluye paso inicial de selección de rol antes de mostrar el formulario.
-
-TODOS:
-- [ ] Agregar validación de formulario y manejo de errores.
-- [ ] Implementar lógica de registro en el backend.
-- [ ] Mejorar diseño, accesibilidad y usabilidad del formulario -> todavía está muy fiero
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import InstitutionForm from '$lib/components/forms/InstitutionForm.svelte';
@@ -41,39 +29,71 @@ TODOS:
 	/>
 </svelte:head>
 
-<main class="relative mx-auto max-w-3xl space-y-6 px-8 py-10">
-	<h2 class="mb-4 text-3xl font-semibold text-[rgb(var(--base-color))]">Registrarse</h2>
+<!-- Fondo decorativo global con degradado suave -->
+<div
+	class="absolute inset-0 -z-10 min-h-screen bg-gradient-to-br from-[#eef2ff] via-white to-white"
+></div>
 
-	{#if stage === 'select'}
-		<p class="mb-4 text-gray-600">Elegí cómo registrarte para continuar:</p>
-		<div class="grid gap-6 sm:grid-cols-2">
-			<RoleCard
-				title="Institución"
-				description="Publicá y administrá proyectos solidarios."
-				icon="institution"
-				on:select={() => choose('institucion')}
-			/>
-			<RoleCard
-				title="Colaborador"
-				description="Sumate a proyectos como persona u organización."
-				icon="collaborator"
-				on:select={() => choose('colaborador')}
-			/>
-		</div>
-	{:else if ready}
-		<button
-			class="mb-4 cursor-pointer text-sm text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-300"
-			type="button"
-			on:click={() => (stage = 'select')}
-		>
-			&larr; Elegir otro tipo
-		</button>
-		{#if rol === 'institucion'}
-			<InstitutionForm />
-		{:else}
-			<CollaboratorForm />
+<main class="relative z-10 mx-auto min-h-screen w-full max-w-5xl px-6 py-20 sm:px-10">
+	<section class="rounded-3xl bg-white p-10 shadow-xl ring-1 ring-gray-200 sm:p-12">
+		{#if stage === 'select'}
+			<h1
+				class="mb-4 text-center text-4xl font-extrabold tracking-tight text-[rgb(var(--base-color))]"
+			>
+				Unite a <span class="whitespace-nowrap">Conectando Corazones</span>
+			</h1>
+			<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
+				Creá tu cuenta para publicar proyectos solidarios o sumarte como colaborador. Juntos,
+				hacemos la diferencia.
+			</p>
+
+			<p class="mb-6 text-center text-base font-medium text-gray-700">¿Cómo querés registrarte?</p>
+
+			<div class="grid gap-6 sm:grid-cols-2">
+				<RoleCard
+					title="Soy una institución"
+					description="Quiero publicar, administrar y visibilizar proyectos solidarios."
+					icon="institution"
+					on:select={() => choose('institucion')}
+				/>
+				<RoleCard
+					title="Soy colaborador/a"
+					description="Quiero participar, ayudar o sumarme a iniciativas solidarias."
+					icon="collaborator"
+					on:select={() => choose('colaborador')}
+				/>
+			</div>
+		{:else if ready}
+			<!-- Ocultamos el título y subtítulo tras elegir el rol -->
+			<button
+				class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+				type="button"
+				on:click={() => (stage = 'select')}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					class="h-4 w-4"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M15 19l-7-7 7-7"
+					/>
+				</svg>
+				Volver a elegir tipo de cuenta
+			</button>
+
+			{#if rol === 'institucion'}
+				<InstitutionForm />
+			{:else}
+				<CollaboratorForm />
+			{/if}
 		{/if}
-	{/if}
+	</section>
 
 	<Loader size={80} loading={!ready} />
 </main>
