@@ -16,6 +16,7 @@ TODOS:
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/forms/DatePicker.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { goto } from '$app/navigation';
 
 	let sending = false;
 	let tipo: 'persona' | 'organizacion' = 'persona';
@@ -100,17 +101,20 @@ TODOS:
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
+	// Función de envío
 	function handleSubmit(event: Event) {
 		event.preventDefault();
 
+		// Verificar si hay errores
 		if (hasErrors) return;
 
 		sending = true;
 
-		// Simular envío
+		// Lógica de envío real a API
+
 		setTimeout(() => {
 			sending = false;
-			alert('Formulario enviado');
+			goto('/verify-identity');
 		}, 1200);
 	}
 </script>

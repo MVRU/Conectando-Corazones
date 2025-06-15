@@ -15,6 +15,7 @@ TODOS:
 	import Input from '../ui/Input.svelte';
 	import DatePicker from './DatePicker.svelte';
 	import Button from '../ui/Button.svelte';
+	import { goto } from '$app/navigation';
 
 	// Validaciones
 	function isValidEmail(email: string): boolean {
@@ -95,7 +96,7 @@ TODOS:
 
 		setTimeout(() => {
 			sending = false;
-			alert('Formulario enviado');
+			goto('/verify-identity');
 		}, 1200);
 	}
 </script>
