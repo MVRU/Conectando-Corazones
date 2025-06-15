@@ -1,4 +1,4 @@
-import type { Step } from '$lib/models/Step';
+import type { Step } from '$lib/types/Step';
 
 export const steps: Step[] = [
     {

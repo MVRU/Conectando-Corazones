@@ -1,4 +1,4 @@
-import type { Testimonial } from '$lib/models/Testimonial';
+import type { Testimonial } from '$lib/types/Testimonial';
 
 export const testimonials: Testimonial[] = [
     {

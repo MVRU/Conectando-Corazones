@@ -1,99 +1,120 @@
-<!--
-* Componente: InstitutionForm
-  -*- Mejora: UX profesional y validaciones modernas.
-  -*- Errores solo al interactuar/tocar campos.
-
-TODOS:
-  - [ ] Validar CUIT con regex (formato argentino)
-  - [ ] Validar fecha de nacimiento (mayor de 18 años)
-  - [ ] Mejorar estilos y accesibilidad -> todavía está muy fiero
-  - [ ] Agregar animaciones sutiles al enviar formulario
-  - [ ] Implementar lógica de envío real (API)
--->
-
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
-	import DatePicker from './DatePicker.svelte';
+	import DatePicker from '../ui/DatePicker.svelte';
 	import Button from '../ui/Button.svelte';
 	import { goto } from '$app/navigation';
 
-	// Validaciones
-	function isValidEmail(email: string): boolean {
-		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	}
+	import {
+		isValidEmail,
+		isValidPassword,
+		isValidUsername,
+		isValidCuit,
+		isAdult,
+		isValidName,
+		isValidLastName,
+		isValidDni,
+		ERROR_MESSAGES
+	} from '$lib/utils/validators';
 
-	function isAdult(date: string): boolean {
-		if (!date) return false;
-		const birth = new Date(date);
-		const today = new Date();
-		const age = today.getFullYear() - birth.getFullYear();
-		const m = today.getMonth() - birth.getMonth();
-		return age > 18 || (age === 18 && m >= 0 && today.getDate() >= birth.getDate());
-	}
-
-	function isValidUsername(username: string): boolean {
-		return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
-	}
-
-	function isValidCuit(cuit: string): boolean {
-		const cuitRegex = /^(\d{2})-\d{7,8}-\d$/;
-		return cuitRegex.test(cuit);
-	}
-
-	// Estados
+	// Estados iniciales
 	let sending = false;
-	let nombre = '';
-	let tipo = 'Escuela';
-	let otroTipo = '';
-	let username = '';
-	let email = '';
-	let cuit = '';
-	let password = '';
-	let repassword = '';
-	let repNombre = '';
-	let repApellido = '';
-	let repDocTipo = 'DNI';
-	let repDocOtro = '';
-	let repDocNumero = '';
-	let repNacimiento = '';
 
-	// Validaciones
-	$: errors = {
-		nombre: nombre.trim() ? '' : 'El nombre es obligatorio',
-		otroTipo: tipo === 'Otro' && otroTipo.trim() === '' ? 'Debe especificar el tipo' : '',
-		username: !username.trim()
-			? 'El nombre de usuario es obligatorio'
-			: !isValidUsername(username)
-				? 'Solo letras, números, ".", "-", "_" (3-30 caracteres)'
-				: '',
-		email: !email.trim() ? 'El email es obligatorio' : !isValidEmail(email) ? 'Email inválido' : '',
-		cuit: cuit.trim() && isValidCuit(cuit) ? '' : 'CUIT inválido',
-		password: password.length < 8 ? 'Debe tener al menos 8 caracteres' : '',
-		repassword: repassword !== password ? 'Las contraseñas no coinciden' : '',
-		repNombre: repNombre.trim() ? '' : 'El nombre es obligatorio',
-		repApellido: repApellido.trim() ? '' : 'El apellido es obligatorio',
-		repDocOtro:
-			repDocTipo === 'Otro' && repDocOtro.trim() === '' ? 'Debe especificar el documento' : '',
-		repDocNumero: repDocNumero.trim() ? '' : 'El número es obligatorio',
-		repNacimiento: repNacimiento && isAdult(repNacimiento) ? '' : 'Debe ser mayor de 18 años'
+	let institution = {
+		nombre: '',
+		tipo: 'Escuela',
+		otroTipo: '',
+		username: '',
+		email: '',
+		cuit: '',
+		password: '',
+		repassword: ''
 	};
 
-	$: hasEmptyFields = Object.values(errors).some((error) => error !== '');
+	let representative = {
+		repNombre: '',
+		repApellido: '',
+		repDocTipo: 'DNI',
+		repDocOtro: '',
+		repDocNumero: '',
+		repNacimiento: ''
+	};
 
-	// Verificar si hay errores en los campos
+	// Validación reactiva de errores
+	$: errors = {
+		nombre: institution.nombre.trim()
+			? isValidName(institution.nombre)
+				? ''
+				: ERROR_MESSAGES.nameInvalid
+			: ERROR_MESSAGES.required,
+
+		otroTipo:
+			institution.tipo === 'Otro' && institution.otroTipo.trim() === ''
+				? ERROR_MESSAGES.specifyInstitutionType
+				: '',
+
+		username: !institution.username.trim()
+			? ERROR_MESSAGES.required
+			: !isValidUsername(institution.username)
+				? ERROR_MESSAGES.usernameInvalid
+				: '',
+
+		email: !institution.email.trim()
+			? ERROR_MESSAGES.required
+			: !isValidEmail(institution.email)
+				? ERROR_MESSAGES.emailInvalid
+				: '',
+
+		cuit:
+			institution.cuit.trim() && isValidCuit(institution.cuit) ? '' : ERROR_MESSAGES.cuitInvalid,
+
+		password:
+			institution.password.length < 8
+				? ERROR_MESSAGES.passwordRequirements
+				: !isValidPassword(institution.password)
+					? ERROR_MESSAGES.passwordRequirements
+					: '',
+
+		repassword:
+			institution.repassword !== institution.password ? ERROR_MESSAGES.passwordMismatch : '',
+
+		repNombre: !representative.repNombre.trim()
+			? ERROR_MESSAGES.required
+			: !isValidName(representative.repNombre)
+				? ERROR_MESSAGES.nameInvalid
+				: '',
+
+		repApellido: !representative.repApellido.trim()
+			? ERROR_MESSAGES.required
+			: !isValidLastName(representative.repApellido)
+				? ERROR_MESSAGES.lastNameInvalid
+				: '',
+
+		repDocOtro:
+			representative.repDocTipo === 'Otro' && representative.repDocOtro.trim() === ''
+				? ERROR_MESSAGES.specifyDocument
+				: '',
+
+		repDocNumero: !representative.repDocNumero.trim()
+			? ERROR_MESSAGES.required
+			: representative.repDocTipo === 'DNI' && !isValidDni(representative.repDocNumero)
+				? ERROR_MESSAGES.dniInvalid
+				: '',
+
+		repNacimiento:
+			representative.repNacimiento && isAdult(representative.repNacimiento)
+				? ''
+				: ERROR_MESSAGES.ageRequirement
+	};
+
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
-	// Función de envío
+	// Manejo del envío del formulario
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-
-		// Verificar si hay errores
 		if (hasErrors) return;
-
 		sending = true;
 
-		// Lógica de envío real a API
-
+		// Simulamos una llamada a la API
 		setTimeout(() => {
 			sending = false;
 			goto('/verify-identity');
@@ -119,7 +140,7 @@ TODOS:
 			<Input
 				id="nombre"
 				name="nombre"
-				bind:value={nombre}
+				bind:value={institution.nombre}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 shadow-sm transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: Fundación Sembrar"
 				error={errors.nombre}
@@ -134,9 +155,10 @@ TODOS:
 			<select
 				id="tipo"
 				name="tipo"
-				bind:value={tipo}
+				bind:value={institution.tipo}
 				class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 			>
+				<option value="">Selecciona tipo</option>
 				<option>Escuela</option>
 				<option>Hospital</option>
 				<option>Comedor</option>
@@ -147,7 +169,7 @@ TODOS:
 			</select>
 		</div>
 
-		{#if tipo === 'Otro'}
+		{#if institution.tipo === 'Otro'}
 			<div>
 				<label for="otroTipo" class="font-semibold text-gray-800">
 					Especificar tipo <span class="text-red-600">*</span>
@@ -155,7 +177,7 @@ TODOS:
 				<Input
 					id="otroTipo"
 					name="otroTipo"
-					bind:value={otroTipo}
+					bind:value={institution.otroTipo}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Tipo de institución"
 					error={errors.otroTipo}
@@ -171,7 +193,7 @@ TODOS:
 			<Input
 				id="username"
 				name="username"
-				bind:value={username}
+				bind:value={institution.username}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="fundacion123"
 				error={errors.username}
@@ -187,7 +209,7 @@ TODOS:
 				id="email"
 				name="email"
 				type="email"
-				bind:value={email}
+				bind:value={institution.email}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="institucion@email.com"
 				error={errors.email}
@@ -202,7 +224,7 @@ TODOS:
 			<Input
 				id="cuit"
 				name="cuit"
-				bind:value={cuit}
+				bind:value={institution.cuit}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: 30-12345678-9"
 				error={errors.cuit}
@@ -218,7 +240,7 @@ TODOS:
 				id="password"
 				name="password"
 				type="password"
-				bind:value={password}
+				bind:value={institution.password}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
 				error={errors.password}
@@ -234,7 +256,7 @@ TODOS:
 				id="repassword"
 				name="repassword"
 				type="password"
-				bind:value={repassword}
+				bind:value={institution.repassword}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
 				error={errors.repassword}
@@ -242,6 +264,7 @@ TODOS:
 		</div>
 	</fieldset>
 
+	<!-- DATOS DEL REPRESENTANTE LEGAL -->
 	<div
 		class="mt-4 flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 px-6 py-7 shadow-sm"
 	>
@@ -253,13 +276,14 @@ TODOS:
 				stroke-width="2"
 				viewBox="0 0 24 24"
 			>
-				<circle cx="12" cy="7" r="4" /><path d="M5.5 21v-2a6.5 6.5 0 0113 0v2" />
+				<circle cx="12" cy="7" r="4" />
+				<path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
 			</svg>
 			Datos del representante legal
 		</legend>
 
-		<!-- Datos del representante -->
 		<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+			<!-- Nombre -->
 			<div>
 				<label for="repNombre" class="font-medium text-[rgb(15,16,41)]">
 					Nombre <span class="text-red-600">*</span>
@@ -267,12 +291,14 @@ TODOS:
 				<Input
 					id="repNombre"
 					name="repNombre"
-					bind:value={repNombre}
+					bind:value={representative.repNombre}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Nombre del representante"
 					error={errors.repNombre}
 				/>
 			</div>
+
+			<!-- Apellido -->
 			<div>
 				<label for="repApellido" class="font-medium text-[rgb(15,16,41)]">
 					Apellido <span class="text-red-600">*</span>
@@ -280,12 +306,14 @@ TODOS:
 				<Input
 					id="repApellido"
 					name="repApellido"
-					bind:value={repApellido}
+					bind:value={representative.repApellido}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Apellido del representante"
 					error={errors.repApellido}
 				/>
 			</div>
+
+			<!-- Tipo de documento -->
 			<div>
 				<label for="repDocTipo" class="font-medium text-[rgb(15,16,41)]">
 					Tipo de documento <span class="text-red-600">*</span>
@@ -293,7 +321,7 @@ TODOS:
 				<select
 					id="repDocTipo"
 					name="repDocTipo"
-					bind:value={repDocTipo}
+					bind:value={representative.repDocTipo}
 					class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				>
 					<option>DNI</option>
@@ -301,7 +329,8 @@ TODOS:
 					<option>Otro</option>
 				</select>
 			</div>
-			{#if repDocTipo === 'Otro'}
+
+			{#if representative.repDocTipo === 'Otro'}
 				<div>
 					<label for="repDocOtro" class="font-medium text-[rgb(15,16,41)]">
 						Especifique <span class="text-red-600">*</span>
@@ -309,13 +338,15 @@ TODOS:
 					<Input
 						id="repDocOtro"
 						name="repDocOtro"
-						bind:value={repDocOtro}
+						bind:value={representative.repDocOtro}
 						customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 						placeholder="Tipo de documento"
 						error={errors.repDocOtro}
 					/>
 				</div>
 			{/if}
+
+			<!-- Número de documento -->
 			<div>
 				<label for="repDocNumero" class="font-medium text-[rgb(15,16,41)]">
 					Número de documento <span class="text-red-600">*</span>
@@ -323,12 +354,14 @@ TODOS:
 				<Input
 					id="repDocNumero"
 					name="repDocNumero"
-					bind:value={repDocNumero}
+					bind:value={representative.repDocNumero}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Ej: 12345678"
 					error={errors.repDocNumero}
 				/>
 			</div>
+
+			<!-- Fecha de nacimiento -->
 			<div>
 				<label for="repNacimiento" class="font-medium text-[rgb(15,16,41)]">
 					Fecha de nacimiento <span class="text-red-600">*</span>
@@ -336,7 +369,7 @@ TODOS:
 				<DatePicker
 					id="repNacimiento"
 					name="repNacimiento"
-					bind:value={repNacimiento}
+					bind:value={representative.repNacimiento}
 					error={errors.repNacimiento}
 				/>
 			</div>
