@@ -2,15 +2,14 @@
 * Componente: CollaboratorForm
   -*- Descripción: formulario de registro de colaboradores.
   -*- Soporta registro individual u organización con representante.
-  -*- Usa funciones compartidas para validaciones (email y mayoría de edad).
-
+  -*- Errores visibles siempre, sin necesidad de tocar campos.
 TODOS:
-	- [ ] Validar CUIT/CUIL con regex (opcional).
-	- [ ] Mejorar accesibilidad (roles ARIA, etiquetas).
-  	- [ ] Manejo de errores más robusto (backend).
-  	- [ ] Integración con API para registro.
-  	- [ ] Estilos y diseño responsivo -> mejorar todavía está fiero
-  	- [ ] Pruebas unitarias y de integración.
+    - [ ] Validar CUIT/CUIL con regex (opcional).
+    - [ ] Mejorar accesibilidad (roles ARIA, etiquetas).
+      - [ ] Manejo de errores más robusto (backend).
+      - [ ] Integración con API para registro.
+      - [ ] Estilos y diseño responsivo -> mejorar todavía está fiero
+      - [ ] Pruebas unitarias y de integración.
 -->
 
 <script lang="ts">
@@ -18,9 +17,38 @@ TODOS:
 	import DatePicker from '$lib/components/forms/DatePicker.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 
+	let sending = false;
+	let tipo: 'persona' | 'organizacion' = 'persona';
+
+	// Datos persona
+	let nombre = '';
+	let apellido = '';
+	let docTipo = 'DNI';
+	let docOtro = '';
+	let docNumero = '';
+	let nacimiento = '';
+	let cuil = '';
+
+	// Datos organización
+	let razonSocial = '';
+	let cuit = '';
+	let repNombre = '';
+	let repApellido = '';
+	let repDocTipo = 'DNI';
+	let repDocOtro = '';
+	let repDocNumero = '';
+	let repNacimiento = '';
+
+	// Usuario y contraseña
+	let username = '';
+	let email = '';
+	let password = '';
+	let repassword = '';
+
 	function isValidEmail(email: string): boolean {
 		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 	}
+
 	function isAdult(date: string): boolean {
 		if (!date) return false;
 		const birth = new Date(date);
@@ -30,35 +58,10 @@ TODOS:
 		return age > 18 || (age === 18 && m >= 0 && today.getDate() >= birth.getDate());
 	}
 
-	let tipo: 'persona' | 'organizacion' = 'persona';
-
-	let nombre = '',
-		apellido = '',
-		docTipo = 'DNI',
-		docOtro = '',
-		docNumero = '',
-		nacimiento = '',
-		cuil = '';
-	let razonSocial = '',
-		cuit = '',
-		repNombre = '',
-		repApellido = '',
-		repDocTipo = 'DNI',
-		repDocOtro = '',
-		repDocNumero = '',
-		repNacimiento = '';
-	let username = '',
-		email = '',
-		password = '',
-		repassword = '';
-	let sending = false;
-
-	let errors: Record<string, string> = {};
-
 	$: errors = {
+		// Persona
 		nombre: tipo === 'persona' ? (nombre.trim() ? '' : 'Requerido') : '',
 		apellido: tipo === 'persona' ? (apellido.trim() ? '' : 'Requerido') : '',
-		docTipo: '',
 		docOtro:
 			tipo === 'persona' && docTipo === 'Otro' && !docOtro.trim() ? 'Especifique el documento' : '',
 		docNumero: tipo === 'persona' ? (docNumero.trim() ? '' : 'Documento obligatorio') : '',
@@ -69,11 +72,12 @@ TODOS:
 					: 'Debe ser mayor de 18 años'
 				: '',
 		cuil: tipo === 'persona' ? (cuil.trim() ? '' : 'CUIL obligatorio') : '',
+
+		// Organización
 		razonSocial: tipo === 'organizacion' ? (razonSocial.trim() ? '' : 'Requerido') : '',
 		cuit: tipo === 'organizacion' ? (cuit.trim() ? '' : 'CUIT obligatorio') : '',
 		repNombre: tipo === 'organizacion' ? (repNombre.trim() ? '' : 'Requerido') : '',
 		repApellido: tipo === 'organizacion' ? (repApellido.trim() ? '' : 'Requerido') : '',
-		repDocTipo: '',
 		repDocOtro:
 			tipo === 'organizacion' && repDocTipo === 'Otro' && !repDocOtro.trim()
 				? 'Especifique el documento'
@@ -86,18 +90,28 @@ TODOS:
 					? ''
 					: 'Debe ser mayor de 18 años'
 				: '',
+
+		// Credenciales
 		username: username.trim() ? '' : 'Requerido',
-		email: email && isValidEmail(email) ? '' : 'Email inválido',
-		password: password ? '' : 'Requerido',
-		repassword: repassword && repassword === password ? '' : 'Las contraseñas no coinciden'
+		email: email.trim() && isValidEmail(email) ? '' : 'Email inválido',
+		password: password.length >= 8 ? '' : 'Mínimo 8 caracteres',
+		repassword: repassword === password ? '' : 'Las contraseñas no coinciden'
 	};
+
+	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-		if (Object.values(errors).some(Boolean)) return;
+
+		if (hasErrors) return;
+
 		sending = true;
-		// Procesar datos...
-		sending = false;
+
+		// Simular envío
+		setTimeout(() => {
+			sending = false;
+			alert('Formulario enviado');
+		}, 1200);
 	}
 </script>
 
@@ -132,7 +146,7 @@ TODOS:
 				<label for="nombre" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 					Nombre <span class="text-red-600">*</span>
 				</label>
-				<Input id="nombre" bind:value={nombre} required error={errors.nombre} />
+				<Input id="nombre" bind:value={nombre} error={errors.nombre} />
 			</div>
 			<div>
 				<label
@@ -141,7 +155,7 @@ TODOS:
 				>
 					Apellido <span class="text-red-600">*</span>
 				</label>
-				<Input id="apellido" bind:value={apellido} required error={errors.apellido} />
+				<Input id="apellido" bind:value={apellido} error={errors.apellido} />
 			</div>
 
 			<!-- Documento -->
@@ -167,10 +181,9 @@ TODOS:
 					>
 						Especifique <span class="text-red-600">*</span>
 					</label>
-					<Input id="docOtro" bind:value={docOtro} required error={errors.docOtro} />
+					<Input id="docOtro" bind:value={docOtro} error={errors.docOtro} />
 				</div>
 			{/if}
-
 			<div>
 				<label
 					for="docNumero"
@@ -178,7 +191,7 @@ TODOS:
 				>
 					Número <span class="text-red-600">*</span>
 				</label>
-				<Input id="docNumero" bind:value={docNumero} required error={errors.docNumero} />
+				<Input id="docNumero" bind:value={docNumero} error={errors.docNumero} />
 			</div>
 			<div>
 				<label
@@ -187,13 +200,13 @@ TODOS:
 				>
 					Fecha de nacimiento <span class="text-red-600">*</span>
 				</label>
-				<DatePicker id="nacimiento" bind:value={nacimiento} required error={errors.nacimiento} />
+				<DatePicker id="nacimiento" bind:value={nacimiento} error={errors.nacimiento} />
 			</div>
 			<div>
 				<label for="cuil" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 					CUIL <span class="text-red-600">*</span>
 				</label>
-				<Input id="cuil" bind:value={cuil} required error={errors.cuil} />
+				<Input id="cuil" bind:value={cuil} error={errors.cuil} />
 			</div>
 		</fieldset>
 	{:else}
@@ -206,13 +219,13 @@ TODOS:
 				>
 					Razón social <span class="text-red-600">*</span>
 				</label>
-				<Input id="razonSocial" bind:value={razonSocial} required error={errors.razonSocial} />
+				<Input id="razonSocial" bind:value={razonSocial} error={errors.razonSocial} />
 			</div>
 			<div class="md:col-span-2">
 				<label for="cuit" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 					CUIT <span class="text-red-600">*</span>
 				</label>
-				<Input id="cuit" bind:value={cuit} required error={errors.cuit} />
+				<Input id="cuit" bind:value={cuit} error={errors.cuit} />
 			</div>
 		</fieldset>
 	{/if}
@@ -223,19 +236,19 @@ TODOS:
 			<label for="username" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 				Nombre de usuario <span class="text-red-600">*</span>
 			</label>
-			<Input id="username" bind:value={username} required error={errors.username} />
+			<Input id="username" bind:value={username} error={errors.username} />
 		</div>
 		<div>
 			<label for="email" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 				Email <span class="text-red-600">*</span>
 			</label>
-			<Input id="email" type="email" bind:value={email} required error={errors.email} />
+			<Input id="email" type="email" bind:value={email} error={errors.email} />
 		</div>
 		<div>
 			<label for="password" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
 				Contraseña <span class="text-red-600">*</span>
 			</label>
-			<Input id="password" type="password" bind:value={password} required error={errors.password} />
+			<Input id="password" type="password" bind:value={password} error={errors.password} />
 		</div>
 		<div>
 			<label
@@ -244,20 +257,28 @@ TODOS:
 			>
 				Confirmar contraseña <span class="text-red-600">*</span>
 			</label>
-			<Input
-				id="repassword"
-				type="password"
-				bind:value={repassword}
-				required
-				error={errors.repassword}
-			/>
+			<Input id="repassword" type="password" bind:value={repassword} error={errors.repassword} />
 		</div>
 	</div>
 
 	<!-- Datos del representante legal (solo si es organización) -->
 	{#if tipo === 'organizacion'}
-		<div class="rounded-2xl border border-blue-100 bg-blue-50/60 px-6 py-8 shadow-sm">
-			<h3 class="mb-4 text-base font-semibold text-blue-800">Datos del representante legal</h3>
+		<div
+			class="mt-4 flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 px-6 py-7 shadow-sm"
+		>
+			<legend class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800">
+				<svg
+					class="h-5 w-5 text-blue-500"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					viewBox="0 0 24 24"
+				>
+					<circle cx="12" cy="7" r="4" />
+					<path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
+				</svg>
+				Datos del representante legal
+			</legend>
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<div>
 					<label
@@ -266,7 +287,7 @@ TODOS:
 					>
 						Nombre <span class="text-red-600">*</span>
 					</label>
-					<Input id="repNombre" bind:value={repNombre} required error={errors.repNombre} />
+					<Input id="repNombre" bind:value={repNombre} error={errors.repNombre} />
 				</div>
 				<div>
 					<label
@@ -275,7 +296,7 @@ TODOS:
 					>
 						Apellido <span class="text-red-600">*</span>
 					</label>
-					<Input id="repApellido" bind:value={repApellido} required error={errors.repApellido} />
+					<Input id="repApellido" bind:value={repApellido} error={errors.repApellido} />
 				</div>
 				<div>
 					<label
@@ -302,7 +323,7 @@ TODOS:
 						>
 							Especifique <span class="text-red-600">*</span>
 						</label>
-						<Input id="repDocOtro" bind:value={repDocOtro} required error={errors.repDocOtro} />
+						<Input id="repDocOtro" bind:value={repDocOtro} error={errors.repDocOtro} />
 					</div>
 				{/if}
 				<div>
@@ -312,7 +333,7 @@ TODOS:
 					>
 						Número de documento <span class="text-red-600">*</span>
 					</label>
-					<Input id="repDocNumero" bind:value={repDocNumero} required error={errors.repDocNumero} />
+					<Input id="repDocNumero" bind:value={repDocNumero} error={errors.repDocNumero} />
 				</div>
 				<div>
 					<label
@@ -321,20 +342,18 @@ TODOS:
 					>
 						Fecha de nacimiento <span class="text-red-600">*</span>
 					</label>
-					<DatePicker
-						id="repNacimiento"
-						bind:value={repNacimiento}
-						required
-						error={errors.repNacimiento}
-					/>
+					<DatePicker id="repNacimiento" bind:value={repNacimiento} error={errors.repNacimiento} />
 				</div>
 			</div>
 		</div>
 	{/if}
 
-	<Button
-		label="Continuar"
-		disabled={sending || Object.values(errors).some(Boolean)}
-		customClass="w-full mt-8"
-	/>
+	<!-- Botón de envío -->
+	<div class="mt-10 flex justify-end">
+		<Button
+			label={sending ? 'Enviando...' : 'Continuar'}
+			disabled={sending || hasErrors}
+			customClass="w-full md:w-auto rounded-xl bg-[rgb(var(--base-color))] text-white font-semibold px-8 py-3 shadow-md hover:shadow-xl transition-all duration-300 disabled:opacity-60"
+		/>
+	</div>
 </form>
