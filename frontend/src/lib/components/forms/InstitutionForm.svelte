@@ -270,7 +270,7 @@
 	>
 		<legend class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800">
 			<svg
-				class="h-5 w-5 text-blue-500"
+				class="h-5 w-5 text-blue-800"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"

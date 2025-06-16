@@ -56,7 +56,9 @@
 	on:submit={handleSubmit}
 	class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-200 md:p-10"
 >
-	<h3 class="mb-6 text-center text-xl font-semibold text-gray-800">Dirección de la institución</h3>
+	<h3 class="mb-10 text-center text-xl font-semibold text-gray-800">
+		Dirección de la institución u organización
+	</h3>
 
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<!-- Calle -->
