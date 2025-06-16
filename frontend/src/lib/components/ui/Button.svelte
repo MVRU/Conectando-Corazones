@@ -35,6 +35,7 @@ TODO:
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
 	export let customAriaLabel: string = `Ir a ${href}`; // Para accesibilidad
+	export let type: 'button' | 'submit' = 'button';
 
 	/* ---------- mapas de tamaño para size ---------- */
 	const rootSize = {
@@ -48,6 +49,7 @@ TODO:
 <!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
+		{type}
 		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
@@ -89,6 +91,7 @@ TODO:
 	<!-- ! Variante Secondary -->
 {:else if variant === 'secondary'}
 	<button
+		{type}
 		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
@@ -130,6 +133,7 @@ TODO:
 	<!-- ! Variante Ghost -->
 {:else}
 	<button
+		{type}
 		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
 		class={clsx(
 			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',

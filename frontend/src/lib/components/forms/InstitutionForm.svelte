@@ -2,7 +2,8 @@
 	import Input from '../ui/Input.svelte';
 	import DatePicker from '../ui/DatePicker.svelte';
 	import Button from '../ui/Button.svelte';
-	import { goto } from '$app/navigation';
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
 
 	import {
 		isValidEmail,
@@ -108,16 +109,14 @@
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
-	// Manejo del envío del formulario
 	function handleSubmit(event: Event) {
 		event.preventDefault();
 		if (hasErrors) return;
 		sending = true;
 
-		// Simulamos una llamada a la API
 		setTimeout(() => {
 			sending = false;
-			goto('/verify-identity');
+			dispatch('submit');
 		}, 1200);
 	}
 </script>
@@ -379,6 +378,7 @@
 	<!-- Botón de envío -->
 	<div class="mt-10 flex justify-end">
 		<Button
+			type="submit"
 			label={sending ? 'Enviando...' : 'Continuar'}
 			disabled={sending || hasErrors}
 			customClass="w-full md:w-auto rounded-xl bg-[rgb(var(--base-color))] text-white font-semibold px-8 py-3 shadow-md hover:shadow-xl transition-all duration-300 disabled:opacity-60"

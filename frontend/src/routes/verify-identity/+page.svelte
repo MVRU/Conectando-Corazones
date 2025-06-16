@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Stepper from '$lib/components/ui/Stepper.svelte';
 
 	let estado = 'cargando'; // posibles valores: 'cargando', 'exito', 'error'
 
@@ -40,8 +41,13 @@
 
 <!-- Estado: Cargando -->
 {#if estado === 'cargando'}
-	<div class="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-		<div></div>
+	<!-- Stepper -->
+	<div class="mx-auto mb-10 mt-10 max-w-4xl px-4 sm:px-8 md:px-12 lg:px-20">
+		<Stepper current={3} total={4} />
+	</div>
+
+	<!-- Loader -->
+	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<Loader loading={true} size={80} message="" />
 		<p class="animate-fade-in mt-8 max-w-md text-lg text-gray-700 delay-300">
 			Estamos conectándonos con ARCA para validar tus datos.
@@ -51,6 +57,9 @@
 
 <!-- Estado: Éxito -->
 {#if estado === 'exito'}
+	<div class="mb-20">
+		<Stepper current={3} total={4} />
+	</div>
 	<div class="flex min-h-screen flex-col items-center justify-center px-4 text-center">
 		<div
 			class="transform rounded-full bg-green-100 p-4 shadow-xl transition-transform duration-300 hover:scale-105"
