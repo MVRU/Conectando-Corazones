@@ -1,17 +1,8 @@
 <script lang="ts">
 	import AddressForm from '$lib/components/forms/AddressForm.svelte';
-	import { goto } from '$app/navigation';
 
 	// Estado para controlar la carga
 	let sending = false;
-
-	interface Direccion {
-		calle: string;
-		numero: string;
-		piso: string;
-		provincia: string;
-		ciudad: string;
-	}
 </script>
 
 <!-- Fondo principal -->
