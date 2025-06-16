@@ -24,3 +24,11 @@ export function searchCities(query: string): string[] {
         .filter((loc) => loc.name.toLowerCase().includes(lowerQuery))
         .map((loc) => loc.name);
 }
+
+/**
+ * -!- Devuelve todas las provincias disponibles
+ */
+
+export function getAllProvinceNames(): string[] {
+    return provinces.map((p) => p.name);
+}

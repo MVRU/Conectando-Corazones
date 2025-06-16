@@ -28,6 +28,10 @@ export const ERROR_MESSAGES = {
     cityInvalid: 'Ciudad inválida. Ingresá un nombre válido.',
     provinceInvalid: 'Provincia inválida. Seleccioná una opción.',
     cityNotInProvince: 'La ciudad seleccionada no pertenece a la provincia elegida.',
+    specifyOtherContact: 'Debe especificar el tipo de contacto',
+    phoneInvalid: 'Número de teléfono inválido',
+    urlInvalid: 'URL inválida',
+    contactDuplicate: 'Ya existe un método de contacto con ese tipo y valor',
 };
 
 /**
@@ -155,4 +159,19 @@ export function isValidCityInProvince(city: string, provinceName: string): boole
     if (!city || !provinceName) return false;
     const location = locations.find((loc) => loc.name === city);
     return !!location && location.province.name === provinceName;
+}
+
+/**
+ * -!- Valida un número de teléfono con prefijo internacional.
+ */
+export function isValidInternationalPhone(phone: string): boolean {
+    if (!phone || !phone.trim()) return false;
+
+    const phoneRegex = /^\+?\d{1,3}[\s\-]?\d{1,4}[\s\-]?\d{3}[\s\-]?\d{4}$/;
+    return phoneRegex.test(phone.replace(/\s|-|\(|\)/g, '')); // Limpia espacios y formateadores
+}
+
+export function isValidWeb(url: string): boolean {
+    const urlRegex = /^(https?:\/\/)?([\w\-])+\.{1}[\w\-]+(\.[\w\-]+)*(:[0-9]+)?(\/.*)?$/;
+    return urlRegex.test(url);
 }

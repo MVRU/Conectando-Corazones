@@ -1,23 +1,22 @@
-<!--
-* Componente: CollaboratorForm
-  -*- Descripción: formulario de registro de colaboradores.
-  -*- Soporta registro individual u organización con representante.
-  -*- Errores visibles siempre, sin necesidad de tocar campos.
-TODOS:
-    - [ ] Validar CUIT/CUIL con regex (opcional).
-    - [ ] Mejorar accesibilidad (roles ARIA, etiquetas).
-      - [ ] Manejo de errores más robusto (backend).
-      - [ ] Integración con API para registro.
-      - [ ] Estilos y diseño responsivo -> mejorar todavía está fiero
-      - [ ] Pruebas unitarias y de integración.
--->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/forms/DatePicker.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { goto } from '$app/navigation';
 
+	import {
+		isValidEmail,
+		isValidPassword,
+		isValidName,
+		isValidLastName,
+		isValidDni,
+		isAdult,
+		isValidUsername,
+		isValidCuit,
+		ERROR_MESSAGES
+	} from '$lib/utils/validators';
+
+	// Estados iniciales
 	let sending = false;
 	let tipo: 'persona' | 'organizacion' = 'persona';
 
@@ -46,72 +45,118 @@ TODOS:
 	let password = '';
 	let repassword = '';
 
-	function isValidEmail(email: string): boolean {
-		return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-	}
-
-	function isAdult(date: string): boolean {
-		if (!date) return false;
-		const birth = new Date(date);
-		const today = new Date();
-		const age = today.getFullYear() - birth.getFullYear();
-		const m = today.getMonth() - birth.getMonth();
-		return age > 18 || (age === 18 && m >= 0 && today.getDate() >= birth.getDate());
-	}
-
+	// Validación reactiva de errores
 	$: errors = {
 		// Persona
-		nombre: tipo === 'persona' ? (nombre.trim() ? '' : 'Requerido') : '',
-		apellido: tipo === 'persona' ? (apellido.trim() ? '' : 'Requerido') : '',
+		nombre:
+			tipo === 'persona' && !nombre.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'persona' && !isValidName(nombre)
+					? ERROR_MESSAGES.nameInvalid
+					: '',
+
+		apellido:
+			tipo === 'persona' && !apellido.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'persona' && !isValidLastName(apellido)
+					? ERROR_MESSAGES.lastNameInvalid
+					: '',
+
 		docOtro:
-			tipo === 'persona' && docTipo === 'Otro' && !docOtro.trim() ? 'Especifique el documento' : '',
-		docNumero: tipo === 'persona' ? (docNumero.trim() ? '' : 'Documento obligatorio') : '',
-		nacimiento:
-			tipo === 'persona'
-				? nacimiento && isAdult(nacimiento)
-					? ''
-					: 'Debe ser mayor de 18 años'
+			tipo === 'persona' && docTipo === 'Otro' && !docOtro.trim()
+				? ERROR_MESSAGES.specifyDocument
 				: '',
-		cuil: tipo === 'persona' ? (cuil.trim() ? '' : 'CUIL obligatorio') : '',
+
+		docNumero:
+			tipo === 'persona' && !docNumero.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'persona' && docTipo === 'DNI' && !isValidDni(docNumero)
+					? ERROR_MESSAGES.dniInvalid
+					: '',
+
+		nacimiento:
+			tipo === 'persona' && nacimiento && isAdult(nacimiento)
+				? ''
+				: tipo === 'persona'
+					? ERROR_MESSAGES.ageRequirement
+					: '',
+
+		cuil: tipo === 'persona' && !cuil.trim() ? ERROR_MESSAGES.required : '',
 
 		// Organización
-		razonSocial: tipo === 'organizacion' ? (razonSocial.trim() ? '' : 'Requerido') : '',
-		cuit: tipo === 'organizacion' ? (cuit.trim() ? '' : 'CUIT obligatorio') : '',
-		repNombre: tipo === 'organizacion' ? (repNombre.trim() ? '' : 'Requerido') : '',
-		repApellido: tipo === 'organizacion' ? (repApellido.trim() ? '' : 'Requerido') : '',
+		razonSocial: tipo === 'organizacion' && !razonSocial.trim() ? ERROR_MESSAGES.required : '',
+
+		cuit:
+			tipo === 'organizacion' && !cuit.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'organizacion' && !isValidCuit(cuit)
+					? ERROR_MESSAGES.cuitInvalid
+					: '',
+
+		repNombre:
+			tipo === 'organizacion' && !repNombre.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'organizacion' && !isValidName(repNombre)
+					? ERROR_MESSAGES.nameInvalid
+					: '',
+
+		repApellido:
+			tipo === 'organizacion' && !repApellido.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'organizacion' && !isValidLastName(repApellido)
+					? ERROR_MESSAGES.lastNameInvalid
+					: '',
+
 		repDocOtro:
 			tipo === 'organizacion' && repDocTipo === 'Otro' && !repDocOtro.trim()
-				? 'Especifique el documento'
-				: '',
-		repDocNumero:
-			tipo === 'organizacion' ? (repDocNumero.trim() ? '' : 'Documento obligatorio') : '',
-		repNacimiento:
-			tipo === 'organizacion'
-				? repNacimiento && isAdult(repNacimiento)
-					? ''
-					: 'Debe ser mayor de 18 años'
+				? ERROR_MESSAGES.specifyDocument
 				: '',
 
+		repDocNumero:
+			tipo === 'organizacion' && !repDocNumero.trim()
+				? ERROR_MESSAGES.required
+				: tipo === 'organizacion' && repDocTipo === 'DNI' && !isValidDni(repDocNumero)
+					? ERROR_MESSAGES.dniInvalid
+					: '',
+
+		repNacimiento:
+			tipo === 'organizacion' && repNacimiento && isAdult(repNacimiento)
+				? ''
+				: tipo === 'organizacion'
+					? ERROR_MESSAGES.ageRequirement
+					: '',
+
 		// Credenciales
-		username: username.trim() ? '' : 'Requerido',
-		email: email.trim() && isValidEmail(email) ? '' : 'Email inválido',
-		password: password.length >= 8 ? '' : 'Mínimo 8 caracteres',
-		repassword: repassword === password ? '' : 'Las contraseñas no coinciden'
+		username: !username.trim()
+			? ERROR_MESSAGES.required
+			: !isValidUsername(username)
+				? ERROR_MESSAGES.usernameInvalid
+				: '',
+
+		email: !email.trim()
+			? ERROR_MESSAGES.required
+			: !isValidEmail(email)
+				? ERROR_MESSAGES.emailInvalid
+				: '',
+
+		password:
+			password.length < 8
+				? ERROR_MESSAGES.passwordRequirements
+				: !isValidPassword(password)
+					? ERROR_MESSAGES.passwordRequirements
+					: '',
+
+		repassword: repassword !== password ? ERROR_MESSAGES.passwordMismatch : ''
 	};
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
-	// Función de envío
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-
-		// Verificar si hay errores
 		if (hasErrors) return;
-
 		sending = true;
 
-		// Lógica de envío real a API
-
+		// Simulamos una llamada a la API
 		setTimeout(() => {
 			sending = false;
 			goto('/verify-identity');
@@ -145,69 +190,67 @@ TODOS:
 	<!-- Datos persona -->
 	{#if tipo === 'persona'}
 		<fieldset class="grid grid-cols-1 gap-6 md:grid-cols-2">
-			<!-- Nombre y Apellido -->
+			<!-- Nombre -->
 			<div>
-				<label for="nombre" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+				<label for="nombre" class="font-semibold text-gray-800">
 					Nombre <span class="text-red-600">*</span>
 				</label>
 				<Input id="nombre" bind:value={nombre} error={errors.nombre} />
 			</div>
+
+			<!-- Apellido -->
 			<div>
-				<label
-					for="apellido"
-					class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-				>
+				<label for="apellido" class="font-semibold text-gray-800">
 					Apellido <span class="text-red-600">*</span>
 				</label>
 				<Input id="apellido" bind:value={apellido} error={errors.apellido} />
 			</div>
 
-			<!-- Documento -->
+			<!-- Tipo de documento -->
 			<div>
-				<label for="docTipo" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+				<label for="docTipo" class="font-semibold text-gray-800">
 					Tipo de documento <span class="text-red-600">*</span>
 				</label>
 				<select
 					id="docTipo"
 					bind:value={docTipo}
-					class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+					class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				>
 					<option>DNI</option>
 					<option>Pasaporte</option>
 					<option>Otro</option>
 				</select>
 			</div>
+
+			<!-- Especificar documento -->
 			{#if docTipo === 'Otro'}
 				<div>
-					<label
-						for="docOtro"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="docOtro" class="font-semibold text-gray-800">
 						Especifique <span class="text-red-600">*</span>
 					</label>
 					<Input id="docOtro" bind:value={docOtro} error={errors.docOtro} />
 				</div>
 			{/if}
+
+			<!-- Número de documento -->
 			<div>
-				<label
-					for="docNumero"
-					class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-				>
-					Número <span class="text-red-600">*</span>
+				<label for="docNumero" class="font-semibold text-gray-800">
+					Número de documento <span class="text-red-600">*</span>
 				</label>
 				<Input id="docNumero" bind:value={docNumero} error={errors.docNumero} />
 			</div>
+
+			<!-- Fecha de nacimiento -->
 			<div>
-				<label
-					for="nacimiento"
-					class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-				>
+				<label for="nacimiento" class="font-semibold text-gray-800">
 					Fecha de nacimiento <span class="text-red-600">*</span>
 				</label>
 				<DatePicker id="nacimiento" bind:value={nacimiento} error={errors.nacimiento} />
 			</div>
+
+			<!-- CUIL -->
 			<div>
-				<label for="cuil" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+				<label for="cuil" class="font-semibold text-gray-800">
 					CUIL <span class="text-red-600">*</span>
 				</label>
 				<Input id="cuil" bind:value={cuil} error={errors.cuil} />
@@ -217,16 +260,14 @@ TODOS:
 		<!-- Datos organización -->
 		<fieldset class="grid grid-cols-1 gap-6 md:grid-cols-2">
 			<div class="md:col-span-2">
-				<label
-					for="razonSocial"
-					class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-				>
+				<label for="razonSocial" class="font-semibold text-gray-800">
 					Razón social <span class="text-red-600">*</span>
 				</label>
 				<Input id="razonSocial" bind:value={razonSocial} error={errors.razonSocial} />
 			</div>
+
 			<div class="md:col-span-2">
-				<label for="cuit" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+				<label for="cuit" class="font-semibold text-gray-800">
 					CUIT <span class="text-red-600">*</span>
 				</label>
 				<Input id="cuit" bind:value={cuit} error={errors.cuit} />
@@ -237,38 +278,38 @@ TODOS:
 	<!-- Usuario y contraseña -->
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<div>
-			<label for="username" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+			<label for="username" class="font-semibold text-gray-800">
 				Nombre de usuario <span class="text-red-600">*</span>
 			</label>
 			<Input id="username" bind:value={username} error={errors.username} />
 		</div>
+
 		<div>
-			<label for="email" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+			<label for="email" class="font-semibold text-gray-800">
 				Email <span class="text-red-600">*</span>
 			</label>
 			<Input id="email" type="email" bind:value={email} error={errors.email} />
 		</div>
+
 		<div>
-			<label for="password" class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]">
+			<label for="password" class="font-semibold text-gray-800">
 				Contraseña <span class="text-red-600">*</span>
 			</label>
 			<Input id="password" type="password" bind:value={password} error={errors.password} />
 		</div>
+
 		<div>
-			<label
-				for="repassword"
-				class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-			>
-				Confirmar contraseña <span class="text-red-600">*</span>
+			<label for="repassword" class="font-semibold text-gray-800">
+				Repetir contraseña <span class="text-red-600">*</span>
 			</label>
 			<Input id="repassword" type="password" bind:value={repassword} error={errors.repassword} />
 		</div>
 	</div>
 
-	<!-- Datos del representante legal (solo si es organización) -->
+	<!-- Datos del representante legal (si es organización) -->
 	{#if tipo === 'organizacion'}
 		<div
-			class="mt-4 flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 px-6 py-7 shadow-sm"
+			class="mt-4 flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 p-7 shadow-sm"
 		>
 			<legend class="mb-2 flex items-center gap-2 text-base font-semibold text-blue-800">
 				<svg
@@ -283,70 +324,63 @@ TODOS:
 				</svg>
 				Datos del representante legal
 			</legend>
+
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<div>
-					<label
-						for="repNombre"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="repNombre" class="font-semibold text-gray-800">
 						Nombre <span class="text-red-600">*</span>
 					</label>
 					<Input id="repNombre" bind:value={repNombre} error={errors.repNombre} />
 				</div>
+
 				<div>
-					<label
-						for="repApellido"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="repApellido" class="font-semibold text-gray-800">
 						Apellido <span class="text-red-600">*</span>
 					</label>
 					<Input id="repApellido" bind:value={repApellido} error={errors.repApellido} />
 				</div>
+
 				<div>
-					<label
-						for="repDocTipo"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="repDocTipo" class="font-semibold text-gray-800">
 						Tipo de documento <span class="text-red-600">*</span>
 					</label>
 					<select
 						id="repDocTipo"
 						bind:value={repDocTipo}
-						class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+						class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					>
 						<option>DNI</option>
 						<option>Pasaporte</option>
 						<option>Otro</option>
 					</select>
 				</div>
+
 				{#if repDocTipo === 'Otro'}
 					<div>
-						<label
-							for="repDocOtro"
-							class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-						>
+						<label for="repDocOtro" class="font-semibold text-gray-800">
 							Especifique <span class="text-red-600">*</span>
 						</label>
 						<Input id="repDocOtro" bind:value={repDocOtro} error={errors.repDocOtro} />
 					</div>
 				{/if}
+
 				<div>
-					<label
-						for="repDocNumero"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="repDocNumero" class="font-semibold text-gray-800">
 						Número de documento <span class="text-red-600">*</span>
 					</label>
 					<Input id="repDocNumero" bind:value={repDocNumero} error={errors.repDocNumero} />
 				</div>
+
 				<div>
-					<label
-						for="repNacimiento"
-						class="mb-2 block text-sm font-semibold text-[rgb(var(--base-color))]"
-					>
+					<label for="repNacimiento" class="font-semibold text-gray-800">
 						Fecha de nacimiento <span class="text-red-600">*</span>
 					</label>
-					<DatePicker id="repNacimiento" bind:value={repNacimiento} error={errors.repNacimiento} />
+					<DatePicker
+						id="repNacimiento"
+						name="repNacimiento"
+						bind:value={repNacimiento}
+						error={errors.repNacimiento}
+					/>
 				</div>
 			</div>
 		</div>

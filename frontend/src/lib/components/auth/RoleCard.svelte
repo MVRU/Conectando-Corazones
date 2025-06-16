@@ -27,7 +27,6 @@
 		'group flex flex-col items-start rounded-2xl border bg-white p-6 transition-all duration-300 hover:scale-105',
 		'hover:border-blue-500 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
 		selected ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 ',
-		// Añadir clases para que las tarjetas sean cuadradas
 		'aspect-w-1 aspect-h-1 w-full'
 	)}
 >
@@ -35,7 +34,8 @@
 		class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-[#00A9FF]"
 	>
 		{#if icon === 'institution'}
-			<!-- Icono para Institución -->
+			<!-- ! Icono para Institución -->
+			<!-- TODO: conseguir un icono mejor -->
 			<svg
 				class="mx-auto h-6 w-6"
 				viewBox="0 0 24 24"
@@ -48,8 +48,8 @@
 				<path d="M12 2l9 7-9 7-9-7z" />
 				<path d="M4 15h16v7H4z" />
 			</svg>
-		{:else if icon === 'collaborator'}
-			<!-- Icono para Colaborador -->
+		{:else}
+			<!-- ! Icono para Colaborador -->
 			<svg
 				class="mx-auto h-6 w-6"
 				viewBox="0 0 24 24"
@@ -62,22 +62,6 @@
 				<circle cx="12" cy="7" r="4" />
 				<path d="M5.5 21v-2a6.5 6.5 0 0 1 13 0v2" />
 			</svg>
-		{:else}
-			<!-- Icono de dos personas -->
-			<svg
-				class="h-6 w-6"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<circle cx="9" cy="7" r="4" />
-				<circle cx="17" cy="7" r="4" />
-				<path d="M17 20h5v-2a4 4 0 00-5-4" />
-				<path d="M7 20H2v-2a4 4 0 015-4" />
-			</svg>
 		{/if}
 	</div>
 
@@ -85,7 +69,7 @@
 		<h3 class="text-center text-base font-semibold text-gray-800">{title}</h3>
 		<p class="mb-4 text-center text-sm text-gray-600">{description}</p>
 	</div>
-	<!-- Botón CTA (Call to Action) -->
+	<!-- ! Botón CTA (Call to Action) -->
 	<Button
 		customClass="mt-4 w-full"
 		variant="secondary"
