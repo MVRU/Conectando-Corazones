@@ -196,15 +196,14 @@
 	</div>
 
 	<!-- Botón continuar -->
-	<!-- TODO: modificar a dónde dirige -->
 	<div class="mt-8 flex justify-end">
 		<Button
 			label={sending ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"
+			type="submit"
 			disabled={hasErrors || sending}
 			customClass="w-full md:w-auto"
-			href="/"
 		/>
 	</div>
 </form>

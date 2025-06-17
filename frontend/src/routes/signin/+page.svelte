@@ -9,9 +9,21 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ArcaValidation from '$lib/components/validation/ArcaValidation.svelte';
 	import EmailValidation from '$lib/components/validation/EmailValidation.svelte';
+	import AddressForm from '$lib/components/forms/AddressForm.svelte';
+	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
+	import { goto } from '$app/navigation';
 
 	let ready = false;
-	let stage: 'select' | 'form' | 'verifying' | 'email' | 'verified' | 'error' = 'select';
+	let stage:
+		| 'select'
+		| 'form'
+		| 'verifying'
+		| 'email'
+		| 'verified'
+		| 'address'
+		| 'contact'
+		| 'error' = 'select';
+
 	let rol: 'institucion' | 'colaborador' = 'institucion';
 
 	onMount(() => {
@@ -132,7 +144,7 @@
 			/>
 		{:else if stage === 'verified'}
 			<div class="mb-20">
-				<Stepper current={3} total={5} />
+				<Stepper current={5} total={5} />
 			</div>
 			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
 				<div class="rounded-full bg-green-100 p-4 shadow-xl">
@@ -152,11 +164,46 @@
 				</div>
 				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Identidad verificada!</h2>
 				<p class="mt-4 max-w-xs text-base text-gray-600">
-					Tu identidad ha sido validada correctamente. Podés continuar ahora.
+					Tu identidad ha sido validada correctamente. Ahora necesitamos que agregues algún medio de
+					contacto y la dirección de tu sede para completar el registro.
 				</p>
 				<div class="mt-8">
-					<Button label="Continuar" variant="primary" href="/address" />
+					<Button label="Continuar" variant="primary" on:click={() => (stage = 'contact')} />
 				</div>
+			</div>
+		{:else if stage === 'contact'}
+			<div class="mb-20">
+				<Stepper current={5} total={5} />
+			</div>
+
+			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
+				<h2 class="text-center text-3xl font-extrabold text-gray-900">Agregá formas de contacto</h2>
+				<p class="mx-auto max-w-2xl text-center text-base text-gray-600">
+					Agregá al menos un número de teléfono. Podés incluir otros medios como redes sociales o
+					emails secundarios.
+				</p>
+
+				<!-- TODO: dirigir a dashboard o pantalla de bienvenida -->
+				<ContactMethodsForm on:submit={() => (stage = 'address')} />
+			</main>
+		{:else if stage === 'address'}
+			<div class="mb-20">
+				<Stepper current={5} total={5} />
+			</div>
+
+			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
+				<!-- Título -->
+				<div class="text-center">
+					<h2 class="mb-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
+						Ingresá la dirección de la sede
+					</h2>
+					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
+						Completá con la dirección principal donde funciona la institución u organización. Más
+						adelante podrás agregar otras direcciones si lo preferís.
+					</p>
+				</div>
+
+				<AddressForm on:submit={() => goto('/')} />
 			</div>
 		{/if}
 	</section>
