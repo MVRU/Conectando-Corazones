@@ -22,6 +22,7 @@
 		| 'verified'
 		| 'address'
 		| 'contact'
+		| 'success'
 		| 'error' = 'select';
 
 	let rol: 'institucion' | 'colaborador' = 'institucion';
@@ -183,7 +184,6 @@
 					emails secundarios.
 				</p>
 
-				<!-- TODO: dirigir a dashboard o pantalla de bienvenida -->
 				<ContactMethodsForm on:submit={() => (stage = 'address')} />
 			</main>
 		{:else if stage === 'address'}
@@ -192,7 +192,6 @@
 			</div>
 
 			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-				<!-- Título -->
 				<div class="text-center">
 					<h2 class="mb-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
 						Ingresá la dirección de la sede
@@ -203,7 +202,38 @@
 					</p>
 				</div>
 
-				<AddressForm on:submit={() => goto('/')} />
+				<AddressForm on:submit={() => (stage = 'success')} />
+			</div>
+		{:else if stage === 'success'}
+			<div class="mb-20">
+				<Stepper current={6} total={5} />
+			</div>
+
+			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
+				<div class="animate-pulse rounded-full bg-green-100 p-6 shadow-xl">
+					<svg
+						class="h-20 w-20 text-green-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 13l4 4L19 7"
+						/>
+					</svg>
+				</div>
+				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Cuenta creada exitosamente!</h2>
+				<p class="mt-4 max-w-md text-base text-gray-600">
+					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o publicar
+					tus proyectos solidarios.
+				</p>
+				<div class="mt-8">
+					<!-- TODO: agregar dashboard u otro -->
+					<Button label="Ir al Dashboard" variant="primary" on:click={() => goto('/dashboard')} />
+				</div>
 			</div>
 		{/if}
 	</section>
