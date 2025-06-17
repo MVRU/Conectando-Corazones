@@ -27,6 +27,7 @@ TODO:
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';
+	import { createEventDispatcher } from 'svelte';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
 	export let href: string = '';
@@ -36,6 +37,19 @@ TODO:
 	export let customClass = '';
 	export let customAriaLabel: string = `Ir a ${href}`; // Para accesibilidad
 	export let type: 'button' | 'submit' = 'button';
+	const dispatch = createEventDispatcher();
+
+	function handleClick(event: MouseEvent) {
+		dispatch('click', event); // Reenviamos el evento al padre
+
+		if (href && !disabled) {
+			if (external) {
+				window.location.href = href;
+			} else {
+				goto(href);
+			}
+		}
+	}
 
 	/* ---------- mapas de tamaño para size ---------- */
 	const rootSize = {
@@ -50,7 +64,7 @@ TODO:
 {#if variant === 'primary'}
 	<button
 		{type}
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -92,7 +106,7 @@ TODO:
 {:else if variant === 'secondary'}
 	<button
 		{type}
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -134,7 +148,7 @@ TODO:
 {:else}
 	<button
 		{type}
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
 			size === 'md'

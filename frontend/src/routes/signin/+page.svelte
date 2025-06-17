@@ -7,9 +7,11 @@
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ArcaValidation from '$lib/components/validation/ArcaValidation.svelte';
+	import EmailValidation from '$lib/components/validation/EmailValidation.svelte';
 
 	let ready = false;
-	let stage: 'select' | 'form' | 'verifying' | 'verified' = 'select';
+	let stage: 'select' | 'form' | 'verifying' | 'email' | 'verified' | 'error' = 'select';
 	let rol: 'institucion' | 'colaborador' = 'institucion';
 
 	onMount(() => {
@@ -22,26 +24,8 @@
 		stage = 'form';
 	}
 
-	function validarConArca() {
-		// Simulación de validación con ARCA
-		return new Promise((resolve) => {
-			setTimeout(() => {
-				resolve({ valido: true });
-			}, 2000);
-		});
-	}
-
 	function onFormSubmit() {
 		stage = 'verifying';
-		validarConArca()
-			.then((res) => {
-				if ((res as { valido: boolean }).valido) {
-					stage = 'verified';
-				} else {
-					stage = 'form';
-				}
-			})
-			.catch(() => (stage = 'form'));
 	}
 </script>
 
@@ -53,7 +37,7 @@
 	/>
 </svelte:head>
 
-<!-- Fondo -->
+<!-- Fondo decorativo -->
 <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
 	class="absolute bottom-0 left-0 right-0 top-[80%] -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
@@ -74,12 +58,10 @@
 					Conectando Corazones
 				</span>
 			</h1>
-
 			<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
 				Creá tu cuenta para publicar proyectos solidarios o sumarte como colaborador. Juntos,
 				hacemos la diferencia.
 			</p>
-
 			<p class="mb-8 text-center text-base font-medium text-gray-700">¿Cómo querés registrarte?</p>
 
 			<div class="grid gap-8 sm:grid-cols-2">
@@ -134,15 +116,20 @@
 				<CollaboratorForm on:submit={onFormSubmit} />
 			{/if}
 		{:else if stage === 'verifying'}
-			<div class="mb-20">
-				<Stepper current={3} total={5} />
-			</div>
-			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
-				<Loader loading={true} size={80} message="" />
-				<p class="mt-6 max-w-md text-lg text-gray-700">
-					Estamos conectándonos con ARCA para validar tus datos.
-				</p>
-			</div>
+			<ArcaValidation
+				currentStep={3}
+				totalSteps={5}
+				on:success={() => (stage = 'email')}
+				on:retry={() => (stage = 'verifying')}
+				on:back={() => (stage = 'form')}
+			/>
+		{:else if stage === 'email'}
+			<EmailValidation
+				currentStep={4}
+				totalSteps={5}
+				on:continue={() => (stage = 'verified')}
+				on:back={() => (stage = 'form')}
+			/>
 		{:else if stage === 'verified'}
 			<div class="mb-20">
 				<Stepper current={3} total={5} />
