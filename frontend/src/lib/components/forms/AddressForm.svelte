@@ -228,6 +228,24 @@
 				</button>
 			</div>
 		</div>
+
+		<!-- Vista previa del mapa -->
+		{#if googleMapsUrl && !isEditingMapUrl}
+			<div
+				class="relative mx-auto mt-10 aspect-square max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:shadow-2xl"
+			>
+				<div class="relative w-full overflow-hidden rounded-3xl bg-gray-200 shadow-md">
+					<iframe
+						src="{googleMapsUrl}&output=embed"
+						class="min-h-[350px] w-full border-0 sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] xl:min-h-[580px]"
+						title="Vista previa del mapa"
+						allowfullscreen
+						loading="lazy"
+						referrerpolicy="no-referrer-when-downgrade"
+					></iframe>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Botón de envío -->

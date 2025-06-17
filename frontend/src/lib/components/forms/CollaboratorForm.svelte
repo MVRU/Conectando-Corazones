@@ -20,6 +20,8 @@
 	// Estados iniciales
 	let sending = false;
 	let tipo: 'persona' | 'organizacion' = 'persona';
+	let showPassword = false;
+	let showRepassword = false;
 
 	// Datos persona
 	let nombre = '';
@@ -291,18 +293,78 @@
 			<Input id="email" type="email" bind:value={email} error={errors.email} />
 		</div>
 
-		<div>
+		<!-- Contraseña -->
+		<div class="relative">
 			<label for="password" class="font-semibold text-gray-800">
 				Contraseña <span class="text-red-600">*</span>
 			</label>
-			<Input id="password" type="password" bind:value={password} error={errors.password} />
+			<Input
+				id="password"
+				name="password"
+				type={showPassword ? 'text' : 'password'}
+				bind:value={password}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+				placeholder="********"
+				error={errors.password}
+			/>
+			<button
+				type="button"
+				class="absolute right-3 top-9 flex h-6 w-6 items-center justify-center focus:outline-none"
+				aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+				on:click={() => (showPassword = !showPassword)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke={showPassword ? '#007fff' : 'currentColor'}
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-5 w-5"
+				>
+					<circle cx="12" cy="12" r="3" />
+					<path d="M2 12s2.5-5 10-5 10 5 10 5-2.5 5-10 5S2 12 2 12z" />
+				</svg>
+			</button>
 		</div>
 
-		<div>
+		<!-- Confirmar contraseña -->
+		<div class="relative">
 			<label for="repassword" class="font-semibold text-gray-800">
 				Repetir contraseña <span class="text-red-600">*</span>
 			</label>
-			<Input id="repassword" type="password" bind:value={repassword} error={errors.repassword} />
+			<Input
+				id="repassword"
+				name="repassword"
+				type={showRepassword ? 'text' : 'password'}
+				bind:value={repassword}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+				placeholder="********"
+				error={errors.repassword}
+			/>
+			<button
+				type="button"
+				class="absolute right-3 top-9 flex h-6 w-6 items-center justify-center focus:outline-none"
+				aria-label={showRepassword
+					? 'Ocultar repetición de contraseña'
+					: 'Mostrar repetición de contraseña'}
+				on:click={() => (showRepassword = !showRepassword)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke={showRepassword ? '#007fff' : 'currentColor'}
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					class="h-5 w-5"
+				>
+					<circle cx="12" cy="12" r="3" />
+					<path d="M2 12s2.5-5 10-5 10 5 10 5-2.5 5-10 5S2 12 2 12z" />
+				</svg>
+			</button>
 		</div>
 	</div>
 
