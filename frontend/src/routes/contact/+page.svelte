@@ -1,7 +1,7 @@
 <!--
 * Página: Contacto
-	-*- Descripción: Información de contacto del equipo y formulario para consultas
-	-*- Funcionalidad: Datos del equipo, formulario de contacto y información institucional
+	-*- Descripción: Formulario para consultas y contacto
+	-*- Funcionalidad: Formulario de contacto
 
 TODO:
 	- [ ] Conectar formulario con backend
@@ -12,30 +12,27 @@ TODO:
 
 <script lang="ts">
         import Button from '$lib/components/ui/elements/Button.svelte';
+        import Select from '$lib/components/ui/elements/Select.svelte';
 
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
 	let validationErrors: string[] = [];
+	let asunto = '';
 
-	// Información del equipo
-	const equipoCreadores = [
-		{
-			nombre: 'Tomás García',
-			rol: 'Desarrollador Principal & Founder',
-			especialidad: 'Full Stack Developer',
-			email: 'tomas.garcia@conectandocorazones.org',
-			descripcion:
-				'Estudiante de Ingeniería en Sistemas de Información en UTN FRRo. Especializado en desarrollo web moderno y tecnologías de la información.'
-		},
-		{
-			nombre: 'Equipo de Desarrollo',
-			rol: 'Colaboradores Técnicos',
-			especialidad: 'Desarrollo & Diseño',
-			email: 'dev@conectandocorazones.org',
-			descripcion:
-				'Grupo de estudiantes y profesionales comprometidos con el desarrollo de soluciones tecnológicas para el bien social.'
-		}
+	// Opciones para el select de asunto
+	const opcionesAsunto = [
+		{ value: 'consulta-general', label: 'Consulta general' },
+		{ value: 'soporte-tecnico', label: 'Soporte técnico' },
+		{ value: 'colaboracion', label: 'Propuesta de colaboración' },
+		{ value: 'institucion', label: 'Soy una institución' },
+		{ value: 'feedback', label: 'Feedback del sistema' },
+		{ value: 'otro', label: 'Otro' }
 	];
+
+	// Función para manejar el cambio del select
+	function handleAsuntoChange(event: CustomEvent) {
+		asunto = event.detail.value;
+	}
 
 	// Función para enviar formulario
 	async function enviarFormulario(event: Event) {
@@ -45,7 +42,7 @@ TODO:
 		const datos = {
 			nombre: (formData.get('nombre') || '').toString().trim(),
 			email: (formData.get('email') || '').toString().trim(),
-			asunto: (formData.get('asunto') || '').toString().trim(),
+			asunto: asunto,
 			mensaje: (formData.get('mensaje') || '').toString().trim()
 		};
 
@@ -80,7 +77,7 @@ TODO:
 	<title>Contacto - Conectando Corazones</title>
 	<meta
 		name="description"
-		content="Contacta con el equipo de Conectando Corazones. Información sobre los creadores y administradores del sistema."
+		content="Contacta con el equipo de Conectando Corazones. Envía tus consultas, sugerencias o propuestas de colaboración."
 	/>
 </svelte:head>
 
@@ -90,95 +87,12 @@ TODO:
 		<div class="mb-12 text-center">
 			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Contacto</h1>
 			<p class="mx-auto max-w-3xl text-lg text-gray-600">
-				Conocé al equipo detrás de Conectando Corazones y ponte en contacto con nosotros para
-				consultas, sugerencias o colaboraciones.
+				Ponte en contacto con nosotros para consultas, sugerencias o colaboraciones.
 			</p>
 		</div>
 
-		<div class="grid gap-12 lg:grid-cols-2">
-			<!-- Sección del equipo -->
-			<div class="space-y-8">
-				<div class="rounded-2xl bg-white p-8 shadow-lg">
-					<h2 class="mb-6 text-2xl font-semibold text-[rgb(var(--base-color))]">
-						🚀 Nuestro Equipo
-					</h2>
-
-					<div class="space-y-6">
-						{#each equipoCreadores as miembro}
-							<div
-								class="rounded-r-lg border-l-4 border-[rgb(var(--color-primary))] bg-blue-50 p-6"
-							>
-								<div class="mb-3 flex items-start justify-between">
-									<div>
-										<h3 class="text-xl font-semibold text-[rgb(var(--base-color))]">
-											{miembro.nombre}
-										</h3>
-										<p class="font-medium text-[rgb(var(--color-primary))]">
-											{miembro.rol}
-										</p>
-										<p class="text-sm text-gray-600">
-											{miembro.especialidad}
-										</p>
-									</div>
-								</div>
-
-								<p class="mb-4 text-gray-700">
-									{miembro.descripcion}
-								</p>
-
-								<div class="flex flex-wrap gap-4 text-sm">
-									<a
-										href="mailto:{miembro.email}"
-										class="flex items-center gap-2 text-[rgb(var(--color-primary))] hover:underline"
-									>
-										📧 {miembro.email}
-									</a>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</div>
-
-				<!-- Información institucional -->
-				<div class="rounded-2xl bg-white p-8 shadow-lg">
-					<h2 class="mb-6 text-2xl font-semibold text-[rgb(var(--base-color))]">
-						🎓 Información Académica
-					</h2>
-
-					<div class="space-y-4">
-						<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-							<div>
-								<h4 class="font-semibold text-[rgb(var(--base-color))]">Institución</h4>
-								<p class="text-gray-700">Universidad Tecnológica Nacional</p>
-							</div>
-							<div>
-								<h4 class="font-semibold text-[rgb(var(--base-color))]">Facultad</h4>
-								<p class="text-gray-700">Facultad Regional Rosario (UTN FRRo)</p>
-							</div>
-							<div>
-								<h4 class="font-semibold text-[rgb(var(--base-color))]">Carrera</h4>
-								<p class="text-gray-700">Ingeniería en Sistemas de Información</p>
-							</div>
-							<div>
-								<h4 class="font-semibold text-[rgb(var(--base-color))]">Año</h4>
-								<p class="text-gray-700">2024</p>
-							</div>
-						</div>
-
-						<div class="mt-6 rounded-lg bg-gray-50 p-4">
-							<h4 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Acerca del Proyecto</h4>
-							<p class="text-gray-700">
-								Conectando Corazones es desarrollado como Proyecto Final de Carrera de Ingeniería en
-								Sistemas de Información. El objetivo es crear una plataforma tecnológica que
-								facilite la conexión entre donantes y organizaciones benéficas, promoviendo la
-								transparencia y trazabilidad en cada proyecto social.
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Formulario de contacto -->
+		<!-- Formulario de contacto -->
+		<div class="mx-auto max-w-2xl">
 			<div class="rounded-2xl bg-white p-8 shadow-lg">
 				<h2 class="mb-6 text-2xl font-semibold text-[rgb(var(--base-color))]">
 					📩 Envianos un Mensaje
@@ -240,26 +154,16 @@ TODO:
 						</div>
 
 						<div>
-							<label
-								for="asunto"
-								class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
-							>
-								Asunto *
-							</label>
-							<select
+							<Select
+								label="Asunto *"
+								options={opcionesAsunto}
+								bind:value={asunto}
+								placeholder="Seleccionar asunto"
+								required={true}
 								id="asunto"
 								name="asunto"
-								required
-								class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
-							>
-								<option value="">Seleccionar asunto</option>
-								<option value="consulta-general">Consulta general</option>
-								<option value="soporte-tecnico">Soporte técnico</option>
-								<option value="colaboracion">Propuesta de colaboración</option>
-								<option value="institucion">Soy una institución</option>
-								<option value="feedback">Feedback del sistema</option>
-								<option value="otro">Otro</option>
-							</select>
+								on:change={handleAsuntoChange}
+							/>
 						</div>
 
 						<div>
@@ -292,39 +196,6 @@ TODO:
 						</button>
 					</form>
 				{/if}
-			</div>
-		</div>
-
-		<!-- Información adicional -->
-		<div class="mt-12 rounded-2xl bg-white p-8 shadow-lg">
-			<h2 class="mb-6 text-center text-2xl font-semibold text-[rgb(var(--base-color))]">
-				📍 Información de Contacto
-			</h2>
-
-			<div class="grid grid-cols-1 gap-8 text-center md:grid-cols-3">
-				<div>
-					<div class="mb-4 text-4xl">🏛️</div>
-					<h3 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Institución</h3>
-					<p class="text-gray-600">Universidad Tecnológica Nacional</p>
-					<p class="text-gray-600">Facultad Regional Rosario</p>
-					<p class="mt-2 text-sm text-gray-500">Zeballos 1341, Rosario, Santa Fe</p>
-				</div>
-
-				<div>
-					<div class="mb-4 text-4xl">💻</div>
-					<h3 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Soporte Técnico</h3>
-					<p class="text-gray-600">Lun - Vie: 9:00 - 18:00</p>
-					<p class="text-gray-600">soporte@conectandocorazones.org</p>
-					<p class="mt-2 text-sm text-gray-500">Tiempo de respuesta: 24-48 hs</p>
-				</div>
-
-				<div>
-					<div class="mb-4 text-4xl">🤝</div>
-					<h3 class="mb-2 font-semibold text-[rgb(var(--base-color))]">Colaboraciones</h3>
-					<p class="text-gray-600">¿Querés ser parte del proyecto?</p>
-					<p class="text-gray-600">colabora@conectandocorazones.org</p>
-					<p class="mt-2 text-sm text-gray-500">Siempre buscamos nuevos talentos</p>
-				</div>
 			</div>
 		</div>
 
