@@ -41,6 +41,7 @@ const mockUsers = {
   institucion: {
     id: '2',
     email: 'escuela@esperanza.edu.ar',
+    profile: 'img/escuela_solidaria.jpg',
     nombre: 'Escuela Esperanza',
     role: 'institucion' as const,
     isActive: true,
@@ -124,14 +125,14 @@ export const authActions = {
   // Iniciar sesión (versión mock para pruebas)
   async login(email: string, password: string, rememberMe: boolean = false) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Buscar usuario en datos mock
       const user = Object.values(mockUsers).find(u => u.email === email);
-      
+
       if (!user || password !== '123456') {
         throw new Error('Credenciales inválidas');
       }
@@ -170,7 +171,7 @@ export const authActions = {
     } finally {
       // Limpiar token local
       localStorage.removeItem('authToken');
-      
+
       // Resetear estado
       authStore.set(initialState);
     }
@@ -179,14 +180,14 @@ export const authActions = {
   // Registrar institución
   async registerInstitucion(userData: any) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Institución registrada exitosamente' };
-      
+
       authStore.update(state => ({
         ...state,
         isLoading: false,
@@ -207,14 +208,14 @@ export const authActions = {
   // Registrar colaborador
   async registerColaborador(userData: any) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Colaborador registrado exitosamente' };
-      
+
       authStore.update(state => ({
         ...state,
         isLoading: false,
@@ -238,7 +239,7 @@ export const authActions = {
     if (!token) return;
 
     authStore.update(state => ({ ...state, isLoading: true }));
-    
+
     try {
       // Simular verificación de token
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -283,7 +284,7 @@ export const authActions = {
 // Función para verificar permisos
 export function hasPermission(permission: string): boolean {
   let hasPermission = false;
-  
+
   authStore.subscribe(state => {
     if (state.user?.role === 'admin') {
       hasPermission = true;
@@ -312,12 +313,12 @@ export function canAccessRoute(route: string): boolean {
   };
 
   const requiredRoles = routePermissions[route] || [];
-  
+
   let canAccess = false;
-  
+
   authStore.subscribe(state => {
-    canAccess = requiredRoles.length === 0 || 
-                (state.user && requiredRoles.includes(state.user.role)) || false;
+    canAccess = requiredRoles.length === 0 ||
+      (state.user && requiredRoles.includes(state.user.role)) || false;
   })();
 
   return canAccess;

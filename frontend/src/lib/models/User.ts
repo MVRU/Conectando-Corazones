@@ -18,6 +18,7 @@ export interface BaseUser {
   updatedAt: Date;
   lastLogin?: Date;
   verificationStatus: VerificationStatus;
+  profile?: string; // URL de la foto de perfil
 }
 
 // Usuario tipo Institución (crea proyectos)
