@@ -35,7 +35,6 @@
 	>
 		{#if icon === 'institution'}
 			<!-- ! Icono para Institución -->
-			<!-- TODO: conseguir un icono mejor -->
 			<svg
 				width="64px"
 				height="64px"

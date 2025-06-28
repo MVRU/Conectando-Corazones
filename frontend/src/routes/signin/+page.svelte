@@ -1,3 +1,5 @@
+<!-- TODO: ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true -->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import InstitutionForm from '$lib/components/forms/InstitutionForm.svelte';
@@ -12,6 +14,7 @@
 	import AddressForm from '$lib/components/forms/AddressForm.svelte';
 	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
 	import { goto } from '$app/navigation';
+	import { fly, fade } from 'svelte/transition';
 
 	let ready = false;
 	let stage:
@@ -50,7 +53,7 @@
 	/>
 </svelte:head>
 
-<!-- Fondo decorativo -->
+<!-- ! Fondo decorativo -->
 <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
 	class="absolute bottom-0 left-0 right-0 top-[80%] -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
@@ -60,43 +63,47 @@
 <main class="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
 	<section class="transition-all duration-300 sm:p-12">
 		{#if stage === 'select'}
-			<div class="mb-20">
-				<Stepper current={1} total={5} />
-			</div>
-			<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
-				<span class="block">Unite a</span>
-				<span
-					class="mt-1 block bg-gradient-to-r from-[rgb(var(--color-primary))] via-blue-400 to-[rgb(var(--color-primary))] bg-clip-text text-transparent"
-				>
-					Conectando Corazones
-				</span>
-			</h1>
-			<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
-				Creá tu cuenta para publicar proyectos solidarios o sumarte como colaborador. Juntos,
-				hacemos la diferencia.
-			</p>
-			<p class="mb-8 text-center text-base font-medium text-gray-700">¿Cómo querés registrarte?</p>
+			<div in:fly={{ y: 20, opacity: 0, duration: 400 }} out:fade={{ duration: 200 }}>
+				<div class="mb-20">
+					<Stepper current={1} total={5} />
+				</div>
+				<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
+					<span class="block">Unite a</span>
+					<span
+						class="mt-1 block bg-gradient-to-r from-[rgb(var(--color-primary))] via-blue-400 to-[rgb(var(--color-primary))] bg-clip-text text-transparent"
+					>
+						Conectando Corazones
+					</span>
+				</h1>
+				<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
+					Creá tu cuenta para publicar proyectos solidarios o sumarte como colaborador. Juntos,
+					hacemos la diferencia.
+				</p>
+				<p class="mb-8 text-center text-base font-medium text-gray-700">
+					¿Cómo querés registrarte?
+				</p>
 
-			<div class="grid gap-8 sm:grid-cols-2">
-				<RoleCard
-					title="Soy una institución"
-					description="Quiero publicar, administrar y visibilizar proyectos solidarios para recibir ayuda."
-					icon="institution"
-					onSelect={() => choose('institucion')}
-				/>
-				<RoleCard
-					title="Soy colaborador/a"
-					description="Quiero ayudar o participar en proyectos como organización o entidad unipersonal."
-					icon="collaborator"
-					onSelect={() => choose('colaborador')}
-				/>
-			</div>
+				<div class="grid gap-8 sm:grid-cols-2">
+					<RoleCard
+						title="Soy una institución"
+						description="Quiero publicar, administrar y visibilizar proyectos solidarios para recibir ayuda."
+						icon="institution"
+						onSelect={() => choose('institucion')}
+					/>
+					<RoleCard
+						title="Soy colaborador/a"
+						description="Quiero ayudar o participar en proyectos como organización o entidad unipersonal."
+						icon="collaborator"
+						onSelect={() => choose('colaborador')}
+					/>
+				</div>
 
-			<p class="mt-6 text-center text-sm text-gray-500">
-				Si sos una organización —con o sin fines de lucro—, seleccioná
-				<span class="font-bold text-[rgb(var(--color-primary))]">"Colaborador/a"</span> para ayudar a
-				las instituciones.
-			</p>
+				<p class="mt-6 text-center text-sm text-gray-500">
+					Si sos una organización —con o sin fines de lucro—, seleccioná
+					<span class="font-bold text-[rgb(var(--color-primary))]">"Colaborador/a"</span> para ayudar
+					a las instituciones.
+				</p>
+			</div>
 		{:else if stage === 'form'}
 			<div class="mb-20">
 				<Stepper current={2} total={5} />
