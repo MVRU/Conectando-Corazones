@@ -1,4 +1,4 @@
-import type { Faq } from '$lib/models/Faq';
+import type { Faq } from '$lib/types/Faq';
 
 export const faqs: Faq[] = [
     {
