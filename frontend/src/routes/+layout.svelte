@@ -2,25 +2,32 @@
 	import '../app.css';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import Breadcrumbs from '$lib/components/ui/Breadcrumbs.svelte';
-	import { breadcrumbs } from '$lib/stores/breadcrumbs';
-	import ScrollToTop from '$lib/components/ui/ScrollToTop.svelte';
+	import Breadcrumbs from '$lib/components/ui/navigation/Breadcrumbs.svelte';
+	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
+	import '$lib/stores/reducedMotion';
+	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { authActions } from '$lib/stores/auth';
 
-	const showBreadcrumb = $derived(() => $breadcrumbs.length > 2);
-
-	let { children } = $props();
+	// * Limpia migas de pan al cambiar de ruta para evitar estados huérfanos
+	onMount(() => {
+		beforeNavigate(clearBreadcrumbs);
+		// Verificar autenticación al cargar la app
+		authActions.checkAuth();
+	});
 </script>
 
 <Header />
+<MotionNotice />
 
-{#if showBreadcrumb()}
-	<Breadcrumbs items={$breadcrumbs} />
-{/if}
+<Breadcrumbs items={$breadcrumbs} />
 
 <ScrollToTop />
 
 <main class="min-h-screen">
-	{@render children()}
+	<slot />
 </main>
 
 <Footer />

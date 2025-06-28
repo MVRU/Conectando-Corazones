@@ -1,3 +1,10 @@
+export interface Contacto {
+    responsable: string;
+    telefono: string;
+    email: string;
+    sitioWeb: string;
+}
+
 export interface Project {
     id?: number;
     titulo: string;
@@ -10,4 +17,12 @@ export interface Project {
     deadline: string; // ISO date
     institucion: string;
     ubicacion: string;
+    fechaInicio?: string;
+    fechaCierre?: string;
+    provincia?: string;
+    ciudad?: string;
+    estado?: string;
+    urgencia?: string;
+    beneficiarios?: number;
+    contacto?: Contacto;
 }
