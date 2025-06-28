@@ -1,7 +1,6 @@
-<!-- ContactMethodsForm.svelte -->
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
-	import Button from '../ui/Button.svelte';
+	import Button from '../ui/elements/Button.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	// Importa funciones y mensajes del archivo centralizado

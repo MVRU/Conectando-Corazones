@@ -8,7 +8,7 @@
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 	import ArcaValidation from '$lib/components/validation/ArcaValidation.svelte';
 	import EmailValidation from '$lib/components/validation/EmailValidation.svelte';
 	import AddressForm from '$lib/components/forms/AddressForm.svelte';

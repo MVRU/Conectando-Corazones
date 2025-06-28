@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 
 	export let selected: boolean = false;
 	export let icon: 'institution' | 'collaborator' | 'user' = 'user';

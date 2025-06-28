@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 
 	const dispatch = createEventDispatcher();

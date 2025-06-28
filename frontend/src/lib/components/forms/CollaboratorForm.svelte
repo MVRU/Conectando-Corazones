@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/forms/DatePicker.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
