@@ -1,9 +1,7 @@
 <script lang="ts">
   function handleImageError(event: Event) {
     const img = event.target as HTMLImageElement;
-    // Ocultar la imagen si no carga
     img.style.display = 'none';
-    // O mostrar un fondo gris con texto
     const container = img.parentElement;
     if (container) {
       container.style.backgroundColor = '#e5e7eb';
@@ -13,32 +11,32 @@
 </script>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
- 
-  <!-- Sección "Por qué existimos" -->
-  <section class="mb-20">
-    <div class="bg-white rounded-3xl p-8 md:p-12 shadow-lg">
-      <h2 class="text-3xl md:text-4xl font-light text-left mb-6 text-gray-800 tracking-wide">
-        Por qué existimos
-      </h2>
-      
-      <h1 class="text-2xl md:text-3xl font-serif text-center mb-10 text-gray-700 leading-tight">
-        Ayudar no cambia el mundo entero,<br />
-        pero sí el mundo de alguien.
-      </h1>
-      
+
+ <!-- Sección "Por qué existimos" -->
+<section class="mb-20">
+  <div class="bg-white rounded-3xl p-8 md:p-12 shadow-lg">
+   <div class="mx-auto mb-10 max-w-4xl text-center">
+  <h1 class="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+    <span class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent">
+      ¿Por qué existimos?
+    </span>
+  </h1>
+</div>
+
+
       <div class="max-w-3xl mx-auto bg-gray-50 rounded-2xl p-8 shadow-sm">
         <div class="prose prose-lg text-gray-600 space-y-4">
           <p class="text-xl leading-relaxed font-light">Creemos que ningún niño debería irse a dormir con hambre.</p>
           <p class="text-xl leading-relaxed font-light">Que ningún abuelo pase sus días en soledad, sin un abrazo, sin una palabra amable, sin una sonrisa.</p>
           <p class="text-xl leading-relaxed font-light">Que las escuelas no tengan que improvisar con lo que hay, sino que puedan enseñar con todo lo que necesitan.</p>
           <p class="text-xl leading-relaxed font-light">Que los hospitales no tengan que hacer milagros con lo mínimo, sino que cuenten con todo lo necesario para cuidar con dignidad.</p>
-          <div class="my-8 border-l-4 border-gray-300 pl-6">
+          <div class="my-8 border-l-4 border-blue-300 pl-6">
             <p class="text-xl leading-relaxed font-light italic">Conectando Corazones nace del deseo profundo de cambiar realidades.</p>
             <p class="text-xl leading-relaxed font-light italic">No desde un escritorio, sino desde el alma.</p>
           </div>
           <p class="text-xl leading-relaxed font-light">Queremos ser el puente entre quienes necesitan ayuda y quienes están dispuestos a darla.</p>
           <p class="text-xl leading-relaxed font-light">Porque la empatía no tiene fronteras, y el compromiso no entiende de excusas.</p>
-          <div class="my-8 border-l-4 border-gray-300 pl-6">
+          <div class="my-8 border-l-4 border-blue-300 pl-6">
             <p class="text-xl leading-relaxed font-light">Esta plataforma es un acto de amor.</p>
             <p class="text-xl leading-relaxed font-light">Es la mano que se extiende, el oído que escucha, el corazón que late junto al de otro.</p>
           </div>
@@ -51,7 +49,7 @@
   <!-- Sección "Misión, Visión y Valores" -->
   <section class="mb-20">
     <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Misión, Visión y Valores</h2>
-    
+
     <div class="grid md:grid-cols-3 gap-8">
       <!-- Misión -->
       <div class="bg-white rounded-lg shadow-lg p-8 text-center hover:shadow-xl transition-shadow">
@@ -101,44 +99,39 @@
 
   <!-- Sección "Nuestro equipo" -->
   <section>
-    <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">Nuestro Equipo</h2>
-    
+    <h2 class="text-3xl font-bold text-center mb-6 text-gray-800">Nuestro Equipo</h2>
+    <div class="max-w-4xl mx-auto mb-12 text-gray-600 text-lg leading-relaxed bg-gray-50 p-6 md:p-8 rounded-xl shadow-sm space-y-4 text-justify">
+      <p>
+        Somos tres estudiantes de la Universidad Tecnológica Nacional – Facultad Regional Rosario, convencidos de que la tecnología puede ser mucho más que líneas de código: puede ser el hilo invisible que une corazones dispuestos a cambiar realidades.
+      </p>
+      <p>
+        <strong>Conectando Corazones</strong> nació como nuestro proyecto final, pero va más allá de una entrega académica. Es una iniciativa que busca potenciar las buenas acciones, creando herramientas digitales simples, seguras y efectivas que conecten a quienes quieren colaborar con quienes más lo necesitan.
+      </p>
+      <p>
+        Porque la tecnología, cuando se pone al servicio de la solidaridad, se convierte en una herramienta poderosa para el cambio social.
+      </p>
+    </div>
+
     <div class="grid md:grid-cols-3 gap-8">
-      <!-- Miembro 1 -->
+      {#each [
+        { name: "Alexis Julian Sklate", role: "Socio", quote: "La solidaridad es el lenguaje universal del corazón", img: "/team/member1.jpg" },
+        { name: "Marina Ana Milo", role: "Socia", quote: "A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando.", img: "/team/member2.jpg" },
+        { name: "Martin Tomas Alvarez", role: "Socio", quote: "La empatía es el puente que conecta corazones", img: "/team/member3.jpg" }
+      ] as member}
       <div class="text-center">
-        <div class="w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200">
-          <img src="/team/member1.jpg" alt="Alexis Julian Sklate" class="w-full h-full object-cover" on:error={handleImageError} />
+        <div class="w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200 transform transition-transform duration-300 hover:scale-105">
+          <img src={member.img} alt={member.name} class="w-full h-full object-cover" on:error={handleImageError} />
         </div>
-        <h3 class="text-xl font-semibold mb-2 text-gray-800">Alexis Julian Sklate </h3>
-        <p class="text-blue-600 mb-2">Socio</p>
-        <p class="text-gray-600 italic">"La solidaridad es el lenguaje universal del corazón"</p>
+        <h3 class="text-xl font-semibold mb-2 text-gray-800">{member.name}</h3>
+        <p class="text-blue-600 mb-2">{member.role}</p>
+        <p class="text-gray-600 italic">"{member.quote}"</p>
       </div>
-
-      <!-- Miembro 2 -->
-      <div class="text-center">
-        <div class="w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200">
-          <img src="/team/member2.jpg" alt="Marina Ana Milo" class="w-full h-full object-cover" on:error={handleImageError} />
-        </div>
-        <h3 class="text-xl font-semibold mb-2 text-gray-800">Marina Ana Milo</h3>
-        <p class="text-blue-600 mb-2">Socia</p>
-         <p class="text-gray-600 italic">"A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando."</p>
-      </div>
-
-      <!-- Miembro 3 -->
-      <div class="text-center">
-        <div class="w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden bg-gray-200">
-          <img src="/team/member3.jpg" alt="Martin Tomas Alvarez" class="w-full h-full object-cover" on:error={handleImageError} />
-        </div>
-        <h3 class="text-xl font-semibold mb-2 text-gray-800">Martin Tomas Alvarez</h3>
-        <p class="text-blue-600 mb-2">Socio</p>
-        <p class="text-gray-600 italic">"La empatía es el puente que conecta corazones"</p>
-      </div>
+      {/each}
     </div>
   </section>
 </div>
 
 <style>
-  /* Estilos adicionales */
   .prose p {
     margin-bottom: 1.5rem;
   }
