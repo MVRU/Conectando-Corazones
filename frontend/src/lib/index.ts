@@ -3,6 +3,7 @@
 // Componentes de UI
 export { default as Badge } from './components/ui/elements/Badge.svelte';
 export { default as Button } from './components/ui/elements/Button.svelte';
+export { default as Select } from './components/ui/elements/Select.svelte';
 export { default as ProjectCard } from './components/ui/cards/ProjectCard.svelte';
 export { default as Breadcrumbs } from './components/ui/navigation/Breadcrumbs.svelte';
 
@@ -21,6 +22,10 @@ export { default as MotionNotice } from './components/feedback/MotionNotice.svel
 // Export stores y utilidades
 export * from './stores/breadcrumbs';
 export * from './stores/reducedMotion';
+export * from './stores/auth';
 export * from './actions/inView';
 export * from './utils/device';
 export * from './data/projects';
+
+// Export modelos
+export * from './models/User';
