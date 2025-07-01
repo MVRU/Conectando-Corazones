@@ -40,9 +40,10 @@ const mockUsers = {
   },
   institucion: {
     id: '2',
+    username: 'escuela_esperanza',
     email: 'escuela@esperanza.edu.ar',
     profile: 'img/escuela_solidaria.jpg',
-    nombre: 'Escuela Esperanza',
+    nombre: 'María García',
     role: 'institucion' as const,
     isActive: true,
     createdAt: new Date('2024-01-15'),
@@ -61,8 +62,7 @@ const mockUsers = {
     descripcion: 'Escuela rural comprometida con la educación de calidad',
     sitioWeb: 'escuelaesperanza.edu.ar',
     tipoInstitucion: 'escuela' as const,
-    capacidadBeneficiarios: 150,
-    proyectosCreados: ['1', '2']
+    proyectosCreados: ['1']
   },
   colaborador: {
     id: '3',

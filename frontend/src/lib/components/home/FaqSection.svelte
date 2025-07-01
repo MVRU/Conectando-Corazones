@@ -8,8 +8,8 @@
 -->
 
 <script lang="ts">
-        import FaqItem from '$lib/components/ui/elements/FaqItem.svelte';
-        import Image from '$lib/components/ui/elements/Image.svelte';
+	import FaqItem from '$lib/components/ui/elements/FaqItem.svelte';
+	import Image from '$lib/components/ui/elements/Image.svelte';
 	import { faqs } from '$lib/data/faqs';
 	import { inView } from '$lib/actions/inView';
 	import { reducedMotion } from '$lib/stores/reducedMotion';
