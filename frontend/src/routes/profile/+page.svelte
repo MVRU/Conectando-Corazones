@@ -5,9 +5,14 @@
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import { projects } from '$lib/data/projects';
+	import { fade } from 'svelte/transition';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 
 	let user: User | null = null;
 	let institucionUser: InstitucionUser | null = null;
+	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado'] as const;
+	let filtroEstado = 'Todos';
+	let busquedaTitulo = '';
 
 	onMount(async () => {
 		await authActions.login('escuela@esperanza.edu.ar', '123456');
@@ -25,6 +30,20 @@
 	function generarGoogleMapsUrl(direccion: any): string {
 		const query = `${direccion.calle} ${direccion.numero}, ${direccion.ciudad}, ${direccion.provincia}, Argentina`;
 		return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+	}
+
+	$: proyectosFiltrados = proyectosCreados
+		.map((id) => projects.find((p) => String(p.id) === String(id)))
+		.filter((p) => p !== undefined)
+		.filter((p) => {
+			const coincideEstado = filtroEstado === 'Todos' || p?.estado === filtroEstado;
+			const coincideTitulo = p?.titulo.toLowerCase().includes(busquedaTitulo.trim().toLowerCase());
+			return coincideEstado && coincideTitulo;
+		});
+
+	function limpiarFiltros() {
+		busquedaTitulo = '';
+		filtroEstado = 'Todos';
 	}
 </script>
 
@@ -240,8 +259,11 @@
 							Información institucional
 						</h2>
 						<ul class="space-y-2 text-sm text-gray-700">
+							<li>
+								<span class="font-medium">Nombre de usuario:</span>
+								{user.username ?? 'No disponible'}
+							</li>
 							<li><span class="font-medium">Razón social:</span> {institucionUser?.razonSocial}</li>
-							<li><span class="font-medium">Username:</span> {user.username ?? 'No disponible'}</li>
 							<li>
 								<span class="font-medium">Fecha de creación:</span>
 								{user.createdAt?.toLocaleDateString()}
@@ -384,23 +406,147 @@
 			</div>
 
 			<!-- ! Proyectos Creados -->
-			<div class="w-full border-t border-gray-100 bg-gray-50 px-8 py-10">
+			<div
+				class="w-full border-t border-gray-100 bg-gradient-to-b from-gray-50 to-white px-6 py-12 sm:px-8 lg:px-12"
+			>
 				<div class="mx-auto max-w-7xl">
-					{#if proyectosCreados.length > 0}
+					<!-- Header de sección -->
+					<div class="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
 						<div>
-							<h3 class="mb-6 text-2xl font-semibold text-slate-800">Proyectos creados</h3>
-							<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-								{#each proyectosCreados as id}
-									{#if projects.find((p) => String(p.id) === String(id))}
-										<ProjectCard proyecto={projects.find((p) => String(p.id) === String(id))!} />
-									{/if}
-								{/each}
+							<h3 class="text-3xl font-bold tracking-tight text-slate-900">Proyectos creados</h3>
+							<p class="mt-1 text-sm text-gray-500">
+								Filtrá por título o estado para encontrar proyectos fácilmente.
+							</p>
+						</div>
+
+						<!-- Filtros -->
+						<div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+							<!-- Búsqueda -->
+							<div class="relative w-full sm:w-64">
+								<input
+									id="busquedaTitulo"
+									type="text"
+									bind:value={busquedaTitulo}
+									placeholder="Buscar por título..."
+									class="peer block w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 shadow-sm transition-all duration-200 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+								/>
+								<svg
+									class="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-400 transition-all duration-200 peer-focus:text-blue-500"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="2"
+										d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"
+									/>
+								</svg>
+							</div>
+
+							<!-- Estado -->
+							<div class="relative w-full sm:w-48">
+								<select
+									id="filtroEstado"
+									bind:value={filtroEstado}
+									class="block w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm text-gray-800 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+								>
+									{#each estadosDisponibles as estado}
+										<option value={estado}>{estado}</option>
+									{/each}
+								</select>
+								<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+									<svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+										<path
+											fill-rule="evenodd"
+											d="M5.23 7.21a.75.75 0 011.06.02L10 11.584l3.71-4.354a.75.75 0 111.14.976l-4.25 5a.75.75 0 01-1.14 0l-4.25-5a.75.75 0 01.02-1.06z"
+											clip-rule="evenodd"
+										/>
+									</svg>
+								</div>
 							</div>
 						</div>
-					{:else}
-						<div class="rounded-xl bg-blue-50 p-6 text-center text-gray-500 shadow-sm">
-							Este usuario aún no ha creado proyectos.
+					</div>
+
+					<!-- Resultados -->
+					{#if proyectosCreados.length === 0}
+						<div
+							class="rounded-xl border border-dashed border-blue-200 bg-blue-50 px-6 py-8 text-center shadow-sm"
+							in:fade
+						>
+							<p class="text-base font-medium text-blue-900">
+								Esta institución aún no ha creado proyectos.
+							</p>
 						</div>
+					{:else}
+						<!-- Contador + botón limpiar -->
+						<div
+							class="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
+						>
+							{#if proyectosFiltrados.length > 0}
+								<p class="text-sm text-gray-500">
+									{#if proyectosFiltrados.length === 1}
+										Se encontró <strong>1</strong> proyecto.
+									{:else}
+										Se encontraron <strong>{proyectosFiltrados.length}</strong> proyectos.
+									{/if}
+								</p>
+							{/if}
+
+							{#if filtroEstado !== 'Todos' || busquedaTitulo.trim()}
+								<button
+									on:click={limpiarFiltros}
+									class="inline-flex cursor-pointer items-center gap-2 rounded-md border border-blue-100 bg-white px-3 py-1.5 text-sm font-medium text-blue-600 shadow-sm transition hover:bg-blue-50 hover:shadow-md active:scale-[.98] active:shadow-inner"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										stroke-width="1.5"
+										stroke="currentColor"
+										class="h-4 w-4"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+									</svg>
+									Limpiar filtros
+								</button>
+							{/if}
+						</div>
+
+						<!-- Mensaje sin resultados -->
+						{#if proyectosFiltrados.length === 0}
+							<div
+								class="rounded-xl border border-dashed border-red-200 bg-red-50 px-6 py-8 text-center shadow-sm"
+								in:fade
+							>
+								<p class="text-base font-medium text-red-900">
+									{#if busquedaTitulo.trim() && filtroEstado !== 'Todos'}
+										No se encontraron proyectos con el título "<strong>{busquedaTitulo}</strong>" y
+										estado "<strong>{filtroEstado}</strong>".
+									{:else if busquedaTitulo.trim()}
+										No se encontraron proyectos con el título "<strong>{busquedaTitulo}</strong>".
+									{:else if filtroEstado !== 'Todos'}
+										No se encontraron proyectos con el estado "<strong>{filtroEstado}</strong>".
+									{:else}
+										No se encontraron proyectos que coincidan con los filtros aplicados.
+									{/if}
+								</p>
+							</div>
+						{:else}
+							<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+								{#each proyectosFiltrados as proyecto (proyecto.id)}
+									<div in:fade>
+										<ProjectCard
+											proyecto={{
+												...proyecto
+											}}
+										/>
+									</div>
+								{/each}
+							</div>
+						{/if}
 					{/if}
 				</div>
 			</div>

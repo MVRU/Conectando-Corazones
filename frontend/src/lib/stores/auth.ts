@@ -62,7 +62,7 @@ const mockUsers = {
     descripcion: 'Escuela rural comprometida con la educación de calidad',
     sitioWeb: 'escuelaesperanza.edu.ar',
     tipoInstitucion: 'escuela' as const,
-    proyectosCreados: ['1']
+    proyectosCreados: ['1', '5', '10']
   },
   colaborador: {
     id: '3',

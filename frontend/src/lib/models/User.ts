@@ -11,7 +11,7 @@ export type VerificationStatus = 'pendiente' | 'verificado' | 'rechazado'; // ? 
 
 // Modelo base de usuario
 export interface BaseUser {
-  id: string; // ! Esto sería username
+  id?: string;
   username?: string;
   email: string;
   nombre: string; // ? ¿Distinguimos nombre y apellido o directamente nombre completo?

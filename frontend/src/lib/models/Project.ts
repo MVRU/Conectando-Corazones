@@ -15,7 +15,15 @@ export interface Project {
     unidad: 'dinero' | 'materiales' | 'voluntarios';
     especie?: string; // Colchones, libros, alimentos, etc.
     deadline: string; // ISO date
-    institucion: string;
+
+    // Relación con institución creadora
+    institucion: string | {
+        id: string;
+        razonSocial: string;
+        provincia?: string;
+        logo?: string;
+    };
+
     ubicacion: string;
     fechaInicio?: string;
     fechaCierre?: string;
@@ -25,4 +33,5 @@ export interface Project {
     urgencia?: string;
     beneficiarios?: number;
     contacto?: Contacto;
+    colaboradores?: { id: string }[]; // Colaboradores asignados al proyecto
 }
