@@ -30,7 +30,8 @@
 		{ label: 'Acerca de', href: '/about' },
 		{ label: 'Proyectos', href: '/projects' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
-		{ label: 'Contacto', href: isHome ? '#support' : '/contact' }
+		{ label: 'Contacto', href: isHome ? '#support' : '/contact' },
+		{ label: 'Configuracion', href: '/settings' }
 	];
 
 	// Función para manejar el logout
@@ -112,6 +113,7 @@
 				<div class="flex items-center gap-4">
 					<span class="text-sm text-gray-300">Hola, {$user?.nombre}</span>
 					<Button label="Mi Perfil" href="/perfil" />
+					<Button label="Configuración" href="/settings" variant="ghost" />
 					<button
 						on:click={handleLogout}
 						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 h-12 min-w-[140px] px-8 py-3 md:h-14"
@@ -187,6 +189,7 @@
 				<div class="space-y-3">
 					<div class="text-sm text-gray-300">Hola, {$user?.nombre}</div>
 					<Button label="Mi Perfil" href="/perfil" variant="ghost" />
+					<Button label="Configuración" href="/settings" variant="ghost" />
 					<button
 						on:click={handleLogout}
 						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 h-12 min-w-[140px] px-8 py-3 md:h-14"

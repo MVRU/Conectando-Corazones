@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@fontsource/raleway": "^5.2.6",
+    "aos": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/aos": "^3.0.7"
+  }
+}

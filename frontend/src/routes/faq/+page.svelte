@@ -123,7 +123,7 @@
 </script>
 
 <div class="max-w-3xl mx-auto p-6 space-y-8">
-  <h1 class="text-3xl font-bold text-gray-800 text-center">Preguntas Frecuentes</h1>
+  <h1 class="text-3xl font-bold text-center bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent">Preguntas Frecuentes</h1>
 
   <div class="relative">
     <input
@@ -136,7 +136,7 @@
 
   {#each $filteredFaqs as category}
     <div class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
-      <h2 class="text-2xl font-semibold text-gray-800 border-b border-gray-200 pb-2">{category.category}</h2>
+      <h2 class="text-2xl font-semibold border-b border-gray-200 pb-2 bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent">{category.category}</h2>
       <div class="space-y-3">
         {#each category.questions as item}
           <details class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition group">
