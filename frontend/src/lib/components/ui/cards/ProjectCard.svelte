@@ -215,7 +215,7 @@
 							href={`/projects/${proyecto.id}/reporte`}
 							size="sm"
 							variant="secondary"
-							customClass="w-full max-w-[180px]"
+							customClass="w-full "
 							on:click={(e) => e.stopPropagation()}
 						/>
 					</div>

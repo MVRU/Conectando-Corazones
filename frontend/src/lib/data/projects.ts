@@ -187,7 +187,10 @@ export const projects: Project[] = [
     titulo: 'Computadoras para Escuela Rural',
     descripcion:
       'La escuela rural necesita equipos informáticos para que los alumnos puedan acceder a herramientas digitales. Buscamos computadoras en buen estado.',
-    institucion: 'Escuela Rural N° 123',
+    institucion: {
+      id: '2',
+      razonSocial: 'Escuela Esperanza',
+    },
     fechaInicio: '2025-02-10',
     fechaCierre: '2025-05-15',
     provincia: 'Salta',

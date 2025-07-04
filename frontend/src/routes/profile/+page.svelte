@@ -6,7 +6,7 @@
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import { projects } from '$lib/data/projects';
 	import { fade } from 'svelte/transition';
-	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Pagination from '$lib/components/ui/navigation/Pagination.svelte';
 
 	let user: User | null = null;
 	let institucionUser: InstitucionUser | null = null;
@@ -44,6 +44,21 @@
 	function limpiarFiltros() {
 		busquedaTitulo = '';
 		filtroEstado = 'Todos';
+	}
+
+	let paginaActual = 1;
+	const proyectosPorPagina = 3;
+
+	$: totalPaginas = Math.ceil(proyectosFiltrados.length / proyectosPorPagina);
+	$: proyectosPaginados = proyectosFiltrados.slice(
+		(paginaActual - 1) * proyectosPorPagina,
+		paginaActual * proyectosPorPagina
+	);
+
+	function cambiarPagina(nuevaPagina: number) {
+		if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+			paginaActual = nuevaPagina;
+		}
 	}
 </script>
 
@@ -481,7 +496,7 @@
 							</p>
 						</div>
 					{:else}
-						<!-- Contador + botón limpiar -->
+						<!-- Contador y botón limpiar -->
 						<div
 							class="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
 						>
@@ -494,7 +509,6 @@
 									{/if}
 								</p>
 							{/if}
-
 							{#if filtroEstado !== 'Todos' || busquedaTitulo.trim()}
 								<button
 									on:click={limpiarFiltros}
@@ -508,7 +522,7 @@
 										stroke="currentColor"
 										class="h-4 w-4"
 									>
-										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
 									</svg>
 									Limpiar filtros
 								</button>
@@ -536,16 +550,21 @@
 							</div>
 						{:else}
 							<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-								{#each proyectosFiltrados as proyecto (proyecto.id)}
+								{#each proyectosPaginados as proyecto (proyecto.id)}
 									<div in:fade>
-										<ProjectCard
-											proyecto={{
-												...proyecto
-											}}
-										/>
+										<ProjectCard proyecto={{ ...proyecto }} />
 									</div>
 								{/each}
 							</div>
+
+							<!-- Paginación -->
+							{#if totalPaginas > 1}
+								<Pagination
+									totalPages={totalPaginas}
+									currentPage={paginaActual}
+									onPageChange={(nueva) => cambiarPagina(nueva)}
+								/>
+							{/if}
 						{/if}
 					{/if}
 				</div>
