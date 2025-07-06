@@ -27,7 +27,7 @@
 	let proyectosVisibles: Project[] = [];
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
-		Activo: 0,
+		Abierto: 0,
 		'En ejecución': 1,
 		Finalizado: 2
 	};
@@ -37,11 +37,11 @@
 		const inicio = p.fechaInicio ? new Date(p.fechaInicio) : null;
 		const cierre = p.fechaCierre ? new Date(p.fechaCierre) : null;
 
-		if (!inicio || !cierre) return 'Activo';
+		if (!inicio || !cierre) return 'Abierto';
 
 		if (hoy > cierre) return 'Finalizado';
 		if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
-		return 'Activo';
+		return 'Abierto';
 	}
 
 	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
@@ -54,7 +54,7 @@
 			);
 		}
 
-		// Ordenar primero por estado (Activo < En ejecución < Finalizado) y después por fechaInicio asc
+		// Ordenar primero por estado (Abierto < En ejecución < Finalizado) y después por fechaInicio asc
 		resultado.sort((a, b) => {
 			const estadoA = estadoTemporizadorProyecto(a);
 			const estadoB = estadoTemporizadorProyecto(b);
@@ -79,7 +79,7 @@
 <section class="w-full px-8 py-8">
 	<!-- Título -->
 	<div style="margin-bottom: var(--spacing-3xl);">
-		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>
+		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Abiertos</h2>
 		<p class="font-inter max-w-3xl text-lg text-gray-600">
 			Descubrí los proyectos que necesitan tu colaboración. Podés participar con donaciones
 			monetarias, materiales específicos o como voluntario.

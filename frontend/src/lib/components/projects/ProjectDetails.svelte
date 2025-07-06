@@ -5,7 +5,7 @@
 
 <!-- Descripción -->
 <section class="mb-10">
-	<h3 class="mb-3 text-xl font-bold text-[rgb(var(--base-color))]">Descripción del Proyecto</h3>
+	<h3 class="mb-3 text-2xl font-bold text-[rgb(var(--base-color))]">Descripción del Proyecto</h3>
 	<p class="text-base leading-relaxed text-gray-700 sm:text-lg sm:leading-8">
 		{proyecto.descripcion}
 	</p>
@@ -16,7 +16,7 @@
 	<!-- Card: Institución -->
 	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
 		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Institución</h4>
-		<p class="text-base font-semibold text-gray-800">{proyecto.institucion}</p>
+		<p class="text-base font-semibold text-gray-800">{proyecto.institucion?.razonSocial}</p>
 	</div>
 
 	<!-- Card: Beneficiarios -->

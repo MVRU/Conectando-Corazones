@@ -26,19 +26,19 @@ TODO:
 	// Función para manejar el login
 	async function handleLogin(event: Event) {
 		event.preventDefault();
-		
+
 		// Validar campos
 		validationErrors = [];
 		if (!email.trim()) validationErrors.push('El email es requerido');
 		if (!password.trim()) validationErrors.push('La contraseña es requerida');
-		
+
 		if (validationErrors.length > 0) {
 			return;
 		}
 
 		try {
 			await authActions.login(email, password, rememberMe);
-			
+
 			// Redirigir según el rol del usuario
 			// TODO: Implementar redirección basada en el rol
 			goto('/');
@@ -101,10 +101,7 @@ TODO:
 
 				<form on:submit={handleLogin} class="space-y-6">
 					<div>
-						<label
-							for="email"
-							class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
-						>
+						<label for="email" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
 							Email *
 						</label>
 						<input
@@ -140,12 +137,27 @@ TODO:
 							>
 								{#if showPassword}
 									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
+										/>
 									</svg>
 								{:else}
 									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+										/>
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+										/>
 									</svg>
 								{/if}
 							</button>
@@ -177,8 +189,19 @@ TODO:
 						{#if $isLoading}
 							<div class="flex items-center justify-center">
 								<svg class="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
 								</svg>
 								Iniciando sesión...
 							</div>
@@ -199,10 +222,7 @@ TODO:
 				<div class="text-center">
 					<p class="text-gray-600">
 						¿No tenés una cuenta?
-						<a
-							href="/signin"
-							class="font-medium text-[rgb(var(--color-primary))] hover:underline"
-						>
+						<a href="/signin" class="font-medium text-[rgb(var(--color-primary))] hover:underline">
 							Registrate aquí
 						</a>
 					</p>
@@ -217,10 +237,11 @@ TODO:
 					¿Por qué registrarse?
 				</h2>
 				<p class="mx-auto mb-6 max-w-2xl text-gray-600">
-					Al crear una cuenta podés hacer seguimiento de tus donaciones, recibir actualizaciones de los proyectos que apoyás y formar parte de nuestra comunidad de donantes comprometidos.
+					Al crear una cuenta podés hacer seguimiento de tus donaciones, recibir actualizaciones de
+					los proyectos que apoyás y formar parte de nuestra comunidad de donantes comprometidos.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
-					<Button label="Ver proyectos activos" href="/projects" disabled={false} />
+					<Button label="Ver proyectos abiertos" href="/projects" disabled={false} />
 					<Button label="Registrarse" href="/signin" variant="secondary" disabled={false} />
 				</div>
 			</div>

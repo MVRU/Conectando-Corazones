@@ -1,16 +1,12 @@
-export interface Contacto {
-    responsable: string;
-    telefono: string;
-    email: string;
-    sitioWeb: string;
-}
+import type { Contacto } from './Contacto';
+import type { InstitucionUser, ColaboradorUser } from './User';
 
 export interface Objetivo {
     objetivo: number;
     cantidadEstimada: number;
     cantidadRecaudada?: number;
     unidad: 'dinero' | 'materiales' | 'voluntarios';
-    especie?: string; // Colchones, libros, alimentos, etc.
+    especie?: string;
 }
 
 export interface Project {
@@ -19,7 +15,11 @@ export interface Project {
     descripcion: string;
     imagen: string;
     deadline: string; // ISO date
-    institucion: string;
+    institucion: {
+        id: string;
+        razonSocial?: string;
+    }
+    colaboradores?: ColaboradorUser[];
     ubicacion: string;
     fechaInicio?: string;
     fechaCierre?: string;

@@ -30,11 +30,6 @@
 	// Variables reactivas para valores dependientes de "proyecto"
 	let mostrarTooltipEstimado: boolean = false;
 	let mostrarTooltipRecaudado: boolean = false;
-	let objetivo: number;
-	let unidad: string;
-	let especie: string;
-	let estimado: number;
-	let recaudado: number;
 	let percentEstimado: number;
 	let percentRecaudado: number;
 	let actualLabel: string;
@@ -99,7 +94,7 @@
 				return 'bg-yellow-100 text-yellow-700';
 			case 'Baja':
 				return 'bg-green-100 text-green-700';
-			case 'Activo':
+			case 'Abierto':
 				return 'bg-green-100 text-green-700';
 			case 'Cerrado':
 				return 'bg-gray-100 text-gray-500';
@@ -171,7 +166,8 @@
 	const disabled = estadoTemporizador === 'En ejecución' || estadoTemporizador === 'Finalizado';
 </script>
 
-<article
+<a
+	href={`/projects/${proyecto.id}`}
 	class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
 >
 	<!-- Imagen destacada -->
@@ -215,7 +211,9 @@
 	<div class="flex flex-1 flex-col justify-between gap-4 p-5 sm:p-6">
 		<div class="space-y-2">
 			<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
-				<span class="font-semibold text-[rgb(var(--color-primary))]">{proyecto.institucion}</span>
+				<span class="font-semibold text-[rgb(var(--color-primary))]"
+					>{proyecto.institucion?.razonSocial}</span
+				>
 				<span>📍 {proyecto.ciudad}, {proyecto.provincia}</span>
 			</div>
 			<h3 class="line-clamp-2 text-base font-bold leading-tight text-gray-800 sm:text-lg">
@@ -302,7 +300,7 @@
 		</div>
 	</div>
 	<ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
-</article>
+</a>
 
 <style>
 	.line-clamp-3 {

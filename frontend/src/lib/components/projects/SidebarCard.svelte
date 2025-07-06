@@ -56,8 +56,16 @@
 			icon: '🙋‍♀️',
 			label: 'voluntariado',
 			button: 'Postularme como voluntario'
+		},
+		multiples: {
+			bg: 'bg-green-50',
+			border: 'border-green-200',
+			text: 'text-green-700',
+			icon: '🤝',
+			label: '',
+			button: 'Colaborar ahora'
 		}
-	}[unicoObjetivo?.unidad ?? 'dinero'];
+	}[unicoObjetivo?.unidad ?? 'multiples'];
 </script>
 
 <!-- Card principal -->
