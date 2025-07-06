@@ -111,7 +111,7 @@
 			{#if $isAuthenticated}
 				<div class="flex items-center gap-4">
 					<span class="text-sm text-gray-300">Hola, {$user?.nombre}</span>
-					<Button label="Mi Perfil" href="/perfil" size="sm" />
+					<Button label="Mi Perfil" href="/profile" size="sm" />
 					<Button label="Cerrar Sesión" variant="ghost" size="sm" on:click={handleLogout}></Button>
 				</div>
 			{:else}
@@ -166,7 +166,7 @@
 			{#if $isAuthenticated}
 				<div class="space-y-3">
 					<div class="text-sm text-gray-300">Hola, {$user?.nombre}</div>
-					<Button label="Mi Perfil" href="/perfil" variant="ghost" />
+					<Button label="Mi Perfil" href="/profile" variant="ghost" />
 					<button
 						on:click={handleLogout}
 						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
