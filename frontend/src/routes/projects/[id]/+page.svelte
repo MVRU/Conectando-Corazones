@@ -12,8 +12,8 @@
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
 	import ProjectContact from '$lib/components/projects/ProjectContact.svelte';
 	import SidebarCard from '$lib/components/projects/SidebarCard.svelte';
-	import ProgressBar from '$lib/components/ui/elements/ProgressBar.svelte';
 	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
+	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 
 	let proyectoId: number;
 
@@ -44,30 +44,6 @@
 			month: 'long',
 			day: 'numeric'
 		});
-	}
-
-	function calcularPorcentajeProgreso() {
-		if (!proyecto) return 0;
-		return Math.min((proyecto.actual / proyecto.objetivo) * 100, 100);
-	}
-
-	function formatearMonto(cantidad: number) {
-		if (!proyecto?.unidad) return cantidad?.toString?.() || '';
-		if (proyecto.unidad === 'dinero') return `$${cantidad.toLocaleString()}`;
-		return cantidad.toString();
-	}
-
-	function getColorProgreso(tipo: string) {
-		switch (tipo) {
-			case 'dinero':
-				return 'green';
-			case 'voluntarios':
-				return 'purple';
-			case 'materiales':
-				return 'blue';
-			default:
-				return 'green';
-		}
 	}
 
 	function getColorUrgencia(urgencia: string) {
@@ -110,12 +86,10 @@
 
 {#if proyecto}
 	<main class="min-h-screen bg-white">
-		<!-- Encabezado destacado a pantalla completa -->
 		<div class="mx-auto mt-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
 			<ProjectHeader {proyecto} {getColorUrgencia} {getColorEstado} />
 		</div>
 
-		<!-- Contenido -->
 		<div class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
 			{#if solicitudEnviada}
 				<div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 shadow">
@@ -126,42 +100,17 @@
 			{/if}
 
 			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
-				<!-- Contenido principal -->
 				<div class="space-y-3 lg:col-span-2">
 					<div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-100">
-						<!-- Progreso -->
 						<section class="space-y-3">
 							<h3 class="text-lg font-semibold text-[rgb(var(--base-color))]">Progreso</h3>
-							<div class="flex items-center justify-between">
-								<span class="text-sm text-gray-700">
-									{formatearMonto(proyecto.actual)} / {proyecto.objetivo}
-								</span>
-								<span class="text-sm text-gray-500">
-									{calcularPorcentajeProgreso().toFixed(1)}%
-								</span>
-							</div>
-							<ProgressBar
-								percent={calcularPorcentajeProgreso()}
-								color={getColorProgreso(proyecto.unidad)}
-							/>
-							{#if proyecto.actual < proyecto.objetivo}
-								<p class="text-sm text-gray-600">
-									<span class="font-bold">
-										{formatearMonto(proyecto.objetivo - proyecto.actual)}
-									</span>
-									faltan para alcanzar el objetivo.
-								</p>
-							{:else}
-								<p class="text-sm font-medium text-green-600">¡Objetivo alcanzado!</p>
-							{/if}
+							<ProjectProgress {proyecto} />
 						</section>
 
-						<!-- Detalles -->
 						<div class="mt-10">
 							<ProjectDetails {proyecto} {formatearFecha} />
 						</div>
 
-						<!-- Actualizaciones -->
 						{#if proyecto.actualizaciones?.length}
 							<section class="mt-6">
 								<h3 class="mb-4 text-lg font-semibold text-[rgb(var(--base-color))]">
@@ -184,59 +133,9 @@
 								</ul>
 							</section>
 						{/if}
-
-						<!-- Evidencia -->
-						{#if proyecto.evidencia?.length}
-							<section class="mt-6">
-								<h3 class="mb-4 text-lg font-semibold text-[rgb(var(--base-color))]">
-									Evidencia del Proyecto
-								</h3>
-								<ul class="space-y-4">
-									{#each proyecto.evidencia as evidencia}
-										<li
-											class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 sm:flex-row sm:items-center sm:justify-between"
-										>
-											<div class="flex items-start gap-3">
-												<span class="text-2xl">{evidencia.tipo === 'Imagen' ? '🖼️' : '📄'}</span>
-												<div>
-													<h4 class="font-semibold text-[rgb(var(--base-color))]">
-														{evidencia.titulo}
-													</h4>
-													<p class="text-sm text-gray-600">{evidencia.descripcion}</p>
-													<span class="text-xs text-gray-500"
-														>{formatearFecha(evidencia.fecha)}</span
-													>
-												</div>
-											</div>
-											<div>
-												<button
-													class="text-sm font-medium text-[rgb(var(--color-primary))] hover:underline"
-													>Ver archivo</button
-												>
-											</div>
-										</li>
-									{/each}
-								</ul>
-							</section>
-						{:else}
-							<section class="mt-6">
-								<h3 class="mb-2 text-lg font-semibold text-[rgb(var(--base-color))]">
-									Evidencia del Proyecto
-								</h3>
-								<div class="rounded-xl bg-gray-50 px-4 py-8 text-center">
-									<p class="text-sm text-gray-500">
-										La institución aún no ha subido evidencia para este proyecto.
-									</p>
-									<p class="mt-2 text-sm text-gray-400">
-										Los archivos de evidencia aparecerán aquí una vez que sean publicados.
-									</p>
-								</div>
-							</section>
-						{/if}
 					</div>
 				</div>
 
-				<!-- Sidebar -->
 				<div class="space-y-6">
 					<SidebarCard {proyecto} {mostrarFormulario} />
 					{#if proyecto.contacto}
