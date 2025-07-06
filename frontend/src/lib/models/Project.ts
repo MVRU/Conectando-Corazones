@@ -10,7 +10,8 @@ export interface Project {
     titulo: string;
     descripcion: string;
     imagen: string;
-    actual: number;
+    cantidadEstimada: number;
+    cantidadRecaudada?: number;
     objetivo: number;
     unidad: 'dinero' | 'materiales' | 'voluntarios';
     especie?: string; // Colchones, libros, alimentos, etc.
