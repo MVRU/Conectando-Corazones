@@ -22,7 +22,7 @@
 		Materiales: 'materiales'
 	};
 
-	let filtroSeleccionado: ParticipacionLabel | 'Todos' = 'Todos';
+	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	export let proyectos: Project[] = defaultProjects;
 	let proyectosVisibles: Project[] = [];
 
@@ -44,17 +44,21 @@
 		return 'Abierto';
 	}
 
-	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
+	function filtrarProyectos(proyectos: Project[], filtros: typeof filtrosSeleccionados): Project[] {
 		let resultado = [...proyectos];
 
-		if (filtro !== 'Todos') {
-			const unidadEsperada = reverseMap[filtro];
+		// Si "Todos" está seleccionado, no se filtra
+		if (!filtros.includes('Todos')) {
+			const unidadesEsperadas = filtros
+				.filter((f): f is ParticipacionLabel => f !== 'Todos')
+				.map((f) => reverseMap[f]);
+
 			resultado = resultado.filter((p) =>
-				p.objetivos?.some((o) => o.unidad?.trim().toLowerCase() === unidadEsperada)
+				p.objetivos?.some((o) => unidadesEsperadas.includes(o.unidad))
 			);
 		}
 
-		// Ordenar primero por estado (Abierto < En ejecución < Finalizado) y después por fechaInicio asc
+		// Orden por estado y fecha
 		resultado.sort((a, b) => {
 			const estadoA = estadoTemporizadorProyecto(a);
 			const estadoB = estadoTemporizadorProyecto(b);
@@ -73,7 +77,38 @@
 		return resultado;
 	}
 
-	$: proyectosVisibles = filtrarProyectos(proyectos, filtroSeleccionado);
+	function toggleFiltro(tipo: ParticipacionLabel | 'Todos') {
+		if (tipo === 'Todos') {
+			filtrosSeleccionados = ['Todos'];
+		} else {
+			const yaSeleccionado = filtrosSeleccionados.includes(tipo);
+			if (yaSeleccionado) {
+				filtrosSeleccionados = filtrosSeleccionados.filter((t) => t !== tipo);
+			} else {
+				filtrosSeleccionados = [...filtrosSeleccionados.filter((t) => t !== 'Todos'), tipo];
+			}
+		}
+
+		// Filtrado actual sin el "Todos"
+		const sinTodos = filtrosSeleccionados.filter((f) => f !== 'Todos');
+
+		// Si no hay filtros seleccionados, volvemos a 'Todos'
+		if (sinTodos.length === 0) {
+			filtrosSeleccionados = ['Todos'];
+		}
+
+		// Si están los tres tipos individuales, activar 'Todos'
+		if (
+			sinTodos.length === 3 &&
+			sinTodos.includes('Monetaria') &&
+			sinTodos.includes('Materiales') &&
+			sinTodos.includes('Voluntariado')
+		) {
+			filtrosSeleccionados = ['Todos'];
+		}
+	}
+
+	$: proyectosVisibles = filtrarProyectos(proyectos, filtrosSeleccionados);
 </script>
 
 <section class="w-full px-8 py-8">
@@ -92,17 +127,17 @@
 		<div class="flex flex-wrap" style="gap: var(--spacing-md);">
 			{#each tiposParticipacion as tipo}
 				<button
-					on:click={() => (filtroSeleccionado = tipo)}
+					on:click={() => toggleFiltro(tipo)}
 					class="font-inter rounded-lg border-2 font-medium transition-all duration-200"
 					style="padding: var(--spacing-md-sm) var(--spacing-lg);"
-					class:bg-primary={filtroSeleccionado === tipo}
-					class:text-white={filtroSeleccionado === tipo}
-					class:border-[rgb(var(--color-primary))]={filtroSeleccionado === tipo}
-					class:bg-white={filtroSeleccionado !== tipo}
-					class:text-[rgb(var(--base-color))]={filtroSeleccionado !== tipo}
-					class:border-gray-200={filtroSeleccionado !== tipo}
-					class:hover:border-[rgb(var(--color-primary))]={filtroSeleccionado !== tipo}
-					class:hover:text-[rgb(var(--color-primary))]={filtroSeleccionado !== tipo}
+					class:bg-primary={filtrosSeleccionados.includes(tipo)}
+					class:text-white={filtrosSeleccionados.includes(tipo)}
+					class:border-[rgb(var(--color-primary))]={filtrosSeleccionados.includes(tipo)}
+					class:bg-white={!filtrosSeleccionados.includes(tipo)}
+					class:text-[rgb(var(--base-color))]={!filtrosSeleccionados.includes(tipo)}
+					class:border-gray-200={!filtrosSeleccionados.includes(tipo)}
+					class:hover:border-[rgb(var(--color-primary))]={!filtrosSeleccionados.includes(tipo)}
+					class:hover:text-[rgb(var(--color-primary))]={!filtrosSeleccionados.includes(tipo)}
 				>
 					{tipo}
 				</button>
@@ -114,8 +149,8 @@
 	<div style="margin-bottom: var(--spacing-2xl);">
 		<p class="font-inter font-medium text-[rgb(var(--base-color))]">
 			Mostrando {proyectosVisibles.length} proyecto{proyectosVisibles.length !== 1 ? 's' : ''}
-			{#if filtroSeleccionado !== 'Todos'}
-				de tipo {filtroSeleccionado}
+			{#if !filtrosSeleccionados.includes('Todos')}
+				de tipo {filtrosSeleccionados.join(', ')}
 			{/if}
 		</p>
 	</div>
@@ -135,7 +170,9 @@
 				No se encontraron proyectos para el filtro seleccionado. Intentá con otro tipo de
 				participación.
 			</p>
-			<Button label="Ver todos los proyectos" href="/projects" />
+			<div class="flex justify-center">
+				<Button label="Ver todos los proyectos" href="/projects" />
+			</div>
 		</div>
 	{/if}
 </section>
