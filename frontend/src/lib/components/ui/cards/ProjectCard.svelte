@@ -221,7 +221,13 @@
 		<div class="mt-2 flex flex-col gap-2">
 			<div class="flex justify-between text-xs font-medium text-gray-700">
 				<span>{icono} Objetivo</span>
-				<span>{actualLabel} / {objetivoLabel}</span>
+				{#if percentRecaudado < 100}
+					<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
+				{:else if estadoTemporizador !== 'Finalizado' && cierre && hoy < cierre}
+					<span class="font-semibold text-emerald-600">Proyecto pendiente de finalizar</span>
+				{:else}
+					<span class="text-gray-500">Objetivo alcanzado</span>
+				{/if}
 			</div>
 			<div class="relative h-3 w-full rounded-full bg-gray-200 shadow-inner">
 				<!-- Estimado -->
