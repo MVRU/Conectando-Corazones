@@ -49,7 +49,9 @@
 
 		if (filtro !== 'Todos') {
 			const unidadEsperada = reverseMap[filtro];
-			resultado = resultado.filter((p) => (p.unidad || '').trim().toLowerCase() === unidadEsperada);
+			resultado = resultado.filter((p) =>
+				p.objetivos?.some((o) => o.unidad?.trim().toLowerCase() === unidadEsperada)
+			);
 		}
 
 		// Ordenar primero por estado (Activo < En ejecución < Finalizado) y después por fechaInicio asc
@@ -63,7 +65,6 @@
 				return prioridadEstadoA - prioridadEstadoB;
 			}
 
-			// Si los estados son iguales, ordenar por fechaInicio asc
 			const fechaA = new Date(a.fechaInicio || '').getTime();
 			const fechaB = new Date(b.fechaInicio || '').getTime();
 			return fechaA - fechaB;

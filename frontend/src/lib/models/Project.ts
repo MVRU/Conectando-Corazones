@@ -5,16 +5,19 @@ export interface Contacto {
     sitioWeb: string;
 }
 
+export interface Objetivo {
+    objetivo: number;
+    cantidadEstimada: number;
+    cantidadRecaudada?: number;
+    unidad: 'dinero' | 'materiales' | 'voluntarios';
+    especie?: string; // Colchones, libros, alimentos, etc.
+}
+
 export interface Project {
     id?: number;
     titulo: string;
     descripcion: string;
     imagen: string;
-    cantidadEstimada: number;
-    cantidadRecaudada?: number;
-    objetivo: number;
-    unidad: 'dinero' | 'materiales' | 'voluntarios';
-    especie?: string; // Colchones, libros, alimentos, etc.
     deadline: string; // ISO date
     institucion: string;
     ubicacion: string;
@@ -26,4 +29,6 @@ export interface Project {
     urgencia?: string;
     beneficiarios?: number;
     contacto?: Contacto;
+
+    objetivos: Objetivo[];
 }

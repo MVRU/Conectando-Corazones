@@ -4,9 +4,11 @@
 	type Unidad = 'dinero' | 'materiales' | 'voluntarios';
 
 	export let proyecto: {
-		unidad: Unidad;
+		objetivos?: {
+			unidad: Unidad;
+			especie?: string;
+		}[];
 		estado: string;
-		especie?: string;
 	};
 
 	export let mostrarFormulario: () => void;
@@ -23,7 +25,11 @@
 		utiles: '✏️'
 	};
 
-	const especie = proyecto.especie?.toLowerCase() || '';
+	// Validar si hay un solo objetivo
+	const tieneUnSoloObjetivo = proyecto.objetivos?.length === 1;
+	const unicoObjetivo = tieneUnSoloObjetivo ? proyecto.objetivos?.[0] : null;
+
+	const especie = unicoObjetivo?.especie?.toLowerCase() || '';
 	const especieIcon = especieEmoji[especie] || '📦';
 
 	const unidadInfo = {
@@ -51,7 +57,7 @@
 			label: 'voluntariado',
 			button: 'Postularme como voluntario'
 		}
-	}[proyecto.unidad];
+	}[unicoObjetivo?.unidad ?? 'dinero'];
 </script>
 
 <!-- Card principal -->
@@ -59,16 +65,18 @@
 	<!-- Título -->
 	<h3 class="mb-5 text-lg font-bold text-[rgb(var(--base-color))]">¿Querés colaborar?</h3>
 
-	<!-- Tipo de colaboración -->
-	<div class={`mb-5 flex items-start gap-3 rounded-xl ${unidadInfo.bg} ${unidadInfo.border} p-4`}>
-		<span class="text-xl">{unidadInfo.icon}</span>
-		<p class={`text-sm ${unidadInfo.text}`}>
-			Este proyecto necesita <strong class="font-semibold">{unidadInfo.label}</strong>.
-		</p>
-	</div>
+	<!-- Tipo de colaboración (solo si hay un solo objetivo) -->
+	{#if tieneUnSoloObjetivo}
+		<div class={`mb-5 flex items-start gap-3 rounded-xl ${unidadInfo.bg} ${unidadInfo.border} p-4`}>
+			<span class="text-xl">{unidadInfo.icon}</span>
+			<p class={`text-sm ${unidadInfo.text}`}>
+				Este proyecto necesita <strong class="font-semibold">{unidadInfo.label}</strong>.
+			</p>
+		</div>
+	{/if}
 
 	<!-- Acción -->
-	{#if proyecto.estado === 'Activo'}
+	{#if proyecto.estado === 'Abierto'}
 		<Button
 			label={unidadInfo.button}
 			on:click={mostrarFormulario}
@@ -76,7 +84,9 @@
 		/>
 	{:else}
 		<div class="mb-4 rounded-lg bg-gray-100 py-4 text-center">
-			<p class="text-sm text-gray-500">Este proyecto ya no está activo</p>
+			<p class="text-sm text-gray-500">
+				Este proyecto ya no está abierto para nuevas postulaciones
+			</p>
 		</div>
 	{/if}
 

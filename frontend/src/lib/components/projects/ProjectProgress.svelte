@@ -14,57 +14,6 @@
 		showModal = true;
 	}
 
-	const especieEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️'
-	};
-
-	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
-
-	let mostrarTooltipEstimado = false;
-	let mostrarTooltipRecaudado = false;
-
-	let unidad = proyecto.unidad;
-	let especie = proyecto.especie?.trim() || '';
-	let estimado = Number(proyecto.cantidadEstimada);
-	let recaudado = Number(proyecto.cantidadRecaudada);
-	let objetivo = Number(proyecto.objetivo);
-
-	let percentEstimado = objetivo > 0 ? Math.min((estimado / objetivo) * 100, 100) : 0;
-	let percentRecaudado = objetivo > 0 ? Math.min((recaudado / objetivo) * 100, 100) : 0;
-
-	let actualLabel =
-		unidad === 'dinero'
-			? `$${recaudado.toLocaleString('es-AR')}`
-			: unidad === 'voluntarios'
-				? `${recaudado} voluntarios`
-				: `${recaudado} ${especie || 'unidades'}`;
-
-	let objetivoLabel =
-		unidad === 'dinero'
-			? `$${objetivo.toLocaleString('es-AR')}`
-			: unidad === 'voluntarios'
-				? `${objetivo} voluntarios`
-				: `${objetivo} ${especie || 'unidades'}`;
-
-	let color: 'green' | 'blue' | 'purple' =
-		unidad === 'dinero' ? 'green' : unidad === 'voluntarios' ? 'purple' : 'blue';
-	let icono =
-		unidad === 'materiales'
-			? getEmojiEspecie(especie)
-			: unidad === 'dinero'
-				? '💰'
-				: unidad === 'voluntarios'
-					? '🙋‍♀️'
-					: '🤝';
-
 	const hoy = new Date();
 	const inicio = proyecto.fechaInicio ? new Date(proyecto.fechaInicio) : null;
 	const cierre = proyecto.fechaCierre ? new Date(proyecto.fechaCierre) : null;
@@ -91,62 +40,67 @@
 		})[color];
 
 	const disabled = estadoTemporizador === 'Finalizado';
+
+	const objetivos = proyecto.objetivos || [];
+	const totalRecaudado = objetivos.reduce((sum, o) => sum + (o.cantidadRecaudada ?? 0), 0);
+	const totalEstimado = objetivos.reduce((sum, o) => sum + (o.cantidadEstimada ?? 0), 0);
+	const totalObjetivo = objetivos.reduce((sum, o) => sum + (o.objetivo ?? 0), 0);
+
+	const porcentajeEstimado =
+		totalEstimado > 0 ? Math.round((totalEstimado / totalObjetivo) * 100) : 0;
+
+	const porcentajeRecaudado =
+		totalObjetivo > 0 ? Math.round((totalRecaudado / totalObjetivo) * 100) : 0;
 </script>
 
-<div class="flex justify-between text-xs font-medium text-gray-700">
-	<span>{icono} Objetivo</span>
-	{#if percentRecaudado < 100}
-		<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
-	{:else if estadoTemporizador !== 'Finalizado' && cierre && hoy < cierre}
-		<span class="font-semibold text-emerald-600">Proyecto pendiente de finalizar</span>
-	{:else}
-		<span class="text-gray-500">Objetivo alcanzado</span>
-	{/if}
-</div>
-<div class="relative mt-1 h-3 w-full rounded-full bg-gray-200 shadow-inner">
-	<!-- Estimado -->
-	<button
-		type="button"
-		class="absolute left-0 top-0 h-full cursor-pointer focus:outline-none"
-		style={`width: ${percentEstimado}%`}
-		on:mouseenter={() => (mostrarTooltipEstimado = true)}
-		on:mouseleave={() => (mostrarTooltipEstimado = false)}
-		on:click={() => abrirModal('estimado')}
-	>
-		<div
-			class="pointer-events-none h-full rounded-full opacity-70"
-			style={`background: repeating-linear-gradient(135deg, ${getRgbColor(color)} 0, ${getRgbColor(color)} 4px, transparent 4px, transparent 8px)`}
-		></div>
-		{#if mostrarTooltipEstimado}
-			<div
-				class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
+{#if objetivos.length > 0}
+	<div class="mb-4">
+		<div class="flex justify-end text-xs font-medium text-gray-700">
+			{#if porcentajeRecaudado < 100}
+				<span>{porcentajeRecaudado}% alcanzado</span>
+			{:else if estadoTemporizador !== 'Finalizado' && cierre && hoy < cierre}
+				<span class="font-semibold text-gray-600">Proyecto pendiente de finalizar</span>
+			{:else}
+				<span class="text-gray-500">Objetivo alcanzado</span>
+			{/if}
+		</div>
+		<div class="relative mt-1 h-3 w-full rounded-full bg-gray-200 shadow-inner">
+			<!-- Estimado -->
+			<button
+				type="button"
+				class="absolute left-0 top-0 h-full cursor-pointer focus:outline-none"
+				style={`width: ${Math.min(porcentajeEstimado, 100)}%`}
+				on:click={() => abrirModal('estimado')}
+				aria-label="Ver detalles del progreso estimado"
 			>
-				🤝 Compromisos de ayuda
-			</div>
-		{/if}
-	</button>
+				<div
+					class="pointer-events-none h-full rounded-full opacity-70"
+					style={`background: repeating-linear-gradient(135deg, ${getRgbColor('blue')} 0, ${getRgbColor('blue')} 4px, transparent 4px, transparent 8px)`}
+				></div>
+			</button>
 
-	<!-- Recaudado -->
-	<button
-		type="button"
-		class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-		style={`width: ${percentRecaudado}%`}
-		on:mouseenter={() => (mostrarTooltipRecaudado = true)}
-		on:mouseleave={() => (mostrarTooltipRecaudado = false)}
-		on:click={() => abrirModal('recaudado')}
-	>
-		<div
-			class={`h-full rounded-full bg-gradient-to-r ${getGradientClass(color)} pointer-events-none`}
-		></div>
-		{#if mostrarTooltipRecaudado}
-			<div
-				class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
-			>
-				✅ Donaciones efectivas
+			<!-- Recaudado -->
+			<div class="absolute -top-6">
+				<span class="text-xs font-semibold text-green-600">
+					{#if porcentajeRecaudado > 100}
+						¡Superado!
+					{/if}
+				</span>
 			</div>
-		{/if}
-	</button>
-</div>
+			<button
+				type="button"
+				class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
+				style={`width: ${Math.min(porcentajeRecaudado, 100)}%`}
+				on:click={() => abrirModal('recaudado')}
+				aria-label="Ver detalles del progreso recaudado"
+			>
+				<div
+					class={`h-full rounded-full bg-gradient-to-r ${getGradientClass('blue')} pointer-events-none`}
+				></div>
+			</button>
+		</div>
+	</div>
+{/if}
 
 {#if mostrarBotones}
 	<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">

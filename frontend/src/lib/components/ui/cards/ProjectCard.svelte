@@ -42,38 +42,45 @@
 	let color: 'green' | 'blue' | 'purple';
 	let icono: string;
 
-	$: {
-		estimado = Number(proyecto.cantidadEstimada);
-		recaudado = Number(proyecto.cantidadRecaudada);
-		objetivo = Number(proyecto.objetivo);
-		unidad = proyecto.unidad;
-		especie = (proyecto.especie || '').trim();
+	$: if (proyecto.objetivos && proyecto.objetivos.length > 0) {
+		const totalObjetivo = proyecto.objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
+		const totalEstimado = proyecto.objetivos.reduce((acc, o) => acc + (o.cantidadEstimada || 0), 0);
+		const totalRecaudado = proyecto.objetivos.reduce(
+			(acc, o) => acc + (o.cantidadRecaudada || 0),
+			0
+		);
+		const primerObjetivo = proyecto.objetivos[0];
 
-		percentEstimado = objetivo > 0 ? Math.min((estimado / objetivo) * 100, 100) : 0;
-		percentRecaudado = objetivo > 0 ? Math.min((recaudado / objetivo) * 100, 100) : 0;
+		percentEstimado = totalObjetivo > 0 ? Math.min((totalEstimado / totalObjetivo) * 100, 100) : 0;
+		percentRecaudado =
+			totalObjetivo > 0 ? Math.min((totalRecaudado / totalObjetivo) * 100, 100) : 0;
 
 		actualLabel =
-			unidad === 'dinero'
-				? `$${recaudado.toLocaleString('es-AR')}`
-				: unidad === 'voluntarios'
-					? `${recaudado} voluntarios`
-					: `${recaudado} ${especie || 'unidades'}`;
+			primerObjetivo.unidad === 'dinero'
+				? `$${totalRecaudado.toLocaleString('es-AR')}`
+				: primerObjetivo.unidad === 'voluntarios'
+					? `${totalRecaudado} voluntarios`
+					: `${totalRecaudado} ${primerObjetivo.especie || 'unidades'}`;
 
 		objetivoLabel =
-			unidad === 'dinero'
-				? `$${objetivo.toLocaleString('es-AR')}`
-				: unidad === 'voluntarios'
-					? `${objetivo} voluntarios`
-					: `${objetivo} ${especie || 'unidades'}`;
+			primerObjetivo.unidad === 'dinero'
+				? `$${totalObjetivo.toLocaleString('es-AR')}`
+				: primerObjetivo.unidad === 'voluntarios'
+					? `${totalObjetivo} voluntarios`
+					: `${totalObjetivo} ${primerObjetivo.especie || 'unidades'}`;
 
-		color = unidad === 'dinero' ? 'green' : unidad === 'voluntarios' ? 'purple' : 'blue';
-
+		color =
+			primerObjetivo.unidad === 'dinero'
+				? 'green'
+				: primerObjetivo.unidad === 'voluntarios'
+					? 'purple'
+					: 'blue';
 		icono =
-			unidad === 'materiales'
-				? getEmojiEspecie(especie)
-				: unidad === 'dinero'
+			primerObjetivo.unidad === 'materiales'
+				? getEmojiEspecie(primerObjetivo.especie)
+				: primerObjetivo.unidad === 'dinero'
 					? '💰'
-					: unidad === 'voluntarios'
+					: primerObjetivo.unidad === 'voluntarios'
 						? '🙋‍♀️'
 						: '🤝';
 	}

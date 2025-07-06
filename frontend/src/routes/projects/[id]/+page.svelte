@@ -38,7 +38,24 @@
 		}
 	}
 
-	function formatearFecha(fecha: string) {
+	function calcularEstadoObjetivo(
+		actual: number,
+		objetivo: number
+	): 'completo' | 'parcial' | 'pendiente' {
+		if (actual >= objetivo) return 'completo';
+		if (actual > 0) return 'parcial';
+		return 'pendiente';
+	}
+
+	function diasRestantes(fechaFin: string): number {
+		const hoy = new Date();
+		const fin = new Date(fechaFin);
+		const diferencia = fin.getTime() - hoy.getTime();
+		return Math.max(Math.ceil(diferencia / (1000 * 60 * 60 * 24)), 0);
+	}
+
+	function formatearFecha(fecha: string | undefined) {
+		if (!fecha) return 'Fecha no disponible';
 		return new Date(fecha).toLocaleDateString('es-ES', {
 			year: 'numeric',
 			month: 'long',
@@ -105,6 +122,107 @@
 						<section class="space-y-3">
 							<h3 class="text-lg font-semibold text-[rgb(var(--base-color))]">Progreso</h3>
 							<ProjectProgress {proyecto} />
+							<h4
+								class="mt-12 flex flex-wrap items-center gap-3 text-base font-semibold text-[rgb(var(--base-color))]"
+							>
+								{proyecto.objetivos.length === 1
+									? 'Objetivo del proyecto'
+									: 'Objetivos del proyecto'}
+								<span class="text-sm font-medium text-gray-500">
+									{diasRestantes(proyecto.fechaCierre)} días restantes
+								</span>
+								<span class="text-sm font-medium text-gray-500"
+									>• Cierra: {formatearFecha(proyecto.fechaCierre)}</span
+								>
+							</h4>
+
+							{#if proyecto.objetivos?.length}
+								<ul class="mt-4 space-y-4">
+									{#each proyecto.objetivos as o}
+										{@const porcentaje = Math.round((o.cantidadRecaudada / o.objetivo) * 100)}
+										<li
+											class="flex flex-col gap-1 rounded-lg border border-gray-200 p-4 shadow-sm sm:flex-row sm:items-center sm:gap-4"
+										>
+											<div class="shrink-0">
+												{#if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'completo'}
+													<svg
+														class="h-6 w-6 text-blue-600"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<rect
+															x="4"
+															y="4"
+															width="16"
+															height="16"
+															rx="4"
+															ry="4"
+															stroke-width="2"
+														/>
+														<path
+															d="M9 12l2 2 4-4"
+															stroke-width="2"
+															stroke-linecap="round"
+															stroke-linejoin="round"
+														/>
+													</svg>
+												{:else if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'parcial'}
+													<svg
+														class="h-6 w-6 text-yellow-500"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<rect
+															x="4"
+															y="4"
+															width="16"
+															height="16"
+															rx="4"
+															ry="4"
+															stroke-width="2"
+														/>
+														<line
+															x1="8"
+															y1="12"
+															x2="16"
+															y2="12"
+															stroke-width="2"
+															stroke-linecap="round"
+														/>
+													</svg>
+												{:else}
+													<svg
+														class="h-6 w-6 text-gray-300"
+														fill="none"
+														viewBox="0 0 24 24"
+														stroke="currentColor"
+													>
+														<rect
+															x="4"
+															y="4"
+															width="16"
+															height="16"
+															rx="4"
+															ry="4"
+															stroke-width="2"
+														/>
+													</svg>
+												{/if}
+											</div>
+											<div class="flex flex-wrap items-center gap-2 text-sm text-gray-700">
+												<span class="font-medium">
+													{o.unidad === 'dinero'
+														? `$${o.cantidadRecaudada} / $${o.objetivo} ${o.especie}`
+														: `${o.cantidadRecaudada} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
+												</span>
+												<span class="text-xs text-gray-500">• {porcentaje}% alcanzado</span>
+											</div>
+										</li>
+									{/each}
+								</ul>
+							{/if}
 						</section>
 
 						<div class="mt-10">
@@ -144,8 +262,6 @@
 				</div>
 			</div>
 		</div>
-
-		<slot name="formulario" />
 	</main>
 {:else}
 	<main class="min-h-screen bg-gray-50 py-10 text-center">
