@@ -108,7 +108,7 @@
 					<div
 						class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
 					>
-						✅ Donaciones efectivas
+						✅ Colaboraciones efectivas
 					</div>
 				{/if}
 			</button>

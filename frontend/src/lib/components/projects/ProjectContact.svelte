@@ -1,57 +1,98 @@
 <script lang="ts">
-	export let contacto;
+	export let contacto: {
+		responsable?: string;
+		telefono?: string;
+		email?: string;
+		sitioWeb?: string;
+	};
 </script>
 
 {#if contacto}
-	<div class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-100 transition hover:shadow-2xl">
-		<h3 class="mb-5 flex items-center gap-2 text-xl font-bold text-[rgb(var(--base-color))]">
+	<div
+		class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-[rgb(var(--color-primary))]/50 hover:shadow-md"
+	>
+		<!-- Título más pequeño -->
+		<h3 class="mb-4 flex items-center justify-center gap-2 text-base font-medium text-gray-700">
 			Información de Contacto
 		</h3>
 
-		<div class="space-y-4 text-sm sm:text-base">
+		<!-- Datos de contacto -->
+		<div class="space-y-4 divide-y divide-gray-100 text-xs sm:text-sm">
 			{#if contacto.responsable}
-				<div class="flex flex-col">
-					<span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-						Responsable
-					</span>
-					<span class="font-medium text-gray-800">{contacto.responsable}</span>
+				<div class="flex flex-col gap-2 pb-3 pt-0 sm:flex-row sm:items-start sm:pt-0">
+					<div
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
+					>
+						👤
+					</div>
+					<div class="sm:pl-2">
+						<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							Responsable
+						</p>
+						<p class="font-medium text-gray-700">{contacto.responsable}</p>
+					</div>
 				</div>
 			{/if}
 
 			{#if contacto.telefono}
-				<div class="flex flex-col">
-					<span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-						Teléfono
-					</span>
-					<span class="font-medium text-gray-800">{contacto.telefono}</span>
+				<div class="flex flex-col gap-2 pb-3 pt-3 sm:flex-row sm:items-start">
+					<div
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
+					>
+						📱
+					</div>
+					<div class="sm:pl-2">
+						<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							Teléfono
+						</p>
+						<p class="font-medium text-gray-700">{contacto.telefono}</p>
+					</div>
 				</div>
 			{/if}
 
 			{#if contacto.email}
-				<div class="flex flex-col">
-					<span class="text-xs font-semibold uppercase tracking-wide text-gray-500"> Email </span>
-					<a
-						href="mailto:{contacto.email}"
-						class="break-all font-medium text-[rgb(var(--color-primary))] hover:underline"
+				<div class="flex flex-col gap-2 pb-3 pt-3 sm:flex-row sm:items-start">
+					<div
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
 					>
-						{contacto.email}
-					</a>
+						✉️
+					</div>
+					<div class="sm:pl-2">
+						<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							Email
+						</p>
+						<a
+							href={`mailto:${contacto.email}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="break-all font-medium text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2"
+						>
+							{contacto.email}
+						</a>
+					</div>
 				</div>
 			{/if}
 
 			{#if contacto.sitioWeb}
-				<div class="flex flex-col">
-					<span class="text-xs font-semibold uppercase tracking-wide text-gray-500">
-						Sitio Web
-					</span>
-					<a
-						href="https://{contacto.sitioWeb}"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="break-all font-medium text-[rgb(var(--color-primary))] hover:underline"
+				<div class="flex flex-col gap-2 pb-3 pt-3 sm:flex-row sm:items-start">
+					<div
+						class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
 					>
-						{contacto.sitioWeb}
-					</a>
+						🌐
+					</div>
+					<div class="sm:pl-2">
+						<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							Sitio Web
+						</p>
+						<a
+							href={`https://${contacto.sitioWeb.replace(/^https?:\/\//, '')}`}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="break-all font-medium text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2"
+						>
+							{contacto.sitioWeb}
+						</a>
+					</div>
 				</div>
 			{/if}
 		</div>
