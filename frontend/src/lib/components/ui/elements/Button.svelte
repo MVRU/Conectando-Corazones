@@ -30,7 +30,7 @@ TODO:
 	import { createEventDispatcher } from 'svelte';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
-	export let href: string = '';
+	export let href: string | null = null;
 	export let external = false;
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
@@ -63,8 +63,12 @@ TODO:
 <!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
-		{type}
-		on:click={handleClick}
+		on:click={() => {
+			if (disabled) return;
+			if (href) {
+				external ? (window.location.href = href) : goto(href);
+			}
+		}}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -105,8 +109,12 @@ TODO:
 	<!-- ! Variante Secondary -->
 {:else if variant === 'secondary'}
 	<button
-		{type}
-		on:click={handleClick}
+		on:click={() => {
+			if (disabled) return;
+			if (href) {
+				external ? (window.location.href = href) : goto(href);
+			}
+		}}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -147,8 +155,12 @@ TODO:
 	<!-- ! Variante Ghost -->
 {:else}
 	<button
-		{type}
-		on:click={handleClick}
+		on:click={() => {
+			if (disabled) return;
+			if (href) {
+				external ? (window.location.href = href) : goto(href);
+			}
+		}}
 		class={clsx(
 			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
 			size === 'md'

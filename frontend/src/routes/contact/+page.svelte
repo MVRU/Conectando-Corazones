@@ -11,8 +11,8 @@ TODO:
 -->
 
 <script lang="ts">
-        import Button from '$lib/components/ui/elements/Button.svelte';
-        import Select from '$lib/components/ui/elements/Select.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Select from '$lib/components/ui/elements/Select.svelte';
 
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
@@ -210,7 +210,7 @@ TODO:
 					la plataforma y crear un impacto positivo más grande en nuestra comunidad.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
-					<Button label="Ver proyectos activos" href="/projects" disabled={false} />
+					<Button label="Ver proyectos abiertos" href="/projects" disabled={false} />
 				</div>
 			</div>
 		</div>

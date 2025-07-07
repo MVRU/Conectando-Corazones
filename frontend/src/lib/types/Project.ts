@@ -1,8 +1,12 @@
-export interface Contacto {
-    responsable: string;
-    telefono: string;
-    email: string;
-    sitioWeb: string;
+import type { Contacto } from './Contacto';
+import type { InstitucionUser, ColaboradorUser } from './User';
+
+export interface Objetivo {
+    objetivo: number;
+    cantidadEstimada: number;
+    cantidadRecaudada?: number;
+    unidad: 'dinero' | 'materiales' | 'voluntarios';
+    especie?: string;
 }
 
 export interface Project {
@@ -10,12 +14,12 @@ export interface Project {
     titulo: string;
     descripcion: string;
     imagen: string;
-    actual: number;
-    objetivo: number;
-    unidad: 'dinero' | 'materiales' | 'voluntarios';
-    especie?: string; // Colchones, libros, alimentos, etc.
     deadline: string; // ISO date
-    institucion: string;
+    institucion: {
+        id: string;
+        razonSocial?: string;
+    }
+    colaboradores?: ColaboradorUser[];
     ubicacion: string;
     fechaInicio?: string;
     fechaCierre?: string;
@@ -25,4 +29,6 @@ export interface Project {
     urgencia?: string;
     beneficiarios?: number;
     contacto?: Contacto;
+
+    objetivos: Objetivo[];
 }
