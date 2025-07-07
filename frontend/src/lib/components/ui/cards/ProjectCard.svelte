@@ -86,21 +86,33 @@
 		return `${f.getDate()}/${f.getMonth() + 1}`;
 	};
 
-	const getBadgeColor = (valor: string) => {
-		switch (valor) {
-			case 'Alta':
-				return 'bg-red-100 text-red-700';
-			case 'Media':
-				return 'bg-yellow-100 text-yellow-700';
-			case 'Baja':
-				return 'bg-green-100 text-green-700';
-			case 'Abierto':
-				return 'bg-green-100 text-green-700';
-			case 'Cerrado':
-				return 'bg-gray-100 text-gray-500';
-			default:
-				return 'bg-gray-100 text-gray-700';
+	const getBadgeClasses = (tipo: 'urgencia' | 'estado', valor: string) => {
+		const base =
+			'inline-flex items-center gap-1 rounded-full px-3 py-[6px] text-[11px] font-semibold ring-1 ring-white/30 shadow-lg backdrop-blur-md transition-all duration-200';
+
+		const estilos = {
+			urgencia: {
+				Alta: 'bg-red-100/80 text-red-800 hover:brightness-105',
+				Media: 'bg-yellow-100/80 text-yellow-800 hover:brightness-105',
+				Baja: 'bg-emerald-100/80 text-emerald-800 hover:brightness-105'
+			},
+			estado: {
+				Abierto: 'bg-emerald-100/80 text-emerald-800 hover:brightness-105',
+				'En ejecución': 'bg-blue-100/80 text-blue-800 hover:brightness-105',
+				Finalizado: 'bg-gray-100/80 text-gray-800 hover:brightness-105',
+				Cerrado: 'bg-gray-100/80 text-gray-800 hover:brightness-105'
+			}
+		};
+
+		if (tipo === 'urgencia' && valor in estilos.urgencia) {
+			return `${base} ${estilos.urgencia[valor as keyof typeof estilos.urgencia]}`;
 		}
+
+		if (tipo === 'estado' && valor in estilos.estado) {
+			return `${base} ${estilos.estado[valor as keyof typeof estilos.estado]}`;
+		}
+
+		return `${base} bg-gray-300/90 text-gray-800`;
 	};
 
 	const getRgbColor = (color: 'green' | 'blue' | 'purple') => {
@@ -191,17 +203,13 @@
 		</div>
 		<div class="absolute right-3 top-3 flex flex-wrap gap-2 text-xs">
 			{#if proyecto.urgencia}
-				<span
-					class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.urgencia)} bg-white/90`}
-				>
+				<span class={getBadgeClasses('urgencia', proyecto.urgencia)}>
 					{proyecto.urgencia}
 				</span>
 			{/if}
 			{#if proyecto.estado}
-				<span
-					class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.estado)} bg-white/90`}
-				>
-					{proyecto.estado}
+				<span class={getBadgeClasses('estado', estadoTemporizador)}>
+					{estadoTemporizador}
 				</span>
 			{/if}
 		</div>

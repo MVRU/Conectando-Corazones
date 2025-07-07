@@ -30,7 +30,7 @@
 {#if open}
 	<div
 		bind:this={modalElement}
-		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm sm:p-6"
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm sm:p-6"
 		role="dialog"
 		aria-modal="true"
 		tabindex="0"
