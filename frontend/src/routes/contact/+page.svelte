@@ -18,6 +18,7 @@ TODO:
 	let enviandoFormulario = false;
 	let validationErrors: string[] = [];
 	let asunto = '';
+	let intentoEnvio = false;
 
 	// Opciones para el select de asunto
 	const opcionesAsunto = [
@@ -37,6 +38,7 @@ TODO:
 	// Función para enviar formulario
 	async function enviarFormulario(event: Event) {
 		event.preventDefault();
+		intentoEnvio = true;
 
 		const formData = new FormData(event.target as HTMLFormElement);
 		const datos = {
@@ -123,7 +125,7 @@ TODO:
 									for="nombre"
 									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
 								>
-									Nombre completo *
+									Nombre completo {#if intentoEnvio}*{/if}
 								</label>
 								<input
 									id="nombre"
@@ -140,7 +142,7 @@ TODO:
 									for="email"
 									class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
 								>
-									Email *
+									Email {#if intentoEnvio}*{/if}
 								</label>
 								<input
 									id="email"
@@ -155,11 +157,11 @@ TODO:
 
 						<div>
 							<Select
-								label="Asunto *"
+								label="Asunto"
 								options={opcionesAsunto}
 								bind:value={asunto}
 								placeholder="Seleccionar asunto"
-								required={true}
+								required={intentoEnvio}
 								id="asunto"
 								name="asunto"
 								on:change={handleAsuntoChange}
@@ -171,7 +173,7 @@ TODO:
 								for="mensaje"
 								class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
 							>
-								Mensaje *
+								Mensaje {#if intentoEnvio}*{/if}
 							</label>
 							<textarea
 								id="mensaje"

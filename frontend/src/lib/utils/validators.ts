@@ -46,8 +46,8 @@ export function isValidPassword(password: string): boolean {
     return (
         /[A-Z]/.test(password) &&
         /[a-z]/.test(password) &&
-        /[0-9]/.test(password) &&
-        /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        /[0-9]/.test(password)
+        //  /[!@#$%^&*(),.?":{}|<>]/.test(password) Ya no se requiere caracter especial
     );
 }
 
@@ -56,38 +56,34 @@ export function isValidUsername(username: string): boolean {
 }
 
 export function isValidCuit(cuit: string): boolean {
-    if (!cuit || cuit.length !== 13) return false;
-    const match = cuit.match(/^(\d{2})-(\d{8})-(\d)$/);
-    if (!match) return false;
-
-    const [, prefix, number, check] = match;
+    if (!cuit) return false;
+    if (!/^\d{11}$/.test(cuit)) return false;
+    const prefix = cuit.slice(0,2);
+    const number = cuit.slice(2,10);
+    const check = cuit.slice(10);
     const digits = prefix + number;
     const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
     let sum = 0;
-
     for (let i = 0; i < digits.length; i++) {
         sum += parseInt(digits[i]) * weights[i];
     }
-
     const mod = sum % 11;
     const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
     return check === calculatedCheckDigit.toString();
 }
 
 export function isValidCuil(cuil: string): boolean {
-    if (!cuil || cuil.length !== 13) return false;
-    const match = cuil.match(/^(\d{2})-(\d{8})-(\d)$/);
-    if (!match) return false;
-
-    const [, prefix, number, check] = match;
+    if (!cuil) return false;
+    if (!/^\d{11}$/.test(cuil)) return false;
+    const prefix = cuil.slice(0,2);
+    const number = cuil.slice(2,10);
+    const check = cuil.slice(10);
     const digits = prefix + number;
     const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
     let sum = 0;
-
     for (let i = 0; i < digits.length; i++) {
         sum += parseInt(digits[i]) * weights[i];
     }
-
     const mod = sum % 11;
     const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
     return check === calculatedCheckDigit.toString();

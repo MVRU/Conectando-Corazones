@@ -70,6 +70,7 @@ TODO:
         >
 		<Button
 			label="Empezá a conectar hoy"
+			href="/signin"
 			customClass="hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition duration-200 shadow-md"
 		/>
 	</div>

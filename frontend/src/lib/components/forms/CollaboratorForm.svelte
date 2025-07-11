@@ -22,6 +22,7 @@
 	let tipo: 'persona' | 'organizacion' = 'persona';
 	let showPassword = false;
 	let showRepassword = false;
+	let intentoEnvio = false;
 
 	// Datos persona
 	let nombre = '';
@@ -156,7 +157,17 @@
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-		if (hasErrors) return;
+		intentoEnvio = true;
+		if (hasErrors) {
+			setTimeout(() => {
+				const firstError = document.querySelector('.border-red-400, .ring-red-400');
+				if (firstError && typeof firstError.scrollIntoView === 'function') {
+					firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					(firstError as HTMLElement).focus?.();
+				}
+			}, 50);
+			return;
+		}
 		sending = true;
 
 		setTimeout(() => {
@@ -195,17 +206,17 @@
 			<!-- Nombre -->
 			<div>
 				<label for="nombre" class="font-semibold text-gray-800">
-					Nombre <span class="text-red-600">*</span>
+					Nombre {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="nombre" bind:value={nombre} error={errors.nombre} />
+				<Input id="nombre" bind:value={nombre} error={intentoEnvio ? errors.nombre : ''} maskCuil={false} />
 			</div>
 
 			<!-- Apellido -->
 			<div>
 				<label for="apellido" class="font-semibold text-gray-800">
-					Apellido <span class="text-red-600">*</span>
+					Apellido {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="apellido" bind:value={apellido} error={errors.apellido} />
+				<Input id="apellido" bind:value={apellido} error={intentoEnvio ? errors.apellido : ''} />
 			</div>
 
 			<!-- Tipo de documento -->
@@ -228,34 +239,34 @@
 			{#if docTipo === 'Otro'}
 				<div>
 					<label for="docOtro" class="font-semibold text-gray-800">
-						Especifique <span class="text-red-600">*</span>
+						Especifique {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="docOtro" bind:value={docOtro} error={errors.docOtro} />
+					<Input id="docOtro" bind:value={docOtro} error={intentoEnvio ? errors.docOtro : ''} />
 				</div>
 			{/if}
 
 			<!-- Número de documento -->
 			<div>
 				<label for="docNumero" class="font-semibold text-gray-800">
-					Número de documento <span class="text-red-600">*</span>
+					Número de documento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="docNumero" bind:value={docNumero} error={errors.docNumero} />
+				<Input id="docNumero" bind:value={docNumero} error={intentoEnvio ? errors.docNumero : ''} />
 			</div>
 
 			<!-- Fecha de nacimiento -->
 			<div>
 				<label for="nacimiento" class="font-semibold text-gray-800">
-					Fecha de nacimiento <span class="text-red-600">*</span>
+					Fecha de nacimiento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<DatePicker id="nacimiento" bind:value={nacimiento} error={errors.nacimiento} />
+				<DatePicker id="nacimiento" bind:value={nacimiento} error={intentoEnvio ? errors.nacimiento : ''} />
 			</div>
 
 			<!-- CUIL -->
 			<div>
 				<label for="cuil" class="font-semibold text-gray-800">
-					CUIL <span class="text-red-600">*</span>
+					CUIL {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="cuil" bind:value={cuil} error={errors.cuil} />
+				<Input id="cuil" bind:value={cuil} error={intentoEnvio ? errors.cuil : ''} maskCuil={true} />
 			</div>
 		</fieldset>
 	{:else}
@@ -263,16 +274,16 @@
 		<fieldset class="grid grid-cols-1 gap-6 md:grid-cols-2">
 			<div class="md:col-span-2">
 				<label for="razonSocial" class="font-semibold text-gray-800">
-					Razón social <span class="text-red-600">*</span>
+					Razón social {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="razonSocial" bind:value={razonSocial} error={errors.razonSocial} />
+				<Input id="razonSocial" bind:value={razonSocial} error={intentoEnvio ? errors.razonSocial : ''} />
 			</div>
 
 			<div class="md:col-span-2">
 				<label for="cuit" class="font-semibold text-gray-800">
-					CUIT <span class="text-red-600">*</span>
+					CUIT {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="cuit" bind:value={cuit} error={errors.cuit} />
+				<Input id="cuit" bind:value={cuit} error={intentoEnvio ? errors.cuit : ''} maskCuil={true} />
 			</div>
 		</fieldset>
 	{/if}
@@ -281,22 +292,22 @@
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<div>
 			<label for="username" class="font-semibold text-gray-800">
-				Nombre de usuario <span class="text-red-600">*</span>
+				Nombre de usuario {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
-			<Input id="username" bind:value={username} error={errors.username} />
+			<Input id="username" bind:value={username} error={intentoEnvio ? errors.username : ''} />
 		</div>
 
 		<div>
 			<label for="email" class="font-semibold text-gray-800">
-				Email <span class="text-red-600">*</span>
+				Email {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
-			<Input id="email" type="email" bind:value={email} error={errors.email} />
+			<Input id="email" type="email" bind:value={email} error={intentoEnvio ? errors.email : ''} />
 		</div>
 
 		<!-- Contraseña -->
 		<div class="relative">
 			<label for="password" class="font-semibold text-gray-800">
-				Contraseña <span class="text-red-600">*</span>
+				Contraseña {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="password"
@@ -305,7 +316,7 @@
 				bind:value={password}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
-				error={errors.password}
+				error={intentoEnvio ? errors.password : ''}
 			/>
 			<button
 				type="button"
@@ -332,7 +343,7 @@
 		<!-- Confirmar contraseña -->
 		<div class="relative">
 			<label for="repassword" class="font-semibold text-gray-800">
-				Repetir contraseña <span class="text-red-600">*</span>
+				Repetir contraseña {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="repassword"
@@ -341,7 +352,7 @@
 				bind:value={repassword}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
-				error={errors.repassword}
+				error={intentoEnvio ? errors.repassword : ''}
 			/>
 			<button
 				type="button"
@@ -390,16 +401,16 @@
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<div>
 					<label for="repNombre" class="font-semibold text-gray-800">
-						Nombre <span class="text-red-600">*</span>
+						Nombre {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repNombre" bind:value={repNombre} error={errors.repNombre} />
+					<Input id="repNombre" bind:value={repNombre} error={intentoEnvio ? errors.repNombre : ''} />
 				</div>
 
 				<div>
 					<label for="repApellido" class="font-semibold text-gray-800">
-						Apellido <span class="text-red-600">*</span>
+						Apellido {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repApellido" bind:value={repApellido} error={errors.repApellido} />
+					<Input id="repApellido" bind:value={repApellido} error={intentoEnvio ? errors.repApellido : ''} />
 				</div>
 
 				<div>
@@ -420,28 +431,28 @@
 				{#if repDocTipo === 'Otro'}
 					<div>
 						<label for="repDocOtro" class="font-semibold text-gray-800">
-							Especifique <span class="text-red-600">*</span>
+							Especifique {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 						</label>
-						<Input id="repDocOtro" bind:value={repDocOtro} error={errors.repDocOtro} />
+						<Input id="repDocOtro" bind:value={repDocOtro} error={intentoEnvio ? errors.repDocOtro : ''} />
 					</div>
 				{/if}
 
 				<div>
 					<label for="repDocNumero" class="font-semibold text-gray-800">
-						Número de documento <span class="text-red-600">*</span>
+						Número de documento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repDocNumero" bind:value={repDocNumero} error={errors.repDocNumero} />
+					<Input id="repDocNumero" bind:value={repDocNumero} error={intentoEnvio ? errors.repDocNumero : ''} />
 				</div>
 
 				<div>
 					<label for="repNacimiento" class="font-semibold text-gray-800">
-						Fecha de nacimiento <span class="text-red-600">*</span>
+						Fecha de nacimiento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
 					<DatePicker
 						id="repNacimiento"
 						name="repNacimiento"
 						bind:value={repNacimiento}
-						error={errors.repNacimiento}
+						error={intentoEnvio ? errors.repNacimiento : ''}
 					/>
 				</div>
 			</div>

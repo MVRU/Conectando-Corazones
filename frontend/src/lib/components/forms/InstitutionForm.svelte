@@ -21,6 +21,7 @@
 	let sending = false;
 	let showPassword = false;
 	let showRepassword = false;
+	let intentoEnvio = false;
 
 	let institution = {
 		nombre: '',
@@ -113,7 +114,18 @@
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
-		if (hasErrors) return;
+		intentoEnvio = true;
+		if (hasErrors) {
+			// Buscar el primer campo con error y hacer scroll
+			setTimeout(() => {
+				const firstError = document.querySelector('.border-red-400, .ring-red-400');
+				if (firstError && typeof firstError.scrollIntoView === 'function') {
+					firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					(firstError as HTMLElement).focus?.();
+				}
+			}, 50);
+			return;
+		}
 		sending = true;
 
 		setTimeout(() => {
@@ -136,7 +148,7 @@
 		<!-- Nombre institución -->
 		<div>
 			<label for="nombre" class="font-semibold text-gray-800">
-				Nombre de la institución <span class="text-red-600">*</span>
+				Nombre de la institución {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="nombre"
@@ -144,14 +156,14 @@
 				bind:value={institution.nombre}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 shadow-sm transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: Fundación Sembrar"
-				error={errors.nombre}
+				error={intentoEnvio ? errors.nombre : ''}
 			/>
 		</div>
 
 		<!-- Tipo de institución -->
 		<div>
 			<label for="tipo" class="font-semibold text-gray-800">
-				Tipo de institución <span class="text-red-600">*</span>
+				Tipo de institución {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<select
 				id="tipo"
@@ -189,7 +201,7 @@
 		<!-- Username -->
 		<div>
 			<label for="username" class="font-semibold text-gray-800">
-				Usuario <span class="text-red-600">*</span>
+				Usuario {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="username"
@@ -197,14 +209,14 @@
 				bind:value={institution.username}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="fundacion123"
-				error={errors.username}
+				error={intentoEnvio ? errors.username : ''}
 			/>
 		</div>
 
 		<!-- Email -->
 		<div>
 			<label for="email" class="font-semibold text-gray-800">
-				Email <span class="text-red-600">*</span>
+				Email {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="email"
@@ -213,29 +225,30 @@
 				bind:value={institution.email}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="institucion@email.com"
-				error={errors.email}
+				error={intentoEnvio ? errors.email : ''}
 			/>
 		</div>
 
 		<!-- CUIT -->
 		<div>
 			<label for="cuit" class="font-semibold text-gray-800">
-				CUIT <span class="text-red-600">*</span>
+				CUIT {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="cuit"
 				name="cuit"
 				bind:value={institution.cuit}
-				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+				maskCuil={true}
+				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="Ej: 30-12345678-9"
-				error={errors.cuit}
+				error={intentoEnvio ? errors.cuit : ''}
 			/>
 		</div>
 
 		<!-- Contraseña -->
 		<div class="relative">
 			<label for="password" class="font-semibold text-gray-800">
-				Contraseña <span class="text-red-600">*</span>
+				Contraseña {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
 			<Input
 				id="password"
@@ -244,7 +257,7 @@
 				bind:value={institution.password}
 				customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black placeholder-gray-400 transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 				placeholder="********"
-				error={errors.password}
+				error={intentoEnvio ? errors.password : ''}
 			/>
 			<button
 				type="button"
@@ -329,7 +342,7 @@
 			<!-- Nombre -->
 			<div>
 				<label for="repNombre" class="font-medium text-[rgb(15,16,41)]">
-					Nombre <span class="text-red-600">*</span>
+					Nombre {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
 				<Input
 					id="repNombre"
@@ -337,14 +350,14 @@
 					bind:value={representative.repNombre}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Nombre del representante"
-					error={errors.repNombre}
+					error={intentoEnvio ? errors.repNombre : ''}
 				/>
 			</div>
 
 			<!-- Apellido -->
 			<div>
 				<label for="repApellido" class="font-medium text-[rgb(15,16,41)]">
-					Apellido <span class="text-red-600">*</span>
+					Apellido {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
 				<Input
 					id="repApellido"
@@ -352,7 +365,7 @@
 					bind:value={representative.repApellido}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Apellido del representante"
-					error={errors.repApellido}
+					error={intentoEnvio ? errors.repApellido : ''}
 				/>
 			</div>
 
@@ -376,7 +389,7 @@
 			{#if representative.repDocTipo === 'Otro'}
 				<div>
 					<label for="repDocOtro" class="font-medium text-[rgb(15,16,41)]">
-						Especifique <span class="text-red-600">*</span>
+						Especifique {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
 					<Input
 						id="repDocOtro"
@@ -384,7 +397,7 @@
 						bind:value={representative.repDocOtro}
 						customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 						placeholder="Tipo de documento"
-						error={errors.repDocOtro}
+						error={intentoEnvio ? errors.repDocOtro : ''}
 					/>
 				</div>
 			{/if}
@@ -392,7 +405,7 @@
 			<!-- Número de documento -->
 			<div>
 				<label for="repDocNumero" class="font-medium text-[rgb(15,16,41)]">
-					Número de documento <span class="text-red-600">*</span>
+					Número de documento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
 				<Input
 					id="repDocNumero"
@@ -400,20 +413,20 @@
 					bind:value={representative.repDocNumero}
 					customClass="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					placeholder="Ej: 12345678"
-					error={errors.repDocNumero}
+					error={intentoEnvio ? errors.repDocNumero : ''}
 				/>
 			</div>
 
 			<!-- Fecha de nacimiento -->
 			<div>
 				<label for="repNacimiento" class="font-medium text-[rgb(15,16,41)]">
-					Fecha de nacimiento <span class="text-red-600">*</span>
+					Fecha de nacimiento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
 				<DatePicker
 					id="repNacimiento"
 					name="repNacimiento"
 					bind:value={representative.repNacimiento}
-					error={errors.repNacimiento}
+					error={intentoEnvio ? errors.repNacimiento : ''}
 				/>
 			</div>
 		</div>

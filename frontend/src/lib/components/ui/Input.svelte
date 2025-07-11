@@ -9,13 +9,40 @@
 	export let placeholder = '';
 	export let error: string | undefined = undefined;
 	export let customClass = '';
+	export let maskCuil = false;
+
+	function formatCuil(val: string) {
+		const digits = val.replace(/\D/g, '').slice(0, 11);
+		if (digits.length <= 2) return digits;
+		if (digits.length <= 10) return `${digits.slice(0,2)}-${digits.slice(2)}`;
+		return `${digits.slice(0,2)}-${digits.slice(2,10)}-${digits.slice(10)}`;
+	}
+
+	let internalValue = value;
+
+	$: if (maskCuil) {
+		internalValue = formatCuil(value);
+	}
+
+	function handleInput(e: Event) {
+		let val = (e.target as HTMLInputElement).value;
+		if (maskCuil) {
+			val = val.replace(/\D/g, '').slice(0, 11);
+			internalValue = formatCuil(val);
+			// dispatch('input', val); // solo números
+			value = val;
+		} else {
+			value = val;
+		}
+	}
 </script>
 
 <div class="space-y-1">
 	<input
 		{id}
 		{name}
-		bind:value
+		value={maskCuil ? internalValue : value}
+		on:input={handleInput}
 		{type}
 		class={clsx(
 			'w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200',

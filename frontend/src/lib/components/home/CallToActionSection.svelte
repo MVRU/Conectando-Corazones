@@ -73,13 +73,13 @@ TODO:
 			>
 				<!-- !Button solo visible en mobile -->
 				<div class="sm:hidden">
-					<Button label="Registrate y generá impacto" href="/registro" variant="ghost" size="sm" />
+					<Button label="Registrate y generá impacto" href="/signin" variant="ghost" size="sm" />
 				</div>
 				<!-- !Button solo visible en desktop -->
 				<div class="hidden sm:block">
 					<Button
 						label="Registrate y empezá a generar impacto"
-						href="/registro"
+						href="/signin 	"
 						variant="ghost"
 						size="md"
 					/>
