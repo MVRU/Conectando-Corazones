@@ -15,24 +15,24 @@ import { describe, expect, it } from 'vitest';
 describe('MotionNotice component', () => {
   // Renderiza el aviso cuando motionNoticeVisible es true
   it('renders when visible', () => {
-    motionNoticeVisible.set(true);    // Fuerza visibilidad del aviso
-    reducedMotion.set(true);          // Simula preferencia de animaciones reducidas
-    render(MotionNotice);             // Renderiza el componente
+    motionNoticeVisible.set(true); // se fuerza la visibilidad
+    reducedMotion.set(true);
+    render(MotionNotice);
 
-    // Verifica que el elemento con role="status" esté presente (el aviso)
-    expect(screen.getByRole('status')).toBeInTheDocument();
+    // el contenedor actúa como botón para expandir
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   // Cambia el valor de reducedMotion al hacer clic en el botón
   it('toggles reducedMotion on click', async () => {
-    motionNoticeVisible.set(true);    // Fuerza visibilidad del aviso
-    reducedMotion.set(true);          // Simula preferencia de animaciones reducidas
+    motionNoticeVisible.set(true);
+    reducedMotion.set(true);
     const { getByRole } = render(MotionNotice);
 
-    // Simula clic en el botón que habilita animaciones
-    await fireEvent.click(getByRole('button', { name: 'Habilitar animaciones' }));
+    // primero se expande para mostrar el botón interno
+    await fireEvent.click(getByRole('button'));
+    await fireEvent.click(getByRole('button', { name: 'Habilitar' }));
 
-    // Verifica que reducedMotion ahora sea false (animaciones habilitadas)
     expect(get(reducedMotion)).toBe(false);
   });
 });

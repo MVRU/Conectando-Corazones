@@ -33,10 +33,12 @@
 	let visibleCrumbsCount = 0;
 
 	/* -------- breadcrumbs automáticos -------- */
-	const autoBreadcrumbs = derived(page, ($page) => {
+	const autoBreadcrumbs = derived(page, ($page: { url?: URL }) => {
+		if (!$page?.url?.pathname) return [];
+
 		const segments = $page.url.pathname.split('/').filter(Boolean);
 		let path = '';
-		return segments.map((segment, idx) => {
+		return segments.map((segment: string, idx: number) => {
 			path += '/' + segment;
 			return {
 				label: decodeURIComponent(
@@ -46,6 +48,7 @@
 			};
 		});
 	});
+
 	$: breadcrumbs = Array.isArray(items) && items.length > 0 ? items : ($autoBreadcrumbs ?? []);
 
 	/* -------- utils -------- */
