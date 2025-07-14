@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
-import type { User, UserRole } from '$lib/models/User';
+import type { User, UserRole } from '$lib/types/User';
+import { mockUsers } from '$lib/mocks/mock-users';
 
 // Estado de autenticación
 interface AuthState {
@@ -15,84 +16,6 @@ const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: false,
   error: null
-};
-
-// Usuarios de prueba estáticos
-const mockUsers = {
-  admin: {
-    id: '1',
-    email: 'admin@conectandocorazones.org',
-    nombre: 'Administrador',
-    role: 'admin' as const,
-    isActive: true,
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date(),
-    verificationStatus: 'verificado' as const,
-    permisos: {
-      gestionarUsuarios: true,
-      gestionarProyectos: true,
-      gestionarInstituciones: true,
-      verReportes: true,
-      gestionarSistema: true
-    },
-    telefono: '+54 341 123-4567',
-    departamento: 'Administración'
-  },
-  institucion: {
-    id: '2',
-    email: 'escuela@esperanza.edu.ar',
-    nombre: 'Escuela Esperanza',
-    role: 'institucion' as const,
-    isActive: true,
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date(),
-    verificationStatus: 'verificado' as const,
-    razonSocial: 'Escuela Esperanza',
-    cuit: '30-12345678-9',
-    telefono: '+54 341 987-6543',
-    direccion: {
-      calle: 'San Martín',
-      numero: '123',
-      ciudad: 'Rosario',
-      provincia: 'Santa Fe',
-      codigoPostal: '2000'
-    },
-    descripcion: 'Escuela rural comprometida con la educación de calidad',
-    sitioWeb: 'escuelaesperanza.edu.ar',
-    tipoInstitucion: 'escuela' as const,
-    capacidadBeneficiarios: 150,
-    proyectosCreados: ['1', '2']
-  },
-  colaborador: {
-    id: '3',
-    email: 'juan.perez@gmail.com',
-    nombre: 'Juan Pérez',
-    role: 'colaborador' as const,
-    isActive: true,
-    createdAt: new Date('2024-02-01'),
-    updatedAt: new Date(),
-    verificationStatus: 'verificado' as const,
-    tipoColaborador: 'persona' as const,
-    telefono: '+54 341 555-1234',
-    direccion: {
-      calle: 'Belgrano',
-      numero: '456',
-      ciudad: 'Rosario',
-      provincia: 'Santa Fe',
-      codigoPostal: '2000'
-    },
-    persona: {
-      dni: '12345678',
-      fechaNacimiento: new Date('1990-05-15'),
-      genero: 'masculino' as const
-    },
-    colaboraciones: ['1', '3'],
-    preferencias: {
-      categorias: ['educacion', 'salud'],
-      provincias: ['santa-fe', 'buenos-aires'],
-      notificaciones: true
-    }
-  }
 };
 
 // Store principal de autenticación
@@ -123,25 +46,23 @@ export const isVerified = derived(authStore, ($auth) => $auth.user?.verification
 export const authActions = {
   // Iniciar sesión (versión mock para pruebas)
   async login(email: string, password: string, rememberMe: boolean = false) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
+
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, rememberMe })
+      });
 
-      // Buscar usuario en datos mock
-      const user = Object.values(mockUsers).find(u => u.email === email);
-      
-      if (!user || password !== '123456') {
-        throw new Error('Credenciales inválidas');
+      if (!response.ok) {
+        const { error } = await response.json();
+        throw new Error(error ?? 'Error al iniciar sesión');
       }
 
-      // Guardar token en localStorage si rememberMe es true
-      if (rememberMe) {
-        localStorage.setItem('authToken', 'mock-token-' + user.id);
-      }
+      const { user } = await response.json();
 
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         user: user as User,
         isAuthenticated: true,
@@ -151,7 +72,7 @@ export const authActions = {
 
       return user;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al iniciar sesión'
@@ -163,15 +84,10 @@ export const authActions = {
   // Cerrar sesión
   async logout() {
     try {
-      // Simular llamada al backend
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await fetch('/api/logout', { method: 'POST' });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     } finally {
-      // Limpiar token local
-      localStorage.removeItem('authToken');
-      
-      // Resetear estado
       authStore.set(initialState);
     }
   },
@@ -179,14 +95,14 @@ export const authActions = {
   // Registrar institución
   async registerInstitucion(userData: any) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Institución registrada exitosamente' };
-      
+
       authStore.update(state => ({
         ...state,
         isLoading: false,
@@ -207,14 +123,14 @@ export const authActions = {
   // Registrar colaborador
   async registerColaborador(userData: any) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
-    
+
     try {
       // Simular delay de red
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Colaborador registrado exitosamente' };
-      
+
       authStore.update(state => ({
         ...state,
         isLoading: false,
@@ -234,34 +150,24 @@ export const authActions = {
 
   // Verificar token al cargar la app
   async checkAuth() {
-    const token = localStorage.getItem('authToken');
-    if (!token) return;
+    authStore.update((state) => ({ ...state, isLoading: true }));
 
-    authStore.update(state => ({ ...state, isLoading: true }));
-    
     try {
-      // Simular verificación de token
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Extraer ID del usuario del token mock
-      const userId = token.replace('mock-token-', '');
-      const user = Object.values(mockUsers).find(u => u.id === userId);
+      const response = await fetch('/api/session');
+      const { user } = await response.json();
 
       if (user) {
-        authStore.update(state => ({
+        authStore.update((state) => ({
           ...state,
           user: user as User,
           isAuthenticated: true,
           isLoading: false
         }));
       } else {
-        // Token inválido, limpiar
-        localStorage.removeItem('authToken');
         authStore.set(initialState);
       }
     } catch (error) {
       console.error('Error al verificar autenticación:', error);
-      localStorage.removeItem('authToken');
       authStore.set(initialState);
     }
   },
@@ -283,7 +189,7 @@ export const authActions = {
 // Función para verificar permisos
 export function hasPermission(permission: string): boolean {
   let hasPermission = false;
-  
+
   authStore.subscribe(state => {
     if (state.user?.role === 'admin') {
       hasPermission = true;
@@ -312,12 +218,12 @@ export function canAccessRoute(route: string): boolean {
   };
 
   const requiredRoles = routePermissions[route] || [];
-  
+
   let canAccess = false;
-  
+
   authStore.subscribe(state => {
-    canAccess = requiredRoles.length === 0 || 
-                (state.user && requiredRoles.includes(state.user.role)) || false;
+    canAccess = requiredRoles.length === 0 ||
+      (state.user && requiredRoles.includes(state.user.role)) || false;
   })();
 
   return canAccess;
