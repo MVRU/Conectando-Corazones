@@ -10,8 +10,7 @@
 -->
 
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { derived } from 'svelte/store';
+	// ! Solo depende del store externo para mantener una única fuente de verdad
 	import { onMount, onDestroy } from 'svelte';
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
 
@@ -34,24 +33,7 @@
 	let containerWidth = 0;
 	let visibleCrumbsCount = 0;
 
-	/* -------- breadcrumbs automáticos -------- */
-	const autoBreadcrumbs = derived(page, ($page: { url?: URL }) => {
-		if (!$page?.url?.pathname) return [];
-
-		const segments = $page.url.pathname.split('/').filter(Boolean);
-		let path = '';
-		return segments.map((segment: string, idx: number) => {
-			path += '/' + segment;
-			return {
-				label: decodeURIComponent(
-					segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
-				),
-				href: idx < segments.length - 1 ? path : undefined
-			};
-		});
-	});
-
-	$: breadcrumbs = Array.isArray(items) && items.length > 0 ? items : ($autoBreadcrumbs ?? []);
+	$: breadcrumbs = Array.isArray(items) ? items : [];
 	$: if (breadcrumbs !== lastBreadcrumbs) {
 		lastBreadcrumbs = breadcrumbs;
 		showPopover = false;

@@ -2,9 +2,9 @@ import { writable, derived } from 'svelte/store';
 import { page } from '$app/stores';
 
 // * DECISIÓN DE DISEÑO
-// -*- Este store genera las migas de pan automáticamente a partir de la ruta
-// -*- actual y permite sobreescribirlas con valores manuales. Se ocultan cuando
-// -*- el total no supera dos elementos para evitar ruido visual.
+// -*- Fuente única de verdad para las migas de pan.
+// -*- Genera las rutas automáticamente y permite reemplazarlas manualmente.
+// -*- Se ocultan cuando el total no supera dos elementos para evitar ruido visual.
 
 export interface BreadcrumbItem {
         label: string;

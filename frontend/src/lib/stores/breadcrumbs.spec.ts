@@ -59,4 +59,13 @@ describe('breadcrumbs store', () => {
         const items = get(breadcrumbMod.breadcrumbs);
         expect(items[2].label).toBe('2');
     });
+
+    it('ignora migas personalizadas con dos elementos o menos', () => {
+        breadcrumbMod.setBreadcrumbs([
+            breadcrumbMod.BREADCRUMB_ROUTES.home,
+            { label: 'Solo' }
+        ]);
+        const items = get(breadcrumbMod.breadcrumbs);
+        expect(items).toEqual([]);
+    });
 });
