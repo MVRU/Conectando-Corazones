@@ -1,5 +1,10 @@
 import { writable, derived, get } from 'svelte/store';
-import type { User } from '$lib/types/User';
+import type {
+  User,
+  RegisterColaboradorData,
+  RegisterInstitucionData
+} from '$lib/types/User';
+import { isValidEmail } from '$lib/utils/validators';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -50,6 +55,10 @@ export const isVerified = derived(authStore, ($auth) => $auth.user?.verification
 export const authActions = {
   // Iniciar sesión (versión mock para pruebas)
   async login(email: string, password: string, rememberMe: boolean = false) {
+    if (!isValidEmail(email) || !password.trim()) {
+      authStore.update((s) => ({ ...s, error: 'Credenciales inválidas' }));
+      return null;
+    }
     authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -97,7 +106,7 @@ export const authActions = {
   },
 
   // Registrar institución
-  async registerInstitucion(userData: any) {
+  async registerInstitucion(userData: RegisterInstitucionData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -125,7 +134,7 @@ export const authActions = {
   },
 
   // Registrar colaborador
-  async registerColaborador(userData: any) {
+  async registerColaborador(userData: RegisterColaboradorData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
