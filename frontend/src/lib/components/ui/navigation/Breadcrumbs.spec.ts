@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/svelte';
 import Breadcrumbs from './Breadcrumbs.svelte';
 import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { setBreadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
+import { tick } from 'svelte';
 import '@testing-library/jest-dom/vitest';
 
 const itemsBase: BreadcrumbItem[] = [
@@ -12,19 +14,28 @@ const itemsBase: BreadcrumbItem[] = [
 ];
 
 describe('Breadcrumbs component', () => {
-  it('renders when there are more than two items', () => {
-    render(Breadcrumbs, { props: { items: itemsBase } });
+  beforeEach(() => {
+    clearBreadcrumbs();
+  });
+
+  it('se renderiza cuando hay más de dos elementos', async () => {
+    setBreadcrumbs(itemsBase);
+    render(Breadcrumbs);
+    await tick();
     expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 
-  it('hides when there are two items or less', () => {
-    const items: BreadcrumbItem[] = itemsBase.slice(0, 2);
-    const { queryByRole } = render(Breadcrumbs, { props: { items } });
+  it('se oculta con dos elementos o menos', async () => {
+    setBreadcrumbs(itemsBase.slice(0, 2));
+    const { queryByRole } = render(Breadcrumbs);
+    await tick();
     expect(queryByRole('navigation')).toBeNull();
   });
 
-  it('updates when items change', async () => {
-    const { rerender } = render(Breadcrumbs, { props: { items: itemsBase } });
+  it('actualiza los elementos mostrados', async () => {
+    setBreadcrumbs(itemsBase);
+    render(Breadcrumbs);
+    await tick();
     expect(screen.getByText('Detalle')).toBeInTheDocument();
 
     const newItems: BreadcrumbItem[] = [
@@ -34,7 +45,8 @@ describe('Breadcrumbs component', () => {
       { label: 'Nuevo' }
     ];
 
-    await rerender({ items: newItems });
+    setBreadcrumbs(newItems);
+    await tick();
     expect(screen.getByText('Nuevo')).toBeInTheDocument();
     expect(screen.queryByText('Detalle')).toBeNull();
   });

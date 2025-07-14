@@ -5,7 +5,7 @@
 	import Breadcrumbs from '$lib/components/ui/navigation/Breadcrumbs.svelte';
 	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
 	import '$lib/stores/reducedMotion';
-	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -22,7 +22,7 @@
 <Header />
 <MotionNotice />
 
-<Breadcrumbs items={$breadcrumbs} />
+<Breadcrumbs />
 
 <ScrollToTop />
 

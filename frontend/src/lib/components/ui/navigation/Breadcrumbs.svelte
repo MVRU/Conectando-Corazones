@@ -5,17 +5,15 @@
         ! Solo se muestra cuando hay más de dos niveles para evitar ruido visual.
 
 * Props:
-        -*- items (BreadcrumbItem[]): lista opcional de { label, href }.
         -*- useIconSeparator (boolean): si true usa flecha, si false usa “/”.
 -->
 
 <script lang="ts">
-	// ! Solo depende del store externo para mantener una única fuente de verdad
 	import { onMount, onDestroy } from 'svelte';
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
+	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 
 	/* -------- props -------- */
-	export let items: BreadcrumbItem[] = [];
 	export let useIconSeparator = true;
 
 	/* -------- constantes de diseño -------- */
@@ -33,7 +31,7 @@
 	let containerWidth = 0;
 	let visibleCrumbsCount = 0;
 
-	$: breadcrumbs = Array.isArray(items) ? items : [];
+	$: breadcrumbs = $breadcrumbsStore;
 	$: if (breadcrumbs !== lastBreadcrumbs) {
 		lastBreadcrumbs = breadcrumbs;
 		showPopover = false;
