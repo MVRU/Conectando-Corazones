@@ -61,8 +61,7 @@ TODO:
 
 		enviandoFormulario = true;
 
-		// TODO: Enviar datos al backend
-		console.log('Datos del formulario:', datos);
+		// TODO: enviar datos al backend
 		setTimeout(() => {
 			enviandoFormulario = false;
 			formularioEnviado = true;

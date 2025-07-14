@@ -1,6 +1,10 @@
-import { writable, derived } from 'svelte/store';
-import type { User, UserRole } from '$lib/types/User';
-import { mockUsers } from '$lib/mocks/mock-users';
+import { writable, derived, get } from 'svelte/store';
+import type { User } from '$lib/types/User';
+
+/**
+ * * DECISIÓN DE DISEÑO:
+ *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
+ */
 
 // Estado de autenticación
 interface AuthState {
@@ -188,23 +192,17 @@ export const authActions = {
 
 // Función para verificar permisos
 export function hasPermission(permission: string): boolean {
-  let hasPermission = false;
-
-  authStore.subscribe(state => {
-    if (state.user?.role === 'admin') {
-      hasPermission = true;
-    } else if (state.user?.role === 'institucion') {
-      // Permisos específicos para instituciones
-      const institucionPermissions = ['crear_proyecto', 'editar_proyecto', 'ver_proyectos_propios'];
-      hasPermission = institucionPermissions.includes(permission);
-    } else if (state.user?.role === 'colaborador') {
-      // Permisos específicos para colaboradores
-      const colaboradorPermissions = ['ver_proyectos', 'hacer_donacion', 'ver_perfil'];
-      hasPermission = colaboradorPermissions.includes(permission);
-    }
-  })();
-
-  return hasPermission;
+  const state = get(authStore);
+  if (state.user?.role === 'admin') return true;
+  if (state.user?.role === 'institucion') {
+    const institucionPermissions = ['crear_proyecto', 'editar_proyecto', 'ver_proyectos_propios'];
+    return institucionPermissions.includes(permission);
+  }
+  if (state.user?.role === 'colaborador') {
+    const colaboradorPermissions = ['ver_proyectos', 'hacer_donacion', 'ver_perfil'];
+    return colaboradorPermissions.includes(permission);
+  }
+  return false;
 }
 
 // Función para verificar si puede acceder a una ruta
@@ -219,12 +217,9 @@ export function canAccessRoute(route: string): boolean {
 
   const requiredRoles = routePermissions[route] || [];
 
-  let canAccess = false;
-
-  authStore.subscribe(state => {
-    canAccess = requiredRoles.length === 0 ||
-      (state.user && requiredRoles.includes(state.user.role)) || false;
-  })();
-
-  return canAccess;
-} 
+  const state = get(authStore);
+  return (
+    requiredRoles.length === 0 ||
+    (!!state.user && requiredRoles.includes(state.user.role))
+  );
+}

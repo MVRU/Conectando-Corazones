@@ -35,8 +35,8 @@ TODO:
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
-	export let customAriaLabel: string = `Ir a ${href}`; // Para accesibilidad
-	export let type: 'button' | 'submit' = 'button';
+	export let customAriaLabel: string | null = null; // para accesibilidad
+	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
 	const dispatch = createEventDispatcher();
 
 	function handleClick(event: MouseEvent) {
@@ -63,12 +63,7 @@ TODO:
 <!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
-		on:click={() => {
-			if (disabled) return;
-			if (href) {
-				external ? (window.location.href = href) : goto(href);
-			}
-		}}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -78,7 +73,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -109,12 +104,7 @@ TODO:
 	<!-- ! Variante Secondary -->
 {:else if variant === 'secondary'}
 	<button
-		on:click={() => {
-			if (disabled) return;
-			if (href) {
-				external ? (window.location.href = href) : goto(href);
-			}
-		}}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -124,7 +114,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -155,12 +145,7 @@ TODO:
 	<!-- ! Variante Ghost -->
 {:else}
 	<button
-		on:click={() => {
-			if (disabled) return;
-			if (href) {
-				external ? (window.location.href = href) : goto(href);
-			}
-		}}
+		on:click={handleClick}
 		class={clsx(
 			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
 			size === 'md'
@@ -171,7 +156,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 			{label}
