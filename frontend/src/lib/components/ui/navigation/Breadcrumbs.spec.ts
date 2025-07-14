@@ -22,4 +22,20 @@ describe('Breadcrumbs component', () => {
     const { queryByRole } = render(Breadcrumbs, { props: { items } });
     expect(queryByRole('navigation')).toBeNull();
   });
+
+  it('updates when items change', async () => {
+    const { rerender } = render(Breadcrumbs, { props: { items: itemsBase } });
+    expect(screen.getByText('Detalle')).toBeInTheDocument();
+
+    const newItems: BreadcrumbItem[] = [
+      { label: 'Inicio', href: '/' },
+      { label: 'Nosotros', href: '/about' },
+      { label: 'Proyectos', href: '/projects' },
+      { label: 'Nuevo' }
+    ];
+
+    await rerender({ items: newItems });
+    expect(screen.getByText('Nuevo')).toBeInTheDocument();
+    expect(screen.queryByText('Detalle')).toBeNull();
+  });
 });

@@ -28,6 +28,8 @@
 	/* -------- estado -------- */
 	let breadcrumbs: BreadcrumbItem[] = [];
 	let showPopover = false;
+	// * Cierra el popover cuando cambia la ruta
+	let lastBreadcrumbs: BreadcrumbItem[] = [];
 	let navRef: HTMLElement | null = null;
 	let containerWidth = 0;
 	let visibleCrumbsCount = 0;
@@ -50,6 +52,10 @@
 	});
 
 	$: breadcrumbs = Array.isArray(items) && items.length > 0 ? items : ($autoBreadcrumbs ?? []);
+	$: if (breadcrumbs !== lastBreadcrumbs) {
+		lastBreadcrumbs = breadcrumbs;
+		showPopover = false;
+	}
 
 	/* -------- utils -------- */
 	const truncate = (label: string, max: number) =>
