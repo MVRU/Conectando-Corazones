@@ -22,7 +22,7 @@ beforeEach(async () => {
 });
 
 describe('breadcrumbs store', () => {
-    it('genera migas desde la ruta', () => {
+    it('genera migas si la ruta está habilitada', () => {
         setPath('/projects/8345');
         const items = get(breadcrumbMod.breadcrumbs);
         expect(items).toEqual([
@@ -32,13 +32,13 @@ describe('breadcrumbs store', () => {
         ]);
     });
 
-    it('no muestra migas si la ruta tiene dos segmentos o menos', () => {
+    it('no genera migas en rutas no habilitadas', () => {
         setPath('/projects');
         const items = get(breadcrumbMod.breadcrumbs);
         expect(items).toEqual([]);
     });
 
-    it('permite definir migas personalizadas', () => {
+    it('no genera migas en rutas no habilitadas', () => {
         breadcrumbMod.setBreadcrumbs([
             breadcrumbMod.BREADCRUMB_ROUTES.home,
             breadcrumbMod.BREADCRUMB_ROUTES.projects,
@@ -58,14 +58,5 @@ describe('breadcrumbs store', () => {
         setPath('/projects/2');
         const items = get(breadcrumbMod.breadcrumbs);
         expect(items[2].label).toBe('2');
-    });
-
-    it('ignora migas personalizadas con dos elementos o menos', () => {
-        breadcrumbMod.setBreadcrumbs([
-            breadcrumbMod.BREADCRUMB_ROUTES.home,
-            { label: 'Solo' }
-        ]);
-        const items = get(breadcrumbMod.breadcrumbs);
-        expect(items).toEqual([]);
     });
 });

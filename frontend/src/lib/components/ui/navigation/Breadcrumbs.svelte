@@ -2,7 +2,7 @@
 * Componente: Breadcrumbs
         -*- Descripción: Navegación de migas de pan para mostrar la ubicación actual.
         -*- Funcionalidad: Muestra la ruta de navegación con enlaces clicables.
-        ! Solo se muestra cuando hay más de dos niveles para evitar ruido visual.
+         ! Se muestra cuando hay migas configuradas (mínimo dos elementos).
 
 * Props:
         -*- useIconSeparator (boolean): si true usa flecha, si false usa “/”.
@@ -101,7 +101,7 @@
 	}
 </script>
 
-{#if breadcrumbs && breadcrumbs.length > 2}
+{#if breadcrumbs && breadcrumbs.length >= 2}
 	<nav
 		bind:this={navRef}
 		class="sticky top-0 z-30 w-full border-b border-gray-100 bg-white/90 px-2 py-2 shadow-sm backdrop-blur sm:px-8 sm:py-4"

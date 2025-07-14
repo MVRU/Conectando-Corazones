@@ -29,13 +29,13 @@ beforeEach(async () => {
 });
 
 describe('Layout breadcrumbs visibility', () => {
-    it('oculta Breadcrumbs en rutas básicas', () => {
+    it('oculta Breadcrumbs cuando no hay migas', () => {
         setPath('/about');
         const { queryByText } = render(Layout, { slots: { default: '<div></div>' } });
         expect(queryByText('breadcrumbs')).toBeNull();
     });
 
-    it('muestra Breadcrumbs en rutas profundas', () => {
+    it('muestra Breadcrumbs cuando hay migas', () => {
         setPath('/projects/1');
         const { getByText } = render(Layout, { slots: { default: '<div></div>' } });
         expect(getByText('breadcrumbs')).toBeInTheDocument();

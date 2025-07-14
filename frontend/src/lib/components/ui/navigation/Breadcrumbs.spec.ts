@@ -18,15 +18,15 @@ describe('Breadcrumbs component', () => {
     clearBreadcrumbs();
   });
 
-  it('se renderiza cuando hay más de dos elementos', async () => {
+  it('se renderiza con dos o más elementos', async () => {
     setBreadcrumbs(itemsBase);
     render(Breadcrumbs);
     await tick();
     expect(screen.getByRole('navigation')).toBeInTheDocument();
   });
 
-  it('se oculta con dos elementos o menos', async () => {
-    setBreadcrumbs(itemsBase.slice(0, 2));
+  it('se oculta con menos de dos elementos', async () => {
+    setBreadcrumbs(itemsBase.slice(0, 1));
     const { queryByRole } = render(Breadcrumbs);
     await tick();
     expect(queryByRole('navigation')).toBeNull();

@@ -3,9 +3,9 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navigation/Breadcrumbs.svelte';
-	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
 	import '$lib/stores/reducedMotion';
+	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -13,9 +13,11 @@
 
 	/**
 	 * ! DECISIÓN DE DISEÑO
-	 * -!- El store centraliza las migas y decide cuándo mostrar el componente
-	 * -!- Se limpian antes de navegar para evitar estados huérfanos
+	 * -!- Se muestran Breadcrumbs sólo cuando existen migas configuradas.
 	 */
+
+	let showBreadcrumbs = false;
+	$: showBreadcrumbs = $breadcrumbs.length >= 2;
 
 	/**
 	 * * Limpia migas de pan al cambiar de ruta para evitar estados huérfanos
@@ -29,7 +31,7 @@
 <Header />
 <MotionNotice />
 
-{#if $breadcrumbs.length}
+{#if showBreadcrumbs}
 	<Breadcrumbs />
 {/if}
 
