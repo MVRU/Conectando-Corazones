@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { isLowEndDevice } from './device';
+import { isLowEndDevice, hasSlowConnection } from './device';
 
 /**
- * ! Test para la función isLowEndDevice
- * 
- * Esta función detecta si el dispositivo es de bajo rendimiento
- * según características como hardwareConcurrency, deviceMemory y userAgent.
+ * ! Tests para la detección de dispositivos de gama baja
+ *
+ * -*- Se cubren casos de CPU, memoria, conexión y combinación en móviles.
+ * -*- Garantiza que la lógica se active correctamente.
  */
 
 describe('isLowEndDevice', () => {
@@ -16,10 +16,27 @@ describe('isLowEndDevice', () => {
         expect(isLowEndDevice(nav)).toBe(true);
     });
 
-    // Debe detectar user agents móviles como low-end
-    it('detects mobile user agent', () => {
-        // Simula un navegador con userAgent de iPhone
+    // ? Un móvil por sí solo no debe considerarse low-end
+    it('ignores mobile user agent when resources are high', () => {
         const nav: any = { hardwareConcurrency: 8, userAgent: 'iPhone', connection: {} };
+        expect(isLowEndDevice(nav)).toBe(false);
+    });
+
+    // Debe detectar poca memoria como dispositivo lento
+    it('detects low device memory', () => {
+        const nav: any = { hardwareConcurrency: 8, deviceMemory: 2, userAgent: 'Test', connection: {} };
+        expect(isLowEndDevice(nav)).toBe(true);
+    });
+
+    // Debe detectar conexiones lentas
+    it('detects slow network', () => {
+        const nav: any = { connection: { effectiveType: '2g' }, userAgent: 'Test', hardwareConcurrency: 8 };
+        expect(isLowEndDevice(nav)).toBe(true);
+    });
+
+    // Debe detectar móviles con mala conexión
+    it('detects mobile with slow connection', () => {
+        const nav: any = { userAgent: 'Android', connection: { downlink: 0.5 }, hardwareConcurrency: 8 };
         expect(isLowEndDevice(nav)).toBe(true);
     });
 
@@ -28,5 +45,31 @@ describe('isLowEndDevice', () => {
         // Simula un navegador de escritorio con buena memoria y CPU
         const nav: any = { hardwareConcurrency: 8, deviceMemory: 8, userAgent: 'Test', connection: {} };
         expect(isLowEndDevice(nav)).toBe(false);
+    });
+});
+
+describe('hasSlowConnection', () => {
+    // Debe detectar el modo ahorro de datos
+    it('detects save-data preference', () => {
+        const nav: any = { connection: { saveData: true } };
+        expect(hasSlowConnection(nav)).toBe(true);
+    });
+
+    // Debe detectar tipo de conexión 2G
+    it('detects 2g connection', () => {
+        const nav: any = { connection: { effectiveType: '2g' } };
+        expect(hasSlowConnection(nav)).toBe(true);
+    });
+
+    // Debe detectar downlink por debajo de 1 Mbps
+    it('detects low downlink', () => {
+        const nav: any = { connection: { downlink: 0.8 } };
+        expect(hasSlowConnection(nav)).toBe(true);
+    });
+
+    // No debe marcar como lenta una conexión rápida
+    it('returns false on fast connection', () => {
+        const nav: any = { connection: { effectiveType: '4g', downlink: 10 } };
+        expect(hasSlowConnection(nav)).toBe(false);
     });
 });

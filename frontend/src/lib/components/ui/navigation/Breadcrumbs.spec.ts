@@ -1,6 +1,8 @@
 import { render, screen } from '@testing-library/svelte';
 import Breadcrumbs from './Breadcrumbs.svelte';
 import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
+import { expect, it } from 'vitest';
+import '@testing-library/jest-dom/vitest';
 
 const itemsBase: BreadcrumbItem[] = [
   { label: 'Inicio', href: '/' },
@@ -9,12 +11,12 @@ const itemsBase: BreadcrumbItem[] = [
   { label: 'Detalle' }
 ];
 
-test('renders when there are more than two items', () => {
+it('renders when there are more than two items', () => {
   render(Breadcrumbs, { props: { items: itemsBase } });
   expect(screen.getByRole('navigation')).toBeInTheDocument();
 });
 
-test('hides when there are two items or less', () => {
+it('hides when there are two items or less', () => {
   const items: BreadcrumbItem[] = itemsBase.slice(0, 2);
   const { queryByRole } = render(Breadcrumbs, { props: { items } });
   expect(queryByRole('navigation')).toBeNull();
