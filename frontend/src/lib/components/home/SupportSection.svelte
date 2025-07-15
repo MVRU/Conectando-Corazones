@@ -2,15 +2,12 @@
 * Componente: SupportSection
     -*- Descripción: sección de ayuda y contacto, con tarjetas de soporte/contacto.
     -*- Props: por ahora, contenido estático.
-
-TODO:
-	- [ ] Corregir los enlaces de contacto.
 -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-       import Badge from '$lib/components/ui/elements/Badge.svelte';
-       import SupportCard from '$lib/components/ui/cards/SupportCard.svelte';
+	import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import SupportCard from '$lib/components/ui/cards/SupportCard.svelte';
 
 	// Los agregué directamente acá porque son estáticos y no se usan en otros lugares -> no vale la pena crear modelo y data separada.
 	const supports = [

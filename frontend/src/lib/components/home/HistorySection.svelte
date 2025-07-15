@@ -5,15 +5,12 @@
 
 * Props:
 	-*- No recibe props por ahora (contenido estático).
-
-TODO:
-	- [ ] Añadir animaciones de entrada suave.
 -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-        import Badge from '$lib/components/ui/elements/Badge.svelte';
-        import Image from '$lib/components/ui/elements/Image.svelte';
+	import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import Image from '$lib/components/ui/elements/Image.svelte';
 
 	let visible = false;
 	let sectionRef: HTMLDivElement;

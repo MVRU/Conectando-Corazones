@@ -11,17 +11,10 @@
 	-*- variant (string): 'primary', 'secondary' o 'ghost'. Por defecto: 'primary'.
 
 TODO:
-	- [ ] Agregar otras variantes de estilo: `secondary`, `outline`, `danger`.
+	- [ ] Agregar otras variantes de estilo: `outline`, `danger`.
 
 ! WARNING:
-	-!- Este botón asume que `href` siempre es una URL válida. Validar si el string es vacío puede ser necesario.
-
-* DECISIÓN DE DISEÑO:
-	-*- Se optó por usar `goto()` de SvelteKit para navegación interna y `window.location.href` para externa, sin usar `<a>` para mayor control.
-
-? CUESTIONES ABIERTAS:
-	-?- ¿Debería usarse un `<a>` si `external === true` por accesibilidad semántica?
-	-?- ¿Conviene separar el componente en dos: Button + LinkButton?
+	-!- Este botón asume que `href` siempre es una URL válida.
 -->
 
 <script lang="ts">

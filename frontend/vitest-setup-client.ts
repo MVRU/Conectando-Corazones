@@ -31,6 +31,3 @@ class MockResizeObserver {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).ResizeObserver = globalThis.ResizeObserver || MockResizeObserver;
-
-
-// TODO: añadir otros mocks si fueran necesarios

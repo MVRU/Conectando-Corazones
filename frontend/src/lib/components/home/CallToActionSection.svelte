@@ -2,10 +2,6 @@
 * Componente: CallToActionSection
 	-*- Descripción: sección de llamada a la acción con animaciones y diseño atractivo.
 	-*- Funcionalidad: muestra un mensaje motivacional y un botón con animaciones de entrada y salida.
-
-TODO:
-	- [ ] Agregar validación para `href` en el botón.
-
 -->
 
 <script lang="ts">
