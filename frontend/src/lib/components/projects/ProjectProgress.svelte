@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Project } from '$lib/models/Project';
+	import type { Project } from '$lib/types/Project';
 	import Button from '../ui/elements/Button.svelte';
 	import ProgressDetailsModal from '../ui/cards/ProgressDetailsModal.svelte';
 
@@ -57,7 +57,7 @@
 </script>
 
 {#if objetivos.length > 0}
-	<div class="mb-4">
+	<div class="animate-fade-up mb-4">
 		<div class="flex justify-end text-xs font-medium text-gray-700">
 			{#if porcentajeRecaudado < 100}
 				<span>{porcentajeRecaudado}% alcanzado</span>
@@ -136,3 +136,20 @@
 {/if}
 
 <ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.4s ease-out both;
+	}
+</style>

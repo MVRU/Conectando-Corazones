@@ -1,4 +1,4 @@
-import type { InstitucionUser } from '$lib/models/User';
+import type { InstitucionUser } from '$lib/types/User';
 
 export const institucionesMock: InstitucionUser[] = [
     {

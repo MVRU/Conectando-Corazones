@@ -5,7 +5,9 @@
 </script>
 
 {#if proyecto.imagen}
-	<div class="relative overflow-hidden rounded-3xl border border-gray-200 shadow-lg">
+	<div
+		class="animate-fade-down relative overflow-hidden rounded-3xl border border-gray-200 shadow-lg"
+	>
 		<img
 			src={proyecto.imagen}
 			alt="Imagen del proyecto"
@@ -52,3 +54,20 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	@keyframes fade-down {
+		from {
+			opacity: 0;
+			transform: translateY(-16px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-down {
+		animation: fade-down 0.5s ease-out both;
+	}
+</style>

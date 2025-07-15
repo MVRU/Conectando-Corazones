@@ -96,12 +96,12 @@
 
 {#if proyecto}
 	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
-		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<ProjectHeader {proyecto} {getColorUrgencia} {getColorEstado} />
 
 			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
 				<!-- Columna principal -->
-				<div class="space-y-10 lg:col-span-2">
+				<div class="animate-fade-up space-y-10 lg:col-span-2">
 					<section
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
 					>
@@ -219,7 +219,7 @@
 				</div>
 
 				<!-- Columna lateral -->
-				<div class="space-y-6">
+				<div class="animate-fade-up space-y-6" style="animation-delay: 100ms">
 					<SidebarCard {proyecto} {mostrarFormulario} />
 
 					{#if proyecto.contacto}
@@ -230,3 +230,20 @@
 		</div>
 	</main>
 {/if}
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(16px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.5s ease-out both;
+	}
+</style>

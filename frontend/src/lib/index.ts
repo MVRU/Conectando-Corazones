@@ -28,4 +28,4 @@ export * from './utils/device';
 export * from './data/projects';
 
 // Export modelos
-export * from './models/User';
+export * from './types/User';

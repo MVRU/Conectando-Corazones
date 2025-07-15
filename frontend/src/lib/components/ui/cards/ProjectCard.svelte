@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Project } from '$lib/models/Project';
+	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';
 	import ProgressDetailsModal from './ProgressDetailsModal.svelte';
 	let showModal = false;
@@ -180,7 +180,8 @@
 
 <a
 	href={`/projects/${proyecto.id}`}
-	class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
+	class="animate-fade-in-up group relative flex h-full translate-y-4 flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white opacity-0
+		shadow-sm transition-all hover:shadow-md"
 >
 	<!-- Imagen destacada -->
 	<div class="relative aspect-[4/3] w-full overflow-hidden">
@@ -324,5 +325,20 @@
 		line-clamp: 2;
 		-webkit-box-orient: vertical;
 		overflow: hidden;
+	}
+
+	@keyframes fade-in-up {
+		0% {
+			opacity: 0;
+			transform: translateY(16px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-in-up {
+		animation: fade-in-up 0.6s ease-out forwards;
 	}
 </style>

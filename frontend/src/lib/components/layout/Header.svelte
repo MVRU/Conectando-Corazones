@@ -12,8 +12,8 @@
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-        import Button from '$lib/components/ui/elements/Button.svelte';
-        import Image from '$lib/components/ui/elements/Image.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Image from '$lib/components/ui/elements/Image.svelte';
 	import { page } from '$app/stores';
 	import { isAuthenticated, user, authActions } from '$lib/stores/auth';
 
@@ -31,7 +31,7 @@
 		{ label: 'Proyectos', href: '/projects' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
 		{ label: 'Contacto', href: isHome ? '#support' : '/contact' },
-		{ label: 'Configuracion', href: '/settings' }
+		{ label: 'Configuración', href: '/settings' }
 	];
 
 	// Función para manejar el logout
@@ -116,12 +116,12 @@
 					<Button label="Configuración" href="/settings" variant="ghost" />
 					<button
 						on:click={handleLogout}
-						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 h-12 min-w-[140px] px-8 py-3 md:h-14"
+						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
 					>
 						<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 							Cerrar Sesión
 							<svg
-								class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+								class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="none"
@@ -184,7 +184,7 @@
 					on:click={() => (menuOpen = false)}>{label}</a
 				>
 			{/each}
-			
+
 			{#if $isAuthenticated}
 				<div class="space-y-3">
 					<div class="text-sm text-gray-300">Hola, {$user?.nombre}</div>
@@ -192,12 +192,12 @@
 					<Button label="Configuración" href="/settings" variant="ghost" />
 					<button
 						on:click={handleLogout}
-						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 h-12 min-w-[140px] px-8 py-3 md:h-14"
+						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
 					>
 						<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 							Cerrar Sesión
 							<svg
-								class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+								class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
 								fill="none"

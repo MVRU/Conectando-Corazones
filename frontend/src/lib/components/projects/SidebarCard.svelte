@@ -64,9 +64,8 @@
 	}[unicoObjetivo?.unidad ?? 'multiples'];
 </script>
 
-<!-- Card principal -->
 <div
-	class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+	class="animate-fade-up rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 >
 	<h3 class="mb-4 text-center text-lg font-semibold text-gray-800">¿Querés colaborar?</h3>
 
@@ -97,3 +96,20 @@
 	<!-- Compartir -->
 	<Button label="Compartir proyecto" variant="secondary" size="sm" customClass="w-full" />
 </div>
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.4s ease-out both;
+	}
+</style>

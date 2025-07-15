@@ -3,7 +3,7 @@
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { projects as defaultProjects } from '$lib/data/projects';
-	import type { Project } from '$lib/models/Project';
+	import type { Project } from '$lib/types/Project';
 
 	const participacionMap = {
 		dinero: 'Monetaria',

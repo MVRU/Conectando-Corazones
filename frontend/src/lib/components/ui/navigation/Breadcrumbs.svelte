@@ -104,7 +104,7 @@
 {#if breadcrumbs && breadcrumbs.length >= 2}
 	<nav
 		bind:this={navRef}
-		class="sticky top-0 z-30 w-full border-b border-gray-100 bg-white/90 px-2 py-2 shadow-sm backdrop-blur sm:px-8 sm:py-4"
+		class="animate-slide-down-fade sticky top-0 z-30 w-full border-b border-gray-100 bg-white/90 px-2 py-2 shadow-sm backdrop-blur sm:px-8 sm:py-4"
 		aria-label="Breadcrumb"
 	>
 		<!--  *MOBILE  -->
@@ -373,5 +373,20 @@
 	}
 	.animate-fade-in {
 		animation: fade-in 0.2s ease;
+	}
+
+	@keyframes slide-down-fade {
+		from {
+			opacity: 0;
+			transform: translateY(-12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-slide-down-fade {
+		animation: slide-down-fade 0.4s ease-out both;
 	}
 </style>

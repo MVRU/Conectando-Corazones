@@ -9,7 +9,7 @@
 
 {#if contacto}
 	<div
-		class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-[rgb(var(--color-primary))]/50 hover:shadow-md"
+		class="animate-fade-up rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-300 focus-within:ring-2 focus-within:ring-[rgb(var(--color-primary))]/50 hover:shadow-md"
 	>
 		<!-- Título más pequeño -->
 		<h3 class="mb-4 flex items-center justify-center gap-2 text-base font-medium text-gray-700">
@@ -98,3 +98,20 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.4s ease-out both;
+	}
+</style>
