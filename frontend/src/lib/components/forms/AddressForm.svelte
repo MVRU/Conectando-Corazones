@@ -24,7 +24,11 @@
 	const dispatch = createEventDispatcher();
 
 	// Ciudades según provincia
+	// Ciudades según provincia
 	$: locations = province ? getCitiesByProvince(province) : [];
+	$: if (province && location && !locations.includes(location)) {
+		location = '';
+	}
 
 	// Genera la URL automáticamente
 	$: {

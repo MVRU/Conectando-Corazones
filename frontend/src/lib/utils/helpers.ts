@@ -6,16 +6,37 @@ import { provinces } from '$lib/data/provinces';
  */
 
 /**
- * -!- Devuelve todas las ciudades de una provincia específica
+ * -!- Mapa de ciudades por provincia para consultas rápidas
  */
+const citiesByProvince: Record<string, string[]> = {};
+
+locations.forEach((loc) => {
+    if (!loc.province || !loc.province.name) return;
+    const key = loc.province.name.trim().toLowerCase();
+    citiesByProvince[key] ??= [];
+    citiesByProvince[key].push(loc.name);
+});
+
+
+
+/**
+ * -!- Devuelve todas las ciudades de una provincia específica
+*/
 export function getCitiesByProvince(provinceName: string): string[] {
     const normalized = provinceName.trim().toLowerCase();
-
-    return locations
-        .filter((loc) => loc.province.name.trim().toLowerCase() === normalized)
-        .map((loc) => loc.name);
+    return citiesByProvince[normalized] ?? [];
 }
 
+/** 
+ * -!- Obtiene la provincia correspondiente a una ciudad
+*/
+export function getProvinceByCity(cityName: string) {
+    const normalized = cityName.trim().toLowerCase();
+    const match = locations.find(
+        (loc) => loc.name.trim().toLowerCase() === normalized
+    );
+    return match?.province;
+}
 
 /**
  * -!- Devuelve todas las ciudades que coinciden parcial o totalmente con un término de búsqueda
@@ -37,3 +58,5 @@ export function searchCities(query: string): string[] {
 export function getAllProvinceNames(): string[] {
     return provinces.map((p) => p.name).sort((a, b) => a.localeCompare(b));
 }
+
+

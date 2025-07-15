@@ -1,5 +1,5 @@
 import { provinces } from "$lib/data/provinces";
-import { locations } from "$lib/mocks/mock-locations";
+import { getProvinceByCity } from '$lib/utils/helpers';
 
 /**
  * ! Mensajes de error comunes para validaciones
@@ -154,14 +154,10 @@ export function isValidProvinceByISO(isoCode: string): boolean {
 export function isValidCityInProvince(city: string, provinceName: string): boolean {
     if (!city || !provinceName) return false;
 
-    const normalizedProvince = provinceName.trim().toLowerCase();
-    const location = locations.find(
-        (loc) =>
-            loc.name.trim().toLowerCase() === city.trim().toLowerCase() &&
-            loc.province.name.trim().toLowerCase() === normalizedProvince
+    const province = getProvinceByCity(city);
+    return (
+        province?.name.trim().toLowerCase() === provinceName.trim().toLowerCase()
     );
-
-    return !!location;
 }
 
 /**
