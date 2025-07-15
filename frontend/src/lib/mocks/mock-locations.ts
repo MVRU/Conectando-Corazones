@@ -1,3 +1,9 @@
+/*
+    *  Está en "mocks" porque hay alrededor de +2.200 ciudades/localidades por provincia...
+        -*- Es mejor consultarlas a una API o ver si hay algún dataset que las contenga.
+        -*- https://datos.gob.ar/
+**/
+
 import type { Location } from '$lib/types/Location';
 import { provinces } from '$lib/data/provinces';
 
@@ -18,7 +24,7 @@ export const locations: Location[] = [
         id: 3,
         name: 'CABA',
         postalCode: '1000',
-        province: provinces.find((p) => p.name === 'CABA')!
+        province: provinces.find((p) => p.name === 'Ciudad Autónoma de Buenos Aires')!
     },
     {
         id: 4,

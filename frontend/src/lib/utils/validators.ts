@@ -1,5 +1,5 @@
-import provinces from "$lib/data/provinces";
-import locations from "$lib/data/locations";
+import { provinces } from "$lib/data/provinces";
+import { locations } from "$lib/mocks/mock-locations";
 
 /**
  * ! Mensajes de error comunes para validaciones
@@ -58,8 +58,8 @@ export function isValidUsername(username: string): boolean {
 export function isValidCuit(cuit: string): boolean {
     if (!cuit) return false;
     if (!/^\d{11}$/.test(cuit)) return false;
-    const prefix = cuit.slice(0,2);
-    const number = cuit.slice(2,10);
+    const prefix = cuit.slice(0, 2);
+    const number = cuit.slice(2, 10);
     const check = cuit.slice(10);
     const digits = prefix + number;
     const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
@@ -75,8 +75,8 @@ export function isValidCuit(cuit: string): boolean {
 export function isValidCuil(cuil: string): boolean {
     if (!cuil) return false;
     if (!/^\d{11}$/.test(cuil)) return false;
-    const prefix = cuil.slice(0,2);
-    const number = cuil.slice(2,10);
+    const prefix = cuil.slice(0, 2);
+    const number = cuil.slice(2, 10);
     const check = cuil.slice(10);
     const digits = prefix + number;
     const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
@@ -153,8 +153,15 @@ export function isValidProvinceByISO(isoCode: string): boolean {
  */
 export function isValidCityInProvince(city: string, provinceName: string): boolean {
     if (!city || !provinceName) return false;
-    const location = locations.find((loc) => loc.name === city);
-    return !!location && location.province.name === provinceName;
+
+    const normalizedProvince = provinceName.trim().toLowerCase();
+    const location = locations.find(
+        (loc) =>
+            loc.name.trim().toLowerCase() === city.trim().toLowerCase() &&
+            loc.province.name.trim().toLowerCase() === normalizedProvince
+    );
+
+    return !!location;
 }
 
 /**

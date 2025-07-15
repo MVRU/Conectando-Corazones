@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { page } from '$app/stores';
-import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs';
+import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 
 // * DECISIÓN DE DISEÑO
 // -*- Fuente única de verdad para las migas de pan.

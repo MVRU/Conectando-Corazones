@@ -10,8 +10,8 @@ TODO:
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-       import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
-	import { testimonials } from '$lib/data/testimonials';
+	import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
+	import { testimonials } from '$lib/mocks/mock-testimonials';
 
 	let centerIndex = 1;
 	let visibleCount = 3;

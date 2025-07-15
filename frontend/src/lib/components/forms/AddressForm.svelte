@@ -251,7 +251,6 @@
 	<!-- Botón de envío -->
 	<div class="mt-8 flex justify-end">
 		<Button
-			type="submit"
 			label={sending ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"

@@ -2,6 +2,7 @@
 export interface Province {
     id?: number; // código de la provincia según ARCA
     name: string;
+    shortName?: string;
 
     // Valores opcionales (puede servir para funciones post-mvp)
     isoCode?: string; // para identificación geográfica

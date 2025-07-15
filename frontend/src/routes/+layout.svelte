@@ -6,7 +6,7 @@
 	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
 	import '$lib/stores/reducedMotion';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs';
+	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';

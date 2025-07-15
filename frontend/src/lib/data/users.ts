@@ -1,3 +1,5 @@
+// TODO: unir con mocks/mock-users.ts
+
 import type { InstitucionUser } from '$lib/types/User';
 
 export const institucionesMock: InstitucionUser[] = [

@@ -1,3 +1,9 @@
+/*
+ * Está en "data" porque es una lista de datos estáticos
+    -*- No son "mocks" porque no simulan nada; son fuentes fijas de verdad (truthy constants).
+    -*- Como no cambian (o muy raramente) tampoco se deberían consultar a una API constantemente.
+**/
+
 import type { Faq } from '$lib/types/Faq';
 
 // ! La categoría "General" son los que aparecen en la sección de inicio (no agregar más)

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { projects } from '$lib/data/projects';
+	import { projects } from '$lib/mocks/mock-projects';
 	import { page } from '$app/stores';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';

@@ -25,7 +25,7 @@ export * from './stores/reducedMotion';
 export * from './stores/auth';
 export * from './actions/inView';
 export * from './utils/device';
-export * from './data/projects';
+export * from './mocks/mock-projects';
 
 // Export modelos
 export * from './types/User';

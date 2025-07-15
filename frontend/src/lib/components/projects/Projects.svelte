@@ -2,7 +2,7 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { projects as defaultProjects } from '$lib/data/projects';
+	import { projects as defaultProjects } from '$lib/mocks/mock-projects';
 	import type { Project } from '$lib/types/Project';
 
 	const participacionMap = {
