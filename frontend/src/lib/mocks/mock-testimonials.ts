@@ -2,13 +2,13 @@ import type { Testimonial } from '$lib/types/Testimonial';
 
 export const testimonials: Testimonial[] = [
     {
-        stars: 5,
+        stars: 4,
         quote: 'Siento que mis ganas de ayudar encontraron el mejor lugar posible.',
         author: 'Lucía M.',
         role: 'Voluntaria'
     },
     {
-        stars: 5,
+        stars: 3,
         quote:
             'Nuestro equipo ha podido colaborar en proyectos que antes ni conocíamos. La plataforma nos guía hacia oportunidades que realmente importan.',
         author: 'Rotaract Club Local',
