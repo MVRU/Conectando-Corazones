@@ -182,7 +182,7 @@
 					class={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ease-in-out
 						${
 							filtrosSeleccionados.includes(tipo)
-								? 'bg-blue-600 text-white shadow-md hover:bg-blue-700'
+								? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
 								: 'border border-gray-300 bg-white text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm'
 						}`}
 				>

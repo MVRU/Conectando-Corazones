@@ -25,8 +25,9 @@ TODO:
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
+	import { onMount, onDestroy } from 'svelte';
 
-	// Props del componente
+	// Props
 	export let options: Array<{ value: string; label: string }> = [];
 	export let value: string = '';
 	export let placeholder: string = 'Seleccionar opción';
@@ -41,9 +42,10 @@ TODO:
 	// Estado interno
 	let isOpen = false;
 	let selectRef: HTMLElement;
-	let optionsRef: HTMLElement;
+	let inputRef: HTMLInputElement;
+	let searchValue = '';
+	let isTyping = false;
 
-	// Event dispatcher para comunicación con el padre
 	const dispatch = createEventDispatcher<{
 		change: { value: string; label: string };
 		focus: void;
@@ -63,25 +65,55 @@ TODO:
 		lg: 'text-base'
 	};
 
-	// Obtener la etiqueta del valor seleccionado
-	$: selectedOption = options.find(opt => opt.value === value);
-	$: displayValue = selectedOption ? selectedOption.label : placeholder;
+	$: selectedOption = options.find((opt) => opt.value === value);
+	$: displayValue = isTyping ? searchValue : selectedOption ? selectedOption.label : placeholder;
 
-	// Función para manejar la selección
+	$: filteredOptions = (() => {
+		if (!isOpen || !searchValue.trim() || searchValue === placeholder) {
+			return options;
+		}
+		return options.filter((option) =>
+			option.label.toLowerCase().includes(searchValue.toLowerCase())
+		);
+	})();
+
 	function handleSelect(option: { value: string; label: string }) {
 		value = option.value;
+		searchValue = selectedOption?.label || '';
+		isTyping = false;
 		isOpen = false;
 		dispatch('change', option);
 	}
 
-	// Función para manejar el click fuera del select
+	function handleInput(event: Event) {
+		const value = (event.target as HTMLInputElement).value;
+		searchValue = value;
+		isTyping = true;
+		if (!isOpen) isOpen = true;
+	}
+
 	function handleClickOutside(event: MouseEvent) {
 		if (selectRef && !selectRef.contains(event.target as Node)) {
 			isOpen = false;
+			isTyping = false;
+			searchValue = selectedOption ? selectedOption.label : '';
 		}
 	}
 
-	// Función para manejar el teclado
+	function toggleDropdown() {
+		if (disabled) return;
+		isOpen = !isOpen;
+		if (!isOpen) {
+			isTyping = false;
+			searchValue = selectedOption ? selectedOption.label : '';
+		} else {
+			isTyping = true;
+			if (!searchValue || searchValue === placeholder) {
+				searchValue = '';
+			}
+		}
+	}
+
 	function handleKeydown(event: KeyboardEvent) {
 		if (disabled) return;
 
@@ -89,40 +121,33 @@ TODO:
 			case 'Enter':
 			case ' ':
 				event.preventDefault();
-				isOpen = !isOpen;
+				toggleDropdown();
 				break;
 			case 'Escape':
 				isOpen = false;
 				break;
 			case 'ArrowDown':
 				event.preventDefault();
-				if (!isOpen) {
-					isOpen = true;
-				}
+				if (!isOpen) isOpen = true;
 				break;
 			case 'ArrowUp':
 				event.preventDefault();
-				if (!isOpen) {
-					isOpen = true;
-				}
+				if (!isOpen) isOpen = true;
 				break;
 		}
 	}
 
-	// Función para manejar el focus
 	function handleFocus() {
 		if (!disabled) {
+			isTyping = true;
 			dispatch('focus');
 		}
 	}
 
-	// Función para manejar el blur
 	function handleBlur() {
+		isTyping = false;
 		dispatch('blur');
 	}
-
-	// Lifecycle
-	import { onMount, onDestroy } from 'svelte';
 
 	onMount(() => {
 		document.addEventListener('click', handleClickOutside);
@@ -133,13 +158,12 @@ TODO:
 	});
 </script>
 
-<div class="w-full">
-	<!-- Label -->
+<div class="w-full space-y-1">
 	{#if label}
 		<label
 			for={id}
 			class={clsx(
-				'mb-2 block font-medium text-[rgb(var(--base-color))]',
+				'mb-2 block font-medium text-gray-700',
 				labelSizeClasses[size],
 				required && 'after:ml-1 after:text-red-500 after:content-["*"]'
 			)}
@@ -148,106 +172,93 @@ TODO:
 		</label>
 	{/if}
 
-	<!-- Select Container -->
+	<!-- Contenedor del Select -->
 	<div class="relative" bind:this={selectRef}>
-		<!-- Select Button -->
-		<button
-			type="button"
-			{id}
-			{name}
-			{disabled}
-			class={clsx(
-				'w-full rounded-lg border bg-white text-left transition-all duration-200 focus:outline-none focus:ring-2',
-				sizeClasses[size],
-				'border-gray-300 focus:border-transparent focus:ring-[rgb(var(--color-primary))]',
-				disabled && 'cursor-not-allowed bg-gray-50 text-gray-500',
-				error && 'border-red-300 focus:ring-red-500',
-				!disabled && 'hover:border-gray-400'
-			)}
-			on:click={() => !disabled && (isOpen = !isOpen)}
+		<input
+			type="text"
+			bind:this={inputRef}
+			bind:value={searchValue}
+			on:input={handleInput}
 			on:keydown={handleKeydown}
 			on:focus={handleFocus}
 			on:blur={handleBlur}
+			{disabled}
+			{id}
+			{name}
+			{placeholder}
+			class={clsx(
+				'w-full rounded-xl border bg-white text-left shadow-sm transition-all duration-200',
+				sizeClasses[size],
+				'border-gray-300 text-gray-900 placeholder:text-gray-400',
+				'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200',
+				error ? 'border-red-300 focus:ring-red-400' : 'hover:border-gray-400',
+				disabled && 'cursor-not-allowed bg-gray-100 text-gray-500'
+			)}
+			readonly={!isTyping}
+			role="combobox"
+			aria-controls="select-options"
 			aria-haspopup="listbox"
 			aria-expanded={isOpen}
 			aria-labelledby={label ? id : undefined}
+		/>
+
+		<!-- Ícono de flecha -->
+		<button
+			type="button"
+			class={clsx(
+				'absolute inset-y-0 right-3 flex cursor-pointer items-center transition-transform duration-200',
+				'text-gray-400'
+			)}
+			aria-label="Toggle dropdown"
+			on:click={toggleDropdown}
+			on:keydown={handleKeydown}
+			{disabled}
 		>
-			<span
-				class={clsx(
-					'block truncate',
-					!selectedOption && 'text-gray-500'
-				)}
-			>
-				{displayValue}
-			</span>
-			
-			<!-- Arrow Icon -->
-			<span
-				class={clsx(
-					'pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 transition-transform duration-200',
-					isOpen && 'rotate-180'
-				)}
-			>
-				<svg
-					class="h-4 w-4 text-gray-400"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				</svg>
-			</span>
+			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+			</svg>
 		</button>
 
-		<!-- Error Message -->
+		<!-- Mensaje de error -->
 		{#if error}
-			<p class="mt-1 text-sm text-red-600">{error}</p>
+			<p class="mt-1 px-1 text-sm text-red-600">{error}</p>
 		{/if}
 
-		<!-- Dropdown Options -->
+		<!-- Opciones desplegables -->
 		{#if isOpen}
 			<div
-				bind:this={optionsRef}
-				class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg"
-				role="listbox"
+				class="absolute z-50 mt-2 max-h-60 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5"
 			>
-				{#each options as option, index}
-					<button
-						type="button"
-						class={clsx(
-							'w-full px-4 py-2 text-left transition-colors duration-150 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none',
-							option.value === value && 'bg-[rgb(var(--color-primary))] text-white hover:bg-[rgb(var(--color-primary-hover))]'
-						)}
-						on:click={() => handleSelect(option)}
-						role="option"
-						aria-selected={option.value === value}
-					>
-						{option.label}
-					</button>
-				{/each}
-				
-				{#if options.length === 0}
-					<div class="px-4 py-2 text-sm text-gray-500">
-						No hay opciones disponibles
-					</div>
-				{/if}
+				<!-- Lista de opciones -->
+				<div class="max-h-52 overflow-auto overscroll-contain">
+					{#each filteredOptions as option}
+						<button
+							type="button"
+							class={clsx(
+								'group w-full px-4 py-2 text-left text-sm transition-colors duration-150',
+								option.value === value
+									? 'bg-blue-500 text-white'
+									: 'text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none'
+							)}
+							on:click={() => handleSelect(option)}
+							role="option"
+							aria-selected={option.value === value}
+						>
+							{option.label}
+						</button>
+					{/each}
+
+					{#if filteredOptions.length === 0}
+						<div class="px-4 py-2 text-sm text-gray-500">No se encontraron resultados</div>
+					{/if}
+				</div>
 			</div>
 		{/if}
 	</div>
 </div>
 
 <style>
-	/* Animación para el dropdown */
-	div[role="listbox"] {
-		animation: slideDown 0.2s ease-out;
-	}
-
-	@keyframes slideDown {
+	@keyframes fadeSlideDown {
 		from {
 			opacity: 0;
 			transform: translateY(-8px);
@@ -257,4 +268,4 @@ TODO:
 			transform: translateY(0);
 		}
 	}
-</style> 
+</style>
