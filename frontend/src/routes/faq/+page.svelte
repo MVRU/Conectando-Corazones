@@ -1,170 +1,259 @@
 <script lang="ts">
-  import { writable, derived } from 'svelte/store';
+	import { writable, derived } from 'svelte/store';
+	import { onMount } from 'svelte'; // Import necesario
+	import { faqs as allFaqs } from '$lib/data/faqs';
 
-  const searchQuery = writable('');
+	type Agrupadas = Record<string, { question: string; answer: string }[]>;
 
-  const faqs = [
-    {
-      category: 'Participación e Inscripción',
-      questions: [
-        {
-          q: '¿Quién puede registrarse en la plataforma?',
-          a: 'Cualquier institución que necesite ayuda o cualquier colaborador (persona u organización) interesado en brindarla.'
-        },
-        {
-          q: '¿Cómo creo una cuenta en Conectando Corazones?',
-          a: 'Primero seleccionás el tipo de usuario (Institución o Colaborador) y luego completás un formulario de registro para crear tu cuenta y acceder a todas las funcionalidades de la plataforma.'
-        },
-        {
-          q: '¿Existen diferentes tipos de usuario?',
-          a: 'Sí, podés registrarte como Institución (para crear proyectos y recibir colaboración) o como Colaborador (para postularte para ayudar en los proyectos disponibles).'
-        },
-        {
-          q: '¿Puedo cambiar de tipo de usuario una vez registrado?',
-          a: 'No, no se puede cambiar de tipo de usuario una vez registrado.'
-        },
-        {
-          q: '¿Puedo proponer un proyecto si no soy una institución?',
-          a: 'Por el momento, solo las instituciones registradas pueden publicar proyectos, pero podés sugerir ideas al equipo de Conectando Corazones..'
-        },
-      ]
-    },
-    {
-      category: 'Tipos de Ayuda y Proyectos',
-      questions: [
-        {
-          q: '¿Qué tipo de proyectos puedo encontrar en la plataforma?',
-          a: 'Encontrarás proyectos de diferentes áreas, como educación, asistencia social, cultura, medio ambiente, salud y otras iniciativas orientadas a mejorar la calidad de vida de comunidades vulnerables.'
-        },
-        {
-          q: '¿Puedo colaborar en más de un proyecto a la vez?',
-          a: 'Sí, podés participar en todos los proyectos que desees, siempre que cumplas con los requerimientos y tu disponibilidad lo permita.'
-        },
-        {
-          q: '¿Cómo sé si un proyecto sigue activo?',
-          a: 'Cada proyecto tiene un estado actualizado en la plataforma para indicar si sigue activo, está en búsqueda de colaboradores o si ya concluyó.'
-        }
-      ]
-    },
-    {
-      category: 'Postulación y Participación',
-      questions: [
-        {
-          q: '¿Qué sucede después de enviar mi postulación?',
-          a: 'La institución responsable del proyecto revisará todas las postulaciones recibidas y seleccionará a los colaboradores que mejor se adapten a los requerimientos de la iniciativa.'
-        },
-        {
-          q: '¿Puedo cambiar o cancelar mi postulación?',
-          a: 'Sí, podés editar o cancelar tu postulación en cualquier momento antes de que la institución la revise.'
-        },
-        {
-          q: '¿Recibiré una notificación si soy seleccionado para colaborar?',
-          a: 'Sí, recibirás una notificación por correo electrónico y dentro de la plataforma para confirmarte que tu postulación fue aceptada.'
-        },
-        {
-          q: '¿Qué responsabilidades asumo al participar en un proyecto?',
-          a: 'Te comprometés a cumplir con las actividades acordadas, respetar los plazos y colaborar de manera responsable para garantizar que el proyecto alcance sus objetivos.'
-        }
-      ]
-    },
-    {
-      category: 'Costos y Políticas de la Plataforma',
-      questions: [
-        {
-          q: '¿La plataforma tiene costo para los usuarios?',
-          a: 'No, tanto para instituciones como para colaboradores, el registro y uso de la plataforma son completamente gratuitos.'
-        },
-        {
-          q: '¿Existen otros costos involucrados?',
-          a: 'La plataforma no cobra ninguna comisión por donaciones o colaboraciones. Todos los aportes llegan directamente a la institución correspondiente.'
-        },
-        {
-          q: '¿Cuáles son las políticas de la comunidad?',
-          a: 'Todos los usuarios deben actuar con responsabilidad, respeto y honestidad, promoviendo un ambiente seguro y colaborativo para todas las partes involucradas.'
-        },
-        {
-          q: '¿Puedo denunciar comportamientos inadecuados?',
-          a: 'Sí, cualquier usuario puede reportar situaciones que no cumplan con las políticas de la comunidad a través del formulario de contacto o la sección de soporte.'
-        }
-      ]
-    },
-  {
-      category: 'Seguridad y Privacidad',
-      questions: [
-        {
-          q: '¿Qué pasa con mis datos personales?',
-          a: 'Los datos que proporcionás son utilizados únicamente para el funcionamiento de la plataforma y nunca se comparten con terceros sin tu consentimiento.'
-        },
-        {
-          q: '¿Mi información de contacto es visible para otros usuarios?',
-          a: 'No. Solo se comparte la información estrictamente necesaria entre las partes cuando una colaboración es confirmada.'
-        },
-        {
-          q: '¿Cómo puedo eliminar mi cuenta?',
-          a: 'Podés solicitar la baja de tu cuenta en cualquier momento desde tu perfil o contactando a soporte.'
-        },
-      ]
-    },
-]
+	// Agrupar FAQs por categoría
+	const faqsPorCategoria = allFaqs
+		.filter((faq) => faq.category && faq.category !== 'General')
+		.reduce((acc, faq) => {
+			const categoria = faq.category!;
+			if (!acc[categoria]) acc[categoria] = [];
+			acc[categoria].push({ question: faq.question, answer: faq.answer });
+			return acc;
+		}, {} as Agrupadas);
 
-  const filteredFaqs = derived([searchQuery], ([$searchQuery]) => {
-    if (!$searchQuery.trim()) return faqs;
+	const categorias = Object.entries(faqsPorCategoria).map(([category, questions]) => ({
+		category,
+		questions
+	}));
 
-    const lowerQuery = $searchQuery.toLowerCase();
-    return faqs
-      .map(category => {
-        const questions = category.questions.filter(
-          q => q.q.toLowerCase().includes(lowerQuery) || q.a.toLowerCase().includes(lowerQuery)
-        );
-        return { ...category, questions };
-      })
-      .filter(category => category.questions.length > 0);
-  });
+	const searchQuery = writable('');
+
+	const filteredFaqs = derived(searchQuery, ($searchQuery) => {
+		if (!$searchQuery.trim()) return categorias;
+
+		const lowerQuery = $searchQuery.toLowerCase();
+		return categorias
+			.map((c) => {
+				const filtered = c.questions.filter(
+					(q) =>
+						q.question.toLowerCase().includes(lowerQuery) ||
+						q.answer.toLowerCase().includes(lowerQuery)
+				);
+				return { category: c.category, questions: filtered };
+			})
+			.filter((c) => c.questions.length > 0);
+	});
+
+	let searchInput: HTMLInputElement | undefined;
+
+	function highlight(text: string, query: string): string {
+		if (!query.trim()) return text;
+		const regex = new RegExp(`(${query})`, 'gi');
+		return text.replace(regex, '<mark class="bg-blue-200 px-1 rounded">$1</mark>');
+	}
+
+	onMount(() => {
+		const hash = decodeURIComponent(location.hash.substring(1));
+		if (hash) {
+			const faq = allFaqs.find((f) => f.question.toLowerCase() === hash.toLowerCase());
+			if (faq) {
+				searchQuery.set(faq.question);
+				setTimeout(() => {
+					const element = document.getElementById(`faq-${encodeURIComponent(faq.question)}`);
+					element?.scrollIntoView({ behavior: 'smooth' });
+				}, 500);
+			}
+		}
+	});
 </script>
 
-<div class="max-w-3xl mx-auto p-6 space-y-8">
-  <h1 class="text-3xl font-bold text-center bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent">Preguntas Frecuentes</h1>
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
+	<!-- Encabezado -->
+	<div class="animate-fade-in-up mb-16 text-center">
+		<h2 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+			Preguntas Frecuentes
+		</h2>
+		<p class="mx-auto mt-2 max-w-2xl text-lg text-gray-500">
+			<strong>Todo lo que necesitás saber:</strong> simple, ordenado y sin vueltas.
+		</p>
+	</div>
 
-  <div class="relative">
-    <input
-      type="text"
-      placeholder="🔍  Buscar en las preguntas..."
-      class="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 placeholder-gray-400"
-      on:input={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
-    />
-  </div>
+	<!-- Barra de búsqueda -->
+	<div class="animate-fade-in-up mx-auto mb-16 w-full max-w-xl">
+		<div class="group relative">
+			<input
+				type="text"
+				placeholder="Buscar entre las preguntas..."
+				class="w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
+				bind:this={searchInput}
+				bind:value={$searchQuery}
+				on:input={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
+				on:keydown={(e) => {
+					if (e.key === 'Escape') {
+						searchQuery.set('');
+						if (searchInput) searchInput.focus();
+					}
+				}}
+			/>
+			<svg
+				class="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition duration-300 group-hover:text-blue-500"
+				xmlns="http://www.w3.org/2000/svg"
+				fill="none"
+				viewBox="0 0 24 24"
+				stroke="currentColor"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
+				/>
+			</svg>
 
-  {#each $filteredFaqs as category}
-    <div class="bg-white rounded-2xl shadow-lg p-6 space-y-4">
-      <h2 class="text-2xl font-semibold border-b border-gray-200 pb-2 bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent">{category.category}</h2>
-      <div class="space-y-3">
-        {#each category.questions as item}
-          <details class="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition group">
-            <summary class="cursor-pointer text-gray-800 font-medium text-lg flex justify-between items-center">
-              {item.q}
-              <svg
-                class="ml-2 w-5 h-5 text-blue-500 transform transition-transform duration-200 group-open:rotate-180"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </summary>
-            <p class="mt-3 text-gray-600 text-base leading-relaxed">{item.a}</p>
-          </details>
-        {/each}
-      </div>
-    </div>
-  {/each}
-</div>
+			{#if $searchQuery}
+				<button
+					type="button"
+					aria-label="Limpiar búsqueda"
+					class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+					on:click={() => {
+						searchQuery.set('');
+						if (searchInput) searchInput.focus();
+					}}
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			{/if}
+		</div>
+	</div>
+
+	<!-- Sin resultados -->
+	{#if $filteredFaqs.length === 0}
+		<div
+			class="animate-fade-in-up rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm"
+		>
+			<svg
+				class="mx-auto mb-4 h-12 w-12 text-blue-500 opacity-80"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+			>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+				/>
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M9 10h.01M15 10h.01M9.172 16.172a4 4 0 015.656 0"
+				/>
+			</svg>
+			<h3 class="mb-2 text-lg font-semibold text-gray-800">No se encontraron resultados</h3>
+			<p class="text-gray-600">
+				{#if $searchQuery.trim() !== ''}
+					Sin coincidencias para <strong>"{$searchQuery}"</strong>.
+				{:else}
+					Probá con otra palabra clave.
+				{/if}
+			</p>
+			{#if $searchQuery.trim() !== ''}
+				<button
+					type="button"
+					class="mt-6 inline-flex cursor-pointer items-center rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
+					on:click={() => {
+						searchQuery.set('');
+						if (searchInput) searchInput.focus();
+					}}
+				>
+					Limpiar búsqueda
+				</button>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Categorías y preguntas -->
+	<div class="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
+		{#each $filteredFaqs as category, i (category.category)}
+			<div class="fade-slide-in" style="animation-delay: {i * 120}ms">
+				<div
+					class="rounded-xl border border-gray-100 bg-white px-6 pb-6 pt-5 shadow-sm transition-all hover:shadow-md"
+				>
+					<h3
+						class="mb-5 flex items-center justify-between border-b border-gray-100 pb-2 text-xl font-medium text-stone-700"
+					>
+						<span>{@html highlight(category.category, $searchQuery)}</span>
+					</h3>
+					<div class="space-y-3">
+						{#each category.questions as item, j (item.question)}
+							<details
+								id={`faq-${encodeURIComponent(item.question)}`}
+								class="group rounded-lg border border-gray-100 bg-gray-50 px-5 py-4 transition-all duration-300 hover:bg-gray-100"
+								style="animation-delay: {(j + 1) * 90}ms"
+							>
+								<summary
+									class="flex cursor-pointer items-center justify-between text-sm font-medium text-gray-800"
+								>
+									<span>{@html highlight(item.question, $searchQuery)}</span>
+									<svg
+										class="ml-3 h-4 w-4 text-blue-500 transition-transform duration-300 group-open:rotate-180"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										viewBox="0 0 24 24"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+									</svg>
+								</summary>
+								<p class="mt-3 text-sm leading-relaxed text-gray-600">
+									{@html highlight(item.answer, $searchQuery)}
+								</p>
+							</details>
+						{/each}
+					</div>
+				</div>
+			</div>
+		{/each}
+	</div>
+</section>
 
 <style>
-  details summary {
-    list-style: none;
-  }
-  details summary::-webkit-details-marker {
-    display: none;
-  }
+	details summary {
+		list-style: none;
+		cursor: pointer;
+	}
+
+	details summary::-webkit-details-marker {
+		display: none;
+	}
+
+	@keyframes fade-in-up {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.animate-fade-in-up {
+		animation: fade-in-up 0.5s ease-out forwards;
+	}
+
+	@keyframes fade-slide-in {
+		from {
+			opacity: 0;
+			transform: translateY(24px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.fade-slide-in {
+		animation: fade-slide-in 0.5s ease-out forwards;
+	}
 </style>

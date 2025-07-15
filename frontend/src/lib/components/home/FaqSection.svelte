@@ -8,14 +8,17 @@
 -->
 
 <script lang="ts">
-        import FaqItem from '$lib/components/ui/elements/FaqItem.svelte';
-        import Image from '$lib/components/ui/elements/Image.svelte';
-	import { faqs } from '$lib/data/faqs';
+	import FaqItem from '$lib/components/ui/elements/FaqItem.svelte';
+	import Image from '$lib/components/ui/elements/Image.svelte';
+	import { faqs as allFaqs } from '$lib/data/faqs';
 	import { inView } from '$lib/actions/inView';
 	import { reducedMotion } from '$lib/stores/reducedMotion';
 
 	let visibleFaq = false;
 	let visibleImg = false;
+
+	// Filtrar solo las FAQs con categoría "General"
+	const faqs = allFaqs.filter((faq) => faq.category === 'General');
 </script>
 
 <section

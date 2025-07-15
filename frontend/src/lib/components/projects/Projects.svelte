@@ -134,11 +134,13 @@
 	}
 </script>
 
-<section class="w-full px-6 py-12 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-12 sm:px-10 lg:px-20">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-14 text-center">
 		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
-		<p class="mt-3 text-lg text-gray-600">Colaborá con donaciones, materiales o como voluntario.</p>
+		<p class="mt-3 text-lg text-gray-600">
+			<strong>Colaborá con:</strong> donaciones, materiales o voluntariado.
+		</p>
 	</div>
 
 	<!-- Buscador -->
