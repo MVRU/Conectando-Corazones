@@ -1,10 +1,11 @@
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { page } from '$app/stores';
 import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs';
 
 // * DECISIÓN DE DISEÑO
 // -*- Fuente única de verdad para las migas de pan.
 // -*- Genera las rutas sólo en páginas habilitadas y permite reemplazarlas manualmente.
+// -*- Ignora los intentos de establecer migas si la ruta no está habilitada.
 
 export interface BreadcrumbItem {
         label: string;
@@ -36,15 +37,21 @@ const auto = derived(page, ($page) => {
         return items.length > 2 ? items : [];
 });
 
-// * Migas en uso (manuales o automáticas)
-export const breadcrumbs = derived([auto, custom], ([$auto, $custom]) => {
+// * Migas en uso (manuales o automáticas) según la ruta actual
+export const breadcrumbs = derived([page, auto, custom], ([$page, $auto, $custom]) => {
+        if (!shouldShowBreadcrumbs($page.url.pathname)) return [];
         if ($custom && $custom.length) return $custom;
         return $auto;
 });
 
 // Función para establecer breadcrumbs manuales
 export function setBreadcrumbs(items: BreadcrumbItem[]) {
-        custom.set(items);
+        const currentPath = get(page).url.pathname;
+        if (shouldShowBreadcrumbs(currentPath)) {
+                custom.set(items);
+        } else {
+                custom.set(null);
+        }
 }
 
 // Limpia las migas personalizadas

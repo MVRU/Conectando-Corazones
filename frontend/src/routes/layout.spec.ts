@@ -28,7 +28,7 @@ beforeEach(async () => {
     pageStore = (await import('$app/stores')).page as any;
 });
 
-describe('Layout breadcrumbs visibility', () => {
+describe('Visibilidad de breadcrumbs', () => {
     it('oculta Breadcrumbs cuando no hay migas', () => {
         setPath('/about');
         const { queryByText } = render(Layout, { slots: { default: '<div></div>' } });
@@ -39,5 +39,16 @@ describe('Layout breadcrumbs visibility', () => {
         setPath('/projects/1');
         const { getByText } = render(Layout, { slots: { default: '<div></div>' } });
         expect(getByText('breadcrumbs')).toBeInTheDocument();
+    });
+
+    it('oculta Breadcrumbs en rutas no habilitadas aunque existan migas', async () => {
+        const breadcrumbMod = await import('$lib/stores/breadcrumbs');
+        breadcrumbMod.setBreadcrumbs([
+            breadcrumbMod.BREADCRUMB_ROUTES.home,
+            { label: 'Registro' }
+        ]);
+        setPath('/signin');
+        const { queryByText } = render(Layout, { slots: { default: '<div></div>' } });
+        expect(queryByText('breadcrumbs')).toBeNull();
     });
 });

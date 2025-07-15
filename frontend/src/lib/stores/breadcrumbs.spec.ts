@@ -38,14 +38,15 @@ describe('breadcrumbs store', () => {
         expect(items).toEqual([]);
     });
 
-    it('no genera migas en rutas no habilitadas', () => {
+    it('ignora migas personalizadas en rutas no habilitadas', () => {
+        setPath('/signin');
         breadcrumbMod.setBreadcrumbs([
             breadcrumbMod.BREADCRUMB_ROUTES.home,
             breadcrumbMod.BREADCRUMB_ROUTES.projects,
             { label: 'Nuevo' }
         ]);
         const items = get(breadcrumbMod.breadcrumbs);
-        expect(items[2].label).toBe('Nuevo');
+        expect(items).toEqual([]);
     });
 
     it('limpia las migas personalizadas', () => {

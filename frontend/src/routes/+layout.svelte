@@ -6,6 +6,8 @@
 	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
 	import '$lib/stores/reducedMotion';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs';
+	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -17,7 +19,7 @@
 	 */
 
 	let showBreadcrumbs = false;
-	$: showBreadcrumbs = $breadcrumbs.length >= 2;
+	$: showBreadcrumbs = shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2;
 
 	/**
 	 * * Limpia migas de pan al cambiar de ruta para evitar estados huérfanos
