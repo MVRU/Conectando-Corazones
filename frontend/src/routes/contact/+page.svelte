@@ -173,6 +173,7 @@ TODO:
 						<Select
 							id="asunto"
 							name="asunto"
+							searchable={false}
 							options={opcionesAsunto}
 							bind:value={asunto}
 							placeholder="Seleccioná un asunto"

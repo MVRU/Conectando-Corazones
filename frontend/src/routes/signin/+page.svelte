@@ -9,7 +9,7 @@
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import ArcaValidation from '$lib/components/validation/ArcaValidation.svelte';
+	import RenaperValidation from '$lib/components/validation/RenaperValidation.svelte';
 	import EmailValidation from '$lib/components/validation/EmailValidation.svelte';
 	import AddressForm from '$lib/components/forms/AddressForm.svelte';
 	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
@@ -40,8 +40,11 @@
 		stage = 'form';
 	}
 
+	/**
+	 * ! Los colaboradores no necesitan verificar su identidad con RENAPER, así que saltamos directamente al email
+	 * */
 	function onFormSubmit() {
-		stage = 'verifying';
+		stage = rol === 'colaborador' ? 'email' : 'verifying';
 	}
 </script>
 
@@ -136,7 +139,7 @@
 				<CollaboratorForm on:submit={onFormSubmit} />
 			{/if}
 		{:else if stage === 'verifying'}
-			<ArcaValidation
+			<RenaperValidation
 				currentStep={3}
 				totalSteps={5}
 				on:success={() => (stage = 'email')}

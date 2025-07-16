@@ -1,6 +1,13 @@
+<!--
+TODOs:
+ 	- [ ] Mover Button "Eliminar" hacia la derecha
+	- [ ] Crear variante para Button tipo "danger" que sea el de "eliminar"
+-->
+
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
 	import Button from '../ui/elements/Button.svelte';
+	import Select from '../ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	// Importa funciones y mensajes del archivo centralizado
@@ -109,16 +116,13 @@
 					<label for="tipo-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
 						Tipo de contacto
 					</label>
-					<select
-						id="tipo-{i}"
+					<Select
+						id={'tipo-' + i}
 						bind:value={contacto.tipo}
 						disabled={i === 0}
-						class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
-					>
-						{#each tiposContacto as tipo}
-							<option value={tipo}>{tipo}</option>
-						{/each}
-					</select>
+						options={tiposContacto.map((t) => ({ value: t, label: t }))}
+						searchable={false}
+					/>
 				</div>
 
 				<!-- Valor del contacto -->
@@ -140,29 +144,27 @@
 						{contacto.tipo === 'Otro' ? 'Especificar tipo' : 'Etiqueta'}
 					</label>
 					{#if contacto.tipo === 'Red social'}
-						<select
-							id="etiqueta-{i}"
+						<Select
+							id={'etiqueta-' + i}
 							bind:value={contacto.etiqueta}
-							class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-						>
-							<option value="">Elegí una red social</option>
-							{#each redesSociales as red}
-								<option value={red}>{red}</option>
-							{/each}
-						</select>
+							options={[
+								{ value: '', label: 'Elegí una red social' },
+								...redesSociales.map((r) => ({ value: r, label: r }))
+							]}
+							searchable={false}
+						/>
 					{:else if contacto.tipo === 'Otro'}
 						<Input id="etiqueta-{i}" bind:value={contacto.etiqueta} placeholder="Ej: Telegram..." />
 					{:else}
-						<select
-							id="etiqueta-{i}"
+						<Select
+							id={'etiqueta-' + i}
 							bind:value={contacto.etiqueta}
-							class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-						>
-							<option value="">Elegí una opción</option>
-							{#each etiquetasGenerales as tag}
-								<option value={tag}>{tag}</option>
-							{/each}
-						</select>
+							options={[
+								{ value: '', label: 'Elegí una opción' },
+								...etiquetasGenerales.map((t) => ({ value: t, label: t }))
+							]}
+							searchable={false}
+						/>
 					{/if}
 				</div>
 
@@ -200,7 +202,6 @@
 			label={sending ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"
-			type="submit"
 			disabled={hasErrors || sending}
 			customClass="w-full md:w-auto"
 		/>

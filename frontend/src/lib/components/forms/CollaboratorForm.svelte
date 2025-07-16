@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
-	import DatePicker from '$lib/components/forms/DatePicker.svelte';
+	import DatePicker from '$lib/components/ui/elements/DatePicker.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Select from '../ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -190,14 +191,16 @@
 		<label for="tipo" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
 			Tipo de colaborador <span class="text-red-600">*</span>
 		</label>
-		<select
+		<Select
 			id="tipo"
 			bind:value={tipo}
-			class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-		>
-			<option value="persona">Persona</option>
-			<option value="organizacion">Organización</option>
-		</select>
+			required={true}
+			error={intentoEnvio && !tipo ? ERROR_MESSAGES.required : ''}
+			options={[
+				{ value: 'persona', label: 'Persona' },
+				{ value: 'organizacion', label: 'Organización' }
+			]}
+		/>
 	</div>
 
 	<!-- Datos persona -->
@@ -208,7 +211,12 @@
 				<label for="nombre" class="font-semibold text-gray-800">
 					Nombre {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="nombre" bind:value={nombre} error={intentoEnvio ? errors.nombre : ''} maskCuil={false} />
+				<Input
+					id="nombre"
+					bind:value={nombre}
+					error={intentoEnvio ? errors.nombre : ''}
+					maskCuil={false}
+				/>
 			</div>
 
 			<!-- Apellido -->
@@ -224,15 +232,17 @@
 				<label for="docTipo" class="font-semibold text-gray-800">
 					Tipo de documento <span class="text-red-600">*</span>
 				</label>
-				<select
+				<Select
 					id="docTipo"
 					bind:value={docTipo}
-					class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-				>
-					<option>DNI</option>
-					<option>Pasaporte</option>
-					<option>Otro</option>
-				</select>
+					required={true}
+					error={''}
+					options={[
+						{ value: 'DNI', label: 'DNI' },
+						{ value: 'Pasaporte', label: 'Pasaporte' },
+						{ value: 'Otro', label: 'Otro' }
+					]}
+				/>
 			</div>
 
 			<!-- Especificar documento -->
@@ -258,7 +268,11 @@
 				<label for="nacimiento" class="font-semibold text-gray-800">
 					Fecha de nacimiento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<DatePicker id="nacimiento" bind:value={nacimiento} error={intentoEnvio ? errors.nacimiento : ''} />
+				<DatePicker
+					id="nacimiento"
+					bind:value={nacimiento}
+					error={intentoEnvio ? errors.nacimiento : ''}
+				/>
 			</div>
 
 			<!-- CUIL -->
@@ -266,7 +280,12 @@
 				<label for="cuil" class="font-semibold text-gray-800">
 					CUIL {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="cuil" bind:value={cuil} error={intentoEnvio ? errors.cuil : ''} maskCuil={true} />
+				<Input
+					id="cuil"
+					bind:value={cuil}
+					error={intentoEnvio ? errors.cuil : ''}
+					maskCuil={true}
+				/>
 			</div>
 		</fieldset>
 	{:else}
@@ -276,14 +295,23 @@
 				<label for="razonSocial" class="font-semibold text-gray-800">
 					Razón social {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="razonSocial" bind:value={razonSocial} error={intentoEnvio ? errors.razonSocial : ''} />
+				<Input
+					id="razonSocial"
+					bind:value={razonSocial}
+					error={intentoEnvio ? errors.razonSocial : ''}
+				/>
 			</div>
 
 			<div class="md:col-span-2">
 				<label for="cuit" class="font-semibold text-gray-800">
 					CUIT {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 				</label>
-				<Input id="cuit" bind:value={cuit} error={intentoEnvio ? errors.cuit : ''} maskCuil={true} />
+				<Input
+					id="cuit"
+					bind:value={cuit}
+					error={intentoEnvio ? errors.cuit : ''}
+					maskCuil={true}
+				/>
 			</div>
 		</fieldset>
 	{/if}
@@ -403,29 +431,39 @@
 					<label for="repNombre" class="font-semibold text-gray-800">
 						Nombre {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repNombre" bind:value={repNombre} error={intentoEnvio ? errors.repNombre : ''} />
+					<Input
+						id="repNombre"
+						bind:value={repNombre}
+						error={intentoEnvio ? errors.repNombre : ''}
+					/>
 				</div>
 
 				<div>
 					<label for="repApellido" class="font-semibold text-gray-800">
 						Apellido {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repApellido" bind:value={repApellido} error={intentoEnvio ? errors.repApellido : ''} />
+					<Input
+						id="repApellido"
+						bind:value={repApellido}
+						error={intentoEnvio ? errors.repApellido : ''}
+					/>
 				</div>
 
 				<div>
 					<label for="repDocTipo" class="font-semibold text-gray-800">
 						Tipo de documento <span class="text-red-600">*</span>
 					</label>
-					<select
+					<Select
 						id="repDocTipo"
 						bind:value={repDocTipo}
-						class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-					>
-						<option>DNI</option>
-						<option>Pasaporte</option>
-						<option>Otro</option>
-					</select>
+						required={true}
+						error={''}
+						options={[
+							{ value: 'DNI', label: 'DNI' },
+							{ value: 'Pasaporte', label: 'Pasaporte' },
+							{ value: 'Otro', label: 'Otro' }
+						]}
+					/>
 				</div>
 
 				{#if repDocTipo === 'Otro'}
@@ -433,7 +471,11 @@
 						<label for="repDocOtro" class="font-semibold text-gray-800">
 							Especifique {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 						</label>
-						<Input id="repDocOtro" bind:value={repDocOtro} error={intentoEnvio ? errors.repDocOtro : ''} />
+						<Input
+							id="repDocOtro"
+							bind:value={repDocOtro}
+							error={intentoEnvio ? errors.repDocOtro : ''}
+						/>
 					</div>
 				{/if}
 
@@ -441,7 +483,11 @@
 					<label for="repDocNumero" class="font-semibold text-gray-800">
 						Número de documento {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 					</label>
-					<Input id="repDocNumero" bind:value={repDocNumero} error={intentoEnvio ? errors.repDocNumero : ''} />
+					<Input
+						id="repDocNumero"
+						bind:value={repDocNumero}
+						error={intentoEnvio ? errors.repDocNumero : ''}
+					/>
 				</div>
 
 				<div>
@@ -462,7 +508,6 @@
 	<!-- Botón de envío -->
 	<div class="mt-10 flex justify-end">
 		<Button
-			type="submit"
 			label={sending ? 'Enviando...' : 'Continuar'}
 			disabled={sending || hasErrors}
 			customClass="w-full md:w-auto rounded-xl bg-[rgb(var(--base-color))] text-white font-semibold px-8 py-3 shadow-md hover:shadow-xl transition-all duration-300 disabled:opacity-60"

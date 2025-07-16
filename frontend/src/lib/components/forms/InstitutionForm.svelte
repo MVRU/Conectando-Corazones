@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
-	import DatePicker from '../ui/DatePicker.svelte';
+	import DatePicker from '$lib/components/ui/elements/DatePicker.svelte';
 	import Button from '../ui/elements/Button.svelte';
+	import Select from '../ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -165,21 +166,23 @@
 			<label for="tipo" class="font-semibold text-gray-800">
 				Tipo de institución {#if intentoEnvio}<span class="text-red-600">*</span>{/if}
 			</label>
-			<select
+			<Select
 				id="tipo"
 				name="tipo"
 				bind:value={institution.tipo}
-				class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-			>
-				<option value="">Selecciona tipo</option>
-				<option>Escuela</option>
-				<option>Hospital</option>
-				<option>Comedor</option>
-				<option>Fundación</option>
-				<option>Asociación</option>
-				<option>Parroquia</option>
-				<option>Otro</option>
-			</select>
+				placeholder="Selecciona tipo"
+				options={[
+					{ value: 'Escuela', label: 'Escuela' },
+					{ value: 'Hospital', label: 'Hospital' },
+					{ value: 'Comedor', label: 'Comedor' },
+					{ value: 'Fundación', label: 'Fundación' },
+					{ value: 'Asociación', label: 'Asociación' },
+					{ value: 'Parroquia', label: 'Parroquia' },
+					{ value: 'Otro', label: 'Otro' }
+				]}
+				error={intentoEnvio ? errors.otroTipo : ''}
+				searchable={false}
+			/>
 		</div>
 
 		{#if institution.tipo === 'Otro'}
@@ -374,16 +377,18 @@
 				<label for="repDocTipo" class="font-medium text-[rgb(15,16,41)]">
 					Tipo de documento <span class="text-red-600">*</span>
 				</label>
-				<select
+				<Select
 					id="repDocTipo"
 					name="repDocTipo"
 					bind:value={representative.repDocTipo}
-					class="mt-1 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-lg text-black transition-all focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-				>
-					<option>DNI</option>
-					<option>Pasaporte</option>
-					<option>Otro</option>
-				</select>
+					options={[
+						{ value: 'DNI', label: 'DNI' },
+						{ value: 'Pasaporte', label: 'Pasaporte' },
+						{ value: 'Otro', label: 'Otro' }
+					]}
+					placeholder="Seleccionar"
+					searchable={false}
+				/>
 			</div>
 
 			{#if representative.repDocTipo === 'Otro'}
@@ -435,7 +440,6 @@
 	<!-- Botón de envío -->
 	<div class="mt-10 flex justify-end">
 		<Button
-			type="submit"
 			label={sending ? 'Enviando...' : 'Continuar'}
 			disabled={sending || hasErrors}
 			customClass="w-full md:w-auto rounded-xl bg-[rgb(var(--base-color))] text-white font-semibold px-8 py-3 shadow-md hover:shadow-xl transition-all duration-300 disabled:opacity-60"

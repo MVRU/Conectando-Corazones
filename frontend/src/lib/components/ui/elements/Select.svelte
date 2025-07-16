@@ -38,6 +38,7 @@ TODO:
 	export let size: 'sm' | 'md' | 'lg' = 'md';
 	export let name: string = '';
 	export let id: string = '';
+	export let searchable = true;
 
 	// Estado interno
 	let isOpen = false;
@@ -69,9 +70,14 @@ TODO:
 	$: displayValue = isTyping ? searchValue : selectedOption ? selectedOption.label : placeholder;
 
 	$: filteredOptions = (() => {
-		if (!isOpen || !searchValue.trim() || searchValue === placeholder) {
+		if (!isOpen) return [];
+
+		if (!searchable) return options;
+
+		if (!searchValue.trim() || searchValue === placeholder) {
 			return options;
 		}
+
 		return options.filter((option) =>
 			option.label.toLowerCase().includes(searchValue.toLowerCase())
 		);
@@ -107,10 +113,8 @@ TODO:
 			isTyping = false;
 			searchValue = selectedOption ? selectedOption.label : '';
 		} else {
-			isTyping = true;
-			if (!searchValue || searchValue === placeholder) {
-				searchValue = '';
-			}
+			isTyping = searchable;
+			searchValue = searchable ? '' : selectedOption ? selectedOption.label : '';
 		}
 	}
 
@@ -192,9 +196,9 @@ TODO:
 				'border-gray-300 text-gray-900 placeholder:text-gray-400',
 				'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200',
 				error ? 'border-red-300 focus:ring-red-400' : 'hover:border-gray-400',
-				disabled && 'cursor-not-allowed bg-gray-100 text-gray-500'
+				disabled && 'cursor-not-allowed bg-gray-100 text-gray-500 placeholder:text-gray-400'
 			)}
-			readonly={!isTyping}
+			readonly={!searchable || !isTyping}
 			role="combobox"
 			aria-controls="select-options"
 			aria-haspopup="listbox"
@@ -206,8 +210,8 @@ TODO:
 		<button
 			type="button"
 			class={clsx(
-				'absolute inset-y-0 right-3 flex cursor-pointer items-center transition-transform duration-200',
-				'text-gray-400'
+				'absolute right-3 top-1/2 -translate-y-1/2 transform',
+				'cursor-pointer text-gray-400 transition-transform duration-200'
 			)}
 			aria-label="Toggle dropdown"
 			on:click={toggleDropdown}
@@ -218,11 +222,6 @@ TODO:
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 			</svg>
 		</button>
-
-		<!-- Mensaje de error -->
-		{#if error}
-			<p class="mt-1 px-1 text-sm text-red-600">{error}</p>
-		{/if}
 
 		<!-- Opciones desplegables -->
 		{#if isOpen}
@@ -238,7 +237,7 @@ TODO:
 								'group w-full px-4 py-2 text-left text-sm transition-colors duration-150',
 								option.value === value
 									? 'bg-blue-500 text-white'
-									: 'text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none'
+									: 'text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none'
 							)}
 							on:click={() => handleSelect(option)}
 							role="option"
@@ -256,6 +255,11 @@ TODO:
 		{/if}
 	</div>
 </div>
+
+<!-- Mensaje de error -->
+{#if error}
+	<p class="mt-1 px-1 text-sm text-red-600">{error}</p>
+{/if}
 
 <style>
 	@keyframes fadeSlideDown {

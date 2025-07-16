@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Select from '../ui/elements/Select.svelte';
 
 	import {
 		isValidStreet,
@@ -105,19 +106,14 @@
 			<label for="province" class="mb-2 block text-sm font-semibold text-gray-700">
 				Provincia <span class="text-red-600">*</span>
 			</label>
-			<select
+			<Select
 				id="province"
+				required={true}
+				placeholder="Selecciona una provincia"
+				options={getAllProvinceNames().map((p) => ({ value: p, label: p }))}
 				bind:value={province}
-				class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
-			>
-				<option value="">Selecciona una provincia</option>
-				{#each getAllProvinceNames() as prov}
-					<option value={prov}>{prov}</option>
-				{/each}
-			</select>
-			{#if errors.province}
-				<p role="alert" class="mt-1 text-sm text-red-600">{errors.province}</p>
-			{/if}
+				error={errors.province}
+			/>
 		</div>
 
 		<!-- Ciudad -->
@@ -125,20 +121,15 @@
 			<label for="location" class="mb-2 block text-sm font-semibold text-gray-700">
 				Ciudad <span class="text-red-600">*</span>
 			</label>
-			<select
+			<Select
 				id="location"
+				required={true}
+				placeholder="Selecciona una ciudad"
+				options={locations.map((c) => ({ value: c, label: c }))}
 				bind:value={location}
 				disabled={!province}
-				class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black transition focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
-			>
-				<option value="">Selecciona una ciudad</option>
-				{#each locations as c}
-					<option value={c}>{c}</option>
-				{/each}
-			</select>
-			{#if errors.location}
-				<p role="alert" class="mt-1 text-sm text-red-600">{errors.location}</p>
-			{/if}
+				error={errors.location}
+			/>
 		</div>
 
 		<!-- Referencia -->
