@@ -4,6 +4,10 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { projects as defaultProjects } from '$lib/mocks/mock-projects';
 	import type { Project } from '$lib/types/Project';
+	import SearchBar from '../ui/elements/SearchBar.svelte';
+	import { writable } from 'svelte/store';
+
+	let searchQuery = writable('');
 
 	const participacionMap = {
 		dinero: 'Monetaria',
@@ -26,7 +30,6 @@
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	export let proyectos: Project[] = defaultProjects;
 	let proyectosVisibles: Project[] = [];
-	let searchQuery = '';
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
 		Abierto: 0,
@@ -126,11 +129,11 @@
 
 	function resetFiltros() {
 		filtrosSeleccionados = ['Todos'];
-		searchQuery = '';
+		searchQuery = writable('');
 	}
 
 	$: {
-		proyectosVisibles = filtrarProyectos(proyectos, filtrosSeleccionados, searchQuery);
+		proyectosVisibles = filtrarProyectos(proyectos, filtrosSeleccionados, $searchQuery);
 	}
 </script>
 
@@ -145,29 +148,12 @@
 
 	<!-- Buscador -->
 	<div class="animate-fade-in-up mx-auto mb-12 w-full max-w-xl">
-		<div class="relative">
-			<input
-				id="search"
-				type="text"
-				bind:value={searchQuery}
-				placeholder="Buscar por título o institución..."
-				class="w-full rounded-xl border border-gray-300 bg-white px-12 py-3 text-sm text-gray-800 placeholder-gray-400 shadow-md transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100"
-			/>
-			<svg
-				class="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
-				/>
-			</svg>
-		</div>
+		<SearchBar
+			bind:value={searchQuery}
+			placeholder="Buscar por título o institución..."
+			ariaLabel="Campo de búsqueda de proyectos solidarios"
+			autofocus={false}
+		/>
 	</div>
 
 	<!-- Filtros -->
@@ -222,13 +208,19 @@
 		<div class="animate-fade-in-up py-24 text-center">
 			<h3 class="mb-4 text-xl font-semibold text-gray-800">No hay proyectos disponibles</h3>
 			<p class="mx-auto mb-6 max-w-xl text-gray-600">
-				{#if searchQuery.trim() !== ''}
-					No se encontraron resultados para <strong>"{searchQuery.trim()}"</strong>.
+				{#if $searchQuery.trim() !== ''}
+					No se encontraron resultados para <strong>"{$searchQuery.trim()}"</strong>.
 				{:else}
 					Probá con otro tipo de participación o reiniciá los filtros.
 				{/if}
 			</p>
-			<div class="flex justify-center" on:click={resetFiltros}>
+			<div
+				class="flex justify-center"
+				on:click={() => {
+					resetFiltros();
+					searchQuery.set('');
+				}}
+			>
 				<Button label="Ver todos los proyectos" />
 			</div>
 		</div>

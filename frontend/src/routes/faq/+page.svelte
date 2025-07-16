@@ -2,6 +2,7 @@
 	import { writable, derived } from 'svelte/store';
 	import { onMount } from 'svelte'; // Import necesario
 	import { faqs as allFaqs } from '$lib/data/faqs';
+	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
 
 	type Agrupadas = Record<string, { question: string; answer: string }[]>;
 
@@ -20,8 +21,7 @@
 		questions
 	}));
 
-	const searchQuery = writable('');
-
+	let searchQuery = writable('');
 	const filteredFaqs = derived(searchQuery, ($searchQuery) => {
 		if (!$searchQuery.trim()) return categorias;
 
@@ -74,57 +74,12 @@
 
 	<!-- Barra de búsqueda -->
 	<div class="animate-fade-in-up mx-auto mb-16 w-full max-w-xl">
-		<div class="group relative">
-			<input
-				type="text"
-				placeholder="Buscar entre las preguntas..."
-				class="w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
-				bind:this={searchInput}
-				bind:value={$searchQuery}
-				on:input={(e) => searchQuery.set((e.target as HTMLInputElement).value)}
-				on:keydown={(e) => {
-					if (e.key === 'Escape') {
-						searchQuery.set('');
-						if (searchInput) searchInput.focus();
-					}
-				}}
-			/>
-			<svg
-				class="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition duration-300 group-hover:text-blue-500"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14z"
-				/>
-			</svg>
-
-			{#if $searchQuery}
-				<button
-					type="button"
-					aria-label="Limpiar búsqueda"
-					class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-					on:click={() => {
-						searchQuery.set('');
-						if (searchInput) searchInput.focus();
-					}}
-				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
-				</button>
-			{/if}
-		</div>
+		<SearchBar
+			bind:value={searchQuery}
+			placeholder="Buscar entre las preguntas..."
+			ariaLabel="Campo de búsqueda de preguntas frecuentes"
+			autofocus={true}
+		/>
 	</div>
 
 	<!-- Sin resultados -->
