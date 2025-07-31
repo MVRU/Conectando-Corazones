@@ -194,7 +194,11 @@
 					emails secundarios.
 				</p>
 
-				<ContactMethodsForm on:submit={() => (stage = 'address')} />
+				<ContactMethodsForm
+					showSkip
+					on:skip={() => (stage = 'address')}
+					on:submit={() => (stage = 'address')}
+				/>
 			</main>
 		{:else if stage === 'address'}
 			<div class="mb-20">
@@ -212,7 +216,11 @@
 					</p>
 				</div>
 
-				<AddressForm on:submit={() => (stage = 'success')} />
+				<AddressForm
+					showSkip
+					on:skip={() => (stage = 'success')}
+					on:submit={() => (stage = 'success')}
+				/>
 			</div>
 		{:else if stage === 'success'}
 			<div class="mb-20">
