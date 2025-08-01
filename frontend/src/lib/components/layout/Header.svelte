@@ -39,6 +39,26 @@
 		}
 	}
 
+	/**
+	 * * Desplaza suavemente a una sección interna, ajustando el offset por la altura del header
+	 */
+	function handleNavClick(event: MouseEvent, href: string) {
+		menuOpen = false; // cierra menú móvil
+
+		if (href.startsWith('#')) {
+			event.preventDefault();
+			const id = href.slice(1);
+			const target = document.getElementById(id);
+			if (target) {
+				const offset = headerRef?.offsetHeight ?? 0;
+				const top = target.getBoundingClientRect().top + window.scrollY - offset;
+				window.scrollTo({ top, behavior: 'smooth' });
+			}
+		} else {
+			showDropdown = false;
+		}
+	}
+
 	onMount(() => {
 		const observer = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.1
@@ -105,6 +125,7 @@
 					{href}
 					class="group relative px-1 py-2 text-base font-medium text-blue-100 transition-colors duration-200 hover:text-white"
 					style="transition-delay:{i * 60}ms"
+					on:click={(e) => handleNavClick(e, href)}
 				>
 					{label}
 					<span
@@ -225,7 +246,7 @@
 						{href}
 						class="group flex items-center rounded-lg px-4 py-3 text-base font-medium text-blue-100 transition-colors duration-200 hover:bg-blue-500/10 hover:text-white"
 						style="transition-delay:{i * 60}ms"
-						on:click={() => (menuOpen = false)}
+						on:click={(e) => handleNavClick(e, href)}
 					>
 						<span>{label}</span>
 						<span class="ml-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100">
