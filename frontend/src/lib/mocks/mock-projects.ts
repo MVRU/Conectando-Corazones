@@ -27,8 +27,7 @@ export const projects: Project[] = [
         "unidad": "materiales",
         "especie": "libros",
         "objetivo": 200,
-        "cantidadEstimada": 180,
-        "cantidadRecaudada": 150
+        "cantidad": 150
       }
     ]
   },
@@ -52,22 +51,19 @@ export const projects: Project[] = [
         unidad: "dinero",
         especie: "ARS",
         objetivo: 50000,
-        cantidadEstimada: 25000,
-        cantidadRecaudada: 0
+        cantidad: 0
       },
       {
         "unidad": "materiales",
         "especie": "kilogramos",
         "objetivo": 300,
-        "cantidadEstimada": 200,
-        "cantidadRecaudada": 100
+        "cantidad": 100
       },
       {
         "unidad": "voluntarios",
         "especie": "repartidores",
         "objetivo": 10,
-        "cantidadEstimada": 10,
-        "cantidadRecaudada": 10
+        "cantidad": 10
       }
     ]
   },
@@ -91,8 +87,7 @@ export const projects: Project[] = [
         "unidad": "voluntarios",
         "especie": "talleristas",
         "objetivo": 20,
-        "cantidadEstimada": 30,
-        "cantidadRecaudada": 25
+        "cantidad": 25
       }
     ]
   },
@@ -116,8 +111,7 @@ export const projects: Project[] = [
         "unidad": "dinero",
         "especie": "pesos",
         "objetivo": 75000000,
-        "cantidadEstimada": 68000000,
-        "cantidadRecaudada": 50000000
+        "cantidad": 50000000
       }
     ]
   },
@@ -141,8 +135,7 @@ export const projects: Project[] = [
         "unidad": "voluntarios",
         "especie": "docentes",
         "objetivo": 8,
-        "cantidadEstimada": 3,
-        "cantidadRecaudada": 2
+        "cantidad": 2
       }
     ]
   },
@@ -167,15 +160,13 @@ export const projects: Project[] = [
         "unidad": "materiales",
         "especie": "kilogramos",
         "objetivo": 500,
-        "cantidadEstimada": 320,
-        "cantidadRecaudada": 250
+        "cantidad": 250
       },
       {
         "unidad": "voluntarios",
         "especie": "repartidores",
         "objetivo": 15,
-        "cantidadEstimada": 10,
-        "cantidadRecaudada": 8
+        "cantidad": 8
       }
     ]
   },
@@ -200,8 +191,7 @@ export const projects: Project[] = [
         "unidad": "materiales",
         "especie": "prendas",
         "objetivo": 100,
-        "cantidadEstimada": 120,
-        "cantidadRecaudada": 100
+        "cantidad": 100
       }
     ]
   },
@@ -226,15 +216,13 @@ export const projects: Project[] = [
         unidad: "voluntarios",
         especie: "voluntarios",
         objetivo: 15,
-        cantidadEstimada: 9,
-        cantidadRecaudada: 6
+        cantidad: 6
       },
       {
         unidad: "dinero",
         especie: "ARS",
         objetivo: 200000,
-        cantidadEstimada: 50000,
-        cantidadRecaudada: 30000
+        cantidad: 30000
       }
     ]
   },
@@ -259,8 +247,7 @@ export const projects: Project[] = [
         "unidad": "materiales",
         "especie": "computadoras",
         "objetivo": 20,
-        "cantidadEstimada": 6,
-        "cantidadRecaudada": 6
+        "cantidad": 6
       }
     ]
   },
@@ -285,8 +272,7 @@ export const projects: Project[] = [
         "unidad": "dinero",
         "especie": "ARS",
         "objetivo": 12000000,
-        "cantidadEstimada": 4500000,
-        "cantidadRecaudada": 3000000
+        "cantidad": 3000000
       }
     ]
   }

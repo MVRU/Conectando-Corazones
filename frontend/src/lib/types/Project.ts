@@ -3,8 +3,7 @@ import type { InstitucionUser, ColaboradorUser } from './User';
 
 export interface Objetivo {
     objetivo: number;
-    cantidadEstimada: number;
-    cantidadRecaudada?: number;
+    cantidad?: number;
     unidad: 'dinero' | 'materiales' | 'voluntarios';
     especie?: string;
 }

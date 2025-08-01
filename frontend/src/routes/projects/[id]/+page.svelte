@@ -131,19 +131,19 @@
 							{#if proyecto.objetivos?.length}
 								<ul class="space-y-4">
 									{#each proyecto.objetivos as o}
-										{@const porcentaje = Math.round((o.cantidadRecaudada / o.objetivo) * 100)}
+										{@const porcentaje = Math.round((o.cantidad / o.objetivo) * 100)}
 										<li
 											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
 										>
 											<!-- Ícono -->
 											<div class="flex-shrink-0">
-												{#if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'completo'}
+												{#if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'completo'}
 													<div
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
 													>
 														✅
 													</div>
-												{:else if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'parcial'}
+												{:else if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'parcial'}
 													<div
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
 													>
@@ -162,21 +162,11 @@
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
 													{o.unidad === 'dinero'
-														? `$${o.cantidadRecaudada.toLocaleString('es-AR')} / $${o.objetivo.toLocaleString('es-AR')} ${o.especie}`
-														: `${o.cantidadRecaudada} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
+														? `$${o.cantidad.toLocaleString('es-AR')} / $${o.objetivo.toLocaleString('es-AR')} ${o.especie}`
+														: `${o.cantidad} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
 												</p>
 												<div class="mt-1 flex justify-between text-xs text-gray-500">
 													<span>{porcentaje}% alcanzado</span>
-													{#if o.cantidadEstimada > o.cantidadRecaudada}
-														<span>
-															Promesas pendientes:
-															<strong>
-																{o.unidad === 'dinero'
-																	? `$${(o.cantidadEstimada - o.cantidadRecaudada).toLocaleString('es-AR')}`
-																	: `${o.cantidadEstimada - o.cantidadRecaudada} ${o.especie}`}
-															</strong>
-														</span>
-													{/if}
 												</div>
 											</div>
 										</li>

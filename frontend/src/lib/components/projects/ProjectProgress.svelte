@@ -1,21 +1,9 @@
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../ui/elements/Button.svelte';
-	import ProgressDetailsModal from '../ui/cards/ProgressDetailsModal.svelte';
 
 	export let proyecto!: Project;
 	export let mostrarBotones = false;
-
-	let showModal = false;
-	let tipoModal: 'estimado' | 'recaudado' = 'estimado';
-
-	let mostrarTooltipEstimado = false;
-	let mostrarTooltipRecaudado = false;
-
-	function abrirModal(tipo: 'estimado' | 'recaudado') {
-		tipoModal = tipo;
-		showModal = true;
-	}
 
 	const hoy = new Date();
 	const inicio = proyecto.fechaInicio ? new Date(proyecto.fechaInicio) : null;
@@ -45,22 +33,18 @@
 	const disabled = estadoTemporizador === 'Finalizado';
 
 	const objetivos = proyecto.objetivos || [];
-	const totalRecaudado = objetivos.reduce((sum, o) => sum + (o.cantidadRecaudada ?? 0), 0);
-	const totalEstimado = objetivos.reduce((sum, o) => sum + (o.cantidadEstimada ?? 0), 0);
+	const totalCantidad = objetivos.reduce((sum, o) => sum + (o.cantidad ?? 0), 0);
 	const totalObjetivo = objetivos.reduce((sum, o) => sum + (o.objetivo ?? 0), 0);
 
-	const porcentajeEstimado =
-		totalObjetivo > 0 ? Math.round((totalEstimado / totalObjetivo) * 100) : 0;
-
-	const porcentajeRecaudado =
-		totalObjetivo > 0 ? Math.round((totalRecaudado / totalObjetivo) * 100) : 0;
+	const porcentajeCantidad =
+		totalObjetivo > 0 ? Math.round((totalCantidad / totalObjetivo) * 100) : 0;
 </script>
 
 {#if objetivos.length > 0}
 	<div class="animate-fade-up mb-4">
 		<div class="flex justify-end text-xs font-medium text-gray-700">
-			{#if porcentajeRecaudado < 100}
-				<span>{porcentajeRecaudado}% alcanzado</span>
+			{#if porcentajeCantidad < 100}
+				<span>{porcentajeCantidad}% alcanzado</span>
 			{:else if estadoTemporizador !== 'Finalizado' && cierre && hoy < cierre}
 				<span class="font-semibold text-emerald-600">Proyecto pendiente de finalizar</span>
 			{:else}
@@ -68,49 +52,16 @@
 			{/if}
 		</div>
 		<div class="relative mt-1 h-3 w-full rounded-full bg-gray-200 shadow-inner">
-			<!-- Estimado -->
-			<button
-				type="button"
-				class="absolute left-0 top-0 h-full cursor-pointer focus:outline-none"
-				style={`width: ${Math.min(porcentajeEstimado, 100)}%`}
-				on:click={() => abrirModal('estimado')}
-				on:mouseenter={() => (mostrarTooltipEstimado = true)}
-				on:mouseleave={() => (mostrarTooltipEstimado = false)}
-				aria-label="Ver detalles del progreso estimado"
-			>
-				<div
-					class="pointer-events-none h-full rounded-full opacity-70"
-					style={`background: repeating-linear-gradient(135deg, ${getRgbColor('blue')} 0, ${getRgbColor('blue')} 4px, transparent 4px, transparent 8px)`}
-				></div>
-				{#if mostrarTooltipEstimado}
-					<div
-						class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
-					>
-						🤝 Compromisos de ayuda
-					</div>
-				{/if}
-			</button>
-
-			<!-- Recaudado -->
+			<!-- Cantidad recaudada -->
 			<button
 				type="button"
 				class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-				style={`width: ${Math.min(porcentajeRecaudado, 100)}%`}
-				on:click={() => abrirModal('recaudado')}
-				on:mouseenter={() => (mostrarTooltipRecaudado = true)}
-				on:mouseleave={() => (mostrarTooltipRecaudado = false)}
+				style={`width: ${Math.min(porcentajeCantidad, 100)}%`}
 				aria-label="Ver detalles del progreso recaudado"
 			>
 				<div
 					class={`h-full rounded-full bg-gradient-to-r ${getGradientClass('blue')} pointer-events-none`}
 				></div>
-				{#if mostrarTooltipRecaudado}
-					<div
-						class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
-					>
-						✅ Colaboraciones efectivas
-					</div>
-				{/if}
 			</button>
 		</div>
 	</div>
@@ -134,8 +85,6 @@
 		/>
 	</div>
 {/if}
-
-<ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
 
 <style>
 	@keyframes fade-up {

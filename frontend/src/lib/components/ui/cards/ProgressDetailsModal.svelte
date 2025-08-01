@@ -1,3 +1,5 @@
+<!-- ! Si no van a haber estimado vs recaudado, entonces habría que sacar este componente -->
+
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 

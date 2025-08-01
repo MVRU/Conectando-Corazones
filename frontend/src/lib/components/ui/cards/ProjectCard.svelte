@@ -1,9 +1,6 @@
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';
-	import ProgressDetailsModal from './ProgressDetailsModal.svelte';
-	let showModal = false;
-	let tipoModal: 'estimado' | 'recaudado' = 'estimado';
 
 	export let proyecto!: Project;
 	export let mostrarBotones: boolean = false;
@@ -20,18 +17,10 @@
 		utiles: '✏️'
 	};
 
-	function abrirModal(tipo: 'estimado' | 'recaudado') {
-		tipoModal = tipo;
-		showModal = true;
-	}
-
 	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
 
 	// Variables reactivas para valores dependientes de "proyecto"
-	let mostrarTooltipEstimado: boolean = false;
-	let mostrarTooltipRecaudado: boolean = false;
-	let percentEstimado: number;
-	let percentRecaudado: number;
+	let percentCantidad: number;
 	let actualLabel: string;
 	let objetivoLabel: string;
 	let color: 'green' | 'blue' | 'purple';
@@ -39,22 +28,17 @@
 
 	$: if (proyecto.objetivos && proyecto.objetivos.length > 0) {
 		const totalObjetivo = proyecto.objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
-		const totalEstimado = proyecto.objetivos.reduce((acc, o) => acc + (o.cantidadEstimada || 0), 0);
-		const totalRecaudado = proyecto.objetivos.reduce(
-			(acc, o) => acc + (o.cantidadRecaudada || 0),
-			0
-		);
+		const totalCantidad = proyecto.objetivos.reduce((acc, o) => acc + (o.cantidad || 0), 0);
 		const primerObjetivo = proyecto.objetivos[0];
 
-		percentEstimado = totalObjetivo > 0 ? Math.min((totalEstimado / totalObjetivo) * 100, 100) : 0;
-		percentRecaudado = totalObjetivo > 0 ? (totalRecaudado / totalObjetivo) * 100 : 0;
+		percentCantidad = totalObjetivo > 0 ? (totalCantidad / totalObjetivo) * 100 : 0;
 
 		actualLabel =
 			primerObjetivo.unidad === 'dinero'
-				? `$${totalRecaudado.toLocaleString('es-AR')}`
+				? `$${totalCantidad.toLocaleString('es-AR')}`
 				: primerObjetivo.unidad === 'voluntarios'
-					? `${totalRecaudado} voluntarios`
-					: `${totalRecaudado} ${primerObjetivo.especie || 'unidades'}`;
+					? `${totalCantidad} voluntarios`
+					: `${totalCantidad} ${primerObjetivo.especie || 'unidades'}`;
 
 		objetivoLabel =
 			primerObjetivo.unidad === 'dinero'
@@ -94,19 +78,6 @@
 			baja: 'text-blue-500'
 		};
 		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
-	};
-
-	const getRgbColor = (color: 'green' | 'blue' | 'purple') => {
-		switch (color) {
-			case 'green':
-				return 'rgb(110,231,183)';
-			case 'blue':
-				return 'rgb(125,211,252)';
-			case 'purple':
-				return 'rgb(196,181,253)';
-			default:
-				return 'rgb(203,213,225)';
-		}
 	};
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') => {
@@ -225,56 +196,25 @@
 		<div class="mt-2 flex flex-col gap-2">
 			<div class="flex justify-between text-xs font-medium text-gray-700">
 				<span>{icono} Objetivo</span>
-				{#if percentRecaudado > 100}
+				{#if percentCantidad > 100}
 					<span class="font-semibold text-purple-600">¡Objetivo superado!</span>
-				{:else if Math.round(percentRecaudado) === 100}
+				{:else if Math.round(percentCantidad) === 100}
 					<span class="font-semibold text-emerald-600">¡Objetivo alcanzado!</span>
 				{:else}
-					<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
+					<span>{percentCantidad.toFixed(0)}% alcanzado</span>
 				{/if}
 			</div>
 			<div class="relative h-3 w-full rounded-full bg-slate-100 shadow-inner">
-				<!-- Estimado -->
-				<button
-					type="button"
-					class="absolute left-0 top-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${percentEstimado}%`}
-					on:mouseenter={() => (mostrarTooltipEstimado = true)}
-					on:mouseleave={() => (mostrarTooltipEstimado = false)}
-					on:click={() => abrirModal('estimado')}
-				>
-					<div
-						class="pointer-events-none h-full rounded-full opacity-50"
-						style={`background: repeating-linear-gradient(135deg, ${getRgbColor(color)} 0, ${getRgbColor(color)} 4px, transparent 4px, transparent 8px)`}
-					></div>
-					{#if mostrarTooltipEstimado}
-						<div
-							class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
-						>
-							🤝 Compromisos de ayuda
-						</div>
-					{/if}
-				</button>
-
-				<!-- Recaudado -->
+				<!-- Cantidad recaudada -->
 				<button
 					type="button"
 					class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${Math.min(percentRecaudado, 100)}%`}
-					on:mouseenter={() => (mostrarTooltipRecaudado = true)}
-					on:mouseleave={() => (mostrarTooltipRecaudado = false)}
-					on:click={() => abrirModal('recaudado')}
+					style={`width: ${Math.min(percentCantidad, 100)}%`}
+					aria-label="Progreso del proyecto: ${percentCantidad.toFixed(0)}% alcanzado"
 				>
 					<div
 						class={`h-full rounded-full bg-gradient-to-r ${getGradientClass(color)} pointer-events-none`}
 					></div>
-					{#if mostrarTooltipRecaudado}
-						<div
-							class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
-						>
-							✅ Colaboraciones efectivas
-						</div>
-					{/if}
 				</button>
 			</div>
 
@@ -298,8 +238,6 @@
 			{/if}
 		</div>
 	</div>
-
-	<ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
 </a>
 
 <style>
