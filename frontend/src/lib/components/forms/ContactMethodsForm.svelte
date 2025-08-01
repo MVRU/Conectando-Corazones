@@ -29,6 +29,10 @@ TODOs:
 	// Dispatcher de evento
 	const dispatch = createEventDispatcher();
 
+	// Permite mostrar un botón para omitir el formulario en flujos opcionales
+	export let showSkip = false;
+	export let skipLabel = 'Omitir';
+
 	// Función para obtener placeholder según tipo
 	function getPlaceholder(tipo: string): string {
 		switch (tipo) {
@@ -196,8 +200,17 @@ TODOs:
 		</div>
 	</div>
 
-	<!-- Botón continuar -->
-	<div class="mt-8 flex justify-end">
+	<!-- Botones de acción -->
+	<div class="mt-8 flex justify-end gap-4">
+		{#if showSkip}
+			<Button
+				label={skipLabel}
+				variant="secondary"
+				size="md"
+				on:click={() => dispatch('skip')}
+				customClass="w-full md:w-auto"
+			/>
+		{/if}
 		<Button
 			label={sending ? 'Guardando...' : 'Continuar'}
 			variant="primary"

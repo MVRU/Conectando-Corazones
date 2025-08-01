@@ -3,6 +3,7 @@
 	import { onMount } from 'svelte'; // Import necesario
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
+	import { highlightSearch } from '$lib/utils/sanitize';
 
 	type Agrupadas = Record<string, { question: string; answer: string }[]>;
 
@@ -41,9 +42,7 @@
 	let searchInput: HTMLInputElement | undefined;
 
 	function highlight(text: string, query: string): string {
-		if (!query.trim()) return text;
-		const regex = new RegExp(`(${query})`, 'gi');
-		return text.replace(regex, '<mark class="bg-blue-200 px-1 rounded">$1</mark>');
+		return highlightSearch(text, query);
 	}
 
 	onMount(() => {

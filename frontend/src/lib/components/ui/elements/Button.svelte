@@ -14,13 +14,14 @@ TODO:
 	- [ ] Agregar otras variantes de estilo: `outline`, `danger`.
 
 ! WARNING:
-	-!- Este botón asume que `href` siempre es una URL válida.
+	-!- Se valida `href` para evitar navegaciones peligrosas.
 -->
 
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';
 	import { createEventDispatcher } from 'svelte';
+	import { isSafeHref } from '$lib/utils/sanitize';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
 	export let href: string | null = null;
@@ -35,7 +36,7 @@ TODO:
 	function handleClick(event: MouseEvent) {
 		dispatch('click', event); // Reenviamos el evento al padre
 
-		if (href && !disabled) {
+		if (href && !disabled && isSafeHref(href)) {
 			if (external) {
 				window.location.href = href;
 			} else {

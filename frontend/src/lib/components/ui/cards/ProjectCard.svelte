@@ -47,8 +47,7 @@
 		const primerObjetivo = proyecto.objetivos[0];
 
 		percentEstimado = totalObjetivo > 0 ? Math.min((totalEstimado / totalObjetivo) * 100, 100) : 0;
-		percentRecaudado =
-			totalObjetivo > 0 ? Math.min((totalRecaudado / totalObjetivo) * 100, 100) : 0;
+		percentRecaudado = totalObjetivo > 0 ? (totalRecaudado / totalObjetivo) * 100 : 0;
 
 		actualLabel =
 			primerObjetivo.unidad === 'dinero'
@@ -83,36 +82,18 @@
 	const formatearFechaCorta = (fecha?: string) => {
 		if (!fecha) return '—';
 		const f = new Date(fecha);
-		return `${f.getDate()}/${f.getMonth() + 1}`;
+		return `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear().toString().slice(-2)}`;
 	};
 
-	const getBadgeClasses = (tipo: 'urgencia' | 'estado', valor: string) => {
+	const getBadgeClasses = (valor: string) => {
 		const base =
-			'inline-flex items-center gap-1 rounded-full px-3 py-[6px] text-[11px] font-semibold ring-1 ring-white/30 shadow-lg backdrop-blur-md transition-all duration-200';
-
-		const estilos = {
-			urgencia: {
-				Alta: 'bg-red-100/80 text-red-800 hover:brightness-105',
-				Media: 'bg-yellow-100/80 text-yellow-800 hover:brightness-105',
-				Baja: 'bg-emerald-100/80 text-emerald-800 hover:brightness-105'
-			},
-			estado: {
-				Abierto: 'bg-emerald-100/80 text-emerald-800 hover:brightness-105',
-				'En ejecución': 'bg-blue-100/80 text-blue-800 hover:brightness-105',
-				Finalizado: 'bg-gray-100/80 text-gray-800 hover:brightness-105',
-				Cerrado: 'bg-gray-100/80 text-gray-800 hover:brightness-105'
-			}
+			'rounded-full bg-white px-3 py-2 text-[11px] font-semibold shadow-sm ring-1 ring-white/40 backdrop-blur-sm';
+		const colores = {
+			alta: 'text-red-700',
+			media: 'text-orange-500',
+			baja: 'text-blue-500'
 		};
-
-		if (tipo === 'urgencia' && valor in estilos.urgencia) {
-			return `${base} ${estilos.urgencia[valor as keyof typeof estilos.urgencia]}`;
-		}
-
-		if (tipo === 'estado' && valor in estilos.estado) {
-			return `${base} ${estilos.estado[valor as keyof typeof estilos.estado]}`;
-		}
-
-		return `${base} bg-gray-300/90 text-gray-800`;
+		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
 	};
 
 	const getRgbColor = (color: 'green' | 'blue' | 'purple') => {
@@ -180,8 +161,7 @@
 
 <a
 	href={`/projects/${proyecto.id}`}
-	class="animate-fade-in-up group relative flex h-full translate-y-4 flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white opacity-0
-		shadow-sm transition-all hover:shadow-md"
+	class="animate-fade-in-up group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition-all hover:shadow-lg"
 >
 	<!-- Imagen destacada -->
 	<div class="relative aspect-[4/3] w-full overflow-hidden">
@@ -191,59 +171,69 @@
 			class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 			loading="lazy"
 		/>
+		<!-- Estado y Fechas -->
 		<div
-			class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-gray-700 shadow backdrop-blur-sm"
+			class="absolute bottom-3 left-3 z-50 flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg backdrop-blur-md"
 		>
-			<span>{emojiTemporizador} {estadoTemporizador}</span>
-			<span class="text-gray-400">•</span>
-			<span
-				>{formatearFechaCorta(proyecto.fechaInicio)} → {formatearFechaCorta(
-					proyecto.fechaCierre
-				)}</span
-			>
+			<span class="text-sm">{emojiTemporizador}</span>
+			<span class="font-medium">{estadoTemporizador}</span>
+			<span class="mx-1 text-gray-300">|</span>
+			<span class="text-gray-500">
+				{formatearFechaCorta(proyecto.fechaInicio)} - {formatearFechaCorta(proyecto.fechaCierre)}
+			</span>
 		</div>
-		<div class="absolute right-3 top-3 flex flex-wrap gap-2 text-xs">
+
+		<!-- Gradiente oscuro sutil -->
+		<div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
 			{#if proyecto.urgencia}
-				<span class={getBadgeClasses('urgencia', proyecto.urgencia)}>
-					{proyecto.urgencia}
-				</span>
-			{/if}
-			{#if proyecto.estado}
-				<span class={getBadgeClasses('estado', estadoTemporizador)}>
-					{estadoTemporizador}
-				</span>
+				<div class="absolute right-4 top-4">
+					<span class={getBadgeClasses(proyecto.urgencia)}>
+						<span>Urgencia {proyecto.urgencia}</span>
+					</span>
+				</div>
 			{/if}
 		</div>
 	</div>
 
 	<!-- Contenido textual -->
-	<div class="flex flex-1 flex-col justify-between gap-4 p-5 sm:p-6">
+	<div class="flex flex-1 flex-col justify-between gap-6 p-6">
 		<div class="space-y-2">
 			<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
 				<span class="font-semibold text-[rgb(var(--color-primary))]"
 					>{proyecto.institucion?.razonSocial}</span
 				>
-				<span>📍 {proyecto.ciudad}, {proyecto.provincia}</span>
+
+				<div class="flex items-center gap-1 text-xs text-gray-500">
+					<svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11.8a2.8 2.8 0 100-5.6 2.8 2.8 0 000 5.6z"
+						/>
+					</svg>
+					<span>{proyecto.ciudad}, {proyecto.provincia}</span>
+				</div>
 			</div>
-			<h3 class="line-clamp-2 text-base font-bold leading-tight text-gray-800 sm:text-lg">
+
+			<h3 class="line-clamp-2 text-lg font-semibold text-gray-900">
 				{proyecto.titulo}
 			</h3>
-			<p class="line-clamp-3 text-sm text-gray-600">{proyecto.descripcion}</p>
+			<p class="line-clamp-3 text-sm leading-relaxed text-gray-600">
+				{proyecto.descripcion}
+			</p>
 		</div>
 
 		<!-- Progreso visual -->
 		<div class="mt-2 flex flex-col gap-2">
 			<div class="flex justify-between text-xs font-medium text-gray-700">
 				<span>{icono} Objetivo</span>
-				{#if percentRecaudado < 100}
-					<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
-				{:else if estadoTemporizador !== 'Finalizado' && cierre && hoy < cierre}
-					<span class="font-semibold text-emerald-600">Proyecto pendiente de finalizar</span>
+				{#if percentRecaudado > 100}
+					<span class="font-semibold text-purple-600">¡Objetivo superado!</span>
+				{:else if Math.round(percentRecaudado) === 100}
+					<span class="font-semibold text-emerald-600">¡Objetivo alcanzado!</span>
 				{:else}
-					<span class="text-gray-500">Objetivo alcanzado</span>
+					<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
 				{/if}
 			</div>
-			<div class="relative h-3 w-full rounded-full bg-gray-200 shadow-inner">
+			<div class="relative h-3 w-full rounded-full bg-slate-100 shadow-inner">
 				<!-- Estimado -->
 				<button
 					type="button"
@@ -254,12 +244,12 @@
 					on:click={() => abrirModal('estimado')}
 				>
 					<div
-						class="pointer-events-none h-full rounded-full opacity-70"
+						class="pointer-events-none h-full rounded-full opacity-50"
 						style={`background: repeating-linear-gradient(135deg, ${getRgbColor(color)} 0, ${getRgbColor(color)} 4px, transparent 4px, transparent 8px)`}
 					></div>
 					{#if mostrarTooltipEstimado}
 						<div
-							class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
+							class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
 						>
 							🤝 Compromisos de ayuda
 						</div>
@@ -270,7 +260,7 @@
 				<button
 					type="button"
 					class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${percentRecaudado}%`}
+					style={`width: ${Math.min(percentRecaudado, 100)}%`}
 					on:mouseenter={() => (mostrarTooltipRecaudado = true)}
 					on:mouseleave={() => (mostrarTooltipRecaudado = false)}
 					on:click={() => abrirModal('recaudado')}
@@ -280,7 +270,7 @@
 					></div>
 					{#if mostrarTooltipRecaudado}
 						<div
-							class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200"
+							class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
 						>
 							✅ Colaboraciones efectivas
 						</div>
@@ -308,6 +298,7 @@
 			{/if}
 		</div>
 	</div>
+
 	<ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
 </a>
 

@@ -37,7 +37,6 @@ export interface InstitucionUser extends BaseUser {
   };
   descripcion: string;
   sitioWeb?: string;
-  logo?: string;
   // Campos específicos para instituciones
   tipoInstitucion: 'escuela' | 'hospital' | 'ong' | 'fundacion' | 'otro';
   capacidadBeneficiarios: number;
