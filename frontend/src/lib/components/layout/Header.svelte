@@ -1,6 +1,7 @@
 <!--
 * Componente: Header
-	-*- Descripción: barra de navegación superior con logo, enlaces y botón de inicio de sesión.
+	-*- Descripción: barra de navegación superior con logo, enlaces y gestión de sesión.
+	-*- Se añadió avatar con menú desplegable para acceder a opciones de usuario.
 
 * Props:
 -*- `menuOpen`: Estado del menú móvil (abierto/cerrado).
@@ -22,6 +23,7 @@
 	let showHeader = true;
 	let lastScrollY = 0;
 	let headerRef: HTMLElement;
+	let showDropdown = false;
 
 	$: isHome = $page.url.pathname === '/';
 
@@ -30,19 +32,31 @@
 		{ label: 'Acerca de', href: '/about' },
 		{ label: 'Proyectos', href: '/projects' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
-		{ label: 'Contacto', href: isHome ? '#support' : '/contact' },
-		{ label: 'Configuración', href: '/settings' }
+		{ label: 'Contacto', href: isHome ? '#support' : '/contact' }
 	];
 
 	// Función para manejar el logout
 	async function handleLogout() {
 		await authActions.logout();
 		menuOpen = false;
+		showDropdown = false;
+	}
+
+	function toggleDropdown() {
+		showDropdown = !showDropdown;
+	}
+
+	function closeDropdownOnClickOutside(event: MouseEvent) {
+		if (showDropdown && !(event.target as HTMLElement).closest('.user-menu, .user-avatar')) {
+			showDropdown = false;
+		}
 	}
 
 	onMount(() => {
 		const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.1 });
 		if (headerRef) io.observe(headerRef);
+
+		window.addEventListener('click', closeDropdownOnClickOutside);
 
 		const onScroll = () => {
 			const currentScroll = window.scrollY;
@@ -58,6 +72,7 @@
 		return () => {
 			io.disconnect();
 			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('click', closeDropdownOnClickOutside);
 		};
 	});
 </script>
@@ -104,68 +119,92 @@
 			{/each}
 		</nav>
 
-		<!-- *CTA Desktop -->
+		<!-- *Usuario + Hamburguesa (todos los dispositivos) -->
 		<div
-			class="hidden md:block"
+			class="flex items-center gap-4"
 			style="animation:fadeSlide .7s .54s both; opacity:{visible ? 1 : 0};"
 		>
+			<!-- Avatar (solo si autenticado) -->
 			{#if $isAuthenticated}
-				<div class="flex items-center gap-4">
-					<span class="text-sm text-gray-300">Hola, {$user?.nombre}</span>
-					<Button label="Mi Perfil" href="/perfil" />
-					<Button label="Configuración" href="/settings" variant="ghost" />
+				<div class="user-avatar relative">
 					<button
-						on:click={handleLogout}
-						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
+						aria-label="Menú de usuario"
+						aria-haspopup="menu"
+						aria-expanded={showDropdown}
+						on:click|stopPropagation={toggleDropdown}
+						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-300"
 					>
-						<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
-							Cerrar Sesión
-							<svg
-								class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="#3b82f6"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg>
-						</span>
-						<span class="cta-btn-bg pointer-events-none absolute inset-0 z-0"></span>
+						<img
+							src={$user?.profile ?? '/users/escuela-esperanza.jpg'}
+							alt="Foto de perfil"
+							class="h-full w-full cursor-pointer object-cover"
+						/>
 					</button>
+
+					{#if showDropdown}
+						<ul
+							class="user-menu absolute right-0 z-50 mt-2 w-40 rounded-lg border border-gray-200 bg-white py-2 text-sm text-gray-800 shadow-lg"
+						>
+							<li>
+								<a
+									href="/profile"
+									class="block px-4 py-2 hover:bg-blue-50"
+									on:click={() => (showDropdown = false)}>Perfil</a
+								>
+							</li>
+							<li>
+								<a
+									href="/dashboard"
+									class="block px-4 py-2 hover:bg-blue-50"
+									on:click={() => (showDropdown = false)}>Dashboard</a
+								>
+							</li>
+							<li>
+								<a
+									href="/settings"
+									class="block px-4 py-2 hover:bg-blue-50"
+									on:click={() => (showDropdown = false)}>Configuración</a
+								>
+							</li>
+							<li>
+								<button
+									class="block w-full cursor-pointer px-4 py-2 text-left hover:bg-blue-50"
+									on:click={handleLogout}>Cerrar Sesión</button
+								>
+							</li>
+						</ul>
+					{/if}
 				</div>
 			{:else}
+				<!-- Botón de login visible en todos los tamaños -->
 				<Button label="Iniciar Sesión" href="/login" />
 			{/if}
-		</div>
 
-		<!-- *Hamburguesa Mobile -->
-		<div class="md:hidden">
-			<button
-				aria-label="Abrir menú"
-				class="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
-				on:click={() => (menuOpen = !menuOpen)}
-				style="animation:fadePop .7s .36s both; opacity:{visible ? 1 : 0};"
-			>
-				<svg
-					class="h-7 w-7 transition-transform duration-300"
-					style="transform:rotate({menuOpen ? 180 : 0}deg)"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
+			<!-- Botón hamburguesa -->
+			<div class="md:hidden">
+				<button
+					aria-label="Abrir menú"
+					class="relative z-50 flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+					on:click={() => (menuOpen = !menuOpen)}
 				>
-					{#if menuOpen}
-						<path d="M6 6l12 12M6 18L18 6" />
-					{:else}
-						<path d="M3 6h18M3 12h18M3 18h18" />
-					{/if}
-				</svg>
-			</button>
+					<svg
+						class="h-7 w-7 transition-transform duration-300"
+						style="transform:rotate({menuOpen ? 180 : 0}deg)"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					>
+						{#if menuOpen}
+							<path d="M6 6l12 12M6 18L18 6" />
+						{:else}
+							<path d="M3 6h18M3 12h18M3 18h18" />
+						{/if}
+					</svg>
+				</button>
+			</div>
 		</div>
 	</div>
 
@@ -185,34 +224,7 @@
 				>
 			{/each}
 
-			{#if $isAuthenticated}
-				<div class="space-y-3">
-					<div class="text-sm text-gray-300">Hola, {$user?.nombre}</div>
-					<Button label="Mi Perfil" href="/perfil" variant="ghost" />
-					<Button label="Configuración" href="/settings" variant="ghost" />
-					<button
-						on:click={handleLogout}
-						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
-					>
-						<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
-							Cerrar Sesión
-							<svg
-								class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="#3b82f6"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg>
-						</span>
-						<span class="cta-btn-bg pointer-events-none absolute inset-0 z-0"></span>
-					</button>
-				</div>
-			{:else}
+			{#if !$isAuthenticated}
 				<div
 					role="button"
 					tabindex="0"
@@ -293,6 +305,7 @@
 			transform: scale(1);
 		}
 	}
+
 	@keyframes slideInDown {
 		from {
 			opacity: 0;
@@ -302,5 +315,9 @@
 			opacity: 1;
 			transform: translateY(0);
 		}
+	}
+
+	.user-menu {
+		animation: fadeSlide 0.3s both;
 	}
 </style>

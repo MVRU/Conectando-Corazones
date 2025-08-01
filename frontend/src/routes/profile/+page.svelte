@@ -34,7 +34,7 @@
 					<div class="flex flex-col items-center gap-6 md:flex-row md:items-center">
 						<div class="relative h-24 w-24">
 							<img
-								src={user.profile ?? '/user-default.svg'}
+								src={user.profile ?? '/users/escuela-esperanza.jpg'}
 								alt="Foto de perfil"
 								class="h-full w-full rounded-full border-2 border-slate-200 object-cover shadow-sm"
 							/>

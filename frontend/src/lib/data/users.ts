@@ -8,6 +8,7 @@ export const institucionesMock: InstitucionUser[] = [
         email: 'contacto@escuelaesperanza.edu.ar',
         nombre: 'Marta Fernández',
         role: 'institucion',
+        profile: '/static/users/escuela-esperanza.jpg',
         isActive: true,
         createdAt: new Date('2024-12-01'),
         updatedAt: new Date(),
@@ -24,7 +25,6 @@ export const institucionesMock: InstitucionUser[] = [
         },
         descripcion: 'Escuela rural comprometida con la educación inclusiva.',
         sitioWeb: 'https://escuelaesperanza.edu.ar',
-        logo: '/img/logos/escuelaesperanza.png',
         tipoInstitucion: 'escuela',
         capacidadBeneficiarios: 150,
         proyectosCreados: ['1']
