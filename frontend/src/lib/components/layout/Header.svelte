@@ -29,6 +29,7 @@
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Acerca de', href: '/about' },
 		{ label: 'Proyectos', href: '/projects' },
+		{ label: 'Dashboard', href: '/dashboard' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
 		{ label: 'Contacto', href: isHome ? '#support' : '/contact' },
 		{ label: 'Configuración', href: '/settings' }
