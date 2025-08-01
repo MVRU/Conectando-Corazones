@@ -43,15 +43,16 @@
 			</svg>
 		{/each}
 	</div>
-	<blockquote class="relative mb-5 text-base italic leading-relaxed text-gray-700">
+	<blockquote class="relative mb-5 select-none text-base italic leading-relaxed text-gray-700">
 		<span class="absolute -left-4 -top-2 text-2xl text-blue-200/60">"</span>
 		{quote}
 		<span class="text-2xl text-blue-200/60">"</span>
 	</blockquote>
+
 	<div class="mt-auto flex flex-col items-start gap-0.5">
-		<p class="font-semibold text-[rgb(var(--color-primary))]">{author}</p>
+		<p class="select-none font-semibold text-[rgb(var(--color-primary))]">{author}</p>
 		{#if role}
-			<p class="text-xs text-gray-400">{role}</p>
+			<p class="select-none text-xs text-gray-400">{role}</p>
 		{/if}
 	</div>
 </div>
