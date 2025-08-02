@@ -9,7 +9,7 @@
 	import type { User, InstitucionUser } from '$lib/types/User';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
-	import { projects } from '$lib/data/projects';
+	import { projects } from '$lib/mocks/mock-projects';
 	import { fade } from 'svelte/transition';
 	import Pagination from '$lib/components/ui/navigation/Pagination.svelte';
 
@@ -18,16 +18,16 @@
 	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado'] as const;
 	let filtroEstado = 'Todos';
 	let busquedaTitulo = '';
+	let currentUrl = '';
 
 	onMount(async () => {
 		await authActions.login('contacto@escuelaesperanza.edu.ar', '123456');
+		currentUrl = window.location.href;
 	});
 
 	$: if ($userStore) {
 		user = $userStore;
-		if (user?.role === 'institucion') {
-			institucionUser = user as InstitucionUser;
-		}
+		institucionUser = user?.role === 'institucion' ? (user as InstitucionUser) : null;
 	}
 
 	$: proyectosCreados = institucionUser?.proyectosCreados ?? [];
@@ -63,6 +63,15 @@
 	function cambiarPagina(nuevaPagina: number) {
 		if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
 			paginaActual = nuevaPagina;
+		}
+	}
+
+	function formatearFecha(fecha?: Date | string) {
+		if (!fecha) return 'no especificado';
+		try {
+			return new Date(fecha).toLocaleDateString();
+		} catch {
+			return 'no especificado';
 		}
 	}
 </script>
@@ -291,7 +300,11 @@
 							<li><span class="font-medium">Razón social:</span> {institucionUser?.razonSocial}</li>
 							<li>
 								<span class="font-medium">Fecha de creación:</span>
-								{user.createdAt?.toLocaleDateString()}
+								{#if user?.createdAt}
+									{formatearFecha(user.createdAt)}
+								{:else}
+									<em>No especificado</em>
+								{/if}
 							</li>
 						</ul>
 					</div>
@@ -324,7 +337,7 @@
 							</li>
 							<li>
 								<span class="font-medium">Nacimiento:</span>
-								{user.fechaNacimiento?.toLocaleDateString() ?? 'no especificado'}
+								{formatearFecha(user.fechaNacimiento) ?? 'no especificado'}
 							</li>
 						</ul>
 					</div>
@@ -378,44 +391,46 @@
 						</div>
 
 						{#if institucionUser?.direccion}
-							<div class="mt-10">
-								<h2 class="mb-4 flex items-center gap-3 text-lg font-semibold text-slate-800">
-									<svg
-										xmlns="http://www.w3.org/2000/svg"
-										class="h-4 w-4 text-blue-600"
-										fill="none"
-										viewBox="0 0 24 24"
-										stroke="currentColor"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-										/>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-										/>
-									</svg>
-									Dirección principal
-								</h2>
-								<p class="text-sm leading-relaxed text-gray-700">
-									{institucionUser.direccion.calle}
-									{institucionUser.direccion.numero},
-									{institucionUser.direccion.ciudad}, {institucionUser.direccion.provincia} ({institucionUser
-										.direccion.codigoPostal})
-								</p>
-								<iframe
-									src={generarGoogleMapsUrl(institucionUser.direccion)}
-									class="mt-3 h-48 w-full rounded-lg border border-gray-200 shadow-sm"
-									loading="lazy"
-									referrerpolicy="no-referrer-when-downgrade"
-									title="Ubicación de la institución"
-								></iframe>
-							</div>
+							{#if institucionUser.direccion.calle && institucionUser.direccion.numero}
+								<div class="mt-10">
+									<h2 class="mb-4 flex items-center gap-3 text-lg font-semibold text-slate-800">
+										<svg
+											xmlns="http://www.w3.org/2000/svg"
+											class="h-4 w-4 text-blue-600"
+											fill="none"
+											viewBox="0 0 24 24"
+											stroke="currentColor"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+											/>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+											/>
+										</svg>
+										Dirección principal
+									</h2>
+									<p class="text-sm leading-relaxed text-gray-700">
+										{institucionUser.direccion.calle}
+										{institucionUser.direccion.numero},
+										{institucionUser.direccion.ciudad}, {institucionUser.direccion.provincia} ({institucionUser
+											.direccion.codigoPostal})
+									</p>
+									<iframe
+										src={generarGoogleMapsUrl(institucionUser.direccion)}
+										class="mt-3 h-48 w-full rounded-lg border border-gray-200 shadow-sm"
+										loading="lazy"
+										referrerpolicy="no-referrer-when-downgrade"
+										title="Ubicación de la institución"
+									></iframe>
+								</div>
+							{/if}
 						{/if}
 					</div>
 
@@ -560,10 +575,12 @@
 							</div>
 						{:else}
 							<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-								{#each proyectosPaginados as proyecto (proyecto.id)}
-									<div in:fade>
-										<ProjectCard proyecto={{ ...proyecto }} />
-									</div>
+								{#each proyectosPaginados as proyecto (proyecto?.id)}
+									{#if proyecto}
+										<div in:fade>
+											<ProjectCard proyecto={{ ...proyecto }} />
+										</div>
+									{/if}
 								{/each}
 							</div>
 

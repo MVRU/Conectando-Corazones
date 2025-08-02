@@ -310,13 +310,14 @@ export function hasPermission(permission: string): boolean {
 }
 
 // Función para verificar si puede acceder a una ruta
+// TODO: corregir rutas y permisos
 export function canAccessRoute(route: string): boolean {
   const routePermissions: Record<string, string[]> = {
     '/admin': ['admin'],
     '/institucion': ['institucion', 'admin'],
     '/colaborador': ['colaborador', 'admin'],
-    '/proyectos/crear': ['institucion', 'admin'],
-    '/perfil': ['institucion', 'colaborador', 'admin']
+    '/projects/create': ['institucion', 'admin'],
+    '/profile': ['institucion', 'colaborador', 'admin']
   };
 
   const requiredRoles = routePermissions[route] || [];

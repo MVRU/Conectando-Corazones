@@ -5,10 +5,14 @@ import type { InstitucionUser } from '$lib/types/User';
 export const institucionesMock: InstitucionUser[] = [
     {
         id: '1',
+        username: 'escuelaesperanza',
         email: 'contacto@escuelaesperanza.edu.ar',
         nombre: 'Marta Fernández',
+        tipoDocumento: 'DNI',
+        numeroDocumento: '12345678',
+        fechaNacimiento: new Date('1980-05-15'),
         role: 'institucion',
-        profile: '/static/users/escuela-esperanza.jpg',
+        profile: '/users/escuela-esperanza.jpg',
         isActive: true,
         createdAt: new Date('2024-12-01'),
         updatedAt: new Date(),
@@ -24,7 +28,7 @@ export const institucionesMock: InstitucionUser[] = [
             codigoPostal: '2000'
         },
         descripcion: 'Escuela rural comprometida con la educación inclusiva.',
-        sitioWeb: 'https://escuelaesperanza.edu.ar',
+        sitioWeb: 'escuelaesperanza.edu.ar',
         tipoInstitucion: 'escuela',
         capacidadBeneficiarios: 150,
         proyectosCreados: ['1']

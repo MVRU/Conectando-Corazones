@@ -18,8 +18,8 @@ export interface BaseUser {
   // ---------------------------------------------------
   // * Representante legal (o persona)
   tipoDocumento?: string; // * Faltaba este atributo
-  numeroDocumento: string;  // * Faltaba este atributo
-  fechaNacimiento: Date;  // * Faltaba este atributo
+  numeroDocumento?: string;  // * Faltaba este atributo
+  fechaNacimiento?: Date;  // * Faltaba este atributo
   // ---------------------------------------------------
   role: UserRole;
   isActive: boolean; // ? ¿Esto sería el estado?
