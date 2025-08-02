@@ -106,7 +106,7 @@
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
 					>
 						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
-						<ProjectProgress {proyecto} />
+						<ProjectProgress {proyecto} variant="extended" />
 
 						<div class="mt-8">
 							<h3

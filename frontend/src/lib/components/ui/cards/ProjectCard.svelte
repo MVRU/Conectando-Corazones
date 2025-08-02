@@ -1,23 +1,11 @@
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';
+	import { calcularProgresoTotal } from '$lib/utils/progress';
+	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 
 	export let proyecto!: Project;
 	export let mostrarBotones: boolean = false;
-
-	const especieEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️'
-	};
-
-	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
 
 	// Variables reactivas para valores dependientes de "proyecto"
 	let percentCantidad: number;
@@ -27,11 +15,12 @@
 	let icono: string;
 
 	$: if (proyecto.objetivos && proyecto.objetivos.length > 0) {
-		const totalObjetivo = proyecto.objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
-		const totalCantidad = proyecto.objetivos.reduce((acc, o) => acc + (o.cantidad || 0), 0);
-		const primerObjetivo = proyecto.objetivos[0];
+		const objetivos = proyecto.objetivos;
+		const totalObjetivo = objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
+		const totalCantidad = objetivos.reduce((acc, o) => acc + (o.cantidad || 0), 0);
+		const primerObjetivo = objetivos[0];
 
-		percentCantidad = totalObjetivo > 0 ? (totalCantidad / totalObjetivo) * 100 : 0;
+		percentCantidad = calcularProgresoTotal(proyecto);
 
 		actualLabel =
 			primerObjetivo.unidad === 'dinero'
@@ -53,14 +42,6 @@
 				: primerObjetivo.unidad === 'voluntarios'
 					? 'purple'
 					: 'blue';
-		icono =
-			primerObjetivo.unidad === 'materiales'
-				? getEmojiEspecie(primerObjetivo.especie)
-				: primerObjetivo.unidad === 'dinero'
-					? '💰'
-					: primerObjetivo.unidad === 'voluntarios'
-						? '🙋‍♀️'
-						: '🤝';
 	}
 
 	const formatearFechaCorta = (fecha?: string) => {
@@ -78,19 +59,6 @@
 			baja: 'text-blue-500'
 		};
 		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
-	};
-
-	const getGradientClass = (color: 'green' | 'blue' | 'purple') => {
-		switch (color) {
-			case 'green':
-				return 'from-emerald-300 via-emerald-400 to-emerald-500';
-			case 'blue':
-				return 'from-sky-300 via-sky-400 to-sky-500';
-			case 'purple':
-				return 'from-violet-300 via-violet-400 to-violet-500';
-			default:
-				return 'from-slate-300 via-slate-400 to-slate-500';
-		}
 	};
 
 	const hoy = new Date();
@@ -194,29 +162,7 @@
 
 		<!-- Progreso visual -->
 		<div class="mt-2 flex flex-col gap-2">
-			<div class="flex justify-between text-xs font-medium text-gray-700">
-				<span>{icono} Objetivo</span>
-				{#if percentCantidad > 100}
-					<span class="font-semibold text-purple-600">¡Objetivo superado!</span>
-				{:else if Math.round(percentCantidad) === 100}
-					<span class="font-semibold text-emerald-600">¡Objetivo alcanzado!</span>
-				{:else}
-					<span>{percentCantidad.toFixed(0)}% alcanzado</span>
-				{/if}
-			</div>
-			<div class="relative h-3 w-full rounded-full bg-slate-100 shadow-inner">
-				<!-- Cantidad recaudada -->
-				<button
-					type="button"
-					class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${Math.min(percentCantidad, 100)}%`}
-					aria-label="Progreso del proyecto: ${percentCantidad.toFixed(0)}% alcanzado"
-				>
-					<div
-						class={`h-full rounded-full bg-gradient-to-r ${getGradientClass(color)} pointer-events-none`}
-					></div>
-				</button>
-			</div>
+			<ProjectProgress {proyecto} variant="compact" />
 
 			{#if mostrarBotones}
 				<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
