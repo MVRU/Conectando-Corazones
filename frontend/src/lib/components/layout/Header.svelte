@@ -142,12 +142,6 @@
 			style="opacity:{visible ? 1 : 0}; transform:translateX({visible ? 0 : '16px'});"
 		>
 			{#if $isAuthenticated}
-<<<<<<< HEAD
-				<div class="flex items-center gap-4">
-					<span class="text-sm text-gray-300">Hola, {$user?.nombre}</span>
-					<Button label="Mi Perfil" href="/profile" size="sm" />
-					<Button label="Cerrar Sesión" variant="ghost" size="sm" on:click={handleLogout}></Button>
-=======
 				<!-- Dropdown Auth -->
 				<div class="user-menu-container relative">
 					<button
@@ -197,7 +191,6 @@
 							</li>
 						</ul>
 					{/if}
->>>>>>> main
 				</div>
 			{:else}
 				<!-- Solo en desktop -->
@@ -238,39 +231,6 @@
 			class="absolute left-0 right-0 top-full z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
 			style="animation:slideUp .4s cubic-bezier(0.22, 1, 0.36, 1) forwards;"
 		>
-<<<<<<< HEAD
-			{#each navLinks as { label, href }, j}
-				<a
-					{href}
-					class="mobile-link self-start"
-					style="animation:fadeSlide .6s both;animation-delay:{j * 100 + 120}ms"
-					on:click={() => (menuOpen = false)}>{label}</a
-				>
-			{/each}
-
-			{#if $isAuthenticated}
-				<div class="space-y-3">
-					<div class="text-sm text-gray-300">Hola, {$user?.nombre}</div>
-					<Button label="Mi Perfil" href="/profile" variant="ghost" />
-					<button
-						on:click={handleLogout}
-						class="cta-minimal-shine-btn rounded-4xl group relative inline-flex h-12 min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 px-8 py-3 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300 md:h-14"
-					>
-						<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
-							Cerrar Sesión
-							<svg
-								class="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1"
-								xmlns="http://www.w3.org/2000/svg"
-								viewBox="0 0 24 24"
-								fill="none"
-								stroke="#3b82f6"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							>
-								<path d="M5 12h14M12 5l7 7-7 7" />
-							</svg>
-=======
 			<div class="flex flex-col gap-1 px-5 py-4">
 				{#if !$isAuthenticated}
 					<a
@@ -292,7 +252,6 @@
 						<span>{label}</span>
 						<span class="ml-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100">
 							→
->>>>>>> main
 						</span>
 					</a>
 				{/each}

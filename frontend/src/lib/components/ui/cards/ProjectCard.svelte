@@ -1,25 +1,11 @@
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';
-<<<<<<< HEAD
-	import ProgressBar from '../elements/ProgressBar.svelte';
-	import { user } from '$lib/stores/auth';
-	import { get } from 'svelte/store';
-=======
 	import { calcularProgresoTotal } from '$lib/utils/progress';
 	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
->>>>>>> main
 
 	export let proyecto!: Project;
 	export let mostrarBotones: boolean = false;
-	const usuario = get(user);
-	const mostrarReporte =
-		proyecto.estado === 'Finalizado' &&
-		(usuario?.id ===
-			(typeof proyecto.institucion === 'string'
-				? proyecto.institucion
-				: proyecto.institucion?.id) ||
-			proyecto.colaboradores?.some((c) => c.id === usuario?.id));
 
 	// Variables reactivas para valores dependientes de "proyecto"
 	let percentCantidad: number;
@@ -116,127 +102,6 @@
 	href={`/projects/${proyecto.id}`}
 	class="animate-fade-in-up group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition-all hover:shadow-lg"
 >
-<<<<<<< HEAD
-	<a
-		href={`/projects/${proyecto.id}`}
-		class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white no-underline shadow-sm transition-all hover:shadow-md"
-	>
-		<!-- Imagen destacada -->
-		<div class="relative aspect-[4/3] w-full overflow-hidden">
-			<img
-				src={proyecto.imagen}
-				alt={proyecto.titulo}
-				class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-				loading="lazy"
-			/>
-			<!-- Estado temporal y fechas -->
-			<div
-				class="absolute bottom-3 left-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-medium text-gray-700 shadow backdrop-blur-sm"
-			>
-				<span>{emojiTemporizador} {estadoTemporizador}</span>
-				<span class="text-gray-400">•</span>
-				<span
-					>{formatearFechaCorta(proyecto.fechaInicio)} → {formatearFechaCorta(
-						proyecto.fechaCierre
-					)}</span
-				>
-			</div>
-
-			<!-- Badges -->
-			<div class="absolute right-3 top-3 flex flex-row items-end gap-2 text-xs">
-				{#if proyecto.urgencia}
-					<span
-						class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.urgencia)} bg-white/90`}
-					>
-						{proyecto.urgencia}
-					</span>
-				{/if}
-				{#if proyecto.estado}
-					<span
-						class={`rounded-full px-3 py-0.5 font-semibold shadow-sm backdrop-blur-sm ${getBadgeColor(proyecto.estado)} bg-white/90`}
-					>
-						{proyecto.estado}
-					</span>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Contenido -->
-		<div class="flex flex-1 flex-col justify-between gap-5 p-6">
-			<div class="space-y-3">
-				<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
-					<span class="font-semibold text-[rgb(var(--color-primary))]">
-						{typeof proyecto.institucion === 'string'
-							? 'Institución'
-							: proyecto.institucion.razonSocial}
-					</span>
-					<span>📍 {proyecto.ciudad}, {proyecto.provincia}</span>
-				</div>
-
-				<h3 class="text-lg font-bold leading-tight text-gray-800">{proyecto.titulo}</h3>
-				<p class="line-clamp-3 text-sm text-gray-600">{proyecto.descripcion}</p>
-			</div>
-
-			<!-- Progreso y/o Reporte -->
-			<div class="mt-2 flex flex-col gap-3">
-				{#if mostrarReporte}
-					{#if mostrarBotones}
-						<div class="flex justify-between text-xs font-medium text-gray-700">
-							<span>{icono} Objetivo</span>
-							<span>{actualLabel} / {objetivoLabel}</span>
-						</div>
-						<ProgressBar {percent} {color} />
-					{/if}
-
-					<div class="flex justify-center">
-						<Button
-							label="Ver reporte"
-							href={`/projects/${proyecto.id}/reporte`}
-							size="sm"
-							variant="secondary"
-							customClass="w-full "
-							on:click={(e) => e.stopPropagation()}
-						/>
-					</div>
-				{:else}
-					<div class="flex justify-between text-xs font-medium text-gray-700">
-						<span>{icono} Objetivo</span>
-						<span>{actualLabel} / {objetivoLabel}</span>
-					</div>
-					<ProgressBar {percent} {color} />
-				{/if}
-			</div>
-
-			<!-- Botones solo si mostrarBotones es true y mostrarReporte es false -->
-			{#if mostrarBotones && !mostrarReporte}
-				<div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
-					<Button
-						label="Ver detalles"
-						href={`/projects/${proyecto.id}`}
-						variant="secondary"
-						size="sm"
-						customClass="flex-1"
-						on:click={(e) => e.stopPropagation()}
-					/>
-
-					<Button
-						label={unidad === 'dinero'
-							? 'Enviar donación'
-							: unidad === 'materiales'
-								? 'Donar materiales'
-								: 'Postularme como voluntario'}
-						href={`/projects/${proyecto.id}#colaborar`}
-						size="sm"
-						{disabled}
-						customClass="flex-1"
-						on:click={(e) => e.stopPropagation()}
-					/>
-				</div>
-			{/if}
-		</div>
-	</a>
-</article>
-=======
 	<!-- Imagen destacada -->
 	<div class="relative aspect-[4/3] w-full overflow-hidden">
 		<img
@@ -320,7 +185,6 @@
 		</div>
 	</div>
 </a>
->>>>>>> main
 
 <style>
 	.line-clamp-3 {

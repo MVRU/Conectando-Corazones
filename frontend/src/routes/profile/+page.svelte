@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { authActions, user as userStore } from '$lib/stores/auth';
-	import type { User, InstitucionUser } from '$lib/models/User';
+	import type { User, InstitucionUser } from '$lib/types/User';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import { projects } from '$lib/data/projects';

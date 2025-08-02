@@ -2,67 +2,12 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-<<<<<<< HEAD
-	import { projects as defaultProjects } from '$lib/data/projects';
-	import type { Project } from '$lib/models/Project';
-	import Pagination from '$lib/components/ui/navigation/Pagination.svelte';
-
-	let filtroSeleccionado: ParticipacionLabel | 'Todos' = 'Todos';
-	let currentPage = 1;
-	const ITEMS_POR_PAGINA = 9;
-
-	// Filtramos y ordenamos los proyectos según el filtro actual
-	function filtrarProyectos(proyectos: Project[], filtro: typeof filtroSeleccionado): Project[] {
-		let resultado = [...proyectos];
-
-		if (filtro !== 'Todos') {
-			const unidadEsperada = reverseMap[filtro];
-			resultado = resultado.filter((p) => (p.unidad || '').trim().toLowerCase() === unidadEsperada);
-		}
-
-		// Ordenar por estado y fechaInicio
-		resultado.sort((a, b) => {
-			const estadoA = estadoTemporizadorProyecto(a);
-			const estadoB = estadoTemporizadorProyecto(b);
-			const prioridadEstadoA = ESTADO_PRIORIDAD[estadoA] ?? 3;
-			const prioridadEstadoB = ESTADO_PRIORIDAD[estadoB] ?? 3;
-
-			if (prioridadEstadoA !== prioridadEstadoB) {
-				return prioridadEstadoA - prioridadEstadoB;
-			}
-
-			const fechaA = new Date(a.fechaInicio || '').getTime();
-			const fechaB = new Date(b.fechaInicio || '').getTime();
-			return fechaA - fechaB;
-		});
-
-		return resultado;
-	}
-
-	$: proyectosFiltrados = filtrarProyectos(proyectos, filtroSeleccionado);
-
-	$: totalPaginas = Math.ceil(proyectosFiltrados.length / ITEMS_POR_PAGINA);
-
-	// Aplicar paginación inicialmente y cada vez que cambie filtro o página
-	$: proyectosVisibles = proyectosFiltrados.slice(
-		(currentPage - 1) * ITEMS_POR_PAGINA,
-		currentPage * ITEMS_POR_PAGINA
-	);
-
-	function cambiarPagina(nueva: number) {
-		if (nueva >= 1 && nueva <= totalPaginas) {
-			currentPage = nueva;
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		}
-	}
-=======
 	import { projects as defaultProjects } from '$lib/mocks/mock-projects';
 	import type { Project } from '$lib/types/Project';
 	import SearchBar from '../ui/elements/SearchBar.svelte';
 	import { writable } from 'svelte/store';
 
 	let searchQuery = writable('');
->>>>>>> main
 
 	const participacionMap = {
 		dinero: 'Monetaria',
@@ -82,11 +27,9 @@
 		Materiales: 'materiales'
 	};
 
-<<<<<<< HEAD
-=======
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
->>>>>>> main
 	export let proyectos: Project[] = defaultProjects;
+	let proyectosVisibles: Project[] = [];
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
 		Abierto: 0,
@@ -105,8 +48,6 @@
 		if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
 		return 'Abierto';
 	}
-<<<<<<< HEAD
-=======
 
 	function filtrarProyectos(
 		proyectos: Project[],
@@ -194,7 +135,6 @@
 	$: {
 		proyectosVisibles = filtrarProyectos(proyectos, filtrosSeleccionados, $searchQuery);
 	}
->>>>>>> main
 </script>
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-12 sm:px-10 lg:px-20">
@@ -262,7 +202,6 @@
 			</div>
 		{/each}
 	</div>
-	<Pagination totalPages={totalPaginas} {currentPage} onPageChange={cambiarPagina} />
 
 	<!-- Sin resultados -->
 	{#if proyectosVisibles.length === 0}

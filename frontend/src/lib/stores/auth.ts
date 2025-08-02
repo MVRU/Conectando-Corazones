@@ -140,23 +140,21 @@ export const authActions = {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Buscar usuario en datos mock
-      const user = Object.values(mockUsers).find(u => u.email === email);
+      const foundUser = Object.values(mockUsers).find(u => u.email === email);
 
-      if (!user || password !== '123456') {
+      if (!foundUser || password !== '123456') {
         throw new Error('Credenciales inválidas');
       }
 
-      const { user } = await response.json();
-
       authStore.update((state) => ({
         ...state,
-        user: user as User,
+        user: foundUser as User,
         isAuthenticated: true,
         isLoading: false,
         error: null
       }));
 
-      return user;
+      return foundUser;
     } catch (error) {
       authStore.update((state) => ({
         ...state,
