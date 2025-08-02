@@ -1,3 +1,8 @@
+<!--
+ * * DECISIÓN DE DISEÑO:
+ * -*- Se fuerza un login de prueba para "Escuela Esperanza" y se
+ *     muestra información acorde al usuario institucional autenticado.
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { authActions, user as userStore } from '$lib/stores/auth';
@@ -15,7 +20,7 @@
 	let busquedaTitulo = '';
 
 	onMount(async () => {
-		await authActions.login('escuela@esperanza.edu.ar', '123456');
+		await authActions.login('contacto@escuelaesperanza.edu.ar', '123456');
 	});
 
 	$: if ($userStore) {
@@ -27,7 +32,7 @@
 
 	$: proyectosCreados = institucionUser?.proyectosCreados ?? [];
 
-	function generarGoogleMapsUrl(direccion: any): string {
+	function generarGoogleMapsUrl(direccion: InstitucionUser['direccion']): string {
 		const query = `${direccion.calle} ${direccion.numero}, ${direccion.ciudad}, ${direccion.provincia}, Argentina`;
 		return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 	}
@@ -203,14 +208,19 @@
 						</div>
 						<div class="text-center md:text-left">
 							<h1 class="text-3xl font-bold text-slate-900">
-								{user?.role === 'institucion'
-									? (institucionUser?.razonSocial ?? user.nombre)
-									: ('tipoColaborador' in user && (user as any).tipoColaborador === 'empresa') ||
-										  (user as any).tipoColaborador === 'ong'
-										? ((user as any).empresa?.razonSocial ??
-											(user as any).ong?.razonSocial ??
-											user.nombre)
-										: user.nombre}
+								{#if user?.role === 'institucion'}
+									{institucionUser?.razonSocial ?? user.nombre}
+								{:else if user?.role === 'colaborador'}
+									{#if user.tipoColaborador === 'empresa'}
+										{user.empresa?.razonSocial ?? user.nombre}
+									{:else if user.tipoColaborador === 'ong'}
+										{user.ong?.razonSocial ?? user.nombre}
+									{:else}
+										{user.nombre}
+									{/if}
+								{:else}
+									{user?.nombre}
+								{/if}
 							</h1>
 
 							<div class="mt-2 flex flex-wrap justify-center gap-2 md:justify-start">

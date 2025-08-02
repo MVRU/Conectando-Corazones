@@ -1,10 +1,5 @@
-import { writable, derived, get } from 'svelte/store';
-import type {
-  User,
-  RegisterColaboradorData,
-  RegisterInstitucionData
-} from '$lib/types/User';
-import { isValidEmail } from '$lib/utils/validators';
+import { writable, derived } from 'svelte/store';
+import type { User, RegisterColaboradorData, RegisterInstitucionData } from '$lib/types/User';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -48,30 +43,40 @@ const mockUsers = {
     telefono: '+54 341 123-4567',
     departamento: 'Administración'
   },
+  /**
+   * * Datos de prueba para institución
+   * -*- Se alinean con las interfaces de usuario institucional
+   *     para validar la vista de perfil.
+   */
   institucion: {
-    id: '2',
-    email: 'escuela@esperanza.edu.ar',
-    nombre: 'Escuela Esperanza',
+    id: '1',
+    username: 'escuelaesperanza',
+    email: 'contacto@escuelaesperanza.edu.ar',
+    nombre: 'Marta Fernández',
+    tipoDocumento: 'DNI',
+    numeroDocumento: '12345678',
+    fechaNacimiento: new Date('1980-05-15'),
     role: 'institucion' as const,
     isActive: true,
-    createdAt: new Date('2024-01-15'),
+    createdAt: new Date('2024-12-01'),
     updatedAt: new Date(),
     verificationStatus: 'verificado' as const,
+    profile: '/users/escuela-esperanza.jpg',
     razonSocial: 'Escuela Esperanza',
-    cuit: '30-12345678-9',
-    telefono: '+54 341 987-6543',
+    cuit: '30-12345678-1',
+    telefono: '+54 341 123-4567',
     direccion: {
-      calle: 'San Martín',
-      numero: '123',
+      calle: 'Belgrano',
+      numero: '1234',
       ciudad: 'Rosario',
       provincia: 'Santa Fe',
       codigoPostal: '2000'
     },
-    descripcion: 'Escuela rural comprometida con la educación de calidad',
+    descripcion: 'Escuela rural comprometida con la educación inclusiva.',
     sitioWeb: 'escuelaesperanza.edu.ar',
     tipoInstitucion: 'escuela' as const,
     capacidadBeneficiarios: 150,
-    proyectosCreados: ['1', '2']
+    proyectosCreados: ['1']
   },
   colaborador: {
     id: '3',
@@ -127,20 +132,24 @@ export const isInstitucion = derived(authStore, ($auth) => $auth.user?.role === 
 export const isColaborador = derived(authStore, ($auth) => $auth.user?.role === 'colaborador');
 
 // Store derivado para verificar si está verificado
-export const isVerified = derived(authStore, ($auth) => $auth.user?.verificationStatus === 'verificado');
+export const isVerified = derived(
+  authStore,
+  ($auth) => $auth.user?.verificationStatus === 'verificado'
+);
 
 // Funciones para manejar la autenticación
 export const authActions = {
   // Iniciar sesión (versión mock para pruebas)
   async login(email: string, password: string, rememberMe: boolean = false) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
+    void rememberMe;
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
       // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Buscar usuario en datos mock
-      const foundUser = Object.values(mockUsers).find(u => u.email === email);
+      const foundUser = Object.values(mockUsers).find((u) => u.email === email);
 
       if (!foundUser || password !== '123456') {
         throw new Error('Credenciales inválidas');
@@ -182,16 +191,17 @@ export const authActions = {
 
   // Registrar institución
   async registerInstitucion(userData: RegisterInstitucionData) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
+    void userData;
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
       // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Institución registrada exitosamente' };
 
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: null
@@ -199,7 +209,7 @@ export const authActions = {
 
       return result;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al registrar'
@@ -210,16 +220,17 @@ export const authActions = {
 
   // Registrar colaborador
   async registerColaborador(userData: RegisterColaboradorData) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
+    void userData;
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
       // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Simular registro exitoso
       const result = { success: true, message: 'Colaborador registrado exitosamente' };
 
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: null
@@ -227,7 +238,7 @@ export const authActions = {
 
       return result;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al registrar'
@@ -241,7 +252,7 @@ export const authActions = {
     const token = localStorage.getItem('authToken');
     if (!token) return;
 
-    authStore.update(state => ({ ...state, isLoading: true }));
+    authStore.update((state) => ({ ...state, isLoading: true }));
 
     try {
       const response = await fetch('/api/session');
@@ -265,14 +276,14 @@ export const authActions = {
 
   // Limpiar error
   clearError() {
-    authStore.update(state => ({ ...state, error: null }));
+    authStore.update((state) => ({ ...state, error: null }));
   },
 
   // Actualizar datos del usuario
   updateUser(userData: Partial<User>) {
-    authStore.update(state => ({
+    authStore.update((state) => ({
       ...state,
-      user: state.user ? { ...state.user, ...userData } as User : null
+      user: state.user ? ({ ...state.user, ...userData } as User) : null
     }));
   }
 };
@@ -281,7 +292,7 @@ export const authActions = {
 export function hasPermission(permission: string): boolean {
   let hasPermission = false;
 
-  authStore.subscribe(state => {
+  authStore.subscribe((state) => {
     if (state.user?.role === 'admin') {
       hasPermission = true;
     } else if (state.user?.role === 'institucion') {
@@ -312,10 +323,12 @@ export function canAccessRoute(route: string): boolean {
 
   let canAccess = false;
 
-  authStore.subscribe(state => {
-    canAccess = requiredRoles.length === 0 ||
-      (state.user && requiredRoles.includes(state.user.role)) || false;
+  authStore.subscribe((state) => {
+    canAccess =
+      requiredRoles.length === 0 ||
+      (state.user && requiredRoles.includes(state.user.role)) ||
+      false;
   })();
 
   return canAccess;
-} 
+}
