@@ -207,7 +207,10 @@
 						Toque "Siguiente" para ver cómo se calcula cada parte.
 					</p>
 				{:else if step === 1}
-					<p>Se promedia el porcentaje completado de cada objetivo.</p>
+					<p>
+						Se calcula el porcentaje total alcanzado sobre el total necesario, sumando todas las
+						cantidades recaudadas y dividiéndolas por la suma de los objetivos.
+					</p>
 					<div
 						class="rounded-lg border border-sky-100 bg-sky-50 p-3 font-mono text-xs leading-snug text-sky-900"
 					>
@@ -215,8 +218,7 @@
 							<div class="h-2 w-2 rounded-full bg-sky-400"></div>
 							<span class="font-medium text-sky-700">Fórmula:</span>
 						</div>
-						<span>suma = ∑ (recaudado / objetivo)</span><br />
-						<span>progreso = (suma / total) × 100</span>
+						<span>progreso = (∑ recaudadado_i) / (∑ objetivo_i) × 100</span>
 					</div>
 					<p class="mt-2">
 						<strong

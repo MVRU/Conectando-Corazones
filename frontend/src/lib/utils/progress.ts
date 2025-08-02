@@ -13,14 +13,18 @@ import type { Objetivo, Project } from '$lib/types/Project';
 export function calcularProgresoCantidad(objetivos: Objetivo[] = []): number {
     if (objetivos.length === 0) return 0;
 
-    const sumaProgresos = objetivos.reduce((acc, obj) => {
-        const cantidad = obj.cantidad ?? 0;
-        const objetivo = obj.objetivo ?? 0;
-        if (objetivo === 0) return acc; // Evita división por cero
-        return acc + cantidad / objetivo; // Puede superar el 100% si se supera el objetivo
-    }, 0);
+    // Filtramos solo objetivos válidos (> 0)
+    const objetivosValidos = objetivos.filter((obj) => (obj.objetivo ?? 0) > 0);
 
-    return (sumaProgresos / objetivos.length) * 100;
+    if (objetivosValidos.length === 0) return 0;
+
+    const totalObjetivo = objetivosValidos.reduce((acc, obj) => acc + (obj.objetivo ?? 0), 0);
+
+    if (totalObjetivo === 0) return 0;
+
+    const totalCumplido = objetivosValidos.reduce((acc, obj) => acc + (obj.cantidad ?? 0), 0);
+
+    return (totalCumplido / totalObjetivo) * 100;
 }
 
 
@@ -35,9 +39,11 @@ export function calcularProgresoTiempo(fechaInicio?: string, fechaCierre?: strin
     const ahora = Date.now();
 
     if (isNaN(inicio) || isNaN(fin) || fin <= inicio) return 0;
+    if (ahora < inicio) return 0;
+    if (ahora > fin) return 100;
 
     const progreso = (ahora - inicio) / (fin - inicio);
-    return Math.min(Math.max(progreso, 0), 1) * 100; // Clamp entre 0 y 100
+    return progreso * 100;
 }
 
 /**
