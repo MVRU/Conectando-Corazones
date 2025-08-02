@@ -1,60 +1,33 @@
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';
-	import ProgressDetailsModal from './ProgressDetailsModal.svelte';
-	let showModal = false;
-	let tipoModal: 'estimado' | 'recaudado' = 'estimado';
+	import { calcularProgresoTotal } from '$lib/utils/progress';
+	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 
 	export let proyecto!: Project;
 	export let mostrarBotones: boolean = false;
 
-	const especieEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️'
-	};
-
-	function abrirModal(tipo: 'estimado' | 'recaudado') {
-		tipoModal = tipo;
-		showModal = true;
-	}
-
-	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
-
 	// Variables reactivas para valores dependientes de "proyecto"
-	let mostrarTooltipEstimado: boolean = false;
-	let mostrarTooltipRecaudado: boolean = false;
-	let percentEstimado: number;
-	let percentRecaudado: number;
+	let percentCantidad: number;
 	let actualLabel: string;
 	let objetivoLabel: string;
 	let color: 'green' | 'blue' | 'purple';
 	let icono: string;
 
 	$: if (proyecto.objetivos && proyecto.objetivos.length > 0) {
-		const totalObjetivo = proyecto.objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
-		const totalEstimado = proyecto.objetivos.reduce((acc, o) => acc + (o.cantidadEstimada || 0), 0);
-		const totalRecaudado = proyecto.objetivos.reduce(
-			(acc, o) => acc + (o.cantidadRecaudada || 0),
-			0
-		);
-		const primerObjetivo = proyecto.objetivos[0];
+		const objetivos = proyecto.objetivos;
+		const totalObjetivo = objetivos.reduce((acc, o) => acc + (o.objetivo || 0), 0);
+		const totalCantidad = objetivos.reduce((acc, o) => acc + (o.cantidad || 0), 0);
+		const primerObjetivo = objetivos[0];
 
-		percentEstimado = totalObjetivo > 0 ? Math.min((totalEstimado / totalObjetivo) * 100, 100) : 0;
-		percentRecaudado = totalObjetivo > 0 ? (totalRecaudado / totalObjetivo) * 100 : 0;
+		percentCantidad = calcularProgresoTotal(proyecto);
 
 		actualLabel =
 			primerObjetivo.unidad === 'dinero'
-				? `$${totalRecaudado.toLocaleString('es-AR')}`
+				? `$${totalCantidad.toLocaleString('es-AR')}`
 				: primerObjetivo.unidad === 'voluntarios'
-					? `${totalRecaudado} voluntarios`
-					: `${totalRecaudado} ${primerObjetivo.especie || 'unidades'}`;
+					? `${totalCantidad} voluntarios`
+					: `${totalCantidad} ${primerObjetivo.especie || 'unidades'}`;
 
 		objetivoLabel =
 			primerObjetivo.unidad === 'dinero'
@@ -69,14 +42,6 @@
 				: primerObjetivo.unidad === 'voluntarios'
 					? 'purple'
 					: 'blue';
-		icono =
-			primerObjetivo.unidad === 'materiales'
-				? getEmojiEspecie(primerObjetivo.especie)
-				: primerObjetivo.unidad === 'dinero'
-					? '💰'
-					: primerObjetivo.unidad === 'voluntarios'
-						? '🙋‍♀️'
-						: '🤝';
 	}
 
 	const formatearFechaCorta = (fecha?: string) => {
@@ -94,32 +59,6 @@
 			baja: 'text-blue-500'
 		};
 		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
-	};
-
-	const getRgbColor = (color: 'green' | 'blue' | 'purple') => {
-		switch (color) {
-			case 'green':
-				return 'rgb(110,231,183)';
-			case 'blue':
-				return 'rgb(125,211,252)';
-			case 'purple':
-				return 'rgb(196,181,253)';
-			default:
-				return 'rgb(203,213,225)';
-		}
-	};
-
-	const getGradientClass = (color: 'green' | 'blue' | 'purple') => {
-		switch (color) {
-			case 'green':
-				return 'from-emerald-300 via-emerald-400 to-emerald-500';
-			case 'blue':
-				return 'from-sky-300 via-sky-400 to-sky-500';
-			case 'purple':
-				return 'from-violet-300 via-violet-400 to-violet-500';
-			default:
-				return 'from-slate-300 via-slate-400 to-slate-500';
-		}
 	};
 
 	const hoy = new Date();
@@ -223,60 +162,7 @@
 
 		<!-- Progreso visual -->
 		<div class="mt-2 flex flex-col gap-2">
-			<div class="flex justify-between text-xs font-medium text-gray-700">
-				<span>{icono} Objetivo</span>
-				{#if percentRecaudado > 100}
-					<span class="font-semibold text-purple-600">¡Objetivo superado!</span>
-				{:else if Math.round(percentRecaudado) === 100}
-					<span class="font-semibold text-emerald-600">¡Objetivo alcanzado!</span>
-				{:else}
-					<span>{percentRecaudado.toFixed(0)}% alcanzado</span>
-				{/if}
-			</div>
-			<div class="relative h-3 w-full rounded-full bg-slate-100 shadow-inner">
-				<!-- Estimado -->
-				<button
-					type="button"
-					class="absolute left-0 top-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${percentEstimado}%`}
-					on:mouseenter={() => (mostrarTooltipEstimado = true)}
-					on:mouseleave={() => (mostrarTooltipEstimado = false)}
-					on:click={() => abrirModal('estimado')}
-				>
-					<div
-						class="pointer-events-none h-full rounded-full opacity-50"
-						style={`background: repeating-linear-gradient(135deg, ${getRgbColor(color)} 0, ${getRgbColor(color)} 4px, transparent 4px, transparent 8px)`}
-					></div>
-					{#if mostrarTooltipEstimado}
-						<div
-							class="absolute -top-10 left-[95%] z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
-						>
-							🤝 Compromisos de ayuda
-						</div>
-					{/if}
-				</button>
-
-				<!-- Recaudado -->
-				<button
-					type="button"
-					class="absolute inset-y-0 left-0 h-full cursor-pointer focus:outline-none"
-					style={`width: ${Math.min(percentRecaudado, 100)}%`}
-					on:mouseenter={() => (mostrarTooltipRecaudado = true)}
-					on:mouseleave={() => (mostrarTooltipRecaudado = false)}
-					on:click={() => abrirModal('recaudado')}
-				>
-					<div
-						class={`h-full rounded-full bg-gradient-to-r ${getGradientClass(color)} pointer-events-none`}
-					></div>
-					{#if mostrarTooltipRecaudado}
-						<div
-							class="absolute -top-10 left-1/2 z-50 w-max -translate-x-1/2 rounded-md bg-white/80 px-3 py-2 text-xs font-medium text-gray-800 shadow ring-1 ring-gray-200 backdrop-blur-sm"
-						>
-							✅ Colaboraciones efectivas
-						</div>
-					{/if}
-				</button>
-			</div>
+			<ProjectProgress {proyecto} variant="compact" />
 
 			{#if mostrarBotones}
 				<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
@@ -298,8 +184,6 @@
 			{/if}
 		</div>
 	</div>
-
-	<ProgressDetailsModal open={showModal} tipo={tipoModal} on:close={() => (showModal = false)} />
 </a>
 
 <style>

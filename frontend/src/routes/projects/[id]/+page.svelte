@@ -106,7 +106,7 @@
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
 					>
 						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
-						<ProjectProgress {proyecto} />
+						<ProjectProgress {proyecto} variant="extended" />
 
 						<div class="mt-8">
 							<h3
@@ -115,35 +115,49 @@
 								<span>
 									{proyecto.objetivos.length === 1 ? 'Objetivo' : 'Objetivos'}
 								</span>
-								<div class="flex items-center gap-3 text-sm">
-									<span
-										class="inline-block rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700"
-									>
-										{diasRestantes(proyecto.fechaCierre)} días restantes
-									</span>
-									<span class="text-gray-500">
-										<strong class="font-medium">Finaliza:</strong>
-										{formatearFecha(proyecto.fechaCierre)}
-									</span>
+								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
+									<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
+										<svg
+											class="h-4 w-4 text-gray-600"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+											/>
+										</svg>
+										<span class="text-xs font-medium text-gray-700">
+											Finaliza: {formatearFecha(proyecto.fechaCierre)}
+										</span>
+									</div>
+									<div class="rounded-full bg-blue-50 px-3 py-1.5">
+										<span class="text-xs font-semibold text-blue-700">
+											{diasRestantes(proyecto.fechaCierre)} días restantes
+										</span>
+									</div>
 								</div>
 							</h3>
 
 							{#if proyecto.objetivos?.length}
 								<ul class="space-y-4">
 									{#each proyecto.objetivos as o}
-										{@const porcentaje = Math.round((o.cantidadRecaudada / o.objetivo) * 100)}
+										{@const porcentaje = Math.round((o.cantidad / o.objetivo) * 100)}
 										<li
 											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
 										>
 											<!-- Ícono -->
 											<div class="flex-shrink-0">
-												{#if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'completo'}
+												{#if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'completo'}
 													<div
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
 													>
 														✅
 													</div>
-												{:else if calcularEstadoObjetivo(o.cantidadRecaudada, o.objetivo) === 'parcial'}
+												{:else if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'parcial'}
 													<div
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
 													>
@@ -162,21 +176,11 @@
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
 													{o.unidad === 'dinero'
-														? `$${o.cantidadRecaudada.toLocaleString('es-AR')} / $${o.objetivo.toLocaleString('es-AR')} ${o.especie}`
-														: `${o.cantidadRecaudada} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
+														? `$${o.cantidad.toLocaleString('es-AR')} / $${o.objetivo.toLocaleString('es-AR')} ${o.especie}`
+														: `${o.cantidad} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
 												</p>
 												<div class="mt-1 flex justify-between text-xs text-gray-500">
 													<span>{porcentaje}% alcanzado</span>
-													{#if o.cantidadEstimada > o.cantidadRecaudada}
-														<span>
-															Promesas pendientes:
-															<strong>
-																{o.unidad === 'dinero'
-																	? `$${(o.cantidadEstimada - o.cantidadRecaudada).toLocaleString('es-AR')}`
-																	: `${o.cantidadEstimada - o.cantidadRecaudada} ${o.especie}`}
-															</strong>
-														</span>
-													{/if}
 												</div>
 											</div>
 										</li>
