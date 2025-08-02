@@ -60,7 +60,7 @@ export const categoriasProyectos = [
 
 // Estados de proyectos
 export const estadosProyectos = [
-  { value: 'activo', label: 'Activo' },
+  { value: 'abierto', label: 'Abierto' },
   { value: 'en-ejecucion', label: 'En Ejecución' },
   { value: 'finalizado', label: 'Finalizado' },
   { value: 'pausado', label: 'Pausado' },

@@ -14,7 +14,7 @@
 	let animateIcon = true;
 	let previousScrollY = 0;
 
-	const unsubscribe = motionNoticeVisible.subscribe((v) => (show = v));
+	const unsubscribe = motionNoticeVisible.subscribe((v: boolean) => (show = v));
 	onDestroy(unsubscribe);
 
 	function toggle() {
@@ -62,6 +62,7 @@
 		role="button"
 		tabindex="0"
 		aria-live="polite"
+		aria-label="Aviso de rendimiento"
 		on:click={handleClick}
 		on:keydown={(e) => {
 			if (e.key === 'Enter' || e.key === ' ') {

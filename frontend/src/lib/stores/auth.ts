@@ -1,5 +1,15 @@
-import { writable, derived } from 'svelte/store';
-import type { User, UserRole } from '$lib/models/User';
+import { writable, derived, get } from 'svelte/store';
+import type {
+  User,
+  RegisterColaboradorData,
+  RegisterInstitucionData
+} from '$lib/types/User';
+import { isValidEmail } from '$lib/utils/validators';
+
+/**
+ * * DECISIÓN DE DISEÑO:
+ *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
+ */
 
 // Estado de autenticación
 interface AuthState {
@@ -40,10 +50,8 @@ const mockUsers = {
   },
   institucion: {
     id: '2',
-    username: 'escuela_esperanza',
     email: 'escuela@esperanza.edu.ar',
-    profile: 'img/escuela_solidaria.jpg',
-    nombre: 'María García',
+    nombre: 'Escuela Esperanza',
     role: 'institucion' as const,
     isActive: true,
     createdAt: new Date('2024-01-15'),
@@ -62,7 +70,8 @@ const mockUsers = {
     descripcion: 'Escuela rural comprometida con la educación de calidad',
     sitioWeb: 'escuelaesperanza.edu.ar',
     tipoInstitucion: 'escuela' as const,
-    proyectosCreados: ['1', '5', '9', '10']
+    capacidadBeneficiarios: 150,
+    proyectosCreados: ['1', '2']
   },
   colaborador: {
     id: '3',
@@ -137,12 +146,9 @@ export const authActions = {
         throw new Error('Credenciales inválidas');
       }
 
-      // Guardar token en localStorage si rememberMe es true
-      if (rememberMe) {
-        localStorage.setItem('authToken', 'mock-token-' + user.id);
-      }
+      const { user } = await response.json();
 
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         user: user as User,
         isAuthenticated: true,
@@ -152,7 +158,7 @@ export const authActions = {
 
       return user;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al iniciar sesión'
@@ -164,8 +170,7 @@ export const authActions = {
   // Cerrar sesión
   async logout() {
     try {
-      // Simular llamada al backend
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await fetch('/api/logout', { method: 'POST' });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     } finally {
@@ -178,7 +183,7 @@ export const authActions = {
   },
 
   // Registrar institución
-  async registerInstitucion(userData: any) {
+  async registerInstitucion(userData: RegisterInstitucionData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -206,7 +211,7 @@ export const authActions = {
   },
 
   // Registrar colaborador
-  async registerColaborador(userData: any) {
+  async registerColaborador(userData: RegisterColaboradorData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -241,28 +246,21 @@ export const authActions = {
     authStore.update(state => ({ ...state, isLoading: true }));
 
     try {
-      // Simular verificación de token
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Extraer ID del usuario del token mock
-      const userId = token.replace('mock-token-', '');
-      const user = Object.values(mockUsers).find(u => u.id === userId);
+      const response = await fetch('/api/session');
+      const { user } = await response.json();
 
       if (user) {
-        authStore.update(state => ({
+        authStore.update((state) => ({
           ...state,
           user: user as User,
           isAuthenticated: true,
           isLoading: false
         }));
       } else {
-        // Token inválido, limpiar
-        localStorage.removeItem('authToken');
         authStore.set(initialState);
       }
     } catch (error) {
       console.error('Error al verificar autenticación:', error);
-      localStorage.removeItem('authToken');
       authStore.set(initialState);
     }
   },

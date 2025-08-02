@@ -2,21 +2,18 @@
 * Componente: Breadcrumbs
         -*- Descripción: Navegación de migas de pan para mostrar la ubicación actual.
         -*- Funcionalidad: Muestra la ruta de navegación con enlaces clicables.
-        ! Solo se muestra cuando hay más de dos niveles para evitar ruido visual.
+         ! Se muestra cuando hay migas configuradas (mínimo dos elementos).
 
 * Props:
-        -*- items (BreadcrumbItem[]): lista opcional de { label, href }.
         -*- useIconSeparator (boolean): si true usa flecha, si false usa “/”.
 -->
 
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { derived } from 'svelte/store';
 	import { onMount, onDestroy } from 'svelte';
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
+	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 
 	/* -------- props -------- */
-	export let items: BreadcrumbItem[] = [];
 	export let useIconSeparator = true;
 
 	/* -------- constantes de diseño -------- */
@@ -28,25 +25,17 @@
 	/* -------- estado -------- */
 	let breadcrumbs: BreadcrumbItem[] = [];
 	let showPopover = false;
+	// * Cierra el popover cuando cambia la ruta
+	let lastBreadcrumbs: BreadcrumbItem[] = [];
 	let navRef: HTMLElement | null = null;
 	let containerWidth = 0;
 	let visibleCrumbsCount = 0;
 
-	/* -------- breadcrumbs automáticos -------- */
-	const autoBreadcrumbs = derived(page, ($page) => {
-		const segments = $page.url.pathname.split('/').filter(Boolean);
-		let path = '';
-		return segments.map((segment, idx) => {
-			path += '/' + segment;
-			return {
-				label: decodeURIComponent(
-					segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ')
-				),
-				href: idx < segments.length - 1 ? path : undefined
-			};
-		});
-	});
-	$: breadcrumbs = Array.isArray(items) && items.length > 0 ? items : ($autoBreadcrumbs ?? []);
+	$: breadcrumbs = $breadcrumbsStore;
+	$: if (breadcrumbs !== lastBreadcrumbs) {
+		lastBreadcrumbs = breadcrumbs;
+		showPopover = false;
+	}
 
 	/* -------- utils -------- */
 	const truncate = (label: string, max: number) =>
@@ -112,10 +101,10 @@
 	}
 </script>
 
-{#if breadcrumbs && breadcrumbs.length > 2}
+{#if breadcrumbs && breadcrumbs.length >= 2}
 	<nav
 		bind:this={navRef}
-		class="sticky top-0 z-30 w-full border-b border-gray-100 bg-white/90 px-2 py-2 shadow-sm backdrop-blur sm:px-8 sm:py-4"
+		class="animate-slide-down-fade sticky top-0 z-30 w-full border-b border-gray-100 bg-white/90 px-2 py-2 shadow-sm backdrop-blur sm:px-8 sm:py-4"
 		aria-label="Breadcrumb"
 	>
 		<!--  *MOBILE  -->
@@ -384,5 +373,20 @@
 	}
 	.animate-fade-in {
 		animation: fade-in 0.2s ease;
+	}
+
+	@keyframes slide-down-fade {
+		from {
+			opacity: 0;
+			transform: translateY(-12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-slide-down-fade {
+		animation: slide-down-fade 0.4s ease-out both;
 	}
 </style>

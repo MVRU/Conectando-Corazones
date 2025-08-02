@@ -1,12 +1,12 @@
 <script lang="ts">
-    import Projects from '$lib/components/projects/Projects.svelte';
+	import Projects from '$lib/components/projects/Projects.svelte';
 </script>
 
 <svelte:head>
 	<title>Proyectos - Conectando Corazones</title>
 	<meta
 		name="description"
-		content="Descubre todos los proyectos activos que necesitan tu colaboración"
+		content="Descubre todos los proyectos abiertos que necesitan tu colaboración"
 	/>
 </svelte:head>
 

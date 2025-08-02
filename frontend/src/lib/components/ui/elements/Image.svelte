@@ -24,28 +24,28 @@
 <script lang="ts">
 	export let src: string = '';
 	export let alt: string = '';
-       export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
-       export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
-       export let width: string = '100%';
-       export let height: string = 'auto';
-       export let href: string = '';
-       export let aspectRatio: string = '';
-       // -* Propiedades para imágenes responsivas *-
-       export let srcset: string = '';
-       export let sizes: string = '';
+	export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
+	export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
+	export let width: string = '100%';
+	export let height: string = 'auto';
+	export let href: string = '';
+	export let aspectRatio: string = '';
+	// -* Propiedades para imágenes responsivas *-
+	export let srcset: string = '';
+	export let sizes: string = '';
 </script>
 
 {#if href}
 	<a {href} class="cursor-pointer">
-                <img
-                        {src}
-                        {alt}
-                        {srcset}
-                        {sizes}
-                        style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
+		<img
+			{src}
+			{alt}
+			{srcset}
+			{sizes}
+			style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
 			class="
          block cursor-pointer object-cover
-        {variant === 'default' ? ' rounded-lg shadow-md' : ''}
+        {variant === 'default' ? ' rounded-lg' : ''}
         {variant === 'circle' ? 'rounded-full' : ''}
         {variant === 'card' ? 'rounded-xl shadow-sm' : ''}
         {animate === 'heartbeat' ? 'animate-heartbeat' : ''}
@@ -56,15 +56,15 @@
 		/>
 	</a>
 {:else}
-        <img
-                {src}
-                {alt}
-                {srcset}
-                {sizes}
-                style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
+	<img
+		{src}
+		{alt}
+		{srcset}
+		{sizes}
+		style={`width: ${width}; ${height !== 'auto' ? `height: ${height};` : ''} ${aspectRatio ? `aspect-ratio: ${aspectRatio};` : ''}`}
 		class="
        block object-cover
-      {variant === 'default' ? ' rounded-lg shadow-md' : ''}
+      {variant === 'default' ? ' rounded-lg' : ''}
       {variant === 'circle' ? 'rounded-full' : ''}
       {variant === 'card' ? 'rounded-xl shadow-sm' : ''}
       {animate === 'heartbeat' ? 'animate-heartbeat' : ''}

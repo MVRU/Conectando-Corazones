@@ -1,36 +1,30 @@
-<!--
-* Componente: TestimonialsSection
-* Descripción: sección de testimonios con carrusel responsivo y animación de entrada.
-
-TODO:
-	- [ ] (Opcional) Agregar indicadores de posición del carrusel.
-	- [ ] (Opcional) Agregar swipe para móviles.
-
--->
-
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-       import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
-	import { testimonials } from '$lib/data/testimonials';
+	import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
+	import { testimonials } from '$lib/mocks/mock-testimonials';
+	import { swipe } from '$lib/actions/swipe';
 
-	let centerIndex = 1;
+	let centerIndex = 0;
 	let visibleCount = 3;
 
 	function clampCenter() {
+		const maxStart = Math.max(0, testimonials.length - visibleCount);
 		if (centerIndex < 0) centerIndex = 0;
-		if (centerIndex > testimonials.length - visibleCount) {
-			centerIndex = testimonials.length - visibleCount;
-		}
+		if (centerIndex > maxStart) centerIndex = maxStart;
 	}
 
 	function updateVisibleCount() {
 		visibleCount = window.innerWidth < 768 ? 1 : 3;
 		clampCenter();
 	}
-	const showPrev = () => centerIndex > 0 && (centerIndex -= 1);
-	const showNext = () => centerIndex < testimonials.length - visibleCount && (centerIndex += 1);
 
-	$: visibleTestimonials = testimonials.slice(centerIndex, centerIndex + visibleCount);
+	const showPrev = () => centerIndex--;
+	const showNext = () => centerIndex++;
+
+	$: visibleTestimonials = Array.from({ length: visibleCount }, (_, i) => {
+		const index = (centerIndex + i) % testimonials.length;
+		return testimonials[(index + testimonials.length) % testimonials.length];
+	});
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -53,90 +47,56 @@ TODO:
 
 <section
 	bind:this={sectionRef}
-	class="pt-50 w-full bg-gradient-to-b from-white to-[#f7f8fd] px-4 pb-20 md:px-8"
+	class="w-full bg-gradient-to-b from-white via-blue-50 to-gray-100 px-4 py-20 sm:px-6 lg:px-8"
 	style="
-		opacity:{visible ? 1 : 0};
-		transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});
-		filter:blur({visible ? 0 : 6}px);
-		transition:opacity .8s cubic-bezier(.45,0,.2,1),
-		          transform .8s cubic-bezier(.45,0,.2,1),
-		          filter   .8s cubic-bezier(.45,0,.2,1);
-	"
+        opacity:{visible ? 1 : 0};
+        transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});
+        filter:blur({visible ? 0 : 6}px);
+        transition:opacity .8s cubic-bezier(.45,0,.2,1),
+                  transform .8s cubic-bezier(.45,0,.2,1),
+                  filter   .8s cubic-bezier(.45,0,.2,1);
+    "
 >
 	<div
-		class="mx-auto mb-10 max-w-6xl text-center"
-		style="transition:opacity .9s .1s, transform .9s .1s; opacity:{visible
-			? 1
-			: 0}; transform:translateY({visible ? 0 : 24}px);"
+		class="duration-900 mx-auto mb-12 max-w-5xl text-center opacity-0 transition delay-100 data-[visible]:transform-none data-[visible]:opacity-100"
+		data-visible={visible}
+		style="transform:translateY({visible ? 0 : '24px'}); opacity:{visible ? 1 : 0};"
 	>
-		<h2 class="mb-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
-			Experiencias reales, <span class="text-[#63666d]">resultados reales.</span>
+		<h2 class="mb-3 text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+			Experiencias reales, <span class="text-gray-600">resultados reales.</span>
 		</h2>
-		<p class="mx-auto mb-3 max-w-2xl text-lg text-gray-500">
-			Lo que dicen quienes confiaron en
-			<span class="font-bold text-[rgb(var(--base-color))]">Conectando Corazones.</span>
+		<p class="mx-auto max-w-2xl text-lg text-gray-500">
+			Lo que dicen quienes confiaron en{' '}
+			<span class="font-bold text-blue-500">Conectando Corazones.</span>
 		</p>
 	</div>
 
-	<!-- *Carrusel para desktop: flechas a los costados y cards en el centro -->
+	<!-- Carrusel -->
 	<div
-		class="relative mx-auto hidden w-full max-w-5xl min-[1210px]:flex min-[1210px]:flex-row min-[1210px]:items-center min-[1210px]:justify-between min-[1210px]:gap-4"
+		use:swipe={{}}
+		on:swipe-left={showNext}
+		on:swipe-right={showPrev}
+		class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
 	>
-		<!-- -*- Flecha izquierda -->
-		<button
-			on:click={showPrev}
-			class="nav-btn cursor-pointer min-[1210px]:-translate-x-6"
-			disabled={centerIndex === 0}
-			aria-label="Ver testimonios anteriores"
-		>
-			<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
-		</button>
-		<!-- -*- Cards -->
-		<div class="flex w-full flex-row items-center justify-center gap-6 md:gap-8">
+		<!-- Contenedor de tarjetas -->
+		<div class="flex w-full flex-row items-center justify-center gap-4 md:gap-6">
 			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
 				<TestimonialCard
 					{...testimonial}
-					active={i === (visibleCount === 3 ? 1 : 0)}
-					locked={visibleCount === 3 ? i !== 1 : false}
+					active={i === Math.floor(visibleCount / 2)}
+					locked={i !== Math.floor(visibleCount / 2)}
 				/>
 			{/each}
 		</div>
-		<!-- -*- Flecha derecha -->
-		<button
-			on:click={showNext}
-			class="nav-btn cursor-pointer min-[1210px]:translate-x-6"
-			disabled={centerIndex === testimonials.length - visibleCount}
-			aria-label="Ver testimonios siguientes"
-		>
-			<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
-		</button>
-	</div>
 
-	<!--* Carrusel para mobile: cards arriba, flechas debajo -->
-	<div class="relative mx-auto flex w-full max-w-5xl flex-col items-center min-[1210px]:hidden">
-		<!-- -*- Cards -->
-		<div class="flex w-full flex-row items-center justify-center gap-6 md:gap-8">
-			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
-				<TestimonialCard
-					{...testimonial}
-					active={i === (visibleCount === 3 ? 1 : 0)}
-					locked={visibleCount === 3 ? i !== 1 : false}
-				/>
-			{/each}
-		</div>
-		<!-- -*- Flechas debajo -->
-		<div class="mt-10 flex w-full items-center justify-center gap-6">
+		<!-- Flechas únicas para todos los dispositivos -->
+		<div class="mt-6 flex w-full justify-between px-4">
 			<button
 				on:click={showPrev}
-				class="nav-btn cursor-pointer"
-				disabled={centerIndex === 0}
-				aria-label="Ver testimonios anteriores"
+				class="nav-btn flex h-10 w-10 items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				aria-label="Anterior testimonio"
 			>
-				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -145,13 +105,13 @@ TODO:
 					/>
 				</svg>
 			</button>
+
 			<button
 				on:click={showNext}
-				class="nav-btn cursor-pointer"
-				disabled={centerIndex === testimonials.length - visibleCount}
-				aria-label="Ver testimonios siguientes"
+				class="nav-btn flex h-10 w-10 items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				aria-label="Siguiente testimonio"
 			>
-				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 				</svg>
 			</button>
@@ -162,34 +122,25 @@ TODO:
 <style>
 	.nav-btn {
 		background: #ffffff;
-		padding: 0.6rem;
-		border-radius: 9999px;
 		color: #3b82f6;
-		box-shadow: 0 2px 6px #0001;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 		transition:
-			background 0.2s,
-			box-shadow 0.2s;
+			background 0.2s ease,
+			box-shadow 0.2s ease;
 		border: none;
 		outline: none;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 	}
+
 	.nav-btn:hover:not(:disabled) {
 		background: #e0ecff;
-		box-shadow: 0 4px 12px #3b82f622;
+		box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 	}
+
 	.nav-btn:disabled {
 		opacity: 0.4;
 		pointer-events: none;
-	}
-
-	@media (min-width: 1210px) {
-		.min-\[1210px\]\:flex {
-			display: flex !important;
-		}
-		.min-\[1210px\]\:hidden {
-			display: none !important;
-		}
 	}
 </style>

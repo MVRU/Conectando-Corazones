@@ -2,17 +2,13 @@
 * Componente: CallToActionSection
 	-*- Descripción: sección de llamada a la acción con animaciones y diseño atractivo.
 	-*- Funcionalidad: muestra un mensaje motivacional y un botón con animaciones de entrada y salida.
-
-TODO:
-	- [ ] Agregar validación para `href` en el botón.
-
 -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-       import Badge from '$lib/components/ui/elements/Badge.svelte';
-       import Image from '$lib/components/ui/elements/Image.svelte';
-       import Button from '$lib/components/ui/elements/Button.svelte';
+	import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import Image from '$lib/components/ui/elements/Image.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 
 	let visible = false;
 	let sectionRef: HTMLDivElement;
@@ -73,13 +69,13 @@ TODO:
 			>
 				<!-- !Button solo visible en mobile -->
 				<div class="sm:hidden">
-					<Button label="Registrate y generá impacto" href="/registro" variant="ghost" size="sm" />
+					<Button label="Registrate y generá impacto" href="/signin" variant="ghost" size="sm" />
 				</div>
 				<!-- !Button solo visible en desktop -->
 				<div class="hidden sm:block">
 					<Button
 						label="Registrate y empezá a generar impacto"
-						href="/registro"
+						href="/signin 	"
 						variant="ghost"
 						size="md"
 					/>

@@ -11,30 +11,39 @@
 	-*- variant (string): 'primary', 'secondary' o 'ghost'. Por defecto: 'primary'.
 
 TODO:
-	- [ ] Agregar otras variantes de estilo: `secondary`, `outline`, `danger`.
+	- [ ] Agregar otras variantes de estilo: `outline`, `danger`.
 
 ! WARNING:
-	-!- Este botón asume que `href` siempre es una URL válida. Validar si el string es vacío puede ser necesario.
-
-* DECISIÓN DE DISEÑO:
-	-*- Se optó por usar `goto()` de SvelteKit para navegación interna y `window.location.href` para externa, sin usar `<a>` para mayor control.
-
-? CUESTIONES ABIERTAS:
-	-?- ¿Debería usarse un `<a>` si `external === true` por accesibilidad semántica?
-	-?- ¿Conviene separar el componente en dos: Button + LinkButton?
+	-!- Se valida `href` para evitar navegaciones peligrosas.
 -->
 
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';
+	import { createEventDispatcher } from 'svelte';
+	import { isSafeHref } from '$lib/utils/sanitize';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
-	export let href: string = '/';
+	export let href: string | null = null;
 	export let external = false;
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
-	export let customAriaLabel: string = `Ir a ${href}`; // Para accesibilidad
+	export let customAriaLabel: string | null = null; // para accesibilidad
+	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
+	const dispatch = createEventDispatcher();
+
+	function handleClick(event: MouseEvent) {
+		dispatch('click', event); // Reenviamos el evento al padre
+
+		if (href && !disabled && isSafeHref(href)) {
+			if (external) {
+				window.location.href = href;
+			} else {
+				goto(href);
+			}
+		}
+	}
 
 	/* ---------- mapas de tamaño para size ---------- */
 	const rootSize = {
@@ -48,7 +57,7 @@ TODO:
 <!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -58,7 +67,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -89,7 +98,7 @@ TODO:
 	<!-- ! Variante Secondary -->
 {:else if variant === 'secondary'}
 	<button
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
 			rootSize[size],
@@ -99,7 +108,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		<span
@@ -130,7 +139,7 @@ TODO:
 	<!-- ! Variante Ghost -->
 {:else}
 	<button
-		on:click={() => (external ? (window.location.href = href) : !disabled && goto(href))}
+		on:click={handleClick}
 		class={clsx(
 			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
 			size === 'md'
@@ -141,7 +150,7 @@ TODO:
 		)}
 		role="link"
 		tabindex="0"
-		aria-label={`${customAriaLabel}`}
+		aria-label={ariaLabel}
 	>
 		<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
 			{label}

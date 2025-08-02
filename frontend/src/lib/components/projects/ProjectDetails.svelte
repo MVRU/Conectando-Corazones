@@ -4,36 +4,81 @@
 </script>
 
 <!-- Descripción -->
-<section class="mb-10">
-	<h3 class="mb-3 text-xl font-bold text-[rgb(var(--base-color))]">Descripción del Proyecto</h3>
-	<p class="text-base leading-relaxed text-gray-700 sm:text-lg sm:leading-8">
+<section class="animate-fade-up mb-10">
+	<h2 class="mb-4 text-2xl font-semibold text-gray-800 sm:text-xl">Descripción del Proyecto</h2>
+	<p class="text-sm leading-relaxed text-gray-700 sm:text-base">
 		{proyecto.descripcion}
 	</p>
 </section>
 
 <!-- Detalles del proyecto -->
-<section class="mb-10 grid gap-4 sm:grid-cols-2">
+<section class="grid gap-5 sm:grid-cols-2">
 	<!-- Card: Institución -->
-	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Institución</h4>
-		<p class="text-base font-semibold text-gray-800">{proyecto.institucion}</p>
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 100ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Institución</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">🏛️</span>
+			{proyecto.institucion?.razonSocial || 'No disponible'}
+		</p>
 	</div>
 
 	<!-- Card: Beneficiarios -->
-	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Beneficiarios</h4>
-		<p class="text-base font-semibold text-gray-800">{proyecto.beneficiarios} personas</p>
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 200ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Beneficiarios</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">👥</span>
+			{proyecto.beneficiarios ? `${proyecto.beneficiarios} personas` : 'Sin especificar'}
+		</p>
 	</div>
 
 	<!-- Card: Fecha de inicio -->
-	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Inicio</h4>
-		<p class="text-base font-semibold text-gray-800">{formatearFecha(proyecto.fechaInicio)}</p>
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 300ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+			Fecha de Inicio
+		</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">📅</span>
+			{formatearFecha(proyecto.fechaInicio) || '—'}
+		</p>
 	</div>
 
 	<!-- Card: Fecha de cierre -->
-	<div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-gray-100 transition hover:shadow-md">
-		<h4 class="mb-1 text-sm font-medium uppercase tracking-wide text-gray-500">Cierre</h4>
-		<p class="text-base font-semibold text-gray-800">{formatearFecha(proyecto.fechaCierre)}</p>
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 400ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+			Fecha de Cierre
+		</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">⏳</span>
+			{formatearFecha(proyecto.fechaCierre) || '—'}
+		</p>
 	</div>
 </section>
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.4s ease-out both;
+	}
+</style>

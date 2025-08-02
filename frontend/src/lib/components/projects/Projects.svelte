@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { fade, fly, scale } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
+<<<<<<< HEAD
 	import { projects as defaultProjects } from '$lib/data/projects';
 	import type { Project } from '$lib/models/Project';
 	import Pagination from '$lib/components/ui/navigation/Pagination.svelte';
@@ -53,6 +55,14 @@
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
 	}
+=======
+	import { projects as defaultProjects } from '$lib/mocks/mock-projects';
+	import type { Project } from '$lib/types/Project';
+	import SearchBar from '../ui/elements/SearchBar.svelte';
+	import { writable } from 'svelte/store';
+
+	let searchQuery = writable('');
+>>>>>>> main
 
 	const participacionMap = {
 		dinero: 'Monetaria',
@@ -72,10 +82,14 @@
 		Materiales: 'materiales'
 	};
 
+<<<<<<< HEAD
+=======
+	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
+>>>>>>> main
 	export let proyectos: Project[] = defaultProjects;
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
-		Activo: 0,
+		Abierto: 0,
 		'En ejecución': 1,
 		Finalizado: 2
 	};
@@ -85,41 +99,138 @@
 		const inicio = p.fechaInicio ? new Date(p.fechaInicio) : null;
 		const cierre = p.fechaCierre ? new Date(p.fechaCierre) : null;
 
-		if (!inicio || !cierre) return 'Activo';
+		if (!inicio || !cierre) return 'Abierto';
 
 		if (hoy > cierre) return 'Finalizado';
 		if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
-		return 'Activo';
+		return 'Abierto';
 	}
+<<<<<<< HEAD
+=======
+
+	function filtrarProyectos(
+		proyectos: Project[],
+		filtros: typeof filtrosSeleccionados,
+		searchQuery: string
+	): Project[] {
+		let resultado = [...proyectos];
+
+		// Filtro por tipo de participación
+		if (!filtros.includes('Todos')) {
+			const unidadesEsperadas = filtros
+				.filter((f): f is ParticipacionLabel => f !== 'Todos')
+				.map((f) => reverseMap[f]);
+
+			resultado = resultado.filter((p) =>
+				p.objetivos?.some((o) => unidadesEsperadas.includes(o.unidad))
+			);
+		}
+
+		// Filtro por título o razón social
+		if (searchQuery.trim() !== '') {
+			const query = searchQuery.trim().toLowerCase();
+			resultado = resultado.filter(
+				(p) =>
+					p.titulo.toLowerCase().includes(query) ||
+					p.institucion?.razonSocial?.toLowerCase().includes(query)
+			);
+		}
+
+		// Orden por estado y fecha
+		resultado.sort((a, b) => {
+			const estadoA = estadoTemporizadorProyecto(a);
+			const estadoB = estadoTemporizadorProyecto(b);
+			const prioridadEstadoA = ESTADO_PRIORIDAD[estadoA] ?? 3;
+			const prioridadEstadoB = ESTADO_PRIORIDAD[estadoB] ?? 3;
+
+			if (prioridadEstadoA !== prioridadEstadoB) {
+				return prioridadEstadoA - prioridadEstadoB;
+			}
+
+			const fechaA = new Date(a.fechaInicio || '').getTime();
+			const fechaB = new Date(b.fechaInicio || '').getTime();
+			return fechaA - fechaB;
+		});
+
+		return resultado;
+	}
+
+	function toggleFiltro(tipo: ParticipacionLabel | 'Todos') {
+		if (tipo === 'Todos') {
+			filtrosSeleccionados = ['Todos'];
+		} else {
+			const yaSeleccionado = filtrosSeleccionados.includes(tipo);
+			if (yaSeleccionado) {
+				filtrosSeleccionados = filtrosSeleccionados.filter((t) => t !== tipo);
+			} else {
+				filtrosSeleccionados = [...filtrosSeleccionados.filter((t) => t !== 'Todos'), tipo];
+			}
+		}
+
+		// Filtrado actual sin el "Todos"
+		const sinTodos = filtrosSeleccionados.filter((f) => f !== 'Todos');
+
+		// Si no hay filtros seleccionados, volvemos a 'Todos'
+		if (sinTodos.length === 0) {
+			filtrosSeleccionados = ['Todos'];
+		}
+
+		// Si están los tres tipos individuales, activar 'Todos'
+		if (
+			sinTodos.length === 3 &&
+			sinTodos.includes('Monetaria') &&
+			sinTodos.includes('Materiales') &&
+			sinTodos.includes('Voluntariado')
+		) {
+			filtrosSeleccionados = ['Todos'];
+		}
+	}
+
+	function resetFiltros() {
+		filtrosSeleccionados = ['Todos'];
+		searchQuery = writable('');
+	}
+
+	$: {
+		proyectosVisibles = filtrarProyectos(proyectos, filtrosSeleccionados, $searchQuery);
+	}
+>>>>>>> main
 </script>
 
-<section class="w-full px-8 py-8">
-	<!-- Título -->
-	<div style="margin-bottom: var(--spacing-3xl);">
-		<h2 class="text-4xl text-[rgb(var(--base-color))]">Proyectos Activos</h2>
-		<p class="font-inter max-w-3xl text-lg text-gray-600">
-			Descubrí los proyectos que necesitan tu colaboración. Podés participar con donaciones
-			monetarias, materiales específicos o como voluntario.
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-12 sm:px-10 lg:px-20">
+	<!-- Encabezado -->
+	<div class="animate-fade-in-up mb-14 text-center">
+		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
+		<p class="mt-3 text-lg text-gray-600">
+			<strong>Colaborá con:</strong> donaciones, materiales o voluntariado.
 		</p>
 	</div>
 
+	<!-- Buscador -->
+	<div class="animate-fade-in-up mx-auto mb-12 w-full max-w-xl">
+		<SearchBar
+			bind:value={searchQuery}
+			placeholder="Buscar por título o institución..."
+			ariaLabel="Campo de búsqueda de proyectos solidarios"
+			autofocus={false}
+		/>
+	</div>
+
 	<!-- Filtros -->
-	<div style="margin-bottom: var(--spacing-3xl);">
-		<h3 class="text-[rgb(var(--base-color))]">Filtrar por tipo de participación</h3>
-		<div class="flex flex-wrap" style="gap: var(--spacing-md);">
+	<div class="animate-fade-in-up mb-10">
+		<h3 class="mb-5 text-center text-base font-semibold text-gray-800">
+			Filtrar por tipo de participación
+		</h3>
+		<div class="flex flex-wrap justify-center gap-4">
 			{#each tiposParticipacion as tipo}
 				<button
-					on:click={() => (filtroSeleccionado = tipo)}
-					class="font-inter rounded-lg border-2 font-medium transition-all duration-200"
-					style="padding: var(--spacing-md-sm) var(--spacing-lg);"
-					class:bg-primary={filtroSeleccionado === tipo}
-					class:text-white={filtroSeleccionado === tipo}
-					class:border-[rgb(var(--color-primary))]={filtroSeleccionado === tipo}
-					class:bg-white={filtroSeleccionado !== tipo}
-					class:text-[rgb(var(--base-color))]={filtroSeleccionado !== tipo}
-					class:border-gray-200={filtroSeleccionado !== tipo}
-					class:hover:border-[rgb(var(--color-primary))]={filtroSeleccionado !== tipo}
-					class:hover:text-[rgb(var(--color-primary))]={filtroSeleccionado !== tipo}
+					on:click={() => toggleFiltro(tipo)}
+					class={`rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ease-in-out
+						${
+							filtrosSeleccionados.includes(tipo)
+								? 'bg-blue-500 text-white shadow-md hover:bg-blue-600'
+								: 'border border-gray-300 bg-white text-gray-700 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm'
+						}`}
 				>
 					{tipo}
 				</button>
@@ -128,32 +239,67 @@
 	</div>
 
 	<!-- Contador -->
-	<div style="margin-bottom: var(--spacing-2xl);">
-		<p class="font-inter font-medium text-[rgb(var(--base-color))]">
-			Mostrando {proyectosVisibles.length} proyecto{proyectosVisibles.length !== 1 ? 's' : ''}
-			{#if filtroSeleccionado !== 'Todos'}
-				de tipo {filtroSeleccionado}
+	<div class="animate-fade-in-up mb-6 text-center text-sm text-gray-600">
+		<p>
+			Mostrando <strong>{proyectosVisibles.length}</strong> proyecto{proyectosVisibles.length !== 1
+				? 's'
+				: ''}
+			{#if !filtrosSeleccionados.includes('Todos')}
+				de tipo <strong>{filtrosSeleccionados.join(', ')}</strong>
 			{/if}
 		</p>
 	</div>
 
-	<!-- Lista -->
-	<div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+	<!-- Lista de proyectos -->
+	<div class="grid gap-10 sm:grid-cols-2 xl:grid-cols-3">
 		{#each proyectosVisibles as proyecto (proyecto.id)}
-			<ProjectCard {proyecto} mostrarBotones={true} />
+			<div
+				in:fly={{ y: 20, duration: 300 }}
+				out:fade={{ duration: 150 }}
+				class="transition-transform hover:scale-[1.02]"
+			>
+				<ProjectCard {proyecto} mostrarBotones={true} />
+			</div>
 		{/each}
 	</div>
 	<Pagination totalPages={totalPaginas} {currentPage} onPageChange={cambiarPagina} />
 
 	<!-- Sin resultados -->
 	{#if proyectosVisibles.length === 0}
-		<div class="py-12 text-center">
-			<h3 class="mb-4 text-[rgb(var(--base-color))]">No hay proyectos disponibles</h3>
-			<p class="font-inter mb-6 text-gray-600">
-				No se encontraron proyectos para el filtro seleccionado. Intentá con otro tipo de
-				participación.
+		<div class="animate-fade-in-up py-24 text-center">
+			<h3 class="mb-4 text-xl font-semibold text-gray-800">No hay proyectos disponibles</h3>
+			<p class="mx-auto mb-6 max-w-xl text-gray-600">
+				{#if $searchQuery.trim() !== ''}
+					No se encontraron resultados para <strong>"{$searchQuery.trim()}"</strong>.
+				{:else}
+					Probá con otro tipo de participación o reiniciá los filtros.
+				{/if}
 			</p>
-			<Button label="Ver todos los proyectos" href="/projects" />
+			<div
+				class="flex justify-center"
+				on:click={() => {
+					resetFiltros();
+					searchQuery.set('');
+				}}
+			>
+				<Button label="Ver todos los proyectos" />
+			</div>
 		</div>
 	{/if}
 </section>
+
+<style>
+	@keyframes fade-in-up {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.animate-fade-in-up {
+		animation: fade-in-up 0.6s ease-out both;
+	}
+</style>

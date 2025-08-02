@@ -5,10 +5,10 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import ProjectCard2 from '$lib/components/ui/cards/ProjectCard2.svelte';
+	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';
-	import { projects } from '$lib/data/projects';
+	import { projects } from '$lib/mocks/mock-projects';
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -66,7 +66,7 @@
 	<!-- *Grid de Proyectos -->
 	<div class="mx-auto grid max-w-7xl gap-10 max-[1049px]:grid-cols-1 min-[1050px]:grid-cols-3">
 		{#each projects.slice(0, 3) as proj (proj.id)}
-			<ProjectCard2 project={proj} />
+			<ProjectCard proyecto={proj} />
 		{/each}
 	</div>
 
