@@ -1,3 +1,5 @@
+// TODO: revisar ya que se ejecuta la primera vez en mobile aunque el dispositivo no sea de gama baja
+
 import { writable, get } from "svelte/store";
 import { browser } from "$app/environment";
 import { isLowEndDevice, hasSlowConnection } from "../utils/device";
