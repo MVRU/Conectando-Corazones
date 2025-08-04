@@ -23,9 +23,11 @@ export function escapeHtml(text: string): string {
 
 /**
  * -!- Verifica que una URL sea segura para navegación.
+ * ? Acepta rutas internas o enlaces http(s); bloquea esquemas peligrosos.
  */
 export function isSafeHref(url: string): boolean {
-    return /^\/?(?!\/)|^https?:\/\//i.test(url);
+    // * Rechaza protocolos como `javascript:` al exigir rutas o http(s)
+    return /^(?:\/(?!\/)|https?:\/\/)/i.test(url);
 }
 
 /**

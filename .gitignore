@@ -1,0 +1,118 @@
+# ----------------------------------------
+# Node.js dependencies & build outputs
+# ----------------------------------------
+node_modules/
+dist/
+build/
+.out/
+.output/
+.next/
+.svelte-kit/
+.cache/
+.storybook-static/
+.yarn/
+.pnp.*
+.yarn/*
+.yarnrc.yml
+
+# ----------------------------------------
+# Dependency directories
+# ----------------------------------------
+jspm_packages/
+bower_components/
+
+# ----------------------------------------
+# Environment variables & sensitive files
+# ----------------------------------------
+.env
+.env.*
+!.env.example
+!.env.test
+.env.local
+.env.*.local
+serviceAccountKey.json
+
+# ----------------------------------------
+# Logs & debug files
+# ----------------------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.pid
+
+# ----------------------------------------
+# Test & coverage outputs
+# ----------------------------------------
+coverage/
+.vitest/
+test-results/
+playwright-report/
+playwright/.cache/
+*.spec.ts.snap
+
+# ----------------------------------------
+# IDE/editor settings
+# ----------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# ----------------------------------------
+# OS-specific files
+# ----------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+.AppleDouble
+.LSOverride
+
+# ----------------------------------------
+# TypeScript
+# ----------------------------------------
+*.tsbuildinfo
+
+# ----------------------------------------
+# SASS
+# ----------------------------------------
+.sass-cache/
+
+# ----------------------------------------
+# Vite
+# ----------------------------------------
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# ----------------------------------------
+# Parcel
+# ----------------------------------------
+.cache/
+
+# ----------------------------------------
+# Next.js static output
+# ----------------------------------------
+out/
+
+# ----------------------------------------
+# React Native
+# ----------------------------------------
+.expo/
+*.expo
+
+# ----------------------------------------
+# Prisma generated files
+# ----------------------------------------
+prisma/dev.db
+prisma/dev.db-journal
+
+# ----------------------------------------
+# ESLint & Prettier
+# ----------------------------------------
+.eslintcache
+.prettiercache

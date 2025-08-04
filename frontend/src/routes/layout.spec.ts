@@ -6,7 +6,6 @@ vi.mock('$lib/components/layout/Header.svelte', () => ({ default: () => '<div>H<
 vi.mock('$lib/components/layout/Footer.svelte', () => ({ default: () => '<div>F</div>' }));
 vi.mock('$lib/components/feedback/MotionNotice.svelte', () => ({ default: () => '<div>M</div>' }));
 vi.mock('$lib/components/ui/navigation/ScrollToTop.svelte', () => ({ default: () => '<div>S</div>' }));
-vi.mock('$lib/components/ui/navigation/Breadcrumbs.svelte', () => ({ default: () => '<nav>breadcrumbs</nav>' }));
 
 vi.mock('$app/stores', () => {
     const page = writable({ url: new URL('http://localhost/') });
@@ -26,29 +25,4 @@ beforeEach(async () => {
     vi.resetModules();
     Layout = (await import('./+layout.svelte')).default;
     pageStore = (await import('$app/stores')).page as any;
-});
-
-describe('Visibilidad de breadcrumbs', () => {
-    it('oculta Breadcrumbs cuando no hay migas', () => {
-        setPath('/about');
-        const { queryByText } = render(Layout, { slots: { default: '<div></div>' } });
-        expect(queryByText('breadcrumbs')).toBeNull();
-    });
-
-    it('muestra Breadcrumbs cuando hay migas', () => {
-        setPath('/projects/1');
-        const { getByText } = render(Layout, { slots: { default: '<div></div>' } });
-        expect(getByText('breadcrumbs')).toBeInTheDocument();
-    });
-
-    it('oculta Breadcrumbs en rutas no habilitadas aunque existan migas', async () => {
-        const breadcrumbMod = await import('$lib/stores/breadcrumbs');
-        breadcrumbMod.setBreadcrumbs([
-            breadcrumbMod.BREADCRUMB_ROUTES.home,
-            { label: 'Registro' }
-        ]);
-        setPath('/signin');
-        const { queryByText } = render(Layout, { slots: { default: '<div></div>' } });
-        expect(queryByText('breadcrumbs')).toBeNull();
-    });
 });

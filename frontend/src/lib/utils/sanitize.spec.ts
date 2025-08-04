@@ -26,7 +26,13 @@ describe('isSafeHref', () => {
     it('acepta rutas internas', () => {
         expect(isSafeHref('/projects')).toBe(true);
     });
+    it('acepta enlaces http', () => {
+        expect(isSafeHref('https://example.com')).toBe(true);
+    });
     it('rechaza javascript protocol', () => {
         expect(isSafeHref('javascript:alert(1)')).toBe(false);
+    });
+    it('rechaza protocolo relativo', () => {
+        expect(isSafeHref('//malicioso.com')).toBe(false);
     });
 });

@@ -2,33 +2,37 @@ import { describe, it, expect } from 'vitest';
 import { swipe } from './swipe';
 
 /**
- * ! Tests de la acción swipe
+ * * DECISIÓN DE DISEÑO:
+ *    -*- Se simulan gestos con PointerEvent para validar la acción swipe.
+ *    -*- Se cubren direcciones izquierda y derecha para asegurar un comportamiento consistente.
  */
 
-// describe('swipe action', () => {
-//     it('emite swipe-left cuando se arrastra a la izquierda', () => {
-//         const div = document.createElement('div');
-//         const events: string[] = [];
-//         const action = swipe(div, { threshold: 10 });
-//         div.addEventListener('swipe-left', () => events.push('left'));
+function createSwipeElement(eventName: 'swipe-left' | 'swipe-right') {
+    const element = document.createElement('div');
+    const events: string[] = [];
+    const action = swipe(element, { threshold: 10 });
+    element.addEventListener(eventName, () => events.push(eventName));
+    return { element, events, destroy: action?.destroy ?? (() => { }) };
+}
 
-//         div.dispatchEvent(new PointerEvent('mousedown', { clientX: 100 }));
-//         div.dispatchEvent(new PointerEvent('mouseup', { clientX: 50 }));
+describe('swipe', () => {
+    it('emite swipe-left cuando se arrastra a la izquierda', () => {
+        const { element, events, destroy } = createSwipeElement('swipe-left');
 
-//         expect(events).toContain('left');
-//         action.destroy();
-//     });
+        element.dispatchEvent(new MouseEvent('mousedown', { clientX: 100 }));
+        window.dispatchEvent(new MouseEvent('mouseup', { clientX: 40 }));
 
-//     it('emite swipe-right cuando se arrastra a la derecha', () => {
-//         const div = document.createElement('div');
-//         const events: string[] = [];
-//         const action = swipe(div, { threshold: 10 });
-//         div.addEventListener('swipe-right', () => events.push('right'));
+        expect(events).toContain('swipe-left');
+        destroy();
+    });
 
-//         div.dispatchEvent(new PointerEvent('mousedown', { clientX: 50 }));
-//         div.dispatchEvent(new PointerEvent('mouseup', { clientX: 80 }));
+    it('emite swipe-right cuando se arrastra a la derecha', () => {
+        const { element, events, destroy } = createSwipeElement('swipe-right');
 
-//         expect(events).toContain('right');
-//         action.destroy();
-//     });
-// });
+        element.dispatchEvent(new MouseEvent('mousedown', { clientX: 40 }));
+        window.dispatchEvent(new MouseEvent('mouseup', { clientX: 100 }));
+
+        expect(events).toContain('swipe-right');
+        destroy();
+    });
+});
