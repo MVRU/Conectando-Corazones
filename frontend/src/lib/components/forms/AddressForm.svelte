@@ -21,6 +21,7 @@
 	let location = '';
 	let reference = '';
 	let googleMapsUrl = '';
+	let intentoEnvio = false;
 
 	// Permite mostrar un botón para omitir el formulario en flujos opcionales
 	export let showSkip = false;
@@ -28,7 +29,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	// Ciudades según provincia
 	// Ciudades según provincia
 	$: locations = province ? getCitiesByProvince(province) : [];
 	$: if (province && location && !locations.includes(location)) {
@@ -86,7 +86,7 @@
 			<label for="street" class="mb-2 block text-sm font-semibold text-gray-700">
 				Calle <span class="text-red-600">*</span>
 			</label>
-			<Input id="street" bind:value={street} error={errors.street} />
+			<Input id="street" bind:value={street} error={intentoEnvio ? errors.street : ''} />
 		</div>
 
 		<!-- Número -->
@@ -94,7 +94,11 @@
 			<label for="streetNumber" class="mb-2 block text-sm font-semibold text-gray-700">
 				Número <span class="text-red-600">*</span>
 			</label>
-			<Input id="streetNumber" bind:value={streetNumber} error={errors.streetNumber} />
+			<Input
+				id="streetNumber"
+				bind:value={streetNumber}
+				error={intentoEnvio ? errors.streetNumber : ''}
+			/>
 		</div>
 
 		<!-- Piso / Depto -->
@@ -116,7 +120,7 @@
 				placeholder="Selecciona una provincia"
 				options={getAllProvinceNames().map((p) => ({ value: p, label: p }))}
 				bind:value={province}
-				error={errors.province}
+				error={intentoEnvio ? errors.province : ''}
 			/>
 		</div>
 
@@ -132,7 +136,7 @@
 				options={locations.map((c) => ({ value: c, label: c }))}
 				bind:value={location}
 				disabled={!province}
-				error={errors.location}
+				error={intentoEnvio ? errors.location : ''}
 			/>
 		</div>
 
