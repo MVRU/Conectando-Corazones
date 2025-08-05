@@ -154,7 +154,7 @@
 						<img
 							src={$user?.profile ?? '/users/escuela-esperanza.jpg'}
 							alt="Foto de perfil"
-							class="h-full w-full object-cover"
+							class="h-full w-full cursor-pointer object-cover"
 						/>
 					</button>
 
