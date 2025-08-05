@@ -9,6 +9,14 @@
 	export let message: string | undefined = undefined;
 
 	const defaults = {
+		401: {
+			title: 'Acceso no autorizado',
+			description: 'Necesitás iniciar sesión para ver esta página.'
+		},
+		403: {
+			title: 'Acceso denegado',
+			description: 'No tenés permiso para acceder a esta sección.'
+		},
 		404: {
 			title: 'Uy... no encontramos lo que buscás',
 			description:
@@ -26,7 +34,7 @@
 		description: message ?? 'Intenta recargar la página o volver al inicio.'
 	};
 
-	const { title, description } = defaults[status as 404 | 500] ?? fallback;
+	const { title, description } = defaults[status as keyof typeof defaults] ?? fallback;
 </script>
 
 <main

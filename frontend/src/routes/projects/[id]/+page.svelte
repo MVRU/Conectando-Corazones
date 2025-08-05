@@ -1,8 +1,3 @@
-<!--
-* DECISIÓN DE DISEÑO: Se valida el parámetro "id" y se lanza error 404 si es inválido para reflejar el estado HTTP correcto.
--!- Riesgo: errores futuros pueden filtrar información sensible en el mensaje.
--->
-
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { projects } from '$lib/mocks/mock-projects';

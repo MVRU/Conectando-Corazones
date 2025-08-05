@@ -9,4 +9,4 @@
 	import ErrorPage from '$lib/components/errors/ErrorPage.svelte';
 </script>
 
-<ErrorPage {status} message={error.message} />
+<ErrorPage {status} message={error?.message} />
