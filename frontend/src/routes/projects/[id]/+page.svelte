@@ -1,8 +1,9 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { projects } from '$lib/mocks/mock-projects';
+	import { encontrarProyectoPorId } from '$lib/utils/projects';
 	import { page } from '$app/stores';
+	import { error } from '@sveltejs/kit';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
 	import ProjectContact from '$lib/components/projects/ProjectContact.svelte';
@@ -10,25 +11,21 @@
 	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
 	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 
-	let proyectoId: number;
 	let proyecto: any = null;
 	let mostrarFormularioColaboracion = false;
 	let solicitudEnviada = false;
 
 	$: {
-		const id = $page.params.id;
-		proyectoId = parseInt(id);
-		cargarProyecto();
-	}
-
-	function cargarProyecto() {
-		proyecto = projects.find((p) => p.id === proyectoId);
-		if (proyecto) {
+		const encontrado = encontrarProyectoPorId($page.params.id, projects);
+		if (encontrado) {
+			proyecto = encontrado;
 			setBreadcrumbs([
 				BREADCRUMB_ROUTES.home,
 				BREADCRUMB_ROUTES.projects,
 				{ label: proyecto.titulo }
 			]);
+		} else {
+			throw error(404, 'Proyecto no encontrado');
 		}
 	}
 

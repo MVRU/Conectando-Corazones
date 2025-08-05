@@ -1,6 +1,7 @@
 // Opciones comunes para formularios del sistema
 
 // Provincias de Argentina
+// TODO: quitar esto, está repetido :P
 export const provincias = [
   { value: 'buenos-aires', label: 'Buenos Aires' },
   { value: 'ciudad-autonoma-buenos-aires', label: 'Ciudad Autónoma de Buenos Aires' },
@@ -29,6 +30,8 @@ export const provincias = [
 ];
 
 // Tipos de institución
+// ? ¿ONG cuenta como Institución o Colaborador para ayudar?
+// ! OJO ACÁ porque un usuario NO puede ser Institución y Colaborador simultáneamente
 export const tiposInstitucion = [
   { value: 'escuela', label: 'Escuela' },
   { value: 'hospital', label: 'Hospital' },
@@ -59,6 +62,7 @@ export const categoriasProyectos = [
 ];
 
 // Estados de proyectos
+// TODO: corregir esto
 export const estadosProyectos = [
   { value: 'abierto', label: 'Abierto' },
   { value: 'en-ejecucion', label: 'En Ejecución' },
@@ -76,6 +80,7 @@ export const nivelesUrgencia = [
 ];
 
 // Tipos de donación
+// ! Servicios y equipamiento no están en el DER
 export const tiposDonacion = [
   { value: 'dinero', label: 'Dinero' },
   { value: 'materiales', label: 'Materiales' },
@@ -100,6 +105,7 @@ export const rubrosEmpresariales = [
 ];
 
 // Géneros
+// ? Esto no está en el DER, pero se puede considerar
 export const generos = [
   { value: 'masculino', label: 'Masculino' },
   { value: 'femenino', label: 'Femenino' },
@@ -107,6 +113,7 @@ export const generos = [
 ];
 
 // Asuntos de contacto
+// TODO: quitar esto, está repetido :P
 export const asuntosContacto = [
   { value: 'consulta-general', label: 'Consulta general' },
   { value: 'soporte-tecnico', label: 'Soporte técnico' },
@@ -117,6 +124,7 @@ export const asuntosContacto = [
 ];
 
 // Estados de verificación
+// ! Esto no lo íbamos a almacenar, si es rechazado no se crea la cuenta
 export const estadosVerificacion = [
   { value: 'pendiente', label: 'Pendiente' },
   { value: 'verificado', label: 'Verificado' },
@@ -124,6 +132,7 @@ export const estadosVerificacion = [
 ];
 
 // Tamaños de empresa (por número de empleados)
+// ? ¿Esto es relevante?
 export const tamanosEmpresa = [
   { value: '1-10', label: '1-10 empleados' },
   { value: '11-50', label: '11-50 empleados' },

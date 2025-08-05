@@ -1,0 +1,48 @@
+<!--
+* DECISIÓN DE DISEÑO: se crea un fallback estático para errores 500 ocurridos antes de inicializar la app.
+-!- Limitación: esta página no aplica estilos dinámicos ni i18n.
+-->
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>500 | Conectando Corazones</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: sans-serif;
+            background: #fff;
+            color: #333;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: #3b82f6;
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>500</h1>
+        <p>Ocurrió un error inesperado.</p>
+        <p><a href="/">Volver al inicio</a></p>
+    </div>
+</body>
+
+</html>

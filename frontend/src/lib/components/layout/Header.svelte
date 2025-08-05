@@ -18,7 +18,6 @@
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Acerca de', href: '/about' },
 		{ label: 'Proyectos', href: '/projects' },
-		{ label: 'Dashboard', href: '/dashboard' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
 		{ label: 'Contacto', href: isHome ? '#support' : '/contact' }
 	];
@@ -154,7 +153,7 @@
 						<img
 							src={$user?.profile ?? '/users/escuela-esperanza.jpg'}
 							alt="Foto de perfil"
-							class="h-full w-full object-cover"
+							class="h-full w-full cursor-pointer object-cover"
 						/>
 					</button>
 
