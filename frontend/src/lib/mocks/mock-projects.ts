@@ -275,5 +275,311 @@ export const projects: Project[] = [
         "cantidad": 3000000
       }
     ]
+  },
+  {
+    id: 11,
+    titulo: 'Refugio para Animales Abandonados',
+    descripcion: 'Refugio que necesita alimento para perros y gatos, medicamentos veterinarios y voluntarios para el cuidado diario de más de 120 animales rescatados.',
+    institucion: { id: "11", razonSocial: "Refugio Patitas Felices" },
+    fechaInicio: '2025-01-15',
+    fechaCierre: '2025-12-31',
+    provincia: 'Entre Ríos',
+    ciudad: 'Paraná',
+    estado: 'Abierto',
+    urgencia: 'Alta',
+    beneficiarios: 120,
+    deadline: '2025-12-31',
+    imagen: '/img/proyectos-1.webp',
+    ubicacion: 'Paraná, Entre Ríos',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "kilogramos de alimento",
+        "objetivo": 800,
+        "cantidad": 200
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "cuidadores",
+        "objetivo": 12,
+        "cantidad": 4
+      }
+    ]
+  },
+  {
+    id: 12,
+    titulo: 'Taller de Oficios para Jóvenes',
+    descripcion: 'Centro de formación laboral que busca herramientas, materiales y instructores para enseñar carpintería, electricidad y plomería a jóvenes en situación de vulnerabilidad.',
+    institucion: { id: "12", razonSocial: "Centro de Formación Laboral San Martín" },
+    fechaInicio: '2024-08-01',
+    fechaCierre: '2024-12-15',
+    provincia: 'Misiones',
+    ciudad: 'Posadas',
+    estado: 'Finalizado',
+    urgencia: 'Media',
+    beneficiarios: 45,
+    deadline: '2024-12-15',
+    imagen: '/img/proyectos-2.webp',
+    ubicacion: 'Posadas, Misiones',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "herramientas",
+        "objetivo": 50,
+        "cantidad": 50
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "instructores",
+        "objetivo": 6,
+        "cantidad": 6
+      }
+    ]
+  },
+  {
+    id: 13,
+    titulo: 'Huerta Comunitaria Urbana',
+    descripcion: 'Proyecto de agricultura urbana que necesita semillas, herramientas de jardinería y voluntarios para enseñar a familias del barrio a cultivar sus propios alimentos.',
+    institucion: { id: "13", razonSocial: "Cooperativa Verde Esperanza" },
+    fechaInicio: '2025-03-01',
+    fechaCierre: '2025-10-31',
+    provincia: 'Río Negro',
+    ciudad: 'Bariloche',
+    estado: 'En ejecución',
+    urgencia: 'Baja',
+    beneficiarios: 35,
+    deadline: '2025-10-31',
+    imagen: '/img/proyectos-3.webp',
+    ubicacion: 'Bariloche, Río Negro',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "herramientas y semillas",
+        "objetivo": 100,
+        "cantidad": 60
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "educadores",
+        "objetivo": 8,
+        "cantidad": 3
+      }
+    ]
+  },
+  {
+    id: 14,
+    titulo: 'Apoyo Nutricional Infantil',
+    descripcion: 'Programa que brinda desayunos y meriendas nutritivas a niños de escuelas primarias en zonas carenciadas. Necesitamos alimentos, utensilios y apoyo económico.',
+    institucion: { id: "14", razonSocial: "Fundación Nutrición Infantil" },
+    fechaInicio: '2025-02-01',
+    fechaCierre: '2025-12-20',
+    provincia: 'Chaco',
+    ciudad: 'Resistencia',
+    estado: 'Abierto',
+    urgencia: 'Alta',
+    beneficiarios: 280,
+    deadline: '2025-12-20',
+    imagen: '/img/proyectos-4.webp',
+    ubicacion: 'Resistencia, Chaco',
+    objetivos: [
+      {
+        "unidad": "dinero",
+        "especie": "ARS",
+        "objetivo": 45000000,
+        "cantidad": 12000000
+      },
+      {
+        "unidad": "materiales",
+        "especie": "kilogramos de alimentos",
+        "objetivo": 600,
+        "cantidad": 150
+      }
+    ]
+  },
+  {
+    id: 15,
+    titulo: 'Biblioteca Digital Rural',
+    descripcion: 'Equipamiento de biblioteca rural con computadoras, tablets y conexión a internet para que estudiantes accedan a recursos educativos digitales.',
+    institucion: { id: "15", razonSocial: "Escuela Rural Digital N° 45" },
+    fechaInicio: '2024-06-01',
+    fechaCierre: '2024-11-30',
+    provincia: 'La Pampa',
+    ciudad: 'General Pico',
+    estado: 'Finalizado',
+    urgencia: 'Media',
+    beneficiarios: 95,
+    deadline: '2024-11-30',
+    imagen: '/img/proyectos-5.webp',
+    ubicacion: 'General Pico, La Pampa',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "equipos informáticos",
+        "objetivo": 15,
+        "cantidad": 15
+      },
+      {
+        "unidad": "dinero",
+        "especie": "ARS",
+        "objetivo": 8000000,
+        "cantidad": 8000000
+      }
+    ]
+  },
+  {
+    id: 16,
+    titulo: 'Capacitación en Microemprendimientos',
+    descripcion: 'Talleres de formación en habilidades empresariales para mujeres jefas de hogar. Incluye capacitación en marketing digital, contabilidad básica y desarrollo de productos.',
+    institucion: { id: "16", razonSocial: "Asociación Mujeres Emprendedoras" },
+    fechaInicio: '2025-04-15',
+    fechaCierre: '2025-09-30',
+    provincia: 'Jujuy',
+    ciudad: 'San Salvador de Jujuy',
+    estado: 'En ejecución',
+    urgencia: 'Media',
+    beneficiarios: 55,
+    deadline: '2025-09-30',
+    imagen: '/img/proyectos-6.webp',
+    ubicacion: 'San Salvador de Jujuy, Jujuy',
+    objetivos: [
+      {
+        "unidad": "voluntarios",
+        "especie": "capacitadores",
+        "objetivo": 10,
+        "cantidad": 7
+      },
+      {
+        "unidad": "materiales",
+        "especie": "materiales didácticos",
+        "objetivo": 80,
+        "cantidad": 40
+      }
+    ]
+  },
+  {
+    id: 17,
+    titulo: 'Centro de Día para Adultos Mayores',
+    descripcion: 'Centro que brinda actividades recreativas, seguimiento médico y alimentación para adultos mayores en situación de soledad. Necesitamos equipamiento médico y voluntarios.',
+    institucion: { id: "17", razonSocial: "Centro de Día Los Abuelos" },
+    fechaInicio: '2025-01-08',
+    fechaCierre: '2025-12-15',
+    provincia: 'Catamarca',
+    ciudad: 'San Fernando del Valle de Catamarca',
+    estado: 'Abierto',
+    urgencia: 'Baja',
+    beneficiarios: 65,
+    deadline: '2025-12-15',
+    imagen: '/img/proyectos-7.webp',
+    ubicacion: 'San Fernando del Valle de Catamarca, Catamarca',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "equipamiento médico",
+        "objetivo": 25,
+        "cantidad": 8
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "acompañantes",
+        "objetivo": 20,
+        "cantidad": 12
+      }
+    ]
+  },
+  {
+    id: 18,
+    titulo: 'Programa de Reciclaje Comunitario',
+    descripcion: 'Iniciativa para establecer puntos de reciclaje en el barrio, educar sobre separación de residuos y crear fuentes de trabajo para recicladores urbanos.',
+    institucion: { id: "18", razonSocial: "EcoBarrio Verde" },
+    fechaInicio: '2024-10-01',
+    fechaCierre: '2025-03-31',
+    provincia: 'San Luis',
+    ciudad: 'San Luis',
+    estado: 'Finalizado',
+    urgencia: 'Baja',
+    beneficiarios: 150,
+    deadline: '2025-03-31',
+    imagen: '/img/proyectos-8.webp',
+    ubicacion: 'San Luis, San Luis',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "contenedores y herramientas",
+        "objetivo": 30,
+        "cantidad": 30
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "educadores ambientales",
+        "objetivo": 5,
+        "cantidad": 5
+      }
+    ]
+  },
+  {
+    id: 19,
+    titulo: 'Apoyo Escolar para Niños con Discapacidad',
+    descripcion: 'Programa de integración escolar que necesita material didáctico adaptado, equipamiento especializado y profesionales para acompañar a niños con discapacidades.',
+    institucion: { id: "19", razonSocial: "Fundación Incluir" },
+    fechaInicio: '2025-03-10',
+    fechaCierre: '2025-12-10',
+    provincia: 'Formosa',
+    ciudad: 'Formosa',
+    estado: 'Abierto',
+    urgencia: 'Alta',
+    beneficiarios: 42,
+    deadline: '2025-12-10',
+    imagen: '/img/proyectos-9.webp',
+    ubicacion: 'Formosa, Formosa',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "material didáctico adaptado",
+        "objetivo": 100,
+        "cantidad": 25
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "profesionales especializados",
+        "objetivo": 8,
+        "cantidad": 2
+      },
+      {
+        "unidad": "dinero",
+        "especie": "ARS",
+        "objetivo": 15000000,
+        "cantidad": 4000000
+      }
+    ]
+  },
+  {
+    id: 20,
+    titulo: 'Orquesta Juvenil Comunitaria',
+    descripcion: 'Proyecto musical que busca instrumentos, partituras y maestros de música para formar una orquesta con jóvenes del barrio y brindarles una alternativa cultural.',
+    institucion: { id: "20", razonSocial: "Conservatorio Popular Música para Todos" },
+    fechaInicio: '2025-02-05',
+    fechaCierre: '2025-11-25',
+    provincia: 'Santiago del Estero',
+    ciudad: 'Santiago del Estero',
+    estado: 'En ejecución',
+    urgencia: 'Media',
+    beneficiarios: 38,
+    deadline: '2025-11-25',
+    imagen: '/img/proyectos-10.webp',
+    ubicacion: 'Santiago del Estero, Santiago del Estero',
+    objetivos: [
+      {
+        "unidad": "materiales",
+        "especie": "instrumentos musicales",
+        "objetivo": 25,
+        "cantidad": 8
+      },
+      {
+        "unidad": "voluntarios",
+        "especie": "profesores de música",
+        "objetivo": 4,
+        "cantidad": 1
+      }
+    ]
   }
 ];
