@@ -31,7 +31,7 @@ export const ERROR_MESSAGES = {
     specifyOtherContact: 'Debe especificar el tipo de contacto',
     phoneInvalid: 'Número de teléfono inválido',
     urlInvalid: 'URL inválida',
-    contactDuplicate: 'Ya existe un método de contacto con ese tipo y valor',
+    contactDuplicate: 'Método de contacto duplicado',
 };
 
 /**

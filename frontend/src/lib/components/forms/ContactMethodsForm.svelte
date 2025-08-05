@@ -81,8 +81,7 @@ TODOs:
 		(c) => c.tipo === 'Teléfono' && isValidInternationalPhone(c.valor)
 	);
 
-	// Verifica duplicados
-	$: contactosUnicos = Array.from(new Set(contactos.map((c) => c.valor)));
+	// -*- hasErrors refleja errores y duplicados
 	$: hasErrors = !telefonoValido || contactos.some((_, i) => errors[i]);
 
 	// Agrega un nuevo contacto
@@ -113,75 +112,84 @@ TODOs:
 	<div class="space-y-6">
 		{#each contactos as contacto, i (contacto)}
 			<div
-				class="group relative flex flex-wrap items-end gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+				class="group relative flex flex-row items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
 			>
-				<!-- Tipo de contacto -->
-				<div class="min-w-[200px] flex-1 md:flex-none">
-					<label for="tipo-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
-						Tipo de contacto
-					</label>
-					<Select
-						id={'tipo-' + i}
-						bind:value={contacto.tipo}
-						disabled={i === 0}
-						options={tiposContacto.map((t) => ({ value: t, label: t }))}
-						searchable={false}
-					/>
-				</div>
-
-				<!-- Valor del contacto -->
-				<div class="min-w-[200px] flex-1 md:flex-none">
-					<label for="valor-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
-						Valor <span class="text-red-600">*</span>
-					</label>
-					<Input
-						id="valor-{i}"
-						bind:value={contacto.valor}
-						placeholder={getPlaceholder(contacto.tipo)}
-						error={errors[i]}
-					/>
-				</div>
-
-				<!-- Etiqueta opcional -->
-				<div class="min-w-[200px] flex-1 md:flex-none">
-					<label for="etiqueta-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
-						{contacto.tipo === 'Otro' ? 'Especificar tipo' : 'Etiqueta'}
-					</label>
-					{#if contacto.tipo === 'Red social'}
+				<!-- Contenedor de campos -->
+				<div class="flex flex-1 flex-wrap gap-4">
+					<!-- Tipo de contacto -->
+					<div class="min-w-[200px] flex-1 md:flex-none">
+						<label for="tipo-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+							Tipo de contacto
+						</label>
 						<Select
-							id={'etiqueta-' + i}
-							bind:value={contacto.etiqueta}
-							options={[
-								{ value: '', label: 'Elegí una red social' },
-								...redesSociales.map((r) => ({ value: r, label: r }))
-							]}
+							id={'tipo-' + i}
+							bind:value={contacto.tipo}
+							disabled={i === 0}
+							options={tiposContacto.map((t) => ({ value: t, label: t }))}
 							searchable={false}
 						/>
-					{:else if contacto.tipo === 'Otro'}
-						<Input id="etiqueta-{i}" bind:value={contacto.etiqueta} placeholder="Ej: Telegram..." />
-					{:else}
-						<Select
-							id={'etiqueta-' + i}
-							bind:value={contacto.etiqueta}
-							options={[
-								{ value: '', label: 'Elegí una opción' },
-								...etiquetasGenerales.map((t) => ({ value: t, label: t }))
-							]}
-							searchable={false}
+					</div>
+
+					<!-- Valor del contacto -->
+					<div class="min-w-[200px] flex-1 md:flex-none">
+						<label for="valor-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+							Valor <span class="text-red-600">*</span>
+						</label>
+						<Input
+							id="valor-{i}"
+							bind:value={contacto.valor}
+							placeholder={getPlaceholder(contacto.tipo)}
+							error={errors[i]}
 						/>
+					</div>
+
+					<!-- Etiqueta -->
+					<div class="min-w-[200px] flex-1 md:flex-none">
+						<label for="etiqueta-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+							{contacto.tipo === 'Otro' ? 'Especificar tipo' : 'Etiqueta'}
+						</label>
+						{#if contacto.tipo === 'Red social'}
+							<Select
+								id={'etiqueta-' + i}
+								bind:value={contacto.etiqueta}
+								options={[
+									{ value: '', label: 'Elegí una red social' },
+									...redesSociales.map((r) => ({ value: r, label: r }))
+								]}
+								searchable={false}
+							/>
+						{:else if contacto.tipo === 'Otro'}
+							<Input
+								id="etiqueta-{i}"
+								bind:value={contacto.etiqueta}
+								placeholder="Ej: Telegram..."
+							/>
+						{:else}
+							<Select
+								id={'etiqueta-' + i}
+								bind:value={contacto.etiqueta}
+								options={[
+									{ value: '', label: 'Elegí una opción' },
+									...etiquetasGenerales.map((t) => ({ value: t, label: t }))
+								]}
+								searchable={false}
+							/>
+						{/if}
+					</div>
+
+					<!-- Botón eliminar -->
+					{#if i > 0}
+						<div class="ml-auto">
+							<button
+								type="button"
+								on:click={() => removeContact(i)}
+								class="cursor-pointer rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus:outline-none"
+							>
+								Eliminar
+							</button>
+						</div>
 					{/if}
 				</div>
-
-				<!-- Botón eliminar -->
-				{#if i > 0}
-					<button
-						type="button"
-						on:click={() => removeContact(i)}
-						class="cursor-pointer self-end rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus:outline-none"
-					>
-						Eliminar
-					</button>
-				{/if}
 			</div>
 		{/each}
 
