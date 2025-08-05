@@ -1,13 +1,14 @@
 <!--
-* DECISIÓN DE DISEÑO: Se valida el parámetro `id` con Number.isInteger y se redirige a 404 si es inválido.
--!- Riesgo: la redirección no establece un estado HTTP 404.
+* DECISIÓN DE DISEÑO: Se valida el parámetro "id" y se lanza error 404 si es inválido para reflejar el estado HTTP correcto.
+-!- Riesgo: errores futuros pueden filtrar información sensible en el mensaje.
 -->
+
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { projects } from '$lib/mocks/mock-projects';
 	import { encontrarProyectoPorId } from '$lib/utils/projects';
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { error } from '@sveltejs/kit';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
 	import ProjectContact from '$lib/components/projects/ProjectContact.svelte';
@@ -29,7 +30,7 @@
 				{ label: proyecto.titulo }
 			]);
 		} else {
-			goto('/404');
+			throw error(404, 'Proyecto no encontrado');
 		}
 	}
 
