@@ -1,3 +1,6 @@
+<!-- TODOs:
+ 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER -->
+
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../ui/elements/Button.svelte';

@@ -1,8 +1,4 @@
 <!--
-* Página: Contacto
-	-*- Descripción: Formulario para consultas y contacto
-	-*- Funcionalidad: Formulario de contacto
-
 TODO:
 	- [ ] Conectar formulario con backend
 	- [ ] Agregar validación de campos
@@ -20,6 +16,9 @@ TODO:
 	let asunto = '';
 	let intentoEnvio = false;
 
+	/**
+	 * FIX: este array viene repetido de form-options sin implementación
+	 */
 	const opcionesAsunto = [
 		{ value: 'consulta-general', label: 'Consulta general' },
 		{ value: 'soporte-tecnico', label: 'Soporte técnico' },

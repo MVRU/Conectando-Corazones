@@ -1,8 +1,4 @@
 <!--
-* Página: Inicio de Sesión
-	-*- Descripción: Formulario de autenticación para usuarios
-	-*- Funcionalidad: Login de usuarios y redirección al registro
-
 TODO:
 	- [ ] Conectar con backend de autenticación
 	- [ ] Implementar validación de campos
@@ -236,6 +232,9 @@ TODO:
 				<h2 class="mb-4 text-2xl font-semibold text-[rgb(var(--base-color))]">
 					¿Por qué registrarse?
 				</h2>
+
+				<!-- FIX: no es una comunidad de donantes-->
+
 				<p class="mx-auto mb-6 max-w-2xl text-gray-600">
 					Al crear una cuenta podés hacer seguimiento de tus donaciones, recibir actualizaciones de
 					los proyectos que apoyás y formar parte de nuestra comunidad de donantes comprometidos.

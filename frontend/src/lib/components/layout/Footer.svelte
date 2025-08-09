@@ -96,8 +96,8 @@
 			<nav class="flex flex-col items-center gap-1 md:items-start md:pl-12">
 				<h5 class="mb-2 text-lg font-bold text-white">Enlaces rápidos</h5>
 				<a href="/about" class="footer-link">Sobre Nosotros</a>
-				<a href="/donate" class="footer-link">Donar</a>
 				<a href="/projects" class="footer-link">Proyectos</a>
+				<a href="/faq" class="footer-link">Preguntas Frecuentes</a>
 				<a href="/contact" class="footer-link">Contacto</a>
 			</nav>
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { writable, derived } from 'svelte/store';
-	import { onMount } from 'svelte'; // Import necesario
+	import { onMount } from 'svelte';
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
 	import { highlightSearch } from '$lib/utils/sanitize';

@@ -1,22 +1,3 @@
-<!--
-* Componente: Button
-	-*- Descripción: botón interactivo con animaciones visuales y navegación integrada.
-	-*- Funcionalidad: soporta navegación interna (mediante `goto`) o externa (`window.location.href`) según el caso.
-
-* Props:
-	-*- label (string): texto visible dentro del botón. Por defecto: 'Hacé clic!'.
-	-*- disabled (boolean): si está activado, el botón queda deshabilitado y atenuado.
-	-*- href (string): ruta o URL de destino al hacer clic.
-	-*- external (boolean): si es `true`, se navega usando `window.location.href` en lugar de `goto()`.
-	-*- variant (string): 'primary', 'secondary' o 'ghost'. Por defecto: 'primary'.
-
-TODO:
-	- [ ] Agregar otras variantes de estilo: `outline`, `danger`.
-
-! WARNING:
-	-!- Se valida `href` para evitar navegaciones peligrosas.
--->
-
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';
@@ -29,12 +10,12 @@ TODO:
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
-	export let customAriaLabel: string | null = null; // para accesibilidad
+	export let customAriaLabel: string | null = null;
 	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
 	const dispatch = createEventDispatcher();
 
 	function handleClick(event: MouseEvent) {
-		dispatch('click', event); // Reenviamos el evento al padre
+		dispatch('click', event);
 
 		if (href && !disabled && isSafeHref(href)) {
 			if (external) {
@@ -45,7 +26,6 @@ TODO:
 		}
 	}
 
-	/* ---------- mapas de tamaño para size ---------- */
 	const rootSize = {
 		md: 'h-12 md:h-14 min-w-[140px] px-6 py-3',
 		sm: 'h-9  md:h-10 min-w-[100px] px-4 py-2'
@@ -172,7 +152,8 @@ TODO:
 {/if}
 
 <style>
-	/* --- ANIMACIÓN PARA PRIMARY BUTTON --- */
+	/**
+	* ! --- ANIMACIÓN PARA PRIMARY BUTTON --- */
 	@keyframes background-up {
 		from {
 			transform: scaleY(0);
@@ -252,7 +233,8 @@ TODO:
 		animation: icon-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 	}
 
-	/* --- ANIMACIÓN PARA GHOST BUTTON --- */
+	/**
+	* ! --- ANIMACIÓN PARA GHOST BUTTON --- */
 	.cta-minimal-shine-btn {
 		position: relative;
 		overflow: hidden;

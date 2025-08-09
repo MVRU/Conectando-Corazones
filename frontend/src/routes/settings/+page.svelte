@@ -1,3 +1,5 @@
+<!-- FIX: corregir atributos cuando se resuelvan las inconsistencias con el DER -->
+
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';
@@ -6,6 +8,7 @@
 	import type { User } from '$lib/types/User';
 
 	// Simulación de usuario logueado (reemplazar por store real)
+	// FIX: ya hay un mock-users para usar, ¿para qué crear otro? Se arrastran inconsistencias con el DER
 	let user: User = {
 		id: '1',
 		email: 'usuario@ejemplo.com',

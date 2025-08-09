@@ -1,3 +1,5 @@
+// FIX: corregir todo esto luego de corregir el type
+
 import type { Project } from '$lib/types/Project';
 
 export const projects: Project[] = [
@@ -6,31 +8,36 @@ export const projects: Project[] = [
     titulo: "Un libro, un sueño",
     descripcion: "Una escuela rural necesita libros para su biblioteca escolar. Con tu ayuda, podemos proporcionar materiales educativos que inspiren a los niños a soñar más allá de su entorno.",
     institucion: { id: "1", razonSocial: "Escuela Esperanza" },
-    fechaInicio: "2025-07-15",
+    fechaInicio: "2025-07-15", // FIX: created_at
     fechaCierre: "2025-10-30",
-    provincia: "Santa Fe",
-    ciudad: "Rosario",
+    provincia: "Santa Fe", // FIX: difiere del DER, ¿para qué tenés la ubicación?
+    ciudad: "Rosario", // FIX: difiere del DER, ¿para qué tenés la ubicación?
     estado: "Abierto",
     urgencia: "Alta",
     beneficiarios: 150,
-    deadline: "2025-06-30",
-    imagen: "/img/proyectos-1.webp",
-    ubicacion: "Rosario, Santa Fe",
-    contacto: {
+    deadline: "2025-06-30", // FIX: difiere del DER y se repite con fechaCierre
+    imagen: "/img/proyectos-1.webp", // FIX: difiere del DER
+    ubicacion: "Rosario, Santa Fe", // FIX: difiere del DER
+    contacto: { // FIX: todo esto difiere del DER
       "responsable": "Prof. Marta Fernández",
       "telefono": "+54 341 123-4567",
       "email": "mfernandez@escuelaesperanza.edu.ar",
       "sitioWeb": "escuelaesperanza.edu.ar"
     },
-    objetivos: [
+    objetivos: [ // FIX: difiere del DER y es participacion_permitida, no objetivos, redundante con atributo objetivo
       {
         "unidad": "materiales",
-        "especie": "libros",
+        "especie": "libros", // FIX: difiere del DER y se arrastra hace tiempo
         "objetivo": 200,
-        "cantidad": 150
+        "cantidad": 150 // FIX: en DER está como actual
       }
     ]
   },
+
+  /** -----------------------------------------------------------------------------------------
+   *   FIX: TODOS LOS DEMÁS DATOS 
+   *  ----------------------------------------------------------------------------------------*/
+
   {
     id: 2,
     titulo: "Comedores con alma",

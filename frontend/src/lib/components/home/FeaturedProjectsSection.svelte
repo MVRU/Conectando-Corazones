@@ -1,8 +1,3 @@
-<!--
-* Componente: FeaturedProjectsSection
-    -*- Descripción: muestra una sección destacada de proyectos con un encabezado, una cuadrícula de tarjetas de proyectos y un botón de llamada a la acción.
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';

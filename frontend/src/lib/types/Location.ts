@@ -1,4 +1,4 @@
-import type { Province } from './province';
+import type { Province } from './Province';
 
 export interface Location {
     id?: number;             // Identificador único de la DB y en casos raros en que el CPA se repita

@@ -40,7 +40,7 @@ body {
     line-height: var(--spacing-3xl);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* ! DECISIÓN DE DISEÑO: evitamos scroll horizontal global */
+    /* ! para evitar scroll horizontal global */
     overflow-x: hidden;
 }
 

@@ -1,3 +1,5 @@
+// FIX: corregir todo esto para que coincida con DER
+
 // Tipos de usuario en el sistema
 export type UserRole = 'institucion' | 'colaborador' | 'admin';
 
@@ -5,19 +7,20 @@ export type UserRole = 'institucion' | 'colaborador' | 'admin';
 export type CollaboratorType = 'empresa' | 'persona' | 'ong';
 
 // Estado de verificación
+// FIX: dijimos que no vamos a almacenar el estado de verificación ya que si se crea el usuario se asume que está verificado
 export type VerificationStatus = 'pendiente' | 'verificado' | 'rechazado';
 
 // Modelo base de usuario
-export interface BaseUser {
+export interface BaseUser {  // FIX: ¿username?
   id: string;
   email: string;
-  nombre: string;
+  nombre: string; // FIX: ¿apellido se va? ¿es nombre completo entonces?
   role: UserRole;
   isActive: boolean;
   createdAt: Date;
-  updatedAt: Date;
-  lastLogin?: Date;
-  verificationStatus: VerificationStatus;
+  updatedAt: Date; // FIX: este atributo no fue discutido y para esto está el historial de cambios, aunque se puede considerar
+  lastLogin?: Date; // FIX: este atributo no fue discutido y no entiendo para qué es relevante
+  verificationStatus: VerificationStatus; // FIX: dijimos que no vamos a almacenar el estado de verificación
   profile?: string; // URL de la foto de perfil
 }
 
@@ -25,21 +28,21 @@ export interface BaseUser {
 export interface InstitucionUser extends BaseUser {
   role: 'institucion';
   // Información específica de la institución
-  razonSocial: string;
+  razonSocial: string; // FIX: difiere del DER
   cuit?: string;
-  telefono: string;
-  direccion: {
+  telefono: string; // FIX: difiere del DER
+  direccion: { // FIX: difiere del DER
     calle: string;
     numero: string;
     ciudad: string;
     provincia: string;
     codigoPostal: string;
   };
-  descripcion: string;
-  sitioWeb?: string;
+  descripcion: string; // FIX: atributo inventado
+  sitioWeb?: string; // FIX: difiere del DER
   // Campos específicos para instituciones
-  tipoInstitucion: 'escuela' | 'hospital' | 'ong' | 'fundacion' | 'otro';
-  capacidadBeneficiarios: number;
+  tipoInstitucion: 'escuela' | 'hospital' | 'ong' | 'fundacion' | 'otro'; // ? ¿Una ONG puede ser una institución?
+  capacidadBeneficiarios: number; // FIX: atributo inventado
   proyectosCreados: string[]; // IDs de proyectos
 }
 
@@ -48,8 +51,8 @@ export interface ColaboradorUser extends BaseUser {
   role: 'colaborador';
   // Información específica del colaborador
   tipoColaborador: CollaboratorType;
-  telefono: string;
-  direccion?: {
+  telefono: string; // FIX: difiere del DER
+  direccion?: { // FIX: difiere del DER y no tiene sentido
     calle: string;
     numero: string;
     ciudad: string;
@@ -57,22 +60,22 @@ export interface ColaboradorUser extends BaseUser {
     codigoPostal: string;
   };
   // Campos específicos según el tipo
-  empresa?: {
+  empresa?: { // FIX: difiere del DER ¿Organización? ¿con_fines_de_lucro?
     razonSocial: string;
     cuit: string;
-    rubro: string;
-    empleados: number;
+    rubro: string; // FIX: atributo inventado
+    empleados: number; // FIX: atributo inventado
   };
-  persona?: {
-    dni: string;
-    fechaNacimiento: Date;
-    genero: 'masculino' | 'femenino' | 'otro';
+  persona?: { // FIX: difiere del DER 
+    dni: string; // FIX: difiere del DER
+    fechaNacimiento: Date; // FIX: difiere del DER
+    genero: 'masculino' | 'femenino' | 'otro'; // FIX: atributo inventado
   };
-  ong?: {
+  ong?: { // FIX: difiere del DER ¿Organización?
     razonSocial: string;
     cuit: string;
-    mision: string;
-    añoFundacion: number;
+    mision: string; // FIX: atributo inventado
+    añoFundacion: number; // FIX: atributo inventado
   };
   // Historial de colaboraciones
   colaboraciones: string[]; // IDs de colaboraciones
@@ -87,6 +90,7 @@ export interface ColaboradorUser extends BaseUser {
 export interface AdminUser extends BaseUser {
   role: 'admin';
   // Permisos específicos del admin
+  // FIX: habíamos dicho que los admins pueden hacer todo
   permisos: {
     gestionarUsuarios: boolean;
     gestionarProyectos: boolean;
@@ -95,8 +99,8 @@ export interface AdminUser extends BaseUser {
     gestionarSistema: boolean;
   };
   // Información de contacto
-  telefono: string;
-  departamento: string;
+  telefono: string; // FIX: difiere del DER
+  departamento: string; // FIX: atributo inventado
 }
 
 // Union type para todos los usuarios
@@ -109,7 +113,7 @@ export interface LoginCredentials {
   rememberMe?: boolean;
 }
 
-export interface RegisterInstitucionData {
+export interface RegisterInstitucionData { // FIX: esta interfaz no tiene sentido y no tiene implementaciones
   email: string;
   password: string;
   nombre: string;
@@ -129,7 +133,7 @@ export interface RegisterInstitucionData {
   capacidadBeneficiarios: number;
 }
 
-export interface RegisterColaboradorData {
+export interface RegisterColaboradorData { // FIX: esta interfaz no tiene sentido y no tiene implementaciones
   email: string;
   password: string;
   nombre: string;

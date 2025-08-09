@@ -1,3 +1,5 @@
+<!-- TODO: corregir atributos cuando se resuelvan las inconsistencias con el DER -->
+
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 
