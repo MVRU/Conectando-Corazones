@@ -1,8 +1,7 @@
 <script lang="ts">
 	export let stars: number = 5;
-	export let quote: string =
-		'Este componente superó todas mis expectativas. Elegante, moderno y funcional.';
-	export let author: string = 'María González';
+	export let quote: string = '';
+	export let author: string = '';
 	export let role: string = '';
 	export let active: boolean = false;
 	export let locked: boolean = false;
@@ -19,7 +18,7 @@
     {active && !locked ? 'z-10 scale-105 ring-1 ring-blue-100/60' : ''}
     {locked
 		? 'pointer-events-none opacity-75 blur-[0.5px]'
-		: 'cursor-pointer hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-50/70'}
+		: ' hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-50/70'}
   "
 >
 	<!-- Estrellas con diseño más refinado -->

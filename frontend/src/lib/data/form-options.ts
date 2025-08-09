@@ -1,7 +1,11 @@
 // Opciones comunes para formularios del sistema
 
+// FIX: mejor data y types por separado, archivos atómicos, no mezclar peras con manzanas, hay que tener todo centralizado, si cambian las provincias lo vamos a cambiar en cada archivo repetido?
+
+// ! Estos export no se están implementando en ningún lado, se crearon y no se usaron, no conviene mantener archivos que no se usan, ¿eliminar?
+
 // Provincias de Argentina
-// TODO: quitar esto, está repetido :P
+// FIX: código repetido, ¿para qué está la data provinces? No sé implementó en ningún lado...
 export const provincias = [
   { value: 'buenos-aires', label: 'Buenos Aires' },
   { value: 'ciudad-autonoma-buenos-aires', label: 'Ciudad Autónoma de Buenos Aires' },
@@ -31,15 +35,16 @@ export const provincias = [
 
 // Tipos de institución
 // ? ¿ONG cuenta como Institución o Colaborador para ayudar?
-// ! OJO ACÁ porque un usuario NO puede ser Institución y Colaborador simultáneamente
+// FIX: OJO ACÁ porque un usuario NO puede ser Institución y Colaborador simultáneamente
 export const tiposInstitucion = [
   { value: 'escuela', label: 'Escuela' },
   { value: 'hospital', label: 'Hospital' },
-  { value: 'ong', label: 'ONG' },
+  { value: 'ong', label: 'ONG' }, // FIX
   { value: 'fundacion', label: 'Fundación' },
   { value: 'otro', label: 'Otro' }
 ];
 
+// FIX: se difiere entre ong y empresa... es organización en el DER
 // Tipos de colaborador
 export const tiposColaborador = [
   { value: 'empresa', label: 'Empresa' },
@@ -62,7 +67,7 @@ export const categoriasProyectos = [
 ];
 
 // Estados de proyectos
-// TODO: corregir esto
+// ! Estos estados quedaron obsoletos y este export no se implementa en ningún lado
 export const estadosProyectos = [
   { value: 'abierto', label: 'Abierto' },
   { value: 'en-ejecucion', label: 'En Ejecución' },
@@ -80,17 +85,17 @@ export const nivelesUrgencia = [
 ];
 
 // Tipos de donación
-// ! Servicios y equipamiento no están en el DER
+// FIX: servicios y equipamiento no están en el DER
 export const tiposDonacion = [
-  { value: 'dinero', label: 'Dinero' },
-  { value: 'materiales', label: 'Materiales' },
-  { value: 'voluntarios', label: 'Voluntarios' },
-  { value: 'servicios', label: 'Servicios' },
-  { value: 'equipamiento', label: 'Equipamiento' }
+  { value: 'dinero', label: 'Dinero' }, // FIX: monetaria
+  { value: 'materiales', label: 'Materiales' }, // FIX: especie
+  { value: 'voluntarios', label: 'Voluntarios' }, // FIX: voluntariado
+  { value: 'servicios', label: 'Servicios' }, // FIX: inventado
+  { value: 'equipamiento', label: 'Equipamiento' } // FIX: inventado
 ];
 
 // Rubros empresariales
-export const rubrosEmpresariales = [
+export const rubrosEmpresariales = [ // FIX: inventado
   { value: 'tecnologia', label: 'Tecnología' },
   { value: 'salud', label: 'Salud' },
   { value: 'educacion', label: 'Educación' },
@@ -113,7 +118,7 @@ export const generos = [
 ];
 
 // Asuntos de contacto
-// TODO: quitar esto, está repetido :P
+// FIX: se creó, no se implementó y se volvió a crear en otro lado repitiendo código
 export const asuntosContacto = [
   { value: 'consulta-general', label: 'Consulta general' },
   { value: 'soporte-tecnico', label: 'Soporte técnico' },
@@ -132,7 +137,7 @@ export const estadosVerificacion = [
 ];
 
 // Tamaños de empresa (por número de empleados)
-// ? ¿Esto es relevante?
+// FIX: inventado, no está en el DER
 export const tamanosEmpresa = [
   { value: '1-10', label: '1-10 empleados' },
   { value: '11-50', label: '11-50 empleados' },

@@ -1,12 +1,3 @@
-<!--
-* Componente: FaqSection
-	-*- Descripción: sección de preguntas frecuentes que aclara dudas comunes sobre el uso de la plataforma.
-	-*- Funcionalidad: muestra una lista de preguntas y respuestas con un diseño atractivo y una imagen relevante.
-
-* Props:
-	-*- No recibe props por ahora (contenido estático).
--->
-
 <script lang="ts">
 	import FaqItem from '$lib/components/ui/elements/FaqItem.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
@@ -17,7 +8,7 @@
 	let visibleFaq = false;
 	let visibleImg = false;
 
-	// Filtrar solo las FAQs con categoría "General"
+	// Filtrar solo las FAQs con categoría "General" (NO CAMBIAR)
 	const faqs = allFaqs.filter((faq) => faq.category === 'General');
 </script>
 

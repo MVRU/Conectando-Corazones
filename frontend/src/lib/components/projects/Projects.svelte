@@ -1,3 +1,7 @@
+<!-- TODOs:
+ 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER
+	- [ ] Corregir los estados de Proyecto -->
+
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
@@ -22,17 +26,17 @@
 	];
 
 	const reverseMap: Record<ParticipacionLabel, keyof typeof participacionMap> = {
-		Monetaria: 'dinero',
-		Voluntariado: 'voluntarios',
-		Materiales: 'materiales'
+		Monetaria: 'dinero', // FIX: monetaria
+		Voluntariado: 'voluntarios', // FIX: voluntariado
+		Materiales: 'materiales' // FIX: especie
 	};
 
 	// Nuevos filtros
-	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado'];
+	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado']; // TODO: corregir los estados
 	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
 	const provinciasDisponibles = [
 		'Todas',
-		...Array.from(new Set(defaultProjects.map(p => p.provincia).filter(Boolean))).sort()
+		...Array.from(new Set(defaultProjects.map((p) => p.provincia).filter(Boolean))).sort()
 	];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	let filtroParticipacionSeleccionado: 'Todos' | ParticipacionLabel = 'Todos';
@@ -40,11 +44,12 @@
 	let urgenciaSeleccionada = 'Todas';
 	let provinciaSeleccionada = 'Todas';
 	let mostrarFiltros = false;
-	
+
 	export let proyectos: Project[] = defaultProjects;
 	let proyectosVisibles: Project[] = [];
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
+		// TODO: corregir los estados
 		Abierto: 0,
 		'En ejecución': 1,
 		Finalizado: 2
@@ -55,6 +60,7 @@
 		const inicio = p.fechaInicio ? new Date(p.fechaInicio) : null;
 		const cierre = p.fechaCierre ? new Date(p.fechaCierre) : null;
 
+		// TODO: corregir los estados
 		if (!inicio || !cierre) return 'Abierto';
 
 		if (hoy > cierre) return 'Finalizado';
@@ -181,8 +187,8 @@
 
 	$: {
 		proyectosVisibles = filtrarProyectos(
-			proyectos, 
-			filtrosSeleccionados, 
+			proyectos,
+			filtrosSeleccionados,
 			$searchQuery,
 			estadoSeleccionado,
 			urgenciaSeleccionada,
@@ -191,7 +197,7 @@
 	}
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-2 pb-6 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-2 sm:px-10 lg:px-20">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-2 text-center">
 		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
@@ -211,7 +217,7 @@
 	<div class="animate-fade-in-up mb-4 text-center">
 		<button
 			on:click={() => (mostrarFiltros = !mostrarFiltros)}
-			class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-50 hover:border-blue-500"
+			class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50"
 		>
 			<svg
 				class="h-4 w-4 transition-transform duration-200"
@@ -219,7 +225,12 @@
 				stroke="currentColor"
 				viewBox="0 0 24 24"
 			>
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+				<path
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					stroke-width="2"
+					d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+				/>
 			</svg>
 			{mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros'}
 			<svg
@@ -235,18 +246,20 @@
 
 	<!-- Filtros -->
 	{#if mostrarFiltros}
-		<div 
+		<div
 			class="animate-fade-in-up mb-4"
 			in:fly={{ y: -20, duration: 300 }}
 			out:fade={{ duration: 200 }}
 		>
 			<div class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
 				<h4 class="mb-6 text-center text-lg font-semibold text-gray-800">Filtros</h4>
-				
+
 				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 					<!-- Filtro por Tipo de Participación -->
 					<div>
-						<label for="filtro-participacion" class="mb-3 block text-sm font-medium text-gray-700">Tipo de participación</label>
+						<label for="filtro-participacion" class="mb-3 block text-sm font-medium text-gray-700"
+							>Tipo de participación</label
+						>
 						<select
 							id="filtro-participacion"
 							bind:value={filtroParticipacionSeleccionado}
@@ -260,7 +273,9 @@
 
 					<!-- Filtro por Estado -->
 					<div>
-						<label for="filtro-estado" class="mb-3 block text-sm font-medium text-gray-700">Estado del proyecto</label>
+						<label for="filtro-estado" class="mb-3 block text-sm font-medium text-gray-700"
+							>Estado del proyecto</label
+						>
 						<select
 							id="filtro-estado"
 							bind:value={estadoSeleccionado}
@@ -274,7 +289,9 @@
 
 					<!-- Filtro por Urgencia -->
 					<div>
-						<label for="filtro-urgencia" class="mb-3 block text-sm font-medium text-gray-700">Urgencia</label>
+						<label for="filtro-urgencia" class="mb-3 block text-sm font-medium text-gray-700"
+							>Urgencia</label
+						>
 						<select
 							id="filtro-urgencia"
 							bind:value={urgenciaSeleccionada}
@@ -288,7 +305,9 @@
 
 					<!-- Filtro por Provincia -->
 					<div>
-						<label for="filtro-provincia" class="mb-3 block text-sm font-medium text-gray-700">Provincia</label>
+						<label for="filtro-provincia" class="mb-3 block text-sm font-medium text-gray-700"
+							>Provincia</label
+						>
 						<select
 							id="filtro-provincia"
 							bind:value={provinciaSeleccionada}
@@ -308,7 +327,12 @@
 						class="inline-flex items-center gap-2 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors duration-200 hover:bg-red-600"
 					>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+							/>
 						</svg>
 						Limpiar todos los filtros
 					</button>
@@ -325,28 +349,36 @@
 				: ''}
 			de <strong>{proyectos.length}</strong> disponible{proyectos.length !== 1 ? 's' : ''}
 		</p>
-		
+
 		<!-- Filtros activos -->
 		{#if !filtrosSeleccionados.includes('Todos') || estadoSeleccionado !== 'Todos' || urgenciaSeleccionada !== 'Todas' || provinciaSeleccionada !== 'Todas'}
 			<div class="mt-2 flex flex-wrap justify-center gap-2">
 				<span class="text-xs text-gray-500">Filtros activos:</span>
 				{#if !filtrosSeleccionados.includes('Todos')}
-					<span class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700">
+					<span
+						class="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700"
+					>
 						Tipo: {filtrosSeleccionados.join(', ')}
 					</span>
 				{/if}
 				{#if estadoSeleccionado !== 'Todos'}
-					<span class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+					<span
+						class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
+					>
 						Estado: {estadoSeleccionado}
 					</span>
 				{/if}
 				{#if urgenciaSeleccionada !== 'Todas'}
-					<span class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700">
+					<span
+						class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700"
+					>
 						Urgencia: {urgenciaSeleccionada}
 					</span>
 				{/if}
 				{#if provinciaSeleccionada !== 'Todas'}
-					<span class="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700">
+					<span
+						class="inline-flex items-center gap-1 rounded-full bg-purple-100 px-2 py-1 text-xs font-medium text-purple-700"
+					>
 						Provincia: {provinciaSeleccionada}
 					</span>
 				{/if}
@@ -379,8 +411,8 @@
 				{/if}
 			</p>
 			<div class="flex justify-center">
-				<Button 
-					label="Ver todos los proyectos" 
+				<Button
+					label="Ver todos los proyectos"
 					on:click={() => {
 						resetFiltros();
 						searchQuery.set('');

@@ -44,7 +44,6 @@
 		repNacimiento: ''
 	};
 
-	// Validación reactiva de errores
 	$: errors = {
 		nombre: institution.nombre.trim()
 			? isValidName(institution.nombre)
@@ -117,7 +116,6 @@
 		event.preventDefault();
 		intentoEnvio = true;
 		if (hasErrors) {
-			// Buscar el primer campo con error y hacer scroll
 			setTimeout(() => {
 				const firstError = document.querySelector('.border-red-400, .ring-red-400');
 				if (firstError && typeof firstError.scrollIntoView === 'function') {

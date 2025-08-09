@@ -1,33 +1,8 @@
-<!--
-* Componente: Select
-	-*- Descripción: Dropdown/Select reutilizable con estilos consistentes del sistema
-	-*- Funcionalidad: Selección de opciones con validación, estados de error y accesibilidad
-
-* Props:
-	-*- options (array): Array de objetos con {value, label} para las opciones
-	-*- value (string): Valor seleccionado actualmente
-	-*- placeholder (string): Texto placeholder cuando no hay selección
-	-*- label (string): Etiqueta del campo
-	-*- required (boolean): Si el campo es requerido
-	-*- disabled (boolean): Si el campo está deshabilitado
-	-*- error (string): Mensaje de error a mostrar
-	-*- size (string): Tamaño del select ('sm', 'md', 'lg')
-	-*- name (string): Nombre del campo para formularios
-	-*- id (string): ID del campo para accesibilidad
-
-TODO:
-	- [ ] Agregar soporte para grupos de opciones
-	- [ ] Implementar búsqueda/filtrado en opciones largas
-	- [ ] Agregar soporte para múltiples selecciones
-	- [ ] Implementar teclado navigation
--->
-
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
 	import { onMount, onDestroy } from 'svelte';
 
-	// Props
 	export let options: Array<{ value: string; label: string }> = [];
 	export let value: string = '';
 	export let placeholder: string = 'Seleccionar opción';
@@ -40,7 +15,6 @@ TODO:
 	export let id: string = '';
 	export let searchable = true;
 
-	// Estado interno
 	let isOpen = false;
 	let selectRef: HTMLElement;
 	let inputRef: HTMLInputElement;

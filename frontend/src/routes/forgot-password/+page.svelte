@@ -1,8 +1,4 @@
 <!--
-* Página: Recuperar Contraseña
-	-*- Descripción: Formulario para solicitar recuperación de contraseña
-	-*- Funcionalidad: Envío de email para reseteo de contraseña
-
 TODO:
 	- [ ] Conectar con backend de autenticación
 	- [ ] Implementar validación robusta de email
@@ -23,6 +19,9 @@ TODO:
 	let emailSent = false;
 
 	// Función para validar el email
+	/**
+	 * FIX: ya hay una función que valida el email en utils/validators.ts para no repetir código al pepe
+	 */
 	function validateEmail(email: string): boolean {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		return emailRegex.test(email);
@@ -53,12 +52,11 @@ TODO:
 		try {
 			// TODO: Implementar llamada al backend
 			// Simulamos una llamada a la API
-			await new Promise(resolve => setTimeout(resolve, 2000));
-			
+			await new Promise((resolve) => setTimeout(resolve, 2000));
+
 			// Simulamos éxito (en la implementación real, aquí iría la llamada al backend)
 			emailSent = true;
 			successMessage = `Te enviamos un email a ${email} con las instrucciones para recuperar tu contraseña.`;
-			
 		} catch (error) {
 			errorMessage = 'Hubo un problema al enviar el email. Por favor intenta nuevamente.';
 			console.error('Error al enviar email de recuperación:', error);
@@ -93,9 +91,7 @@ TODO:
 					animate="heartbeat"
 				/>
 			</div>
-			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">
-				Recuperar Contraseña
-			</h1>
+			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Recuperar Contraseña</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
 				Ingresa tu email y te enviaremos las instrucciones para crear una nueva contraseña
 			</p>
@@ -129,7 +125,10 @@ TODO:
 
 					<form on:submit={handleSubmit} class="space-y-6">
 						<div>
-							<label for="email" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
+							<label
+								for="email"
+								class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+							>
 								Email *
 							</label>
 							<input
@@ -178,8 +177,15 @@ TODO:
 				{:else}
 					<!-- Mensaje de éxito -->
 					<div class="text-center">
-						<div class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-							<svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<div
+							class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100"
+						>
+							<svg
+								class="h-8 w-8 text-green-600"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -199,7 +205,8 @@ TODO:
 
 						<div class="space-y-4">
 							<p class="text-sm text-gray-500">
-								Si no recibís el email en los próximos minutos, revisá tu carpeta de spam o correo no deseado.
+								Si no recibís el email en los próximos minutos, revisá tu carpeta de spam o correo
+								no deseado.
 							</p>
 
 							<button
@@ -233,7 +240,7 @@ TODO:
 							Volver al inicio de sesión
 						</a>
 					</p>
-					
+
 					<p class="text-gray-600">
 						¿No tenés una cuenta?
 						<a href="/signin" class="font-medium text-[rgb(var(--color-primary))] hover:underline">
@@ -247,12 +254,10 @@ TODO:
 		<!-- Información adicional -->
 		<div class="mt-12 text-center">
 			<div class="rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 p-8">
-				<h2 class="mb-4 text-2xl font-semibold text-[rgb(var(--base-color))]">
-					¿Necesitás ayuda?
-				</h2>
+				<h2 class="mb-4 text-2xl font-semibold text-[rgb(var(--base-color))]">¿Necesitás ayuda?</h2>
 				<p class="mx-auto mb-6 max-w-2xl text-gray-600">
-					Si seguís teniendo problemas para acceder a tu cuenta, no dudes en contactarnos. 
-					Nuestro equipo está aquí para ayudarte.
+					Si seguís teniendo problemas para acceder a tu cuenta, no dudes en contactarnos. Nuestro
+					equipo está aquí para ayudarte.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
 					<Button label="Contactar soporte" href="/contact" disabled={false} />

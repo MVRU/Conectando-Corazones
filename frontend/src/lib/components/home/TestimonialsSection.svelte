@@ -72,6 +72,7 @@
 	</div>
 
 	<!-- Carrusel -->
+	<!-- ! Ignorar el error que aparece, está ok -->
 	<div
 		use:swipe={{}}
 		on:swipe-left={showNext}
@@ -93,7 +94,7 @@
 		<div class="mt-6 flex w-full justify-between px-4">
 			<button
 				on:click={showPrev}
-				class="nav-btn flex h-10 w-10 items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 				aria-label="Anterior testimonio"
 			>
 				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,7 +109,7 @@
 
 			<button
 				on:click={showNext}
-				class="nav-btn flex h-10 w-10 items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 				aria-label="Siguiente testimonio"
 			>
 				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,10 +1,4 @@
-<!--
-* Componente: ProgressBar
-	-*- Descripción: barra de progreso con color configurable.
-	-*- Props:
-		-*- percent: número 0-100
-		-*- color: 'green' | 'blue' | 'purple'
--->
+<!-- FIX: este componente ya no se usa, quedó obsoleto, usamos "ProjectProgress" -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';

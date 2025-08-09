@@ -1,3 +1,7 @@
+<!-- TODOs:
+ 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER
+	- [ ] Agregar "..." a la ubicación con un tooltip que muestra la ubicación completa -->
+
 <script lang="ts">
 	import type { Project } from '$lib/types/Project';
 	import Button from '../elements/Button.svelte';

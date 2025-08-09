@@ -23,13 +23,11 @@
 	let googleMapsUrl = '';
 	let intentoEnvio = false;
 
-	// Permite mostrar un botón para omitir el formulario en flujos opcionales
 	export let showSkip = false;
 	export let skipLabel = 'Omitir';
 
 	const dispatch = createEventDispatcher();
 
-	// Ciudades según provincia
 	$: locations = province ? getCitiesByProvince(province) : [];
 	$: if (province && location && !locations.includes(location)) {
 		location = '';
@@ -47,7 +45,6 @@
 		}
 	}
 
-	// Errores reactivos
 	$: errors = {
 		street: isValidStreet(street) ? '' : ERROR_MESSAGES.addressStreetInvalid,
 		streetNumber: isValidStreetNumber(streetNumber) ? '' : ERROR_MESSAGES.addressNumberInvalid,

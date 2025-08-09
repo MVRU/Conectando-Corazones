@@ -1,7 +1,8 @@
-// TODO: unir con mocks/mock-users.ts
+// TODO: unir con mocks/mock-users.ts cuando se resuelvan las inconsistencias con el DER
 
 import type { InstitucionUser } from '$lib/types/User';
 
+// FIX: estos errores son los mismos que se arrastran de mock-users, hay que combinar los dos archivos en uno que coincida con el DER
 export const institucionesMock: InstitucionUser[] = [
     {
         id: '1',

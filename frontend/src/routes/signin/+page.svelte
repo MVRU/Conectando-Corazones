@@ -1,4 +1,6 @@
-<!-- TODO: ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true -->
+<!-- TODOs:
+	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER 
+ 	- [ ] Ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';
