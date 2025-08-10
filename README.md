@@ -76,11 +76,11 @@ El sistema está desarrollado con tecnologías modernas, arquitectura desacoplad
 - Validación oficial con APIs del Estado Argentino
 - Documentación técnica con Swagger y [GitHub Wiki](../../wiki)
 
-> La estructura del proyecto se encuentra organizada en `/frontend`, `/backend` y `/docs`.
+> La estructura del proyecto se encuentra organizada en `/frontend`, `/backend` y `/docs-site`.
 
 ## 📖 Documentación
 
-La documentación técnica y funcional del sistema está disponible en la carpeta [`/docs`](./docs), tanto en inglés como en español siguiendo estándares profesionales. 
+La documentación técnica y funcional del sistema está disponible en la carpeta [`/docs-site/docs`](./docs-site/docs), tanto en inglés como en español siguiendo estándares profesionales.
 
 **Incluye:** arquitectura del sistema, modelos de base de datos, flujos de datos, configuración y más.
 

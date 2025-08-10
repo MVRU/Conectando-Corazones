@@ -1,6 +1,3 @@
-
-## `dev/api/eventos.md`
-```md
 ---
 title: Eventos y auditoría
 ---
@@ -14,3 +11,14 @@ Definiciones de eventos de dominio y logs de auditoría.
 | `proyecto.estado.cambiado` | Backend  | `proyectoId`, `estadoAnterior`, `estadoNuevo` | sí           |
 
 Convención de nombres: `<agregado>.<verbo>` y payloads **inmutables**.
+
+### Ejemplo de payload serializado
+
+```json
+{
+  "evento": "proyecto.creado",
+  "proyectoId": 123,
+  "titulo": "Aula verde",
+  "institucion": "Escuela N° 1"
+}
+```

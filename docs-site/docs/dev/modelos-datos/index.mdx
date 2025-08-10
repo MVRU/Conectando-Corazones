@@ -1,0 +1,10 @@
+---
+title: Modelos de datos
+---
+
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
+## Secciones
+{/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}
+<DocCardList items={useCurrentSidebarCategory().items} />

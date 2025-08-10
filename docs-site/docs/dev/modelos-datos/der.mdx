@@ -1,8 +1,5 @@
-
-## `dev/modelos-datos/der.mdx`
-```mdx
 ---
-title: Diagrama Entidad-Relación (DER)
+title: Diagrama Entidad-Relación
 ---
 
 import Tabs from '@theme/Tabs';
@@ -10,12 +7,15 @@ import TabItem from '@theme/TabItem';
 
 > Esta versión refleja el estado **actual** del esquema. Si cambia el modelo, actualizá este diagrama y el **Diccionario de datos**.
 
+{/* TODO: agregar enlace a DER interactivo con draw.io */}
+
 <Tabs>
   <TabItem value="mermaid" label="Mermaid (editable)">
   
 ```mermaid
 erDiagram
   Usuario ||--o{ Participacion : realiza
+  Proyecto ||--o{ Participacion : recibe
   Institucion ||--o{ Proyecto : crea
   Proyecto ||--o{ Evidencia : contiene
   Proyecto ||--o{ Objetivo : define
@@ -56,3 +56,9 @@ erDiagram
     int    cantidad
     string unidad
   }
+```
+  </TabItem>
+  <TabItem value="png" label="Imagen">
+{/* ![Diagrama DER](./der.png) */}
+  </TabItem>
+</Tabs>

@@ -1,41 +1,40 @@
-# Website
+# Sitio de documentación
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+Este sitio utiliza [Docusaurus](https://docusaurus.io/) para generar páginas estáticas.
 
-## Installation
+## Requisitos
 
-```bash
-yarn
-```
+- Node.js ≥ 18
+- npm
 
-## Local Development
-
-```bash
-yarn start
-```
-
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
-
-## Build
+## Instalación de dependencias
 
 ```bash
-yarn build
+npm install
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
-
-## Deployment
-
-Using SSH:
+## Desarrollo local
 
 ```bash
-USE_SSH=true yarn deploy
+npm start
 ```
 
-Not using SSH:
+Abre un servidor de desarrollo con recarga en caliente.
+
+## Despliegue
 
 ```bash
-GIT_USER=<Your GitHub username> yarn deploy
+npm run deploy
 ```
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+> ! Configurá la variable `GIT_USER` o `USE_SSH=true` si desplegás en GitHub Pages.
+
+## Contribuir a la documentación
+
+1. Editá o agregá archivos en la carpeta [`docs-site`](../docs-site).
+2. Previsualizá los cambios con `npm start`.
+3. Enviá un Pull Request siguiendo la [guía de contribución](../CONTRIBUTING.md).
+
+## Documentación general
+
+La documentación completa del proyecto se encuentra en la carpeta [`docs-site`](../docs-site).
