@@ -5,8 +5,6 @@ title: Guía para desarrolladores
 import DocCardList from '@theme/DocCardList';
 import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
 
-{/* * Enlaces directos para facilitar el mantenimiento sincronizado de código y documentación */}
-
 Bienvenido al área técnica de **Conectando Corazones**. Esta guía reúne los recursos clave para contribuir al proyecto.
 
 ### Prerrequisitos
@@ -16,6 +14,43 @@ Bienvenido al área técnica de **Conectando Corazones**. Esta guía reúne los 
 - SvelteKit
 
 > **Política de actualización**: cada cambio de código debe incluir la actualización de la documentación relacionada en el mismo PR.
+
+## Puesta en marcha rápida
+
+### Backend
+
+1. Instalar dependencias
+   ```bash
+   cd backend
+   npm install
+   ```
+2. Configurar variables de entorno copiando `.env.example` a `.env` y completando credenciales.
+3. Iniciar servidor de desarrollo
+   ```bash
+   npm run dev
+   ```
+   [Detalles en el README del backend](../../../../backend/README.md)
+
+### Frontend
+
+1. Instalar dependencias
+   ```bash
+   cd frontend
+   npm install
+   ```
+2. Definir variables en `.env` según documentación del frontend.
+3. Iniciar aplicación
+   ```bash
+   npm run dev
+   ```
+   [Detalles en el README del frontend](../../../../frontend/README.md)
+
+## Consideraciones de seguridad
+
+- Mantener tokens y datos sensibles fuera del repositorio; usar archivos `.env` y gestores de secretos.
+- Revocar y rotar credenciales comprometidas de inmediato.
+- Evitar registrar información confidencial en logs o mensajes de error.
+
 
 ## Secciones
 {/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}

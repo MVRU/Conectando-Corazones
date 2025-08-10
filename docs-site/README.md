@@ -23,17 +23,25 @@ Abre un servidor de desarrollo con recarga en caliente.
 
 ## Despliegue
 
+Antes de desplegar, definí las variables para GitHub Pages:
+
+```bash
+export GIT_USER=tu_usuario         # -*- reemplazá con tu usuario de GitHub
+# o
+export USE_SSH=true                # -*- habilitá despliegue mediante SSH
+```
+
+Si el sitio se sirve desde un subdirectorio, ajustá `baseUrl` en `docusaurus.config.ts` (por defecto `/`).
+
 ```bash
 npm run deploy
 ```
-
-> ! Configurá la variable `GIT_USER` o `USE_SSH=true` si desplegás en GitHub Pages.
 
 ## Contribuir a la documentación
 
 1. Editá o agregá archivos en la carpeta [`docs-site`](../docs-site).
 2. Previsualizá los cambios con `npm start`.
-3. Enviá un Pull Request siguiendo la [guía de contribución](../CONTRIBUTING.md).
+3. Seguí el proceso para documentación descripto en la [guía de contribución](../CONTRIBUTING.md) antes de abrir un Pull Request.
 
 ## Documentación general
 

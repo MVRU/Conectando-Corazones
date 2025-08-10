@@ -15,3 +15,21 @@ Todo endpoint debe incluir **Request**, **Response** y **Códigos de estado**. S
   "fechaCierre": "2025-09-30",
   "provincia": "Santa Fe"
 }
+```
+
+**Response**
+```json
+{
+  "id": 1,
+  "titulo": "Cocinas para escuela",
+  "fechaInicio": "2025-08-10",
+  "fechaCierre": "2025-09-30",
+  "provincia": "Santa Fe",
+  "estado": "activo"
+}
+```
+
+**Códigos de estado**
+- `201 Created` - proyecto creado
+- `400 Bad Request` - datos inválidos
+- `500 Internal Server Error` - error inesperado

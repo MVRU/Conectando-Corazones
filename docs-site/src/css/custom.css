@@ -122,3 +122,26 @@ table tr:nth-child(2n) {
   border-radius: 8px;
   padding: 0.75rem;
 }
+
+/* Permite que los diagramas Mermaid se expandan y hagan scroll horizontal si exceden el ancho */
+.theme-mermaid,
+.mermaid {
+  overflow: auto;
+}
+
+/* Evita que el SVG se limite al ancho del contenedor */
+.theme-mermaid svg,
+.mermaid svg {
+  max-width: none !important;
+}
+
+/* UX opcional: cursor de “arrastre” cuando hay overflow */
+.theme-mermaid,
+.mermaid {
+  cursor: grab;
+}
+
+.theme-mermaid:active,
+.mermaid:active {
+  cursor: grabbing;
+}

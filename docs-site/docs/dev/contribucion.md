@@ -34,6 +34,6 @@ title: Contribución
 
 ## Documentación relacionada
 
-- Consultá el archivo [CONTRIBUTING.md](../../../CONTRIBUTING.md) para lineamientos generales.
+- Consultá el archivo [CONTRIBUTING.md](https://github.com/MVRU/Conectando-Corazones/blob/main/CONTRIBUTING.md) para lineamientos generales.
 
 <!-- -!- Actualizar estas instrucciones si se modifican los scripts de lint o test. -->

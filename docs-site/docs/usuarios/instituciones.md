@@ -22,4 +22,5 @@ title: Instituciones
 ### Riesgos y limitaciones
 
 - Verifique la veracidad de la información compartida para garantizar la transparencia.
-- ...
+- Limite el acceso a sus proyectos a solo miembros autorizados y actualice los permisos con regularidad.
+- Asegúrese de que las evidencias sean legítimas y que no tengan rostros sin consentimiento.
