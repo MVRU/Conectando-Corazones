@@ -1,0 +1,7 @@
+{
+    "label": "Decisiones (ADR)",
+    "link": {
+        "type": "generated-index",
+        "description": "Registro de decisiones técnicas y su contexto."
+    }
+}

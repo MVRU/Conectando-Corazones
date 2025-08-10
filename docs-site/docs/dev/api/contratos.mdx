@@ -1,0 +1,17 @@
+---
+title: Contratos de API (DTOs)
+---
+
+:::tip
+Todo endpoint debe incluir **Request**, **Response** y **Códigos de estado**. Si cambia el contrato, actualizá este doc en el mismo PR.
+:::
+
+### POST /api/proyectos
+**Request**
+```json
+{
+  "titulo": "Cocinas para escuela",
+  "fechaInicio": "2025-08-10",
+  "fechaCierre": "2025-09-30",
+  "provincia": "Santa Fe"
+}

@@ -1,0 +1,115 @@
+/**
+ * Conectando Corazones — Tema "azul noche" + acentos cian
+ * Enfocado en contraste AA y look similar a la landing.
+ */
+
+/* ===== Base (también para "light") — usamos fondo oscuro como en la landing ===== */
+:root {
+  /* Azul/cian de acento para links y CTA (legible sobre navy) */
+  --ifm-color-primary: #38bdf8;
+  /* sky-400 */
+  --ifm-color-primary-dark: #22a6e6;
+  /* ~sky-500- */
+  --ifm-color-primary-darker: #1b84b6;
+  --ifm-color-primary-darkest: #145b7d;
+  --ifm-color-primary-light: #60d0fb;
+  /* sky-300 */
+  --ifm-color-primary-lighter: #93e0fe;
+  /* sky-200 */
+  --ifm-color-primary-lightest: #d0f0ff;
+  /* sky-100 */
+
+  /* Fondo y superficies (navy) — similar a tu hero */
+  --ifm-background-color: #0c1326;
+  /* navy muy oscuro */
+  --ifm-background-surface-color: #0f1933;
+  /* paneles/cards */
+  --ifm-navbar-background-color: #0c1326;
+  --ifm-footer-background-color: #0a0f20;
+
+  /* Tipografía y radios */
+  --ifm-font-color-base: #e6e8ee;
+  --ifm-heading-color: #eaf2ff;
+  --ifm-code-font-size: 95%;
+  --ifm-button-border-radius: 0.7rem;
+  --ifm-global-radius: 0.8rem;
+  --ifm-alert-border-radius: 0.7rem;
+
+  /* Resaltado en código */
+  --docusaurus-highlighted-code-line-bg: rgba(56, 189, 248, 0.12);
+}
+
+/* Hero: degradé profundo azul → cian (como la landing) */
+.hero--primary {
+  color: #eaf2ff;
+  background: radial-gradient(1200px 600px at 25% 10%, rgba(56, 189, 248, 0.15), transparent 60%),
+    linear-gradient(180deg, #0c1326 0%, #0f1933 55%, #0b1226 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+/* Headings con acento cian-azulado (uso opcional con la clase .cc-gradient-text) */
+.cc-gradient-text {
+  background: linear-gradient(90deg, #8ab4ff 0%, #38bdf8 60%, #c7d2fe 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Cards/paneles más oscuros y suaves */
+.card,
+.theme-admonition,
+.alert {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid rgba(148, 163, 184, 0.10);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+}
+
+/* Links y CTA */
+a:hover {
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+.button--primary {
+  background: var(--ifm-color-primary);
+  color: #05101d;
+  box-shadow: 0 8px 22px rgba(56, 189, 248, 0.25);
+}
+
+.button--primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(56, 189, 248, 0.35);
+}
+
+/* Navbar: borde sutil y blur leve */
+.navbar {
+  backdrop-filter: saturate(120%) blur(6px);
+  box-shadow: 0 1px 0 rgba(148, 163, 184, 0.10);
+}
+
+/* Tablas con rayado sutil */
+table tr:nth-child(2n) {
+  background-color: rgba(56, 189, 248, 0.05);
+}
+
+/* Code blocks al hover */
+.theme-code-block:hover {
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+}
+
+/* ===== Modo oscuro explícito (mantiene la misma paleta, refuerza contraste) ===== */
+[data-theme='dark'] {
+  --ifm-color-primary: #7dd3fc;
+  /* sky-300 para más legibilidad */
+  --ifm-color-primary-light: #a5e4ff;
+  --ifm-color-primary-dark: #38bdf8;
+
+  --ifm-background-color: #0a1122;
+  --ifm-background-surface-color: #0f1933;
+  --ifm-navbar-background-color: #0a1122;
+  --ifm-footer-background-color: #080d1a;
+
+  --ifm-font-color-base: #e8ecf6;
+  --ifm-heading-color: #f0f6ff;
+
+  --docusaurus-highlighted-code-line-bg: rgba(125, 211, 252, 0.14);
+}

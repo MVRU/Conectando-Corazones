@@ -1,0 +1,45 @@
+.hero {
+  padding: 5rem 0 3rem;
+  text-align: left;
+  background:
+    radial-gradient(1200px 600px at 25% 10%, rgba(56, 189, 248, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--ifm-background-color) 0%, #0f1933 55%, #0b1226 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+.kicker {
+  color: #c7d2fe;
+  font-size: 0.95rem;
+  margin: 0 0 .5rem 0;
+  opacity: .9;
+}
+
+.title {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  margin: 0 0 .75rem 0;
+}
+
+.subtitle {
+  max-width: 52rem;
+  color: #d6deff;
+}
+
+.ctaRow {
+  display: flex;
+  gap: .8rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.logosRow {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  opacity: .6;
+  margin-top: 2.2rem;
+}
+
+.logosRow img {
+  height: 26px;
+  filter: grayscale(100%) brightness(1.1);
+}

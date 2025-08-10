@@ -1,0 +1,19 @@
+---
+title: Guía para desarrolladores
+---
+
+import DocCardList from '@theme/DocCardList';
+import {useCurrentSidebarCategory} from '@docusaurus/theme-common';
+
+Bienvenido al área técnica de **Conectando Corazones**. Acá viven:
+
+- **Arquitectura** (frontend SvelteKit, backend Node/Express + TypeScript, PostgreSQL/Prisma).
+- **Modelos de datos**: DER y **Diccionario de datos**.
+- **Contratos de API** (DTOs/request/response), **eventos** y reglas de validación.
+- **ADR** (Architecture Decision Records) que registran decisiones y su porqué.
+
+> **Regla de oro**: si cambia el modelo o el contrato, **actualizá** DER + Diccionario + Contratos en el mismo PR.
+
+## Secciones
+{/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}
+<DocCardList items={useCurrentSidebarCategory().items} />
