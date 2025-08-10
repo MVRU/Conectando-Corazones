@@ -145,3 +145,32 @@ table tr:nth-child(2n) {
 .mermaid:active {
   cursor: grabbing;
 }
+
+/* 3 autores en una sola fila en páginas de post */
+.theme-blog-post-page .margin-vert--md .avatar {
+  /* Asegura que cada autor se comporte como una “tarjeta” flexible */
+  min-width: 0;
+}
+
+@media (min-width: 997px) {
+
+  /* Selecciona el contenedor que agrupa avatares de autores */
+  .theme-blog-post-page .margin-vert--md:has(.avatar) {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--ifm-spacing-sm);
+    align-items: start;
+  }
+}
+
+/* Por si tu versión de Safari/Firefox no soporta :has(), alternativa menos elegante: */
+@supports not (selector(:has(*))) {
+  @media (min-width: 997px) {
+    .theme-blog-post-page .margin-vert--md {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--ifm-spacing-sm);
+      align-items: start;
+    }
+  }
+}

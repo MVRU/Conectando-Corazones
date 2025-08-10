@@ -1,7 +1,7 @@
 ---
 slug: lanzamiento-proyecto
 title: Lanzamiento de Conectando Corazones
-authors: [alexis, marina, tomás]
+authors: [alexis, marina, tomas]
 tags: [lanzamiento]
 ---
 

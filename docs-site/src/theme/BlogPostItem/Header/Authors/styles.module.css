@@ -1,0 +1,54 @@
+.authorsGrid {
+    display: grid;
+    gap: var(--ifm-spacing-sm);
+    grid-template-columns: 1fr;
+    align-items: start;
+    margin: var(--ifm-spacing-vertical) 0;
+}
+
+@media (min-width: 997px) {
+    .authorsGrid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.cell {
+    min-width: 0;
+}
+
+.link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--ifm-color-emphasis-300);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    background: var(--ifm-background-surface-color);
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    object-fit: cover;
+}
+
+.meta {
+    min-width: 0;
+}
+
+.name {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.role {
+    font-size: 0.85rem;
+    color: var(--ifm-color-emphasis-700);
+    line-height: 1.2;
+}
