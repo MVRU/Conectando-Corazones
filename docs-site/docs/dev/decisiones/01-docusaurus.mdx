@@ -1,0 +1,89 @@
+---
+slug: adr-01
+title: "01 - Adopción de Docusaurus para la Documentación"
+tags: [adr]
+---
+
+import Authors from '@site/src/components/Authors';
+
+# Adopción de Docusaurus para la Documentación
+
+#### Fecha de aprobación: ...
+<Authors names={['marina']} />
+
+---
+
+## Contexto
+Hasta el momento, la documentación del proyecto estaba distribuida en diferentes plataformas y formatos:  
+- **Miro** para flujos y diagramas.
+- **Google Drive** para documentos.
+- **GitHub** para código y notas técnicas dispersas.
+- Conversaciones en **chats** y mensajes no estructurados.
+
+**Esta dispersión genera:**
+- Dificultad para encontrar información y decisiones anteriores.
+- Versiones contradictorias de un mismo contenido.
+- Falta de trazabilidad sobre quién, cuándo y por qué se definió algo.
+- Dificultad para reutilizar la documentación técnica en otros formatos (manuales de usuario, guías de instalación, etc.).
+
+Es necesario un **punto único de verdad** *("Single Source of Truth")* para:
+1. Centralizar todo el conocimiento del proyecto en un solo lugar.
+2. Mantener un **historial claro** de cambios y decisiones.
+3. Permitir que todo el equipo participe en la creación y revisión, con control de aprobación antes de su implementación real al sistema.
+4. Facilitar la búsqueda, navegación y consulta de contenido.
+5. Poder reutilizar y versionar el contenido para distintos públicos (usuarios, colaboradores, administradores).
+
+---
+
+## Alternativas consideradas
+
+1. **Markdown plano en el repositorio**
+   - ✔ Simplicidad técnica.
+   - ✘ Sin navegación jerárquica integrada.
+   - ✘ Sin buscador avanzado.
+   - ✘ Sin soporte nativo de versiones y traducciones.
+   
+2. **Wiki de GitHub**
+   - ✔ Edición sencilla y vinculada a GitHub.
+   - ✘ No sigue el mismo flujo de Pull Requests, reduciendo el control de revisiones.
+   - ✘ Pobre personalización visual y sin soporte de plugins avanzados.
+   
+3. **Docusaurus**
+   - ✔ Sitio estático moderno y navegable.
+   - ✔ Integración total con Git y el flujo de PR para control de calidad y aprobación.
+   - ✔ Soporte para búsqueda interna, multidioma, versionado y temas personalizados.
+   - ✔ Compatible con MDX, lo que permite combinar texto, código, diagramas y componentes interactivos.
+   - ✔ Escalable para reutilizar contenido en manuales y guías.
+   - ✘ Requiere instalar y mantener dependencias de Node.js.
+   - ✘ Paso extra de build para generar el sitio.
+
+---
+
+## ¿Decisión?
+Se adopta **Docusaurus** como framework oficial para la documentación del proyecto **Conectando Corazones**.
+
+Este repositorio se convierte en el **repositorio oficial de documentación**, donde se registrarán:
+- Documentación técnica.
+- Manuales de usuario.
+- Architecture Decision Records (ADR).
+- Guías de procesos internos.
+- Historial de decisiones aprobado por el equipo.
+
+Toda nueva propuesta de cambio (arquitectura, flujo, funcionalidad) **solo se implementará en el sistema si está registrada y aprobada en este repositorio** mediante Pull Request con fecha y firma de aprobación.
+
+---
+
+## Consecuencias
+
+### Positivas
+- **Centralización:** toda la documentación vive en un único lugar, eliminando duplicados y contradicciones.
+- **Control y trazabilidad:** cada cambio queda registrado, con autor, fecha y justificación.
+- **Participación colaborativa:** cualquier miembro del equipo puede proponer cambios, sujetos a revisión y aprobación.
+- **Reutilización:** el contenido podrá servir también como base para manuales, FAQs, guías y capacitaciones.
+- **Estructura y búsqueda:** mnor tiempo para encontrar información crítica.
+- **Versionado y multidioma:** posibilidad de mantener múltiples versiones y traducciones de la documentación.
+
+### Negativas
+- Requiere un entorno Node.js y mantener dependencias actualizadas.
+- Necesidad de disciplina del equipo para mantener la documentación actualizada y aprobada antes de aplicar cambios en el código.
+    - ***Aunque esto bien puede ser una ventaja para evitar decisiones unilaterales sin consenso.***

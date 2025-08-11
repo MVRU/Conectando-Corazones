@@ -1,0 +1,14 @@
+---
+title: Contratos de Proyectos
+---
+
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
+:::tip
+Todo endpoint debe incluir **Request**, **Response** y **Códigos de estado**. Si cambia el contrato, se deberá actualizar este doc.
+:::
+
+## Secciones
+{/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}
+<DocCardList items={useCurrentSidebarCategory().items} />
