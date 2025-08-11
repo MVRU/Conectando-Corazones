@@ -87,7 +87,8 @@ const config: Config = {
       title: 'Conectando Corazones',
       logo: {
         alt: 'Logo de Conectando Corazones',
-        src: 'img/logo-1.png',
+        src: 'img/logo-2.png',
+        srcDark: 'img/logo-1.png',
       },
       items: [
         {
@@ -111,8 +112,12 @@ const config: Config = {
           title: 'Documentación',
           items: [
             {
-              label: 'Documentación',
-              to: '/docs/intro',
+              label: 'Para usuarios',
+              to: '/docs/usuarios',
+            },
+            {
+              label: 'Para desarrolladores',
+              to: '/docs/dev',
             },
           ],
         },
@@ -130,7 +135,7 @@ const config: Config = {
           ],
         },
         {
-          title: 'More',
+          title: 'Otros',
           items: [
             {
               label: 'Blog',

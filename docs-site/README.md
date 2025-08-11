@@ -37,11 +37,30 @@ Si el sitio se sirve desde un subdirectorio, ajustá `baseUrl` en `docusaurus.co
 npm run deploy
 ```
 
+## Pruebas locales de la versión estática
+
+Para validar el resultado final antes de publicar:
+
+```bash
+npm run build
+npm run serve
+```
+
+El primer comando genera los archivos estáticos y el segundo los sirve en un servidor local para comprobación.
+
+## Traducciones (i18n)
+
+```bash
+npm run write-translations
+```
+
+El contenido fuente está en español. El comando anterior extrae las cadenas a `i18n/<idioma>` para que puedan traducirse y versionarse.
+
 ## Contribuir a la documentación
 
 1. Editá o agregá archivos en la carpeta [`docs-site`](../docs-site).
 2. Previsualizá los cambios con `npm start`.
-3. Seguí el proceso para documentación descripto en la [guía de contribución](../CONTRIBUTING.md) antes de abrir un Pull Request.
+3. Revisá la [guía de contribución para documentación](../CONTRIBUTING.md#documentacion) antes de abrir un Pull Request.
 
 ## Documentación general
 

@@ -1,7 +1,7 @@
 {
-    "label": "Decisiones (ADR)",
+    "label": "Decisiones (ADRs)",
     "link": {
-        "type": "generated-index",
-        "description": "Registro de decisiones técnicas numeradas secuencialmente (001, 002, ...)."
+        "type": "doc",
+        "id": "dev/decisiones/index"
     }
 }

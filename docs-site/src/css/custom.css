@@ -1,3 +1,7 @@
+/* =========================================================
+   DARK THEME 
+   ========================================================= */
+
 /* ===== Base (también para "light") — usamos fondo oscuro como en la landing ===== */
 :root {
   /* Azul/cian de acento para links y CTA (legible sobre navy) */
@@ -146,31 +150,812 @@ table tr:nth-child(2n) {
   cursor: grabbing;
 }
 
-/* 3 autores en una sola fila en páginas de post */
-.theme-blog-post-page .margin-vert--md .avatar {
-  /* Asegura que cada autor se comporte como una “tarjeta” flexible */
-  min-width: 0;
+/* Fondo suave + sin borde duro */
+.footer {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--ifm-color-primary) 10%, transparent), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%, color-mix(in oklab, var(--ifm-color-primary) 8%, transparent), transparent 55%),
+    color-mix(in oklab, var(--ifm-background-surface-color) 96%, transparent);
+  border-top: none;
+  padding-top: 2.2rem;
+  padding-bottom: 2rem;
 }
 
-@media (min-width: 997px) {
+/* Línea superior sutil y animada */
+.footer::before {
+  content: '';
+  display: block;
+  height: 1px;
+  width: 100%;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--ifm-color-primary) 45%, transparent), transparent);
+  background-size: 200% 100%;
+  animation: footerLine 8s linear infinite;
+  opacity: .5;
+}
 
-  /* Selecciona el contenedor que agrupa avatares de autores */
-  .theme-blog-post-page .margin-vert--md:has(.avatar) {
-    display: grid !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--ifm-spacing-sm);
-    align-items: start;
+@keyframes footerLine {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
   }
 }
 
-/* Por si tu versión de Safari/Firefox no soporta :has(), alternativa menos elegante: */
-@supports not (selector(:has(*))) {
-  @media (min-width: 997px) {
-    .theme-blog-post-page .margin-vert--md {
-      display: grid !important;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ifm-spacing-sm);
-      align-items: start;
-    }
+/* Columnas como grid limpio */
+.footer__links {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+@media (max-width: 996px) {
+  .footer__links {
+    grid-template-columns: 1fr;
   }
+}
+
+/* Títulos y links más finos */
+.footer__title {
+  font-weight: 650;
+  margin-bottom: .6rem;
+}
+
+.footer__link-item {
+  color: var(--ifm-color-emphasis-700);
+  transition: color .2s ease, transform .2s ease;
+}
+
+.footer__link-item:hover {
+  color: var(--ifm-color-primary);
+  transform: translateX(2px);
+}
+
+/* Copyright centrado y discreto */
+.footer__bottom {
+  border-top: none;
+  margin-top: 1.2rem;
+  padding-top: .8rem;
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+}
+
+/* ===== Hero wrapper ===== */
+.hero {
+  position: relative;
+  overflow: clip;
+  /* evita scroll por orbes */
+  padding: 96px 0 48px;
+  background:
+    radial-gradient(1200px 600px at 100% -10%,
+      color-mix(in oklab, var(--ifm-color-primary) 10%, transparent), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%,
+      color-mix(in oklab, var(--ifm-color-primary) 8%, transparent), transparent 55%),
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--ifm-background-surface-color) 98%, transparent),
+      color-mix(in oklab, var(--ifm-background-surface-color) 92%, transparent) 60%,
+      transparent);
+}
+
+.heroInner {
+  position: relative;
+  z-index: 1;
+  max-width: 1100px;
+}
+
+/* ===== Fondo dinámico ===== */
+.heroBg {
+  --parallaxX: 0px;
+  --parallaxY: 0px;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  width: 42vmin;
+  height: 42vmin;
+  border-radius: 50%;
+  filter: blur(24px);
+  opacity: .55;
+  transform: translate(var(--parallaxX), var(--parallaxY));
+  animation: float 14s ease-in-out infinite;
+}
+
+.o1 {
+  left: -6%;
+  top: -8%;
+  background: radial-gradient(60% 60% at 40% 35%,
+      color-mix(in oklab, var(--ifm-color-primary) 26%, transparent), transparent);
+  animation-delay: 0s;
+}
+
+.o2 {
+  right: -10%;
+  top: 10%;
+  width: 48vmin;
+  height: 48vmin;
+  background: radial-gradient(60% 60% at 60% 45%,
+      color-mix(in oklab, var(--ifm-color-primary) 18%, transparent), transparent);
+  animation-delay: 2.5s;
+}
+
+.o3 {
+  left: 35%;
+  bottom: -20%;
+  width: 50vmin;
+  height: 50vmin;
+  background: radial-gradient(60% 60% at 50% 55%,
+      color-mix(in oklab, var(--ifm-color-primary) 14%, transparent), transparent);
+  animation-delay: 1.2s;
+}
+
+.noise {
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.035'/></svg>");
+  opacity: .4;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translate(var(--parallaxX), calc(var(--parallaxY) + 0px)) scale(1);
+  }
+
+  50% {
+    transform: translate(var(--parallaxX), calc(var(--parallaxY) - 6px)) scale(1.02);
+  }
+}
+
+/* ===== Tipografía ===== */
+.kicker {
+  margin: 0 0 6px;
+  color: var(--ifm-color-emphasis-600);
+  font-size: .95rem;
+  letter-spacing: .2px;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: clamp(2.2rem, 1.5rem + 2.6vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: .2px;
+}
+
+.gradientText {
+  background: linear-gradient(90deg,
+      color-mix(in oklab, var(--ifm-color-primary) 80%, #74c0fc) 0%,
+      #b3e0ff 40%,
+      color-mix(in oklab, var(--ifm-color-primary) 70%, #74c0fc) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 100%;
+  animation: hue 8s ease-in-out infinite;
+}
+
+@keyframes hue {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.subtitle {
+  max-width: 60ch;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 0 22px;
+}
+
+/* ===== CTA ===== */
+.ctaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.primaryBtn {
+  --btn: var(--ifm-color-primary);
+  color: #0b1020;
+  border: none;
+  background: radial-gradient(160% 120% at 0% 0%, white 0%, var(--btn) 60%);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .2);
+  transition: transform 180ms ease, box-shadow 200ms ease, filter 200ms ease;
+}
+
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, .26);
+  filter: saturate(105%);
+}
+
+.primaryBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .2);
+}
+
+.secondaryBtn {
+  border: none;
+  background: color-mix(in oklab, var(--ifm-background-surface-color) 92%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent);
+  transition: transform 180ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.secondaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 38%, transparent),
+    0 10px 26px rgba(0, 0, 0, .16);
+}
+
+/* ===== Scroll cue ===== */
+.scrollCue {
+  display: inline-flex;
+  margin-top: 30px;
+  width: 24px;
+  height: 36px;
+  border-radius: 999px;
+  border: 2px solid color-mix(in oklab, var(--ifm-color-primary) 45%, transparent);
+  justify-content: center;
+  align-items: center;
+  opacity: .7;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.scrollCue:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.scrollDot {
+  width: 4px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--ifm-color-primary) 65%, white);
+  animation: dot 1.8s ease-in-out infinite;
+}
+
+@keyframes dot {
+  0% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+}
+
+/* ===== Motion reduce ===== */
+@media (prefers-reduced-motion: reduce) {
+
+  .gradientText,
+  .orb,
+  .scrollDot {
+    animation: none !important;
+  }
+}
+
+/* =========================================================
+   LIGHT THEME — mantiene el estilo, cambia el tono a claro
+   ========================================================= */
+[data-theme='light'] {
+  /* Paleta primaria (azules limpios, alto contraste en blanco) */
+  --ifm-color-primary: #0ea5e9;
+  /* sky-500 */
+  --ifm-color-primary-dark: #0284c7;
+  /* sky-600 */
+  --ifm-color-primary-darker: #0369a1;
+  /* sky-700 */
+  --ifm-color-primary-darkest: #075985;
+  /* sky-800 */
+  --ifm-color-primary-light: #38bdf8;
+  /* sky-400 */
+  --ifm-color-primary-lighter: #7dd3fc;
+  /* sky-300 */
+  --ifm-color-primary-lightest: #bae6fd;
+  /* sky-200 */
+
+  /* Fondos claros y superficies */
+  --ifm-background-color: #ffffff;
+  /* page */
+  --ifm-background-surface-color: #f8fafc;
+  /* cards/paneles (slate-50) */
+  --ifm-navbar-background-color: rgba(255, 255, 255, .85);
+  --ifm-footer-background-color: #f8fafc;
+
+  /* Tipografía */
+  --ifm-font-color-base: #0f172a;
+  /* slate-900 */
+  --ifm-heading-color: #0b1226;
+  /* tu navy oscuro como título */
+  --ifm-color-emphasis-700: #334155;
+  /* slate-700 para textos secundarios */
+
+  /* Código y resaltados */
+  --docusaurus-highlighted-code-line-bg: rgba(14, 165, 233, 0.10);
+}
+
+[data-theme='light'] .navbar {
+  backdrop-filter: saturate(120%) blur(8px);
+  box-shadow: 0 1px 0 rgba(2, 6, 23, 0.06);
+  border-bottom: 1px solid rgba(2, 6, 23, 0.05);
+}
+
+[data-theme='light'] .hero.hero--primary {
+  color: var(--ifm-heading-color);
+  background:
+    radial-gradient(1200px 600px at 25% 10%, rgba(14, 165, 233, 0.12), transparent 60%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 65%, #ffffff 100%);
+  border-bottom: 1px solid rgba(2, 6, 23, 0.06);
+}
+
+[data-theme='light'] .cc-gradient-text {
+  background: linear-gradient(90deg, #075985 0%, #0ea5e9 60%, #2563eb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-theme='light'] .card,
+[data-theme='light'] .theme-admonition,
+[data-theme='light'] .alert {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow:
+    0 8px 16px rgba(2, 6, 23, 0.06),
+    0 2px 8px rgba(2, 6, 23, 0.04);
+}
+
+[data-theme='light'] .card:hover,
+[data-theme='light'] .cardLink:hover,
+[data-theme='light'] .card:focus-within,
+[data-theme='light'] .cardLink:focus-visible {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 18px 36px rgba(2, 6, 23, 0.10),
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent),
+    0 0 0 1px rgba(2, 6, 23, 0.03);
+}
+
+[data-theme='light'] .iconWrap {
+  background:
+    radial-gradient(120% 120% at 30% 30%,
+      color-mix(in oklab, var(--ifm-color-primary) 16%, transparent), transparent 60%),
+    #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(2, 6, 23, 0.06);
+}
+
+[data-theme='light'] .button--primary {
+  background: var(--ifm-color-primary-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(2, 6, 23, .12);
+}
+
+[data-theme='light'] .button--primary:hover {
+  background: var(--ifm-color-primary-darker);
+  box-shadow: 0 14px 28px rgba(2, 6, 23, .16);
+}
+
+[data-theme='light'] .button--secondary {
+  background: #ffffff;
+  color: var(--ifm-color-emphasis-700);
+  box-shadow: inset 0 0 0 1px rgba(2, 6, 23, 0.10);
+}
+
+[data-theme='light'] .button--secondary:hover {
+  background: color-mix(in oklab, var(--ifm-color-primary) 8%, #ffffff);
+  color: #0b1226;
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent),
+    0 10px 20px rgba(2, 6, 23, 0.10);
+}
+
+[data-theme='light'] a:hover {
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+[data-theme='light'] table tr:nth-child(2n) {
+  background-color: rgba(2, 6, 23, 0.03);
+}
+
+[data-theme='light'] .theme-code-block {
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  background: #fff;
+}
+
+[data-theme='light'] .theme-code-block:hover {
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.18);
+}
+
+[data-theme='light'] .theme-mermaid,
+[data-theme='light'] .mermaid {
+  background: #ffffff;
+  border: 1px solid rgba(2, 6, 23, 0.08);
+  border-radius: 8px;
+  padding: .75rem;
+  overflow: auto;
+}
+
+[data-theme='light'] .footer {
+  background:
+    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--ifm-color-primary) 8%, transparent), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%, color-mix(in oklab, var(--ifm-color-primary) 6%, transparent), transparent 55%),
+    #f8fafc;
+  border-top: 1px solid rgba(2, 6, 23, 0.06);
+}
+
+[data-theme='light'] .footer__bottom {
+  color: var(--ifm-color-emphasis-700);
+}
+
+[data-theme='light'] .orb {
+  opacity: .35;
+  filter: blur(18px);
+}
+
+[data-theme='light'] .noise {
+  opacity: .15;
+  mix-blend-mode: multiply;
+}
+
+[data-theme='light'] .subtitle,
+[data-theme='light'] .sectionSubtitle {
+  color: #475569;
+}
+
+[data-theme='light'] .kicker {
+  color: #64748b;
+}
+
+[data-theme='light'] .subtitle {
+  color: #475569;
+}
+
+[data-theme='light'] .navbar__link,
+[data-theme='light'] .footer__link-item {
+  color: #334155;
+}
+
+[data-theme='light'] .navbar__link:hover,
+[data-theme='light'] .footer__link-item:hover {
+  color: var(--ifm-color-primary-dark);
+}
+
+[data-theme='light'] {
+  --ifm-tabs-color: #334155;
+  --ifm-tabs-color-active: #0b1226;
+  --ifm-tabs-color-active-border: #0ea5e9;
+}
+
+[data-theme='light'] .tabs__item {
+  color: var(--ifm-tabs-color);
+}
+
+[data-theme='light'] .tabs__item--active {
+  color: var(--ifm-tabs-color-active);
+  border-bottom-color: var(--ifm-tabs-color-active-border);
+}
+
+[data-theme='light'] .cardTitle {
+  color: #0b1226;
+}
+
+[data-theme='light'] .cardText {
+  color: #475569;
+}
+
+[data-theme='light'] .icon {
+  color: var(--ifm-color-primary-dark);
+  opacity: .95;
+}
+
+[data-theme='light'] .button--secondary {
+  color: #0b1226;
+}
+
+[data-theme='light'] .button--secondary:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--ifm-color-primary) 38%, transparent);
+  outline-offset: 2px;
+}
+
+[data-theme='light'] {
+  --ifm-code-background: #f1f5f9;
+  --ifm-code-color: #0b1226;
+}
+
+[data-theme='light'] code:not(.hljs) {
+  background: var(--ifm-code-background);
+  color: var(--ifm-code-color);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  border-radius: .35rem;
+  padding: .12em .35em;
+}
+
+[data-theme='light'] .menu__link {
+  color: #334155;
+}
+
+[data-theme='light'] .menu__link--active,
+[data-theme='light'] .menu__link:hover {
+  color: #0b1226;
+}
+
+@supports (text-shadow: 0 1px 0 #000) {
+  [data-theme='light'] .hero.hero--primary .hero__title {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .4);
+  }
+}
+
+[data-theme='light'] .cc-gradient-text {
+  background: linear-gradient(90deg, #0369a1 0%, #0ea5e9 55%, #2563eb 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-theme='light'] .hero__subtitle,
+[data-theme='light'] .subtitle {
+  color: #334155;
+}
+
+[data-theme='light'] .footer__title {
+  color: #0b1226;
+}
+
+/* =============================
+   Animaciones globales (ambos temas)
+   ============================= */
+.card,
+.cardLink {
+  transition:
+    transform 180ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+.card:hover,
+.cardLink:hover,
+.card:focus-within,
+.cardLink:focus-visible {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 18px 36px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent);
+}
+
+/* Botones */
+.button--primary,
+.button--secondary {
+  transition:
+    transform 180ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease,
+    filter 200ms ease;
+}
+
+/* Títulos y gradient text animado */
+.cc-gradient-text {
+  background-size: 200% 100%;
+  animation: hue 8s ease-in-out infinite;
+}
+
+@keyframes hue {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* =============================
+   Tema oscuro: reusar interacciones
+   ============================= */
+[data-theme='dark'] .card:hover,
+[data-theme='dark'] .cardLink:hover,
+[data-theme='dark'] .card:focus-within,
+[data-theme='dark'] .cardLink:focus-visible {
+  box-shadow:
+    0 18px 36px rgba(2, 6, 23, 0.35),
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent);
+}
+
+[data-theme='dark'] .button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(56, 189, 248, 0.35);
+}
+
+[data-theme='dark'] .button--secondary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 38%, transparent),
+    0 10px 26px rgba(0, 0, 0, 0.16);
+}
+
+/* =========================================================
+   Identidad tipográfica y acentos Conectando Corazones
+   ========================================================= */
+
+/* Paleta semántica (común) */
+:root {
+  --cc-accent: var(--ifm-color-primary);
+  --cc-accent-strong: color-mix(in oklab, var(--ifm-color-primary) 85%, #1f3b5b);
+  --cc-muted: var(--ifm-color-emphasis-700);
+
+  /* Colores por jerarquía (se sobreescriben por tema) */
+  --cc-h1: #8ab4ff;
+  /* fallback */
+  --cc-h2: #7dd3fc;
+  /* fallback */
+  --cc-h3: var(--ifm-heading-color);
+}
+
+/* Tema oscuro: h1/h2 luminosos, resto como está */
+[data-theme='dark'] {
+  --cc-h1: #8ab4ff;
+  /* azul suave con brillo */
+  --cc-h2: #7dd3fc;
+  /* cian elegante */
+  --cc-h3: var(--ifm-heading-color);
+  --cc-hr: rgba(125, 211, 252, .28);
+  --cc-quote-bg: rgba(125, 211, 252, .07);
+  --cc-quote-border: rgba(125, 211, 252, .25);
+}
+
+/* Tema claro: h1/h2 más densos para contraste AA+ */
+[data-theme='light'] {
+  --cc-h1: #0b5ea8;
+  /* azul profundo */
+  --cc-h2: #0284c7;
+  /* sky-600 */
+  --cc-h3: #0b1226;
+  --cc-hr: rgba(2, 132, 199, .22);
+  --cc-quote-bg: rgba(14, 165, 233, .06);
+  --cc-quote-border: rgba(14, 165, 233, .28);
+}
+
+/* ============ Headings por jerarquía ============ */
+/* Docs/MD y componentes de Docusaurus usan estas clases/etiquetas */
+.markdown h1,
+.hero .hero__title,
+h1 {
+  color: var(--cc-h1);
+  /* sutil subrayado degradado solo en MD (no en hero) */
+}
+
+.markdown h1 {
+  position: relative;
+  padding-bottom: .25rem;
+}
+
+.markdown h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--cc-h1), transparent 70%);
+  opacity: .25;
+}
+
+.markdown h2,
+h2 {
+  color: var(--cc-h2);
+}
+
+.markdown h2 {
+  position: relative;
+  scroll-margin-top: 84px;
+  /* mejor anclado */
+}
+
+.markdown h2::before {
+  /* barrita a la izquierda, minimal */
+  content: "";
+  position: absolute;
+  left: -0.9rem;
+  top: .25rem;
+  width: 4px;
+  height: 1.1em;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--cc-h2), color-mix(in oklab, var(--cc-h2) 20%, transparent));
+  opacity: .35;
+}
+
+.markdown h3,
+h3 {
+  color: var(--cc-h3);
+  letter-spacing: .1px;
+}
+
+/* Mantener h4/h5/h6 como estaban; solo afinamos el color mutedo en MD */
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+  color: var(--ifm-heading-color);
+}
+
+/* ============ Acentos suaves y elementos comunes ============ */
+
+/* Línea <hr> con tinte del primario */
+.markdown hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cc-hr), transparent);
+}
+
+/* Blockquote con “papel” suave y borde teñido */
+.markdown blockquote {
+  background: var(--cc-quote-bg);
+  border-left: 4px solid var(--cc-quote-border);
+  border-radius: 8px;
+  padding: .75rem .9rem;
+  color: var(--ifm-font-color-base);
+}
+
+/* Listas: bullets con color del primario (no cambia el texto) */
+.markdown ul>li::marker {
+  color: color-mix(in oklab, var(--ifm-color-primary) 85%, var(--ifm-font-color-base));
+}
+
+.markdown ol>li::marker {
+  color: color-mix(in oklab, var(--ifm-color-primary) 70%, var(--ifm-font-color-base));
+}
+
+/* Tablas: encabezado con hairline del primario */
+.markdown table thead th {
+  border-bottom: 2px solid color-mix(in oklab, var(--ifm-color-primary) 30%, transparent);
+}
+
+/* Enlaces in‑content: hover sutil con subrayado tintado */
+.markdown a {
+  text-decoration-color: color-mix(in oklab, var(--ifm-color-primary) 40%, transparent);
+  text-underline-offset: 2px;
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+
+.markdown a:hover {
+  color: var(--ifm-color-primary-dark);
+  text-decoration-color: var(--ifm-color-primary);
+}
+
+/* Cards de listas de documentación: coherencia con tu sheen/hover */
+a.card .card__header h2,
+a.card .card__header h3 {
+  color: var(--ifm-heading-color);
+  transition: color .18s ease, transform .18s ease;
+}
+
+a.card:hover .card__header h2,
+a.card:hover .card__header h3 {
+  color: var(--ifm-color-primary-dark);
+  transform: translateX(2px);
 }

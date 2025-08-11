@@ -21,6 +21,10 @@ title: Contribución
 - Mensajes en imperativo y breves (máx. 72 caracteres).
 - Commits pequeños y enfocados.
 
+## Registro de decisiones
+
+- Toda decisión técnica relevante debe documentarse mediante un ADR numerado en [decisiones](/docs/dev/decisiones/index).
+
 ## Flujo previo a un Pull Request
 
 1. Asegurar que las dependencias estén instaladas en el paquete afectado.

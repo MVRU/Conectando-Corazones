@@ -22,8 +22,8 @@ export default function Home(): JSX.Element {
             transparencia.
           </p>
           <div className={styles.ctaRow}>
-            <Link className="button button--primary button--lg" to="https://conectando-corazones.vercel.app/signin">
-              Registrarse
+            <Link className="button button--primary button--lg" to="docs/usuarios">
+              Guía para usuarios
             </Link>
             <Link className="button button--secondary button--lg" to="/docs/dev">
               Guía para desarrolladores

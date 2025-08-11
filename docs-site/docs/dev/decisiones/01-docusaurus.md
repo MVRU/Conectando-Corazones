@@ -1,5 +1,5 @@
 ---
-title: "001 - Adopción de Docusaurus para la documentación"
+title: "01 - Adopción de Docusaurus para la documentación"
 ---
 
 ## Contexto

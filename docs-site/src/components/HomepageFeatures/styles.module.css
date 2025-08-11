@@ -1,37 +1,204 @@
+/* ====== Fondo elegante (gradientes suaves) ====== */
 .features {
-  padding: 3rem 0 4rem;
+  padding: 3.6rem 0;
+  background:
+    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--ifm-color-primary) 10%, transparent), transparent 60%),
+    radial-gradient(900px 400px at -10% 110%, color-mix(in oklab, var(--ifm-color-primary) 8%, transparent), transparent 55%);
 }
 
+.container {
+  max-width: 1100px;
+}
+
+/* ====== Títulos ====== */
 .sectionTitle {
   text-align: center;
-  margin-bottom: 2rem;
-}
-
-.card {
-  margin-bottom: 1.25rem;
-  text-align: left;
-  background: var(--ifm-background-surface-color);
-  border: 1px solid rgba(148, 163, 184, 0.10);
-  border-radius: var(--ifm-global-radius);
-  padding: 1.25rem;
-  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.25);
-}
-
-.iconWrap {
-  width: 42px;
-  height: 42px;
+  font-size: clamp(1.7rem, 1.1rem + 1.5vw, 2.2rem);
   margin-bottom: .5rem;
+  letter-spacing: .2px;
 }
 
-.iconWrap img {
-  width: 100%;
+.sectionSubtitle {
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+  margin: 0 auto 1.5rem;
+  max-width: 62ch;
+}
+
+/* ====== Tabs ====== */
+.tabs {
+  margin-top: 1rem;
+}
+
+/* ====== Grid ====== */
+.grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-top: 14px;
+}
+
+.cell {
+  min-width: 0;
+}
+
+/* ====== Tarjeta: menos borde, más “glass” y sombra suave ====== */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* icono + textos centrados */
+  text-align: center;
   height: 100%;
+  padding: 20px 18px 22px;
+  border-radius: 16px;
+
+  /* Sin borde duro: apenas una línea interna (hairline) + sombra suave */
+  border: none;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, .18),
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 14%, transparent);
+
+  background:
+    linear-gradient(180deg,
+      color-mix(in oklab, var(--ifm-background-surface-color) 92%, transparent),
+      color-mix(in oklab, var(--ifm-background-surface-color) 85%, transparent));
+  transition:
+    transform 240ms cubic-bezier(.2, .8, .2, 1),
+    box-shadow 240ms ease,
+    background 240ms ease;
 }
 
+/* Blur real donde esté disponible */
+@supports (backdrop-filter: blur(8px)) {
+  .card {
+    background: color-mix(in oklab, var(--ifm-background-surface-color) 78%, transparent);
+    backdrop-filter: saturate(115%) blur(10px);
+  }
+}
+
+/* Hover/Focus: elevar con glow muy sutil y micro-scale */
+.card:hover,
+.cardLink:hover,
+.card:focus-within,
+.cardLink:focus-visible {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, .22),
+    inset 0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 28%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--ifm-color-primary) 12%, transparent);
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.cardLink:focus-visible {
+  outline: 3px solid color-mix(in oklab, var(--ifm-color-primary) 38%, transparent);
+  outline-offset: 4px;
+}
+
+/* ====== Icono centrado con halo y animación suave ====== */
+.iconWrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  background:
+    radial-gradient(120% 120% at 30% 30%, color-mix(in oklab, var(--ifm-color-primary) 22%, transparent), transparent 60%),
+    color-mix(in oklab, var(--ifm-background-surface-color) 86%, transparent);
+  position: relative;
+}
+
+/* Halo animado (muy discreto) */
+.iconWrap::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  opacity: .0;
+  background: radial-gradient(100% 100% at 50% 50%, color-mix(in oklab, var(--ifm-color-primary) 22%, transparent), transparent 60%);
+  transition: opacity 300ms ease, transform 300ms ease;
+  transform: scale(.96);
+}
+
+.card:hover .iconWrap::after,
+.card:focus-within .iconWrap::after {
+  opacity: .6;
+  transform: scale(1);
+}
+
+.icon {
+  width: 28px;
+  height: 28px;
+  stroke-width: 1.9;
+  color: var(--ifm-color-primary);
+  animation: iconFloat 5.5s ease-in-out infinite;
+}
+
+/* ====== Tipografía ====== */
 .cardTitle {
-  margin: .25rem 0 .35rem;
+  font-size: 1.08rem;
+  margin: 2px 0 6px;
+  line-height: 1.25;
+  letter-spacing: .15px;
 }
 
 .cardText {
-  opacity: .9;
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  max-width: 44ch;
+}
+
+/* ====== Sheen (brillo ligero) al pasar el mouse ====== */
+.cardLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, .06) 50%, transparent 60%);
+  background-size: 200% 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease, background-position 600ms ease;
+}
+
+.cardLink:hover::after {
+  opacity: 1;
+  background-position: -100% 0;
+}
+
+/* ====== Animaciones ====== */
+@keyframes iconFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* ====== Motion reduce ====== */
+@media (prefers-reduced-motion: reduce) {
+
+  .card,
+  .cardLink {
+    transition: none;
+    transform: none !important;
+  }
+
+  .icon {
+    animation: none;
+  }
+
+  .cardLink::after {
+    display: none;
+  }
 }

@@ -22,5 +22,8 @@ Entidad validada (escuela, hospital, comedor, etc.) que propone proyectos y reci
 ### Colaborador
 Persona u organización que ofrece recursos, voluntariado o donaciones para los proyectos publicados.
 
+### Administrador
+Usuario con privilegios de supervisión que gestiona la plataforma y resuelve incidencias. Consulta la [guía para administradores](usuarios/administradores) para más detalles.
+
 ### Desarrollador
 Profesional o voluntario que contribuye al código y evolución de la plataforma, garantizando su calidad y sostenibilidad.
