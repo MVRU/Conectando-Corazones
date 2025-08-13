@@ -1,8 +1,7 @@
-// FIX: difiere del DER y se arrastra hace tiempo
 
 export interface Contacto {
-    responsable: string;
-    telefono: string;
-    email: string;
-    sitioWeb: string;
-}
+    tipo_contacto: 'email' | 'telefono' | 'web' | 'red_social' | 'otro';
+    valor: string;
+    etiqueta: 'principal' | 'secundario' | 'opcional';
+                                                                        }
+                                                                        
