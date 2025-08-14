@@ -5,4 +5,5 @@ export interface Resena {
   contenido: string;
   puntaje: number;
   aprobado?: boolean;
+  username: string;
 }
