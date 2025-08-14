@@ -1,591 +1,578 @@
-// FIX: corregir todo esto luego de corregir el type
 
-import type { Proyecto } from '$lib/types/Proyecto';
+import type { Proyecto } from '../types/Proyecto';
+import { mockUsuarios } from './mock-usuarios';
+import { localidades } from './mock-localidades';
+import { categorias } from './mock-categorias';
 
-export const proyectos: Proyecto[] = [
+export const mockProyectos: Proyecto[] = [
   {
     id_proyecto: 1,
-    titulo: "Un libro, un sueño",
-    descripcion: "Una escuela rural necesita libros para su biblioteca escolar. Con tu ayuda, podemos proporcionar materiales educativos que inspiren a los niños a soñar más allá de su entorno.",
-    url_portada: "/img/proyectos-1.webp", // FIX: difiere del DER
-    created_at: "2025-07-15", // FIX: created_at
-    estado: "Abierto",
-    institucion: { id: "1", razonSocial: "Escuela Esperanza" },
-    fechaCierre: "2025-10-30",
-    provincia: "Santa Fe", // FIX: difiere del DER, ¿para qué tenés la ubicación?
-    ciudad: "Rosario", // FIX: difiere del DER, ¿para qué tenés la ubicación?
-    urgencia: "Alta",
-    beneficiarios: 150,
-    deadline: "2025-06-30", // FIX: difiere del DER y se repite con fechaCierre
-    ubicacion: "Rosario, Santa Fe", // FIX: difiere del DER
-    contacto: { // FIX: todo esto difiere del DER
-      responsable: "Prof. Marta Fernández",
-      telefono: "+54 341 123-4567",
-      email: "mfernandez@escuelaesperanza.edu.ar",
-      sitioWeb: "escuelaesperanza.edu.ar"
-    },
-    objetivos: [ // FIX: difiere del DER y es participacion_permitida, no objetivos, redundante con atributo objetivo
+    titulo: 'Un libro, un sueño',
+    descripcion: 'Campaña para recolectar libros infantiles y donarlos a niños de bajos recursos.',
+    url_portada: '/proyectos/libro-sueno.jpg',
+    created_at: new Date('2025-03-01'),
+    fecha_cierre_postulaciones: new Date('2025-04-01'),
+    fecha_fin_tentativa: new Date('2025-06-01'),
+//    modalidad: 'presencial',
+  id_chat_firebase: 1001,
+    estado_id: 1,
+    participacion_permitida_ids: [1, 2],
+    categoria_ids: [1],
+    colaboracion_ids: [1, 2],
+    institucion_id: 1,
+    colaborador_ids: [1, 2],
+    direccion_id: 1,
+    evidencia_ids: [1],
+    solicitud_finalizacion_ids: [1],
+    estado: { id_estado: 1, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "materiales",
-        especie: "libros", // FIX: difiere del DER y se arrastra hace tiempo
+        id_proyecto: 1,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 20,
+        actual: 12,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+      },
+      {
+        id_proyecto: 1,
+        id_tipo_participacion: 2,
+        unidad: 'libros',
         objetivo: 200,
-        cantidad: 150 // FIX: en DER está como actual
+        actual: 150,
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+      }
+    ],
+  categorias: [categorias[1]],
+    colaboraciones: [
+      { id_colaboracion: 1, estado: 'aceptada', created_at: new Date('2025-03-05') },
+      { id_colaboracion: 2, estado: 'pendiente', created_at: new Date('2025-03-10') }
+    ],
+    institucion: mockUsuarios.escuela_esperanza,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 1,
+      calle: 'San Martín',
+      numero: '456',
+      piso: '1',
+      departamento: 'A',
+      referencia: 'Frente a la plaza principal',
+      url_google_maps: 'https://maps.google.com/?q=San+Martín+456',
+      localidad_id: localidades[3].id_localidad,
+      localidad: localidades[3]
+    },
+    evidencias: [
+      {
+        id_evidencia: 1,
+        descripcion: 'Fotos de la entrega de libros',
+        created_at: new Date('2025-06-02'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 1,
+        descripcion: 'Proyecto finalizado con éxito',
+        created_at: new Date('2025-06-03'),
+        evidencia_ids: [1],
+        evidencias: []
       }
     ]
   },
-
-  /** -----------------------------------------------------------------------------------------
-   *   FIX: TODOS LOS DEMÁS DATOS 
-   *  ----------------------------------------------------------------------------------------*/
-
   {
     id_proyecto: 2,
-    titulo: "Comedores con alma",
-    "descripcion": "Un comedor comunitario en una zona urbana marginal requiere alimentos no perecederos para alimentar a más de 50 familias semanales. Tu contribución garantizará que nadie pase hambre.",
-    institucion: { id: "2", razonSocial: "Comedor Los Pinos" },
-    created_at: "2025-07-01",
-    fechaCierre: "2025-10-30",
-    provincia: "Buenos Aires",
-    ciudad: "La Plata",
-    estado: "Abierto",
-    urgencia: "Media",
-    beneficiarios: 75,
-    deadline: "2025-07-30",
-    imagen: "/img/proyectos-2.webp",
-    ubicacion: "La Plata, Buenos Aires",
-    objetivos: [
+    titulo: 'Comedores con alma',
+    descripcion: 'Red de comedores comunitarios para brindar alimentos a familias vulnerables.',
+    url_portada: '/proyectos/comedores-alma.jpg',
+    created_at: new Date('2025-02-10'),
+    fecha_cierre_postulaciones: new Date('2025-03-10'),
+    fecha_fin_tentativa: new Date('2025-05-10'),
+   // modalidad: 'presencial',
+  id_chat_firebase: 1002,
+    estado_id: 2,
+    participacion_permitida_ids: [1],
+    categoria_ids: [2],
+    colaboracion_ids: [3],
+    institucion_id: 2,
+    colaborador_ids: [3, 4],
+    direccion_id: 2,
+    evidencia_ids: [2],
+    solicitud_finalizacion_ids: [2],
+    estado: { id_estado: 2, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 50000,
-        cantidad: 0
+        id_proyecto: 2,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 30,
+        actual: 18,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
       },
       {
-        unidad: "materiales",
-        especie: "kilogramos",
-        objetivo: 300,
-        cantidad: 100
-      },
+        id_proyecto: 2,
+        id_tipo_participacion: 2,
+        unidad: 'platos',
+        objetivo: 1000,
+        actual: 700,
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+      }
+    ],
+  categorias: [categorias[0]],
+    colaboraciones: [
+      { id_colaboracion: 3, estado: 'aceptada', created_at: new Date('2025-02-15') }
+    ],
+    institucion: mockUsuarios.comedor_los_pinos,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 2,
+      calle: 'Calle 8',
+      numero: '456',
+      referencia: 'Barrio Norte',
+      url_google_maps: 'https://maps.google.com/?q=Calle+8+456',
+      localidad_id: localidades[1].id_localidad,
+      localidad: localidades[1]
+    },
+    evidencias: [
       {
-        unidad: "voluntarios",
-        especie: "repartidores",
-        objetivo: 10,
-        cantidad: 10
+        id_evidencia: 2,
+        descripcion: 'Registro fotográfico de la entrega de alimentos',
+        created_at: new Date('2025-05-11'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 2,
+        descripcion: 'Cierre exitoso de la campaña',
+        created_at: new Date('2025-05-12'),
+        evidencia_ids: [2],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 3,
-    titulo: "Hogar de sonrisas",
-    descripcion: "Un hogar de niños con discapacidades necesita voluntarios para organizar talleres artísticos y recreativos. Tu tiempo y talento pueden marcar una diferencia significativa en sus vidas.",
-    institucion: { id: "3", razonSocial: "Fundación Siempre" },
-    created_at: "2025-03-01",
-    fechaCierre: "2025-08-15",
-    provincia: "Córdoba",
-    ciudad: "Córdoba Capital",
-    estado: "En ejecución",
-    urgencia: "Baja",
-    beneficiarios: 80,
-    deadline: "2025-08-15",
-    imagen: "/img/proyectos-3.webp",
-    ubicacion: "Córdoba Capital, Córdoba",
-    objetivos: [
+    titulo: 'Hogar de sonrisas',
+    descripcion: 'Acompañamiento y contención a niños en situación de vulnerabilidad.',
+    url_portada: '/proyectos/hogar-sonrisas.jpg',
+    created_at: new Date('2025-01-20'),
+    fecha_cierre_postulaciones: new Date('2025-02-20'),
+    fecha_fin_tentativa: new Date('2025-04-20'),
+   // modalidad: 'presencial',
+  id_chat_firebase: 1003,
+    estado_id: 3,
+    participacion_permitida_ids: [2],
+    categoria_ids: [3],
+    colaboracion_ids: [4],
+    institucion_id: 3,
+    colaborador_ids: [5],
+    direccion_id: 3,
+    evidencia_ids: [3],
+    solicitud_finalizacion_ids: [3],
+    estado: { id_estado: 3, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "voluntarios",
-        especie: "talleristas",
-        objetivo: 20,
-        cantidad: 25
+        id_proyecto: 3,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 10,
+        actual: 7,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+      }
+    ],
+  categorias: [categorias[2]],
+    colaboraciones: [
+      { id_colaboracion: 4, estado: 'aceptada', created_at: new Date('2025-01-25') }
+    ],
+    institucion: mockUsuarios.fundacion_siempre,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 3,
+      calle: 'Av. Belgrano',
+      numero: '123',
+      referencia: 'Frente a la plaza central',
+      url_google_maps: 'https://maps.google.com/?q=Av+Belgrano+123',
+      localidad_id: localidades[0].id_localidad,
+      localidad: localidades[0]
+    },
+    evidencias: [
+      {
+        id_evidencia: 3,
+        descripcion: 'Testimonios y fotos de los niños beneficiados',
+        created_at: new Date('2025-04-21'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 3,
+        descripcion: 'Proyecto cerrado con éxito',
+        created_at: new Date('2025-04-22'),
+        evidencia_ids: [3],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 4,
-    titulo: "Equipamiento Médico Hospitalario",
-    descripcion: "Adquisición de equipos médicos esenciales para el hospital público de la comunidad: desfibrilador, monitor multiparamétrico y bomba de infusión.",
-    institucion: { id: "4", razonSocial: "Hospital General San José" },
-    created_at: "2025-01-01",
-    fechaCierre: "2025-05-31",
-    provincia: "Mendoza",
-    ciudad: "Mendoza Capital",
-    estado: "Finalizado",
-    urgencia: "Alta",
-    beneficiarios: 500,
-    deadline: "2024-05-31",
-    imagen: "/img/proyectos-4.webp",
-    ubicacion: "Mendoza Capital, Mendoza",
-    objetivos: [
+    titulo: 'Equipamiento Médico Hospitalario',
+    descripcion: 'Adquisición de equipamiento médico para mejorar la atención en hospitales públicos.',
+    url_portada: '/proyectos/equipamiento-medico.jpg',
+    created_at: new Date('2025-04-01'),
+    fecha_cierre_postulaciones: new Date('2025-05-01'),
+    fecha_fin_tentativa: new Date('2025-07-01'),
+    modalidad: 'presencial',
+  id_chat_firebase: 1004,
+    estado_id: 4,
+    participacion_permitida_ids: [1, 3],
+    categoria_ids: [4],
+    colaboracion_ids: [5],
+    institucion_id: 4,
+    colaborador_ids: [6],
+    direccion_id: 4,
+    evidencia_ids: [4],
+    solicitud_finalizacion_ids: [4],
+    estado: { id_estado: 4, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "dinero",
-        especie: "pesos",
-        objetivo: 75000000,
-        cantidad: 50000000
+        id_proyecto: 4,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 8,
+        actual: 5,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+      },
+      {
+        id_proyecto: 4,
+        id_tipo_participacion: 3,
+        unidad: 'pesos',
+        objetivo: 500000,
+        actual: 320000,
+        tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
+      }
+    ],
+  categorias: [categorias[2]],
+    colaboraciones: [
+      { id_colaboracion: 5, estado: 'aceptada', created_at: new Date('2025-04-05') }
+    ],
+    institucion: mockUsuarios.hospital_sanjose,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 4,
+      calle: 'Av. San Martín',
+      numero: '789',
+      referencia: 'Esquina con Av. Rivadavia',
+      url_google_maps: 'https://maps.google.com/?q=Av+San+Martin+789',
+      localidad_id: localidades[4].id_localidad,
+      localidad: localidades[4]
+    },
+    evidencias: [
+      {
+        id_evidencia: 4,
+        descripcion: 'Fotos del equipamiento entregado',
+        created_at: new Date('2025-07-02'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 4,
+        descripcion: 'Entrega finalizada',
+        created_at: new Date('2025-07-03'),
+        evidencia_ids: [4],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 5,
-    titulo: "Apoyo Escolar Comunitario",
-    descripcion: "Necesitamos docentes y estudiantes universitarios para dar clases de apoyo en matemática, lengua y ciencias a niños en situación de vulnerabilidad social.",
-    institucion: { id: "5", razonSocial: "Instituto de Formación Laboral" },
-    created_at: "2025-04-01",
-    fechaCierre: "2025-10-30",
-    provincia: "Tucumán",
-    ciudad: "San Miguel de Tucumán",
-    estado: "En ejecución",
-    urgencia: "Media",
-    beneficiarios: 60,
-    deadline: "2024-10-30",
-    imagen: "/img/proyectos-5.webp",
-    ubicacion: "San Miguel de Tucumán, Tucumán",
-    objetivos: [
+    titulo: 'Apoyo Escolar Comunitario',
+    descripcion: 'Clases de apoyo escolar gratuitas para niños y adolescentes.',
+    url_portada: '/proyectos/apoyo-escolar.jpg',
+    created_at: new Date('2025-03-15'),
+    fecha_cierre_postulaciones: new Date('2025-04-15'),
+    fecha_fin_tentativa: new Date('2025-06-15'),
+    modalidad: 'presencial',
+  id_chat_firebase: 1005,
+    estado_id: 5,
+    participacion_permitida_ids: [1, 2],
+    categoria_ids: [1, 5],
+    colaboracion_ids: [6],
+    institucion_id: 5,
+    colaborador_ids: [7],
+    direccion_id: 5,
+    evidencia_ids: [5],
+    solicitud_finalizacion_ids: [5],
+    estado: { id_estado: 5, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "voluntarios",
-        especie: "docentes",
-        objetivo: 8,
-        cantidad: 2
+        id_proyecto: 5,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 25,
+        actual: 15,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+      },
+      {
+        id_proyecto: 5,
+        id_tipo_participacion: 2,
+        unidad: 'cuadernos',
+        objetivo: 100,
+        actual: 60,
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+      }
+    ],
+  categorias: [categorias[1], categorias[3]],
+    colaboraciones: [
+      { id_colaboracion: 6, estado: 'aceptada', created_at: new Date('2025-03-20') }
+    ],
+    institucion: mockUsuarios.instituto_formacion,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 5,
+      calle: 'Av. Independencia',
+      numero: '321',
+      referencia: 'Cerca de la estación',
+      url_google_maps: 'https://maps.google.com/?q=Av+Independencia+321',
+      localidad_id: localidades[5].id_localidad,
+      localidad: localidades[5]
+    },
+    evidencias: [
+      {
+        id_evidencia: 5,
+        descripcion: 'Fotos de las clases y testimonios',
+        created_at: new Date('2025-06-16'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 5,
+        descripcion: 'Finalización del ciclo lectivo',
+        created_at: new Date('2025-06-17'),
+        evidencia_ids: [5],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 6,
     titulo: 'Alimentos No Perecederos',
-    descripcion:
-      'Recolección de alimentos no perecederos (arroz, fideos, aceite, conservas) para abastecer comedores comunitarios durante el invierno.',
-    institucion: { id: "6", razonSocial: "Comedor Los Pinos" },
-    created_at: '2025-02-15',
-    fechaCierre: '2025-12-31',
-    provincia: 'Buenos Aires',
-    ciudad: 'Quilmes',
-    estado: 'Abierto',
-    urgencia: 'Alta',
-    beneficiarios: 200,
-    deadline: '2024-12-31',
-    imagen: '/img/proyectos-6.webp',
-    ubicacion: 'Quilmes, Buenos Aires',
-    objetivos: [
+    descripcion: 'Campaña de recolección de alimentos no perecederos para familias en situación de emergencia.',
+    url_portada: '/proyectos/alimentos-no-perecederos.jpg',
+    created_at: new Date('2025-02-25'),
+    fecha_cierre_postulaciones: new Date('2025-03-25'),
+    fecha_fin_tentativa: new Date('2025-05-25'),
+   // modalidad: 'presencial',
+  id_chat_firebase: 1006,
+    estado_id: 6,
+    participacion_permitida_ids: [1],
+    categoria_ids: [2],
+    colaboracion_ids: [7],
+    institucion_id: 2,
+    colaborador_ids: [8],
+    direccion_id: 6,
+    evidencia_ids: [6],
+    solicitud_finalizacion_ids: [6],
+    estado: { id_estado: 6, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "materiales",
-        especie: "kilogramos",
-        objetivo: 500,
-        cantidad: 250
+        id_proyecto: 6,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 40,
+        actual: 22,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
       },
       {
-        unidad: "voluntarios",
-        especie: "repartidores",
-        objetivo: 15,
-        cantidad: 8
+        id_proyecto: 6,
+        id_tipo_participacion: 2,
+        unidad: 'alimentos',
+        objetivo: 500,
+        actual: 320,
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+      }
+    ],
+  categorias: [categorias[0]],
+    colaboraciones: [
+      { id_colaboracion: 7, estado: 'aceptada', created_at: new Date('2025-02-28') }
+    ],
+    institucion: mockUsuarios.comedor_los_pinos,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 6,
+      calle: 'Calle 8',
+      numero: '456',
+      referencia: 'Barrio Norte',
+      url_google_maps: 'https://maps.google.com/?q=Calle+8+456',
+      localidad_id: localidades[1].id_localidad,
+      localidad: localidades[1]
+    },
+    evidencias: [
+      {
+        id_evidencia: 6,
+        descripcion: 'Fotos de la recolección y entrega',
+        created_at: new Date('2025-05-26'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 6,
+        descripcion: 'Campaña finalizada',
+        created_at: new Date('2025-05-27'),
+        evidencia_ids: [6],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 7,
     titulo: 'Ropa de Abrigo Invernal',
-    descripcion:
-      'Se solicitan camperas, buzos, mantas y frazadas en buen estado para personas en situación de calle durante los meses de frío.',
-    institucion: { id: "7", razonSocial: "Fundación Calor Humano" },
-    created_at: '2025-03-15',
-    fechaCierre: '2025-06-30',
-    provincia: 'Buenos Aires',
-    ciudad: 'CABA',
-    estado: 'En ejecución',
-    urgencia: 'Alta',
-    beneficiarios: 100,
-    deadline: '2024-06-30',
-    imagen: '/img/proyectos-7.webp',
-    ubicacion: 'CABA, Buenos Aires',
-    objetivos: [
+    descripcion: 'Donación y distribución de ropa de abrigo para personas en situación de calle.',
+    url_portada: '/proyectos/ropa-abrigo.jpg',
+    created_at: new Date('2025-05-01'),
+    fecha_cierre_postulaciones: new Date('2025-06-01'),
+    fecha_fin_tentativa: new Date('2025-08-01'),
+//   modalidad: 'presencial',
+  id_chat_firebase: 1007,
+    estado_id: 7,
+    participacion_permitida_ids: [1, 2],
+    categoria_ids: [6],
+    colaboracion_ids: [8],
+    institucion_id: 6,
+    colaborador_ids: [9],
+    direccion_id: 7,
+    evidencia_ids: [7],
+    solicitud_finalizacion_ids: [7],
+    estado: { id_estado: 7, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "materiales",
-        especie: "prendas",
-        objetivo: 100,
-        cantidad: 100
+        id_proyecto: 7,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
+        objetivo: 12,
+        actual: 8,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+      },
+      {
+        id_proyecto: 7,
+        id_tipo_participacion: 2,
+        unidad: 'prendas',
+        objetivo: 200,
+        actual: 120,
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+      }
+    ],
+  categorias: [categorias[5]],
+    colaboraciones: [
+      { id_colaboracion: 8, estado: 'aceptada', created_at: new Date('2025-05-10') }
+    ],
+    institucion: mockUsuarios.fundacion_calor,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 7,
+      calle: 'Av. Mitre',
+      numero: '654',
+      referencia: 'A metros del hospital',
+      url_google_maps: 'https://maps.google.com/?q=Av+Mitre+654',
+      localidad_id: localidades[6].id_localidad,
+      localidad: localidades[6]
+    },
+    evidencias: [
+      {
+        id_evidencia: 7,
+        descripcion: 'Fotos de la entrega de ropa',
+        created_at: new Date('2025-08-02'),
+        archivos: [],
+        solicitudes_finalizacion: []
+      }
+    ],
+    solicitudes_finalizacion: [
+      {
+        id_solicitud: 7,
+        descripcion: 'Campaña de abrigo finalizada',
+        created_at: new Date('2025-08-03'),
+        evidencia_ids: [7],
+        evidencias: []
       }
     ]
   },
   {
     id_proyecto: 8,
     titulo: 'Cuidadores de Adultos Mayores',
-    descripcion:
-      'Buscamos voluntarios para acompañar y brindar cuidados básicos a adultos mayores en hogar geriátrico. Se requiere disponibilidad de tiempo y paciencia.',
-    institucion: { id: "8", razonSocial: "Hogar Santa Teresa" },
-    created_at: '2025-01-20',
-    fechaCierre: '2025-12-20',
-    provincia: 'Santa Fe',
-    ciudad: 'Santa Fe Capital',
-    estado: 'En ejecución',
-    urgencia: 'Media',
-    beneficiarios: 45,
-    deadline: '2024-12-20',
-    imagen: '/img/proyectos-8.webp',
-    ubicacion: 'Santa Fe Capital, Santa Fe',
-    objetivos: [
+    descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
+    url_portada: '/proyectos/cuidadores-adultos.jpg',
+    created_at: new Date('2025-04-10'),
+    fecha_cierre_postulaciones: new Date('2025-05-10'),
+    fecha_fin_tentativa: new Date('2025-07-10'),
+   // modalidad: 'presencial',
+  id_chat_firebase: 1008,
+    estado_id: 8,
+    participacion_permitida_ids: [3],
+    categoria_ids: [7],
+    colaboracion_ids: [9],
+    institucion_id: 7,
+    colaborador_ids: [10],
+    direccion_id: 8,
+    evidencia_ids: [8],
+    solicitud_finalizacion_ids: [8],
+    estado: { id_estado: 8, descripcion: 'en_curso' },
+    participacion_permitida: [
       {
-        unidad: "voluntarios",
-        especie: "voluntarios",
-        objetivo: 15,
-        cantidad: 6
-      },
-      {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 200000,
-        cantidad: 30000
-      }
-    ]
-  },
-  {
-    id_proyecto: 9,
-    titulo: 'Computadoras para Escuela Rural',
-    descripcion:
-      'La escuela rural necesita equipos informáticos para que los alumnos puedan acceder a herramientas digitales. Buscamos computadoras en buen estado.',
-    institucion: { id: "9", razonSocial: "Escuela Rural N° 123" },
-    created_at: '2025-02-10',
-    fechaCierre: '2025-05-15',
-    provincia: 'Salta',
-    ciudad: 'Cafayate',
-    estado: 'Finalizado',
-    urgencia: 'Media',
-    beneficiarios: 85,
-    deadline: '2024-07-15',
-    imagen: '/img/proyectos-9.webp',
-    ubicacion: 'Cafayate, Salta',
-    objetivos: [
-      {
-        "unidad": "materiales",
-        "especie": "computadoras",
-        "objetivo": 20,
-        "cantidad": 6
-      }
-    ]
-  },
-  {
-    id_proyecto: 10,
-    titulo: 'Becas Universitarias',
-    descripcion:
-      'Programa de becas para estudiantes de bajos recursos que desean acceder a la educación superior. Cada beca cubre matrícula y materiales por un año.',
-    institucion: { id: "10", razonSocial: "Fundación Educación para Todos" },
-    created_at: '2025-02-20',
-    fechaCierre: '2025-11-30',
-    provincia: 'Neuquén',
-    ciudad: 'Neuquén Capital',
-    estado: 'En ejecución',
-    urgencia: 'Baja',
-    beneficiarios: 24,
-    deadline: '2024-11-30',
-    imagen: '/img/proyectos-10.webp',
-    ubicacion: 'Neuquén Capital, Neuquén',
-    objetivos: [
-      {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 12000000,
-        cantidad: 3000000
-      }
-    ]
-  },
-  {
-    id_proyecto: 11,
-    titulo: 'Refugio para Animales Abandonados',
-    descripcion: 'Refugio que necesita alimento para perros y gatos, medicamentos veterinarios y voluntarios para el cuidado diario de más de 120 animales rescatados.',
-    institucion: { id: "11", razonSocial: "Refugio Patitas Felices" },
-    created_at: '2025-01-15',
-    fechaCierre: '2025-12-31',
-    provincia: 'Entre Ríos',
-    ciudad: 'Paraná',
-    estado: 'Abierto',
-    urgencia: 'Alta',
-    beneficiarios: 120,
-    deadline: '2025-12-31',
-    imagen: '/img/proyectos-1.webp',
-    ubicacion: 'Paraná, Entre Ríos',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "kilogramos de alimento",
-        objetivo: 800,
-        cantidad: 200
-      },
-      {
-        unidad: "voluntarios",
-        especie: "cuidadores",
-        objetivo: 12,
-        cantidad: 4
-      }
-    ]
-  },
-  {
-    id_proyecto: 12,
-    titulo: 'Taller de Oficios para Jóvenes',
-    descripcion: 'Centro de formación laboral que busca herramientas, materiales y instructores para enseñar carpintería, electricidad y plomería a jóvenes en situación de vulnerabilidad.',
-    institucion: { id: "12", razonSocial: "Centro de Formación Laboral San Martín" },
-    created_at: '2024-08-01',
-    fechaCierre: '2024-12-15',
-    provincia: 'Misiones',
-    ciudad: 'Posadas',
-    estado: 'Finalizado',
-    urgencia: 'Media',
-    beneficiarios: 45,
-    deadline: '2024-12-15',
-    imagen: '/img/proyectos-2.webp',
-    ubicacion: 'Posadas, Misiones',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "herramientas",
-        objetivo: 50,
-        cantidad: 50
-      },
-      {
-        unidad: "voluntarios",
-        especie: "instructores",
-        objetivo: 6,
-        cantidad: 6
-      }
-    ]
-  },
-  {
-    id_proyecto: 13,
-    titulo: 'Huerta Comunitaria Urbana',
-    descripcion: 'Proyecto de agricultura urbana que necesita semillas, herramientas de jardinería y voluntarios para enseñar a familias del barrio a cultivar sus propios alimentos.',
-    institucion: { id: "13", razonSocial: "Cooperativa Verde Esperanza" },
-    created_at: '2025-03-01',
-    fechaCierre: '2025-10-31',
-    provincia: 'Río Negro',
-    ciudad: 'Bariloche',
-    estado: 'En ejecución',
-    urgencia: 'Baja',
-    beneficiarios: 35,
-    deadline: '2025-10-31',
-    imagen: '/img/proyectos-3.webp',
-    ubicacion: 'Bariloche, Río Negro',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "herramientas y semillas",
-        objetivo: 100,
-        cantidad: 60
-      },
-      {
-        unidad: "voluntarios",
-        especie: "educadores",
-        objetivo: 8,
-        cantidad: 3
-      }
-    ]
-  },
-  {
-    id_proyecto: 14,
-    titulo: 'Apoyo Nutricional Infantil',
-    descripcion: 'Programa que brinda desayunos y meriendas nutritivas a niños de escuelas primarias en zonas carenciadas. Necesitamos alimentos, utensilios y apoyo económico.',
-    institucion: { id: "14", razonSocial: "Fundación Nutrición Infantil" },
-    created_at: '2025-02-01',
-    fechaCierre: '2025-12-20',
-    provincia: 'Chaco',
-    ciudad: 'Resistencia',
-    estado: 'Abierto',
-    urgencia: 'Alta',
-    beneficiarios: 280,
-    deadline: '2025-12-20',
-    imagen: '/img/proyectos-4.webp',
-    ubicacion: 'Resistencia, Chaco',
-    objetivos: [
-      {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 45000000,
-        cantidad: 12000000
-      },
-      {
-        unidad: "materiales",
-        especie: "kilogramos de alimentos",
-        objetivo: 600,
-        cantidad: 150
-      }
-    ]
-  },
-  {
-    id_proyecto: 15,
-    titulo: 'Biblioteca Digital Rural',
-    descripcion: 'Equipamiento de biblioteca rural con computadoras, tablets y conexión a internet para que estudiantes accedan a recursos educativos digitales.',
-    institucion: { id: "15", razonSocial: "Escuela Rural Digital N° 45" },
-    created_at: '2024-06-01',
-    fechaCierre: '2024-11-30',
-    provincia: 'La Pampa',
-    ciudad: 'General Pico',
-    estado: 'Finalizado',
-    urgencia: 'Media',
-    beneficiarios: 95,
-    deadline: '2024-11-30',
-    imagen: '/img/proyectos-5.webp',
-    ubicacion: 'General Pico, La Pampa',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "equipos informáticos",
-        objetivo: 15,
-        cantidad: 15
-      },
-      {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 8000000,
-        cantidad: 8000000
-      }
-    ]
-  },
-  {
-    id_proyecto: 16,
-    titulo: 'Capacitación en Microemprendimientos',
-    descripcion: 'Talleres de formación en habilidades empresariales para mujeres jefas de hogar. Incluye capacitación en marketing digital, contabilidad básica y desarrollo de productos.',
-    institucion: { id: "16", razonSocial: "Asociación Mujeres Emprendedoras" },
-    created_at: '2025-04-15',
-    fechaCierre: '2025-09-30',
-    provincia: 'Jujuy',
-    ciudad: 'San Salvador de Jujuy',
-    estado: 'En ejecución',
-    urgencia: 'Media',
-    beneficiarios: 55,
-    deadline: '2025-09-30',
-    imagen: '/img/proyectos-6.webp',
-    ubicacion: 'San Salvador de Jujuy, Jujuy',
-    objetivos: [
-      {
-        unidad: "voluntarios",
-        especie: "capacitadores",
+        id_proyecto: 8,
+        id_tipo_participacion: 1,
+        unidad: 'personas',
         objetivo: 10,
-        cantidad: 7
+        actual: 5,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
       },
       {
-        unidad: "materiales",
-        especie: "materiales didácticos",
-        objetivo: 80,
-        cantidad: 40
+        id_proyecto: 8,
+        id_tipo_participacion: 3,
+        unidad: 'pesos',
+        objetivo: 100000,
+        actual: 40000,
+        tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
       }
-    ]
-  },
-  {
-    id_proyecto: 17,
-    titulo: 'Centro de Día para Adultos Mayores',
-    descripcion: 'Centro que brinda actividades recreativas, seguimiento médico y alimentación para adultos mayores en situación de soledad. Necesitamos equipamiento médico y voluntarios.',
-    institucion: { id: "17", razonSocial: "Centro de Día Los Abuelos" },
-    created_at: '2025-01-08',
-    fechaCierre: '2025-12-15',
-    provincia: 'Catamarca',
-    ciudad: 'San Fernando del Valle de Catamarca',
-    estado: 'Abierto',
-    urgencia: 'Baja',
-    beneficiarios: 65,
-    deadline: '2025-12-15',
-    imagen: '/img/proyectos-7.webp',
-    ubicacion: 'San Fernando del Valle de Catamarca, Catamarca',
-    objetivos: [
+    ],
+  categorias: [categorias[6]],
+    colaboraciones: [
+      { id_colaboracion: 9, estado: 'aceptada', created_at: new Date('2025-04-15') }
+    ],
+    institucion: mockUsuarios.hogar_santa_teresa,
+    colaboradores: [],
+    direccion: {
+      id_direccion: 8,
+      calle: 'Calle 25',
+      numero: '789',
+      referencia: 'Barrio Sur',
+      url_google_maps: 'https://maps.google.com/?q=Calle+25+789',
+      localidad_id: localidades[7].id_localidad,
+      localidad: localidades[7]
+    },
+    evidencias: [
       {
-        unidad: "materiales",
-        especie: "equipamiento médico",
-        objetivo: 25,
-        cantidad: 8
-      },
-      {
-        unidad: "voluntarios",
-        especie: "acompañantes",
-        objetivo: 20,
-        cantidad: 12
+        id_evidencia: 8,
+        descripcion: 'Fotos de las capacitaciones',
+        created_at: new Date('2025-07-11'),
+        archivos: [],
+        solicitudes_finalizacion: []
       }
-    ]
-  },
-  {
-    id_proyecto: 18,
-    titulo: 'Programa de Reciclaje Comunitario',
-    descripcion: 'Iniciativa para establecer puntos de reciclaje en el barrio, educar sobre separación de residuos y crear fuentes de trabajo para recicladores urbanos.',
-    institucion: { id: "18", razonSocial: "EcoBarrio Verde" },
-    created_at: '2024-10-01',
-    fechaCierre: '2025-03-31',
-    provincia: 'San Luis',
-    ciudad: 'San Luis',
-    estado: 'Finalizado',
-    urgencia: 'Baja',
-    beneficiarios: 150,
-    deadline: '2025-03-31',
-    imagen: '/img/proyectos-8.webp',
-    ubicacion: 'San Luis, San Luis',
-    objetivos: [
+    ],
+    solicitudes_finalizacion: [
       {
-        unidad: "materiales",
-        especie: "contenedores y herramientas",
-        objetivo: 30,
-        cantidad: 30
-      },
-      {
-        unidad: "voluntarios",
-        especie: "educadores ambientales",
-        objetivo: 5,
-        cantidad: 5
-      }
-    ]
-  },
-  {
-    id_proyecto: 19,
-    titulo: 'Apoyo Escolar para Niños con Discapacidad',
-    descripcion: 'Programa de integración escolar que necesita material didáctico adaptado, equipamiento especializado y profesionales para acompañar a niños con discapacidades.',
-    institucion: { id: "19", razonSocial: "Fundación Incluir" },
-    created_at: '2025-03-10',
-    fechaCierre: '2025-12-10',
-    provincia: 'Formosa',
-    ciudad: 'Formosa',
-    estado: 'Abierto',
-    urgencia: 'Alta',
-    beneficiarios: 42,
-    deadline: '2025-12-10',
-    imagen: '/img/proyectos-9.webp',
-    ubicacion: 'Formosa, Formosa',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "material didáctico adaptado",
-        objetivo: 100,
-        cantidad: 25
-      },
-      {
-        unidad: "voluntarios",
-        especie: "profesionales especializados",
-        objetivo: 8,
-        cantidad: 2
-      },
-      {
-        unidad: "dinero",
-        especie: "ARS",
-        objetivo: 15000000,
-        cantidad: 4000000
-      }
-    ]
-  },
-  {
-    id_proyecto: 20,
-    titulo: 'Orquesta Juvenil Comunitaria',
-    descripcion: 'Proyecto musical que busca instrumentos, partituras y maestros de música para formar una orquesta con jóvenes del barrio y brindarles una alternativa cultural.',
-    institucion: { id: "20", razonSocial: "Conservatorio Popular Música para Todos" },
-    created_at: '2025-02-05',
-    fechaCierre: '2025-11-25',
-    provincia: 'Santiago del Estero',
-    ciudad: 'Santiago del Estero',
-    estado: 'En ejecución',
-    urgencia: 'Media',
-    beneficiarios: 38,
-    deadline: '2025-11-25',
-    imagen: '/img/proyectos-10.webp',
-    ubicacion: 'Santiago del Estero, Santiago del Estero',
-    objetivos: [
-      {
-        unidad: "materiales",
-        especie: "instrumentos musicales",
-        objetivo: 25,
-        cantidad: 8
-      },
-      {
-        unidad: "voluntarios",
-        especie: "profesores de música",
-        objetivo: 4,
-        cantidad: 1
+        id_solicitud: 8,
+        descripcion: 'Cierre de ciclo de formación',
+        created_at: new Date('2025-07-12'),
+        evidencia_ids: [8],
+        evidencias: []
       }
     ]
   }

@@ -636,8 +636,238 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-20')
             }
         ],
+		reportes: []
+        } satisfies Institucion,
+
+
+    // Fundación Siempre
+    fundacion_siempre: {
+        username: 'fundacion_siempre',
+        nombre: 'Gabriela',
+        apellido: 'López',
+        tipo_documento: 'DNI',
+        numero_documento: '31234567',
+        fecha_nacimiento: new Date('1980-04-12'),
+        estado: 'activo',
+        created_at: new Date('2024-03-10'),
+        rol: 'institucion',
+        url_foto: '/users/fundacion-siempre.jpg',
+        cuit: '30-99887766-4',
+        nombre_legal: 'Fundación Siempre',
+        tipo_institucion: 'fundacion',
+        direccion: {
+            calle: 'Av. Belgrano',
+            numero: '123',
+            referencia: 'Frente a la plaza central',
+            localidad: {
+                codigo_postal: '1406',
+                nombre: 'Buenos Aires',
+                provincia: {
+                    codigo_iso: 'AR-C',
+                    nombre: 'Ciudad Autónoma de Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'info@fundacionsiempre.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
         reportes: []
-    } satisfies Institucion
+    } satisfies Institucion,
+
+    // Comedor Los Pinos
+    comedor_los_pinos: {
+        username: 'comedor_los_pinos',
+        nombre: 'Silvia',
+        apellido: 'Pineda',
+        tipo_documento: 'DNI',
+        numero_documento: '28765432',
+        fecha_nacimiento: new Date('1975-09-15'),
+        estado: 'activo',
+        created_at: new Date('2024-02-20'),
+        rol: 'institucion',
+        url_foto: '/users/comedor-los-pinos.jpg',
+        cuit: '30-87654321-2',
+        nombre_legal: 'Comedor Los Pinos',
+        tipo_institucion: 'comedor',
+        direccion: {
+            calle: 'Calle 8',
+            numero: '456',
+            referencia: 'Barrio Norte',
+            localidad: {
+                codigo_postal: '1900',
+                nombre: 'La Plata',
+                provincia: {
+                    codigo_iso: 'AR-B',
+                    nombre: 'Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'contacto@comedoreslospinos.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
+        reportes: []
+    } satisfies Institucion,
+
+    // Hospital General San José
+    hospital_sanjose: {
+        username: 'hospital_sanjose',
+        nombre: 'Ricardo',
+        apellido: 'Martínez',
+        tipo_documento: 'DNI',
+        numero_documento: '29876543',
+        fecha_nacimiento: new Date('1968-12-05'),
+        estado: 'activo',
+        created_at: new Date('2024-04-01'),
+        rol: 'institucion',
+        url_foto: '/users/hospital-sanjose.jpg',
+        cuit: '30-11223344-5',
+        nombre_legal: 'Hospital General San José',
+        tipo_institucion: 'hospital',
+        direccion: {
+            calle: 'Av. San Martín',
+            numero: '789',
+            referencia: 'Esquina con Av. Rivadavia',
+            localidad: {
+                codigo_postal: '5000',
+                nombre: 'Córdoba',
+                provincia: {
+                    codigo_iso: 'AR-X',
+                    nombre: 'Córdoba'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'info@hospitalsanjose.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
+        reportes: []
+    } satisfies Institucion,
+
+    // Instituto de Formación Laboral
+    instituto_formacion: {
+        username: 'instituto_formacion',
+        nombre: 'Patricia',
+        apellido: 'Suárez',
+        tipo_documento: 'DNI',
+        numero_documento: '31223344',
+        fecha_nacimiento: new Date('1972-07-22'),
+        estado: 'activo',
+        created_at: new Date('2024-05-01'),
+        rol: 'institucion',
+        url_foto: '/users/instituto-formacion.jpg',
+        cuit: '30-22334455-6',
+        nombre_legal: 'Instituto de Formación Laboral',
+        tipo_institucion: 'instituto',
+        direccion: {
+            calle: 'Av. Independencia',
+            numero: '321',
+            referencia: 'Cerca de la estación',
+            localidad: {
+                codigo_postal: '3100',
+                nombre: 'Paraná',
+                provincia: {
+                    codigo_iso: 'AR-E',
+                    nombre: 'Entre Ríos'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'info@institutoformacion.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
+        reportes: []
+    } satisfies Institucion,
+
+    // Fundación Calor Humano
+    fundacion_calor: {
+        username: 'fundacion_calor',
+        nombre: 'Esteban',
+        apellido: 'Moreno',
+        tipo_documento: 'DNI',
+        numero_documento: '30998877',
+        fecha_nacimiento: new Date('1978-10-30'),
+        estado: 'activo',
+        created_at: new Date('2024-06-01'),
+        rol: 'institucion',
+        url_foto: '/users/fundacion-calor.jpg',
+        cuit: '30-33445566-7',
+        nombre_legal: 'Fundación Calor Humano',
+        tipo_institucion: 'fundacion',
+        direccion: {
+            calle: 'Av. Mitre',
+            numero: '654',
+            referencia: 'A metros del hospital',
+            localidad: {
+                codigo_postal: '8000',
+                nombre: 'Bahía Blanca',
+                provincia: {
+                    codigo_iso: 'AR-B',
+                    nombre: 'Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'info@fundacioncalor.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
+        reportes: []
+    } satisfies Institucion,
+
+    // Hogar Santa Teresa
+    hogar_santa_teresa: {
+        username: 'hogar_santa_teresa',
+        nombre: 'Teresa',
+        apellido: 'Giménez',
+        tipo_documento: 'DNI',
+        numero_documento: '32233445',
+        fecha_nacimiento: new Date('1962-03-18'),
+        estado: 'activo',
+        created_at: new Date('2024-07-01'),
+        rol: 'institucion',
+        url_foto: '/users/hogar-santa-teresa.jpg',
+        cuit: '30-44556677-8',
+        nombre_legal: 'Hogar Santa Teresa',
+        tipo_institucion: 'hogar',
+        direccion: {
+            calle: 'Calle 25',
+            numero: '789',
+            referencia: 'Barrio Sur',
+            localidad: {
+                codigo_postal: '4000',
+                nombre: 'San Miguel de Tucumán',
+                provincia: {
+                    codigo_iso: 'AR-T',
+                    nombre: 'Tucumán'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'info@hogarsantateresa.org',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [],
+        reportes: []
+    } satisfies Institucion,
+
 } as const;
 
 export type MockUsuarios = typeof mockUsuarios;

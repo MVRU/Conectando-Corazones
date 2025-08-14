@@ -1,5 +1,6 @@
 import type { Estado } from './Estado';
 import type { TipoParticipacion } from './TipoParticipacion';
+import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';
@@ -17,7 +18,7 @@ export interface Proyecto {
   fecha_cierre_postulaciones?: Date;
   fecha_fin_tentativa: Date;
   modalidad?: string;
-  id_chat_firebase?: string;
+  id_chat_firebase?: number;
 
   // * RELACIONES
 
@@ -34,7 +35,7 @@ export interface Proyecto {
 
   // -*- Objetos expandidos para read
   estado?: Estado;
-  participacion_permitida?: TipoParticipacion[];
+  participacion_permitida?: ParticipacionPermitida[];
   categorias?: Categoria[];
   colaboraciones?: Colaboracion[];
   institucion?: Institucion;
