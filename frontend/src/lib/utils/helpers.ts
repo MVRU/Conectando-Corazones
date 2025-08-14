@@ -1,5 +1,7 @@
-import { locations } from '$lib/mocks/mock-locations';
-import { provinces } from '$lib/data/provinces';
+// TODO: revisar y corregir errores tras cambios en interfaces
+
+import { localidades } from '$lib/mocks/mock-localidades';
+import { provincias } from '$lib/data/provincias';
 
 /**
  * ! HELPERS PARA MANIPULAR UBICACIONES
@@ -10,11 +12,11 @@ import { provinces } from '$lib/data/provinces';
  */
 const citiesByProvince: Record<string, string[]> = {};
 
-locations.forEach((loc) => {
-    if (!loc.province || !loc.province.name) return;
-    const key = loc.province.name.trim().toLowerCase();
+localidades.forEach((loc) => {
+    if (!loc.provincia || !loc.provincia.nombre) return;
+    const key = loc.provincia.nombre.trim().toLowerCase();
     citiesByProvince[key] ??= [];
-    citiesByProvince[key].push(loc.name);
+    citiesByProvince[key].push(loc.nombre);
 });
 
 
@@ -32,10 +34,10 @@ export function getCitiesByProvince(provinceName: string): string[] {
 */
 export function getProvinceByCity(cityName: string) {
     const normalized = cityName.trim().toLowerCase();
-    const match = locations.find(
-        (loc) => loc.name.trim().toLowerCase() === normalized
+    const match = localidades.find(
+        (loc) => loc.nombre.trim().toLowerCase() === normalized
     );
-    return match?.province;
+    return match?.provincia;
 }
 
 /**
@@ -45,9 +47,9 @@ export function searchCities(query: string): string[] {
     const lowerQuery = query.trim().toLowerCase();
     if (!lowerQuery) return [];
 
-    return locations
-        .filter((loc) => loc.name.toLowerCase().includes(lowerQuery))
-        .map((loc) => loc.name);
+    return localidades
+        .filter((loc) => loc.nombre.toLowerCase().includes(lowerQuery))
+        .map((loc) => loc.nombre);
 }
 
 
@@ -56,7 +58,5 @@ export function searchCities(query: string): string[] {
  */
 
 export function getAllProvinceNames(): string[] {
-    return provinces.map((p) => p.name).sort((a, b) => a.localeCompare(b));
+    return provincias.map((p) => p.nombre).sort((a, b) => a.localeCompare(b));
 }
-
-

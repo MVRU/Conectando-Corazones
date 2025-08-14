@@ -1,5 +1,5 @@
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
-import type { ColaboradorDisyuncion } from './Usuarios';
+import type { ColaboradorDisyuncion } from './Usuario';
 
 export interface Evaluacion {
   solicitud: SolicitudFinalizacion;

@@ -4,7 +4,7 @@
     -*- Como no cambian (o muy raramente) tampoco se deberían consultar a una API constantemente.
 **/
 
-import type { Step } from '$lib/types/Step';
+import type { Step } from '$lib/types/otros/Step';
 
 export const steps: Step[] = [
     {

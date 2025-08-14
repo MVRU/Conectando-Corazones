@@ -1,5 +1,5 @@
 export interface Parametro {
-  id_parametro: string;
+  id_parametro?: string;
   nombre: string;
   valor: string;
   tipo: string;

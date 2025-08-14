@@ -23,7 +23,7 @@ export * from './stores/auth';
 export * from './actions/inView';
 export * from './utils/device';
 export * from './utils/sanitize';
-export * from './mocks/mock-projects';
+export * from './mocks/mock-proyectos';
 
 // Modelos
-export * from './types/User';
+export * from './types/Usuario';

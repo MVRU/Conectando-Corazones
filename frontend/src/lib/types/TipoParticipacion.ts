@@ -1,4 +1,4 @@
 export interface TipoParticipacion {
-  id_tipo_participacion: number;
+  id_tipo_participacion?: number;
   descripcion: string;
 }

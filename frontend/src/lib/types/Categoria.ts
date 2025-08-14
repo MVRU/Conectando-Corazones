@@ -1,4 +1,8 @@
+// * DECISIÓN DE DISEÑO
+// -*-  Se usa number porque el id es INTEGER autoincremental por defecto
+// -*-  El id_categoria se marca como opcional (?) para posibles flujos de creación
+
 export interface Categoria {
-  id_categoria: string;
-  descripcion: 'Medioambiente' | 'Educacion' | 'Salud' | 'Desarrollo economico' | 'Promocion de la paz' | 'Seguridad' | 'Entretenimiento' | 'Liderazgo' | 'Personas con discapacidades' | 'Tecnologia' | 'Politica' | 'Religion' | 'LGTBQ+' | 'Apoyo ante una crisis' | 'Empleo' | 'Inmigrantes y refugiados' | 'Otro' | string;
+  id_categoria?: number;
+  descripcion: string;
 }

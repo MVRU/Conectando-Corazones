@@ -1,10 +1,10 @@
 import type { Archivo } from './Archivo';
-import { SolicitudFinalizacion } from './SolicitudFinalizacion';
+import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
 
 export interface Evidencia {
-  id_evidencia: number;
+  id_evidencia?: number;
   descripcion: string;
-  created_at: Date;
-  archivos: Archivo[];
-  solicitudes_finalizacion: SolicitudFinalizacion[];
+  created_at?: Date;
+  archivos?: Archivo[];
+  solicitudes_finalizacion?: SolicitudFinalizacion[];
 }

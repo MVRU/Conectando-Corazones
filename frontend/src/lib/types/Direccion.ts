@@ -1,12 +1,15 @@
 import type { Localidad } from './Localidad';
 
 export interface Direccion {
-	id_direccion: string;
+	id_direccion?: number;
 	calle: string;
 	numero: string;
 	piso?: string;
 	departamento?: string;
 	referencia?: string;
 	url_google_maps?: string;
-	localidad: Localidad;
-}
+
+	// * Relacion con Localidad
+	localidad_id?: number; // FK para crear/actualizar
+	localidad?: Localidad; // Objeto expandido al leer
+}	

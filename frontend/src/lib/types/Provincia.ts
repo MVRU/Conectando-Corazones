@@ -1,7 +1,6 @@
-import type { Localidad } from './Localidad';
-
 export interface Provincia {
-  id_provincia: string;
+  id_provincia?: number;
   nombre: string;
-  localidades?: Localidad[]; 
+  nombre_corto?: string;
+  codigo_iso?: string;
 }

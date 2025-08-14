@@ -1,4 +1,6 @@
-import { provinces } from "$lib/data/provinces";
+// TODO: revisar y corregir errores tras cambios en interfaces
+
+import { provincias } from "$lib/data/provincias";
 import { getProvinceByCity } from '$lib/utils/helpers';
 
 /**
@@ -137,15 +139,15 @@ export function isValidCity(city: string): boolean {
 }
 
 export function isValidProvince(province: string): boolean {
-    return provinces.some((p) => p.name === province);
+    return provincias.some((p) => p.nombre === province);
 }
 
 export function isValidProvinceById(id: number): boolean {
-    return provinces.some((p) => p.id === id);
+    return provincias.some((p) => p.id_provincia === id);
 }
 
 export function isValidProvinceByISO(isoCode: string): boolean {
-    return provinces.some((p) => p.isoCode === isoCode);
+    return provincias.some((p) => p.codigo_iso === isoCode);
 }
 
 /**
@@ -156,7 +158,7 @@ export function isValidCityInProvince(city: string, provinceName: string): boole
 
     const province = getProvinceByCity(city);
     return (
-        province?.name.trim().toLowerCase() === provinceName.trim().toLowerCase()
+        province?.nombre.trim().toLowerCase() === provinceName.trim().toLowerCase()
     );
 }
 

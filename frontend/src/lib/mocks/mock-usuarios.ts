@@ -1,8 +1,8 @@
 // FIX: corregir todo esto luego de corregir el type
 
-import type { User } from '$lib/types/User';
+import type { Usuario } from '$lib/types/Usuario';
 
-export const mockUsers = {
+export const mockUsuarios = {
     admin: {
         id: '1',
         email: 'admin@conectandocorazones.org',
@@ -79,6 +79,6 @@ export const mockUsers = {
             notificaciones: true
         }
     }
-} satisfies Record<string, User>; // Esto garantiza que todo cumpla con User
+} satisfies Record<string, Usuario>; // Esto garantiza que todo cumpla con User
 
-export type MockUsers = typeof mockUsers;
+export type mockUsuarios = typeof mockUsuarios; mockUsuarios

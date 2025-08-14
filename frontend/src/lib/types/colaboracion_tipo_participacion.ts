@@ -1,5 +1,5 @@
-import type { Colaboracion } from './colaboracion';
-import type { TipoParticipacion } from './tipoParticipacion';
+import type { Colaboracion } from './Colaboracion';
+import type { TipoParticipacion } from './TipoParticipacion';
 import type { Proyecto } from './Proyecto';
 
 export interface ColaboracionTipoParticipacion {
