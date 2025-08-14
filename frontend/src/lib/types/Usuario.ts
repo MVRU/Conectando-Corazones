@@ -13,9 +13,9 @@ export interface Usuario {
   apellido: string;
   tipo_documento: string;
   numero_documento: string;
-  fecha_nacimiento: string;
+  fecha_nacimiento: Date;
   estado: string;
-  created_at: string;
+  created_at: Date;
   rol: 'institucion' | 'colaborador' | 'administrador';
   url_foto: string;
   reportes?: Reporte[];

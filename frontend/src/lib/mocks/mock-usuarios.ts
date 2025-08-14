@@ -1,84 +1,643 @@
-// FIX: corregir todo esto luego de corregir el type
-
-import type { Usuario } from '$lib/types/Usuario';
+import type { Usuario, Administrador, Institucion, Colaborador, Organizacion, Unipersonal } from '$lib/types/Usuario';
+import type { Direccion } from '$lib/types/Direccion';
+import type { Contacto } from '$lib/types/Contacto';
+import type { Resena } from '$lib/types/Resena';
+import type { Consentimiento } from '$lib/types/Consentimiento';
+import type { Reporte } from '$lib/types/Reporte';
 
 export const mockUsuarios = {
-    admin: {
-        id: '1',
-        email: 'admin@conectandocorazones.org',
-        nombre: 'Administrador',
-        role: 'admin',
-        isActive: true,
-        createdAt: new Date('2024-01-01'),
-        updatedAt: new Date(),
-        verificationStatus: 'verificado', // FIX: dijimos que si usuario se crea, está verificado
-
-        // FIX: dijimos que admin tiene todos los permisos
-        permisos: {
-            gestionarUsuarios: true,
-            gestionarProyectos: true,
-            gestionarInstituciones: true,
-            verReportes: true,
-            gestionarSistema: true
+    // Administrador del sistema
+    admin1: {
+        username: 'admin_conectando',
+        nombre: 'Alexis',
+        apellido: 'Sklate',
+        tipo_documento: 'DNI',
+        numero_documento: '45258963',
+        fecha_nacimiento: new Date('2005-03-15'),
+        estado: 'activo',
+        created_at: new Date('2020-01-01'),
+        rol: 'administrador',
+        url_foto: '/users/admin-default.jpg',
+        direccion: {
+            calle: 'Av. Corrientes',
+            numero: '1234',
+            piso: '5',
+            departamento: 'A',
+            referencia: 'Edificio Torre Central, entre Callao y Uruguay',
+            localidad: {
+                codigo_postal: 'C1043AAZ',
+                nombre: 'Buenos Aires',
+                provincia: {
+                    codigo_iso: 'AR-C',
+                    nombre: 'Ciudad Autónoma de Buenos Aires'
+                }
+            }
         },
-        telefono: '+54 341 123-4567', // FIX: difiere del DER
-        departamento: 'Administración'  // FIX: atributo inventado
-    },
-    institucion: {
-        id: '2',
-        email: 'escuela@esperanza.edu.ar',
-        nombre: 'Escuela Esperanza',
-        role: 'institucion',
-        isActive: true,
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date(),
-        verificationStatus: 'verificado', // FIX: dijimos que si usuario se crea, está verificado
-        razonSocial: 'Escuela Esperanza',
-        cuit: '30-12345678-9',
-        telefono: '+54 341 987-6543', // FIX: difiere del DER
-        direccion: { // FIX: difiere del DER
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'admin@conectandocorazones.org',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 1,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 1,
+                contenido: 'Excelente gestión del proyecto de infraestructura escolar. Se cumplieron todos los objetivos en tiempo y forma.',
+                puntaje: 5,
+                aprobado: true,
+                username: 'admin_conectando'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 1,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-01-01')
+            },
+            {
+                id_consentimiento: 2,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-01-01')
+            },
+            {
+                id_consentimiento: 3,
+                tipo: 'conducta',
+                version: '1.0',
+                created_at: new Date('2024-01-01')
+            }
+        ],
+        reportes: [
+            {
+                id_reporte: 1,
+                tipo_objeto: 'Usuario',
+                id_objeto: 5,
+                motivo: 'Comportamiento inapropiado',
+                descripcion: 'Usuario envió comentarios ofensivos en la sección de colaboración del proyecto #3.',
+                created_at: new Date('2024-03-15'),
+                estado: 'resuelto',
+                fecha_resolucion: new Date('2024-03-16'),
+                comentario_resolucion: 'Se aplicó suspensión temporal y se contactó al usuario para aclarar las normas de conducta.'
+            }
+        ],
+        reporte_admin: []
+    } satisfies Administrador,
+
+    // Institución educativa
+    escuela_esperanza: {
+        username: 'escuela_esperanza',
+        nombre: 'María Elena',
+        apellido: 'Rodríguez',
+        tipo_documento: 'DNI',
+        numero_documento: '25678432',
+        fecha_nacimiento: new Date('1970-06-10'),
+        estado: 'activo',
+        created_at: new Date('2024-01-15'),
+        rol: 'institucion',
+        url_foto: '/users/escuela-esperanza.jpg',
+        cuit: '30-71234567-8',
+        nombre_legal: 'Escuela Primaria Esperanza',
+        tipo_institucion: 'educacion_publica',
+        direccion: {
             calle: 'San Martín',
-            numero: '123',
-            ciudad: 'Rosario',
-            provincia: 'Santa Fe',
-            codigoPostal: '2000'
-        },
-        descripcion: 'Escuela rural comprometida con la educación de calidad',
-        sitioWeb: 'escuelaesperanza.edu.ar', // FIX: difiere del DER
-        tipoInstitucion: 'escuela',
-        capacidadBeneficiarios: 150, // FIX: atributo inventado
-        proyectosCreados: ['1', '2']
-    },
-    colaborador: {
-        id: '3',
-        email: 'juan.perez@gmail.com',
-        nombre: 'Juan Pérez',
-        role: 'colaborador',
-        isActive: true,
-        createdAt: new Date('2024-02-01'),
-        updatedAt: new Date(),
-        verificationStatus: 'verificado', // FIX: dijimos que si usuario se crea, está verificado
-        tipoColaborador: 'persona',
-        telefono: '+54 341 555-1234', // FIX: difiere del DER
-        direccion: { // FIX: difierente del DER
-            calle: 'Belgrano',
             numero: '456',
-            ciudad: 'Rosario',
-            provincia: 'Santa Fe',
-            codigoPostal: '2000'
+            referencia: 'Frente a la plaza principal',
+            localidad: {
+                codigo_postal: '2000',
+                nombre: 'Rosario',
+                provincia: {
+                    codigo_iso: 'AR-S',
+                    nombre: 'Santa Fe'
+                }
+            }
         },
-        persona: { // FIX: difiere del DER
-            dni: '12345678', // FIX: difiere del DER
-            fechaNacimiento: new Date('1990-05-15'), // FIX: difiere del DER
-            genero: 'masculino' // FIX: atributo inventado
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'direccion@escuelaesperanza.edu.ar',
+            etiqueta: 'principal'
         },
-        colaboraciones: ['1', '3'],
-        preferencias: {
-            categorias: ['educacion', 'salud'],
-            provincias: ['santa-fe', 'buenos-aires'],
-            notificaciones: true
-        }
-    }
-} satisfies Record<string, Usuario>; // Esto garantiza que todo cumpla con User
+        resenas: [
+            {
+                id_resena: 2,
+                tipo_objeto: 'Usuario',
+                id_objeto: 3,
+                contenido: 'Colaborador muy comprometido, ayudó mucho en la organización del proyecto de biblioteca.',
+                puntaje: 4,
+                aprobado: true,
+                username: 'escuela_esperanza'
+            },
+            {
+                id_resena: 3,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 2,
+                contenido: 'El proyecto de huerta escolar fue un éxito total. Los niños aprendieron mucho y ahora tenemos alimentos frescos.',
+                puntaje: 5,
+                aprobado: true,
+                username: 'escuela_esperanza'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 4,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-01-15')
+            },
+            {
+                id_consentimiento: 5,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-01-15')
+            },
+            {
+                id_consentimiento: 6,
+                tipo: 'evidencia',
+                version: '1.0',
+                created_at: new Date('2024-01-15')
+            }
+        ],
+        reportes: []
+    } satisfies Institucion,
 
-export type mockUsuarios = typeof mockUsuarios; mockUsuarios
+    // Hospital público
+    hospital_garrahan: {
+        username: 'hospital_garrahan',
+        nombre: 'Dr. Roberto',
+        apellido: 'García',
+        tipo_documento: 'DNI',
+        numero_documento: '22456789',
+        fecha_nacimiento: new Date('1965-11-20'),
+        estado: 'activo',
+        created_at: new Date('2024-02-10'),
+        rol: 'institucion',
+        url_foto: '/users/hospital-garrahan.jpg',
+        cuit: '30-54789123-4',
+        nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
+        tipo_institucion: 'salud_publica',
+        direccion: {
+            calle: 'Combate de los Pozos',
+            numero: '1881',
+            referencia: 'Hospital Garrahan - Sector Administrativo',
+            localidad: {
+                codigo_postal: 'C1245AAM',
+                nombre: 'Buenos Aires',
+                provincia: {
+                    codigo_iso: 'AR-C',
+                    nombre: 'Ciudad Autónoma de Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'proyectos@garrahan.gov.ar',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [
+            {
+                id_consentimiento: 7,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-10')
+            },
+            {
+                id_consentimiento: 8,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-02-10')
+            }
+        ],
+        reportes: [
+            {
+                id_reporte: 2,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 4,
+                motivo: 'Falta de transparencia',
+                descripcion: 'El proyecto no publica actualizaciones regulares sobre el uso de los fondos recibidos.',
+                created_at: new Date('2024-03-20'),
+                estado: 'pendiente',
+            }
+        ]
+    } satisfies Institucion,
+
+    // Colaborador individual 1
+    maria_gonzalez: {
+        username: 'maria_g',
+        nombre: 'María',
+        apellido: 'González',
+        tipo_documento: 'DNI',
+        numero_documento: '32456789',
+        fecha_nacimiento: new Date('1988-07-22'),
+        estado: 'activo',
+        created_at: new Date('2024-02-01'),
+        rol: 'colaborador',
+        url_foto: '/users/maria-gonzalez.jpg',
+        cuit_cuil: '27-32456789-1',
+        tipo_colaborador: 'unipersonal',
+        direccion: {
+            calle: 'Mitre',
+            numero: '789',
+            piso: '2',
+            departamento: 'B',
+            localidad: {
+                codigo_postal: '5000',
+                nombre: 'Córdoba',
+                provincia: {
+                    codigo_iso: 'AR-X',
+                    nombre: 'Córdoba'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'maria.gonzalez@gmail.com',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 4,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 1,
+                contenido: 'Muy buena organización del proyecto, aunque faltó más comunicación sobre los avances.',
+                puntaje: 3,
+                aprobado: true,
+                username: 'maria_g'
+            },
+            {
+                id_resena: 5,
+                tipo_objeto: 'Usuario',
+                id_objeto: 2,
+                contenido: 'La institución fue muy transparente con el uso de los recursos. Recomiendo colaborar con ellos.',
+                puntaje: 5,
+                aprobado: true,
+                username: 'maria_g'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 9,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-01')
+            },
+            {
+                id_consentimiento: 10,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-02-01')
+            }
+        ],
+        reportes: []
+    } satisfies Unipersonal,
+
+    // Colaborador individual 2
+    carlos_rodriguez: {
+        username: 'carlos_r',
+        nombre: 'Carlos',
+        apellido: 'Rodríguez',
+        tipo_documento: 'DNI',
+        numero_documento: '18765432',
+        fecha_nacimiento: new Date('1975-12-08'),
+        estado: 'activo',
+        created_at: new Date('2024-02-15'),
+        rol: 'colaborador',
+        url_foto: '/users/carlos-rodriguez.jpg',
+        cuit_cuil: '20-18765432-9',
+        tipo_colaborador: 'unipersonal',
+        direccion: {
+            calle: 'Rivadavia',
+            numero: '2341',
+            referencia: 'Casa con portón verde',
+            localidad: {
+                codigo_postal: '4000',
+                nombre: 'San Miguel de Tucumán',
+                provincia: {
+                    codigo_iso: 'AR-T',
+                    nombre: 'Tucumán'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'carlos.rodriguez@hotmail.com',
+            etiqueta: 'principal'
+        },
+        resenas: [],
+        consentimientos: [
+            {
+                id_consentimiento: 11,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-15')
+            }
+        ],
+        reportes: [
+            {
+                id_reporte: 3,
+                tipo_objeto: 'Usuario',
+                id_objeto: 6,
+                motivo: 'Spam',
+                descripcion: 'Usuario envía múltiples mensajes promocionales no relacionados con proyectos sociales.',
+                created_at: new Date('2024-03-25'),
+                estado: 'pendiente'
+            }
+        ]
+    } satisfies Unipersonal,
+
+    // Organización sin fines de lucro
+    fundacion_manos_unidas: {
+        username: 'fundacion_manos',
+        nombre: 'Patricia',
+        apellido: 'Morales',
+        tipo_documento: 'DNI',
+        numero_documento: '30987654',
+        fecha_nacimiento: new Date('1975-04-15'),
+        estado: 'activo',
+        created_at: new Date('2024-01-20'),
+        rol: 'colaborador',
+        url_foto: '/users/fundacion-manos-unidas.jpg',
+        cuit_cuil: '30-98765432-1',
+        tipo_colaborador: 'organizacion',
+        razon_social: 'Fundación Manos Unidas Argentina',
+        con_fines_de_lucro: false,
+        direccion: {
+            calle: 'Av. Santa Fe',
+            numero: '1456',
+            piso: '3',
+            departamento: 'C',
+            referencia: 'Edificio Libertador, oficina 302',
+            localidad: {
+                codigo_postal: 'C1060ABR',
+                nombre: 'Buenos Aires',
+                provincia: {
+                    codigo_iso: 'AR-C',
+                    nombre: 'Ciudad Autónoma de Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'contacto@manosunidas.org.ar',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 6,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 3,
+                contenido: 'Excelente proyecto de asistencia alimentaria. Muy bien coordinado y con gran impacto social.',
+                puntaje: 5,
+                aprobado: true,
+                username: 'fundacion_manos'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 12,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-01-20')
+            },
+            {
+                id_consentimiento: 13,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-01-20')
+            },
+            {
+                id_consentimiento: 14,
+                tipo: 'evidencia',
+                version: '1.0',
+                created_at: new Date('2024-01-20')
+            },
+            {
+                id_consentimiento: 15,
+                tipo: 'conducta',
+                version: '1.0',
+                created_at: new Date('2024-01-20')
+            }
+        ],
+        reportes: []
+    } satisfies Organizacion,
+
+    // Empresa con fines de lucro
+    empresa_solidaria_sa: {
+        username: 'empresa_solidaria',
+        nombre: 'Juan Carlos',
+        apellido: 'Mendoza',
+        tipo_documento: 'DNI',
+        numero_documento: '28567890',
+        fecha_nacimiento: new Date('1978-03-22'),
+        estado: 'activo',
+        created_at: new Date('2024-02-05'),
+        rol: 'colaborador',
+        url_foto: '/users/empresa-solidaria.jpg',
+        cuit_cuil: '30-56789012-3',
+        tipo_colaborador: 'organizacion',
+        razon_social: 'Empresa Solidaria S.A.',
+        con_fines_de_lucro: true,
+        direccion: {
+            calle: 'Av. del Libertador',
+            numero: '5678',
+            piso: '12',
+            departamento: 'A',
+            referencia: 'Torre Empresarial Norte',
+            localidad: {
+                codigo_postal: 'B1636DSR',
+                nombre: 'Olivos',
+                provincia: {
+                    codigo_iso: 'AR-B',
+                    nombre: 'Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'rse@empresasolidaria.com.ar',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 7,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 5,
+                contenido: 'Proyecto bien estructurado pero podría mejorar la comunicación con los beneficiarios.',
+                puntaje: 3,
+                aprobado: true,
+                username: 'empresa_solidaria'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 16,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-05')
+            },
+            {
+                id_consentimiento: 17,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-02-05')
+            }
+        ],
+        reportes: []
+    } satisfies Organizacion,
+
+    // Colaborador individual 3
+    ana_martinez: {
+        username: 'ana_m',
+        nombre: 'Ana',
+        apellido: 'Martínez',
+        tipo_documento: 'DNI',
+        numero_documento: '24567890',
+        fecha_nacimiento: new Date('1982-09-14'),
+        estado: 'activo',
+        created_at: new Date('2024-03-01'),
+        rol: 'colaborador',
+        url_foto: '/users/ana-martinez.jpg',
+        cuit_cuil: '27-24567890-2',
+        tipo_colaborador: 'unipersonal',
+        direccion: {
+            calle: 'San Juan',
+            numero: '1122',
+            localidad: {
+                codigo_postal: '3100',
+                nombre: 'Paraná',
+                provincia: {
+                    codigo_iso: 'AR-E',
+                    nombre: 'Entre Ríos'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'ana.martinez@outlook.com',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 8,
+                tipo_objeto: 'Usuario',
+                id_objeto: 1,
+                contenido: 'Administración muy eficiente y rápida respuesta a consultas.',
+                puntaje: 4,
+                aprobado: true,
+                username: 'ana_m'
+            },
+            {
+                id_resena: 9,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 6,
+                contenido: 'Proyecto muy necesario pero faltó mejor planificación en la logística.',
+                puntaje: 2,
+                aprobado: false,
+                username: 'ana_m'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 18,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-03-01')
+            },
+            {
+                id_consentimiento: 19,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-03-01')
+            },
+            {
+                id_consentimiento: 20,
+                tipo: 'conducta',
+                version: '1.0',
+                created_at: new Date('2024-03-01')
+            }
+        ],
+        reportes: [
+            {
+                id_reporte: 4,
+                tipo_objeto: 'Proyecto',
+                id_objeto: 7,
+                motivo: 'Información incorrecta',
+                descripcion: 'El proyecto indica que atiende 200 beneficiarios pero en realidad solo atiende 50.',
+                created_at: new Date('2024-03-28'),
+                estado: 'resuelto',
+                fecha_resolucion: new Date('2024-03-30'),
+                comentario_resolucion: 'Se corrigió la información en la descripción del proyecto.'
+            }
+        ]
+    } satisfies Unipersonal,
+
+    // Institución de salud privada
+    clinica_san_jorge: {
+        username: 'clinica_sj',
+        nombre: 'Dra. Carmen',
+        apellido: 'Vega',
+        tipo_documento: 'DNI',
+        numero_documento: '26789123',
+        fecha_nacimiento: new Date('1972-07-18'),
+        estado: 'activo',
+        created_at: new Date('2024-02-20'),
+        rol: 'institucion',
+        url_foto: '/users/clinica-san-jorge.jpg',
+        cuit: '30-87654321-9',
+        nombre_legal: 'Clínica San Jorge S.A.',
+        tipo_institucion: 'salud_privada',
+        direccion: {
+            calle: 'Av. 9 de Julio',
+            numero: '3456',
+            referencia: 'Edificio principal, planta baja',
+            localidad: {
+                codigo_postal: '1425',
+                nombre: 'Buenos Aires',
+                provincia: {
+                    codigo_iso: 'AR-C',
+                    nombre: 'Ciudad Autónoma de Buenos Aires'
+                }
+            }
+        },
+        contacto: {
+            tipo_contacto: 'email',
+            valor: 'responsabilidad.social@clinicasanjorge.com.ar',
+            etiqueta: 'principal'
+        },
+        resenas: [
+            {
+                id_resena: 10,
+                tipo_objeto: 'Usuario',
+                id_objeto: 4,
+                contenido: 'Colaboración excepcional de esta organización. Muy profesionales y comprometidos.',
+                puntaje: 5,
+                aprobado: true,
+                username: 'clinica_sj'
+            }
+        ],
+        consentimientos: [
+            {
+                id_consentimiento: 21,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-20')
+            },
+            {
+                id_consentimiento: 22,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-02-20')
+            },
+            {
+                id_consentimiento: 23,
+                tipo: 'evidencia',
+                version: '1.0',
+                created_at: new Date('2024-02-20')
+            }
+        ],
+        reportes: []
+    } satisfies Institucion
+} as const;
+
+export type MockUsuarios = typeof mockUsuarios;
