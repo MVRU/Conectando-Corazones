@@ -8,6 +8,16 @@ import type { Contacto } from './Contacto';
 import type { HistorialDeCambios } from './HistorialDeCambios';
 
 export interface Usuario {
+  username: string;
+  nombre: string;
+  apellido: string;
+  tipo_documento: string;
+  numero_documento: string;
+  fecha_nacimiento: string;
+  estado: string;
+  created_at: string;
+  rol: 'institucion' | 'colaborador' | 'administrador';
+  url_foto: string;
   reportes?: Reporte[];
   consentimientos?: Consentimiento[];
   resenas?: Resena[];
