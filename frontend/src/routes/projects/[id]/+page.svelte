@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { projects } from '$lib/mocks/mock-projects';
+	import { mockProyectos as projects } from '$lib/mocks/mock-proyectos';
 	import { encontrarProyectoPorId } from '$lib/utils/projects';
 	import { page } from '$app/stores';
 	import { error } from '@sveltejs/kit';

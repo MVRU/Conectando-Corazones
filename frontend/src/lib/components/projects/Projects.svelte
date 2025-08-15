@@ -6,8 +6,8 @@
 	import { fade, fly, scale } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { projects as defaultProjects } from '$lib/mocks/mock-projects';
-	import type { Project } from '$lib/types/Project';
+	import { mockProyectos as defaultProjects } from '$lib/mocks/mock-proyectos';
+	import type { Proyecto } from '$lib/types/Proyecto';
 	import SearchBar from '../ui/elements/SearchBar.svelte';
 	import { writable } from 'svelte/store';
 

@@ -3,12 +3,12 @@
 	- [ ] Agregar "..." a la ubicación con un tooltip que muestra la ubicación completa -->
 
 <script lang="ts">
-	import type { Project } from '$lib/types/Project';
+	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '../elements/Button.svelte';
 	import { calcularProgresoTotal } from '$lib/utils/progress';
 	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 
-	export let proyecto!: Project;
+	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
 
 	// Variables reactivas para valores dependientes de "proyecto"

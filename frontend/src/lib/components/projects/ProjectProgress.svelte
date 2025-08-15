@@ -2,7 +2,7 @@
  	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER -->
 
 <script lang="ts">
-	import type { Project } from '$lib/types/Project';
+	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '../ui/elements/Button.svelte';
 	import {
 		calcularProgresoTotal,
