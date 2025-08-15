@@ -1,9 +1,9 @@
 import { writable, derived, get } from 'svelte/store';
 import type {
-  User,
-  RegisterColaboradorData,
-  RegisterInstitucionData
-} from '$lib/types/User';
+  Usuario,
+  Institucion,
+  Colaborador
+} from '$lib/types/Usuario';
 import { isValidEmail } from '$lib/utils/validators';
 
 /**
@@ -11,9 +11,37 @@ import { isValidEmail } from '$lib/utils/validators';
  *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
  */
 
+// Tipos para registro
+interface RegisterColaboradorData {
+  username: string;
+  nombre: string;
+  apellido: string;
+  tipo_documento: string;
+  numero_documento: string;
+  fecha_nacimiento: string;
+  cuit_cuil: string;
+  tipo_colaborador: string;
+  email: string;
+  password: string;
+}
+
+interface RegisterInstitucionData {
+  username: string;
+  nombre: string;
+  apellido: string;
+  tipo_documento: string;
+  numero_documento: string;
+  fecha_nacimiento: string;
+  cuit: string;
+  nombre_legal: string;
+  tipo_institucion: string;
+  email: string;
+  password: string;
+}
+
 // Estado de autenticación
 interface AuthState {
-  user: User | null;
+  user: Usuario | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -37,25 +65,25 @@ export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
 // Store derivado para el rol del usuario
-export const userRole = derived(authStore, ($auth) => $auth.user?.role || null);
+export const userRole = derived(authStore, ($auth) => $auth.user?.rol || null);
 
 // Store derivado para verificar si es admin
-export const isAdmin = derived(authStore, ($auth) => $auth.user?.role === 'admin');
+export const isAdmin = derived(authStore, ($auth) => $auth.user?.rol === 'administrador');
 
 // Store derivado para verificar si es institución
-export const isInstitucion = derived(authStore, ($auth) => $auth.user?.role === 'institucion');
+export const isInstitucion = derived(authStore, ($auth) => $auth.user?.rol === 'institucion');
 
 // Store derivado para verificar si es colaborador
-export const isColaborador = derived(authStore, ($auth) => $auth.user?.role === 'colaborador');
+export const isColaborador = derived(authStore, ($auth) => $auth.user?.rol === 'colaborador');
 
 // Store derivado para verificar si está verificado
-export const isVerified = derived(authStore, ($auth) => $auth.user?.verificationStatus === 'verificado');
+export const isVerified = derived(authStore, ($auth) => $auth.user?.estado === 'activo');
 
 // Funciones para manejar la autenticación
 export const authActions = {
   // Iniciar sesión (versión mock para pruebas)
-  async login(email: string, password: string, rememberMe: boolean = false) {
-    if (!isValidEmail(email) || !password.trim()) {
+  async login(username: string, password: string, rememberMe: boolean = false) {
+    if (!username.trim() || !password.trim()) {
       authStore.update((s) => ({ ...s, error: 'Credenciales inválidas' }));
       return null;
     }
@@ -65,7 +93,7 @@ export const authActions = {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, rememberMe })
+        body: JSON.stringify({ username, password, rememberMe })
       });
 
       if (!response.ok) {
@@ -77,7 +105,7 @@ export const authActions = {
 
       authStore.update((state) => ({
         ...state,
-        user: user as User,
+        user: user as Usuario,
         isAuthenticated: true,
         isLoading: false,
         error: null
@@ -172,7 +200,7 @@ export const authActions = {
       if (user) {
         authStore.update((state) => ({
           ...state,
-          user: user as User,
+          user: user as Usuario,
           isAuthenticated: true,
           isLoading: false
         }));
@@ -191,10 +219,10 @@ export const authActions = {
   },
 
   // Actualizar datos del usuario
-  updateUser(userData: Partial<User>) {
+  updateUser(userData: Partial<Usuario>) {
     authStore.update(state => ({
       ...state,
-      user: state.user ? { ...state.user, ...userData } as User : null
+      user: state.user ? { ...state.user, ...userData } as Usuario : null
     }));
   }
 };
@@ -202,12 +230,12 @@ export const authActions = {
 // Función para verificar permisos
 export function hasPermission(permission: string): boolean {
   const state = get(authStore);
-  if (state.user?.role === 'admin') return true;
-  if (state.user?.role === 'institucion') {
+  if (state.user?.rol === 'administrador') return true;
+  if (state.user?.rol === 'institucion') {
     const institucionPermissions = ['crear_proyecto', 'editar_proyecto', 'ver_proyectos_propios'];
     return institucionPermissions.includes(permission);
   }
-  if (state.user?.role === 'colaborador') {
+  if (state.user?.rol === 'colaborador') {
     const colaboradorPermissions = ['ver_proyectos', 'hacer_donacion', 'ver_perfil'];
     return colaboradorPermissions.includes(permission);
   }
@@ -217,11 +245,11 @@ export function hasPermission(permission: string): boolean {
 // Función para verificar si puede acceder a una ruta
 export function canAccessRoute(route: string): boolean {
   const routePermissions: Record<string, string[]> = {
-    '/admin': ['admin'],
-    '/institucion': ['institucion', 'admin'],
-    '/colaborador': ['colaborador', 'admin'],
-    '/proyectos/crear': ['institucion', 'admin'],
-    '/perfil': ['institucion', 'colaborador', 'admin']
+    '/admin': ['administrador'],
+    '/institucion': ['institucion', 'administrador'],
+    '/colaborador': ['colaborador', 'administrador'],
+    '/proyectos/crear': ['institucion', 'administrador'],
+    '/perfil': ['institucion', 'colaborador', 'administrador']
   };
 
   const requiredRoles = routePermissions[route] || [];
@@ -229,6 +257,6 @@ export function canAccessRoute(route: string): boolean {
   const state = get(authStore);
   return (
     requiredRoles.length === 0 ||
-    (!!state.user && requiredRoles.includes(state.user.role))
+    (!!state.user && requiredRoles.includes(state.user.rol))
   );
 }
