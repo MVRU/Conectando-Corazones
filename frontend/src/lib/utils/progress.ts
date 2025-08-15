@@ -4,7 +4,7 @@
  *     -*- Se consideran tanto los objetivos cumplidos como el tiempo transcurrido.
  */
 
-import type { Objetivo, Project } from '$lib/types/Project';
+import type { Proyecto } from '$lib/types/Proyecto';
 
 /**
  * Calcula el porcentaje de cumplimiento de los objetivos
