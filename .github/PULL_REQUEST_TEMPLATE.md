@@ -1,40 +1,22 @@
 # 🚀 Pull Request – Conectando Corazones
 
-¡Gracias por tu contribución! Por favor, completá la siguiente información para que podamos revisar tu PR de forma eficiente.
+**Resumen del cambio**
+> Explicá brevemente qué hiciste y por qué. Indicar issue relacionado si aplica: #ISSUE_ID
 
-## 📋 Descripción del cambio
-
-Explicá brevemente qué cambios hiciste y por qué.
-
-> Ejemplo: se agrega validación de token en el middleware de rutas protegidas.
-
-## 🧩 Tipo de cambio
-
-- [ ] 🐛 Fix – Corrección de bug
-- [ ] ✨ Feature – Nueva funcionalidad
-- [ ] ♻️ Refactor – Mejora del código sin cambiar funcionalidad
-- [ ] 🧪 Tests – Adición o corrección de pruebas
-- [ ] 📝 Docs – Cambios en la documentación
-
-## 🧪 ¿Cómo se probó?
-
-Contanos qué hiciste para verificar que el cambio funciona correctamente.
-
-> Ejemplo: ejecuté la app en desarrollo y probé los formularios de registro con datos inválidos.
-
-## 📎 Tareas relacionadas
-
-Closes #<número del issue> (si aplica)  
-Relates to #<otro issue>
+---
 
 ## 📝 Checklist
 
+- [ ] Alineado al DER y contratos de datos (types, mocks, DTOs).
+- [ ] Documentación y mocks actualizados si aplica.
 - [ ] El código sigue los lineamientos generales del proyecto. 
+- [ ] Pasan los tests existentes y los nuevos.
 - [ ] Estoy de acuerdo con seguir el [Código de Conducta](./CODE_OF_CONDUCT.md) al enviar este PR.
 - [ ] He leido la [Guía para Contribuir](../CONTRIBUTING.md) al proyecto.
-- [ ] Pasan los tests existentes y los nuevos.
-- [ ] Se actualizó la documentación si fue necesario.
-- [ ] El PR está vinculado a un issue (si corresponde).
+
+## 🧪 Pruebas realizadas
+> Detallá qué hiciste para validar que funciona y no rompe nada.  
+> Ej.: formulario de registro probado con casos válidos/invalidos.
 
 ## 📸 Capturas (opcional)
 
@@ -42,4 +24,4 @@ Si hiciste un cambio visual, agregá una imagen o GIF.
 
 ## 📣 Notas finales
 
-¿Hay algo que el equipo de revisión deba saber?
+¿Hay algo que el equipo deba saber? Riesgos, impacto en otras áreas...
