@@ -43,7 +43,35 @@ const config: Config = {
   },
 
   markdown: { mermaid: true },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    [
+      '@easyops-cn/docusaurus-search-local',
+      {
+        // Recomendado para GH Pages (mejora cache y evita colisiones)
+        hashed: true,
+
+        // Idiomas a indexar (mejor stemming y stopwords)
+        language: ['es', 'en'],
+
+        // Qué indexar
+        indexDocs: true,
+        indexBlog: true, // poné false si no querés indexar el blog
+
+        // UX
+        highlightSearchTermsOnTargetPage: true,
+        searchBarShortcutHint: true,
+
+        // Rutas base (solo tocá si las cambiaste)
+        docsRouteBasePath: '/docs',
+        blogRouteBasePath: '/blog',
+
+        // Opcional: limitar resultados o desactivar index de páginas sueltas
+        // indexPages: false,
+        // searchResultLimits: 20,
+      },
+    ],
+  ],
 
   presets: [
     [
