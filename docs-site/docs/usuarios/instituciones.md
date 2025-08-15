@@ -11,8 +11,8 @@ title: Instituciones
 
 ## Flujo de proyectos
 
-1. Desde el panel, cree un nuevo proyecto e indique objetivos y beneficiarios.
-2. Acepte postulaciones de colaboradores y defina roles según las necesidades del proyecto.
+1. Desde el panel, cree un nuevo proyecto e indique objetivos y cantidad de beneficiarios.
+2. Acepte postulaciones de colaboradores y coordine con ellos a través del chat compartido según las necesidades del proyecto.
 3. Monitoree el avance en la sección **Seguimiento** para mantener la trazabilidad.
 
 <!-- ![Diagrama del flujo de proyectos](/img/flujo-proyectos.svg) -->
@@ -20,7 +20,7 @@ title: Instituciones
 ## Carga de evidencias
 
 1. Abra el proyecto correspondiente y diríjase a **Evidencias**.
-2. Suba fotografías o documentos que respalden cada etapa del proceso.
+2. Suba fotografías o documentos que respalden cada objetivo y etapa del proceso.
 3. Siempre revise el contenido antes de publicarlo.
 
 <!-- ![Diagrama del flujo de evidencias](/img/flujo-evidencias.svg) -->
@@ -36,7 +36,7 @@ title: Instituciones
 
 - Comparta solo la información necesaria y evite datos personales de terceros.
 - Utilice cuentas institucionales oficiales para las evidencias.
-- Consulte la [Política de Privacidad](/privacy) para conocer el tratamiento de datos.
+- Consulte la [Política de Privacidad](/pdf/politicas-condiciones.pdf) para conocer el tratamiento de datos.
 
 ### Riesgos y limitaciones
 

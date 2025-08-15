@@ -32,9 +32,9 @@ title: Colaboradores
 
 ### Mejores prácticas de privacidad
 
-- No comparta credenciales ni datos sensibles de beneficiarios.
+- No comparta credenciales ni datos sensibles.
 - Utilice contraseñas fuertes y únicas para su cuenta.
-- Revise la [Política de Privacidad](/privacy) antes de publicar información.
+- Revise la [Política de Privacidad](/pdf/politicas-condiciones.pdf) antes de publicar información.
 
 ### Riesgos y limitaciones
 - No comparta credenciales ni información personal de terceros sin autorización.

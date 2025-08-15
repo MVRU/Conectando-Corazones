@@ -5,10 +5,6 @@ authors: [marina]
 tags: [endpoint, proyectos]
 ---
 
-import Authors from '@site/src/components/Authors';
-
-<Authors names={['marina']} />
-
 ## POST /api/proyectos
 
 Este endpoint permite **registrar un nuevo proyecto** en la plataforma, asociándolo automáticamente a la institución del usuario autenticado. 
@@ -91,12 +87,12 @@ Imaginemos que la **Escuela Esperanza** quiere iniciar un proyecto para comprar 
 
 ```json
 {
-  "id_proyecto": 87,
+  "id_proyecto": 87, //nuevo
   "titulo": "Lecturas que unen",
   "descripcion": "Compra de 100 libros y realización de un taller semanal con 10 docentes voluntarios para alumnos de 3er y 4to grado.",
   "url_portada": "https://example.com/portada.jpg",
   "fecha_fin_tentativa": "2025-09-30T12:00:00Z",
-  "estado": "EN_CURSO",
+  "estado": "EN_CURSO", //nuevo
   "categorias": ["EDUCACION", "NIÑEZ"],
   "ubicaciones": [
     { "id_ubicacion": 4346753, "tipo_ubicacion": "entrega de libros" },
@@ -106,8 +102,8 @@ Imaginemos que la **Escuela Esperanza** quiere iniciar un proyecto para comprar 
     { "tipo": "EN_ESPECIE", "unidad": "libros", "objetivo": 100 },
     { "tipo": "VOLUNTARIADO", "unidad": "docentes", "objetivo": 10 }
   ],
-  "created_at": "2025-07-01T12:00:00Z",
-  "id_chat_firebase": "chat_proyecto_87"
+  "created_at": "2025-07-01T12:00:00Z", //nuevo
+  "id_chat_firebase": "chat_proyecto_87" //nuevo
 }
 ```
 
@@ -200,14 +196,18 @@ Los enums sirven para estandarizar valores y evitar errores de interpretación. 
 
 ## Anexos
 
-### Anexo A: Secuencia de Frontend, Backend, DB y Chat
+### Anexo A: Secuencia de Frontend, Backend, BD y Chat
+
+:::note 
+El siguiente diagrama de secuencia es a modo de referencia para mejorar la comprensión, **no reemplaza el funcionamiento real de la plataforma**.
+:::
 
 ```mermaid
 sequenceDiagram
 actor Usuario as Frontend
 participant API as Backend
-participant DB as PostgreSQL
-participant Chat as Firebase
+participant DB as PostgreSQL (BD)
+participant Chat as Firebase (Chat)
 
 Note over Usuario,API: Caso Escuela Esperanza
 Usuario->>API: POST /api/proyectos (Bearer JWT + JSON body)
