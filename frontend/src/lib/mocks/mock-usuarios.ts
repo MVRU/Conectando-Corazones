@@ -9,6 +9,7 @@ export const mockUsuarios = {
     // Administrador del sistema
     admin1: {
         username: 'admin_conectando',
+        password: '123456',
         nombre: 'Alexis',
         apellido: 'Sklate',
         tipo_documento: 'DNI',
@@ -88,6 +89,7 @@ export const mockUsuarios = {
     // Institución educativa
     escuela_esperanza: {
         username: 'escuela_esperanza',
+        password: '123456',
         nombre: 'María Elena',
         apellido: 'Rodríguez',
         tipo_documento: 'DNI',
@@ -164,6 +166,7 @@ export const mockUsuarios = {
     // Hospital público
     hospital_garrahan: {
         username: 'hospital_garrahan',
+        password: '123456',
         nombre: 'Dr. Roberto',
         apellido: 'García',
         tipo_documento: 'DNI',
@@ -225,6 +228,7 @@ export const mockUsuarios = {
     // Colaborador individual 1
     maria_gonzalez: {
         username: 'maria_g',
+        password: '123456',
         nombre: 'María',
         apellido: 'González',
         tipo_documento: 'DNI',
@@ -295,6 +299,7 @@ export const mockUsuarios = {
     // Colaborador individual 2
     carlos_rodriguez: {
         username: 'carlos_r',
+        password: '123456',
         nombre: 'Carlos',
         apellido: 'Rodríguez',
         tipo_documento: 'DNI',
@@ -349,6 +354,7 @@ export const mockUsuarios = {
     // Organización sin fines de lucro
     fundacion_manos_unidas: {
         username: 'fundacion_manos',
+        password: '123456',
         nombre: 'Patricia',
         apellido: 'Morales',
         tipo_documento: 'DNI',
@@ -425,6 +431,7 @@ export const mockUsuarios = {
     // Empresa con fines de lucro
     empresa_solidaria_sa: {
         username: 'empresa_solidaria',
+        password: '123456',
         nombre: 'Juan Carlos',
         apellido: 'Mendoza',
         tipo_documento: 'DNI',
@@ -489,6 +496,7 @@ export const mockUsuarios = {
     // Colaborador individual 3
     ana_martinez: {
         username: 'ana_m',
+        password: '123456',
         nombre: 'Ana',
         apellido: 'Martínez',
         tipo_documento: 'DNI',
@@ -575,6 +583,7 @@ export const mockUsuarios = {
     // Institución de salud privada
     clinica_san_jorge: {
         username: 'clinica_sj',
+        password: '123456',
         nombre: 'Dra. Carmen',
         apellido: 'Vega',
         tipo_documento: 'DNI',
@@ -643,6 +652,7 @@ export const mockUsuarios = {
     // Fundación Siempre
     fundacion_siempre: {
         username: 'fundacion_siempre',
+        password: '123456',
         nombre: 'Gabriela',
         apellido: 'López',
         tipo_documento: 'DNI',
@@ -681,6 +691,7 @@ export const mockUsuarios = {
     // Comedor Los Pinos
     comedor_los_pinos: {
         username: 'comedor_los_pinos',
+        password: '123456',
         nombre: 'Silvia',
         apellido: 'Pineda',
         tipo_documento: 'DNI',
@@ -719,6 +730,7 @@ export const mockUsuarios = {
     // Hospital General San José
     hospital_sanjose: {
         username: 'hospital_sanjose',
+        password: '123456',
         nombre: 'Ricardo',
         apellido: 'Martínez',
         tipo_documento: 'DNI',
@@ -757,6 +769,7 @@ export const mockUsuarios = {
     // Instituto de Formación Laboral
     instituto_formacion: {
         username: 'instituto_formacion',
+        password: '123456',
         nombre: 'Patricia',
         apellido: 'Suárez',
         tipo_documento: 'DNI',
@@ -795,6 +808,7 @@ export const mockUsuarios = {
     // Fundación Calor Humano
     fundacion_calor: {
         username: 'fundacion_calor',
+        password: '123456',
         nombre: 'Esteban',
         apellido: 'Moreno',
         tipo_documento: 'DNI',
@@ -833,6 +847,7 @@ export const mockUsuarios = {
     // Hogar Santa Teresa
     hogar_santa_teresa: {
         username: 'hogar_santa_teresa',
+        password: '123456',
         nombre: 'Teresa',
         apellido: 'Giménez',
         tipo_documento: 'DNI',

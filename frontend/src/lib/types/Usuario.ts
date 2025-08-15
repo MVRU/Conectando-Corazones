@@ -9,6 +9,7 @@ import type { HistorialDeCambios } from './HistorialDeCambios';
 
 export interface Usuario {
   username: string;
+  password: string;
   nombre: string;
   apellido: string;
   tipo_documento: string;
