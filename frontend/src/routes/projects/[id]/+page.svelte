@@ -5,6 +5,11 @@
 	import { error } from '@sveltejs/kit';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
+<<<<<<< Updated upstream
+=======
+	import ProjectContact from '$lib/components/projects/ContactoProyecto.svelte';
+	import SidebarCard from '$lib/components/projects/SidebarCard.svelte';
+>>>>>>> Stashed changes
 	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
 	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';

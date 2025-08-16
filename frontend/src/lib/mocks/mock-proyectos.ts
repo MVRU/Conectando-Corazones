@@ -129,8 +129,8 @@ export const mockProyectos: Proyecto[] = [
       calle: 'Calle 8',
       numero: '456',
       referencia: 'Barrio Norte',
-      url_google_maps: 'https://maps.google.com/?q=Calle+8+456',
-      localidad_id: localidades[1].id_localidad,
+      url_google_maps: 'https://maps.google.com/?q=Calle+8+456', //tampoco seria necesario en los mocks
+      localidad_id: localidades[1].id_localidad, //no es necesario en los mocks
       localidad: localidades[1]
     },
     evidencias: [
