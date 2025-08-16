@@ -1,6 +1,9 @@
-<!-- TODOs:
+<!-- FIX:
  	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER
-	- [ ] Corregir los estados de Proyecto -->
+	- [ ] Corregir los estados de Proyecto
+	- [ ] Corregir nombres de tipos de participación
+	
+	-->
 
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
@@ -36,7 +39,9 @@
 	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
 	const provinciasDisponibles = [
 		'Todas',
-		...Array.from(new Set(defaultProjects.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean))).sort()
+		...Array.from(
+			new Set(defaultProjects.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean))
+		).sort()
 	];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	let filtroParticipacionSeleccionado: 'Todos' | ParticipacionLabel = 'Todos';
@@ -76,7 +81,6 @@
 		urgencia: string,
 		provincia: string
 	): Proyecto[] {
-
 		let resultado = [...proyectos];
 
 		// Filtro por tipo de participación
@@ -135,7 +139,6 @@
 			const fechaB = new Date(b.created_at || '').getTime();
 			return fechaA - fechaB;
 		});
-
 
 		return resultado;
 	}

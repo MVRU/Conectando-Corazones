@@ -1,4 +1,4 @@
-// TODO: revisar y corregir errores tras cambios en interfaces
+// FIX: revisar y corregir errores tras cambios en interfaces
 
 import { localidades } from '$lib/mocks/mock-localidades';
 import { provincias } from '$lib/data/provincias';

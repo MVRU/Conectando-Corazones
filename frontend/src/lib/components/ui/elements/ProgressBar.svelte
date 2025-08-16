@@ -1,5 +1,3 @@
-<!-- FIX: este componente ya no se usa, quedó obsoleto, usamos "ProjectProgress" -->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 

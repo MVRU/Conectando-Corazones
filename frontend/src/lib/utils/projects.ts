@@ -12,7 +12,7 @@ export function encontrarProyectoPorId(idParam: string, lista: Proyecto[]): Proy
         throw error(404, 'ID de proyecto inválido');
     }
 
-    const proyecto = lista.find((p) => p.id === idNumerico);
+    const proyecto = lista.find((p) => p.id_proyecto === idNumerico);
 
     if (!proyecto) {
         throw error(404, 'Proyecto no encontrado');

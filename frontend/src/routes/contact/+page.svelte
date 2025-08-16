@@ -16,9 +16,6 @@ TODO:
 	let asunto = '';
 	let intentoEnvio = false;
 
-	/**
-	 * FIX: este array viene repetido de form-options sin implementación
-	 */
 	const opcionesAsunto = [
 		{ value: 'consulta-general', label: 'Consulta general' },
 		{ value: 'soporte-tecnico', label: 'Soporte técnico' },

@@ -2,13 +2,15 @@
 * Componente: DashboardGeneral
 	-*- Descripción: Dashboard principal con métricas en formato de tarjetas grid
 	-*- KPIs: proyectos participados, donaciones, instituciones, beneficiarios, progreso, insignias
+
+	FIX: revisar y corregir errores tras cambios en interfaces
 -->
 
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import ProgressBar from '$lib/components/ui/elements/ProgressBar.svelte';
-	
+
 	// Datos simulados basados en los KPIs de la imagen
 	const metricas = {
 		totalProyectos: 12,
@@ -22,29 +24,39 @@
 	};
 
 	const proyectosActivos = [
-		{ titulo: "Libros para escuela rural", progreso: 85, objetivo: "500 libros", recaudado: "425 libros" },
-		{ titulo: "Comedor comunitario", progreso: 60, objetivo: "$50,000", recaudado: "$30,000" },
-		{ titulo: "Computadoras para biblioteca", progreso: 40, objetivo: "20 equipos", recaudado: "8 equipos" },
-		{ titulo: "Medicamentos básicos", progreso: 90, objetivo: "$15,000", recaudado: "$13,500" }
+		{
+			titulo: 'Libros para escuela rural',
+			progreso: 85,
+			objetivo: '500 libros',
+			recaudado: '425 libros'
+		},
+		{ titulo: 'Comedor comunitario', progreso: 60, objetivo: '$50,000', recaudado: '$30,000' },
+		{
+			titulo: 'Computadoras para biblioteca',
+			progreso: 40,
+			objetivo: '20 equipos',
+			recaudado: '8 equipos'
+		},
+		{ titulo: 'Medicamentos básicos', progreso: 90, objetivo: '$15,000', recaudado: '$13,500' }
 	];
 
 	const categorias = [
-		{ nombre: "Educación", tuInteres: 85, realParticipacion: 70 },
-		{ nombre: "Salud", tuInteres: 60, realParticipacion: 80 },
-		{ nombre: "Alimentación", tuInteres: 75, realParticipacion: 45 },
-		{ nombre: "Tecnología", tuInteres: 40, realParticipacion: 60 }
+		{ nombre: 'Educación', tuInteres: 85, realParticipacion: 70 },
+		{ nombre: 'Salud', tuInteres: 60, realParticipacion: 80 },
+		{ nombre: 'Alimentación', tuInteres: 75, realParticipacion: 45 },
+		{ nombre: 'Tecnología', tuInteres: 40, realParticipacion: 60 }
 	];
 
 	const evolucionAnual = [
-		{ año: "2022", beneficiarios: 89 },
-		{ año: "2023", beneficiarios: 234 },
-		{ año: "2024", beneficiarios: 342 }
+		{ año: '2022', beneficiarios: 89 },
+		{ año: '2023', beneficiarios: 234 },
+		{ año: '2024', beneficiarios: 342 }
 	];
 
 	let animate = false;
 
 	onMount(() => {
-		setTimeout(() => animate = true, 100);
+		setTimeout(() => (animate = true), 100);
 	});
 </script>
 
@@ -52,7 +64,7 @@
 	<!-- Métricas Principales -->
 	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
 		<!-- Total de Proyectos -->
-		<div 
+		<div
 			class="group relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
@@ -74,7 +86,7 @@
 		</div>
 
 		<!-- Total Donado -->
-		<div 
+		<div
 			class="group relative overflow-hidden rounded-2xl border border-green-100 bg-gradient-to-br from-green-50 to-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
@@ -83,13 +95,15 @@
 			<div class="absolute -right-4 -top-4 text-6xl opacity-10">💰</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-green-600">Total Donado</h3>
-				<p class="mt-2 text-3xl font-bold text-gray-900">${metricas.totalDonado.toLocaleString()}</p>
+				<p class="mt-2 text-3xl font-bold text-gray-900">
+					${metricas.totalDonado.toLocaleString()}
+				</p>
 				<p class="mt-1 text-xs text-gray-500">En efectivo y materiales</p>
 			</div>
 		</div>
 
 		<!-- Instituciones Colaboradas -->
-		<div 
+		<div
 			class="group relative overflow-hidden rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
@@ -104,7 +118,7 @@
 		</div>
 
 		<!-- Beneficiarios -->
-		<div 
+		<div
 			class="group relative overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50 to-white p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
@@ -120,7 +134,7 @@
 	</div>
 
 	<!-- Proyectos Activos con Progreso -->
-	<div 
+	<div
 		class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg"
 		class:opacity-0={!animate}
 		class:translate-y-4={!animate}
@@ -130,10 +144,10 @@
 			<h2 class="text-xl font-bold text-gray-900">📈 Proyectos Activos</h2>
 			<div class="h-px flex-1 bg-gradient-to-r from-blue-200 to-transparent"></div>
 		</div>
-		
+
 		<div class="grid gap-4 sm:grid-cols-2">
 			{#each proyectosActivos as proyecto, i}
-				<div 
+				<div
 					class="rounded-xl border border-gray-100 bg-gray-50/50 p-4 transition-all duration-300 hover:bg-gray-50"
 					class:opacity-0={!animate}
 					style="transition-delay: {600 + i * 100}ms"
@@ -158,7 +172,7 @@
 	<!-- Fila inferior: Categorías e Insignias -->
 	<div class="grid gap-6 lg:grid-cols-2">
 		<!-- Categorías de Interés vs Reales -->
-		<div 
+		<div
 			class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
@@ -174,9 +188,9 @@
 						<div class="space-y-1">
 							<div class="flex items-center gap-2">
 								<span class="w-16 text-xs text-blue-600">Tu interés</span>
-								<div class="flex-1 bg-blue-100 rounded-full h-2">
-									<div 
-										class="bg-blue-500 rounded-full h-2 transition-all duration-1000" 
+								<div class="h-2 flex-1 rounded-full bg-blue-100">
+									<div
+										class="h-2 rounded-full bg-blue-500 transition-all duration-1000"
 										style="width: {categoria.tuInteres}%"
 									></div>
 								</div>
@@ -184,9 +198,9 @@
 							</div>
 							<div class="flex items-center gap-2">
 								<span class="w-16 text-xs text-green-600">Real</span>
-								<div class="flex-1 bg-green-100 rounded-full h-2">
-									<div 
-										class="bg-green-500 rounded-full h-2 transition-all duration-1000" 
+								<div class="h-2 flex-1 rounded-full bg-green-100">
+									<div
+										class="h-2 rounded-full bg-green-500 transition-all duration-1000"
 										style="width: {categoria.realParticipacion}%"
 									></div>
 								</div>
@@ -199,14 +213,16 @@
 		</div>
 
 		<!-- Insignias y Evolución -->
-		<div 
+		<div
 			class="space-y-6"
 			class:opacity-0={!animate}
 			class:translate-y-4={!animate}
 			style="transition-delay: 800ms"
 		>
 			<!-- Insignias -->
-			<div class="rounded-2xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-white p-6 shadow-lg">
+			<div
+				class="rounded-2xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-white p-6 shadow-lg"
+			>
 				<h2 class="mb-4 text-lg font-bold text-gray-900">🏆 Insignias Conseguidas</h2>
 				<div class="flex items-center gap-4">
 					<div class="text-4xl font-bold text-yellow-600">{metricas.insignias}</div>
@@ -232,9 +248,9 @@
 						<div class="flex items-center justify-between">
 							<span class="font-medium text-gray-700">{año.año}</span>
 							<div class="flex items-center gap-2">
-								<div class="h-2 w-20 bg-blue-100 rounded-full">
-									<div 
-										class="h-2 bg-blue-500 rounded-full transition-all duration-1000" 
+								<div class="h-2 w-20 rounded-full bg-blue-100">
+									<div
+										class="h-2 rounded-full bg-blue-500 transition-all duration-1000"
 										style="width: {(año.beneficiarios / metricas.beneficiarios) * 100}%"
 									></div>
 								</div>

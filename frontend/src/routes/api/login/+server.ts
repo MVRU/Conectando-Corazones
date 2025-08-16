@@ -1,3 +1,5 @@
+// FIX: revisar y corregir errores tras cambios en interfaces
+
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';

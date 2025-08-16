@@ -1,3 +1,5 @@
+<!-- FIX: revisar y corregir errores tras cambios en interfaces -->
+
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
 	import Button from '../ui/elements/Button.svelte';

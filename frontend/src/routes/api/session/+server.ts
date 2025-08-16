@@ -1,3 +1,5 @@
+// FIX: revisar y corregir errores tras cambios en interfaces
+
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
@@ -7,7 +9,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
     if (!token) return json({ user: null });
 
     const userId = token.replace('mock-token-', '');
-    const user = Object.values(mockUsuarios).find((u) => u.id === userId);
+    const user = Object.values(mockUsuarios).find((u) => u.username === userId);
 
     if (!user) {
         cookies.delete('auth_token', { path: '/' });

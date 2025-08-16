@@ -6,7 +6,6 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';
 	import { fly, fade } from 'svelte/transition';
 	import DashboardGeneral from './DashboardGeneral.svelte';

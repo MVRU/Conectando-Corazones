@@ -1,3 +1,5 @@
+<!-- FIX: corregir atributos cuando se resuelvan las inconsistencias con el DER (español)-->
+
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';

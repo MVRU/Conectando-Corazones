@@ -7,6 +7,8 @@
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 
+// FIX: revisar y corregir errores tras cambios en interfaces
+
 /**
  * Calcula el porcentaje de cumplimiento de los objetivos
  * promediando el cumplimiento individual de cada uno.

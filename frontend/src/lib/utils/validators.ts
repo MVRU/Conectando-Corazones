@@ -1,4 +1,4 @@
-// TODO: revisar y corregir errores tras cambios en interfaces
+// FIX: revisar y corregir errores tras cambios en interfaces
 
 import { provincias } from "$lib/data/provincias";
 import { getProvinceByCity } from '$lib/utils/helpers';

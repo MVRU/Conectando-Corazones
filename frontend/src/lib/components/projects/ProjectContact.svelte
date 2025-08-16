@@ -1,4 +1,4 @@
-<!-- TODOs:
+<!-- FIX:
  	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER -->
 
 <script lang="ts">

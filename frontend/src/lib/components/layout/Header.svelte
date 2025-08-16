@@ -1,3 +1,5 @@
+<!-- FIX: corregir atributos de usuario autenticado -->
+
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
