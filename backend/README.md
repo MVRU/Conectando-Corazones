@@ -92,7 +92,7 @@ npm test          # Ejecutar pruebas unitarias con Vitest
 
   * Firebase (auth, storage, notificaciones)
   * PostgreSQL (vía Prisma)
-  * APIs externas (RENAPER, ARCA, SendGrid)
+  * APIs externas (RENAPER, SendGrid)
 
 </details>
 
@@ -184,7 +184,7 @@ npm test          # Run unit tests with Vitest
 
   * Firebase (auth, storage, notifications)
   * PostgreSQL (via Prisma)
-  * External APIs (RENAPER, ARCA, SendGrid)
+  * External APIs (RENAPER, SendGrid)
 
 </details>
 ```

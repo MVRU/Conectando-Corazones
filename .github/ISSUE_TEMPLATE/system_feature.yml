@@ -24,7 +24,7 @@ body:
       label: 📋 Descripción de la funcionalidad
       description: Detallá qué debe hacer esta función o módulo, cómo se espera que se comporte.
       placeholder: |
-        Al registrar una institución, se debe validar su CUIT a través de la API de ARCA y guardar los datos básicos si la respuesta es válida.
+        Al registrar una institución, se debe validar su identidad a través de la API de RENAPER y guardar los datos básicos si la respuesta es válida.
     validations:
       required: true
 

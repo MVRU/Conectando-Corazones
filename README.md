@@ -1,272 +1,240 @@
-![Conectando Corazones – Plataforma solidaria](https://github.com/user-attachments/assets/99a5686b-6cb8-48f8-a468-c2cd612cfa9c)
+<p align="center">
+  <a href="README.md"><img src="https://img.shields.io/badge/ Español-0ea5e9?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/MVRU/Conectando-Corazones"><img src="https://img.shields.io/badge/English-e63946?style=for-the-badge&logo=google-translate" /></a>
+</p>
 
-<h1 align="center">💞Conectando Corazones</h1>
 
-<details open>
-<summary><h2>🇪🇸 Español</h2></summary>
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e293b,100:3b82f6&height=180&section=header&text=Conectando%20Corazones&fontSize=42&fontColor=ffffff&animation=twinkling&fontAlignY=35" />
+</p>
 
-**Conectando Corazones** es una plataforma digital sin fines de lucro que vincula a instituciones que necesitan ayuda —como escuelas, hospitales y comedores comunitarios— con personas, organizaciones y empresas dispuestas a brindarla en Argentina.
+<p align="center">
+  <em>❤️ Plataforma solidaria, transparente y trazable</em><br/>
+  <sub>Conectamos instituciones que necesitan ayuda con personas y organizaciones dispuestas a brindarla.</sub>
+</p>
 
-Promueve la solidaridad, la transparencia y la trazabilidad en cada proyecto, mediante herramientas digitales seguras, accesibles y responsables.
 
-## 🌍 Propósito
+<p align="center">
+ <a href="https://conectando-corazones.vercel.app/"><img src="https://img.shields.io/badge/App en vivo-0ea5e9?style=for-the-badge&logo=vercel&logoColor=white" /></a>
+  <a href="https://mvru.github.io/Conectando-Corazones/"><img src="https://img.shields.io/badge/Documentación-10b981?style=for-the-badge&logo=docusaurus&logoColor=white" /></a>
 
-Facilitar el encuentro entre quienes desean ayudar y quienes más lo necesitan, organizando las necesidades sociales en proyectos visibles, trazables y verificables.  
+</p>
 
-El objetivo es potenciar el impacto colectivo y construir una red de colaboración confiable y sostenible.
+<p align="center">
+  <a href="https://github.com/MVRU/Conectando-Corazones/issues">
+    <img src="https://img.shields.io/badge/Reportar problema-red?style=for-the-badge&logo=github" />
+  </a>
+</p>
 
-## 🔑 Características principales
 
-- ✅ Registro con validación oficial mediante APIs gubernamentales (**[RENAPER](https://www.argentina.gob.ar/interior/renaper)** y **[ARCA](https://www.afip.gob.ar/landing/default.asp)**).
-- 📄 Publicación estructurada de proyectos por instituciones verificadas.
-- 🤲 Postulación de colaboradores solidarios (personas, empresas u ONGs).
-- 💬 Chat seguro habilitado una vez aceptada la colaboración.
-- 📸 Cierre con evidencia obligatoria para garantizar transparencia.
-- 📊 Dashboard con métricas personalizadas.
-- 🧠 Recomendaciones inteligentes de proyectos según perfil.
-- ♿ Enfoque inclusivo, ético y orientado al bien común.
+---
 
-## 👥 Tipos de usuarios
+## ✨ Highlights
 
-- 🏫 **Instituciones**  
-  Comedores, escuelas, hospitales, fundaciones u otras entidades que necesiten ayuda.
+<p align="center">
+  <img src="https://img.shields.io/github/stars/MVRU/Conectando-Corazones?color=yellow&style=for-the-badge" />
+  <img src="https://img.shields.io/github/contributors/MVRU/Conectando-Corazones?color=green&style=for-the-badge" />
+  <img src="https://img.shields.io/github/last-commit/MVRU/Conectando-Corazones?style=for-the-badge&color=blue"/>
+  <img src="https://img.shields.io/github/issues/MVRU/Conectando-Corazones?style=for-the-badge&color=red"/>
+  <img src="https://img.shields.io/github/license/MVRU/Conectando-Corazones?color=purple&style=for-the-badge" />
+</p>
 
-- 🤝 **Colaboradores**  
-  Personas físicas o jurídicas que deseen colaborar con recursos, tiempo o donaciones.
+---
 
-- 🛠️ **Administradores del sistema**  
-  Responsables del control de calidad, moderación, validaciones y monitoreo.
+## 🍁 Introducción
 
-## ⚙️ Tecnologías utilizadas
+**Conectando Corazones** es una plataforma digital sin fines de lucro que vincula a instituciones que necesitan ayuda —como escuelas, hospitales y comedores— con personas, ONGs y empresas dispuestas a brindarla en Argentina.
 
-El sistema está desarrollado con tecnologías modernas, arquitectura desacoplada y servicios de despliegue en la nube.
+---
 
-### 🔸 Lenguaje principal
-- **TypeScript** (sobre JavaScript)
+## 🎯 Propósito
 
-### 🔹 Backend
-- Node.js + Express.js
-- Arquitectura en capas (routes, controllers, services, repositories)
-- Prisma ORM (PostgreSQL)
-- Axios (consumo de APIs externas)
-- Firebase: Authentication, Storage y Realtime Database
-- Integraciones: RENAPER, ARCA y SendGrid
+> **Facilitar la ayuda con trazabilidad total.**  
+> Cada proyecto tiene evidencias verificables para garantizar confianza entre instituciones, colaboradores y comunidad.
 
-### 🔹 Base de datos
-- PostgreSQL (servicio en la nube a través de Render)
+---
 
-### 🔸 Frontend
-- React (SPA con Vite)
-- Tailwind CSS + clsx
-- React Router DOM (ruteo y roles)
-- React Hook Form + Yup (formularios y validación)
-- Zustand + Context API (gestión de estados)
-- Chart.js (visualización de métricas)
+## 🚀 Funcionalidades
 
-### 🧪 Testing
-- Vitest + Testing Library (unitarias e integración)
-- Playwright (end-to-end)
-- Supertest (simulación de peticiones HTTP)
+<div align="center">
 
-### ☁️ Despliegue y servicios
-- Vercel (frontend)
-- Render (backend y base de datos)
-- Firebase (auth, almacenamiento, mensajería en tiempo real)
+| Característica             | Descripción                                                    |
+| -------------------------- | -------------------------------------------------------------- |
+| ✅ Registro verificado      | Email institucional, revisión documental, RENAPER (*post-MVP*) |
+| 📄 Publicación de proyectos | Solo por instituciones verificadas                             |
+| 🤝 Colaboraciones           | Personas, ONGs, empresas                                       |
+| 💬 Chat seguro              | Habilitado tras aceptación                                     |
+| 📸 Evidencias               | Cierre obligatorio con fotos/documentos                        |
+| 📊 Dashboard                | Métricas, seguimiento y recomendaciones                        |
+| 💞 Accesibilidad            | Diseño inclusivo y ético                                       |
 
-### 🧠 Recomendaciones inteligentes
-- PostgreSQL: filtrado por historial, categorías y geolocalización
-- Librerías de apoyo: lodash, fastest-levenshtein, geo-distance
+</div>
 
-### 🛡️ Seguridad y buenas prácticas
-- Helmet, CORS, express-rate-limit (seguridad en Express)
-- Validación oficial con APIs del Estado Argentino
-- Documentación técnica con Swagger y [GitHub Wiki](../../wiki)
+> ⚖️ **Aviso legal**: no procesamos pagos, no actuamos como escrow, no garantizamos legitimidad absoluta. La plataforma provee trazabilidad para control ciudadano.
 
-> La estructura del proyecto se encuentra organizada en `/frontend`, `/backend` y `/docs`.
+---
+
+## 👥 Usuarios
+
+<div align="center">
+
+| Rol                   | Permisos                                                      | Ejemplos                        |
+| --------------------- | ------------------------------------------------------------- | ------------------------------- |
+| **🏫 Instituciones**   | Publicar proyectos, gestionar colaboradores, subir evidencias | Escuelas, comedores, hospitales |
+| **🤲 Colaboradores**   | Postularse, enviar recursos, participar en chats              | Voluntarios, empresas, ONGs     |
+| **🛡️ Administradores** | Verificar cuentas, moderar contenido, auditar proyectos       | Equipo técnico y ético          |
+
+</div>
+
+
+### Cómo funciona (en 6 pasos)
+
+```mermaid
+flowchart LR
+  A[Institución publica necesidad] --> B[Define objetivos]
+  B --> C[Colaboradores exploran y se postulan]
+  C --> D[Institución acepta propuestas]
+  D --> E[Chat grupal para coordinar]
+  E --> F[Evidencias + Cierre con impacto]
+
+```
+
+---
+
+## 💻 Stack Tecnológico
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <h3>Frontend</h3>
+      <img src="https://skillicons.dev/icons?i=svelte,ts,tailwind" alt="Svelte, TypeScript, Tailwind" />
+    </td>
+    <td align="center" width="33%">
+      <h3>Backend</h3>
+      <img src="https://skillicons.dev/icons?i=nodejs,express,ts,prisma,postgres" alt="Node.js, Express, Prisma, PostgreSQL" />
+    </td>
+    <td align="center" width="33%">
+      <h3>Infraestructura</h3>
+      <img src="https://skillicons.dev/icons?i=vercel,firebase" alt="Vercel, Firebase" />
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
 
 ## 📖 Documentación
 
-La documentación técnica y funcional del sistema está disponible en la carpeta [`/docs`](./docs), tanto en inglés como en español siguiendo estándares profesionales. 
+<p align="center">
+  <a href="https://mvru.github.io/Conectando-Corazones/">
+    <img src="https://img.shields.io/badge/Docusaurus-3ECC5F?logo=docusaurus&logoColor=white&style=for-the-badge" />
+  </a>
+</p>
 
-**Incluye:** arquitectura del sistema, modelos de base de datos, flujos de datos, configuración y más.
+<div align="center">
 
-## 📚 Manuales de usuario
+| Sección         | Contenido                                   |
+| --------------- | ------------------------------------------- |
+| 📘 Guía Usuarios | Cómo publicar, colaborar y subir evidencias |
+| 🤝 Guía Devs     | Diagramas, ADRs y decisones técnicas        |
+| 🔐 Marco Legal   | Datos y políticas de privacidad             |
 
-Encontrá guías prácticas, manuales para instituciones y colaboradores, preguntas frecuentes y más en la **[Wiki del proyecto](../../wiki)**.
+</div>
 
-## 🚀 Cómo contribuir
+---
 
-**¡Conectando Corazones es un proyecto abierto a la comunidad!**  
-Podés colaborar como desarrollador/a, diseñador/a, tester, redactor/a o mentor/a técnico.
+## 📂 Estructura del Repositorio
 
-### ✍️ Pasos para colaborar:
+```plaintext
+📦 Conectando-Corazones
+├── 🟦 frontend/       → SvelteKit + TailwindCSS
+├── ⬛ backend/         → Express + Prisma + PostgreSQL
+├── 🟨 docs-site/       → Documentación con Docusaurus
+├── 📂 .github/         → Workflows, issues, CODE_OF_CONDUCT
+├── 📄 CONTRIBUTING.md  → Guía de contribución
+├── 📄 LICENSE          → AGPL-3.0
+└── 📄 SECURITY.md      → Política de seguridad
+```
 
-1. Hacé un fork del repositorio.
-2. Cloná tu copia:  
-   `git clone https://github.com/MVRU/Conectando-Corazones.git`
-3. Instalá las dependencias necesarias en `/frontend` y `/backend`.
-4. Creá una rama descriptiva:  
-   `git checkout -b mejora-validacion-apirest`
-5. Realizá tus cambios y abrí un Pull Request.
+---
 
-> Consultá el archivo [`CONTRIBUTING.md`](./CONTRIBUTING.md) para conocer las normas y pautas de colaboración.
+## 🤝 Contribuir
 
-## 🛡️ Políticas y comunidad
+<p align="center">
+  <img src="https://contrib.rocks/image?repo=MVRU/Conectando-Corazones" alt="Contribuidores" />
+</p>
 
-- 📜 [Código de Conducta](./.github/CODE_OF_CONDUCT.md) – Basado en Contributor Covenant v2.1  
-- 🔐 [Política de Seguridad](./.github/SECURITY.md) – Para reportar vulnerabilidades de forma responsable  
-- 🧾 [Licencia AGPL-3.0](./LICENSE) – Uso libre con código abierto obligatorio para derivaciones
+### 🛠️ Comenzá así:
 
-## 👨‍🎓 Créditos
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/MVRU/Conectando-Corazones.git
 
-Este proyecto fue desarrollado como trabajo final de la carrera de **Ingeniería en Sistemas de Información** en la **Universidad Tecnológica Nacional – Facultad Regional Rosario (UTN FRRo)**.
+# 2. Instalar dependencias
+cd frontend && npm install
+cd ../backend && npm install
 
-**Autores:**  
-- Martín Tomás Álvarez  
-- Marina Ana Milo  
-- Alexis Julián Sklate
+# 3. Crear una rama
+git checkout -b feature/descripcion-clara
+```
+
+> 👉 **Guía completa** → [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+
+---
+
+## 🛡️ Comunidad y Seguridad
+
+- 📜 [Código de Conducta](./.github/CODE_OF_CONDUCT.md)  
+- 🔐 [Política de Seguridad](./.github/SECURITY.md)  
+- 🧾 [Licencia AGPL-3.0](./LICENSE)
+
+### 🔒 Datos y privacidad
+
+<div align="center">
+
+| Política            | Acciones                                                     |
+| ------------------- | ------------------------------------------------------------ |
+| **Privacidad**      | Datos mínimos, cifrado en Firebase, eliminación de metadatos |
+| **Acceso**          | Restringido a roles autorizados                              |
+| **Responsabilidad** | Control total del usuario sobre su información               |
+| **Ética**           | Difuminado de rostros, protección de menores                 |
+
+</div>
+
+---
+
+## 🎓 Créditos
+
+Proyecto desarrollado como trabajo final de **Ingeniería en Sistemas de Información** – **UTN FRRo**.
+
+<div align="center">
+
+|                     Alexis Julián Sklate                      |                   Marina Ana Milo                    |                     Martín Tomás Álvarez                      |
+| :-----------------------------------------------------------: | :--------------------------------------------------: | :-----------------------------------------------------------: |
+| <img src="https://github.com/AleSklate0807.png" width="80" /> | <img src="https://github.com/MVRU.png" width="80" /> | <img src="https://github.com/TomasAlvarez0.png" width="80" /> |
+|      [@AleSklate0807](https://github.com/AleSklate0807)       |           [@MVRU](https://github.com/MVRU)           |      [@TomasAlvarez0](https://github.com/TomasAlvarez0)       |
+
+</div>
+
+---
 
 ## 📬 Contacto
 
-Para consultas, propuestas de colaboración o reportes técnicos, escribinos a:  
-📩 **Crear un email...**
+<p align="center">
+  <a href="https://github.com/MVRU/Conectando-Corazones/issues"><img src="https://img.shields.io/badge/Reportar%20Bug-f59e0b?style=for-the-badge&logo=github" /></a>
+  <a href="https://github.com/MVRU/Conectando-Corazones/discussions"><img src="https://img.shields.io/badge/Discutir-3b82f6?style=for-the-badge&logo=github" /></a>
+  <a href="mailto:conectando.corazones.contacto@gmail.com"><img src="https://img.shields.io/badge/Email-ef4444?style=for-the-badge&logo=gmail" /></a>
+</p>
 
-</details>
+---
 
-<details>
-<summary><h2>🌐 English</h2></summary>
+<div align="center">
+  <sub>❤️ Hecho con propósito, código limpio y mucho corazón.</sub>
+</div>
 
-**Conectando Corazones** is a non-profit digital platform that connects institutions in need —such as schools, hospitals and community kitchens— with individuals, organizations, and companies willing to help in Argentina.
-
-It promotes solidarity, transparency, and traceability in every project, using secure, accessible and responsible digital tools.
-
-## 🌍 Purpose
-
-To facilitate the connection between those who want to help and those who need it most, by organizing social needs into visible, traceable and verifiable projects.  
-
-Our goal is to maximize collective impact and build a trustworthy and sustainable collaboration network.
-
-## 🔑 Key Features
-
-- ✅ Official identity validation via government APIs (**[RENAPER](https://www.argentina.gob.ar/interior/renaper)** and **[ARCA](https://www.afip.gob.ar/landing/default.asp)**)
-- 📄 Structured project posting by verified institutions
-- 🤲 Collaboration proposals (donations, time or services)
-- 💬 Secure chat enabled once collaboration is accepted
-- 📸 Mandatory evidence upload to close projects transparently
-- 📊 Personalized metrics dashboard
-- 🧠 Smart recommendations based on user profile and history
-- ♿ Inclusive and socially-oriented design
-
-## 👥 User Types
-
-- 🏫 **Institutions**  
-  Schools, hospitals, food kitchens, foundations, and other verified entities
-
-- 🤝 **Collaborators**  
-  Individuals or organizations that want to donate, volunteer or offer services
-
-- 🛠️ **System Administrators**  
-  Moderators and maintainers in charge of verification, quality and metrics
-
-## ⚙️ Technologies Used
-
-The platform is built with modern technologies, a decoupled architecture, and cloud-based deployment services.
-
-### 🔸 Main Language
-
-* **TypeScript** (on top of JavaScript)
-
-### 🔹 Backend
-
-* Node.js + Express.js
-* Layered architecture (routes, controllers, services, repositories)
-* Prisma ORM (PostgreSQL)
-* Axios (external API consumption)
-* Firebase: Authentication, Storage and Realtime Database
-* Integrations: RENAPER, ARCA, and SendGrid
-
-### 🔹 Database
-
-* PostgreSQL (hosted via Render)
-
-### 🔸 Frontend
-
-* React (SPA using Vite)
-* Tailwind CSS + clsx
-* React Router DOM (routing and role-based access)
-* React Hook Form + Yup (form handling and validation)
-* Zustand + Context API (state management)
-* Chart.js (data visualization)
-
-### 🧪 Testing
-
-* Vitest + Testing Library (unit and integration tests)
-* Playwright (end-to-end tests)
-* Supertest (HTTP request simulation)
-
-### ☁️ Deployment & Services
-
-* Vercel (frontend)
-* Render (backend and database)
-* Firebase (auth, file storage, real-time messaging)
-
-### 🧠 Smart Recommendations
-
-* PostgreSQL queries: project history, preferred categories, geo-based filtering
-* Support libraries: lodash, fastest-levenshtein, geo-distance
-
-### 🛡️ Security & Best Practices
-
-* Helmet, CORS, express-rate-limit (for backend protection)
-* Official validation with Argentine government APIs
-* Technical documentation via Swagger and [GitHub Wiki](../../wiki)
-
-> See `/frontend`, `/backend` and `/docs` for structure.
-
-## 📖 Documentation
-
-Technical documentation is available in the [`/docs`](./docs) folder.  
-Includes system architecture, database models, data flows, configuration and more — in English and Spanish.
-
-## 📚 User Guides
-
-Practical manuals and FAQs are available in the **[Project Wiki](../../wiki)**.
-
-## 🚀 Contributing
-
-**Conectando Corazones is open to community contributions!**  
-You can help as a developer, designer, tester or technical reviewer.
-
-### ✍️ How to contribute:
-
-1. Fork the repository  
-2. Clone your fork:  
-   `git clone https://github.com/MVRU/Conectando-Corazones.git`
-3. Install dependencies in `/frontend` and `/backend`
-4. Create a branch:  
-   `git checkout -b fix-api-validation`
-5. Commit your changes and open a Pull Request
-
-> See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for more details.
-
-## 🛡️ Community and Policies
-
-- 📜 [Code of Conduct](./.github/CODE_OF_CONDUCT.md) – Based on Contributor Covenant v2.1  
-- 🔐 [Security Policy](./.github/SECURITY.md) – Responsible disclosure instructions  
-- 🧾 [AGPL-3.0 License](./LICENSE) – Strong copyleft open source license
-
-## 👨‍🎓 Credits
-
-Developed as the final project of the **Information Systems Engineering** degree at the **Universidad Tecnológica Nacional – Facultad Regional Rosario (UTN FRRo).**
-
-**Authors:**  
-- Martín Tomás Álvarez  
-- Marina Ana Milo  
-- Alexis Julián Sklate
-
-## 📬 Contact
-
-For questions, collaboration proposals or technical reports, email us at:  
-📩 **Crear un email...**
-
-</details>
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f172a,50:1e293b,100:3b82f6&height=120&section=footer"/>
+</p>

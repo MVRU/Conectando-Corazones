@@ -1,0 +1,38 @@
+/* ===== Hero (default: dark) ===== */
+.hero {
+  padding: 5rem 0 3rem;
+  text-align: left;
+  background:
+    radial-gradient(1200px 600px at 25% 10%, rgba(56, 189, 248, 0.12), transparent 60%),
+    linear-gradient(180deg, #0c1326 0%, #0f1933 55%, #0b1226 100%);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+}
+
+/* ===== Light theme — mismo layout, mejor paleta ===== */
+:global([data-theme='light']) .hero {
+  padding: 5rem 0 3rem;
+  background:
+    radial-gradient(1100px 520px at 18% 6%, rgba(14, 165, 233, .10), transparent 60%),
+    radial-gradient(900px 420px at 92% 86%, rgba(2, 132, 199, .08), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, #f5f9fc 62%, #ffffff 100%);
+  border-bottom: 1px solid rgba(2, 6, 23, 0.06);
+}
+
+:global([data-theme='light']) .cc-gradient-text {
+  background: linear-gradient(90deg, #0b5ea8 0%, #22a6e6 55%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* CTA row */
+.ctaRow {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.4rem;
+  flex-wrap: wrap;
+}
+
+.ctaRow> :global(a.button) {
+  margin: 0;
+}
