@@ -7,12 +7,12 @@
 	export let getColorEstado;
 </script>
 
-{#if proyecto.imagen}
+{#if proyecto.url_portada}
 	<div
 		class="animate-fade-down relative overflow-hidden rounded-3xl border border-gray-200 shadow-lg"
 	>
 		<img
-			src={proyecto.imagen}
+			src={proyecto.url_portada}
 			alt="Imagen del proyecto"
 			class="h-64 w-full object-cover sm:h-80 lg:h-[26rem]"
 			loading="lazy"

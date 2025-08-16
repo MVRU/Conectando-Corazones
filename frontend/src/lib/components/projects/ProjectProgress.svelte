@@ -10,7 +10,7 @@
 		calcularProgresoTiempo
 	} from '$lib/utils/progress';
 
-	export let proyecto!: Project;
+	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
 	export let variant: 'compact' | 'extended' = 'compact';
 
@@ -33,8 +33,8 @@
 	let icono: string;
 
 	const hoy = new Date();
-	const inicio = proyecto.fechaInicio ? new Date(proyecto.fechaInicio) : null;
-	const cierre = proyecto.fechaCierre ? new Date(proyecto.fechaCierre) : null;
+	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
+	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
 	let estadoTemporizador = '—';
 	if (inicio && cierre) {
@@ -52,29 +52,29 @@
 
 	let color: 'green' | 'blue' | 'purple' = 'blue';
 
-	$: if (proyecto.objetivos && proyecto.objetivos.length > 0) {
-		const unidad = proyecto.objetivos[0].unidad;
-		color = unidad === 'dinero' ? 'green' : unidad === 'voluntarios' ? 'purple' : 'blue';
+	// Actualizada para usar participacion_permitida
+	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
+		const unidad = proyecto.participacion_permitida[0]?.unidad;
+		color = unidad === 'dinero' ? 'green' : unidad === 'personas' ? 'purple' : 'blue';
 	}
 
 	const disabled = estadoTemporizador === 'Finalizado';
-	const objetivos = proyecto.objetivos || [];
-	const primerObjetivo = objetivos[0];
+	const participaciones = proyecto.participacion_permitida || [];
+	const primerParticipacion = participaciones[0];
 
-	let progresoCantidad = calcularProgresoCantidad(objetivos);
-	let progresoTiempo = calcularProgresoTiempo(proyecto.fechaInicio, proyecto.fechaCierre);
+	let progresoCantidad = calcularProgresoCantidad(participaciones);
+	let progresoTiempo = calcularProgresoTiempo(proyecto.created_at?.toString(), proyecto.fecha_fin_tentativa?.toString());
 	let progresoTotal = Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo);
 
 	let showModal = false;
 
-	icono =
-		primerObjetivo.unidad === 'materiales'
-			? getEmojiEspecie(primerObjetivo.especie)
-			: primerObjetivo.unidad === 'dinero'
-				? '💰'
-				: primerObjetivo.unidad === 'voluntarios'
-					? '🙋‍♀️'
-					: '🤝';
+	// Ahora usando participacion_permitida
+	icono = primerParticipacion?.unidad === 'dinero'
+		? '💰'
+		: primerParticipacion?.unidad === 'personas'
+			? '🙋‍♀️'
+			: primerParticipacion?.unidad ? getEmojiEspecie(primerParticipacion.unidad)
+				: '🤝'; // Valor por defecto
 
 	function getMensajeProgreso() {
 		if (progresoCantidad > 100) {
@@ -90,7 +90,7 @@
 	}
 </script>
 
-{#if objetivos.length > 0}
+{#if participaciones.length > 0}
 	<div class="animate-fade-up mb-5 transform transition-all duration-300">
 		<!-- ! Etiqueta de progreso -->
 		{#if variant === 'extended'}
@@ -159,11 +159,14 @@
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-md scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
-			on:click|stopPropagation
+			role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" on:click|stopPropagation
+			on:keydown={(e) => {
+				if (e.key === 'Escape') showModal = false;
+			}}
 		>
 			<!-- Encabezado -->
 			<div class="flex items-center justify-between border-b border-gray-100 px-5 pb-4 pt-5">
-				<h2 class="text-base font-semibold leading-tight text-gray-800">
+				<h2 id="modal-title" class="text-base font-semibold leading-tight text-gray-800">
 					{step === 0
 						? 'Cálculo del progreso'
 						: step === 1
@@ -315,14 +318,14 @@
 	<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:gap-2">
 		<Button
 			label="Ver detalles"
-			href={`/projects/${proyecto.id}`}
+			href={`/projects/${proyecto.id_proyecto}`}
 			variant="secondary"
 			size="sm"
 			customClass="flex-1 py-2.5 text-sm transition-all"
 		/>
 		<Button
 			label="Colaborar ahora"
-			href={`/projects/${proyecto.id}#colaborar`}
+			href={`/projects/${proyecto.id_proyecto}#colaborar`}
 			size="sm"
 			{disabled}
 			customClass="flex-1 py-2.5 text-sm font-medium transition-all"
