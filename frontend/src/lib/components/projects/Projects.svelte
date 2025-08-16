@@ -36,7 +36,7 @@
 	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
 	const provinciasDisponibles = [
 		'Todas',
-		...Array.from(new Set(defaultProjects.map((p) => p.provincia).filter(Boolean))).sort()
+		...Array.from(new Set(defaultProjects.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean))).sort()
 	];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	let filtroParticipacionSeleccionado: 'Todos' | ParticipacionLabel = 'Todos';
@@ -45,8 +45,8 @@
 	let provinciaSeleccionada = 'Todas';
 	let mostrarFiltros = false;
 
-	export let proyectos: Project[] = defaultProjects;
-	let proyectosVisibles: Project[] = [];
+	export let proyectos: Proyecto[] = defaultProjects;
+	let proyectosVisibles: Proyecto[] = [];
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {
 		// TODO: corregir los estados
@@ -55,10 +55,10 @@
 		Finalizado: 2
 	};
 
-	function estadoTemporizadorProyecto(p: Project): string {
+	function estadoTemporizadorProyecto(p: Proyecto): string {
 		const hoy = new Date();
-		const inicio = p.fechaInicio ? new Date(p.fechaInicio) : null;
-		const cierre = p.fechaCierre ? new Date(p.fechaCierre) : null;
+		const inicio = p.created_at ? new Date(p.created_at) : null;
+		const cierre = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
 
 		// TODO: corregir los estados
 		if (!inicio || !cierre) return 'Abierto';
@@ -69,13 +69,14 @@
 	}
 
 	function filtrarProyectos(
-		proyectos: Project[],
+		proyectos: Proyecto[],
 		filtros: typeof filtrosSeleccionados,
 		searchQuery: string,
 		estado: string,
 		urgencia: string,
 		provincia: string
-	): Project[] {
+	): Proyecto[] {
+
 		let resultado = [...proyectos];
 
 		// Filtro por tipo de participación
@@ -84,9 +85,10 @@
 				.filter((f): f is ParticipacionLabel => f !== 'Todos')
 				.map((f) => reverseMap[f]);
 
-			resultado = resultado.filter((p) =>
-				p.objetivos?.some((o) => unidadesEsperadas.includes(o.unidad))
-			);
+			// TODO: Implementar filtro cuando los mocks tengan objetos expandidos
+			// resultado = resultado.filter((p) =>
+			// 	p.objetivos?.some((o) => unidadesEsperadas.includes(o.unidad))
+			// );
 		}
 
 		// Filtro por estado
@@ -99,12 +101,13 @@
 
 		// Filtro por urgencia
 		if (urgencia !== 'Todas') {
-			resultado = resultado.filter((p) => p.urgencia === urgencia);
+			// TODO: Implementar urgencia cuando esté en el tipo
+			// resultado = resultado.filter((p) => p.urgencia === urgencia);
 		}
 
 		// Filtro por provincia
 		if (provincia !== 'Todas') {
-			resultado = resultado.filter((p) => p.provincia === provincia);
+			resultado = resultado.filter((p) => p.direccion?.localidad?.provincia?.nombre === provincia);
 		}
 
 		// Filtro por título o razón social
@@ -113,7 +116,7 @@
 			resultado = resultado.filter(
 				(p) =>
 					p.titulo.toLowerCase().includes(query) ||
-					p.institucion?.razonSocial?.toLowerCase().includes(query)
+					p.institucion?.nombre_legal?.toLowerCase().includes(query)
 			);
 		}
 
@@ -128,10 +131,11 @@
 				return prioridadEstadoA - prioridadEstadoB;
 			}
 
-			const fechaA = new Date(a.fechaInicio || '').getTime();
-			const fechaB = new Date(b.fechaInicio || '').getTime();
+			const fechaA = new Date(a.created_at || '').getTime();
+			const fechaB = new Date(b.created_at || '').getTime();
 			return fechaA - fechaB;
 		});
+
 
 		return resultado;
 	}
@@ -388,7 +392,7 @@
 
 	<!-- Lista de proyectos -->
 	<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-		{#each proyectosVisibles as proyecto (proyecto.id)}
+		{#each proyectosVisibles as proyecto (proyecto.id_proyecto)}
 			<div
 				in:fly={{ y: 20, duration: 300 }}
 				out:fade={{ duration: 150 }}

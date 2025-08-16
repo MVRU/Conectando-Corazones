@@ -1,22 +1,21 @@
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { mockProyectos as projects } from '$lib/mocks/mock-proyectos';
-	import { encontrarProyectoPorId } from '$lib/utils/projects';
+	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { page } from '$app/stores';
 	import { error } from '@sveltejs/kit';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
-	import ProjectContact from '$lib/components/projects/ProjectContact.svelte';
-	import SidebarCard from '$lib/components/projects/SidebarCard.svelte';
 	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
 	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import { ESTADO_LABELS } from '$lib/types/Estado';
 
-	let proyecto: any = null;
-	let mostrarFormularioColaboracion = false;
-	let solicitudEnviada = false;
+	let proyecto: Proyecto | null = null;
 
 	$: {
-		const encontrado = encontrarProyectoPorId($page.params.id, projects);
+		const id = $page.params.id;
+		const encontrado = mockProyectos.find(p => p.id_proyecto?.toString() === id);
+		
 		if (encontrado) {
 			proyecto = encontrado;
 			setBreadcrumbs([
@@ -38,7 +37,8 @@
 		return 'pendiente';
 	}
 
-	function diasRestantes(fechaFin: string): number {
+	function diasRestantes(fechaFin: string | undefined): number {
+		if (!fechaFin) return 0;
 		const hoy = new Date();
 		const fin = new Date(fechaFin);
 		const diferencia = fin.getTime() - hoy.getTime();
@@ -75,14 +75,36 @@
 		);
 	}
 
-	function mostrarFormulario() {
-		mostrarFormularioColaboracion = true;
-	}
-
-	function enviarSolicitud(event: Event) {
-		event.preventDefault();
-		solicitudEnviada = true;
-		setTimeout(() => (solicitudEnviada = false), 5000);
+	// Cálculo del estado temporal basado en fechas (igual que en ProjectCard y ProjectHeader)
+	function getEstadoTemporal(proyecto: Proyecto | null): string {
+		if (!proyecto) return 'En curso';
+		
+		const hoy = new Date();
+		const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
+		const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
+		
+		if (inicio && cierre) {
+			if (hoy > cierre) {
+				return 'Finalizado';
+			} else if (hoy >= inicio && hoy <= cierre) {
+				return 'En ejecución';
+			} else {
+				const diff = inicio.getTime() - hoy.getTime();
+				const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
+				if (dias <= 0) {
+					return 'Hoy comienza';
+				} else if (dias === 1) {
+					return 'Comienza mañana';
+				} else if (dias < 7) {
+					return `En ${dias} días`;
+				} else {
+					const semanas = Math.floor(dias / 7);
+					return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
+				}
+			}
+		}
+		
+		return proyecto.estado?.descripcion ? ESTADO_LABELS[proyecto.estado.descripcion] : 'En curso';
 	}
 </script>
 
@@ -94,76 +116,56 @@
 {#if proyecto}
 	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
 		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+			<!-- Header del proyecto -->
 			<ProjectHeader {proyecto} {getColorUrgencia} {getColorEstado} />
 
 			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
 				<!-- Columna principal -->
 				<div class="animate-fade-up space-y-10 lg:col-span-2">
-					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
-					>
+					<!-- Progreso del proyecto -->
+					<section class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg">
 						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
 						<ProjectProgress {proyecto} variant="extended" />
 
 						<div class="mt-8">
-							<h3
-								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
-							>
+							<h3 class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900">
 								<span>
-									{proyecto.objetivos.length === 1 ? 'Objetivo' : 'Objetivos'}
+									{(proyecto.participacion_permitida?.length || 0) === 1 ? 'Participación' : 'Participaciones'}
 								</span>
 								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
 									<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-										<svg
-											class="h-4 w-4 text-gray-600"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-											/>
+										<svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 										</svg>
 										<span class="text-xs font-medium text-gray-700">
-											Finaliza: {formatearFecha(proyecto.fechaCierre)}
+											Finaliza: {formatearFecha(proyecto.fecha_fin_tentativa?.toString())}
 										</span>
 									</div>
 									<div class="rounded-full bg-blue-50 px-3 py-1.5">
 										<span class="text-xs font-semibold text-blue-700">
-											{diasRestantes(proyecto.fechaCierre)} días restantes
+											{diasRestantes(proyecto.fecha_fin_tentativa?.toString() || '')} días restantes
 										</span>
 									</div>
 								</div>
 							</h3>
 
-							{#if proyecto.objetivos?.length}
+							{#if proyecto.participacion_permitida?.length}
 								<ul class="space-y-4">
-									{#each proyecto.objetivos as o}
-										{@const porcentaje = Math.round((o.cantidad / o.objetivo) * 100)}
-										<li
-											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
-										>
+									{#each proyecto.participacion_permitida as p}
+										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
+										<li class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200">
 											<!-- Ícono -->
 											<div class="flex-shrink-0">
-												{#if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'completo'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
-													>
+												{#if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
+													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700">
 														✅
 													</div>
-												{:else if calcularEstadoObjetivo(o.cantidad, o.objetivo) === 'parcial'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
-													>
+												{:else if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
+													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700">
 														⏳
 													</div>
 												{:else}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500"
-													>
+													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
 														📦
 													</div>
 												{/if}
@@ -172,9 +174,9 @@
 											<!-- Contenido -->
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
-													{o.unidad === 'dinero'
-														? `$${o.cantidad.toLocaleString('es-AR')} / $${o.objetivo.toLocaleString('es-AR')} ${o.especie}`
-														: `${o.cantidad} / ${o.objetivo}${o.unidad === 'voluntarios' ? ' voluntarios' : ` ${o.especie}`}`}
+													{p.unidad === 'dinero'
+														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
+														: `${p.actual || 0} / ${p.objetivo} ${p.unidad === 'personas' ? 'voluntarios' : p.unidad}`}
 												</p>
 												<div class="mt-1 flex justify-between text-xs text-gray-500">
 													<span>{porcentaje}% alcanzado</span>
@@ -184,50 +186,50 @@
 									{/each}
 								</ul>
 							{:else}
-								<p class="text-sm text-gray-500">No hay objetivos definidos para este proyecto.</p>
+								<p class="text-sm text-gray-500">No hay participaciones definidas para este proyecto.</p>
 							{/if}
 						</div>
 					</section>
 
 					<!-- Detalles del proyecto -->
-					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
-					>
+					<section class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg">
 						<ProjectDetails {proyecto} {formatearFecha} />
 					</section>
-
-					<!-- Actualizaciones -->
-					{#if proyecto.actualizaciones?.length}
-						<section class="rounded-xl border border-gray-200 bg-white p-6 shadow">
-							<h3 class="mb-4 text-xl font-semibold text-[rgb(var(--color-primary))]">
-								Actualizaciones del Proyecto
-							</h3>
-							<ul class="space-y-4">
-								{#each proyecto.actualizaciones as a}
-									<li
-										class="rounded border-l-4 border-[rgb(var(--color-primary))] bg-blue-50 p-4 transition hover:bg-blue-100"
-									>
-										<div class="flex justify-between text-sm font-medium text-gray-800">
-											<span>{a.titulo}</span>
-											<span class="text-gray-500">{formatearFecha(a.fecha)}</span>
-										</div>
-										<p class="mt-1 text-sm text-gray-700">{a.descripcion}</p>
-									</li>
-								{/each}
-							</ul>
-						</section>
-					{/if}
 				</div>
 
 				<!-- Columna lateral -->
 				<div class="animate-fade-up space-y-6" style="animation-delay: 100ms">
-					<SidebarCard {proyecto} {mostrarFormulario} />
-
-					{#if proyecto.contacto}
-						<ProjectContact contacto={proyecto.contacto} />
-					{/if}
+					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow">
+						<h3 class="text-lg font-semibold mb-4">Estado del Proyecto</h3>
+						<div class="space-y-3">
+							<div class="flex justify-between items-center">
+								<span class="text-sm text-gray-600">Estado:</span>
+								<span class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Finalizado' ? 'text-blue-600' : getEstadoTemporal(proyecto) === 'En ejecución' ? 'text-green-600' : 'text-orange-600'}">
+									{getEstadoTemporal(proyecto)}
+								</span>
+							</div>
+							<div class="flex justify-between items-center">
+								<span class="text-sm text-gray-600">Institución:</span>
+								<span class="text-sm font-medium">
+									{proyecto.institucion?.nombre_legal || 'N/A'}
+								</span>
+							</div>
+							<div class="flex justify-between items-center">
+								<span class="text-sm text-gray-600">Ubicación:</span>
+								<span class="text-sm font-medium">
+									{proyecto.direccion?.localidad?.nombre || 'N/A'}
+								</span>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
+		</div>
+	</main>
+{:else}
+	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
+		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+			<p>Cargando proyecto...</p>
 		</div>
 	</main>
 {/if}
