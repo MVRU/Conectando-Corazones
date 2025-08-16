@@ -65,7 +65,7 @@ const InstitutionFeatures: FeatureItem[] = [
   {
     title: 'Validaciones oficiales',
     Icon: ShieldCheck,
-    description: <>Integraciones opcionales (RENAPER/ARCA) para reducir fraude y datos duplicados.</>,
+    description: <>Integraciones opcionales (RENAPER) para reducir fraude y datos duplicados.</>,
     href: '/docs/arquitectura/integraciones',
   },
   {
