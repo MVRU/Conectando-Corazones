@@ -1,5 +1,4 @@
 import type { Estado } from './Estado';
-import type { TipoParticipacion } from './TipoParticipacion';
 import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
