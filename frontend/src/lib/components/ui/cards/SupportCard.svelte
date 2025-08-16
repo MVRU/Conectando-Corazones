@@ -1,14 +1,3 @@
-<!--
-* Componente: SupportCard
-    -*- Descripción: tarjeta individual de contacto/soporte.
-    -*- Props:
-        -*- icon (string): tipo de icono a mostrar.
-        -*- title (string): título de la tarjeta.
-        -*- description (string): descripción breve.
-        -*-- link (string): href del enlace de acción.
-        -*- linkText (string): texto del enlace.
--->
-
 <script lang="ts">
 	export let icon: 'user' | 'support' | 'alert' = 'user';
 	export let title = '';

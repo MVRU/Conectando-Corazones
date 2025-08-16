@@ -3,16 +3,16 @@
 */
 
 import { error } from '@sveltejs/kit';
-import type { Project } from '$lib/types/Project';
+import type { Proyecto } from '$lib/types/Proyecto';
 
-export function encontrarProyectoPorId(idParam: string, lista: Project[]): Project {
+export function encontrarProyectoPorId(idParam: string, lista: Proyecto[]): Proyecto {
     const idNumerico = Number(idParam);
 
     if (!Number.isInteger(idNumerico)) {
         throw error(404, 'ID de proyecto inválido');
     }
 
-    const proyecto = lista.find((p) => p.id === idNumerico);
+    const proyecto = lista.find((p) => p.id_proyecto === idNumerico);
 
     if (!proyecto) {
         throw error(404, 'Proyecto no encontrado');

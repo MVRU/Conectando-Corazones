@@ -2,7 +2,9 @@
 * Componente: DashboardAnalitico
 	-*- Descripción: Dashboard con enfoque en análisis temporal y evolución detallada
 	-*- KPIs: tendencias, progreso histórico, comparativas y proyecciones
--->
+
+FIX: revisar y corregir errores tras cambios en interfaces
+	-->
 
 <script lang="ts">
 	import { onMount } from 'svelte';

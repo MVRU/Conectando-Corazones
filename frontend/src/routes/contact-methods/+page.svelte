@@ -1,12 +1,5 @@
 <script lang="ts">
 	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
-	import { goto } from '$app/navigation';
-
-	interface Contacto {
-		tipo: string;
-		valor: string;
-		etiqueta?: string | null;
-	}
 </script>
 
 <!-- Fondo decorativo infinito -->

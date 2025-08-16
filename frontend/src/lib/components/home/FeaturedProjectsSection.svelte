@@ -1,14 +1,9 @@
-<!--
-* Componente: FeaturedProjectsSection
-    -*- Descripción: muestra una sección destacada de proyectos con un encabezado, una cuadrícula de tarjetas de proyectos y un botón de llamada a la acción.
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';
-	import { projects } from '$lib/mocks/mock-projects';
+	import { mockProyectos as projects } from '$lib/mocks/mock-proyectos';
 
 	let visible = false;
 	let sectionRef: HTMLElement;

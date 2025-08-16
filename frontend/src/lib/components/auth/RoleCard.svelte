@@ -1,3 +1,5 @@
+<!-- TODO: corregir atributos (español) -->
+
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';

@@ -1,11 +1,4 @@
 <!--
-* Componente: HowItWorksSection
-	-*- Descripción: sección informativa que explica en pasos cómo funciona la plataforma.
-	-*- Funcionalidad: presenta 6 pasos numerados con fondo visual, título y descripción. Cada paso usa el componente `StepCard`.
-
-* Props:
-	-*- No recibe props por ahora; los pasos están definidos internamente.
-
 TODO:
 	- [ ] (Opcional) Parametrizar pasos para admitir contenido dinámico en el futuro.
 -->

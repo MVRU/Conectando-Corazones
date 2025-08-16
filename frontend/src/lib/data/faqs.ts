@@ -4,7 +4,7 @@
     -*- Como no cambian (o muy raramente) tampoco se deberían consultar a una API constantemente.
 **/
 
-import type { Faq } from '$lib/types/Faq';
+import type { Faq } from '$lib/types/otros/Faq';
 
 // ! La categoría "General" son los que aparecen en la sección de inicio (no agregar más)
 

@@ -1,8 +1,4 @@
 <!--
-* Página: Contacto
-	-*- Descripción: Formulario para consultas y contacto
-	-*- Funcionalidad: Formulario de contacto
-
 TODO:
 	- [ ] Conectar formulario con backend
 	- [ ] Agregar validación de campos

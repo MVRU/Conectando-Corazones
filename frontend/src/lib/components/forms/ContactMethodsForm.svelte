@@ -1,8 +1,4 @@
-<!--
-TODOs:
- 	- [ ] Mover Button "Eliminar" hacia la derecha
-	- [ ] Crear variante para Button tipo "danger" que sea el de "eliminar"
--->
+<!-- FIX: revisar y corregir errores tras cambios en interfaces -->
 
 <script lang="ts">
 	import Input from '../ui/Input.svelte';
@@ -10,7 +6,6 @@ TODOs:
 	import Select from '../ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 
-	// Importa funciones y mensajes del archivo centralizado
 	import {
 		isValidEmail,
 		isValidInternationalPhone,
@@ -21,19 +16,15 @@ TODOs:
 	let contactos = [{ tipo: 'Teléfono', valor: '', etiqueta: '' }];
 	let sending = false;
 
-	// Tipos principales de contacto
 	const tiposContacto = ['Teléfono', 'Correo electrónico', 'Sitio web', 'Red social', 'Otro'];
 	const redesSociales = ['Instagram', 'Facebook', 'LinkedIn', 'WhatsApp'];
 	const etiquetasGenerales = ['Principal', 'Secundario', 'Personal'];
 
-	// Dispatcher de evento
 	const dispatch = createEventDispatcher();
 
-	// Permite mostrar un botón para omitir el formulario en flujos opcionales
 	export let showSkip = false;
 	export let skipLabel = 'Omitir';
 
-	// Función para obtener placeholder según tipo
 	function getPlaceholder(tipo: string): string {
 		switch (tipo) {
 			case 'Teléfono':
@@ -51,7 +42,6 @@ TODOs:
 		}
 	}
 
-	// Validaciones reactivas por contacto
 	$: errors = contactos.map((contacto, index) => {
 		const { tipo, valor, etiqueta } = contacto;
 
@@ -66,7 +56,6 @@ TODOs:
 
 		if (tipo === 'Otro' && !etiqueta?.trim()) return ERROR_MESSAGES.specifyOtherContact;
 
-		// Validar duplicados (mismo tipo + valor)
 		const isDuplicate = contactos.some(
 			(c, i) => i !== index && c.tipo === tipo && c.valor === valor
 		);
@@ -76,25 +65,20 @@ TODOs:
 		return '';
 	});
 
-	// Valida si hay al menos un teléfono válido
 	$: telefonoValido = contactos.some(
 		(c) => c.tipo === 'Teléfono' && isValidInternationalPhone(c.valor)
 	);
 
-	// -*- hasErrors refleja errores y duplicados
 	$: hasErrors = !telefonoValido || contactos.some((_, i) => errors[i]);
 
-	// Agrega un nuevo contacto
 	function addContact() {
 		contactos = [...contactos, { tipo: 'Teléfono', valor: '', etiqueta: '' }];
 	}
 
-	// Elimina un contacto
 	function removeContact(index: number) {
 		contactos = contactos.filter((_, i) => i !== index);
 	}
 
-	// Maneja el envío del formulario
 	function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		if (hasErrors) return;
@@ -114,7 +98,6 @@ TODOs:
 			<div
 				class="group relative flex flex-row items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
 			>
-				<!-- Contenedor de campos -->
 				<div class="flex flex-1 flex-wrap gap-4">
 					<!-- Tipo de contacto -->
 					<div class="min-w-[200px] flex-1 md:flex-none">

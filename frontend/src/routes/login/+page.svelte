@@ -1,8 +1,4 @@
 <!--
-* Página: Inicio de Sesión
-	-*- Descripción: Formulario de autenticación para usuarios
-	-*- Funcionalidad: Login de usuarios y redirección al registro
-
 TODO:
 	- [ ] Conectar con backend de autenticación
 	- [ ] Implementar validación de campos
@@ -17,7 +13,7 @@ TODO:
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 
-	let email = '';
+	let username = '';
 	let password = '';
 	let rememberMe = false;
 	let showPassword = false;
@@ -29,7 +25,7 @@ TODO:
 
 		// Validar campos
 		validationErrors = [];
-		if (!email.trim()) validationErrors.push('El email es requerido');
+		if (!username.trim()) validationErrors.push('El nombre de usuario es requerido');
 		if (!password.trim()) validationErrors.push('La contraseña es requerida');
 
 		if (validationErrors.length > 0) {
@@ -37,7 +33,7 @@ TODO:
 		}
 
 		try {
-			await authActions.login(email, password, rememberMe);
+			await authActions.login(username, password, rememberMe);
 
 			// Redirigir según el rol del usuario
 			// TODO: Implementar redirección basada en el rol
@@ -101,17 +97,22 @@ TODO:
 
 				<form on:submit={handleLogin} class="space-y-6">
 					<div>
-						<label for="email" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
-							Email *
+						<label for="username" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
+							Nombre de Usuario *
 						</label>
 						<input
-							id="email"
-							bind:value={email}
-							type="email"
+							id="username"
+							bind:value={username}
+							type="text"
 							required
 							class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
-							placeholder="tu.email@ejemplo.com"
+							placeholder="admin_conectando"
 						/>
+						<p class="mt-1 text-xs text-gray-500">
+							Prueba con: <code class="bg-gray-100 px-1 rounded">admin_conectando</code>, 
+							<code class="bg-gray-100 px-1 rounded">escuela_esperanza</code>, 
+							<code class="bg-gray-100 px-1 rounded">maria_g</code>
+						</p>
 					</div>
 
 					<div>
@@ -128,7 +129,7 @@ TODO:
 								type={showPassword ? 'text' : 'password'}
 								required
 								class="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
-								placeholder="Tu contraseña"
+								placeholder="123456"
 							/>
 							<button
 								type="button"
@@ -162,6 +163,9 @@ TODO:
 								{/if}
 							</button>
 						</div>
+						<p class="mt-1 text-xs text-gray-500">
+							Todos los usuarios de prueba usan la contraseña: <code class="bg-gray-100 px-1 rounded">123456</code>
+						</p>
 					</div>
 
 					<div class="flex items-center justify-between">
@@ -236,6 +240,9 @@ TODO:
 				<h2 class="mb-4 text-2xl font-semibold text-[rgb(var(--base-color))]">
 					¿Por qué registrarse?
 				</h2>
+
+				<!-- FIX: no es una comunidad de donantes-->
+
 				<p class="mx-auto mb-6 max-w-2xl text-gray-600">
 					Al crear una cuenta podés hacer seguimiento de tus donaciones, recibir actualizaciones de
 					los proyectos que apoyás y formar parte de nuestra comunidad de donantes comprometidos.

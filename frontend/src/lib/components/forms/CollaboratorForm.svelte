@@ -18,7 +18,6 @@
 		ERROR_MESSAGES
 	} from '$lib/utils/validators';
 
-	// Estados iniciales
 	let sending = false;
 	let tipo: 'persona' | 'organizacion' = 'persona';
 	let showPassword = false;
@@ -50,7 +49,6 @@
 	let password = '';
 	let repassword = '';
 
-	// Validación reactiva de errores
 	$: errors = {
 		// Persona
 		nombre:

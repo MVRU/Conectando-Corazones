@@ -1,9 +1,3 @@
-<!--
-* Componente: SupportSection
-    -*- Descripción: sección de ayuda y contacto, con tarjetas de soporte/contacto.
-    -*- Props: por ahora, contenido estático.
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';

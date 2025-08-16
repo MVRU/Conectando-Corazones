@@ -1,31 +1,18 @@
-<!--
-* Componente: Breadcrumbs
-        -*- Descripción: Navegación de migas de pan para mostrar la ubicación actual.
-        -*- Funcionalidad: Muestra la ruta de navegación con enlaces clicables.
-         ! Se muestra cuando hay migas configuradas (mínimo dos elementos).
-
-* Props:
-        -*- useIconSeparator (boolean): si true usa flecha, si false usa “/”.
--->
-
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
 	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 
-	/* -------- props -------- */
 	export let useIconSeparator = true;
 
-	/* -------- constantes de diseño -------- */
 	const MOBILE_MAX_LABEL = 14;
 	const MIN_ITEM_WIDTH = 110;
 	const MIN_LAST_ITEM_WIDTH = 120;
 	const SEPARATOR_WIDTH = 32;
 
-	/* -------- estado -------- */
 	let breadcrumbs: BreadcrumbItem[] = [];
 	let showPopover = false;
-	// * Cierra el popover cuando cambia la ruta
+
 	let lastBreadcrumbs: BreadcrumbItem[] = [];
 	let navRef: HTMLElement | null = null;
 	let containerWidth = 0;
@@ -37,11 +24,9 @@
 		showPopover = false;
 	}
 
-	/* -------- utils -------- */
 	const truncate = (label: string, max: number) =>
 		label && label.length > max ? label.slice(0, max - 1).trimEnd() + '…' : (label ?? '');
 
-	/* -------- medir ancho para desktop -------- */
 	function observeNavWidth() {
 		if (!navRef) return;
 		const ro = new ResizeObserver((entries) => {
@@ -53,7 +38,6 @@
 		onDestroy(() => ro.disconnect());
 	}
 
-	/* -------- cerrar popover al hacer clic fuera -------- */
 	function closePopoverOnClickOutside(event: MouseEvent) {
 		if (
 			showPopover &&
@@ -69,7 +53,6 @@
 		return () => window.removeEventListener('click', closePopoverOnClickOutside);
 	});
 
-	/* -------- cálculo de breadcrumbs visibles (desktop) -------- */
 	$: {
 		visibleCrumbsCount = 0;
 
