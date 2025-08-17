@@ -3,12 +3,8 @@
 
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import Button from '../ui/elements/Button.svelte';
-	import {
-		calcularProgresoTotal,
-		calcularProgresoCantidad,
-		calcularProgresoTiempo
-	} from '$lib/utils/progress';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import { calcularProgresoCantidad, calcularProgresoTiempo } from '$lib/utils/progress';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
@@ -30,7 +26,7 @@
 
 	let step = 0;
 	const steps = 4;
-	let icono: string;
+	let icono = '🤝';
 
 	const hoy = new Date();
 	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
@@ -52,29 +48,35 @@
 
 	let color: 'green' | 'blue' | 'purple' = 'blue';
 
-	// Actualizada para usar participacion_permitida
+	const visualMap: Record<
+		string,
+		{ color: 'green' | 'blue' | 'purple'; emoji: (u?: string) => string }
+	> = {
+		Monetaria: { color: 'green', emoji: () => '💰' },
+		Voluntariado: { color: 'purple', emoji: () => '🙋‍♀️' },
+		Materiales: { color: 'blue', emoji: (u?: string) => getEmojiEspecie(u) }
+	};
+
+	const defaultVisual = { color: 'blue' as const, emoji: () => '🤝' };
+
 	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
-		const unidad = proyecto.participacion_permitida[0]?.unidad;
-		color = unidad === 'dinero' ? 'green' : unidad === 'personas' ? 'purple' : 'blue';
+		const { unidad, tipo_participacion } = proyecto.participacion_permitida[0] || {};
+		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
+		color = visual.color;
+		icono = visual.emoji(unidad);
 	}
 
 	const disabled = estadoTemporizador === 'Finalizado';
 	const participaciones = proyecto.participacion_permitida || [];
-	const primerParticipacion = participaciones[0];
 
 	let progresoCantidad = calcularProgresoCantidad(participaciones);
-	let progresoTiempo = calcularProgresoTiempo(proyecto.created_at?.toString(), proyecto.fecha_fin_tentativa?.toString());
+	let progresoTiempo = calcularProgresoTiempo(
+		proyecto.created_at?.toString(),
+		proyecto.fecha_fin_tentativa?.toString()
+	);
 	let progresoTotal = Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo);
 
 	let showModal = false;
-
-	// Ahora usando participacion_permitida
-	icono = primerParticipacion?.unidad === 'dinero'
-		? '💰'
-		: primerParticipacion?.unidad === 'personas'
-			? '🙋‍♀️'
-			: primerParticipacion?.unidad ? getEmojiEspecie(primerParticipacion.unidad)
-				: '🤝'; // Valor por defecto
 
 	function getMensajeProgreso() {
 		if (progresoCantidad > 100) {
@@ -159,7 +161,11 @@
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-md scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
-			role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-title"
+			tabindex="-1"
+			on:click|stopPropagation
 			on:keydown={(e) => {
 				if (e.key === 'Escape') showModal = false;
 			}}

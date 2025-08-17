@@ -4,9 +4,9 @@
 	- [ ] Implementar propiedad 'urgencia' en tipo Proyecto y mocks -->
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import Button from '../elements/Button.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { calcularProgresoTotal } from '$lib/utils/progress';
-	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
+	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
@@ -24,34 +24,37 @@
 		const totalObjetivo = participaciones.reduce((acc, p) => acc + (p.objetivo || 0), 0);
 		const totalActual = participaciones.reduce((acc, p) => acc + (p.actual || 0), 0);
 		const primerParticipacion = participaciones[0];
-		
-		percentCantidad = calcularProgresoTotal(proyecto);
-		
-		actualLabel = primerParticipacion.unidad === 'dinero'
-			? `$${totalActual.toLocaleString('es-AR')}`
-			: primerParticipacion.unidad === 'personas'
-				? `${totalActual} voluntarios`
-				: `${totalActual} ${primerParticipacion.unidad}`;
-		
-		objetivoLabel = primerParticipacion.unidad === 'dinero'
-			? `$${totalObjetivo.toLocaleString('es-AR')}`
-			: primerParticipacion.unidad === 'personas'
-				? `${totalObjetivo} voluntarios`
-				: `${totalObjetivo} ${primerParticipacion.unidad}`;
-		
-		color = primerParticipacion.unidad === 'dinero'
-			? 'green'
-			: primerParticipacion.unidad === 'personas'
-				? 'purple'
-				: 'blue';
-		
-		icono = primerParticipacion.unidad === 'dinero'
-			? 'money'
-			: primerParticipacion.unidad === 'personas'
-				? 'users'
-				: 'archive';
-	}
 
+		percentCantidad = calcularProgresoTotal(proyecto);
+
+		actualLabel =
+			primerParticipacion.unidad === 'dinero'
+				? `$${totalActual.toLocaleString('es-AR')}`
+				: primerParticipacion.unidad === 'personas'
+					? `${totalActual} voluntarios`
+					: `${totalActual} ${primerParticipacion.unidad}`;
+
+		objetivoLabel =
+			primerParticipacion.unidad === 'dinero'
+				? `$${totalObjetivo.toLocaleString('es-AR')}`
+				: primerParticipacion.unidad === 'personas'
+					? `${totalObjetivo} voluntarios`
+					: `${totalObjetivo} ${primerParticipacion.unidad}`;
+
+		color =
+			primerParticipacion.unidad === 'dinero'
+				? 'green'
+				: primerParticipacion.unidad === 'personas'
+					? 'purple'
+					: 'blue';
+
+		icono =
+			primerParticipacion.unidad === 'dinero'
+				? 'money'
+				: primerParticipacion.unidad === 'personas'
+					? 'users'
+					: 'archive';
+	}
 
 	const formatearFechaCorta = (fecha?: string) => {
 		if (!fecha) return '—';
@@ -114,8 +117,8 @@
 	<!-- Imagen destacada -->
 	<div class="relative aspect-[4/3] w-full overflow-hidden">
 		<img
-					src={proyecto.url_portada || '/img/proyecto-default.jpg'}
-		alt={proyecto.titulo}
+			src={proyecto.url_portada || '/img/proyecto-default.jpg'}
+			alt={proyecto.titulo}
 			class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 			loading="lazy"
 		/>
@@ -127,7 +130,9 @@
 			<span class="font-medium">{estadoTemporizador}</span>
 			<span class="mx-1 text-gray-300">|</span>
 			<span class="text-gray-500">
-				{formatearFechaCorta(proyecto.created_at?.toString())} - {formatearFechaCorta(proyecto.fecha_fin_tentativa?.toString())}
+				{formatearFechaCorta(proyecto.created_at?.toString())} - {formatearFechaCorta(
+					proyecto.fecha_fin_tentativa?.toString()
+				)}
 			</span>
 		</div>
 
@@ -148,9 +153,9 @@
 	<div class="flex flex-1 flex-col justify-between gap-6 p-6">
 		<div class="space-y-2">
 			<div class="flex flex-wrap items-center justify-between text-xs text-gray-500">
-							<span class="font-semibold text-[rgb(var(--color-primary))]"
-				>{proyecto.institucion?.nombre_legal || 'Institución'}</span
-			>
+				<span class="font-semibold text-[rgb(var(--color-primary))]"
+					>{proyecto.institucion?.nombre_legal || 'Institución'}</span
+				>
 
 				<div class="flex items-center gap-1 text-xs text-gray-500">
 					<svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -158,7 +163,10 @@
 							d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11.8a2.8 2.8 0 100-5.6 2.8 2.8 0 000 5.6z"
 						/>
 					</svg>
-					<span>{proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad?.provincia?.nombre || 'Provincia'}</span>
+					<span
+						>{proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad
+							?.provincia?.nombre || 'Provincia'}</span
+					>
 				</div>
 			</div>
 
@@ -172,7 +180,7 @@
 
 		<!-- Progreso visual -->
 		<div class="mt-2 flex flex-col gap-2">
-			<ProjectProgress {proyecto} variant="compact" />
+			<ProyectoProgreso {proyecto} variant="compact" />
 
 			{#if mostrarBotones}
 				<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">

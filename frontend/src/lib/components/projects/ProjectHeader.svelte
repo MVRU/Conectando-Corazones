@@ -1,28 +1,28 @@
 <!-- TODOs:
  	- [x] Corregir atributos de ubicación (✅ Completado: ciudad/provincia → direccion.localidad)
  	- [x] Corregir badge de estado (✅ Completado: [object Object] → estado temporal calculado)
- 	- [x] Sincronizar estado con ProjectCard (✅ Completado: ahora ambos usan cálculo temporal)
+ 	- [x] Sincronizar estado con ProyectoCard (✅ Completado: ahora ambos usan cálculo temporal)
  	- [ ] Corregir badge de urgencia cuando esté disponible en el tipo -->
 
 <script lang="ts">
 	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
-	
+
 	export let proyecto;
 	export let getColorUrgencia;
 	export let getColorEstado;
-	
+
 	function getEstadoLabel(estado: any): string {
 		if (!estado?.descripcion) return 'Falla estado';
 		const desc = estado.descripcion as EstadoDescripcion;
 		return ESTADO_LABELS[desc] || 'Falla estado';
 	}
-	
-	// Cálculo del estado temporal basado en fechas 
+
+	// Cálculo del estado temporal basado en fechas
 	function getEstadoTemporal(proyecto: any): string {
 		const hoy = new Date();
 		const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 		const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
-		
+
 		if (inicio && cierre) {
 			if (hoy > cierre) {
 				return 'Finalizado';
@@ -43,7 +43,7 @@
 				}
 			}
 		}
-		
+
 		return getEstadoLabel(proyecto.estado);
 	}
 </script>
@@ -75,7 +75,8 @@
 			>
 				<!-- Ubicación -->
 				<span class="flex items-center gap-1 text-pink-200">
-					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad?.provincia?.nombre || 'Provincia'}
+					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad
+						?.provincia?.nombre || 'Provincia'}
 				</span>
 
 				<!-- Badges -->

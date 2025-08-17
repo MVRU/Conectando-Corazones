@@ -1,15 +1,16 @@
 <script lang="ts">
-	export let stars: number = 5;
-	export let quote: string = '';
-	export let author: string = '';
-	export let role: string = '';
+	export let puntaje: number = 5;
+	export let contenido: string = '';
+	export let username: string = '';
+	export let rol: string = '';
 	export let active: boolean = false;
 	export let locked: boolean = false;
 
 	const MAX_LENGTH = 180;
 
-	// Cita truncada
-	$: derivedQuote = quote.length > MAX_LENGTH ? quote.slice(0, MAX_LENGTH).trimEnd() + '…' : quote;
+	// * Se trunca el contenido para mantener la tarjeta compacta
+	$: contenidoTruncado =
+		contenido.length > MAX_LENGTH ? contenido.slice(0, MAX_LENGTH).trimEnd() + '…' : contenido;
 </script>
 
 <div
@@ -23,10 +24,12 @@
 >
 	<!-- Estrellas con diseño más refinado -->
 	<div class="mb-5 flex justify-center gap-1.5">
-		{#each Array(5) as _, i}
+		{#each Array(5).keys() as i (i)}
 			<svg
 				class="h-5 w-5 transition-all duration-300 ease-out
-          {i < stars ? 'text-amber-400 drop-shadow-sm' : 'text-gray-200 group-hover:text-gray-300'}
+          {i < puntaje
+					? 'text-amber-400 drop-shadow-sm'
+					: 'text-gray-200 group-hover:text-gray-300'}
           group-hover:scale-110"
 				fill="currentColor"
 				viewBox="0 0 20 20"
@@ -43,16 +46,16 @@
 	<blockquote
 		class="relative mb-6 flex-grow text-center text-base italic leading-relaxed text-gray-700/90 selection:bg-blue-50 selection:text-blue-800"
 	>
-		<span class="relative z-10">{derivedQuote}</span>
+		<span class="relative z-10">{contenidoTruncado}</span>
 	</blockquote>
 
 	<!-- Autor y rol -->
 	<div class="mt-auto flex flex-col items-center gap-0.5">
 		<p class="font-semibold text-gray-800 transition-colors duration-200 group-hover:text-blue-500">
-			{author}
+			{username}
 		</p>
-		{#if role}
-			<p class="text-xs font-medium text-gray-500">{role}</p>
+		{#if rol}
+			<p class="text-xs font-medium text-gray-500">{rol}</p>
 		{/if}
 	</div>
 </div>

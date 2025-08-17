@@ -9,30 +9,27 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import { mockProyectos as defaultProjects } from '$lib/mocks/mock-proyectos';
 	import { fade, fly } from 'svelte/transition';
-	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
+	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import SearchBar from '../ui/elements/SearchBar.svelte';
+	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
 	import { writable } from 'svelte/store';
 
 	let searchQuery = writable('');
 
 	const participacionMap = {
-		dinero: 'Monetaria',
-		voluntarios: 'Voluntariado',
-		materiales: 'Materiales'
+		Monetaria: 'Monetaria',
+		Voluntariado: 'Voluntariado',
+		Especie: 'Especie'
 	} as const;
 
-	type ParticipacionLabel = (typeof participacionMap)[keyof typeof participacionMap];
+	type ParticipacionLabel = keyof typeof participacionMap;
+
 	const tiposParticipacion: ('Todos' | ParticipacionLabel)[] = [
 		'Todos',
 		...Object.values(participacionMap)
 	];
 
-	const reverseMap: Record<ParticipacionLabel, keyof typeof participacionMap> = {
-		Monetaria: 'dinero', // FIX: monetaria
-		Voluntariado: 'voluntarios', // FIX: voluntariado
-		Materiales: 'materiales' // FIX: especie
-	};
+	const reverseMap: Record<ParticipacionLabel, ParticipacionLabel> = participacionMap;
 
 	// Nuevos filtros
 	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado']; // TODO: corregir los estados
@@ -85,15 +82,16 @@
 
 		// Filtro por tipo de participación
 		if (!filtros.includes('Todos')) {
-			const unidadesEsperadas = filtros
+			const tiposEsperados = filtros
 				.filter((f): f is ParticipacionLabel => f !== 'Todos')
 				.map((f) => reverseMap[f]);
 
 			resultado = resultado.filter((p) =>
-				p.participacion_permitida?.some((participacion) => {
-					const { unidad } = participacion; // * objetivo y actual disponibles para métricas
-					return unidadesEsperadas.includes(unidad as keyof typeof participacionMap);
-				})
+				p.participacion_permitida?.some(
+					(pp) =>
+						pp.tipo_participacion?.descripcion &&
+						tiposEsperados.includes(pp.tipo_participacion.descripcion as ParticipacionLabel)
+				)
 			);
 		}
 
@@ -372,7 +370,7 @@
 				out:fade={{ duration: 150 }}
 				class="transition-transform hover:scale-[1.02]"
 			>
-				<ProjectCard {proyecto} mostrarBotones={true} />
+				<ProyectoCard {proyecto} mostrarBotones={true} />
 			</div>
 		{/each}
 	</div>

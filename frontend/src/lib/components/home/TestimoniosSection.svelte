@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import TestimonialCard from '$lib/components/ui/cards/TestimonialCard.svelte';
-	import { testimonials } from '$lib/mocks/mock-testimonials';
+	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
+	import { mockTestimonios } from '$lib/mocks/mock-testimonios';
 	import { swipe } from '$lib/actions/swipe';
 
 	let centerIndex = 0;
 	let visibleCount = 3;
 
 	function clampCenter() {
-		const maxStart = Math.max(0, testimonials.length - visibleCount);
+		const maxStart = Math.max(0, mockTestimonios.length - visibleCount);
 		if (centerIndex < 0) centerIndex = 0;
 		if (centerIndex > maxStart) centerIndex = maxStart;
 	}
@@ -21,9 +21,9 @@
 	const showPrev = () => centerIndex--;
 	const showNext = () => centerIndex++;
 
-	$: visibleTestimonials = Array.from({ length: visibleCount }, (_, i) => {
-		const index = (centerIndex + i) % testimonials.length;
-		return testimonials[(index + testimonials.length) % testimonials.length];
+	$: testimoniosVisibles = Array.from({ length: visibleCount }, (_, i) => {
+		const index = (centerIndex + i) % mockTestimonios.length;
+		return mockTestimonios[(index + mockTestimonios.length) % mockTestimonios.length];
 	});
 
 	let visible = false;
@@ -36,7 +36,7 @@
 		const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.15
 		});
-		sectionRef && io.observe(sectionRef);
+		if (sectionRef) io.observe(sectionRef);
 
 		onDestroy(() => {
 			window.removeEventListener('resize', updateVisibleCount);
@@ -81,9 +81,9 @@
 	>
 		<!-- Contenedor de tarjetas -->
 		<div class="flex w-full flex-row items-center justify-center gap-4 md:gap-6">
-			{#each visibleTestimonials as testimonial, i (testimonial.quote)}
-				<TestimonialCard
-					{...testimonial}
+			{#each testimoniosVisibles as testimonio, i (testimonio.contenido)}
+				<TestimoniosCard
+					{...testimonio}
 					active={i === Math.floor(visibleCount / 2)}
 					locked={i !== Math.floor(visibleCount / 2)}
 				/>

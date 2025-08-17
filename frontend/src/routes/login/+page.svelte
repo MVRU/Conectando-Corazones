@@ -12,8 +12,9 @@ TODO:
 	import Image from '$lib/components/ui/elements/Image.svelte';
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
+	import { isValidEmail, isValidUsername } from '$lib/utils/validators';
 
-	let username = '';
+	let identificador = '';
 	let password = '';
 	let rememberMe = false;
 	let showPassword = false;
@@ -25,15 +26,18 @@ TODO:
 
 		// Validar campos
 		validationErrors = [];
-		if (!username.trim()) validationErrors.push('El nombre de usuario es requerido');
+		if (!identificador.trim()) validationErrors.push('El usuario o correo es requerido');
 		if (!password.trim()) validationErrors.push('La contraseña es requerida');
+		if (identificador && !isValidEmail(identificador) && !isValidUsername(identificador)) {
+			validationErrors.push('Ingresá un correo o usuario válido');
+		}
 
 		if (validationErrors.length > 0) {
 			return;
 		}
 
 		try {
-			await authActions.login(username, password, rememberMe);
+			await authActions.login(identificador, password, rememberMe);
 
 			// Redirigir según el rol del usuario
 			// TODO: Implementar redirección basada en el rol
@@ -97,21 +101,24 @@ TODO:
 
 				<form on:submit={handleLogin} class="space-y-6">
 					<div>
-						<label for="username" class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]">
-							Nombre de Usuario *
+						<label
+							for="identificador"
+							class="mb-2 block text-sm font-medium text-[rgb(var(--base-color))]"
+						>
+							Usuario o correo *
 						</label>
 						<input
-							id="username"
-							bind:value={username}
+							id="identificador"
+							bind:value={identificador}
 							type="text"
 							required
 							class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							placeholder="admin_conectando"
 						/>
 						<p class="mt-1 text-xs text-gray-500">
-							Prueba con: <code class="bg-gray-100 px-1 rounded">admin_conectando</code>, 
-							<code class="bg-gray-100 px-1 rounded">escuela_esperanza</code>, 
-							<code class="bg-gray-100 px-1 rounded">maria_g</code>
+							Prueba con: <code class="rounded bg-gray-100 px-1">admin_conectando</code>,
+							<code class="rounded bg-gray-100 px-1">escuela_esperanza</code>,
+							<code class="rounded bg-gray-100 px-1">maria_g</code>
 						</p>
 					</div>
 
@@ -164,7 +171,9 @@ TODO:
 							</button>
 						</div>
 						<p class="mt-1 text-xs text-gray-500">
-							Todos los usuarios de prueba usan la contraseña: <code class="bg-gray-100 px-1 rounded">123456</code>
+							Todos los usuarios de prueba usan la contraseña: <code
+								class="rounded bg-gray-100 px-1">123456</code
+							>
 						</p>
 					</div>
 

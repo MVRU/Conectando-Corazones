@@ -4,8 +4,8 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import InstitutionForm from '$lib/components/forms/InstitutionForm.svelte';
-	import CollaboratorForm from '$lib/components/forms/CollaboratorForm.svelte';
+	import InstitucionForm from '$lib/components/forms/InstitucionForm.svelte';
+	import ColaboradorForm from '$lib/components/forms/ColaboradorForm.svelte';
 	import RoleCard from '$lib/components/auth/RoleCard.svelte';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
@@ -13,8 +13,8 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import RenaperValidation from '$lib/components/validation/RenaperValidation.svelte';
 	import EmailValidation from '$lib/components/validation/EmailValidation.svelte';
-	import AddressForm from '$lib/components/forms/AddressForm.svelte';
-	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
+	import DireccionForm from '$lib/components/forms/DireccionForm.svelte';
+	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 
@@ -136,9 +136,9 @@
 			</button>
 
 			{#if rol === 'institucion'}
-				<InstitutionForm on:submit={onFormSubmit} />
+				<InstitucionForm on:submit={onFormSubmit} />
 			{:else}
-				<CollaboratorForm on:submit={onFormSubmit} />
+				<ColaboradorForm on:submit={onFormSubmit} />
 			{/if}
 		{:else if stage === 'verifying'}
 			<RenaperValidation
@@ -196,7 +196,7 @@
 					emails secundarios.
 				</p>
 
-				<ContactMethodsForm
+				<MetodosContactoForm
 					showSkip
 					on:skip={() => (stage = 'address')}
 					on:submit={() => (stage = 'address')}
@@ -218,7 +218,7 @@
 					</p>
 				</div>
 
-				<AddressForm
+				<DireccionForm
 					showSkip
 					on:skip={() => (stage = 'success')}
 					on:submit={() => (stage = 'success')}

@@ -1,6 +1,6 @@
 // FIX: revisar y corregir errores tras cambios en interfaces
 
-import { localidades } from '$lib/mocks/mock-localidades';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import { provincias } from '$lib/data/provincias';
 
 /**
@@ -12,7 +12,7 @@ import { provincias } from '$lib/data/provincias';
  */
 const citiesByProvince: Record<string, string[]> = {};
 
-localidades.forEach((loc) => {
+mockLocalidades.forEach((loc) => {
     if (!loc.provincia || !loc.provincia.nombre) return;
     const key = loc.provincia.nombre.trim().toLowerCase();
     citiesByProvince[key] ??= [];
@@ -34,7 +34,7 @@ export function getCitiesByProvince(provinceName: string): string[] {
 */
 export function getProvinceByCity(cityName: string) {
     const normalized = cityName.trim().toLowerCase();
-    const match = localidades.find(
+    const match = mockLocalidades.find(
         (loc) => loc.nombre.trim().toLowerCase() === normalized
     );
     return match?.provincia;
@@ -47,7 +47,7 @@ export function searchCities(query: string): string[] {
     const lowerQuery = query.trim().toLowerCase();
     if (!lowerQuery) return [];
 
-    return localidades
+    return mockLocalidades
         .filter((loc) => loc.nombre.toLowerCase().includes(lowerQuery))
         .map((loc) => loc.nombre);
 }

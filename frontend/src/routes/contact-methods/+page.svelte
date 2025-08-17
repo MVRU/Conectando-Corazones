@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ContactMethodsForm from '$lib/components/forms/ContactMethodsForm.svelte';
+	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 </script>
 
 <!-- Fondo decorativo infinito -->
@@ -18,5 +18,5 @@
 		secundarios.
 	</p>
 
-	<ContactMethodsForm />
+	<MetodosContactoForm />
 </main>

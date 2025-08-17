@@ -1,10 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
-import type {
-  Usuario,
-  Institucion,
-  Colaborador
-} from '$lib/types/Usuario';
-import { isValidEmail } from '$lib/utils/validators';
+import type { Usuario /*, Institucion, Colaborador*/ } from '$lib/types/Usuario';
+import { isValidEmail, isValidUsername } from '$lib/utils/validators';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -18,7 +14,7 @@ interface RegisterColaboradorData {
   apellido: string;
   tipo_documento: string;
   numero_documento: string;
-  fecha_nacimiento: string;
+  fecha_nacimiento: Date;
   cuit_cuil: string;
   tipo_colaborador: string;
   email: string;
@@ -31,7 +27,7 @@ interface RegisterInstitucionData {
   apellido: string;
   tipo_documento: string;
   numero_documento: string;
-  fecha_nacimiento: string;
+  fecha_nacimiento: Date;
   cuit: string;
   nombre_legal: string;
   tipo_institucion: string;
@@ -65,47 +61,55 @@ export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
 // Store derivado para el rol del usuario
-export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol || null);
+export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol ?? null);
 
-// Store derivado para verificar si es admin
+// Store derivado para verificar rol
 export const isAdmin = derived(authStore, ($auth) => $auth.usuario?.rol === 'administrador');
-
-// Store derivado para verificar si es institución
 export const isInstitucion = derived(authStore, ($auth) => $auth.usuario?.rol === 'institucion');
-
-// Store derivado para verificar si es colaborador
 export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol === 'colaborador');
 
-// Store derivado para verificar si está verificado
+// Store derivado para verificar estado
 export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
 
 // Funciones para manejar la autenticación
 export const authActions = {
-  // Iniciar sesión (versión mock para pruebas)
-  async login(username: string, password: string, rememberMe: boolean = false) {
-    if (!username.trim() || !password.trim()) {
+  /**
+   * Iniciar sesión (acepta email o username como "identificador")
+   */
+  async login(identificador: string, password: string, recordarSesion: boolean = false): Promise<Usuario | null> {
+    const credencial = identificador?.trim();
+    if (
+      !credencial ||
+      !password?.trim() ||
+      (!isValidEmail(credencial) && !isValidUsername(credencial))
+    ) {
       authStore.update((s) => ({ ...s, error: 'Credenciales inválidas' }));
       return null;
     }
+
     authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, rememberMe })
+        body: JSON.stringify({
+          identificador: credencial,
+          password,
+          rememberMe: recordarSesion
+        })
       });
 
       if (!response.ok) {
-        const { error } = await response.json();
+        const { error } = await response.json().catch(() => ({ error: null }));
         throw new Error(error ?? 'Error al iniciar sesión');
       }
 
-      const { usuario } = await response.json();
+      const { usuario } = (await response.json()) as { usuario: Usuario };
 
       authStore.update((state) => ({
         ...state,
-        usuario: usuario as Usuario,
+        usuario,
         isAuthenticated: true,
         isLoading: false,
         error: null
@@ -122,8 +126,10 @@ export const authActions = {
     }
   },
 
-  // Cerrar sesión
-  async logout() {
+  /**
+   * Cerrar sesión
+   */
+  async logout(): Promise<void> {
     try {
       await fetch('/api/logout', { method: 'POST' });
     } catch (error) {
@@ -133,26 +139,18 @@ export const authActions = {
     }
   },
 
-  // Registrar institución
-  async registerInstitucion(usuarioData: RegisterInstitucionData) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
-
+  /**
+   * Registrar institución (mock)
+   */
+  async registerInstitucion(_usuarioData: RegisterInstitucionData) {
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Simular registro exitoso
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       const result = { success: true, message: 'Institución registrada exitosamente' };
-
-      authStore.update(state => ({
-        ...state,
-        isLoading: false,
-        error: null
-      }));
-
+      authStore.update((state) => ({ ...state, isLoading: false, error: null }));
       return result;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al registrar'
@@ -161,26 +159,18 @@ export const authActions = {
     }
   },
 
-  // Registrar colaborador
-  async registerColaborador(usuarioData: RegisterColaboradorData) {
-    authStore.update(state => ({ ...state, isLoading: true, error: null }));
-
+  /**
+   * Registrar colaborador (mock)
+   */
+  async registerColaborador(_usuarioData: RegisterColaboradorData) {
+    authStore.update((state) => ({ ...state, isLoading: true, error: null }));
     try {
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Simular registro exitoso
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       const result = { success: true, message: 'Colaborador registrado exitosamente' };
-
-      authStore.update(state => ({
-        ...state,
-        isLoading: false,
-        error: null
-      }));
-
+      authStore.update((state) => ({ ...state, isLoading: false, error: null }));
       return result;
     } catch (error) {
-      authStore.update(state => ({
+      authStore.update((state) => ({
         ...state,
         isLoading: false,
         error: error instanceof Error ? error.message : 'Error al registrar'
@@ -189,20 +179,21 @@ export const authActions = {
     }
   },
 
-  // Verificar token al cargar la app
-  async checkAuth() {
+  /**
+   * Verificar sesión al cargar la app
+   */
+  async checkAuth(): Promise<void> {
     authStore.update((state) => ({ ...state, isLoading: true }));
-
     try {
       const response = await fetch('/api/session');
-      const { usuario } = await response.json();
-
+      const { usuario } = (await response.json()) as { usuario: Usuario | null };
       if (usuario) {
         authStore.update((state) => ({
           ...state,
-          usuario: usuario as Usuario,
+          usuario,
           isAuthenticated: true,
-          isLoading: false
+          isLoading: false,
+          error: null
         }));
       } else {
         authStore.set(initialState);
@@ -213,36 +204,47 @@ export const authActions = {
     }
   },
 
-  // Limpiar error
+  /**
+   * Limpiar estado de error
+   */
   clearError() {
-    authStore.update(state => ({ ...state, error: null }));
+    authStore.update((state) => ({ ...state, error: null }));
   },
 
-  // Actualizar datos del usuario
+  /**
+   * Actualizar datos del usuario
+   */
   updateUsuario(usuarioData: Partial<Usuario>) {
-    authStore.update(state => ({
+    authStore.update((state) => ({
       ...state,
-      usuario: state.usuario ? { ...state.usuario, ...usuarioData } as Usuario : null
+      usuario: state.usuario ? ({ ...state.usuario, ...usuarioData } as Usuario) : null
     }));
   }
 };
 
-// Función para verificar permisos
+/**
+ * Verificar permisos por rol
+ */
 export function hasPermission(permission: string): boolean {
   const state = get(authStore);
   if (state.usuario?.rol === 'administrador') return true;
+
   if (state.usuario?.rol === 'institucion') {
     const institucionPermissions = ['crear_proyecto', 'editar_proyecto', 'ver_proyectos_propios'];
     return institucionPermissions.includes(permission);
   }
+
   if (state.usuario?.rol === 'colaborador') {
     const colaboradorPermissions = ['ver_proyectos', 'hacer_donacion', 'ver_perfil'];
     return colaboradorPermissions.includes(permission);
   }
+
   return false;
 }
 
-// Función para verificar si puede acceder a una ruta
+/**
+ * Verificar acceso a rutas por rol
+ */
 export function canAccessRoute(route: string): boolean {
   const routePermissions: Record<string, string[]> = {
     '/admin': ['administrador'],
@@ -252,9 +254,9 @@ export function canAccessRoute(route: string): boolean {
     '/perfil': ['institucion', 'colaborador', 'administrador']
   };
 
-  const requiredRoles = routePermissions[route] || [];
-
+  const requiredRoles = routePermissions[route] ?? [];
   const state = get(authStore);
+
   return (
     requiredRoles.length === 0 ||
     (!!state.usuario && requiredRoles.includes(state.usuario.rol))

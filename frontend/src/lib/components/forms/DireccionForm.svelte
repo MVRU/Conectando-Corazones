@@ -3,7 +3,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import Select from '../ui/elements/Select.svelte';
+	import Select from '$lib/components/ui/elements/Select.svelte';
 
 	import {
 		isValidStreet,
@@ -11,7 +11,12 @@
 		isValidCityInProvince,
 		ERROR_MESSAGES
 	} from '$lib/utils/validators';
-	import { getAllProvinceNames, getCitiesByProvince } from '$lib/utils/helpers';
+
+	import { mockLocalidades } from '$lib/mocks/mock-localidades';
+	import { provincias } from '$lib/data/provincias';
+	import type { Provincia } from '$lib/types/Provincia';
+	import type { Localidad } from '$lib/types/Localidad';
+	import type { Direccion } from '$lib/types/Direccion';
 	import { createEventDispatcher } from 'svelte';
 
 	let sending = false;
@@ -19,8 +24,11 @@
 	let street = '';
 	let streetNumber = '';
 	let floorOrDepartment = '';
-	let province = '';
-	let location = '';
+	let provinciaId = '';
+	let localidadId = '';
+	let provincia: Provincia | undefined;
+	let localidad: Localidad | undefined;
+	let localidadesProvincia: Localidad[] = [];
 	let reference = '';
 	let googleMapsUrl = '';
 	let intentoEnvio = false;
@@ -30,19 +38,32 @@
 
 	const dispatch = createEventDispatcher();
 
-	$: locations = province ? getCitiesByProvince(province) : [];
-	$: if (province && location && !locations.includes(location)) {
-		location = '';
+	const toStr = (n?: number) => (n == null ? '' : String(n));
+
+	$: provincia = provincias.find((p) => toStr(p.id_provincia) === provinciaId);
+
+	$: localidadesProvincia = provincia
+		? mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia)
+		: [];
+
+	$: if (
+		provincia &&
+		localidadId &&
+		!localidadesProvincia.some((l) => toStr(l.id_localidad) === localidadId)
+	) {
+		localidadId = '';
 	}
+
+	$: localidad = localidadesProvincia.find((l) => toStr(l.id_localidad) === localidadId);
 
 	// Genera la URL automáticamente
 	$: {
 		if (
 			isValidStreet(street) &&
 			isValidStreetNumber(streetNumber) &&
-			isValidCityInProvince(location, province)
+			isValidCityInProvince(localidad?.id_localidad, provincia?.id_provincia)
 		) {
-			const direccionCompleta = `${street} ${streetNumber}, ${location}, ${province}`;
+			const direccionCompleta = `${street} ${streetNumber}, ${localidad?.nombre}, ${provincia?.nombre}`;
 			googleMapsUrl = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
 		}
 	}
@@ -50,23 +71,33 @@
 	$: errors = {
 		street: isValidStreet(street) ? '' : ERROR_MESSAGES.addressStreetInvalid,
 		streetNumber: isValidStreetNumber(streetNumber) ? '' : ERROR_MESSAGES.addressNumberInvalid,
-		province: province.trim() ? '' : ERROR_MESSAGES.provinceInvalid,
-		location: isValidCityInProvince(location, province) ? '' : ERROR_MESSAGES.cityNotInProvince
+		province: provincia ? '' : ERROR_MESSAGES.provinceInvalid,
+		location: isValidCityInProvince(localidad?.id_localidad, provincia?.id_provincia)
+			? ''
+			: ERROR_MESSAGES.cityNotInProvince
 	};
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
+		intentoEnvio = true;
 		if (hasErrors) return;
 
 		sending = true;
 
 		setTimeout(() => {
 			sending = false;
-			// Simula un envío exitoso
-
-			dispatch('submit');
+			const direccion: Direccion = {
+				calle: street,
+				numero: streetNumber,
+				piso: floorOrDepartment || undefined,
+				referencia: reference || undefined,
+				url_google_maps: googleMapsUrl || undefined,
+				localidad_id: localidad?.id_localidad,
+				localidad
+			};
+			dispatch('submit', direccion);
 		}, 800);
 	}
 </script>
@@ -109,35 +140,29 @@
 		</div>
 
 		<!-- Provincia -->
-		<div>
-			<label for="province" class="mb-2 block text-sm font-semibold text-gray-700">
-				Provincia <span class="text-red-600">*</span>
-			</label>
-			<Select
-				id="province"
-				required={true}
-				placeholder="Selecciona una provincia"
-				options={getAllProvinceNames().map((p) => ({ value: p, label: p }))}
-				bind:value={province}
-				error={intentoEnvio ? errors.province : ''}
-			/>
-		</div>
+		<Select
+			id="province"
+			required={true}
+			placeholder="Selecciona una provincia"
+			options={provincias
+				.filter((p) => p.id_provincia != null)
+				.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
+			bind:value={provinciaId}
+			error={intentoEnvio ? errors.province : ''}
+		/>
 
 		<!-- Ciudad -->
-		<div>
-			<label for="location" class="mb-2 block text-sm font-semibold text-gray-700">
-				Ciudad <span class="text-red-600">*</span>
-			</label>
-			<Select
-				id="location"
-				required={true}
-				placeholder="Selecciona una ciudad"
-				options={locations.map((c) => ({ value: c, label: c }))}
-				bind:value={location}
-				disabled={!province}
-				error={intentoEnvio ? errors.location : ''}
-			/>
-		</div>
+		<Select
+			id="location"
+			required={true}
+			placeholder="Selecciona una ciudad"
+			options={localidadesProvincia
+				.filter((c) => c.id_localidad != null)
+				.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
+			bind:value={localidadId}
+			disabled={!provincia}
+			error={intentoEnvio ? errors.location : ''}
+		/>
 
 		<!-- Referencia -->
 		<div class="md:col-span-2">

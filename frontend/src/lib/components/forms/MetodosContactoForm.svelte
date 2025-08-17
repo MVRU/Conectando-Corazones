@@ -1,10 +1,18 @@
 <!-- FIX: revisar y corregir errores tras cambios en interfaces -->
 
 <script lang="ts">
-	import Input from '../ui/Input.svelte';
-	import Button from '../ui/elements/Button.svelte';
-	import Select from '../ui/elements/Select.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Select from '$lib/components/ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
+
+	import {
+		TIPOS_CONTACTO,
+		ETIQUETAS_CONTACTO,
+		type Contacto,
+		type TipoContacto,
+		type EtiquetaContacto
+	} from '$lib/types/Contacto';
 
 	import {
 		isValidEmail,
@@ -13,29 +21,52 @@
 		ERROR_MESSAGES
 	} from '$lib/utils/validators';
 
-	let contactos = [{ tipo: 'Teléfono', valor: '', etiqueta: '' }];
+	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	let sending = false;
 
-	const tiposContacto = ['Teléfono', 'Correo electrónico', 'Sitio web', 'Red social', 'Otro'];
-	const redesSociales = ['Instagram', 'Facebook', 'LinkedIn', 'WhatsApp'];
-	const etiquetasGenerales = ['Principal', 'Secundario', 'Personal'];
+	const tipoContactoLabels: Record<TipoContacto, string> = {
+		telefono: 'Teléfono',
+		email: 'Correo electrónico',
+		web: 'Sitio web',
+		red_social: 'Red social'
+	};
 
-	const dispatch = createEventDispatcher();
+	const tipoContactoOptions = [
+		...TIPOS_CONTACTO.map((t) => ({ value: t, label: tipoContactoLabels[t] })),
+		{ value: 'otro', label: 'Otro' }
+	];
+
+	const redesSociales = ['Instagram', 'Facebook', 'LinkedIn', 'WhatsApp'];
+
+	const etiquetaLabels: Record<EtiquetaContacto, string> = {
+		principal: 'Principal',
+		secundario: 'Secundario'
+	};
+
+	const etiquetaOptions = ETIQUETAS_CONTACTO.map((e) => ({
+		value: e,
+		label: etiquetaLabels[e]
+	}));
+
+	const dispatch = createEventDispatcher<{
+		submit: Contacto[];
+		skip: void;
+	}>();
 
 	export let showSkip = false;
 	export let skipLabel = 'Omitir';
 
-	function getPlaceholder(tipo: string): string {
+	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
-			case 'Teléfono':
+			case 'telefono':
 				return 'Ej: +54 9 1234 5678';
-			case 'Correo electrónico':
+			case 'email':
 				return 'Ej: contacto@ejemplo.com';
-			case 'Sitio web':
+			case 'web':
 				return 'Ej: https://tuorganizacion.org';
-			case 'Red social':
+			case 'red_social':
 				return 'Ej: @tuorganizacion';
-			case 'Otro':
+			case 'otro':
 				return 'Ej: Telegram, Fax...';
 			default:
 				return 'Ej: Valor del contacto';
@@ -43,21 +74,21 @@
 	}
 
 	$: errors = contactos.map((contacto, index) => {
-		const { tipo, valor, etiqueta } = contacto;
+		const { tipo_contacto, valor, etiqueta } = contacto;
 
 		if (!valor.trim()) return ERROR_MESSAGES.required;
 
-		if (tipo === 'Teléfono' && !isValidInternationalPhone(valor))
+		if (tipo_contacto === 'telefono' && !isValidInternationalPhone(valor))
 			return ERROR_MESSAGES.phoneInvalid;
 
-		if (tipo === 'Correo electrónico' && !isValidEmail(valor)) return ERROR_MESSAGES.emailInvalid;
+		if (tipo_contacto === 'email' && !isValidEmail(valor)) return ERROR_MESSAGES.emailInvalid;
 
-		if (tipo === 'Sitio web' && !isValidWeb(valor)) return ERROR_MESSAGES.urlInvalid;
+		if (tipo_contacto === 'web' && !isValidWeb(valor)) return ERROR_MESSAGES.urlInvalid;
 
-		if (tipo === 'Otro' && !etiqueta?.trim()) return ERROR_MESSAGES.specifyOtherContact;
+		if (tipo_contacto === 'otro' && !etiqueta?.trim()) return ERROR_MESSAGES.specifyOtherContact;
 
 		const isDuplicate = contactos.some(
-			(c, i) => i !== index && c.tipo === tipo && c.valor === valor
+			(c, i) => i !== index && c.tipo_contacto === tipo_contacto && c.valor === valor
 		);
 
 		if (isDuplicate) return ERROR_MESSAGES.contactDuplicate;
@@ -66,13 +97,13 @@
 	});
 
 	$: telefonoValido = contactos.some(
-		(c) => c.tipo === 'Teléfono' && isValidInternationalPhone(c.valor)
+		(c) => c.tipo_contacto === 'telefono' && isValidInternationalPhone(c.valor)
 	);
 
 	$: hasErrors = !telefonoValido || contactos.some((_, i) => errors[i]);
 
 	function addContact() {
-		contactos = [...contactos, { tipo: 'Teléfono', valor: '', etiqueta: '' }];
+		contactos = [...contactos, { tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	}
 
 	function removeContact(index: number) {
@@ -106,9 +137,9 @@
 						</label>
 						<Select
 							id={'tipo-' + i}
-							bind:value={contacto.tipo}
+							bind:value={contacto.tipo_contacto}
 							disabled={i === 0}
-							options={tiposContacto.map((t) => ({ value: t, label: t }))}
+							options={tipoContactoOptions as unknown as Array<{ value: string; label: string }>}
 							searchable={false}
 						/>
 					</div>
@@ -121,7 +152,7 @@
 						<Input
 							id="valor-{i}"
 							bind:value={contacto.valor}
-							placeholder={getPlaceholder(contacto.tipo)}
+							placeholder={getPlaceholder(contacto.tipo_contacto)}
 							error={errors[i]}
 						/>
 					</div>
@@ -129,19 +160,22 @@
 					<!-- Etiqueta -->
 					<div class="min-w-[200px] flex-1 md:flex-none">
 						<label for="etiqueta-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
-							{contacto.tipo === 'Otro' ? 'Especificar tipo' : 'Etiqueta'}
+							{contacto.tipo_contacto === 'otro' ? 'Especificar tipo' : 'Etiqueta'}
 						</label>
-						{#if contacto.tipo === 'Red social'}
+						{#if contacto.tipo_contacto === 'red_social'}
 							<Select
 								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								options={[
-									{ value: '', label: 'Elegí una red social' },
+									{
+										value: '',
+										label: 'Elegí una red social'
+									},
 									...redesSociales.map((r) => ({ value: r, label: r }))
 								]}
 								searchable={false}
 							/>
-						{:else if contacto.tipo === 'Otro'}
+						{:else if contacto.tipo_contacto === 'otro'}
 							<Input
 								id="etiqueta-{i}"
 								bind:value={contacto.etiqueta}
@@ -152,8 +186,11 @@
 								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								options={[
-									{ value: '', label: 'Elegí una opción' },
-									...etiquetasGenerales.map((t) => ({ value: t, label: t }))
+									{
+										value: '',
+										label: 'Elegí una opción'
+									},
+									...etiquetaOptions
 								]}
 								searchable={false}
 							/>

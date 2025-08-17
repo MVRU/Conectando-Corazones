@@ -3,7 +3,7 @@
 	import HowItWorksSection from '$lib/components/home/HowItWorksSection.svelte';
 	import HistorySection from '$lib/components/home/HistorySection.svelte';
 	import CallToActionSection from '$lib/components/home/CallToActionSection.svelte';
-	import TestimonialsSection from '$lib/components/home/TestimonialsSection.svelte';
+	import TestimoniosSection from '$lib/components/home/TestimoniosSection.svelte';
 	import FaqSection from '$lib/components/home/FaqSection.svelte';
 	import SupportSection from '$lib/components/home/SupportSection.svelte';
 	import FeaturedProjectsSection from '$lib/components/home/FeaturedProjectsSection.svelte';
@@ -19,7 +19,7 @@
 <HowItWorksSection />
 <HistorySection />
 <CallToActionSection />
-<TestimonialsSection />
+<TestimoniosSection />
 <FaqSection />
 <FeaturedProjectsSection />
 <SupportSection />

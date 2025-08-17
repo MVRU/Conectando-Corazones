@@ -6,4 +6,5 @@ export interface Resena {
   puntaje: number;
   aprobado?: boolean;
   username: string;
+  rol?: string; // ! No está en DER, agregado como opcional para testimonios de home
 }

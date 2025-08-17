@@ -19,7 +19,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-03-01'),
     fecha_cierre_postulaciones: new Date('2025-04-01'),
     fecha_fin_tentativa: new Date('2025-06-01'),
-    //    modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1001,
     estado_id: 1,
     participacion_permitida_ids: [1, 2],
@@ -38,7 +38,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 20,
         actual: 12,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 1,
@@ -46,7 +46,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'libros',
         objetivo: 200,
         actual: 150,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
     colaboraciones: [
@@ -93,7 +93,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-02-10'),
     fecha_cierre_postulaciones: new Date('2025-03-10'),
     fecha_fin_tentativa: new Date('2025-05-10'),
-    // modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1002,
     estado_id: 2,
     participacion_permitida_ids: [1],
@@ -112,7 +112,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 30,
         actual: 18,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 2,
@@ -120,7 +120,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'platos',
         objetivo: 1000,
         actual: 700,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
     colaboraciones: [
@@ -164,7 +164,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-01-20'),
     fecha_cierre_postulaciones: new Date('2025-02-20'),
     fecha_fin_tentativa: new Date('2025-04-20'),
-    // modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1003,
     estado_id: 3,
     participacion_permitida_ids: [2],
@@ -183,7 +183,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 10,
         actual: 7,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       }
     ],
     colaboraciones: [
@@ -247,7 +247,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 8,
         actual: 5,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 4,
@@ -318,7 +318,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 25,
         actual: 15,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 5,
@@ -326,7 +326,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'cuadernos',
         objetivo: 100,
         actual: 60,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
     colaboraciones: [
@@ -371,7 +371,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-02-25'),
     fecha_cierre_postulaciones: new Date('2025-03-25'),
     fecha_fin_tentativa: new Date('2025-05-25'),
-    // modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1006,
     estado_id: 6,
     participacion_permitida_ids: [1],
@@ -390,7 +390,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 40,
         actual: 22,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 6,
@@ -398,7 +398,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'alimentos',
         objetivo: 500,
         actual: 320,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
     colaboraciones: [
@@ -442,7 +442,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-05-01'),
     fecha_cierre_postulaciones: new Date('2025-06-01'),
     fecha_fin_tentativa: new Date('2025-08-01'),
-    //   modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1007,
     estado_id: 7,
     participacion_permitida_ids: [1, 2],
@@ -461,7 +461,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 12,
         actual: 8,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 7,
@@ -469,7 +469,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'prendas',
         objetivo: 200,
         actual: 120,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
+        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
     colaboraciones: [
@@ -513,7 +513,7 @@ const proyectosBase: Proyecto[] = [
     created_at: new Date('2025-04-10'),
     fecha_cierre_postulaciones: new Date('2025-05-10'),
     fecha_fin_tentativa: new Date('2025-07-10'),
-    // modalidad: 'presencial',
+    modalidad: 'presencial',
     id_chat_firebase: 1008,
     estado_id: 8,
     participacion_permitida_ids: [3],
@@ -532,7 +532,7 @@ const proyectosBase: Proyecto[] = [
         unidad: 'personas',
         objetivo: 10,
         actual: 5,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
       {
         id_proyecto: 8,

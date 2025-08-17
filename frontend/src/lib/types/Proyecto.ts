@@ -8,6 +8,8 @@ import type { Direccion } from './Direccion';
 import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
 
+export type Modalidad = 'presencial' | 'virtual' | 'mixta'; // ! VER
+
 export interface Proyecto {
   id_proyecto?: number;
   titulo: string;
@@ -16,7 +18,7 @@ export interface Proyecto {
   created_at?: Date;
   fecha_cierre_postulaciones?: Date;
   fecha_fin_tentativa: Date;
-  modalidad?: string;
+  modalidad?: Modalidad;
   id_chat_firebase?: number;
 
   // * RELACIONES

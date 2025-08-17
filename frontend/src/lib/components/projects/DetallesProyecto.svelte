@@ -1,10 +1,8 @@
-
-
 <script lang="ts">
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-export let proyecto: Proyecto;
-export let formatearFecha: (fecha: Date | string | undefined) => string;
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+	export let proyecto: Proyecto;
+	export let formatearFecha: (fecha: Date | string | undefined) => string;
 </script>
 
 <!-- Descripción -->
@@ -17,98 +15,102 @@ export let formatearFecha: (fecha: Date | string | undefined) => string;
 
 <!-- Detalles del proyecto -->
 <div class="grid gap-5 sm:grid-cols-2">
-		<!-- Card: Institución -->
-		<div
-			class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-			style="animation-delay: 100ms"
-		>
-			<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Institución</h4>
-			<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
-				<span class="text-lg">🏛️</span>
-				{proyecto.institucion?.nombre_legal || proyecto.institucion?.nombre || 'No disponible'}
-			</p>
-		</div>
-
-		<!-- Card: Categorías -->
-		<div
-			class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-			style="animation-delay: 200ms"
-		>
-			<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Categorías</h4>
-			<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
-				<span class="text-lg">🏷️</span>
-				{#if proyecto.categorias && proyecto.categorias.length > 0}
-					{proyecto.categorias.map(c => c.nombre).join(', ')}
-				{:else}
-					Sin especificar
-				{/if}
-			</p>
-		</div>
-
-		<!-- Card: Fecha de inicio -->
-		<div
-			class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-			style="animation-delay: 300ms"
-		>
-			<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-				Fecha de Inicio
-			</h4>
-			<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
-				<span class="text-lg">📅</span>
-				{formatearFecha(proyecto.created_at) || '—'}
-			</p>
-		</div>
-
-		<!-- Card: Fecha de cierre -->
-		<div
-			class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-			style="animation-delay: 400ms"
-		>
-			<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-				Fecha de Cierre
-			</h4>
-			<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
-				<span class="text-lg">⏳</span>
-				{formatearFecha(proyecto.fecha_fin_tentativa) || '—'}
-			</p>
-		</div>
-
-		<!-- Card: Objetivos / Participación -->
-		<div
-			class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-			style="animation-delay: 500ms"
-		>
-			<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Formas de Colaboración</h4>
-			<ul class="text-sm text-gray-800 sm:text-base space-y-1">
-				{#if proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0}
-					{#each proyecto.participacion_permitida as p}
-						<li>
-							<span class="font-medium">{p.tipo_participacion?.descripcion || p.unidad}:</span>
-							&nbsp;Objetivo: {p.objetivo} {p.unidad}
-							{#if p.actual !== undefined}
-								&nbsp;|&nbsp; Actual: {p.actual} {p.unidad}
-							{/if}
-						</li>
-					{/each}
-				{:else}
-					<li>No hay objetivos definidos</li>
-				{/if}
-			</ul>
-		</div>
+	<!-- Card: Institución -->
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 100ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Institución</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">🏛️</span>
+			{proyecto.institucion?.nombre_legal || proyecto.institucion?.nombre || 'No disponible'}
+		</p>
 	</div>
-	<style>
-		@keyframes fade-up {
-			from {
-				opacity: 0;
-				transform: translateY(12px);
-			}
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
-		}
 
-		.animate-fade-up {
-			animation: fade-up 0.4s ease-out both;
+	<!-- Card: Categorías -->
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 200ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Categorías</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">🏷️</span>
+			{#if proyecto.categorias && proyecto.categorias.length > 0}
+				{proyecto.categorias.map((c) => c.descripcion).join(', ')}
+			{:else}
+				Sin especificar
+			{/if}
+		</p>
+	</div>
+
+	<!-- Card: Fecha de inicio -->
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 300ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+			Fecha de Inicio
+		</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">📅</span>
+			{formatearFecha(proyecto.created_at) || '—'}
+		</p>
+	</div>
+
+	<!-- Card: Fecha de cierre -->
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 400ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+			Fecha de Cierre
+		</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">⏳</span>
+			{formatearFecha(proyecto.fecha_fin_tentativa) || '—'}
+		</p>
+	</div>
+
+	<!-- Card: Objetivos / Participación -->
+	<div
+		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
+		style="animation-delay: 500ms"
+	>
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+			Formas de Colaboración
+		</h4>
+		<ul class="space-y-1 text-sm text-gray-800 sm:text-base">
+			{#if proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0}
+				{#each proyecto.participacion_permitida as p}
+					<li>
+						<span class="font-medium">{p.tipo_participacion?.descripcion || p.unidad}:</span>
+						&nbsp;Objetivo: {p.objetivo}
+						{p.unidad}
+						{#if p.actual !== undefined}
+							&nbsp;|&nbsp; Actual: {p.actual} {p.unidad}
+						{/if}
+					</li>
+				{/each}
+			{:else}
+				<li>No hay objetivos definidos</li>
+			{/if}
+		</ul>
+	</div>
+</div>
+
+<style>
+	@keyframes fade-up {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
 		}
-	</style>
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.animate-fade-up {
+		animation: fade-up 0.4s ease-out both;
+	}
+</style>

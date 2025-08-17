@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Input from '../ui/Input.svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elements/DatePicker.svelte';
-	import Button from '../ui/elements/Button.svelte';
-	import Select from '../ui/elements/Select.svelte';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Select from '$lib/components/ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -41,7 +41,7 @@
 		repDocTipo: 'DNI',
 		repDocOtro: '',
 		repDocNumero: '',
-		repNacimiento: ''
+		repNacimiento: null
 	};
 
 	$: errors = {
@@ -105,7 +105,7 @@
 				: '',
 
 		repNacimiento:
-			representative.repNacimiento && isAdult(representative.repNacimiento)
+			representative.repNacimiento && isAdult(new Date(representative.repNacimiento))
 				? ''
 				: ERROR_MESSAGES.ageRequirement
 	};

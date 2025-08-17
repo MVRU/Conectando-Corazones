@@ -5,13 +5,8 @@
 	import { error } from '@sveltejs/kit';
 
 	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
-<<<<<<< Updated upstream
-=======
-	import ProjectContact from '$lib/components/projects/ContactoProyecto.svelte';
-	import SidebarCard from '$lib/components/projects/SidebarCard.svelte';
->>>>>>> Stashed changes
-	import ProjectDetails from '$lib/components/projects/ProjectDetails.svelte';
-	import ProjectProgress from '$lib/components/projects/ProjectProgress.svelte';
+	import DetallesProyecto from '$lib/components/projects/DetallesProyecto.svelte';
+	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import { ESTADO_LABELS } from '$lib/types/Estado';
 
@@ -19,8 +14,8 @@
 
 	$: {
 		const id = $page.params.id;
-		const encontrado = mockProyectos.find(p => p.id_proyecto?.toString() === id);
-		
+		const encontrado = mockProyectos.find((p) => p.id_proyecto?.toString() === id);
+
 		if (encontrado) {
 			proyecto = encontrado;
 			setBreadcrumbs([
@@ -42,17 +37,28 @@
 		return 'pendiente';
 	}
 
-	function diasRestantes(fechaFin: string | undefined): number {
-		if (!fechaFin) return 0;
+	// * Fechas como objetos Date para evitar conversiones innecesarias
+
+	// -*- Helper para normalizar fechas // TODO: pasar a archivo utils
+	function toDateOrNull(fecha: string | Date | undefined | null): Date | null {
+		if (!fecha) return null;
+		if (fecha instanceof Date) return isNaN(fecha.getTime()) ? null : fecha;
+		const d = new Date(fecha);
+		return isNaN(d.getTime()) ? null : d;
+	}
+
+	function diasRestantes(fechaFin: string | Date | undefined): number {
+		const fin = toDateOrNull(fechaFin);
+		if (!fin) return 0;
 		const hoy = new Date();
-		const fin = new Date(fechaFin);
 		const diferencia = fin.getTime() - hoy.getTime();
 		return Math.max(Math.ceil(diferencia / (1000 * 60 * 60 * 24)), 0);
 	}
 
-	function formatearFecha(fecha: string | undefined) {
-		if (!fecha) return 'Fecha no disponible';
-		return new Date(fecha).toLocaleDateString('es-ES', {
+	function formatearFecha(fecha: string | Date | undefined): string {
+		const d = toDateOrNull(fecha);
+		if (!d) return 'Fecha no disponible';
+		return d.toLocaleDateString('es-ES', {
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric'
@@ -80,35 +86,27 @@
 		);
 	}
 
-	// Cálculo del estado temporal basado en fechas (igual que en ProjectCard y ProjectHeader)
+	// Cálculo del estado temporal basado en fechas (igual que en ProyectoCard y ProjectHeader)
 	function getEstadoTemporal(proyecto: Proyecto | null): string {
 		if (!proyecto) return 'En curso';
-		
+
 		const hoy = new Date();
-		const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
-		const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
-		
+		const inicio = toDateOrNull(proyecto.created_at);
+		const cierre = toDateOrNull(proyecto.fecha_fin_tentativa);
+
 		if (inicio && cierre) {
-			if (hoy > cierre) {
-				return 'Finalizado';
-			} else if (hoy >= inicio && hoy <= cierre) {
-				return 'En ejecución';
-			} else {
-				const diff = inicio.getTime() - hoy.getTime();
-				const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-				if (dias <= 0) {
-					return 'Hoy comienza';
-				} else if (dias === 1) {
-					return 'Comienza mañana';
-				} else if (dias < 7) {
-					return `En ${dias} días`;
-				} else {
-					const semanas = Math.floor(dias / 7);
-					return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
-				}
-			}
+			if (hoy > cierre) return 'Finalizado';
+			if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
+
+			const diff = inicio.getTime() - hoy.getTime();
+			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
+			if (dias <= 0) return 'Hoy comienza';
+			if (dias === 1) return 'Comienza mañana';
+			if (dias < 7) return `En ${dias} días`;
+			const semanas = Math.floor(dias / 7);
+			return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
 		}
-		
+
 		return proyecto.estado?.descripcion ? ESTADO_LABELS[proyecto.estado.descripcion] : 'En curso';
 	}
 </script>
@@ -128,29 +126,67 @@
 				<!-- Columna principal -->
 				<div class="animate-fade-up space-y-10 lg:col-span-2">
 					<!-- Progreso del proyecto -->
-					<section class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg">
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+					>
 						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
-						<ProjectProgress {proyecto} variant="extended" />
+						<ProyectoProgreso {proyecto} variant="extended" />
 
 						<div class="mt-8">
-							<h3 class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900">
+							<h3
+								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
+							>
 								<span>
-									{(proyecto.participacion_permitida?.length || 0) === 1 ? 'Participación' : 'Participaciones'}
+									{(proyecto.participacion_permitida?.length || 0) === 1
+										? 'Participación'
+										: 'Participaciones'}
 								</span>
 								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
-									<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-										<svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-										</svg>
-										<span class="text-xs font-medium text-gray-700">
-											Finaliza: {formatearFecha(proyecto.fecha_fin_tentativa?.toString())}
-										</span>
-									</div>
-									<div class="rounded-full bg-blue-50 px-3 py-1.5">
-										<span class="text-xs font-semibold text-blue-700">
-											{diasRestantes(proyecto.fecha_fin_tentativa?.toString() || '')} días restantes
-										</span>
-									</div>
+									{#if proyecto.created_at}
+										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
+											<svg
+												class="h-4 w-4 text-gray-600"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<span class="text-xs font-medium text-gray-700">
+												Inicio: {formatearFecha(proyecto.created_at)}
+											</span>
+										</div>
+									{/if}
+									{#if proyecto.fecha_fin_tentativa}
+										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
+											<svg
+												class="h-4 w-4 text-gray-600"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											<span class="text-xs font-medium text-gray-700">
+												Finaliza: {formatearFecha(proyecto.fecha_fin_tentativa)}
+											</span>
+										</div>
+										<div class="rounded-full bg-blue-50 px-3 py-1.5">
+											<span class="text-xs font-semibold text-blue-700">
+												{diasRestantes(proyecto.fecha_fin_tentativa)} días restantes
+											</span>
+										</div>
+									{/if}
 								</div>
 							</h3>
 
@@ -158,19 +194,27 @@
 								<ul class="space-y-4">
 									{#each proyecto.participacion_permitida as p}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
-										<li class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200">
+										<li
+											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
+										>
 											<!-- Ícono -->
 											<div class="flex-shrink-0">
 												{#if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
-													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700">
+													<div
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
+													>
 														✅
 													</div>
 												{:else if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
-													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700">
+													<div
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
+													>
 														⏳
 													</div>
 												{:else}
-													<div class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+													<div
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500"
+													>
 														📦
 													</div>
 												{/if}
@@ -191,35 +235,45 @@
 									{/each}
 								</ul>
 							{:else}
-								<p class="text-sm text-gray-500">No hay participaciones definidas para este proyecto.</p>
+								<p class="text-sm text-gray-500">
+									No hay participaciones definidas para este proyecto.
+								</p>
 							{/if}
 						</div>
 					</section>
 
 					<!-- Detalles del proyecto -->
-					<section class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg">
-						<ProjectDetails {proyecto} {formatearFecha} />
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+					>
+						<DetallesProyecto {proyecto} {formatearFecha} />
 					</section>
 				</div>
 
 				<!-- Columna lateral -->
 				<div class="animate-fade-up space-y-6" style="animation-delay: 100ms">
 					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow">
-						<h3 class="text-lg font-semibold mb-4">Estado del Proyecto</h3>
+						<h3 class="mb-4 text-lg font-semibold">Estado del Proyecto</h3>
 						<div class="space-y-3">
-							<div class="flex justify-between items-center">
+							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Estado:</span>
-								<span class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Finalizado' ? 'text-blue-600' : getEstadoTemporal(proyecto) === 'En ejecución' ? 'text-green-600' : 'text-orange-600'}">
+								<span
+									class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Finalizado'
+										? 'text-blue-600'
+										: getEstadoTemporal(proyecto) === 'En ejecución'
+											? 'text-green-600'
+											: 'text-orange-600'}"
+								>
 									{getEstadoTemporal(proyecto)}
 								</span>
 							</div>
-							<div class="flex justify-between items-center">
+							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Institución:</span>
 								<span class="text-sm font-medium">
 									{proyecto.institucion?.nombre_legal || 'N/A'}
 								</span>
 							</div>
-							<div class="flex justify-between items-center">
+							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Ubicación:</span>
 								<span class="text-sm font-medium">
 									{proyecto.direccion?.localidad?.nombre || 'N/A'}

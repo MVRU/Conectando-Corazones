@@ -9,6 +9,7 @@ import type { Contacto } from './Contacto';
 export interface Usuario {
   id_usuario?: number; // ! id SIEMPRE -> en el DER no se colocó pq no se contempla la implementación real en la BD, es una representación, un modelado
   username: string;
+  email?: string; // ! VER -> opcional para no romper mocks, dsp cambiamos
   password: string;
   nombre: string;
   apellido: string;

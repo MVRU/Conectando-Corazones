@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elements/DatePicker.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import Select from '../ui/elements/Select.svelte';
+	import Select from '$lib/components/ui/elements/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
@@ -30,7 +30,7 @@
 	let docTipo = 'DNI';
 	let docOtro = '';
 	let docNumero = '';
-	let nacimiento = '';
+	let nacimiento: Date | null = null;
 	let cuil = '';
 
 	// Datos organización
@@ -41,7 +41,7 @@
 	let repDocTipo = 'DNI';
 	let repDocOtro = '';
 	let repDocNumero = '';
-	let repNacimiento = '';
+	let repNacimiento: Date | null = null;
 
 	// Usuario y contraseña
 	let username = '';
@@ -234,7 +234,7 @@
 					id="docTipo"
 					bind:value={docTipo}
 					required={true}
-					error={''}
+					error=""
 					options={[
 						{ value: 'DNI', label: 'DNI' },
 						{ value: 'Pasaporte', label: 'Pasaporte' },
@@ -455,7 +455,7 @@
 						id="repDocTipo"
 						bind:value={repDocTipo}
 						required={true}
-						error={''}
+						error=""
 						options={[
 							{ value: 'DNI', label: 'DNI' },
 							{ value: 'Pasaporte', label: 'Pasaporte' },

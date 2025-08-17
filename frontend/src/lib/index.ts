@@ -2,7 +2,7 @@
 export { default as Badge } from './components/ui/elements/Badge.svelte';
 export { default as Button } from './components/ui/elements/Button.svelte';
 export { default as Select } from './components/ui/elements/Select.svelte';
-export { default as ProjectCard } from './components/ui/cards/ProjectCard.svelte';
+export { default as ProyectoCard } from './components/ui/cards/ProyectoCard.svelte';
 export { default as Breadcrumbs } from './components/ui/navigation/Breadcrumbs.svelte';
 
 // Componentes de páginas

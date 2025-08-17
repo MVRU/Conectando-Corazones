@@ -1,7 +1,7 @@
 // FIX: revisar y corregir errores tras cambios en interfaces
 
 import { provincias } from "$lib/data/provincias";
-import { getProvinceByCity } from '$lib/utils/helpers';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 /**
  * ! Mensajes de error comunes para validaciones
@@ -91,16 +91,14 @@ export function isValidCuil(cuil: string): boolean {
     return check === calculatedCheckDigit.toString();
 }
 
-export function isAdult(date: string): boolean {
-    if (!date) return false;
-    const birth = new Date(date);
-    if (isNaN(birth.getTime())) return false;
+export function isAdult(date: Date): boolean {
+    if (!(date instanceof Date) || isNaN(date.getTime())) return false;
     const today = new Date();
-    const age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    const d = today.getDate() - birth.getDate();
+    const age = today.getFullYear() - date.getFullYear();
+    const m = today.getMonth() - date.getMonth();
+    const d = today.getDate() - date.getDate();
 
-    if (birth > today) return false;
+    if (date > today) return false;
 
     return age > 18 || (age === 18 && (m > 0 || (m === 0 && d >= 0)));
 }
@@ -151,15 +149,18 @@ export function isValidProvinceByISO(isoCode: string): boolean {
 }
 
 /**
- * -!- Valida si una ciudad pertenece a una provincia específica.
+ * -!- Valida si una ciudad pertenece a una provincia específica usando IDs.
  */
-export function isValidCityInProvince(city: string, provinceName: string): boolean {
-    if (!city || !provinceName) return false;
+export function isValidCityInProvince(
+    localidadId?: number | string,
+    provinciaId?: number | string
+): boolean {
+    const locId = Number(localidadId);
+    const provId = Number(provinciaId);
+    if (!locId || !provId) return false;
 
-    const province = getProvinceByCity(city);
-    return (
-        province?.nombre.trim().toLowerCase() === provinceName.trim().toLowerCase()
-    );
+    const localidad = mockLocalidades.find((l) => l.id_localidad === locId);
+    return localidad?.id_provincia === provId;
 }
 
 /**
