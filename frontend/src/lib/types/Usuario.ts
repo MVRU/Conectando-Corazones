@@ -26,7 +26,7 @@ export interface Usuario {
   categorias_preferidas?: Categoria[];
   tipos_participacion_preferidas?: TipoParticipacion[];
   direccion?: Direccion;
-  contacto?: Contacto[];
+  contactos?: Contacto[];
 }
 
 export interface Institucion extends Usuario {

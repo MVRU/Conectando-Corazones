@@ -3,7 +3,7 @@
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Badge from '$lib/components/ui/elements/Badge.svelte';
-	import { mockProyectos as projects } from '$lib/mocks/mock-proyectos';
+	import { mockProyectos as proyectos } from '$lib/mocks/mock-proyectos';
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -60,7 +60,7 @@
 
 	<!-- *Grid de Proyectos -->
 	<div class="mx-auto grid max-w-7xl gap-10 max-[1049px]:grid-cols-1 min-[1050px]:grid-cols-3">
-		{#each projects.slice(0, 3) as proj (proj.id)}
+		{#each proyectos.slice(0, 3) as proj (proj.id_proyecto)}
 			<ProyectoCard proyecto={proj} />
 		{/each}
 	</div>

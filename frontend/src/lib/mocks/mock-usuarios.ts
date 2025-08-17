@@ -8,10 +8,6 @@ import type {
 } from '$lib/types/Usuario';
 
 import type { Direccion } from '$lib/types/Direccion';
-import type { Contacto } from '$lib/types/Contacto';
-import type { Resena } from '$lib/types/Resena';
-import type { Consentimiento } from '$lib/types/Consentimiento';
-import type { Reporte } from '$lib/types/Reporte';
 
 export const mockUsuarios = {
     // Administrador del sistema
@@ -43,11 +39,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'admin@conectandocorazones.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'admin@conectandocorazones.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 1,
@@ -79,20 +77,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-01-01')
             }
         ],
-        reportes: [
-            {
-                id_reporte: 1,
-                tipo_objeto: 'Usuario',
-                id_objeto: 5,
-                motivo: 'Comportamiento inapropiado',
-                descripcion: 'Usuario envió comentarios ofensivos en la sección de colaboración del proyecto #3.',
-                created_at: new Date('2024-03-15'),
-                estado: 'resuelto',
-                fecha_resolucion: new Date('2024-03-16'),
-                comentario_resolucion: 'Se aplicó suspensión temporal y se contactó al usuario para aclarar las normas de conducta.'
-            }
-        ],
-        reporte_admin: []
     } satisfies Administrador,
 
     // Institución educativa
@@ -125,11 +109,18 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'direccion@escuelaesperanza.edu.ar',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'direccion@escuelaesperanza.edu.ar',
+                etiqueta: 'principal'
+            },
+            {
+                tipo_contacto: 'telefono',
+                valor: '341 XXXXXXX',
+                etiqueta: 'celular'
+            }
+        ],
         resenas: [
             {
                 id_resena: 2,
@@ -170,7 +161,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-01-15')
             }
         ],
-        reportes: []
     } satisfies Institucion,
 
     // Hospital público
@@ -203,11 +193,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'proyectos@garrahan.gov.ar',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'proyectos@garrahan.gov.ar',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [
             {
@@ -221,17 +213,6 @@ export const mockUsuarios = {
                 tipo: 'privacidad',
                 version: '1.0',
                 created_at: new Date('2024-02-10')
-            }
-        ],
-        reportes: [
-            {
-                id_reporte: 2,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 4,
-                motivo: 'Falta de transparencia',
-                descripcion: 'El proyecto no publica actualizaciones regulares sobre el uso de los fondos recibidos.',
-                created_at: new Date('2024-03-20'),
-                estado: 'pendiente',
             }
         ]
     } satisfies Institucion,
@@ -266,11 +247,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'maria.gonzalez@gmail.com',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'maria.gonzalez@gmail.com',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 4,
@@ -305,7 +288,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-01')
             }
         ],
-        reportes: []
     } satisfies Unipersonal,
 
     // Colaborador individual 2
@@ -337,11 +319,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'carlos.rodriguez@hotmail.com',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'carlos.rodriguez@hotmail.com',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [
             {
@@ -351,17 +335,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-15')
             }
         ],
-        reportes: [
-            {
-                id_reporte: 3,
-                tipo_objeto: 'Usuario',
-                id_objeto: 6,
-                motivo: 'Spam',
-                descripcion: 'Usuario envía múltiples mensajes promocionales no relacionados con proyectos sociales.',
-                created_at: new Date('2024-03-25'),
-                estado: 'pendiente'
-            }
-        ]
     } satisfies Unipersonal,
 
     // Organización sin fines de lucro
@@ -397,11 +370,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'contacto@manosunidas.org.ar',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'contacto@manosunidas.org.ar',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 6,
@@ -439,7 +414,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-01-20')
             }
         ],
-        reportes: []
     } satisfies Organizacion,
 
     // Empresa con fines de lucro
@@ -475,11 +449,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'rse@empresasolidaria.com.ar',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'rse@empresasolidaria.com.ar',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 7,
@@ -505,7 +481,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-05')
             }
         ],
-        reportes: []
     } satisfies Organizacion,
 
     // Colaborador individual 3
@@ -536,11 +511,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'ana.martinez@outlook.com',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'ana.martinez@outlook.com',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 8,
@@ -581,19 +558,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-03-01')
             }
         ],
-        reportes: [
-            {
-                id_reporte: 4,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 7,
-                motivo: 'Información incorrecta',
-                descripcion: 'El proyecto indica que atiende 200 beneficiarios pero en realidad solo atiende 50.',
-                created_at: new Date('2024-03-28'),
-                estado: 'resuelto',
-                fecha_resolucion: new Date('2024-03-30'),
-                comentario_resolucion: 'Se corrigió la información en la descripción del proyecto.'
-            }
-        ]
     } satisfies Unipersonal,
 
     // Institución de salud privada
@@ -626,11 +590,13 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'responsabilidad.social@clinicasanjorge.com.ar',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'responsabilidad.social@clinicasanjorge.com.ar',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [
             {
                 id_resena: 10,
@@ -662,7 +628,6 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-20')
             }
         ],
-        reportes: []
     } satisfies Institucion,
 
 
@@ -696,14 +661,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'info@fundacionsiempre.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'info@fundacionsiempre.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
     // Comedor Los Pinos
@@ -736,14 +702,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'contacto@comedoreslospinos.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'contacto@comedoreslospinos.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
     // Hospital General San José
@@ -776,14 +743,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'info@hospitalsanjose.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'info@hospitalsanjose.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
     // Instituto de Formación Laboral
@@ -816,14 +784,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'info@institutoformacion.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'info@institutoformacion.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
     // Fundación Calor Humano
@@ -856,14 +825,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'info@fundacioncalor.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'info@fundacioncalor.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
     // Hogar Santa Teresa
@@ -896,14 +866,15 @@ export const mockUsuarios = {
                 }
             }
         },
-        contacto: {
-            tipo_contacto: 'email',
-            valor: 'info@hogarsantateresa.org',
-            etiqueta: 'principal'
-        },
+        contactos: [
+            {
+                tipo_contacto: 'email',
+                valor: 'info@hogarsantateresa.org',
+                etiqueta: 'principal'
+            }
+        ],
         resenas: [],
         consentimientos: [],
-        reportes: []
     } satisfies Institucion,
 
 } as const;

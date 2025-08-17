@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;
 </script>
@@ -71,30 +70,22 @@
 		</p>
 	</div>
 
-	<!-- Card: Objetivos / Participación -->
+	<!-- Card: Colaboradores -->
 	<div
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 		style="animation-delay: 500ms"
 	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-			Formas de Colaboración
-		</h4>
-		<ul class="space-y-1 text-sm text-gray-800 sm:text-base">
-			{#if proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0}
-				{#each proyecto.participacion_permitida as p}
-					<li>
-						<span class="font-medium">{p.tipo_participacion?.descripcion || p.unidad}:</span>
-						&nbsp;Objetivo: {p.objetivo}
-						{p.unidad}
-						{#if p.actual !== undefined}
-							&nbsp;|&nbsp; Actual: {p.actual} {p.unidad}
-						{/if}
-					</li>
-				{/each}
+		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Colaboradores</h4>
+		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
+			<span class="text-lg">🤝</span>
+			{#if proyecto.colaboradores && proyecto.colaboradores.length > 0}
+				{proyecto.colaboradores
+					.map((c) => ('razon_social' in c ? c.razon_social : `${c.nombre} ${c.apellido}`))
+					.join(', ')}
 			{:else}
-				<li>No hay objetivos definidos</li>
+				Sin colaboradores
 			{/if}
-		</ul>
+		</p>
 	</div>
 </div>
 

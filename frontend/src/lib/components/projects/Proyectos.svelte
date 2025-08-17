@@ -7,7 +7,7 @@
 
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { mockProyectos as defaultProjects } from '$lib/mocks/mock-proyectos';
+	import { mockProyectos as defaultProyectos } from '$lib/mocks/mock-proyectos';
 	import { fade, fly } from 'svelte/transition';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
@@ -37,7 +37,9 @@
 	const provinciasDisponibles = [
 		'Todas',
 		...Array.from(
-			new Set(defaultProjects.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean))
+			new Set(
+				defaultProyectos.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean)
+			)
 		).sort()
 	];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
@@ -47,7 +49,7 @@
 	let provinciaSeleccionada = 'Todas';
 	let mostrarFiltros = false;
 
-	export let proyectos: Proyecto[] = defaultProjects;
+	export let proyectos: Proyecto[] = defaultProyectos;
 	let proyectosVisibles: Proyecto[] = [];
 
 	const ESTADO_PRIORIDAD: Record<string, number> = {

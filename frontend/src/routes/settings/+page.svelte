@@ -13,8 +13,8 @@
 
 	// --- Información personal ---
 	let nombre = usuario.nombre;
-	let email = usuario.contacto?.valor || '';
-	let telefono = ''; // TODO: Agregar teléfono a la estructura de contacto
+	let email = usuario.contactos?.find((c) => c.tipo_contacto === 'email')?.valor || '';
+	let telefono = usuario.contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor || ''; // TODO: agregar teléfono en mocks para probar
 	let profile = usuario.url_foto || '';
 	let nuevaFoto: File | null = null;
 

@@ -20,7 +20,7 @@
 			proyecto = encontrado;
 			setBreadcrumbs([
 				BREADCRUMB_ROUTES.home,
-				BREADCRUMB_ROUTES.projects,
+				BREADCRUMB_ROUTES.proyectos,
 				{ label: proyecto.titulo }
 			]);
 		} else {

@@ -53,7 +53,7 @@ export const provincias: Provincia[] = [
     },
     {
         id_provincia: 8,
-        nombre: 'Rioja',
+        nombre: 'La Rioja',
         codigo_iso: 'AR-F',
     },
     {

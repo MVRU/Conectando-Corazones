@@ -1,14 +1,43 @@
-
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { Categoria } from '$lib/types/Categoria';
+import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
 
+// ---------- Helpers ----------
+// TODO: considerar pasarlos a utils
+
+const isDefined = <T>(x: T | null | undefined): x is T => x != null;
+
 const categoriasPorId = (ids: number[] = []): Categoria[] =>
   ids
     .map((id) => mockCategorias.find((c) => c.id_categoria === id))
-    .filter((c): c is Categoria => Boolean(c));
+    .filter(isDefined);
+
+// ---------- Índice SOLO de colaboradores ----------
+
+const colaboradoresIndex: Record<number, ColaboradorDisyuncion> = Object
+  .values(mockUsuarios)
+  .reduce<Record<number, ColaboradorDisyuncion>>((acc, u: any) => {
+    // Narrowing estructural: rol + campos de Colaborador
+    if (
+      u?.rol === 'colaborador' &&
+      typeof u.cuit_cuil === 'string' &&
+      typeof u.tipo_colaborador === 'string' &&
+      typeof u.id_usuario === 'number'
+    ) {
+      acc[u.id_usuario] = u as ColaboradorDisyuncion;
+    }
+    return acc;
+  }, {});
+
+const OFFSET_COLABORADOR = 3;
+
+const colaboradoresPorId = (ids: number[] = []): ColaboradorDisyuncion[] =>
+  ids
+    .map((id) => colaboradoresIndex[id + OFFSET_COLABORADOR])
+    .filter(isDefined);
 
 const proyectosBase: Proyecto[] = [
   {
@@ -25,7 +54,7 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     categoria_ids: [2],
     colaboracion_ids: [1, 2],
-    institucion_id: 1,
+    institucion_id: 2,
     colaborador_ids: [1, 2],
     direccion_id: 1,
     evidencia_ids: [1],
@@ -580,5 +609,6 @@ const proyectosBase: Proyecto[] = [
 
 export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
   ...proyecto,
-  mockCategorias: categoriasPorId(proyecto.categoria_ids ?? [])
+  categorias: categoriasPorId(proyecto.categoria_ids ?? []),
+  colaboradores: colaboradoresPorId(proyecto.colaborador_ids ?? [])
 }));
