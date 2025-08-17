@@ -1,7 +1,7 @@
 
 import type { Categoria } from '$lib/types/Categoria';
 
-export const categorias: Categoria[] = [
+export const mockCategorias: Categoria[] = [
     { id_categoria: 1, descripcion: 'Medioambiente' },
     { id_categoria: 2, descripcion: 'Educación' },
     { id_categoria: 3, descripcion: 'Salud' },

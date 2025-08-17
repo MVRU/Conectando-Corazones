@@ -6,7 +6,7 @@ export { default as ProjectCard } from './components/ui/cards/ProjectCard.svelte
 export { default as Breadcrumbs } from './components/ui/navigation/Breadcrumbs.svelte';
 
 // Componentes de páginas
-export { default as Projects } from './components/projects/Projects.svelte';
+export { default as Projects } from './components/projects/Proyectos.svelte';
 
 export { default as Image } from './components/ui/elements/Image.svelte';
 

@@ -3,8 +3,14 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { authActions, user as userStore } from '$lib/stores/auth';
-	import type { Usuario, Institucion, Colaborador, Organizacion, Unipersonal } from '$lib/types/Usuario';
+	import { authActions, usuario as usuarioStore } from '$lib/stores/auth';
+	import type {
+		Usuario,
+		Institucion,
+		Colaborador,
+		Organizacion,
+		Unipersonal
+	} from '$lib/types/Usuario';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 
 	let usuario: Usuario | null = null;
@@ -17,14 +23,14 @@
 		await authActions.login('admin_conectando', '123456');
 	});
 
-	$: if ($userStore) {
-		usuario = $userStore;
+	$: if ($usuarioStore) {
+		usuario = $usuarioStore;
 
 		if (usuario?.rol === 'institucion') {
 			institucionUsuario = usuario as Institucion;
 		} else if (usuario?.rol === 'colaborador') {
 			colaboradorUsuario = usuario as Colaborador;
-			
+
 			// Determinar si es organización o unipersonal
 			if ('razon_social' in colaboradorUsuario) {
 				organizacionUsuario = colaboradorUsuario as Organizacion;
@@ -39,6 +45,6 @@
 	{#if !usuario}
 		<Loader loading />
 	{:else}
-	<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"></div>
+		<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"></div>
 	{/if}
 </div>

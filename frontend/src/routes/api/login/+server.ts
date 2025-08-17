@@ -7,12 +7,12 @@ import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 export const POST: RequestHandler = async ({ request, cookies }) => {
     const { username, password, rememberMe } = await request.json();
 
-    const user = Object.values(mockUsuarios).find((u) => u.username === username);
-    if (!user || user.password !== password) {
+    const usuario = Object.values(mockUsuarios).find((u) => u.username === username);
+    if (!usuario || usuario.password !== password) {
         return json({ error: 'Credenciales inválidas' }, { status: 401 });
     }
 
-    cookies.set('auth_token', `mock-token-${user.username}`, {
+    cookies.set('auth_token', `mock-token-${usuario.username}`, {
         path: '/',
         httpOnly: true,
         sameSite: 'strict',
@@ -20,5 +20,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         maxAge: rememberMe ? 60 * 60 * 24 * 7 : undefined
     });
 
-    return json({ user });
+    // -*- Se omite la contraseña para no exponer credenciales en la respuesta
+    const { password: _pw, ...safeUsuario } = usuario;
+    return json({ usuario: safeUsuario });
 };

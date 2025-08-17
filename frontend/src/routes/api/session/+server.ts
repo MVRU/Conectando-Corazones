@@ -6,15 +6,16 @@ import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 export const GET: RequestHandler = async ({ cookies }) => {
     const token = cookies.get('auth_token');
-    if (!token) return json({ user: null });
+    if (!token) return json({ usuario: null });
 
-    const userId = token.replace('mock-token-', '');
-    const user = Object.values(mockUsuarios).find((u) => u.username === userId);
+    const username = token.replace('mock-token-', '');
+    const usuario = Object.values(mockUsuarios).find((u) => u.username === username);
 
-    if (!user) {
+    if (!usuario) {
         cookies.delete('auth_token', { path: '/' });
-        return json({ user: null });
+        return json({ usuario: null });
     }
 
-    return json({ user });
+    const { password: _pw, ...safeUsuario } = usuario;
+    return json({ usuario: safeUsuario });
 };

@@ -6,7 +6,7 @@
 
 import type { Localidad } from '$lib/types/Localidad';
 
-export const localidades: Localidad[] = [
+export const mockLocalidades: Localidad[] = [
     {
         id_localidad: 1,
         nombre: 'Buenos Aires',
@@ -128,5 +128,3 @@ export const localidades: Localidad[] = [
         id_provincia: 16,
     }
 ];
-
-export default localidades;

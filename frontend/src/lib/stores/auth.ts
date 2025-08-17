@@ -41,7 +41,7 @@ interface RegisterInstitucionData {
 
 // Estado de autenticación
 interface AuthState {
-  user: Usuario | null;
+  usuario: Usuario | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -49,7 +49,7 @@ interface AuthState {
 
 // Estado inicial
 const initialState: AuthState = {
-  user: null,
+  usuario: null,
   isAuthenticated: false,
   isLoading: false,
   error: null
@@ -59,25 +59,25 @@ const initialState: AuthState = {
 export const authStore = writable<AuthState>(initialState);
 
 // Stores derivados para facilitar el acceso
-export const user = derived(authStore, ($auth) => $auth.user);
+export const usuario = derived(authStore, ($auth) => $auth.usuario);
 export const isAuthenticated = derived(authStore, ($auth) => $auth.isAuthenticated);
 export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
 // Store derivado para el rol del usuario
-export const userRole = derived(authStore, ($auth) => $auth.user?.rol || null);
+export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol || null);
 
 // Store derivado para verificar si es admin
-export const isAdmin = derived(authStore, ($auth) => $auth.user?.rol === 'administrador');
+export const isAdmin = derived(authStore, ($auth) => $auth.usuario?.rol === 'administrador');
 
 // Store derivado para verificar si es institución
-export const isInstitucion = derived(authStore, ($auth) => $auth.user?.rol === 'institucion');
+export const isInstitucion = derived(authStore, ($auth) => $auth.usuario?.rol === 'institucion');
 
 // Store derivado para verificar si es colaborador
-export const isColaborador = derived(authStore, ($auth) => $auth.user?.rol === 'colaborador');
+export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol === 'colaborador');
 
 // Store derivado para verificar si está verificado
-export const isVerified = derived(authStore, ($auth) => $auth.user?.estado === 'activo');
+export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
 
 // Funciones para manejar la autenticación
 export const authActions = {
@@ -101,17 +101,17 @@ export const authActions = {
         throw new Error(error ?? 'Error al iniciar sesión');
       }
 
-      const { user } = await response.json();
+      const { usuario } = await response.json();
 
       authStore.update((state) => ({
         ...state,
-        user: user as Usuario,
+        usuario: usuario as Usuario,
         isAuthenticated: true,
         isLoading: false,
         error: null
       }));
 
-      return user;
+      return usuario;
     } catch (error) {
       authStore.update((state) => ({
         ...state,
@@ -134,7 +134,7 @@ export const authActions = {
   },
 
   // Registrar institución
-  async registerInstitucion(userData: RegisterInstitucionData) {
+  async registerInstitucion(usuarioData: RegisterInstitucionData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -162,7 +162,7 @@ export const authActions = {
   },
 
   // Registrar colaborador
-  async registerColaborador(userData: RegisterColaboradorData) {
+  async registerColaborador(usuarioData: RegisterColaboradorData) {
     authStore.update(state => ({ ...state, isLoading: true, error: null }));
 
     try {
@@ -195,12 +195,12 @@ export const authActions = {
 
     try {
       const response = await fetch('/api/session');
-      const { user } = await response.json();
+      const { usuario } = await response.json();
 
-      if (user) {
+      if (usuario) {
         authStore.update((state) => ({
           ...state,
-          user: user as Usuario,
+          usuario: usuario as Usuario,
           isAuthenticated: true,
           isLoading: false
         }));
@@ -219,10 +219,10 @@ export const authActions = {
   },
 
   // Actualizar datos del usuario
-  updateUser(userData: Partial<Usuario>) {
+  updateUsuario(usuarioData: Partial<Usuario>) {
     authStore.update(state => ({
       ...state,
-      user: state.user ? { ...state.user, ...userData } as Usuario : null
+      usuario: state.usuario ? { ...state.usuario, ...usuarioData } as Usuario : null
     }));
   }
 };
@@ -230,12 +230,12 @@ export const authActions = {
 // Función para verificar permisos
 export function hasPermission(permission: string): boolean {
   const state = get(authStore);
-  if (state.user?.rol === 'administrador') return true;
-  if (state.user?.rol === 'institucion') {
+  if (state.usuario?.rol === 'administrador') return true;
+  if (state.usuario?.rol === 'institucion') {
     const institucionPermissions = ['crear_proyecto', 'editar_proyecto', 'ver_proyectos_propios'];
     return institucionPermissions.includes(permission);
   }
-  if (state.user?.rol === 'colaborador') {
+  if (state.usuario?.rol === 'colaborador') {
     const colaboradorPermissions = ['ver_proyectos', 'hacer_donacion', 'ver_perfil'];
     return colaboradorPermissions.includes(permission);
   }
@@ -257,6 +257,6 @@ export function canAccessRoute(route: string): boolean {
   const state = get(authStore);
   return (
     requiredRoles.length === 0 ||
-    (!!state.user && requiredRoles.includes(state.user.rol))
+    (!!state.usuario && requiredRoles.includes(state.usuario.rol))
   );
 }

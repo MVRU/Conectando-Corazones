@@ -6,11 +6,11 @@
 	-->
 
 <script lang="ts">
-	import { fade, fly, scale } from 'svelte/transition';
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import { mockProyectos as defaultProjects } from '$lib/mocks/mock-proyectos';
+	import { fade, fly } from 'svelte/transition';
 	import ProjectCard from '$lib/components/ui/cards/ProjectCard.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { mockProyectos as defaultProjects } from '$lib/mocks/mock-proyectos';
-	import type { Proyecto } from '$lib/types/Proyecto';
 	import SearchBar from '../ui/elements/SearchBar.svelte';
 	import { writable } from 'svelte/store';
 
@@ -73,7 +73,7 @@
 		return 'Abierto';
 	}
 
-	function filtrarProyectos(
+	export function filtrarProyectos(
 		proyectos: Proyecto[],
 		filtros: typeof filtrosSeleccionados,
 		searchQuery: string,
@@ -89,10 +89,12 @@
 				.filter((f): f is ParticipacionLabel => f !== 'Todos')
 				.map((f) => reverseMap[f]);
 
-			// TODO: Implementar filtro cuando los mocks tengan objetos expandidos
-			// resultado = resultado.filter((p) =>
-			// 	p.objetivos?.some((o) => unidadesEsperadas.includes(o.unidad))
-			// );
+			resultado = resultado.filter((p) =>
+				p.participacion_permitida?.some((participacion) => {
+					const { unidad } = participacion; // * objetivo y actual disponibles para métricas
+					return unidadesEsperadas.includes(unidad as keyof typeof participacionMap);
+				})
+			);
 		}
 
 		// Filtro por estado
@@ -141,37 +143,6 @@
 		});
 
 		return resultado;
-	}
-
-	function toggleFiltro(tipo: ParticipacionLabel | 'Todos') {
-		if (tipo === 'Todos') {
-			filtrosSeleccionados = ['Todos'];
-		} else {
-			const yaSeleccionado = filtrosSeleccionados.includes(tipo);
-			if (yaSeleccionado) {
-				filtrosSeleccionados = filtrosSeleccionados.filter((t) => t !== tipo);
-			} else {
-				filtrosSeleccionados = [...filtrosSeleccionados.filter((t) => t !== 'Todos'), tipo];
-			}
-		}
-
-		// Filtrado actual sin el "Todos"
-		const sinTodos = filtrosSeleccionados.filter((f) => f !== 'Todos');
-
-		// Si no hay filtros seleccionados, volvemos a 'Todos'
-		if (sinTodos.length === 0) {
-			filtrosSeleccionados = ['Todos'];
-		}
-
-		// Si están los tres tipos individuales, activar 'Todos'
-		if (
-			sinTodos.length === 3 &&
-			sinTodos.includes('Monetaria') &&
-			sinTodos.includes('Materiales') &&
-			sinTodos.includes('Voluntariado')
-		) {
-			filtrosSeleccionados = ['Todos'];
-		}
 	}
 
 	function resetFiltros() {
@@ -272,7 +243,7 @@
 							bind:value={filtroParticipacionSeleccionado}
 							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						>
-							{#each tiposParticipacion as tipo}
+							{#each tiposParticipacion as tipo (tipo)}
 								<option value={tipo}>{tipo}</option>
 							{/each}
 						</select>
@@ -288,7 +259,7 @@
 							bind:value={estadoSeleccionado}
 							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						>
-							{#each estadosDisponibles as estado}
+							{#each estadosDisponibles as estado (estado)}
 								<option value={estado}>{estado}</option>
 							{/each}
 						</select>
@@ -304,7 +275,7 @@
 							bind:value={urgenciaSeleccionada}
 							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						>
-							{#each urgenciasDisponibles as urgencia}
+							{#each urgenciasDisponibles as urgencia (urgencia)}
 								<option value={urgencia}>{urgencia}</option>
 							{/each}
 						</select>
@@ -320,7 +291,7 @@
 							bind:value={provinciaSeleccionada}
 							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						>
-							{#each provinciasDisponibles as provincia}
+							{#each provinciasDisponibles as provincia (provincia)}
 								<option value={provincia}>{provincia}</option>
 							{/each}
 						</select>

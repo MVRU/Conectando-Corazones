@@ -1,4 +1,12 @@
-import type { Usuario, Administrador, Institucion, Colaborador, Organizacion, Unipersonal } from '$lib/types/Usuario';
+import type {
+    Usuario,
+    Administrador,
+    Institucion,
+    Colaborador,
+    Organizacion,
+    Unipersonal
+} from '$lib/types/Usuario';
+
 import type { Direccion } from '$lib/types/Direccion';
 import type { Contacto } from '$lib/types/Contacto';
 import type { Resena } from '$lib/types/Resena';
@@ -8,7 +16,8 @@ import type { Reporte } from '$lib/types/Reporte';
 export const mockUsuarios = {
     // Administrador del sistema
     admin1: {
-        username: 'admin_conectando',
+        id_usuario: 1,
+        username: 'alexis_sklate',
         password: '123456',
         nombre: 'Alexis',
         apellido: 'Sklate',
@@ -88,6 +97,7 @@ export const mockUsuarios = {
 
     // Institución educativa
     escuela_esperanza: {
+        id_usuario: 2,
         username: 'escuela_esperanza',
         password: '123456',
         nombre: 'María Elena',
@@ -165,6 +175,7 @@ export const mockUsuarios = {
 
     // Hospital público
     hospital_garrahan: {
+        id_usuario: 3,
         username: 'hospital_garrahan',
         password: '123456',
         nombre: 'Dr. Roberto',
@@ -227,6 +238,7 @@ export const mockUsuarios = {
 
     // Colaborador individual 1
     maria_gonzalez: {
+        id_usuario: 4,
         username: 'maria_g',
         password: '123456',
         nombre: 'María',
@@ -298,6 +310,7 @@ export const mockUsuarios = {
 
     // Colaborador individual 2
     carlos_rodriguez: {
+        id_usuario: 5,
         username: 'carlos_r',
         password: '123456',
         nombre: 'Carlos',
@@ -353,6 +366,7 @@ export const mockUsuarios = {
 
     // Organización sin fines de lucro
     fundacion_manos_unidas: {
+        id_usuario: 6,
         username: 'fundacion_manos',
         password: '123456',
         nombre: 'Patricia',
@@ -430,6 +444,7 @@ export const mockUsuarios = {
 
     // Empresa con fines de lucro
     empresa_solidaria_sa: {
+        id_usuario: 7,
         username: 'empresa_solidaria',
         password: '123456',
         nombre: 'Juan Carlos',
@@ -495,6 +510,7 @@ export const mockUsuarios = {
 
     // Colaborador individual 3
     ana_martinez: {
+        id_usuario: 8,
         username: 'ana_m',
         password: '123456',
         nombre: 'Ana',
@@ -582,6 +598,7 @@ export const mockUsuarios = {
 
     // Institución de salud privada
     clinica_san_jorge: {
+        id_usuario: 9,
         username: 'clinica_sj',
         password: '123456',
         nombre: 'Dra. Carmen',
@@ -645,12 +662,13 @@ export const mockUsuarios = {
                 created_at: new Date('2024-02-20')
             }
         ],
-		reportes: []
-        } satisfies Institucion,
+        reportes: []
+    } satisfies Institucion,
 
 
     // Fundación Siempre
     fundacion_siempre: {
+        id_usuario: 10,
         username: 'fundacion_siempre',
         password: '123456',
         nombre: 'Gabriela',
@@ -690,6 +708,7 @@ export const mockUsuarios = {
 
     // Comedor Los Pinos
     comedor_los_pinos: {
+        id_usuario: 11,
         username: 'comedor_los_pinos',
         password: '123456',
         nombre: 'Silvia',
@@ -729,6 +748,7 @@ export const mockUsuarios = {
 
     // Hospital General San José
     hospital_sanjose: {
+        id_usuario: 12,
         username: 'hospital_sanjose',
         password: '123456',
         nombre: 'Ricardo',
@@ -768,6 +788,7 @@ export const mockUsuarios = {
 
     // Instituto de Formación Laboral
     instituto_formacion: {
+        id_usuario: 13,
         username: 'instituto_formacion',
         password: '123456',
         nombre: 'Patricia',
@@ -807,6 +828,7 @@ export const mockUsuarios = {
 
     // Fundación Calor Humano
     fundacion_calor: {
+        id_usuario: 14,
         username: 'fundacion_calor',
         password: '123456',
         nombre: 'Esteban',
@@ -846,6 +868,7 @@ export const mockUsuarios = {
 
     // Hogar Santa Teresa
     hogar_santa_teresa: {
+        id_usuario: 15,
         username: 'hogar_santa_teresa',
         password: '123456',
         nombre: 'Teresa',

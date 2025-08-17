@@ -5,9 +5,9 @@ import type { Categoria } from './Categoria';
 import type { TipoParticipacion } from './TipoParticipacion';
 import type { Direccion } from './Direccion';
 import type { Contacto } from './Contacto';
-import type { HistorialDeCambios } from './HistorialDeCambios';
 
 export interface Usuario {
+  id_usuario?: number; // ! id SIEMPRE -> en el DER no se colocó pq no se contempla la implementación real en la BD, es una representación, un modelado
   username: string;
   password: string;
   nombre: string;
@@ -22,11 +22,10 @@ export interface Usuario {
   reportes?: Reporte[];
   consentimientos?: Consentimiento[];
   resenas?: Resena[];
-  categorias?: Categoria[];
-  tipoParticipaciones?: TipoParticipacion[];
+  categorias_preferidas?: Categoria[];
+  tipos_participacion_preferidas?: TipoParticipacion[];
   direccion?: Direccion;
-  contacto?: Contacto;
-  historialDeCambios?: HistorialDeCambios[];
+  contacto?: Contacto[];
 }
 
 export interface Institucion extends Usuario {
@@ -36,7 +35,7 @@ export interface Institucion extends Usuario {
 }
 
 export interface Administrador extends Usuario {
-  reporte_admin: Reporte[];
+  // reporte_admin: Reporte[]; // ! Esto va del lado del reporte, no del admin (cardinalidad 1:N) -> admin puede tener muchísimos reportes (payloads gigantes y costosos)
 }
 
 
@@ -50,6 +49,6 @@ export interface Organizacion extends Colaborador {
   con_fines_de_lucro: boolean;
 }
 
-export interface Unipersonal extends Colaborador {}
+export interface Unipersonal extends Colaborador { }
 
 export type ColaboradorDisyuncion = Organizacion | Unipersonal;

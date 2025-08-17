@@ -10,7 +10,7 @@ import type { Usuario } from '$lib/types/Usuario';
 declare global {
 	namespace App {
 		interface Locals {
-			user?: Usuario;
+			usuario?: Usuario;
 		}
 		// interface Error {}
 		// interface PageData {}

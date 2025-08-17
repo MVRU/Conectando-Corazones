@@ -6,7 +6,7 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 
 	export let selected: boolean = false;
-	export let icon: 'institution' | 'collaborator' | 'user' = 'user';
+	export let icon: 'institution' | 'collaborator' | 'usuario' = 'usuario';
 	export let title: string = '';
 	export let description: string = '';
 	export let onSelect: () => void;

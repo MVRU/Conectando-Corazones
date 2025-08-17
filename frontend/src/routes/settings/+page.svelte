@@ -9,13 +9,13 @@
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 	// Usamos un usuario real de los mocks
-	let user: Usuario = mockUsuarios.maria_gonzalez as Usuario;
+	let usuario: Usuario = mockUsuarios.maria_gonzalez as Usuario;
 
 	// --- Información personal ---
-	let nombre = user.nombre;
-	let email = user.contacto?.valor || '';
-	let telefono = '';  // TODO: Agregar teléfono a la estructura de contacto
-	let profile = user.url_foto || '';
+	let nombre = usuario.nombre;
+	let email = usuario.contacto?.valor || '';
+	let telefono = ''; // TODO: Agregar teléfono a la estructura de contacto
+	let profile = usuario.url_foto || '';
 	let nuevaFoto: File | null = null;
 
 	function handleFotoChange(e: Event) {
@@ -32,7 +32,7 @@
 		'Animales',
 		'Medio ambiente'
 	];
-	let preferencias: string[] = user.rol === 'colaborador' ? [] : [];  // TODO: Implementar sistema de preferencias
+	let preferencias: string[] = usuario.rol === 'colaborador' ? [] : []; // TODO: Implementar sistema de preferencias
 	function toggleCategoria(cat: string) {
 		if (preferencias.includes(cat)) {
 			preferencias = preferencias.filter((c) => c !== cat);
@@ -148,7 +148,7 @@
 	</section>
 
 	<!-- Preferencias de categorías (solo colaborador) -->
-	{#if user.rol === 'colaborador'}
+	{#if usuario.rol === 'colaborador'}
 		<section class="mb-12 rounded-3xl border border-gray-100 bg-white p-8 shadow-2xl">
 			<h2
 				class="mb-8 bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-2xl font-bold text-transparent"

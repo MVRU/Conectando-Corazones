@@ -1,11 +1,12 @@
 <!-- FIX: corregir atributos de usuario autenticado -->
 
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
 	import { page } from '$app/stores';
-	import { isAuthenticated, user, authActions } from '$lib/stores/auth';
+	import { isAuthenticated, usuario, authActions } from '$lib/stores/auth';
+	import type { Usuario } from '$lib/types/Usuario';
 
 	let menuOpen = false;
 	let visible = false;
@@ -153,7 +154,7 @@
 						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
 					>
 						<img
-							src={$user?.profile ?? '/users/escuela-esperanza.jpg'}
+							src={$usuario?.url_foto ?? '/users/escuela-esperanza.jpg'}
 							alt="Foto de perfil"
 							class="h-full w-full cursor-pointer object-cover"
 						/>

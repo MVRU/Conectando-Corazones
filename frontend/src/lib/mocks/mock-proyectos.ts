@@ -1,10 +1,16 @@
 
-import type { Proyecto } from '../types/Proyecto';
-import { mockUsuarios } from './mock-usuarios';
-import { localidades } from './mock-localidades';
-import { categorias } from './mock-categorias';
+import type { Proyecto } from '$lib/types/Proyecto';
+import type { Categoria } from '$lib/types/Categoria';
+import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import { mockCategorias } from '$lib/mocks/mock-categorias';
 
-export const mockProyectos: Proyecto[] = [
+const categoriasPorId = (ids: number[] = []): Categoria[] =>
+  ids
+    .map((id) => mockCategorias.find((c) => c.id_categoria === id))
+    .filter((c): c is Categoria => Boolean(c));
+
+const proyectosBase: Proyecto[] = [
   {
     id_proyecto: 1,
     titulo: 'Un libro, un sueño',
@@ -13,11 +19,11 @@ export const mockProyectos: Proyecto[] = [
     created_at: new Date('2025-03-01'),
     fecha_cierre_postulaciones: new Date('2025-04-01'),
     fecha_fin_tentativa: new Date('2025-06-01'),
-//    modalidad: 'presencial',
-  id_chat_firebase: 1001,
+    //    modalidad: 'presencial',
+    id_chat_firebase: 1001,
     estado_id: 1,
     participacion_permitida_ids: [1, 2],
-    categoria_ids: [1],
+    categoria_ids: [2],
     colaboracion_ids: [1, 2],
     institucion_id: 1,
     colaborador_ids: [1, 2],
@@ -43,7 +49,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
       }
     ],
-  categorias: [categorias[1]],
     colaboraciones: [
       { id_colaboracion: 1, estado: 'aceptada', created_at: new Date('2025-03-05') },
       { id_colaboracion: 2, estado: 'pendiente', created_at: new Date('2025-03-10') }
@@ -58,8 +63,8 @@ export const mockProyectos: Proyecto[] = [
       departamento: 'A',
       referencia: 'Frente a la plaza principal',
       url_google_maps: 'https://maps.google.com/?q=San+Martín+456',
-      localidad_id: localidades[3].id_localidad,
-      localidad: localidades[3]
+      localidad_id: mockLocalidades[3].id_localidad,
+      localidad: mockLocalidades[3]
     },
     evidencias: [
       {
@@ -88,11 +93,11 @@ export const mockProyectos: Proyecto[] = [
     created_at: new Date('2025-02-10'),
     fecha_cierre_postulaciones: new Date('2025-03-10'),
     fecha_fin_tentativa: new Date('2025-05-10'),
-   // modalidad: 'presencial',
-  id_chat_firebase: 1002,
+    // modalidad: 'presencial',
+    id_chat_firebase: 1002,
     estado_id: 2,
     participacion_permitida_ids: [1],
-    categoria_ids: [2],
+    categoria_ids: [1],
     colaboracion_ids: [3],
     institucion_id: 2,
     colaborador_ids: [3, 4],
@@ -118,7 +123,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
       }
     ],
-  categorias: [categorias[0]],
     colaboraciones: [
       { id_colaboracion: 3, estado: 'aceptada', created_at: new Date('2025-02-15') }
     ],
@@ -129,9 +133,9 @@ export const mockProyectos: Proyecto[] = [
       calle: 'Calle 8',
       numero: '456',
       referencia: 'Barrio Norte',
-      url_google_maps: 'https://maps.google.com/?q=Calle+8+456', //tampoco seria necesario en los mocks
-      localidad_id: localidades[1].id_localidad, //no es necesario en los mocks
-      localidad: localidades[1]
+      url_google_maps: 'https://maps.google.com/?q=Calle+8+456',
+      localidad_id: mockLocalidades[1].id_localidad,
+      localidad: mockLocalidades[1]
     },
     evidencias: [
       {
@@ -160,8 +164,8 @@ export const mockProyectos: Proyecto[] = [
     created_at: new Date('2025-01-20'),
     fecha_cierre_postulaciones: new Date('2025-02-20'),
     fecha_fin_tentativa: new Date('2025-04-20'),
-   // modalidad: 'presencial',
-  id_chat_firebase: 1003,
+    // modalidad: 'presencial',
+    id_chat_firebase: 1003,
     estado_id: 3,
     participacion_permitida_ids: [2],
     categoria_ids: [3],
@@ -182,7 +186,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntarios' }
       }
     ],
-  categorias: [categorias[2]],
     colaboraciones: [
       { id_colaboracion: 4, estado: 'aceptada', created_at: new Date('2025-01-25') }
     ],
@@ -194,8 +197,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '123',
       referencia: 'Frente a la plaza central',
       url_google_maps: 'https://maps.google.com/?q=Av+Belgrano+123',
-      localidad_id: localidades[0].id_localidad,
-      localidad: localidades[0]
+      localidad_id: mockLocalidades[0].id_localidad,
+      localidad: mockLocalidades[0]
     },
     evidencias: [
       {
@@ -219,16 +222,17 @@ export const mockProyectos: Proyecto[] = [
   {
     id_proyecto: 4,
     titulo: 'Equipamiento Médico Hospitalario',
-    descripcion: 'Adquisición de equipamiento médico para mejorar la atención en hospitales públicos.',
+    descripcion:
+      'Adquisición de equipamiento médico para mejorar la atención en hospitales públicos.',
     url_portada: '/img/proyectos-4.webp',
     created_at: new Date('2025-04-01'),
     fecha_cierre_postulaciones: new Date('2025-05-01'),
     fecha_fin_tentativa: new Date('2025-07-01'),
     modalidad: 'presencial',
-  id_chat_firebase: 1004,
+    id_chat_firebase: 1004,
     estado_id: 4,
     participacion_permitida_ids: [1, 3],
-    categoria_ids: [4],
+    categoria_ids: [3],
     colaboracion_ids: [5],
     institucion_id: 4,
     colaborador_ids: [6],
@@ -254,7 +258,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
       }
     ],
-  categorias: [categorias[2]],
     colaboraciones: [
       { id_colaboracion: 5, estado: 'aceptada', created_at: new Date('2025-04-05') }
     ],
@@ -266,8 +269,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '789',
       referencia: 'Esquina con Av. Rivadavia',
       url_google_maps: 'https://maps.google.com/?q=Av+San+Martin+789',
-      localidad_id: localidades[4].id_localidad,
-      localidad: localidades[4]
+      localidad_id: mockLocalidades[4].id_localidad,
+      localidad: mockLocalidades[4]
     },
     evidencias: [
       {
@@ -297,10 +300,10 @@ export const mockProyectos: Proyecto[] = [
     fecha_cierre_postulaciones: new Date('2025-04-15'),
     fecha_fin_tentativa: new Date('2025-06-15'),
     modalidad: 'presencial',
-  id_chat_firebase: 1005,
+    id_chat_firebase: 1005,
     estado_id: 5,
     participacion_permitida_ids: [1, 2],
-    categoria_ids: [1, 5],
+    categoria_ids: [2, 4],
     colaboracion_ids: [6],
     institucion_id: 5,
     colaborador_ids: [7],
@@ -326,7 +329,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
       }
     ],
-  categorias: [categorias[1], categorias[3]],
     colaboraciones: [
       { id_colaboracion: 6, estado: 'aceptada', created_at: new Date('2025-03-20') }
     ],
@@ -338,8 +340,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '321',
       referencia: 'Cerca de la estación',
       url_google_maps: 'https://maps.google.com/?q=Av+Independencia+321',
-      localidad_id: localidades[5].id_localidad,
-      localidad: localidades[5]
+      localidad_id: mockLocalidades[5].id_localidad,
+      localidad: mockLocalidades[5]
     },
     evidencias: [
       {
@@ -363,16 +365,17 @@ export const mockProyectos: Proyecto[] = [
   {
     id_proyecto: 6,
     titulo: 'Alimentos No Perecederos',
-    descripcion: 'Campaña de recolección de alimentos no perecederos para familias en situación de emergencia.',
+    descripcion:
+      'Campaña de recolección de alimentos no perecederos para familias en situación de emergencia.',
     url_portada: '/img/proyectos-6.webp',
     created_at: new Date('2025-02-25'),
     fecha_cierre_postulaciones: new Date('2025-03-25'),
     fecha_fin_tentativa: new Date('2025-05-25'),
-   // modalidad: 'presencial',
-  id_chat_firebase: 1006,
+    // modalidad: 'presencial',
+    id_chat_firebase: 1006,
     estado_id: 6,
     participacion_permitida_ids: [1],
-    categoria_ids: [2],
+    categoria_ids: [1],
     colaboracion_ids: [7],
     institucion_id: 2,
     colaborador_ids: [8],
@@ -398,7 +401,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
       }
     ],
-  categorias: [categorias[0]],
     colaboraciones: [
       { id_colaboracion: 7, estado: 'aceptada', created_at: new Date('2025-02-28') }
     ],
@@ -410,8 +412,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '456',
       referencia: 'Barrio Norte',
       url_google_maps: 'https://maps.google.com/?q=Calle+8+456',
-      localidad_id: localidades[1].id_localidad,
-      localidad: localidades[1]
+      localidad_id: mockLocalidades[1].id_localidad,
+      localidad: mockLocalidades[1]
     },
     evidencias: [
       {
@@ -440,8 +442,8 @@ export const mockProyectos: Proyecto[] = [
     created_at: new Date('2025-05-01'),
     fecha_cierre_postulaciones: new Date('2025-06-01'),
     fecha_fin_tentativa: new Date('2025-08-01'),
-//   modalidad: 'presencial',
-  id_chat_firebase: 1007,
+    //   modalidad: 'presencial',
+    id_chat_firebase: 1007,
     estado_id: 7,
     participacion_permitida_ids: [1, 2],
     categoria_ids: [6],
@@ -470,7 +472,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'En especie' }
       }
     ],
-  categorias: [categorias[5]],
     colaboraciones: [
       { id_colaboracion: 8, estado: 'aceptada', created_at: new Date('2025-05-10') }
     ],
@@ -482,8 +483,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '654',
       referencia: 'A metros del hospital',
       url_google_maps: 'https://maps.google.com/?q=Av+Mitre+654',
-      localidad_id: localidades[6].id_localidad,
-      localidad: localidades[6]
+      localidad_id: mockLocalidades[6].id_localidad,
+      localidad: mockLocalidades[6]
     },
     evidencias: [
       {
@@ -512,8 +513,8 @@ export const mockProyectos: Proyecto[] = [
     created_at: new Date('2025-04-10'),
     fecha_cierre_postulaciones: new Date('2025-05-10'),
     fecha_fin_tentativa: new Date('2025-07-10'),
-   // modalidad: 'presencial',
-  id_chat_firebase: 1008,
+    // modalidad: 'presencial',
+    id_chat_firebase: 1008,
     estado_id: 8,
     participacion_permitida_ids: [3],
     categoria_ids: [7],
@@ -542,7 +543,6 @@ export const mockProyectos: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
       }
     ],
-  categorias: [categorias[6]],
     colaboraciones: [
       { id_colaboracion: 9, estado: 'aceptada', created_at: new Date('2025-04-15') }
     ],
@@ -554,8 +554,8 @@ export const mockProyectos: Proyecto[] = [
       numero: '789',
       referencia: 'Barrio Sur',
       url_google_maps: 'https://maps.google.com/?q=Calle+25+789',
-      localidad_id: localidades[7].id_localidad,
-      localidad: localidades[7]
+      localidad_id: mockLocalidades[7].id_localidad,
+      localidad: mockLocalidades[7]
     },
     evidencias: [
       {
@@ -577,3 +577,8 @@ export const mockProyectos: Proyecto[] = [
     ]
   }
 ];
+
+export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
+  ...proyecto,
+  mockCategorias: categoriasPorId(proyecto.categoria_ids ?? [])
+}));
