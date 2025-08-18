@@ -1,43 +1,41 @@
-<!-- FIX: corregir atributos cuando se resuelvan las inconsistencias con el DER -->
-
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import Badge from '$lib/components/ui/elements/Badge.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
-	import { onMount } from 'svelte';
-	import type { Usuario } from '$lib/types/Usuario';
+	import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+	import { mockCategorias } from '$lib/mocks/mock-categorias';
 
 	// Usamos un usuario real de los mocks
-	let usuario: Usuario = mockUsuarios.maria_gonzalez as Usuario;
+	let usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador = mockUsuarios.maria_gonzalez;
 
 	// --- Información personal ---
-	let nombre = usuario.nombre;
+	let nombre = `${usuario.nombre} ${usuario.apellido}`;
 	let email = usuario.contactos?.find((c) => c.tipo_contacto === 'email')?.valor || '';
-	let telefono = usuario.contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor || ''; // TODO: agregar teléfono en mocks para probar
+	let telefono = usuario.contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor || '';
 	let profile = usuario.url_foto || '';
 	let nuevaFoto: File | null = null;
 
 	function handleFotoChange(e: Event) {
 		const file = (e.target as HTMLInputElement).files?.[0];
-		if (file) nuevaFoto = file;
+		if (file) {
+			nuevaFoto = file;
+			// Preview de la nueva foto
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				profile = e.target?.result as string;
+			};
+			reader.readAsDataURL(file);
+		}
 	}
 
-	// --- Preferencias de categorías ---
-	const categorias = [
-		'Alimentación',
-		'Salud',
-		'Educación',
-		'Infraestructura',
-		'Animales',
-		'Medio ambiente'
-	];
-	let preferencias: string[] = usuario.rol === 'colaborador' ? [] : []; // TODO: Implementar sistema de preferencias
-	function toggleCategoria(cat: string) {
-		if (preferencias.includes(cat)) {
-			preferencias = preferencias.filter((c) => c !== cat);
+	// --- Preferencias de categorías
+	let preferencias: number[] = usuario.categorias_preferidas?.map(cat => cat.id_categoria!) || [];
+	
+	function toggleCategoria(categoriaId: number) {
+		if (preferencias.includes(categoriaId)) {
+			preferencias = preferencias.filter((id) => id !== categoriaId);
 		} else {
-			preferencias = [...preferencias, cat];
+			preferencias = [...preferencias, categoriaId];
 		}
 	}
 
@@ -51,20 +49,77 @@
 	let passConfirm = '';
 
 	function guardarCambios() {
-		// Lógica para guardar cambios
+		console.log('=== GUARDANDO CAMBIOS ===');
+		console.log('Usuario ID:', usuario.id_usuario);
+		console.log('Teléfono actualizado:', telefono);
+		console.log('URL foto actualizada:', profile);
+		console.log('Notificaciones Push:', notificacionesPush);
+		console.log('Notificaciones Mail:', notificacionesMail);
+		console.log('Preferencias de categorías:', preferencias);
+		console.log('Categorías seleccionadas:', 
+			mockCategorias.filter(cat => preferencias.includes(cat.id_categoria!))
+				.map(cat => cat.descripcion)
+		);
+		
+		// Simular persistencia
+		alert('Cambios guardados exitosamente');
 	}
+
 	function cambiarPassword() {
-		// Lógica para cambiar contraseña
+		// Validar que las contraseñas coincidan
+		if (passNueva !== passConfirm) {
+			console.error('Error: Las contraseñas no coinciden');
+			alert('Error: Las contraseñas no coinciden');
+			return;
+		}
+
+		// Validar que se ingresó una contraseña
+		if (!passNueva.trim()) {
+			console.error('Error: La nueva contraseña no puede estar vacía');
+			alert('Error: La nueva contraseña no puede estar vacía');
+			return;
+		}
+
+		// Validar contraseña actual (simulado)
+		if (!passActual.trim()) {
+			console.error('Error: Debe ingresar la contraseña actual');
+			alert('Error: Debe ingresar la contraseña actual');
+			return;
+		}
+
+		console.log('=== CAMBIO DE CONTRASEÑA ===');
+		console.log('Usuario ID:', usuario.id_usuario);
+		console.log('Contraseña actual verificada:', '✓');
+		console.log('Nueva contraseña validada:', '✓');
+		console.log('Contraseñas coinciden:', '✓');
+		
+		// Limpiar campos
+		passActual = '';
+		passNueva = '';
+		passConfirm = '';
+		
+		alert('Contraseña cambiada exitosamente');
 	}
 
 	// --- Iconos para categorías ---
 	const categoriaIconos: Record<string, string> = {
-		Alimentación: '🍞',
-		Salud: '➕',
-		Educación: '📚',
-		Infraestructura: '🏗️',
-		Animales: '🐾',
-		'Medio ambiente': '🌱'
+		'Medioambiente': '🌱',
+		'Educación': '📚',
+		'Salud': '➕',
+		'Desarrollo económico': '💼',
+		'Promoción de la paz': '☮️',
+		'Seguridad': '�️',
+		'Entretenimiento': '🎭',
+		'Liderazgo': '👑',
+		'Personas con discapacidades': '♿',
+		'Tecnología': '�',
+		'Política': '🏛️',
+		'Religión': '🙏',
+		'LGTBQ+': '🏳️‍🌈',
+		'Apoyo ante una crisis': '🆘',
+		'Empleo': '💼',
+		'Inmigrantes y refugiados': '�',
+		'Otro': '🔧'
 	};
 
 	let showDeleteModal = false;
@@ -72,8 +127,10 @@
 		showDeleteModal = true;
 	}
 	function confirmarEliminarCuenta() {
+		console.log('=== ELIMINAR CUENTA ===');
+		console.log('Usuario eliminado:', usuario.id_usuario);
 		showDeleteModal = false;
-		// Lógica real de eliminación
+		alert('Cuenta eliminada (simulación)');
 	}
 	function cancelarEliminarCuenta() {
 		showDeleteModal = false;
@@ -156,29 +213,32 @@
 				Preferencias de categorías de proyecto
 			</h2>
 			<div class="mb-6 flex flex-wrap gap-4">
-				{#each categorias as cat}
+				{#each mockCategorias as categoria}
 					<label class="flex cursor-pointer select-none items-center gap-2">
 						<input
 							type="checkbox"
-							checked={preferencias.includes(cat)}
-							on:change={() => toggleCategoria(cat)}
+							checked={preferencias.includes(categoria.id_categoria!)}
+							on:change={() => toggleCategoria(categoria.id_categoria!)}
 							class="h-5 w-5 rounded-2xl border-gray-300 accent-blue-500 focus:ring-2 focus:ring-blue-200"
 						/>
-						<span class="text-2xl">{categoriaIconos[cat]}</span>
+						<span class="text-2xl">{categoriaIconos[categoria.descripcion] || '🔧'}</span>
 						<span
-							class={preferencias.includes(cat) ? 'font-semibold text-blue-700' : 'text-gray-400'}
-							>{cat}</span
+							class={preferencias.includes(categoria.id_categoria!) ? 'font-semibold text-blue-700' : 'text-gray-400'}
+							>{categoria.descripcion}</span
 						>
 					</label>
 				{/each}
 			</div>
-			<!-- Barra de progreso fina y delicada con gradiente -->
+			<!-- Barra de progreso -->
 			<div class="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
 				<div
 					class="h-full rounded-full bg-gradient-to-r from-[#68b4ff] to-[#007fff] transition-all duration-300"
-					style="width: {Math.round((preferencias.length / categorias.length) * 100)}%;"
+					style="width: {Math.round((preferencias.length / mockCategorias.length) * 100)}%;"
 				></div>
 			</div>
+			<p class="text-sm text-gray-500">
+				{preferencias.length} de {mockCategorias.length} categorías seleccionadas
+			</p>
 		</section>
 	{/if}
 
