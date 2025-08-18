@@ -1,9 +1,11 @@
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { Categoria } from '$lib/types/Categoria';
 import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
+import type { Colaboracion } from '$lib/types/Colaboracion';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
+import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
 
 // ---------- Helpers ----------
 // TODO: considerar pasarlos a utils
@@ -17,21 +19,29 @@ const categoriasPorId = (ids: number[] = []): Categoria[] =>
 
 const colaboradoresIndex: Record<number, ColaboradorDisyuncion> = Object.values(
   mockUsuarios
-).reduce<Record<number, ColaboradorDisyuncion>>((acc, u: any) => {
-  // Narrowing estructural: rol + campos de Colaborador
+).reduce<Record<number, ColaboradorDisyuncion>>((acc, u) => {
+  const candidate = u as {
+    rol?: unknown;
+    cuit_cuil?: unknown;
+    tipo_colaborador?: unknown;
+    id_usuario?: unknown;
+  };
   if (
-    u?.rol === 'colaborador' &&
-    typeof u.cuit_cuil === 'string' &&
-    typeof u.tipo_colaborador === 'string' &&
-    typeof u.id_usuario === 'number'
+    candidate.rol === 'colaborador' &&
+    typeof candidate.cuit_cuil === 'string' &&
+    typeof candidate.tipo_colaborador === 'string' &&
+    typeof candidate.id_usuario === 'number'
   ) {
-    acc[u.id_usuario] = u as ColaboradorDisyuncion;
+    acc[candidate.id_usuario] = candidate as ColaboradorDisyuncion;
   }
   return acc;
 }, {});
 
 const colaboradoresPorId = (ids: number[] = []): ColaboradorDisyuncion[] =>
   ids.map((id) => colaboradoresIndex[id]).filter(isDefined);
+
+const colaboracionesPorId = (ids: number[] = []): Colaboracion[] =>
+  ids.map((id) => mockColaboraciones.find((c) => c.id_colaboracion === id)).filter(isDefined);
 
 const proyectosBase: Proyecto[] = [
   {
@@ -71,12 +81,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 1, estado: 'aceptada', created_at: new Date('2025-03-05') },
-      { id_colaboracion: 2, estado: 'pendiente', created_at: new Date('2025-03-10') }
-    ],
     institucion: mockUsuarios.escuela_esperanza,
-    colaboradores: [],
     direccion: {
       id_direccion: 1,
       calle: 'San Martín',
@@ -144,11 +149,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 3, estado: 'aceptada', created_at: new Date('2025-02-15') }
-    ],
     institucion: mockUsuarios.comedor_los_pinos,
-    colaboradores: [],
     direccion: {
       id_direccion: 2,
       calle: 'Calle 8',
@@ -195,7 +196,7 @@ const proyectosBase: Proyecto[] = [
     direccion_id: 3,
     evidencia_ids: [3],
     solicitud_finalizacion_ids: [3],
-    estado: "en_curso",
+    estado: "en_revision",
     participacion_permitida: [
       {
         id_proyecto: 3,
@@ -206,11 +207,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 4, estado: 'aceptada', created_at: new Date('2025-01-25') }
-    ],
     institucion: mockUsuarios.fundacion_siempre,
-    colaboradores: [],
     direccion: {
       id_direccion: 3,
       calle: 'Av. Belgrano',
@@ -254,11 +251,11 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [3],
     colaboracion_ids: [5],
     institucion_id: 4,
-    colaborador_ids: [9],
+    colaborador_ids: [6],
     direccion_id: 4,
     evidencia_ids: [4],
     solicitud_finalizacion_ids: [4],
-    estado: "en_curso",
+    estado: "en_auditoria",
     participacion_permitida: [
       {
         id_proyecto: 4,
@@ -277,11 +274,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 5, estado: 'aceptada', created_at: new Date('2025-04-05') }
-    ],
     institucion: mockUsuarios.hospital_sanjose,
-    colaboradores: [],
     direccion: {
       id_direccion: 4,
       calle: 'Av. San Martín',
@@ -324,11 +317,11 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [2, 4],
     colaboracion_ids: [6],
     institucion_id: 5,
-    colaborador_ids: [10],
+    colaborador_ids: [7],
     direccion_id: 5,
     evidencia_ids: [5],
     solicitud_finalizacion_ids: [5],
-    estado: "en_curso",
+    estado: "cancelado",
     participacion_permitida: [
       {
         id_proyecto: 5,
@@ -347,11 +340,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 6, estado: 'aceptada', created_at: new Date('2025-03-20') }
-    ],
     institucion: mockUsuarios.instituto_formacion,
-    colaboradores: [],
     direccion: {
       id_direccion: 5,
       calle: 'Av. Independencia',
@@ -395,7 +384,7 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [1],
     colaboracion_ids: [7],
     institucion_id: 2,
-    colaborador_ids: [11],
+    colaborador_ids: [8],
     direccion_id: 6,
     evidencia_ids: [6],
     solicitud_finalizacion_ids: [6],
@@ -418,11 +407,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 7, estado: 'aceptada', created_at: new Date('2025-02-28') }
-    ],
     institucion: mockUsuarios.comedor_los_pinos,
-    colaboradores: [],
     direccion: {
       id_direccion: 6,
       calle: 'Calle 8',
@@ -465,7 +450,7 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [6],
     colaboracion_ids: [8],
     institucion_id: 6,
-    colaborador_ids: [12],
+    colaborador_ids: [4],
     direccion_id: 7,
     evidencia_ids: [7],
     solicitud_finalizacion_ids: [7],
@@ -488,11 +473,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 8, estado: 'aceptada', created_at: new Date('2025-05-10') }
-    ],
     institucion: mockUsuarios.fundacion_calor,
-    colaboradores: [],
     direccion: {
       id_direccion: 7,
       calle: 'Av. Mitre',
@@ -535,7 +516,7 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [7],
     colaboracion_ids: [9],
     institucion_id: 7,
-    colaborador_ids: [13],
+    colaborador_ids: [5],
     direccion_id: 8,
     evidencia_ids: [8],
     solicitud_finalizacion_ids: [8],
@@ -558,11 +539,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
       }
     ],
-    colaboraciones: [
-      { id_colaboracion: 9, estado: 'aceptada', created_at: new Date('2025-04-15') }
-    ],
     institucion: mockUsuarios.hogar_santa_teresa,
-    colaboradores: [],
     direccion: {
       id_direccion: 8,
       calle: 'Calle 25',
@@ -596,5 +573,6 @@ const proyectosBase: Proyecto[] = [
 export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
   ...proyecto,
   categorias: categoriasPorId(proyecto.categoria_ids ?? []),
+  colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
   colaboradores: colaboradoresPorId(proyecto.colaborador_ids ?? [])
 }));

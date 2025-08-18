@@ -1,41 +1,18 @@
 <script lang="ts">
-	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 	import type { Proyecto } from '$lib/types/Proyecto';
 
 	export let proyecto: Proyecto;
 	export let getColorUrgencia: (u: string) => string;
-	export let getColorEstado: (label: string) => string;
+	export let getColorEstado: (estado: EstadoDescripcion) => string;
 
 	const provinciaNombre =
 		getProvinciaFromLocalidad(proyecto.direccion?.localidad)?.nombre ?? 'Provincia';
 
-	function getEstadoLabel(estado: EstadoDescripcion | undefined): string {
-		if (!estado) return 'En curso';
-		return ESTADO_LABELS[estado] ?? 'En curso';
-	}
-
-	// Cálculo del estado temporal basado en fechas
-	function getEstadoTemporal(p: Proyecto): string {
-		const hoy = new Date();
-		const inicio = p.created_at ? new Date(p.created_at) : null;
-		const cierre = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
-
-		if (inicio && cierre) {
-			if (hoy > cierre) return 'Completado';
-			if (hoy >= inicio && hoy <= cierre) return 'En curso';
-
-			const diff = inicio.getTime() - hoy.getTime();
-			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-			if (dias <= 0) return 'Hoy comienza';
-			if (dias === 1) return 'Comienza mañana';
-			if (dias < 7) return `En ${dias} días`;
-			const semanas = Math.floor(dias / 7);
-			return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
-		}
-
-		return getEstadoLabel(p.estado);
-	}
+	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
+	const estadoEtiqueta = estadoLabel(estadoCodigo);
 </script>
 
 {#if proyecto.url_portada}
@@ -65,14 +42,11 @@
 					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {provinciaNombre}
 				</span>
 
-				{#if proyecto.estado}
-					{@const estadoTemporal = getEstadoTemporal(proyecto)}
-					<span
-						class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(estadoTemporal)} bg-white/80`}
-					>
-						📌 {estadoTemporal}
-					</span>
-				{/if}
+				<span
+					class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(estadoCodigo)} bg-white/80`}
+				>
+					📌 {estadoEtiqueta}
+				</span>
 			</div>
 		</div>
 	</div>

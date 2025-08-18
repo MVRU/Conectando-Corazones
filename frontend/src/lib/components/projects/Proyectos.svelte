@@ -15,6 +15,7 @@
 	import { writable } from 'svelte/store';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 	import { filtrarProyectos } from '$lib/utils/util-proyectos';
+	import { ESTADO_LABELS } from '$lib/types/Estado';
 
 	let searchQuery = writable('');
 
@@ -31,17 +32,8 @@
 		...Object.values(participacionMap)
 	];
 
-	const reverseMap: Record<ParticipacionLabel, ParticipacionLabel> = participacionMap;
+	const estadosDisponibles = ['Todos', ...Object.values(ESTADO_LABELS)];
 
-	const estadosDisponibles = [
-		'Todos',
-		'En curso',
-		'Pendiente de solicitud de cierre',
-		'En revisión',
-		'En auditoría',
-		'Completado',
-		'Cancelado'
-	]; // TODO: corregir los estados
 	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
 	let provinciasDisponibles: string[] = [];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
@@ -90,8 +82,7 @@
 			$searchQuery,
 			estadoSeleccionado,
 			urgenciaSeleccionada,
-			provinciaSeleccionada,
-			reverseMap
+			provinciaSeleccionada
 		);
 	}
 </script>
@@ -310,13 +301,7 @@
 				{/if}
 			</p>
 			<div class="flex justify-center">
-				<Button
-					label="Ver todos los proyectos"
-					on:click={() => {
-						resetFiltros();
-						searchQuery.set('');
-					}}
-				/>
+				<Button label="Ver todos los proyectos" on:click={resetFiltros} />
 			</div>
 		</div>
 	{/if}

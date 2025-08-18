@@ -20,7 +20,7 @@ export const mockUsuarios = {
         estado: 'activo',
         created_at: new Date('2020-01-01'),
         rol: 'administrador',
-        url_foto: '/users/admin-default.jpg',
+        url_foto: '/users/admin-default.png',
         direccion: {
             calle: 'Av. Corrientes',
             numero: '1234',
@@ -190,6 +190,48 @@ export const mockUsuarios = {
             { id_consentimiento: 10, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-02-01') }
         ]
     } satisfies Unipersonal,
+
+    biblioteca_popular: {
+        id_usuario: 5,
+        username: 'biblioteca_popular',
+        password: '123456',
+        nombre: 'Lucía',
+        apellido: 'Fernández',
+        tipo_documento: 'DNI',
+        numero_documento: '30567890',
+        fecha_nacimiento: new Date('1975-08-20'),
+        estado: 'activo',
+        created_at: new Date('2024-02-15'),
+        rol: 'colaborador',
+        url_foto: '/users/biblioteca-popular.jpg',
+        cuit_cuil: '30-12345678-9',
+        tipo_colaborador: 'organizacion',
+        razon_social: 'Biblioteca Popular Los Libros',
+        con_fines_de_lucro: false,
+        direccion: {
+            calle: 'Belgrano',
+            numero: '987',
+            referencia: 'Esquina con Sarmiento',
+            localidad_id: 6,
+            localidad: getLocalidad(6)
+        },
+        contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
+        resenas: [],
+        consentimientos: [
+            {
+                id_consentimiento: 11,
+                tipo: 'terminos',
+                version: '1.0',
+                created_at: new Date('2024-02-15')
+            },
+            {
+                id_consentimiento: 12,
+                tipo: 'privacidad',
+                version: '1.0',
+                created_at: new Date('2024-02-15')
+            }
+        ]
+    } satisfies Organizacion,
 
     fundacion_manos_unidas: {
         id_usuario: 6,

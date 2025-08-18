@@ -5,6 +5,8 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { calcularProgresoCantidad, calcularProgresoTiempo } from '$lib/utils/util-progreso';
+	import { getEstadoCodigo } from '$lib/utils/util-estados';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
@@ -32,12 +34,7 @@
 	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
-	let estadoTemporizador = '—';
-	if (inicio && cierre) {
-		if (hoy > cierre) estadoTemporizador = 'Completado';
-		else if (hoy >= inicio && hoy <= cierre) estadoTemporizador = 'En curso';
-		else estadoTemporizador = 'Pendiente';
-	}
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') =>
 		({
@@ -66,7 +63,8 @@
 		icono = visual.emoji(unidad);
 	}
 
-	const disabled = estadoTemporizador === 'Completado';
+	const disabled = estadoCodigo === 'completado';
+
 	const participaciones = proyecto.participacion_permitida || [];
 
 	let progresoCantidad = calcularProgresoCantidad(participaciones);
@@ -83,7 +81,7 @@
 		}
 		if (progresoTotal < 100)
 			return { texto: `${progresoTotal}% alcanzado`, clase: 'text-gray-700' };
-		if (estadoTemporizador !== 'Completado' && cierre && hoy < cierre)
+		if (estadoCodigo !== 'completado' && cierre && hoy < cierre)
 			return { texto: 'Listo para finalizar', clase: 'text-orange-600 font-semibold' };
 		return { texto: '¡Objetivo alcanzado!', clase: 'text-emerald-600 font-semibold' };
 	}

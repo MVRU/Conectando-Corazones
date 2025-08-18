@@ -8,7 +8,8 @@
 	import DetallesProyecto from '$lib/components/projects/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 
 	let proyecto: Proyecto | null = null;
@@ -80,44 +81,21 @@
 		);
 	}
 
-	function getColorEstado(estado: string) {
+	function getColorEstado(estado: EstadoDescripcion) {
 		return (
 			{
-				'En curso': 'text-green-600 bg-green-100',
-				'Próximo a cerrar': 'text-orange-600 bg-orange-100',
-				Cerrado: 'text-gray-600 bg-gray-100',
-				Completado: 'text-blue-600 bg-blue-100'
+				en_curso: 'text-green-600 bg-green-100',
+				pendiente_solicitud_cierre: 'text-orange-600 bg-orange-100',
+				en_revision: 'text-gray-600 bg-gray-100',
+				en_auditoria: 'text-gray-600 bg-gray-100',
+				completado: 'text-blue-600 bg-blue-100',
+				cancelado: 'text-gray-600 bg-gray-100'
 			}[estado] || 'text-gray-600 bg-gray-100'
 		);
 	}
 
-	// Cálculo del estado temporal basado en fechas (igual que en ProyectoCard y ProjectHeader)
-	function getEstadoTemporal(p: Proyecto | null): string {
-		if (!p) return 'En curso';
-
-		const hoy = new Date();
-		const inicio = toDateOrNull(p.created_at);
-		const cierre = toDateOrNull(p.fecha_fin_tentativa);
-
-		if (inicio && cierre) {
-			if (hoy > cierre) return 'Completado';
-			if (hoy >= inicio && hoy <= cierre) return 'En curso';
-
-			const diff = inicio.getTime() - hoy.getTime();
-			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-			if (dias <= 0) return 'Hoy comienza';
-			if (dias === 1) return 'Comienza mañana';
-			if (dias < 7) return `En ${dias} días`;
-			const semanas = Math.floor(dias / 7);
-			return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
-		}
-
-		if (p.estado) {
-			const desc = p.estado as EstadoDescripcion;
-			return ESTADO_LABELS[desc];
-		}
-		return 'En curso';
-	}
+	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
+	$: colorTextoEstado = getColorEstado(estadoCodigo).split(' ')[0];
 </script>
 
 <svelte:head>
@@ -199,7 +177,7 @@
 
 							{#if proyecto.participacion_permitida?.length}
 								<ul class="space-y-4">
-									{#each proyecto.participacion_permitida as p}
+									{#each proyecto.participacion_permitida as p, i (i)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
 										<li
 											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
@@ -264,14 +242,8 @@
 						<div class="space-y-3">
 							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Estado:</span>
-								<span
-									class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Completado'
-										? 'text-blue-600'
-										: getEstadoTemporal(proyecto) === 'En curso'
-											? 'text-green-600'
-											: 'text-orange-600'}"
-								>
-									{getEstadoTemporal(proyecto)}
+								<span class={`text-sm font-medium ${colorTextoEstado}`}>
+									{estadoLabel(estadoCodigo)}
 								</span>
 							</div>
 							<div class="flex items-center justify-between">

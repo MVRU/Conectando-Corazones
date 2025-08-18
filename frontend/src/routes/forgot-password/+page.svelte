@@ -9,7 +9,7 @@ TODO:
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
-	import { goto } from '$app/navigation';
+	import { isValidEmail } from '$lib/utils/validators';
 
 	let email = '';
 	let isLoading = false;
@@ -18,16 +18,6 @@ TODO:
 	let errorMessage = '';
 	let emailSent = false;
 
-	// Función para validar el email
-	/**
-	 * FIX: ya hay una función que valida el email en utils/validators.ts para no repetir código al pepe
-	 */
-	function validateEmail(email: string): boolean {
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email);
-	}
-
-	// Función para manejar el envío del formulario
 	async function handleSubmit(event: Event) {
 		event.preventDefault();
 
@@ -42,7 +32,7 @@ TODO:
 			return;
 		}
 
-		if (!validateEmail(email)) {
+		if (!isValidEmail(email)) {
 			validationErrors.push('Por favor ingresa un email válido');
 			return;
 		}

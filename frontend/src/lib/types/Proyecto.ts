@@ -25,11 +25,12 @@ export interface Proyecto { // ! VER: ¿volvemos a agregar el atributo "urgencia
 
   // -*- FKS para create/update
   estado_id?: number;
+
   participacion_permitida_ids?: number[];
   categoria_ids?: number[];
   colaboracion_ids?: number[];
   institucion_id?: number;
-  colaborador_ids?: number[];
+  colaborador_ids?: number[]; // ! FIX VER: esta relación no existe en el DER
   direccion_id?: number;
   evidencia_ids?: number[];
   solicitud_finalizacion_ids?: number[];
@@ -40,7 +41,7 @@ export interface Proyecto { // ! VER: ¿volvemos a agregar el atributo "urgencia
   categorias?: Categoria[];
   colaboraciones?: Colaboracion[];
   institucion?: Institucion;
-  colaboradores?: ColaboradorDisyuncion[];
+  colaboradores?: ColaboradorDisyuncion[]; // ! FIX VER: esta relación no existe en el DER
   direccion?: Direccion;
   evidencias?: Evidencia[];
   solicitudes_finalizacion?: SolicitudFinalizacion[];

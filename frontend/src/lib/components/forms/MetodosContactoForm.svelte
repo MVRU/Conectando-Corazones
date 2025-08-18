@@ -132,7 +132,7 @@
 				<div class="flex flex-1 flex-wrap gap-4">
 					<!-- Tipo de contacto -->
 					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for="tipo-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+						<label for={'tipo-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
 							Tipo de contacto
 						</label>
 						<Select
@@ -146,11 +146,11 @@
 
 					<!-- Valor del contacto -->
 					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for="valor-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+						<label for={'valor-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
 							Valor <span class="text-red-600">*</span>
 						</label>
 						<Input
-							id="valor-{i}"
+							id={'valor-' + i}
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
 							error={errors[i]}
@@ -159,7 +159,7 @@
 
 					<!-- Etiqueta -->
 					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for="etiqueta-{i}" class="mb-2 block text-sm font-semibold text-gray-700">
+						<label for={'etiqueta-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
 							{contacto.tipo_contacto === 'otro' ? 'Especificar tipo' : 'Etiqueta'}
 						</label>
 						{#if contacto.tipo_contacto === 'red_social'}
@@ -177,7 +177,7 @@
 							/>
 						{:else if contacto.tipo_contacto === 'otro'}
 							<Input
-								id="etiqueta-{i}"
+								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								placeholder="Ej: Telegram..."
 							/>

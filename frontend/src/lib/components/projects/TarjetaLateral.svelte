@@ -2,7 +2,7 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-	import { ESTADO_LABELS } from '$lib/types/Estado';
+	import { getEstadoCodigo } from '$lib/utils/util-estados';
 
 	export let proyecto: Proyecto;
 	export let mostrarFormulario: () => void;
@@ -90,7 +90,7 @@
 
 	function proyectoAbierto() {
 		// Estado válido para colaborar: 'en_curso'
-		return proyecto.estado?.descripcion === 'en_curso';
+		return getEstadoCodigo(proyecto.estado, proyecto.estado_id) === 'en_curso';
 	}
 </script>
 

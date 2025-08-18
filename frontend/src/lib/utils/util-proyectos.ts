@@ -5,14 +5,15 @@
 import { error } from '@sveltejs/kit';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
+import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 
-const ESTADO_PRIORIDAD: Record<string, number> = {
-    'En curso': 0,
-    'Pendiente de solicitud de cierre': 1,
-    'En revisión': 2,
-    'En auditoría': 3,
-    'Completado': 4,
-    'Cancelado': 5
+const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
+    en_curso: 0,
+    pendiente_solicitud_cierre: 1,
+    en_revision: 2,
+    en_auditoria: 3,
+    completado: 4,
+    cancelado: 5
 };
 
 export function encontrarProyectoPorId(idParam: string, lista: Proyecto[]): Proyecto {
@@ -31,31 +32,18 @@ export function encontrarProyectoPorId(idParam: string, lista: Proyecto[]): Proy
     return proyecto;
 }
 
-function estadoTemporizadorProyecto(p: Proyecto): string { // FIX: esta lógica hay que sacarla
-    const hoy = new Date();
-    const inicio = p.created_at ? new Date(p.created_at) : null;
-    const cierre = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
-
-    if (!inicio || !cierre) return 'Abierto';
-    if (hoy > cierre) return 'Completado';
-    if (hoy >= inicio && hoy <= cierre) return 'En curso';
-    return 'Abierto';
-}
-
 export function filtrarProyectos(
     proyectos: Proyecto[],
     filtros: string[],
     searchQuery: string,
     estado: string,
     urgencia: string,
-    provincia: string,
-    reverseMap: Record<string, string>
+    provincia: string
 ): Proyecto[] {
     let resultado = [...proyectos];
 
     if (!filtros.includes('Todos')) {
-        const tiposEsperados = filtros.filter((f) => f !== 'Todos').map((f) => reverseMap[f]);
-
+        const tiposEsperados = filtros.filter((f) => f !== 'Todos');
         resultado = resultado.filter((p) =>
             p.participacion_permitida?.some(
                 (pp) =>
@@ -66,7 +54,9 @@ export function filtrarProyectos(
     }
 
     if (estado !== 'Todos') {
-        resultado = resultado.filter((p) => estadoTemporizadorProyecto(p) === estado);
+        resultado = resultado.filter(
+            (p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado
+        );
     }
 
     if (urgencia !== 'Todas') {
@@ -89,10 +79,8 @@ export function filtrarProyectos(
     }
 
     resultado.sort((a, b) => {
-        const estadoA = estadoTemporizadorProyecto(a);
-        const estadoB = estadoTemporizadorProyecto(b);
-        const prioridadEstadoA = ESTADO_PRIORIDAD[estadoA] ?? 3;
-        const prioridadEstadoB = ESTADO_PRIORIDAD[estadoB] ?? 3;
+        const prioridadEstadoA = ESTADO_PRIORIDAD[a.estado ?? 'en_curso'] ?? 3;
+        const prioridadEstadoB = ESTADO_PRIORIDAD[b.estado ?? 'en_curso'] ?? 3;
 
         if (prioridadEstadoA !== prioridadEstadoB) {
             return prioridadEstadoA - prioridadEstadoB;

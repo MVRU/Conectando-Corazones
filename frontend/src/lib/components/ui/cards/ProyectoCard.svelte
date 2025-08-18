@@ -7,6 +7,8 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
+	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
@@ -73,41 +75,17 @@
 		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
 	};
 
-	const hoy = new Date();
-	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
-	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
-
-	let estadoTemporizador = '—';
-	let emojiTemporizador = '⌛';
-
-	if (inicio && cierre) {
-		if (hoy > cierre) {
-			estadoTemporizador = 'Completado';
-			emojiTemporizador = '✅';
-		} else if (hoy >= inicio && hoy <= cierre) {
-			estadoTemporizador = 'En curso';
-			emojiTemporizador = '🟢';
-		} else {
-			const diff = inicio.getTime() - hoy.getTime();
-			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-			if (dias <= 0) {
-				estadoTemporizador = 'Hoy comienza';
-				emojiTemporizador = '⏱️';
-			} else if (dias === 1) {
-				estadoTemporizador = 'Comienza mañana';
-				emojiTemporizador = '📆';
-			} else if (dias < 7) {
-				estadoTemporizador = `En ${dias} días`;
-				emojiTemporizador = '⏳';
-			} else {
-				const semanas = Math.floor(dias / 7);
-				estadoTemporizador = semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
-				emojiTemporizador = '⏳';
-			}
-		}
-	}
-
-	const disabled = estadoTemporizador === 'En curso' || estadoTemporizador === 'Completado';
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
+	const estadoTemporizador = estadoLabel(estadoCodigo);
+	const emojiPorEstado: Record<EstadoDescripcion, string> = {
+		en_curso: '🟢',
+		pendiente_solicitud_cierre: '⏳',
+		en_revision: '🔍',
+		en_auditoria: '🔎',
+		completado: '✅',
+		cancelado: '❌'
+	};
+	const emojiTemporizador = emojiPorEstado[estadoCodigo] || '⌛';
 </script>
 
 <a
@@ -195,7 +173,6 @@
 						label="Colaborar ahora"
 						href={`/projects/${proyecto.id_proyecto}#colaborar`}
 						size="sm"
-						{disabled}
 						customClass="flex-1"
 					/>
 				</div>
