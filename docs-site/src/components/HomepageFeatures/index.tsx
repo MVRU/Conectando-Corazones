@@ -60,25 +60,25 @@ const InstitutionFeatures: FeatureItem[] = [
     title: 'Subida de evidencia cuidada',
     Icon: Upload,
     description: <>Cargá fotos y documentos cifrados para cerrar tus proyectos.</>,
-    href: '/docs/guia-colaboradores/evidencias',
+    href: '/docs/usuarios/evidencias',
   },
   {
     title: 'Validaciones oficiales',
     Icon: ShieldCheck,
     description: <>Integraciones opcionales (RENAPER) para reducir fraude y datos duplicados.</>,
-    href: '/docs/arquitectura/integraciones',
+    href: '/docs/dev/api/integraciones',
   },
   {
     title: 'Paneles y KPIs accionables',
     Icon: Gauge,
     description: <>Indicadores clave y alertas para priorizar acciones y medir impacto real.</>,
-    href: '/docs/guias/kpis',
+    href: '/docs/usuarios/kpis',
   },
   {
     title: 'Privacidad por diseño',
     Icon: Lock,
     description: <>Datos mínimos, consentimiento informado y controles de acceso por rol.</>,
-    href: '/docs/seguridad/privacidad',
+    href: '/docs/legal/usuarios/privacidad',
   },
 ];
 
@@ -90,19 +90,19 @@ const ContributorFeatures: FeatureItem[] = [
     title: 'Transparencia y trazabilidad',
     Icon: FileCheck2,
     description: <>Cada proyecto mantiene historial y evidencias verificables con auditoría simple.</>,
-    href: '/docs/guia-instituciones/transparencia',
+    href: '/docs/legal/usuarios/transparencia-trazabilidad',
   },
   {
     title: 'Chat en tiempo real',
     Icon: MessageCircle,
     description: <>Coordiná con la institución vía mensajería en tiempo real (Firebase).</>,
-    href: '/docs/guia-colaboradores/chat',
+    href: '/docs/usuarios/chat',
   },
   {
     title: 'Tu contribución, visible',
     Icon: HeartHandshake,
     description: <>Tu ayuda queda registrada y trazable, con reconocimiento y métricas.</>,
-    href: '/docs/guia-colaboradores/impacto',
+    href: '/docs/usuarios/colaboradores/impacto',
   },
   {
     title: 'Código abierto y comunidad',
