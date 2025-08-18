@@ -1,16 +1,13 @@
 import type {
-    Usuario,
     Administrador,
     Institucion,
-    Colaborador,
     Organizacion,
     Unipersonal
 } from '$lib/types/Usuario';
 
-import type { Direccion } from '$lib/types/Direccion';
+import { getLocalidad } from '$lib/utils/util-ubicaciones';
 
 export const mockUsuarios = {
-    // Administrador del sistema
     admin1: {
         id_usuario: 1,
         username: 'alexis_sklate',
@@ -30,56 +27,31 @@ export const mockUsuarios = {
             piso: '5',
             departamento: 'A',
             referencia: 'Edificio Torre Central, entre Callao y Uruguay',
-            localidad: {
-                codigo_postal: 'C1043AAZ',
-                nombre: 'Buenos Aires',
-                provincia: {
-                    codigo_iso: 'AR-C',
-                    nombre: 'Ciudad Autónoma de Buenos Aires'
-                }
-            }
+            localidad_id: 3,
+            localidad: getLocalidad(3),
         },
         contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'admin@conectandocorazones.org',
-                etiqueta: 'principal'
-            }
+            { tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
         ],
         resenas: [
             {
                 id_resena: 1,
                 tipo_objeto: 'Proyecto',
                 id_objeto: 1,
-                contenido: 'Excelente gestión del proyecto de infraestructura escolar. Se cumplieron todos los objetivos en tiempo y forma.',
+                contenido:
+                    'Excelente gestión del proyecto de infraestructura escolar. Se cumplieron todos los objetivos en tiempo y forma.',
                 puntaje: 5,
                 aprobado: true,
                 username: 'admin_conectando'
             }
         ],
         consentimientos: [
-            {
-                id_consentimiento: 1,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-01-01')
-            },
-            {
-                id_consentimiento: 2,
-                tipo: 'privacidad',
-                version: '1.0',
-                created_at: new Date('2024-01-01')
-            },
-            {
-                id_consentimiento: 3,
-                tipo: 'conducta',
-                version: '1.0',
-                created_at: new Date('2024-01-01')
-            }
-        ],
+            { id_consentimiento: 1, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-01') },
+            { id_consentimiento: 2, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-01') },
+            { id_consentimiento: 3, tipo: 'conducta', version: '1.0', created_at: new Date('2024-01-01') }
+        ]
     } satisfies Administrador,
 
-    // Institución educativa
     escuela_esperanza: {
         id_usuario: 2,
         username: 'escuela_esperanza',
@@ -100,33 +72,20 @@ export const mockUsuarios = {
             calle: 'San Martín',
             numero: '456',
             referencia: 'Frente a la plaza principal',
-            localidad: {
-                codigo_postal: '2000',
-                nombre: 'Rosario',
-                provincia: {
-                    codigo_iso: 'AR-S',
-                    nombre: 'Santa Fe'
-                }
-            }
+            localidad_id: 4,
+            localidad: getLocalidad(4),
         },
         contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'direccion@escuelaesperanza.edu.ar',
-                etiqueta: 'principal'
-            },
-            {
-                tipo_contacto: 'telefono',
-                valor: '341 XXXXXXX',
-                etiqueta: 'celular'
-            }
+            { tipo_contacto: 'email', valor: 'direccion@escuelaesperanza.edu.ar', etiqueta: 'principal' },
+            { tipo_contacto: 'telefono', valor: '341 XXXXXXX', etiqueta: 'celular' }
         ],
         resenas: [
             {
                 id_resena: 2,
                 tipo_objeto: 'Usuario',
                 id_objeto: 3,
-                contenido: 'Colaborador muy comprometido, ayudó mucho en la organización del proyecto de biblioteca.',
+                contenido:
+                    'Colaborador muy comprometido, ayudó mucho en la organización del proyecto de biblioteca.',
                 puntaje: 4,
                 aprobado: true,
                 username: 'escuela_esperanza'
@@ -135,35 +94,20 @@ export const mockUsuarios = {
                 id_resena: 3,
                 tipo_objeto: 'Proyecto',
                 id_objeto: 2,
-                contenido: 'El proyecto de huerta escolar fue un éxito total. Los niños aprendieron mucho y ahora tenemos alimentos frescos.',
+                contenido:
+                    'El proyecto de huerta escolar fue un éxito total. Los niños aprendieron mucho y ahora tenemos alimentos frescos.',
                 puntaje: 5,
                 aprobado: true,
                 username: 'escuela_esperanza'
             }
         ],
         consentimientos: [
-            {
-                id_consentimiento: 4,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-01-15')
-            },
-            {
-                id_consentimiento: 5,
-                tipo: 'privacidad',
-                version: '1.0',
-                created_at: new Date('2024-01-15')
-            },
-            {
-                id_consentimiento: 6,
-                tipo: 'evidencia',
-                version: '1.0',
-                created_at: new Date('2024-01-15')
-            }
-        ],
+            { id_consentimiento: 4, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-15') },
+            { id_consentimiento: 5, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-15') },
+            { id_consentimiento: 6, tipo: 'evidencia', version: '1.0', created_at: new Date('2024-01-15') }
+        ]
     } satisfies Institucion,
 
-    // Hospital público
     hospital_garrahan: {
         id_usuario: 3,
         username: 'hospital_garrahan',
@@ -184,40 +128,17 @@ export const mockUsuarios = {
             calle: 'Combate de los Pozos',
             numero: '1881',
             referencia: 'Hospital Garrahan - Sector Administrativo',
-            localidad: {
-                codigo_postal: 'C1245AAM',
-                nombre: 'Buenos Aires',
-                provincia: {
-                    codigo_iso: 'AR-C',
-                    nombre: 'Ciudad Autónoma de Buenos Aires'
-                }
-            }
+            localidad_id: 3,
+            localidad: getLocalidad(3),
         },
-        contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'proyectos@garrahan.gov.ar',
-                etiqueta: 'principal'
-            }
-        ],
+        contactos: [{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }],
         resenas: [],
         consentimientos: [
-            {
-                id_consentimiento: 7,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-02-10')
-            },
-            {
-                id_consentimiento: 8,
-                tipo: 'privacidad',
-                version: '1.0',
-                created_at: new Date('2024-02-10')
-            }
+            { id_consentimiento: 7, tipo: 'terminos', version: '1.0', created_at: new Date('2024-02-10') },
+            { id_consentimiento: 8, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-02-10') }
         ]
     } satisfies Institucion,
 
-    // Colaborador individual 1
     maria_gonzalez: {
         id_usuario: 4,
         username: 'maria_g',
@@ -238,28 +159,17 @@ export const mockUsuarios = {
             numero: '789',
             piso: '2',
             departamento: 'B',
-            localidad: {
-                codigo_postal: '5000',
-                nombre: 'Córdoba',
-                provincia: {
-                    codigo_iso: 'AR-X',
-                    nombre: 'Córdoba'
-                }
-            }
+            localidad_id: 5,
+            localidad: getLocalidad(5),
         },
-        contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'maria.gonzalez@gmail.com',
-                etiqueta: 'principal'
-            }
-        ],
+        contactos: [{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }],
         resenas: [
             {
                 id_resena: 4,
                 tipo_objeto: 'Proyecto',
                 id_objeto: 1,
-                contenido: 'Muy buena organización del proyecto, aunque faltó más comunicación sobre los avances.',
+                contenido:
+                    'Muy buena organización del proyecto, aunque faltó más comunicación sobre los avances.',
                 puntaje: 3,
                 aprobado: true,
                 username: 'maria_g'
@@ -268,76 +178,19 @@ export const mockUsuarios = {
                 id_resena: 5,
                 tipo_objeto: 'Usuario',
                 id_objeto: 2,
-                contenido: 'La institución fue muy transparente con el uso de los recursos. Recomiendo colaborar con ellos.',
+                contenido:
+                    'La institución fue muy transparente con el uso de los recursos. Recomiendo colaborar con ellos.',
                 puntaje: 5,
                 aprobado: true,
                 username: 'maria_g'
             }
         ],
         consentimientos: [
-            {
-                id_consentimiento: 9,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-02-01')
-            },
-            {
-                id_consentimiento: 10,
-                tipo: 'privacidad',
-                version: '1.0',
-                created_at: new Date('2024-02-01')
-            }
-        ],
+            { id_consentimiento: 9, tipo: 'terminos', version: '1.0', created_at: new Date('2024-02-01') },
+            { id_consentimiento: 10, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-02-01') }
+        ]
     } satisfies Unipersonal,
 
-    // Colaborador individual 2
-    carlos_rodriguez: {
-        id_usuario: 5,
-        username: 'carlos_r',
-        password: '123456',
-        nombre: 'Carlos',
-        apellido: 'Rodríguez',
-        tipo_documento: 'DNI',
-        numero_documento: '18765432',
-        fecha_nacimiento: new Date('1975-12-08'),
-        estado: 'activo',
-        created_at: new Date('2024-02-15'),
-        rol: 'colaborador',
-        url_foto: '/users/carlos-rodriguez.jpg',
-        cuit_cuil: '20-18765432-9',
-        tipo_colaborador: 'unipersonal',
-        direccion: {
-            calle: 'Rivadavia',
-            numero: '2341',
-            referencia: 'Casa con portón verde',
-            localidad: {
-                codigo_postal: '4000',
-                nombre: 'San Miguel de Tucumán',
-                provincia: {
-                    codigo_iso: 'AR-T',
-                    nombre: 'Tucumán'
-                }
-            }
-        },
-        contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'carlos.rodriguez@hotmail.com',
-                etiqueta: 'principal'
-            }
-        ],
-        resenas: [],
-        consentimientos: [
-            {
-                id_consentimiento: 11,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-02-15')
-            }
-        ],
-    } satisfies Unipersonal,
-
-    // Organización sin fines de lucro
     fundacion_manos_unidas: {
         id_usuario: 6,
         username: 'fundacion_manos',
@@ -360,63 +213,30 @@ export const mockUsuarios = {
             numero: '1456',
             piso: '3',
             departamento: 'C',
-            referencia: 'Edificio Libertador, oficina 302',
-            localidad: {
-                codigo_postal: 'C1060ABR',
-                nombre: 'Buenos Aires',
-                provincia: {
-                    codigo_iso: 'AR-C',
-                    nombre: 'Ciudad Autónoma de Buenos Aires'
-                }
-            }
+            localidad_id: 3,
+            localidad: getLocalidad(3),
         },
-        contactos: [
-            {
-                tipo_contacto: 'email',
-                valor: 'contacto@manosunidas.org.ar',
-                etiqueta: 'principal'
-            }
-        ],
+        contactos: [{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }],
         resenas: [
             {
                 id_resena: 6,
                 tipo_objeto: 'Proyecto',
                 id_objeto: 3,
-                contenido: 'Excelente proyecto de asistencia alimentaria. Muy bien coordinado y con gran impacto social.',
+                contenido:
+                    'Excelente proyecto de asistencia alimentaria. Muy bien coordinado y con gran impacto social.',
                 puntaje: 5,
                 aprobado: true,
                 username: 'fundacion_manos'
             }
         ],
         consentimientos: [
-            {
-                id_consentimiento: 12,
-                tipo: 'terminos',
-                version: '1.0',
-                created_at: new Date('2024-01-20')
-            },
-            {
-                id_consentimiento: 13,
-                tipo: 'privacidad',
-                version: '1.0',
-                created_at: new Date('2024-01-20')
-            },
-            {
-                id_consentimiento: 14,
-                tipo: 'evidencia',
-                version: '1.0',
-                created_at: new Date('2024-01-20')
-            },
-            {
-                id_consentimiento: 15,
-                tipo: 'conducta',
-                version: '1.0',
-                created_at: new Date('2024-01-20')
-            }
-        ],
+            { id_consentimiento: 12, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-20') },
+            { id_consentimiento: 13, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-20') },
+            { id_consentimiento: 14, tipo: 'evidencia', version: '1.0', created_at: new Date('2024-01-20') },
+            { id_consentimiento: 15, tipo: 'conducta', version: '1.0', created_at: new Date('2024-01-20') }
+        ]
     } satisfies Organizacion,
 
-    // Empresa con fines de lucro
     empresa_solidaria_sa: {
         id_usuario: 7,
         username: 'empresa_solidaria',
@@ -440,14 +260,8 @@ export const mockUsuarios = {
             piso: '12',
             departamento: 'A',
             referencia: 'Torre Empresarial Norte',
-            localidad: {
-                codigo_postal: 'B1636DSR',
-                nombre: 'Olivos',
-                provincia: {
-                    codigo_iso: 'AR-B',
-                    nombre: 'Buenos Aires'
-                }
-            }
+            localidad_id: 21,
+            localidad: getLocalidad(21),
         },
         contactos: [
             {
@@ -483,7 +297,6 @@ export const mockUsuarios = {
         ],
     } satisfies Organizacion,
 
-    // Colaborador individual 3
     ana_martinez: {
         id_usuario: 8,
         username: 'ana_m',
@@ -502,14 +315,8 @@ export const mockUsuarios = {
         direccion: {
             calle: 'San Juan',
             numero: '1122',
-            localidad: {
-                codigo_postal: '3100',
-                nombre: 'Paraná',
-                provincia: {
-                    codigo_iso: 'AR-E',
-                    nombre: 'Entre Ríos'
-                }
-            }
+            localidad_id: 22,
+            localidad: getLocalidad(22)
         },
         contactos: [
             {
@@ -560,7 +367,6 @@ export const mockUsuarios = {
         ],
     } satisfies Unipersonal,
 
-    // Institución de salud privada
     clinica_san_jorge: {
         id_usuario: 9,
         username: 'clinica_sj',
@@ -581,14 +387,8 @@ export const mockUsuarios = {
             calle: 'Av. 9 de Julio',
             numero: '3456',
             referencia: 'Edificio principal, planta baja',
-            localidad: {
-                codigo_postal: '1425',
-                nombre: 'Buenos Aires',
-                provincia: {
-                    codigo_iso: 'AR-C',
-                    nombre: 'Ciudad Autónoma de Buenos Aires'
-                }
-            }
+            localidad_id: 3,
+            localidad: getLocalidad(3)
         },
         contactos: [
             {
@@ -630,8 +430,6 @@ export const mockUsuarios = {
         ],
     } satisfies Institucion,
 
-
-    // Fundación Siempre
     fundacion_siempre: {
         id_usuario: 10,
         username: 'fundacion_siempre',
@@ -652,14 +450,8 @@ export const mockUsuarios = {
             calle: 'Av. Belgrano',
             numero: '123',
             referencia: 'Frente a la plaza central',
-            localidad: {
-                codigo_postal: '1406',
-                nombre: 'Buenos Aires',
-                provincia: {
-                    codigo_iso: 'AR-C',
-                    nombre: 'Ciudad Autónoma de Buenos Aires'
-                }
-            }
+            localidad_id: 3,
+            localidad: getLocalidad(3)
         },
         contactos: [
             {
@@ -672,7 +464,6 @@ export const mockUsuarios = {
         consentimientos: [],
     } satisfies Institucion,
 
-    // Comedor Los Pinos
     comedor_los_pinos: {
         id_usuario: 11,
         username: 'comedor_los_pinos',
@@ -693,14 +484,8 @@ export const mockUsuarios = {
             calle: 'Calle 8',
             numero: '456',
             referencia: 'Barrio Norte',
-            localidad: {
-                codigo_postal: '1900',
-                nombre: 'La Plata',
-                provincia: {
-                    codigo_iso: 'AR-B',
-                    nombre: 'Buenos Aires'
-                }
-            }
+            localidad_id: 2,
+            localidad: getLocalidad(2)
         },
         contactos: [
             {
@@ -713,7 +498,6 @@ export const mockUsuarios = {
         consentimientos: [],
     } satisfies Institucion,
 
-    // Hospital General San José
     hospital_sanjose: {
         id_usuario: 12,
         username: 'hospital_sanjose',
@@ -734,14 +518,8 @@ export const mockUsuarios = {
             calle: 'Av. San Martín',
             numero: '789',
             referencia: 'Esquina con Av. Rivadavia',
-            localidad: {
-                codigo_postal: '5000',
-                nombre: 'Córdoba',
-                provincia: {
-                    codigo_iso: 'AR-X',
-                    nombre: 'Córdoba'
-                }
-            }
+            localidad_id: 5,
+            localidad: getLocalidad(5)
         },
         contactos: [
             {
@@ -754,7 +532,6 @@ export const mockUsuarios = {
         consentimientos: [],
     } satisfies Institucion,
 
-    // Instituto de Formación Laboral
     instituto_formacion: {
         id_usuario: 13,
         username: 'instituto_formacion',
@@ -775,14 +552,8 @@ export const mockUsuarios = {
             calle: 'Av. Independencia',
             numero: '321',
             referencia: 'Cerca de la estación',
-            localidad: {
-                codigo_postal: '3100',
-                nombre: 'Paraná',
-                provincia: {
-                    codigo_iso: 'AR-E',
-                    nombre: 'Entre Ríos'
-                }
-            }
+            localidad_id: 22,
+            localidad: getLocalidad(22)
         },
         contactos: [
             {
@@ -795,7 +566,6 @@ export const mockUsuarios = {
         consentimientos: [],
     } satisfies Institucion,
 
-    // Fundación Calor Humano
     fundacion_calor: {
         id_usuario: 14,
         username: 'fundacion_calor',
@@ -816,14 +586,8 @@ export const mockUsuarios = {
             calle: 'Av. Mitre',
             numero: '654',
             referencia: 'A metros del hospital',
-            localidad: {
-                codigo_postal: '8000',
-                nombre: 'Bahía Blanca',
-                provincia: {
-                    codigo_iso: 'AR-B',
-                    nombre: 'Buenos Aires'
-                }
-            }
+            localidad_id: 23,
+            localidad: getLocalidad(23)
         },
         contactos: [
             {
@@ -836,7 +600,6 @@ export const mockUsuarios = {
         consentimientos: [],
     } satisfies Institucion,
 
-    // Hogar Santa Teresa
     hogar_santa_teresa: {
         id_usuario: 15,
         username: 'hogar_santa_teresa',
@@ -857,14 +620,8 @@ export const mockUsuarios = {
             calle: 'Calle 25',
             numero: '789',
             referencia: 'Barrio Sur',
-            localidad: {
-                codigo_postal: '4000',
-                nombre: 'San Miguel de Tucumán',
-                provincia: {
-                    codigo_iso: 'AR-T',
-                    nombre: 'Tucumán'
-                }
-            }
+            localidad_id: 9,
+            localidad: getLocalidad(9)
         },
         contactos: [
             {

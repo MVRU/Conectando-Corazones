@@ -9,12 +9,14 @@ TODO:
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Select from '$lib/components/ui/elements/Select.svelte';
+	import type { PageData } from './$types';
 
+	export let data: PageData;
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
 	let validationErrors: string[] = [];
-	let asunto = '';
 	let intentoEnvio = false;
+	let asunto = data.preselectedAsunto || '';
 
 	const opcionesAsunto = [
 		{ value: 'consulta-general', label: 'Consulta general' },
@@ -22,6 +24,7 @@ TODO:
 		{ value: 'colaboracion', label: 'Propuesta de colaboración' },
 		{ value: 'institucion', label: 'Soy una institución' },
 		{ value: 'feedback', label: 'Feedback del sistema' },
+		{ value: 'denuncia', label: 'Denuncia o reporte' },
 		{ value: 'otro', label: 'Otro' }
 	];
 

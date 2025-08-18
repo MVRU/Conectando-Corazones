@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
 	import Ticker from '$lib/components/visual/Ticker.svelte';

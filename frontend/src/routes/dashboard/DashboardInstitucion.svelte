@@ -151,7 +151,7 @@
 				return 'border-blue-200 bg-blue-50 text-blue-700';
 			case 'proximo_cierre':
 				return 'border-green-200 bg-green-50 text-green-700';
-			case 'finalizado':
+			case 'completado':
 				return 'border-gray-200 bg-gray-50 text-gray-700';
 			default:
 				return 'border-gray-200 bg-gray-50 text-gray-700';

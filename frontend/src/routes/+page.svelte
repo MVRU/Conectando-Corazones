@@ -5,7 +5,7 @@
 	import CallToActionSection from '$lib/components/home/CallToActionSection.svelte';
 	import TestimoniosSection from '$lib/components/home/TestimoniosSection.svelte';
 	import FaqSection from '$lib/components/home/FaqSection.svelte';
-	import SupportSection from '$lib/components/home/SupportSection.svelte';
+	import SoporteSection from '$lib/components/home/SoporteSection.svelte';
 	import FeaturedProjectsSection from '$lib/components/home/FeaturedProjectsSection.svelte';
 	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { onMount } from 'svelte';
@@ -22,4 +22,4 @@
 <TestimoniosSection />
 <FaqSection />
 <FeaturedProjectsSection />
-<SupportSection />
+<SoporteSection />

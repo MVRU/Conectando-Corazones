@@ -62,7 +62,7 @@
 		style="animation-delay: 400ms"
 	>
 		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
-			Fecha de Cierre
+			Fecha de Cierre Tentativa
 		</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">⏳</span>

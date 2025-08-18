@@ -7,11 +7,9 @@
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 
-// FIX: revisar y corregir errores tras cambios en interfaces
-
 /**
  * Calcula el porcentaje de cumplimiento de los objetivos
- * promediando el cumplimiento individual de cada uno.
+ * promediando el cumplimiento individual de cada uno
  */
 export function calcularProgresoCantidad(participaciones: ParticipacionPermitida[] = []): number {
     if (participaciones.length === 0) return 0;
@@ -32,29 +30,28 @@ export function calcularProgresoCantidad(participaciones: ParticipacionPermitida
 
 
 /**
- * Calcula el porcentaje de tiempo transcurrido desde la fecha de inicio hasta la fecha de cierre.
+ * Calcula el porcentaje de tiempo transcurrido desde la fecha de inicio hasta la fecha de cierre
  */
-export function calcularProgresoTiempo(fechaInicio?: string, fechaCierre?: string): number {
+export function calcularProgresoTiempo(fechaInicio?: Date, fechaCierre?: Date): number {
     if (!fechaInicio || !fechaCierre) return 0;
 
-    const inicio = new Date(fechaInicio).getTime();
-    const fin = new Date(fechaCierre).getTime();
+    const inicio = fechaInicio.getTime();
+    const fin = fechaCierre.getTime();
     const ahora = Date.now();
 
-    if (isNaN(inicio) || isNaN(fin) || fin <= inicio) return 0;
+    if ([inicio, fin].some(isNaN) || fin <= inicio) return 0;
     if (ahora < inicio) return 0;
     if (ahora > fin) return 100;
 
-    const progreso = (ahora - inicio) / (fin - inicio);
-    return progreso * 100;
+    return ((ahora - inicio) / (fin - inicio)) * 100;
 }
 
 /**
- * Calcula el porcentaje total de progreso combinando avance en cantidad y tiempo.
+ * Calcula el porcentaje total de progreso combinando avance en cantidad y tiempo
  */
 export function calcularProgresoTotal(proyecto: Proyecto): number {
     const cantidad = calcularProgresoCantidad(proyecto.participacion_permitida || []);
-    const tiempo = calcularProgresoTiempo(proyecto.created_at?.toString(), proyecto.fecha_fin_tentativa?.toString());
+    const tiempo = calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa);
 
     return Math.round(0.6 * cantidad + 0.4 * tiempo);
 }

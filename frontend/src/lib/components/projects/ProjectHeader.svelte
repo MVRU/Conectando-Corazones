@@ -1,50 +1,40 @@
-<!-- TODOs:
- 	- [x] Corregir atributos de ubicación (✅ Completado: ciudad/provincia → direccion.localidad)
- 	- [x] Corregir badge de estado (✅ Completado: [object Object] → estado temporal calculado)
- 	- [x] Sincronizar estado con ProyectoCard (✅ Completado: ahora ambos usan cálculo temporal)
- 	- [ ] Corregir badge de urgencia cuando esté disponible en el tipo -->
-
 <script lang="ts">
 	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
+	import type { Proyecto } from '$lib/types/Proyecto';
 
-	export let proyecto;
-	export let getColorUrgencia;
-	export let getColorEstado;
+	export let proyecto: Proyecto;
+	export let getColorUrgencia: (u: string) => string;
+	export let getColorEstado: (label: string) => string;
 
-	function getEstadoLabel(estado: any): string {
-		if (!estado?.descripcion) return 'Falla estado';
-		const desc = estado.descripcion as EstadoDescripcion;
-		return ESTADO_LABELS[desc] || 'Falla estado';
+	const provinciaNombre =
+		getProvinciaFromLocalidad(proyecto.direccion?.localidad)?.nombre ?? 'Provincia';
+
+	function getEstadoLabel(estado: EstadoDescripcion | undefined): string {
+		if (!estado) return 'En curso';
+		return ESTADO_LABELS[estado] ?? 'En curso';
 	}
 
 	// Cálculo del estado temporal basado en fechas
-	function getEstadoTemporal(proyecto: any): string {
+	function getEstadoTemporal(p: Proyecto): string {
 		const hoy = new Date();
-		const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
-		const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
+		const inicio = p.created_at ? new Date(p.created_at) : null;
+		const cierre = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
 
 		if (inicio && cierre) {
-			if (hoy > cierre) {
-				return 'Finalizado';
-			} else if (hoy >= inicio && hoy <= cierre) {
-				return 'En ejecución';
-			} else {
-				const diff = inicio.getTime() - hoy.getTime();
-				const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-				if (dias <= 0) {
-					return 'Hoy comienza';
-				} else if (dias === 1) {
-					return 'Comienza mañana';
-				} else if (dias < 7) {
-					return `En ${dias} días`;
-				} else {
-					const semanas = Math.floor(dias / 7);
-					return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
-				}
-			}
+			if (hoy > cierre) return 'Completado';
+			if (hoy >= inicio && hoy <= cierre) return 'En curso';
+
+			const diff = inicio.getTime() - hoy.getTime();
+			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
+			if (dias <= 0) return 'Hoy comienza';
+			if (dias === 1) return 'Comienza mañana';
+			if (dias < 7) return `En ${dias} días`;
+			const semanas = Math.floor(dias / 7);
+			return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
 		}
 
-		return getEstadoLabel(proyecto.estado);
+		return getEstadoLabel(p.estado);
 	}
 </script>
 
@@ -59,10 +49,8 @@
 			loading="lazy"
 		/>
 
-		<!-- Degradado para contraste -->
 		<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
 
-		<!-- Contenido superpuesto -->
 		<div class="absolute bottom-0 left-0 right-0 px-6 pb-6 pt-10 text-white sm:px-8 lg:px-10">
 			<h1
 				class="max-w-4xl text-2xl font-extrabold leading-snug drop-shadow-md sm:text-3xl lg:text-4xl"
@@ -73,26 +61,16 @@
 			<div
 				class="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium drop-shadow sm:text-base"
 			>
-				<!-- Ubicación -->
 				<span class="flex items-center gap-1 text-pink-200">
-					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad
-						?.provincia?.nombre || 'Provincia'}
+					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {provinciaNombre}
 				</span>
 
-				<!-- Badges -->
-				{#if proyecto.urgencia}
-					<span
-						class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorUrgencia(proyecto.urgencia)} bg-white/80`}
-					>
-						⚠️ {proyecto.urgencia}
-					</span>
-				{/if}
-
 				{#if proyecto.estado}
+					{@const estadoTemporal = getEstadoTemporal(proyecto)}
 					<span
-						class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(proyecto.estado.descripcion || 'en_curso')} bg-white/80`}
+						class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(estadoTemporal)} bg-white/80`}
 					>
-						📌 {getEstadoTemporal(proyecto)}
+						📌 {estadoTemporal}
 					</span>
 				{/if}
 			</div>
@@ -111,7 +89,6 @@
 			transform: translateY(0);
 		}
 	}
-
 	.animate-fade-down {
 		animation: fade-down 0.5s ease-out both;
 	}

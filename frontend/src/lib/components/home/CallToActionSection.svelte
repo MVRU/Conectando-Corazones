@@ -75,7 +75,7 @@
 				<div class="hidden sm:block">
 					<Button
 						label="Registrate y empezá a generar impacto"
-						href="/signin 	"
+						href="/signin"
 						variant="ghost"
 						size="md"
 					/>

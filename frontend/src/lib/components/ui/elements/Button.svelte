@@ -6,6 +6,7 @@
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
 	export let href: string | null = null;
+	export let target: '_blank' | '_self' | string = '_blank';
 	export let external = false;
 	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
@@ -19,7 +20,7 @@
 
 		if (href && !disabled && isSafeHref(href)) {
 			if (external) {
-				window.location.href = href;
+				window.open(href, target, 'noopener');
 			} else {
 				goto(href);
 			}

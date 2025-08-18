@@ -1,4 +1,3 @@
-import type { Estado } from './Estado';
 import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
@@ -7,10 +6,11 @@ import type { ColaboradorDisyuncion } from './Usuario';
 import type { Direccion } from './Direccion';
 import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
+import type { EstadoDescripcion } from '$lib/types/Estado';
 
 export type Modalidad = 'presencial' | 'virtual' | 'mixta'; // ! VER
 
-export interface Proyecto {
+export interface Proyecto { // ! VER: ¿volvemos a agregar el atributo "urgencia"? ¿Y "beneficiarios"?
   id_proyecto?: number;
   titulo: string;
   descripcion: string;
@@ -35,7 +35,7 @@ export interface Proyecto {
   solicitud_finalizacion_ids?: number[];
 
   // -*- Objetos expandidos para read
-  estado?: Estado;
+  estado?: EstadoDescripcion;
   participacion_permitida?: ParticipacionPermitida[];
   categorias?: Categoria[];
   colaboraciones?: Colaboracion[];

@@ -14,7 +14,7 @@
 	// Datos simulados basados en los KPIs de la imagen
 	const metricas = {
 		totalProyectos: 12,
-		proyectosFinalizados: 8,
+		proyectosCompletados: 8,
 		proyectosEnEjecucion: 4,
 		totalDonado: 45750,
 		instituciones: 6,
@@ -76,7 +76,7 @@
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.totalProyectos}</p>
 				<div class="mt-3 flex gap-4 text-xs">
 					<span class="flex items-center gap-1 text-green-600">
-						✅ {metricas.proyectosFinalizados} finalizados
+						✅ {metricas.proyectosCompletados} completados
 					</span>
 					<span class="flex items-center gap-1 text-blue-600">
 						🔄 {metricas.proyectosEnEjecucion} activos

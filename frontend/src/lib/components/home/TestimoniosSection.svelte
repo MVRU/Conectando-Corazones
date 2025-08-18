@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
 	import { mockTestimonios } from '$lib/mocks/mock-testimonios';
 	import { swipe } from '$lib/actions/swipe';
@@ -38,10 +38,10 @@
 		});
 		if (sectionRef) io.observe(sectionRef);
 
-		onDestroy(() => {
+		return () => {
 			window.removeEventListener('resize', updateVisibleCount);
 			io.disconnect();
-		});
+		};
 	});
 </script>
 
@@ -66,8 +66,9 @@
 			Experiencias reales, <span class="text-gray-600">resultados reales.</span>
 		</h2>
 		<p class="mx-auto max-w-2xl text-lg text-gray-500">
-			Lo que dicen quienes confiaron en{' '}
-			<span class="font-bold text-blue-500">Conectando Corazones.</span>
+			Lo que dicen quienes confiaron en <span class="font-bold text-blue-500"
+				>Conectando Corazones.</span
+			>
 		</p>
 	</div>
 

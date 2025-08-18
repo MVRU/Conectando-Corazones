@@ -1,11 +1,34 @@
-// FIX: revisar y corregir errores tras cambios en interfaces
-
-import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import type { Localidad } from '$lib/types/Localidad';
+import type { Provincia } from '$lib/types/Provincia';
 import { provincias } from '$lib/data/provincias';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 /**
- * ! HELPERS PARA MANIPULAR UBICACIONES
+ * * Getters sencillos
  */
+
+export const getLocalidad = (id: number) =>
+    mockLocalidades.find(({ id_localidad }) => id_localidad === id);
+
+export const getProvincia = (id: number) =>
+    provincias.find(({ id_provincia }) => id_provincia === id);
+
+/*
+ -!- Obtiene la provincia asociada a una localidad
+ ? Depende de la lista estática de "provincias"; si se externaliza, ajustar esta util
+ */
+
+export function getProvinciaFromLocalidad(localidad?: Localidad): Provincia | undefined {
+    const provinciaId = localidad?.id_provincia;
+    if (provinciaId === undefined || provinciaId === null) return undefined;
+    return provincias.find((p) => p.id_provincia === provinciaId);
+}
+
+/*
+ -!- Helper para obtener localidades por ID y evitar depender del índice del arreglo mockLocalidades
+ */
+export const obtenerLocalidadPorId = (id: number): Localidad | undefined =>
+    mockLocalidades.find((l) => l.id_localidad === id);
 
 /**
  * -!- Mapa de ciudades por provincia para consultas rápidas
@@ -18,8 +41,6 @@ mockLocalidades.forEach((loc) => {
     citiesByProvince[key] ??= [];
     citiesByProvince[key].push(loc.nombre);
 });
-
-
 
 /**
  * -!- Devuelve todas las ciudades de una provincia específica
@@ -34,9 +55,7 @@ export function getCitiesByProvince(provinceName: string): string[] {
 */
 export function getProvinceByCity(cityName: string) {
     const normalized = cityName.trim().toLowerCase();
-    const match = mockLocalidades.find(
-        (loc) => loc.nombre.trim().toLowerCase() === normalized
-    );
+    const match = mockLocalidades.find((loc) => loc.nombre.trim().toLowerCase() === normalized);
     return match?.provincia;
 }
 

@@ -11,33 +11,27 @@ import { mockCategorias } from '$lib/mocks/mock-categorias';
 const isDefined = <T>(x: T | null | undefined): x is T => x != null;
 
 const categoriasPorId = (ids: number[] = []): Categoria[] =>
-  ids
-    .map((id) => mockCategorias.find((c) => c.id_categoria === id))
-    .filter(isDefined);
+  ids.map((id) => mockCategorias.find((c) => c.id_categoria === id)).filter(isDefined);
 
 // ---------- Índice SOLO de colaboradores ----------
 
-const colaboradoresIndex: Record<number, ColaboradorDisyuncion> = Object
-  .values(mockUsuarios)
-  .reduce<Record<number, ColaboradorDisyuncion>>((acc, u: any) => {
-    // Narrowing estructural: rol + campos de Colaborador
-    if (
-      u?.rol === 'colaborador' &&
-      typeof u.cuit_cuil === 'string' &&
-      typeof u.tipo_colaborador === 'string' &&
-      typeof u.id_usuario === 'number'
-    ) {
-      acc[u.id_usuario] = u as ColaboradorDisyuncion;
-    }
-    return acc;
-  }, {});
-
-const OFFSET_COLABORADOR = 3;
+const colaboradoresIndex: Record<number, ColaboradorDisyuncion> = Object.values(
+  mockUsuarios
+).reduce<Record<number, ColaboradorDisyuncion>>((acc, u: any) => {
+  // Narrowing estructural: rol + campos de Colaborador
+  if (
+    u?.rol === 'colaborador' &&
+    typeof u.cuit_cuil === 'string' &&
+    typeof u.tipo_colaborador === 'string' &&
+    typeof u.id_usuario === 'number'
+  ) {
+    acc[u.id_usuario] = u as ColaboradorDisyuncion;
+  }
+  return acc;
+}, {});
 
 const colaboradoresPorId = (ids: number[] = []): ColaboradorDisyuncion[] =>
-  ids
-    .map((id) => colaboradoresIndex[id + OFFSET_COLABORADOR])
-    .filter(isDefined);
+  ids.map((id) => colaboradoresIndex[id]).filter(isDefined);
 
 const proyectosBase: Proyecto[] = [
   {
@@ -46,20 +40,19 @@ const proyectosBase: Proyecto[] = [
     descripcion: 'Campaña para recolectar libros infantiles y donarlos a niños de bajos recursos.',
     url_portada: '/img/proyectos-1.webp',
     created_at: new Date('2025-03-01'),
-    fecha_cierre_postulaciones: new Date('2025-04-01'),
-    fecha_fin_tentativa: new Date('2025-06-01'),
+    fecha_cierre_postulaciones: new Date('2025-08-01'),
+    fecha_fin_tentativa: new Date('2025-10-01'),
     modalidad: 'presencial',
     id_chat_firebase: 1001,
-    estado_id: 1,
     participacion_permitida_ids: [1, 2],
-    categoria_ids: [2],
+    categoria_ids: [2, 7],
     colaboracion_ids: [1, 2],
     institucion_id: 2,
-    colaborador_ids: [1, 2],
+    colaborador_ids: [4, 5],
     direccion_id: 1,
     evidencia_ids: [1],
     solicitud_finalizacion_ids: [1],
-    estado: { id_estado: 1, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 1,
@@ -107,7 +100,7 @@ const proyectosBase: Proyecto[] = [
     solicitudes_finalizacion: [
       {
         id_solicitud: 1,
-        descripcion: 'Proyecto finalizado con éxito',
+        descripcion: 'Proyecto completado con éxito',
         created_at: new Date('2025-06-03'),
         evidencia_ids: [1],
         evidencias: []
@@ -124,16 +117,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-05-10'),
     modalidad: 'presencial',
     id_chat_firebase: 1002,
-    estado_id: 2,
     participacion_permitida_ids: [1],
     categoria_ids: [1],
     colaboracion_ids: [3],
     institucion_id: 2,
-    colaborador_ids: [3, 4],
+    colaborador_ids: [6, 7],
     direccion_id: 2,
     evidencia_ids: [2],
     solicitud_finalizacion_ids: [2],
-    estado: { id_estado: 2, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 2,
@@ -195,16 +187,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-04-20'),
     modalidad: 'presencial',
     id_chat_firebase: 1003,
-    estado_id: 3,
     participacion_permitida_ids: [2],
     categoria_ids: [3],
     colaboracion_ids: [4],
     institucion_id: 3,
-    colaborador_ids: [5],
+    colaborador_ids: [8],
     direccion_id: 3,
     evidencia_ids: [3],
     solicitud_finalizacion_ids: [3],
-    estado: { id_estado: 3, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 3,
@@ -259,16 +250,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-07-01'),
     modalidad: 'presencial',
     id_chat_firebase: 1004,
-    estado_id: 4,
     participacion_permitida_ids: [1, 3],
     categoria_ids: [3],
     colaboracion_ids: [5],
     institucion_id: 4,
-    colaborador_ids: [6],
+    colaborador_ids: [9],
     direccion_id: 4,
     evidencia_ids: [4],
     solicitud_finalizacion_ids: [4],
-    estado: { id_estado: 4, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 4,
@@ -281,7 +271,7 @@ const proyectosBase: Proyecto[] = [
       {
         id_proyecto: 4,
         id_tipo_participacion: 3,
-        unidad: 'pesos',
+        unidad: 'ARS',
         objetivo: 500000,
         actual: 320000,
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
@@ -330,16 +320,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-06-15'),
     modalidad: 'presencial',
     id_chat_firebase: 1005,
-    estado_id: 5,
     participacion_permitida_ids: [1, 2],
     categoria_ids: [2, 4],
     colaboracion_ids: [6],
     institucion_id: 5,
-    colaborador_ids: [7],
+    colaborador_ids: [10],
     direccion_id: 5,
     evidencia_ids: [5],
     solicitud_finalizacion_ids: [5],
-    estado: { id_estado: 5, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 5,
@@ -402,16 +391,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-05-25'),
     modalidad: 'presencial',
     id_chat_firebase: 1006,
-    estado_id: 6,
     participacion_permitida_ids: [1],
     categoria_ids: [1],
     colaboracion_ids: [7],
     institucion_id: 2,
-    colaborador_ids: [8],
+    colaborador_ids: [11],
     direccion_id: 6,
     evidencia_ids: [6],
     solicitud_finalizacion_ids: [6],
-    estado: { id_estado: 6, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 6,
@@ -473,16 +461,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-08-01'),
     modalidad: 'presencial',
     id_chat_firebase: 1007,
-    estado_id: 7,
     participacion_permitida_ids: [1, 2],
     categoria_ids: [6],
     colaboracion_ids: [8],
     institucion_id: 6,
-    colaborador_ids: [9],
+    colaborador_ids: [12],
     direccion_id: 7,
     evidencia_ids: [7],
     solicitud_finalizacion_ids: [7],
-    estado: { id_estado: 7, descripcion: 'en_curso' },
+    estado: "en_curso",
     participacion_permitida: [
       {
         id_proyecto: 7,
@@ -544,16 +531,15 @@ const proyectosBase: Proyecto[] = [
     fecha_fin_tentativa: new Date('2025-07-10'),
     modalidad: 'presencial',
     id_chat_firebase: 1008,
-    estado_id: 8,
     participacion_permitida_ids: [3],
     categoria_ids: [7],
     colaboracion_ids: [9],
     institucion_id: 7,
-    colaborador_ids: [10],
+    colaborador_ids: [13],
     direccion_id: 8,
     evidencia_ids: [8],
     solicitud_finalizacion_ids: [8],
-    estado: { id_estado: 8, descripcion: 'en_curso' },
+    estado: "completado",
     participacion_permitida: [
       {
         id_proyecto: 8,
@@ -566,7 +552,7 @@ const proyectosBase: Proyecto[] = [
       {
         id_proyecto: 8,
         id_tipo_participacion: 3,
-        unidad: 'pesos',
+        unidad: 'ARS',
         objetivo: 100000,
         actual: 40000,
         tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }

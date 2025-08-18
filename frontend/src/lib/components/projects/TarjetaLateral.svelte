@@ -1,96 +1,97 @@
 <script lang="ts">
-import Button from '$lib/components/ui/elements/Button.svelte';
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-import { ESTADO_LABELS } from '$lib/types/Estado';
+	import Button from '$lib/components/ui/elements/Button.svelte';
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+	import { ESTADO_LABELS } from '$lib/types/Estado';
 
-export let proyecto: Proyecto;
-export let mostrarFormulario: () => void;
+	export let proyecto: Proyecto;
+	export let mostrarFormulario: () => void;
 
-const especieEmoji: Record<string, string> = {
-	libros: '📚',
-	colchones: '🛏️',
-	alimentos: '🍽️',
-	juguetes: '🧸',
-	computadoras: '💻',
-	prendas: '👕',
-	medicamentos: '💊',
-	herramientas: '🔧',
-	utiles: '✏️'
-};
-
-const participaciones = proyecto.participacion_permitida ?? [];
-const tieneUnSoloObjetivo = participaciones.length === 1;
-const multiplesObjetivos = participaciones.length > 1;
-const unicoObjetivo = tieneUnSoloObjetivo ? participaciones[0] : null;
-
-function getUnidadInfo(obj: ParticipacionPermitida | null, multiples: boolean) {
-	if (multiples) {
-		return {
-			bg: 'bg-yellow-50',
-			border: 'border-yellow-200',
-			text: 'text-yellow-800',
-			icon: '🤝',
-			label: 'ayuda múltiple (donaciones, materiales o voluntariado)',
-			button: 'Colaborar ahora'
-		};
-	}
-	if (!obj) return {
-		bg: 'bg-gray-50',
-		border: 'border-gray-200',
-		text: 'text-gray-800',
-		icon: '❓',
-		label: 'colaboración',
-		button: 'Colaborar'
+	const especieEmoji: Record<string, string> = {
+		libros: '📚',
+		colchones: '🛏️',
+		alimentos: '🍽️',
+		juguetes: '🧸',
+		computadoras: '💻',
+		prendas: '👕',
+		medicamentos: '💊',
+		herramientas: '🔧',
+		utiles: '✏️'
 	};
-	const tipo = obj.tipo_participacion?.descripcion?.toLowerCase() || '';
-	if (tipo === 'voluntarios') {
-		return {
-			bg: 'bg-purple-50',
-			border: 'border-purple-200',
-			text: 'text-purple-800',
-			icon: '🙋‍♀️',
-			label: 'voluntariado',
-			button: 'Postularme como voluntario'
-		};
-	}
-	if (tipo === 'en especie') {
-		const especie = obj.unidad;
-		return {
-			bg: 'bg-blue-50',
-			border: 'border-blue-200',
-			text: 'text-blue-800',
-			icon: especieEmoji[especie?.toLowerCase()] || '📦',
-			label: especie ? `donaciones de ${especie}` : 'donaciones específicas',
-			button: 'Donar materiales'
-		};
-	}
-	if (tipo === 'monetaria') {
-		return {
-			bg: 'bg-green-50',
-			border: 'border-green-200',
-			text: 'text-green-800',
-			icon: '�',
-			label: 'donaciones monetarias',
-			button: 'Donar ahora'
-		};
-	}
-	return {
-		bg: 'bg-gray-50',
-		border: 'border-gray-200',
-		text: 'text-gray-800',
-		icon: '❓',
-		label: 'colaboración',
-		button: 'Colaborar'
-	};
-}
 
-const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
+	const participaciones = proyecto.participacion_permitida ?? [];
+	const tieneUnSoloObjetivo = participaciones.length === 1;
+	const multiplesObjetivos = participaciones.length > 1;
+	const unicoObjetivo = tieneUnSoloObjetivo ? participaciones[0] : null;
 
-function proyectoAbierto() {
-	// Estado válido para colaborar: 'en_curso'
-	return proyecto.estado?.descripcion === 'en_curso';
-}
+	function getUnidadInfo(obj: ParticipacionPermitida | null, multiples: boolean) {
+		if (multiples) {
+			return {
+				bg: 'bg-yellow-50',
+				border: 'border-yellow-200',
+				text: 'text-yellow-800',
+				icon: '🤝',
+				label: 'ayuda múltiple (donaciones, materiales o voluntariado)',
+				button: 'Colaborar ahora'
+			};
+		}
+		if (!obj)
+			return {
+				bg: 'bg-gray-50',
+				border: 'border-gray-200',
+				text: 'text-gray-800',
+				icon: '❓',
+				label: 'colaboración',
+				button: 'Colaborar'
+			};
+		const tipo = obj.tipo_participacion?.descripcion?.toLowerCase() || '';
+		if (tipo === 'Voluntariado') {
+			return {
+				bg: 'bg-purple-50',
+				border: 'border-purple-200',
+				text: 'text-purple-800',
+				icon: '🙋‍♀️',
+				label: 'voluntariado',
+				button: 'Postularme como voluntario'
+			};
+		}
+		if (tipo === 'Especie') {
+			const especie = obj.unidad;
+			return {
+				bg: 'bg-blue-50',
+				border: 'border-blue-200',
+				text: 'text-blue-800',
+				icon: especieEmoji[especie?.toLowerCase()] || '📦',
+				label: especie ? `donaciones de ${especie}` : 'donaciones específicas',
+				button: 'Donar materiales'
+			};
+		}
+		if (tipo === 'Monetaria') {
+			return {
+				bg: 'bg-green-50',
+				border: 'border-green-200',
+				text: 'text-green-800',
+				icon: '�',
+				label: 'donaciones monetarias',
+				button: 'Donar ahora'
+			};
+		}
+		return {
+			bg: 'bg-gray-50',
+			border: 'border-gray-200',
+			text: 'text-gray-800',
+			icon: '❓',
+			label: 'colaboración',
+			button: 'Colaborar'
+		};
+	}
+
+	const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
+
+	function proyectoAbierto() {
+		// Estado válido para colaborar: 'en_curso'
+		return proyecto.estado?.descripcion === 'en_curso';
+	}
 </script>
 
 <div
@@ -111,8 +112,9 @@ function proyectoAbierto() {
 			<p class={`text-sm ${unidadInfo.text}`}>
 				Este proyecto necesita <strong>{unidadInfo.label}</strong>.
 				{#if unicoObjetivo}
-					<span class="block mt-1 text-xs text-gray-500">
-						Objetivo: {unicoObjetivo.objetivo} {unicoObjetivo.unidad}
+					<span class="mt-1 block text-xs text-gray-500">
+						Objetivo: {unicoObjetivo.objetivo}
+						{unicoObjetivo.unidad}
 						{#if unicoObjetivo.actual !== undefined}
 							&nbsp;|&nbsp; Actual: {unicoObjetivo.actual} {unicoObjetivo.unidad}
 						{/if}

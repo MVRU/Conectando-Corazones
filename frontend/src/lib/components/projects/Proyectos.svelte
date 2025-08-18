@@ -1,5 +1,5 @@
 <!-- FIX:
- 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER
+ 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER		
 	- [ ] Corregir los estados de Proyecto
 	- [ ] Corregir nombres de tipos de participación
 	
@@ -13,6 +13,8 @@
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
 	import { writable } from 'svelte/store';
+	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
+	import { filtrarProyectos } from '$lib/utils/util-proyectos';
 
 	let searchQuery = writable('');
 
@@ -31,17 +33,17 @@
 
 	const reverseMap: Record<ParticipacionLabel, ParticipacionLabel> = participacionMap;
 
-	// Nuevos filtros
-	const estadosDisponibles = ['Todos', 'Abierto', 'En ejecución', 'Finalizado']; // TODO: corregir los estados
+	const estadosDisponibles = [
+		'Todos',
+		'En curso',
+		'Pendiente de solicitud de cierre',
+		'En revisión',
+		'En auditoría',
+		'Completado',
+		'Cancelado'
+	]; // TODO: corregir los estados
 	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
-	const provinciasDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				defaultProyectos.map((p) => p.direccion?.localidad?.provincia?.nombre).filter(Boolean)
-			)
-		).sort()
-	];
+	let provinciasDisponibles: string[] = [];
 	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
 	let filtroParticipacionSeleccionado: 'Todos' | ParticipacionLabel = 'Todos';
 	let estadoSeleccionado = 'Todos';
@@ -52,98 +54,16 @@
 	export let proyectos: Proyecto[] = defaultProyectos;
 	let proyectosVisibles: Proyecto[] = [];
 
-	const ESTADO_PRIORIDAD: Record<string, number> = {
-		// TODO: corregir los estados
-		Abierto: 0,
-		'En ejecución': 1,
-		Finalizado: 2
-	};
-
-	function estadoTemporizadorProyecto(p: Proyecto): string {
-		const hoy = new Date();
-		const inicio = p.created_at ? new Date(p.created_at) : null;
-		const cierre = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
-
-		// TODO: corregir los estados
-		if (!inicio || !cierre) return 'Abierto';
-
-		if (hoy > cierre) return 'Finalizado';
-		if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
-		return 'Abierto';
-	}
-
-	export function filtrarProyectos(
-		proyectos: Proyecto[],
-		filtros: typeof filtrosSeleccionados,
-		searchQuery: string,
-		estado: string,
-		urgencia: string,
-		provincia: string
-	): Proyecto[] {
-		let resultado = [...proyectos];
-
-		// Filtro por tipo de participación
-		if (!filtros.includes('Todos')) {
-			const tiposEsperados = filtros
-				.filter((f): f is ParticipacionLabel => f !== 'Todos')
-				.map((f) => reverseMap[f]);
-
-			resultado = resultado.filter((p) =>
-				p.participacion_permitida?.some(
-					(pp) =>
-						pp.tipo_participacion?.descripcion &&
-						tiposEsperados.includes(pp.tipo_participacion.descripcion as ParticipacionLabel)
-				)
-			);
-		}
-
-		// Filtro por estado
-		if (estado !== 'Todos') {
-			resultado = resultado.filter((p) => {
-				const estadoActual = estadoTemporizadorProyecto(p);
-				return estadoActual === estado;
-			});
-		}
-
-		// Filtro por urgencia
-		if (urgencia !== 'Todas') {
-			// TODO: Implementar urgencia cuando esté en el tipo
-			// resultado = resultado.filter((p) => p.urgencia === urgencia);
-		}
-
-		// Filtro por provincia
-		if (provincia !== 'Todas') {
-			resultado = resultado.filter((p) => p.direccion?.localidad?.provincia?.nombre === provincia);
-		}
-
-		// Filtro por título o razón social
-		if (searchQuery.trim() !== '') {
-			const query = searchQuery.trim().toLowerCase();
-			resultado = resultado.filter(
-				(p) =>
-					p.titulo.toLowerCase().includes(query) ||
-					p.institucion?.nombre_legal?.toLowerCase().includes(query)
-			);
-		}
-
-		// Orden por estado y fecha
-		resultado.sort((a, b) => {
-			const estadoA = estadoTemporizadorProyecto(a);
-			const estadoB = estadoTemporizadorProyecto(b);
-			const prioridadEstadoA = ESTADO_PRIORIDAD[estadoA] ?? 3;
-			const prioridadEstadoB = ESTADO_PRIORIDAD[estadoB] ?? 3;
-
-			if (prioridadEstadoA !== prioridadEstadoB) {
-				return prioridadEstadoA - prioridadEstadoB;
-			}
-
-			const fechaA = new Date(a.created_at || '').getTime();
-			const fechaB = new Date(b.created_at || '').getTime();
-			return fechaA - fechaB;
-		});
-
-		return resultado;
-	}
+	$: provinciasDisponibles = [
+		'Todas',
+		...Array.from(
+			new Set(
+				proyectos
+					.map((p) => getProvinciaFromLocalidad(p.direccion?.localidad)?.nombre ?? '')
+					.filter((s) => s !== '')
+			)
+		).sort()
+	];
 
 	function resetFiltros() {
 		filtrosSeleccionados = ['Todos'];
@@ -151,7 +71,7 @@
 		estadoSeleccionado = 'Todos';
 		urgenciaSeleccionada = 'Todas';
 		provinciaSeleccionada = 'Todas';
-		searchQuery = writable('');
+		searchQuery.set('');
 	}
 
 	// Sincronizar el dropdown con el array de filtros
@@ -170,7 +90,8 @@
 			$searchQuery,
 			estadoSeleccionado,
 			urgenciaSeleccionada,
-			provinciaSeleccionada
+			provinciaSeleccionada,
+			reverseMap
 		);
 	}
 </script>

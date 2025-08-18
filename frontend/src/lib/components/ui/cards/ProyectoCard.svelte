@@ -5,7 +5,7 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elements/Button.svelte';
-	import { calcularProgresoTotal } from '$lib/utils/progress';
+	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
 
 	export let proyecto!: Proyecto;
@@ -82,10 +82,10 @@
 
 	if (inicio && cierre) {
 		if (hoy > cierre) {
-			estadoTemporizador = 'Finalizado';
+			estadoTemporizador = 'Completado';
 			emojiTemporizador = '✅';
 		} else if (hoy >= inicio && hoy <= cierre) {
-			estadoTemporizador = 'En ejecución';
+			estadoTemporizador = 'En curso';
 			emojiTemporizador = '🟢';
 		} else {
 			const diff = inicio.getTime() - hoy.getTime();
@@ -107,7 +107,7 @@
 		}
 	}
 
-	const disabled = estadoTemporizador === 'En ejecución' || estadoTemporizador === 'Finalizado';
+	const disabled = estadoTemporizador === 'En curso' || estadoTemporizador === 'Completado';
 </script>
 
 <a

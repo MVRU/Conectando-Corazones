@@ -8,9 +8,14 @@
 	import DetallesProyecto from '$lib/components/projects/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { ESTADO_LABELS } from '$lib/types/Estado';
+	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 
 	let proyecto: Proyecto | null = null;
+	let provinciaNombre: string = 'Provincia';
+
+	$: provinciaNombre =
+		getProvinciaFromLocalidad(proyecto?.direccion?.localidad)?.nombre ?? 'Provincia';
 
 	$: {
 		const id = $page.params.id;
@@ -78,7 +83,7 @@
 	function getColorEstado(estado: string) {
 		return (
 			{
-				Abierto: 'text-green-600 bg-green-100',
+				'En curso': 'text-green-600 bg-green-100',
 				'Próximo a cerrar': 'text-orange-600 bg-orange-100',
 				Cerrado: 'text-gray-600 bg-gray-100',
 				Completado: 'text-blue-600 bg-blue-100'
@@ -87,16 +92,16 @@
 	}
 
 	// Cálculo del estado temporal basado en fechas (igual que en ProyectoCard y ProjectHeader)
-	function getEstadoTemporal(proyecto: Proyecto | null): string {
-		if (!proyecto) return 'En curso';
+	function getEstadoTemporal(p: Proyecto | null): string {
+		if (!p) return 'En curso';
 
 		const hoy = new Date();
-		const inicio = toDateOrNull(proyecto.created_at);
-		const cierre = toDateOrNull(proyecto.fecha_fin_tentativa);
+		const inicio = toDateOrNull(p.created_at);
+		const cierre = toDateOrNull(p.fecha_fin_tentativa);
 
 		if (inicio && cierre) {
-			if (hoy > cierre) return 'Finalizado';
-			if (hoy >= inicio && hoy <= cierre) return 'En ejecución';
+			if (hoy > cierre) return 'Completado';
+			if (hoy >= inicio && hoy <= cierre) return 'En curso';
 
 			const diff = inicio.getTime() - hoy.getTime();
 			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
@@ -107,7 +112,11 @@
 			return semanas === 1 ? 'En 1 semana' : `En ${semanas} semanas`;
 		}
 
-		return proyecto.estado?.descripcion ? ESTADO_LABELS[proyecto.estado.descripcion] : 'En curso';
+		if (p.estado) {
+			const desc = p.estado as EstadoDescripcion;
+			return ESTADO_LABELS[desc];
+		}
+		return 'En curso';
 	}
 </script>
 
@@ -137,9 +146,7 @@
 								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
 							>
 								<span>
-									{(proyecto.participacion_permitida?.length || 0) === 1
-										? 'Participación'
-										: 'Participaciones'}
+									{(proyecto.participacion_permitida?.length || 0) === 1 ? 'Objetivo' : 'Objetivos'}
 								</span>
 								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
 									{#if proyecto.created_at}
@@ -258,9 +265,9 @@
 							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Estado:</span>
 								<span
-									class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Finalizado'
+									class="text-sm font-medium {getEstadoTemporal(proyecto) === 'Completado'
 										? 'text-blue-600'
-										: getEstadoTemporal(proyecto) === 'En ejecución'
+										: getEstadoTemporal(proyecto) === 'En curso'
 											? 'text-green-600'
 											: 'text-orange-600'}"
 								>
@@ -276,7 +283,7 @@
 							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Ubicación:</span>
 								<span class="text-sm font-medium">
-									{proyecto.direccion?.localidad?.nombre || 'N/A'}
+									{proyecto.direccion?.localidad?.nombre || 'N/A'}, {provinciaNombre}
 								</span>
 							</div>
 						</div>

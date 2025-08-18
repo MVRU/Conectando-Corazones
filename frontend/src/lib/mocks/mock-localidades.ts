@@ -5,8 +5,9 @@
 **/
 
 import type { Localidad } from '$lib/types/Localidad';
+import { provincias } from '$lib/data/provincias';
 
-export const mockLocalidades: Localidad[] = [
+const localidadesBase: Omit<Localidad, 'provincia'>[] = [
     {
         id_localidad: 1,
         nombre: 'Buenos Aires',
@@ -128,3 +129,8 @@ export const mockLocalidades: Localidad[] = [
         id_provincia: 16,
     }
 ];
+
+export const mockLocalidades: Localidad[] = localidadesBase.map((localidad) => ({
+    ...localidad,
+    provincia: provincias.find((p) => p.id_provincia === localidad.id_provincia)
+}));
