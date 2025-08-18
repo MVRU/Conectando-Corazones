@@ -1,11 +1,14 @@
 import { writable, derived, get } from 'svelte/store';
-import type { Usuario /*, Institucion, Colaborador*/ } from '$lib/types/Usuario';
+import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
 import { isValidEmail, isValidUsername } from '$lib/utils/validators';
 
 /**
  * * DECISIÓN DE DISEÑO:
  *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
  */
+
+// Tipo unión para todos los tipos de usuario posibles
+type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
 // Tipos para registro
 interface RegisterColaboradorData {
@@ -37,7 +40,7 @@ interface RegisterInstitucionData {
 
 // Estado de autenticación
 interface AuthState {
-  usuario: Usuario | null;
+  usuario: UsuarioCompleto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -76,7 +79,7 @@ export const authActions = {
   /**
    * Iniciar sesión (acepta email o username como "identificador")
    */
-  async login(identificador: string, password: string, recordarSesion: boolean = false): Promise<Usuario | null> {
+  async login(identificador: string, password: string, recordarSesion: boolean = false): Promise<UsuarioCompleto | null> {
     const credencial = identificador?.trim();
     if (
       !credencial ||
@@ -105,7 +108,7 @@ export const authActions = {
         throw new Error(error ?? 'Error al iniciar sesión');
       }
 
-      const { usuario } = (await response.json()) as { usuario: Usuario };
+      const { usuario } = (await response.json()) as { usuario: UsuarioCompleto };
 
       authStore.update((state) => ({
         ...state,
@@ -186,7 +189,7 @@ export const authActions = {
     authStore.update((state) => ({ ...state, isLoading: true }));
     try {
       const response = await fetch('/api/session');
-      const { usuario } = (await response.json()) as { usuario: Usuario | null };
+      const { usuario } = (await response.json()) as { usuario: UsuarioCompleto | null };
       if (usuario) {
         authStore.update((state) => ({
           ...state,
