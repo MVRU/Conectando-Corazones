@@ -18,7 +18,7 @@ interface RegisterColaboradorData {
   tipo_documento: string;
   numero_documento: string;
   fecha_nacimiento: Date;
-  cuit_cuil: string;
+  cuit_cuil: string; // ! quitar cuando corrijamos signin
   tipo_colaborador: string;
   email: string;
   password: string;
@@ -31,7 +31,7 @@ interface RegisterInstitucionData {
   tipo_documento: string;
   numero_documento: string;
   fecha_nacimiento: Date;
-  cuit: string;
+  cuit: string; // ! quitar cuando corrijamos signin
   nombre_legal: string;
   tipo_institucion: string;
   email: string;

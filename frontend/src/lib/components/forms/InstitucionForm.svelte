@@ -30,7 +30,7 @@
 		otroTipo: '',
 		username: '',
 		email: '',
-		cuit: '',
+		cuit: '', // ! quitar cuando corrijamos signin
 		password: '',
 		repassword: ''
 	};
@@ -68,6 +68,7 @@
 				? MENSAJES_ERROR.correoInvalido
 				: '',
 
+		// ! quitar cuando corrijamos signin
 		cuit:
 			institution.cuit.trim() && isValidCuit(institution.cuit) ? '' : MENSAJES_ERROR.cuitInvalid,
 

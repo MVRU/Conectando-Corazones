@@ -4,4 +4,7 @@ export interface Archivo {
   descripcion?: string;
   tipo_mime?: string;
   created_at?: Date;
+
+  // * Relaciones (FKs)
+  usuario_id: number; // -*- usuario que sube archivo
 }

@@ -9,7 +9,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     const { identificador, password, rememberMe } = await request.json();
 
     const usuario = Object.values(mockUsuarios).find((u) => {
-        const email = u.contactos?.find((c) => c.tipo_contacto === 'email')?.valor; // ! VER
+        const email = u.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')?.valor; // ! VER
         return u.username === identificador || email === identificador;
     });
 

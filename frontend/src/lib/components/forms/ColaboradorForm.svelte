@@ -31,11 +31,11 @@
 	let docOtro = '';
 	let docNumero = '';
 	let nacimiento: Date | null = null;
-	let cuil = '';
+	let cuil = ''; // ! quitar cuando corrijamos signin
 
 	// Datos organización
 	let razonSocial = '';
-	let cuit = '';
+	let cuit = ''; // ! quitar cuando corrijamos signin
 	let repNombre = '';
 	let repApellido = '';
 	let repDocTipo = 'DNI';
@@ -84,11 +84,13 @@
 					? MENSAJES_ERROR.requisitoEdad
 					: '',
 
+		// ! quitar cuando corrijamos signin
 		cuil: tipo === 'persona' && !cuil.trim() ? MENSAJES_ERROR.obligatorio : '',
 
 		// Organización
 		razonSocial: tipo === 'organizacion' && !razonSocial.trim() ? MENSAJES_ERROR.obligatorio : '',
 
+		// ! quitar cuando corrijamos signin
 		cuit:
 			tipo === 'organizacion' && !cuit.trim()
 				? MENSAJES_ERROR.obligatorio

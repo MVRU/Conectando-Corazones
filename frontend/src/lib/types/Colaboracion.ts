@@ -1,8 +1,9 @@
 // * DECISIÓN DE DISEÑO: limitar los estados posibles para evitar inconsistencias
-export type EstadoColaboracion = 'pendiente' | 'aceptada' | 'rechazada'; // ! VER: dsp hablamos de esto
+export type EstadoColaboracion = 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
 
 export interface Colaboracion {
   id_colaboracion?: number;
   estado: EstadoColaboracion;
+  justificacion?: string;
   created_at?: Date;
 }
