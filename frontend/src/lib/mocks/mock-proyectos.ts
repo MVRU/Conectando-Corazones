@@ -1,6 +1,5 @@
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { Categoria } from '$lib/types/Categoria';
-import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
 import type { Colaboracion } from '$lib/types/Colaboracion';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
@@ -14,31 +13,6 @@ const isDefined = <T>(x: T | null | undefined): x is T => x != null;
 
 const categoriasPorId = (ids: number[] = []): Categoria[] =>
   ids.map((id) => mockCategorias.find((c) => c.id_categoria === id)).filter(isDefined);
-
-// ---------- Índice SOLO de colaboradores ----------
-
-const colaboradoresIndex: Record<number, ColaboradorDisyuncion> = Object.values(
-  mockUsuarios
-).reduce<Record<number, ColaboradorDisyuncion>>((acc, u) => {
-  const candidate = u as {
-    rol?: unknown;
-    cuit_cuil?: unknown;
-    tipo_colaborador?: unknown;
-    id_usuario?: unknown;
-  };
-  if (
-    candidate.rol === 'colaborador' &&
-    typeof candidate.cuit_cuil === 'string' &&
-    typeof candidate.tipo_colaborador === 'string' &&
-    typeof candidate.id_usuario === 'number'
-  ) {
-    acc[candidate.id_usuario] = candidate as ColaboradorDisyuncion;
-  }
-  return acc;
-}, {});
-
-const colaboradoresPorId = (ids: number[] = []): ColaboradorDisyuncion[] =>
-  ids.map((id) => colaboradoresIndex[id]).filter(isDefined);
 
 const colaboracionesPorId = (ids: number[] = []): Colaboracion[] =>
   ids.map((id) => mockColaboraciones.find((c) => c.id_colaboracion === id)).filter(isDefined);
@@ -58,7 +32,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [2, 7],
     colaboracion_ids: [1, 2],
     institucion_id: 2,
-    colaborador_ids: [4, 5],
     direccion_id: 1,
     evidencia_ids: [1],
     solicitud_finalizacion_ids: [1],
@@ -126,7 +99,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [1],
     colaboracion_ids: [3],
     institucion_id: 2,
-    colaborador_ids: [6, 7],
     direccion_id: 2,
     evidencia_ids: [2],
     solicitud_finalizacion_ids: [2],
@@ -192,7 +164,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [3],
     colaboracion_ids: [4],
     institucion_id: 3,
-    colaborador_ids: [8],
     direccion_id: 3,
     evidencia_ids: [3],
     solicitud_finalizacion_ids: [3],
@@ -251,7 +222,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [3],
     colaboracion_ids: [5],
     institucion_id: 4,
-    colaborador_ids: [6],
     direccion_id: 4,
     evidencia_ids: [4],
     solicitud_finalizacion_ids: [4],
@@ -317,7 +287,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [2, 4],
     colaboracion_ids: [6],
     institucion_id: 5,
-    colaborador_ids: [7],
     direccion_id: 5,
     evidencia_ids: [5],
     solicitud_finalizacion_ids: [5],
@@ -384,7 +353,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [1],
     colaboracion_ids: [7],
     institucion_id: 2,
-    colaborador_ids: [8],
     direccion_id: 6,
     evidencia_ids: [6],
     solicitud_finalizacion_ids: [6],
@@ -450,7 +418,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [6],
     colaboracion_ids: [8],
     institucion_id: 6,
-    colaborador_ids: [4],
     direccion_id: 7,
     evidencia_ids: [7],
     solicitud_finalizacion_ids: [7],
@@ -516,7 +483,6 @@ const proyectosBase: Proyecto[] = [
     categoria_ids: [7],
     colaboracion_ids: [9],
     institucion_id: 7,
-    colaborador_ids: [5],
     direccion_id: 8,
     evidencia_ids: [8],
     solicitud_finalizacion_ids: [8],
@@ -573,6 +539,5 @@ const proyectosBase: Proyecto[] = [
 export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
   ...proyecto,
   categorias: categoriasPorId(proyecto.categoria_ids ?? []),
-  colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
-  colaboradores: colaboradoresPorId(proyecto.colaborador_ids ?? [])
+  colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? [])
 }));
