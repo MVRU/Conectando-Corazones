@@ -14,4 +14,5 @@ export interface Evidencia {
   // -*- Objetos expandidos
   archivos?: Archivo[];
   solicitudes_finalizacion?: SolicitudFinalizacion[];
+  id_proyecto?: number;
 }

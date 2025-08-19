@@ -7,5 +7,6 @@ export interface Archivo {
   fecha_vencimiento?: Date;
 
   // * Relaciones (FKs)
-  usuario_id: number; // -*- usuario que sube archivo
+  id_usuario?: number;
+  id_evidencia?: number;
 }
