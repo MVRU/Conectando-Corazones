@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { type JSX } from 'react';
 import clsx from 'clsx';
+import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import Heading from '@theme/Heading';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -19,16 +21,17 @@ import {
 } from 'lucide-react';
 import styles from './styles.module.css';
 
-type LucideIcon = (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+type LucideIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 type FeatureItem = {
   title: string;
   description: React.ReactNode;
-  href?: string;
+  to?: string;
   Icon?: LucideIcon;
 };
 
-function FeatureCard({ title, description, href, Icon }: FeatureItem) {
+function FeatureCard({ title, description, to, Icon }: FeatureItem) {
+  const url = to ? useBaseUrl(to) : undefined;
   const inner = (
     <>
       <div className={styles.iconWrap} aria-hidden="true">
@@ -41,10 +44,10 @@ function FeatureCard({ title, description, href, Icon }: FeatureItem) {
 
   return (
     <div className={clsx('col', styles.cell)}>
-      {href ? (
-        <a className={clsx(styles.card, styles.cardLink)} href={href} aria-label={title}>
+      {to ? (
+        <Link className={clsx(styles.card, styles.cardLink)} to={url} aria-label={title}>
           {inner}
-        </a>
+        </Link>
       ) : (
         <div className={styles.card}>{inner}</div>
       )}
@@ -60,25 +63,25 @@ const InstitutionFeatures: FeatureItem[] = [
     title: 'Subida de evidencia cuidada',
     Icon: Upload,
     description: <>Cargá fotos y documentos cifrados para cerrar tus proyectos.</>,
-    href: '/docs/usuarios/evidencias',
+    to: '/docs/usuarios/evidencias',
   },
   {
     title: 'Validaciones oficiales',
     Icon: ShieldCheck,
     description: <>Integraciones opcionales (RENAPER) para reducir fraude y datos duplicados.</>,
-    href: '/docs/dev/api/integraciones',
+    to: '/docs/dev/api/integraciones',
   },
   {
     title: 'Paneles y KPIs accionables',
     Icon: Gauge,
     description: <>Indicadores clave y alertas para priorizar acciones y medir impacto real.</>,
-    href: '/docs/usuarios/kpis',
+    to: '/docs/usuarios/kpis',
   },
   {
     title: 'Privacidad por diseño',
     Icon: Lock,
     description: <>Datos mínimos, consentimiento informado y controles de acceso por rol.</>,
-    href: '/docs/legal/usuarios/privacidad',
+    to: '/docs/legal/usuarios/privacidad',
   },
 ];
 
@@ -90,25 +93,25 @@ const ContributorFeatures: FeatureItem[] = [
     title: 'Transparencia y trazabilidad',
     Icon: FileCheck2,
     description: <>Cada proyecto mantiene historial y evidencias verificables con auditoría simple.</>,
-    href: '/docs/legal/usuarios/transparencia-trazabilidad',
+    to: '/docs/legal/usuarios/transparencia-trazabilidad',
   },
   {
     title: 'Chat en tiempo real',
     Icon: MessageCircle,
     description: <>Coordiná con la institución vía mensajería en tiempo real (Firebase).</>,
-    href: '/docs/usuarios/chat',
+    to: '/docs/usuarios/chat',
   },
   {
     title: 'Tu contribución, visible',
     Icon: HeartHandshake,
     description: <>Tu ayuda queda registrada y trazable, con reconocimiento y métricas.</>,
-    href: '/docs/usuarios/colaboradores/impacto',
+    to: '/docs/usuarios/colaboradores/impacto',
   },
   {
     title: 'Código abierto y comunidad',
     Icon: Code2,
     description: <>Sumate al proyecto: reportá issues, propone mejoras y participá del roadmap.</>,
-    href: '/docs/comunidad/como-participar',
+    to: '/docs/comunidad/como-participar',
   },
 ];
 

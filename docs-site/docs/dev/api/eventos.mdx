@@ -2,21 +2,24 @@
 title: Eventos y auditoría
 ---
 
-{/* TODO: completar esta sección con HistorialCambios */}
+{/* * Corregir para ue siga tabla "HistorialCambios" */}
 
-A completar...
+`HistorialCambios` es una bitácora inmutable que almacena cada modificación relevante del dominio. Sirve como fuente única de verdad para auditorías internas y solicitudes externas.
 
-{/* Definiciones de eventos de dominio y logs de auditoría.
+## Eventos de dominio
 
-| Evento                     | Emisor   | Payload clave                                 | Persistencia |
-| -------------------------- | -------- | --------------------------------------------- | ------------ |
-| `proyecto.creado`          | API      | `proyectoId`, `titulo`, `institucion`         | sí           |
-| `evidencia.subida`         | Frontend | `proyectoId`, `tipo`, `url`, `hash`           | sí           |
-| `proyecto.estado.cambiado` | Backend  | `proyectoId`, `estadoAnterior`, `estadoNuevo` | sí           |
+| Evento | Emisor | Payload clave | Persistencia |
+| --- | --- | --- | --- |
+| `proyecto.creado` | API | `proyectoId`, `titulo`, `institucion` | sí |
+| `proyecto.actualizado` | API | `proyectoId`, `campo`, `valorAnterior`, `valorNuevo` | sí |
+| `evidencia.subida` | Frontend | `proyectoId`, `tipo`, `url`, `hash` | sí |
+| `evidencia.eliminada` | Frontend | `proyectoId`, `evidenciaId`, `motivo` | sí |
+| `proyecto.estado.cambiado` | Backend | `proyectoId`, `estadoAnterior`, `estadoNuevo` | sí |
+| `usuario.verificado` | Backend | `usuarioId`, `metodo` | sí |
 
-Convención de nombres: `<agregado>.<verbo>` y payloads **inmutables**.
+*Convención de nombres: `<agregado>.<verbo>` y payloads inmutables.*
 
-### Ejemplo de payload serializado
+## Ejemplos de payload
 
 ```json
 {
@@ -25,4 +28,23 @@ Convención de nombres: `<agregado>.<verbo>` y payloads **inmutables**.
   "titulo": "Aula verde",
   "institucion": "Escuela N° 1"
 }
-``` */}
+```
+
+```json
+{
+  "evento": "evidencia.eliminada",
+  "proyectoId": 123,
+  "evidenciaId": 456,
+  "motivo": "Contenido inapropiado"
+}
+```
+
+## Política de retención
+
+Los registros de `HistorialCambios` se conservan **6 meses** posteriores al cierre del proyecto y luego se purgan según la [política de retención](../../legal/devs/retencion-datos).
+
+## Riesgos o limitaciones de auditoría
+
+- Una falla de red del cliente podría evitar el envío de un evento.
+- Las marcas de tiempo dependen del reloj del servidor.
+- El acceso a los registros está restringido y requiere trazabilidad adicional.

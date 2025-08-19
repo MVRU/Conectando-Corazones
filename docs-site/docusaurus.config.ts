@@ -147,19 +147,27 @@ const config: Config = {
               label: 'Para desarrolladores',
               to: '/docs/dev',
             },
+            {
+              label: 'Marco legal',
+              to: '/docs/legal'
+            },
           ],
         },
         {
           title: 'Comunidad',
           items: [
             {
+              label: 'Acerca de la comunidad',
+              to: 'docs/comunidad'
+            },
+            {
               label: 'GitHub Issues',
               href: 'https://github.com/MVRU/Conectando-Corazones/issues',
             },
             {
-              label: 'Wiki del proyecto',
-              href: 'https://github.com/MVRU/Conectando-Corazones/wiki',
-            },
+              label: 'GitHub Discussions',
+              href: 'https://github.com/MVRU/Conectando-Corazones/discussions'
+            }
           ],
         },
         {

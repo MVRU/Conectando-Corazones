@@ -1,7 +1,8 @@
 {
     "label": "Comunidad",
+    "position": 3,
     "link": {
         "type": "doc",
-        "id": "comunidad"
+        "id": "comunidad/index"
     }
 }
