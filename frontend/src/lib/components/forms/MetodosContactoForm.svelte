@@ -15,11 +15,11 @@
 	} from '$lib/types/Contacto';
 
 	import {
-		isValidEmail,
-		isValidInternationalPhone,
-		isValidWeb,
-		ERROR_MESSAGES
-	} from '$lib/utils/validators';
+		validarCorreo,
+		validarTelefonoInternacional,
+		validarUrl,
+		MENSAJES_ERROR
+	} from '$lib/utils/validaciones';
 
 	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	let sending = false;
@@ -76,28 +76,29 @@
 	$: errors = contactos.map((contacto, index) => {
 		const { tipo_contacto, valor, etiqueta } = contacto;
 
-		if (!valor.trim()) return ERROR_MESSAGES.required;
+		if (!valor.trim()) return MENSAJES_ERROR.obligatorio;
 
-		if (tipo_contacto === 'telefono' && !isValidInternationalPhone(valor))
-			return ERROR_MESSAGES.phoneInvalid;
+		if (tipo_contacto === 'telefono' && !validarTelefonoInternacional(valor))
+			return MENSAJES_ERROR.telefonoInvalido;
 
-		if (tipo_contacto === 'email' && !isValidEmail(valor)) return ERROR_MESSAGES.emailInvalid;
+		if (tipo_contacto === 'email' && !validarCorreo(valor)) return MENSAJES_ERROR.correoInvalido;
 
-		if (tipo_contacto === 'web' && !isValidWeb(valor)) return ERROR_MESSAGES.urlInvalid;
+		if (tipo_contacto === 'web' && !validarUrl(valor)) return MENSAJES_ERROR.urlInvalida;
 
-		if (tipo_contacto === 'otro' && !etiqueta?.trim()) return ERROR_MESSAGES.specifyOtherContact;
+		if (tipo_contacto === 'otro' && !etiqueta?.trim())
+			return MENSAJES_ERROR.otroContactoObligatorio;
 
 		const isDuplicate = contactos.some(
 			(c, i) => i !== index && c.tipo_contacto === tipo_contacto && c.valor === valor
 		);
 
-		if (isDuplicate) return ERROR_MESSAGES.contactDuplicate;
+		if (isDuplicate) return MENSAJES_ERROR.contactoDuplicado;
 
 		return '';
 	});
 
 	$: telefonoValido = contactos.some(
-		(c) => c.tipo_contacto === 'telefono' && isValidInternationalPhone(c.valor)
+		(c) => c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)
 	);
 
 	$: hasErrors = !telefonoValido || contactos.some((_, i) => errors[i]);

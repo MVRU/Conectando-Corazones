@@ -6,11 +6,11 @@
 	import Select from '$lib/components/ui/elements/Select.svelte';
 
 	import {
-		isValidStreet,
-		isValidStreetNumber,
-		isValidCityInProvince,
-		ERROR_MESSAGES
-	} from '$lib/utils/validators';
+		validarCalle,
+		validarNumeroCalle,
+		validarCiudadEnProvincia,
+		MENSAJES_ERROR
+	} from '$lib/utils/validaciones';
 
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
@@ -59,9 +59,9 @@
 	// Genera la URL automáticamente
 	$: {
 		if (
-			isValidStreet(street) &&
-			isValidStreetNumber(streetNumber) &&
-			isValidCityInProvince(localidad?.id_localidad, provincia?.id_provincia)
+			validarCalle(street) &&
+			validarNumeroCalle(streetNumber) &&
+			validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 		) {
 			const direccionCompleta = `${street} ${streetNumber}, ${localidad?.nombre}, ${provincia?.nombre}`;
 			googleMapsUrl = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
@@ -69,12 +69,12 @@
 	}
 
 	$: errors = {
-		street: isValidStreet(street) ? '' : ERROR_MESSAGES.addressStreetInvalid,
-		streetNumber: isValidStreetNumber(streetNumber) ? '' : ERROR_MESSAGES.addressNumberInvalid,
-		province: provincia ? '' : ERROR_MESSAGES.provinceInvalid,
-		location: isValidCityInProvince(localidad?.id_localidad, provincia?.id_provincia)
+		street: validarCalle(street) ? '' : MENSAJES_ERROR.calleInvalida,
+		streetNumber: validarNumeroCalle(streetNumber) ? '' : MENSAJES_ERROR.numeroCalleInvalido,
+		province: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
+		location: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 			? ''
-			: ERROR_MESSAGES.cityNotInProvince
+			: MENSAJES_ERROR.ciudadNoPerteneceProvincia
 	};
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');

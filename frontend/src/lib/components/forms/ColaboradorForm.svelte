@@ -7,16 +7,16 @@
 	const dispatch = createEventDispatcher();
 
 	import {
-		isValidEmail,
-		isValidPassword,
-		isValidName,
-		isValidLastName,
+		validarCorreo,
+		validarContrasena,
+		validarNombre,
+		validarApellido,
 		isValidDni,
-		isAdult,
-		isValidUsername,
+		esAdulto,
+		validarUsername,
 		isValidCuit,
-		ERROR_MESSAGES
-	} from '$lib/utils/validators';
+		MENSAJES_ERROR
+	} from '$lib/utils/validaciones';
 
 	let sending = false;
 	let tipo: 'persona' | 'organizacion' = 'persona';
@@ -53,103 +53,103 @@
 		// Persona
 		nombre:
 			tipo === 'persona' && !nombre.trim()
-				? ERROR_MESSAGES.required
-				: tipo === 'persona' && !isValidName(nombre)
-					? ERROR_MESSAGES.nameInvalid
+				? MENSAJES_ERROR.obligatorio
+				: tipo === 'persona' && !validarNombre(nombre)
+					? MENSAJES_ERROR.nombreInvalido
 					: '',
 
 		apellido:
 			tipo === 'persona' && !apellido.trim()
-				? ERROR_MESSAGES.required
-				: tipo === 'persona' && !isValidLastName(apellido)
-					? ERROR_MESSAGES.lastNameInvalid
+				? MENSAJES_ERROR.obligatorio
+				: tipo === 'persona' && !validarApellido(apellido)
+					? MENSAJES_ERROR.apellidoInvalido
 					: '',
 
 		docOtro:
 			tipo === 'persona' && docTipo === 'Otro' && !docOtro.trim()
-				? ERROR_MESSAGES.specifyDocument
+				? MENSAJES_ERROR.specifyDocument
 				: '',
 
 		docNumero:
 			tipo === 'persona' && !docNumero.trim()
-				? ERROR_MESSAGES.required
+				? MENSAJES_ERROR.obligatorio
 				: tipo === 'persona' && docTipo === 'DNI' && !isValidDni(docNumero)
-					? ERROR_MESSAGES.dniInvalid
+					? MENSAJES_ERROR.dniInvalid
 					: '',
 
 		nacimiento:
-			tipo === 'persona' && nacimiento && isAdult(nacimiento)
+			tipo === 'persona' && nacimiento && esAdulto(nacimiento)
 				? ''
 				: tipo === 'persona'
-					? ERROR_MESSAGES.ageRequirement
+					? MENSAJES_ERROR.requisitoEdad
 					: '',
 
-		cuil: tipo === 'persona' && !cuil.trim() ? ERROR_MESSAGES.required : '',
+		cuil: tipo === 'persona' && !cuil.trim() ? MENSAJES_ERROR.obligatorio : '',
 
 		// Organización
-		razonSocial: tipo === 'organizacion' && !razonSocial.trim() ? ERROR_MESSAGES.required : '',
+		razonSocial: tipo === 'organizacion' && !razonSocial.trim() ? MENSAJES_ERROR.obligatorio : '',
 
 		cuit:
 			tipo === 'organizacion' && !cuit.trim()
-				? ERROR_MESSAGES.required
+				? MENSAJES_ERROR.obligatorio
 				: tipo === 'organizacion' && !isValidCuit(cuit)
-					? ERROR_MESSAGES.cuitInvalid
+					? MENSAJES_ERROR.cuitInvalid
 					: '',
 
 		repNombre:
 			tipo === 'organizacion' && !repNombre.trim()
-				? ERROR_MESSAGES.required
-				: tipo === 'organizacion' && !isValidName(repNombre)
-					? ERROR_MESSAGES.nameInvalid
+				? MENSAJES_ERROR.obligatorio
+				: tipo === 'organizacion' && !validarNombre(repNombre)
+					? MENSAJES_ERROR.nombreInvalido
 					: '',
 
 		repApellido:
 			tipo === 'organizacion' && !repApellido.trim()
-				? ERROR_MESSAGES.required
-				: tipo === 'organizacion' && !isValidLastName(repApellido)
-					? ERROR_MESSAGES.lastNameInvalid
+				? MENSAJES_ERROR.obligatorio
+				: tipo === 'organizacion' && !validarApellido(repApellido)
+					? MENSAJES_ERROR.apellidoInvalido
 					: '',
 
 		repDocOtro:
 			tipo === 'organizacion' && repDocTipo === 'Otro' && !repDocOtro.trim()
-				? ERROR_MESSAGES.specifyDocument
+				? MENSAJES_ERROR.specifyDocument
 				: '',
 
 		repDocNumero:
 			tipo === 'organizacion' && !repDocNumero.trim()
-				? ERROR_MESSAGES.required
+				? MENSAJES_ERROR.obligatorio
 				: tipo === 'organizacion' && repDocTipo === 'DNI' && !isValidDni(repDocNumero)
-					? ERROR_MESSAGES.dniInvalid
+					? MENSAJES_ERROR.dniInvalid
 					: '',
 
 		repNacimiento:
-			tipo === 'organizacion' && repNacimiento && isAdult(repNacimiento)
+			tipo === 'organizacion' && repNacimiento && esAdulto(repNacimiento)
 				? ''
 				: tipo === 'organizacion'
-					? ERROR_MESSAGES.ageRequirement
+					? MENSAJES_ERROR.requisitoEdad
 					: '',
 
 		// Credenciales
 		username: !username.trim()
-			? ERROR_MESSAGES.required
-			: !isValidUsername(username)
-				? ERROR_MESSAGES.usernameInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarUsername(username)
+				? MENSAJES_ERROR.usuarioInvalido
 				: '',
 
 		email: !email.trim()
-			? ERROR_MESSAGES.required
-			: !isValidEmail(email)
-				? ERROR_MESSAGES.emailInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarCorreo(email)
+				? MENSAJES_ERROR.correoInvalido
 				: '',
 
 		password:
 			password.length < 8
-				? ERROR_MESSAGES.passwordRequirements
-				: !isValidPassword(password)
-					? ERROR_MESSAGES.passwordRequirements
+				? MENSAJES_ERROR.requisitosContrasena
+				: !validarContrasena(password)
+					? MENSAJES_ERROR.requisitosContrasena
 					: '',
 
-		repassword: repassword !== password ? ERROR_MESSAGES.passwordMismatch : ''
+		repassword: repassword !== password ? MENSAJES_ERROR.contrasenasNoCoinciden : ''
 	};
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');
@@ -193,7 +193,7 @@
 			id="tipo"
 			bind:value={tipo}
 			required={true}
-			error={intentoEnvio && !tipo ? ERROR_MESSAGES.required : ''}
+			error={intentoEnvio && !tipo ? MENSAJES_ERROR.obligatorio : ''}
 			options={[
 				{ value: 'persona', label: 'Persona' },
 				{ value: 'organizacion', label: 'Organización' }

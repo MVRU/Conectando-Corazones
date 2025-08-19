@@ -7,16 +7,16 @@
 	const dispatch = createEventDispatcher();
 
 	import {
-		isValidEmail,
-		isValidPassword,
-		isValidUsername,
+		validarCorreo,
+		validarContrasena,
+		validarUsername,
 		isValidCuit,
-		isAdult,
-		isValidName,
-		isValidLastName,
+		esAdulto,
+		validarNombre,
+		validarApellido,
 		isValidDni,
-		ERROR_MESSAGES
-	} from '$lib/utils/validators';
+		MENSAJES_ERROR
+	} from '$lib/utils/validaciones';
 
 	// Estados iniciales
 	let sending = false;
@@ -46,68 +46,68 @@
 
 	$: errors = {
 		nombre: institution.nombre.trim()
-			? isValidName(institution.nombre)
+			? validarNombre(institution.nombre)
 				? ''
-				: ERROR_MESSAGES.nameInvalid
-			: ERROR_MESSAGES.required,
+				: MENSAJES_ERROR.nombreInvalido
+			: MENSAJES_ERROR.obligatorio,
 
 		otroTipo:
 			institution.tipo === 'Otro' && institution.otroTipo.trim() === ''
-				? ERROR_MESSAGES.specifyInstitutionType
+				? MENSAJES_ERROR.tipoInstitucionObligatorio
 				: '',
 
 		username: !institution.username.trim()
-			? ERROR_MESSAGES.required
-			: !isValidUsername(institution.username)
-				? ERROR_MESSAGES.usernameInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarUsername(institution.username)
+				? MENSAJES_ERROR.usuarioInvalido
 				: '',
 
 		email: !institution.email.trim()
-			? ERROR_MESSAGES.required
-			: !isValidEmail(institution.email)
-				? ERROR_MESSAGES.emailInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarCorreo(institution.email)
+				? MENSAJES_ERROR.correoInvalido
 				: '',
 
 		cuit:
-			institution.cuit.trim() && isValidCuit(institution.cuit) ? '' : ERROR_MESSAGES.cuitInvalid,
+			institution.cuit.trim() && isValidCuit(institution.cuit) ? '' : MENSAJES_ERROR.cuitInvalid,
 
 		password:
 			institution.password.length < 8
-				? ERROR_MESSAGES.passwordRequirements
-				: !isValidPassword(institution.password)
-					? ERROR_MESSAGES.passwordRequirements
+				? MENSAJES_ERROR.requisitosContrasena
+				: !validarContrasena(institution.password)
+					? MENSAJES_ERROR.requisitosContrasena
 					: '',
 
 		repassword:
-			institution.repassword !== institution.password ? ERROR_MESSAGES.passwordMismatch : '',
+			institution.repassword !== institution.password ? MENSAJES_ERROR.contrasenasNoCoinciden : '',
 
 		repNombre: !representative.repNombre.trim()
-			? ERROR_MESSAGES.required
-			: !isValidName(representative.repNombre)
-				? ERROR_MESSAGES.nameInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarNombre(representative.repNombre)
+				? MENSAJES_ERROR.nombreInvalido
 				: '',
 
 		repApellido: !representative.repApellido.trim()
-			? ERROR_MESSAGES.required
-			: !isValidLastName(representative.repApellido)
-				? ERROR_MESSAGES.lastNameInvalid
+			? MENSAJES_ERROR.obligatorio
+			: !validarApellido(representative.repApellido)
+				? MENSAJES_ERROR.apellidoInvalido
 				: '',
 
 		repDocOtro:
 			representative.repDocTipo === 'Otro' && representative.repDocOtro.trim() === ''
-				? ERROR_MESSAGES.specifyDocument
+				? MENSAJES_ERROR.specifyDocument
 				: '',
 
 		repDocNumero: !representative.repDocNumero.trim()
-			? ERROR_MESSAGES.required
+			? MENSAJES_ERROR.obligatorio
 			: representative.repDocTipo === 'DNI' && !isValidDni(representative.repDocNumero)
-				? ERROR_MESSAGES.dniInvalid
+				? MENSAJES_ERROR.dniInvalid
 				: '',
 
 		repNacimiento:
-			representative.repNacimiento && isAdult(new Date(representative.repNacimiento))
+			representative.repNacimiento && esAdulto(new Date(representative.repNacimiento))
 				? ''
-				: ERROR_MESSAGES.ageRequirement
+				: MENSAJES_ERROR.requisitoEdad
 	};
 
 	$: hasErrors = Object.values(errors).some((error) => error !== '');

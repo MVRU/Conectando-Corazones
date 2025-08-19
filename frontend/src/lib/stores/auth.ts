@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
-import { isValidEmail, isValidUsername } from '$lib/utils/validators';
+import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -84,7 +84,7 @@ export const authActions = {
     if (
       !credencial ||
       !password?.trim() ||
-      (!isValidEmail(credencial) && !isValidUsername(credencial))
+      (!validarCorreo(credencial) && !validarUsername(credencial))
     ) {
       authStore.update((s) => ({ ...s, error: 'Credenciales inválidas' }));
       return null;

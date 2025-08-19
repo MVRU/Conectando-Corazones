@@ -12,7 +12,7 @@ TODO:
 	import Image from '$lib/components/ui/elements/Image.svelte';
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
-	import { isValidEmail, isValidUsername } from '$lib/utils/validators';
+	import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 
 	let identificador = '';
 	let password = '';
@@ -28,7 +28,7 @@ TODO:
 		validationErrors = [];
 		if (!identificador.trim()) validationErrors.push('El usuario o correo es requerido');
 		if (!password.trim()) validationErrors.push('La contraseña es requerida');
-		if (identificador && !isValidEmail(identificador) && !isValidUsername(identificador)) {
+		if (identificador && !validarCorreo(identificador) && !validarUsername(identificador)) {
 			validationErrors.push('Ingresá un correo o usuario válido');
 		}
 

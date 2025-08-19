@@ -9,7 +9,7 @@ TODO:
 <script lang="ts">
 	import Button from '$lib/components/ui/elements/Button.svelte';
 	import Image from '$lib/components/ui/elements/Image.svelte';
-	import { isValidEmail } from '$lib/utils/validators';
+	import { validarCorreo } from '$lib/utils/validaciones';
 
 	let email = '';
 	let isLoading = false;
@@ -32,7 +32,7 @@ TODO:
 			return;
 		}
 
-		if (!isValidEmail(email)) {
+		if (!validarCorreo(email)) {
 			validationErrors.push('Por favor ingresa un email válido');
 			return;
 		}
