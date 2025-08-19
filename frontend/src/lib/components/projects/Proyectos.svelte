@@ -1,9 +1,3 @@
-<!-- FIX:
- 	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER		
-	- [ ] Corregir los estados de Proyecto
-	- [ ] Corregir nombres de tipos de participación
-	
-	-->
 
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
@@ -16,30 +10,21 @@
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 	import { filtrarProyectos } from '$lib/utils/util-proyectos';
 	import { ESTADO_LABELS } from '$lib/types/Estado';
+	import { TIPO_PARTICIPACION_LABELS, type TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 
 	let searchQuery = writable('');
 
-	const participacionMap = {
-		Monetaria: 'Monetaria',
-		Voluntariado: 'Voluntariado',
-		Especie: 'Especie'
-	} as const;
-
-	type ParticipacionLabel = keyof typeof participacionMap;
-
-	const tiposParticipacion: ('Todos' | ParticipacionLabel)[] = [
+	const tiposParticipacion: ('Todos' | TipoParticipacionDescripcion)[] = [
 		'Todos',
-		...Object.values(participacionMap)
+		...Object.keys(TIPO_PARTICIPACION_LABELS) as TipoParticipacionDescripcion[]
 	];
 
 	const estadosDisponibles = ['Todos', ...Object.values(ESTADO_LABELS)];
 
-	const urgenciasDisponibles = ['Todas', 'Alta', 'Media', 'Baja'];
 	let provinciasDisponibles: string[] = [];
-	let filtrosSeleccionados: (ParticipacionLabel | 'Todos')[] = ['Todos'];
-	let filtroParticipacionSeleccionado: 'Todos' | ParticipacionLabel = 'Todos';
+	let filtrosSeleccionados: (TipoParticipacionDescripcion | 'Todos')[] = ['Todos'];
+	let filtroParticipacionSeleccionado: 'Todos' | TipoParticipacionDescripcion = 'Todos';
 	let estadoSeleccionado = 'Todos';
-	let urgenciaSeleccionada = 'Todas';
 	let provinciaSeleccionada = 'Todas';
 	let mostrarFiltros = false;
 
@@ -61,7 +46,6 @@
 		filtrosSeleccionados = ['Todos'];
 		filtroParticipacionSeleccionado = 'Todos';
 		estadoSeleccionado = 'Todos';
-		urgenciaSeleccionada = 'Todas';
 		provinciaSeleccionada = 'Todas';
 		searchQuery.set('');
 	}
@@ -81,7 +65,6 @@
 			filtrosSeleccionados,
 			$searchQuery,
 			estadoSeleccionado,
-			urgenciaSeleccionada,
 			provinciaSeleccionada
 		);
 	}
@@ -144,7 +127,7 @@
 			<div class="rounded-xl border border-gray-200 bg-gray-50 p-6 shadow-sm">
 				<h4 class="mb-6 text-center text-lg font-semibold text-gray-800">Filtros</h4>
 
-				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+				<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 					<!-- Filtro por Tipo de Participación -->
 					<div>
 						<label for="filtro-participacion" class="mb-3 block text-sm font-medium text-gray-700"
@@ -173,22 +156,6 @@
 						>
 							{#each estadosDisponibles as estado (estado)}
 								<option value={estado}>{estado}</option>
-							{/each}
-						</select>
-					</div>
-
-					<!-- Filtro por Urgencia -->
-					<div>
-						<label for="filtro-urgencia" class="mb-3 block text-sm font-medium text-gray-700"
-							>Urgencia</label
-						>
-						<select
-							id="filtro-urgencia"
-							bind:value={urgenciaSeleccionada}
-							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-						>
-							{#each urgenciasDisponibles as urgencia (urgencia)}
-								<option value={urgencia}>{urgencia}</option>
 							{/each}
 						</select>
 					</div>
@@ -241,7 +208,7 @@
 		</p>
 
 		<!-- Filtros activos -->
-		{#if !filtrosSeleccionados.includes('Todos') || estadoSeleccionado !== 'Todos' || urgenciaSeleccionada !== 'Todas' || provinciaSeleccionada !== 'Todas'}
+		{#if !filtrosSeleccionados.includes('Todos') || estadoSeleccionado !== 'Todos' || provinciaSeleccionada !== 'Todas'}
 			<div class="mt-2 flex flex-wrap justify-center gap-2">
 				<span class="text-xs text-gray-500">Filtros activos:</span>
 				{#if !filtrosSeleccionados.includes('Todos')}
@@ -256,13 +223,6 @@
 						class="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
 					>
 						Estado: {estadoSeleccionado}
-					</span>
-				{/if}
-				{#if urgenciaSeleccionada !== 'Todas'}
-					<span
-						class="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-medium text-yellow-700"
-					>
-						Urgencia: {urgenciaSeleccionada}
 					</span>
 				{/if}
 				{#if provinciaSeleccionada !== 'Todas'}

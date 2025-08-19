@@ -37,7 +37,6 @@ export function filtrarProyectos(
     filtros: string[],
     searchQuery: string,
     estado: string,
-    urgencia: string,
     provincia: string
 ): Proyecto[] {
     let resultado = [...proyectos];
@@ -57,10 +56,6 @@ export function filtrarProyectos(
         resultado = resultado.filter(
             (p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado
         );
-    }
-
-    if (urgencia !== 'Todas') {
-        // TODO: Implementar urgencia cuando esté en el tipo
     }
 
     if (provincia !== 'Todas') {
