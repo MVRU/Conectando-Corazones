@@ -10,6 +10,6 @@ export interface Direccion {
 	url_google_maps?: string;
 
 	// * Relacion con Localidad
-	localidad_id?: number; // FK para crear/actualizar
+	id_localidad?: number;// FK para crear/actualizar
 	localidad?: Localidad; // Objeto expandido al leer
 }	

@@ -17,15 +17,12 @@ export interface Usuario {
   created_at: Date;
   rol: 'institucion' | 'colaborador' | 'administrador';
   url_foto: string;
-  reportes?: Reporte[]; // ! payload grande
-  consentimientos?: Consentimiento[]; // ! payload grande
-  resenas?: Resena[]; // ! payload grande
+
   categorias_preferidas?: Categoria[];
   tipos_participacion_preferidas?: TipoParticipacion[];
   direccion?: Direccion;
-  contactos?: Contacto[]; // ! payload grande
+  id_direccion?: number;
 }
-
 export interface Institucion extends Usuario {
   nombre_legal: string;
   tipo_institucion: string;

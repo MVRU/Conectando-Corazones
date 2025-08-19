@@ -8,4 +8,6 @@ export interface HistorialDeCambios {
   valor_nuevo: string;
   justificacion: string;
   created_at: Date;
+    // * Relaciones (FKs)
+  id_usuario?: number;
 }

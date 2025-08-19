@@ -7,4 +7,6 @@ export interface Resena {
   aprobado?: boolean;
   username: string;
   rol?: string; // ! No está en DER, agregado como opcional para testimonios de home
+    // * Relaciones (FKs)
+  id_usuario?: number;
 }

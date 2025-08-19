@@ -8,4 +8,5 @@ export interface SolicitudFinalizacion {
   // * RELACIONES
   evidencia_ids?: number[]; // -*- FK para create/update
   evidencias?: Evidencia[]; // -*- Objetos expandidos para read
+  id_proyecto?: number;
 }

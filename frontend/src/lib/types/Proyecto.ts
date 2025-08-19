@@ -25,7 +25,7 @@ export interface Proyecto {
   // * RELACIONES
 
   // -*- FKS para create/update
-  estado_id?: number;
+  id_estado?: number;
 
   participacion_permitida_ids?: number[];
   categoria_ids?: number[];

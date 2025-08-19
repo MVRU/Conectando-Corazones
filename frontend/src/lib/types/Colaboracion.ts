@@ -6,4 +6,5 @@ export interface Colaboracion {
   estado: EstadoColaboracion;
   justificacion?: string;
   created_at?: Date;
+  id_proyecto?: number;
 }

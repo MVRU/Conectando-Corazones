@@ -15,4 +15,6 @@ export interface Consentimiento {
   tipo: TipoConsentimiento;
   version: string;
   created_at?: Date;
+    // * Relaciones (FKs)
+  id_usuario?: number;
 }

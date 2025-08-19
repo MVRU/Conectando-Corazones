@@ -7,4 +7,5 @@ export interface Evidencia {
   created_at?: Date;
   archivos?: Archivo[];
   solicitudes_finalizacion?: SolicitudFinalizacion[];
+  id_proyecto?: number;
 }
