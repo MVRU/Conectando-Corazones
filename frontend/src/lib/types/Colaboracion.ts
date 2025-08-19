@@ -1,9 +1,10 @@
-// * DECISIÓN DE DISEÑO: limitar los estados posibles para evitar inconsistencias
-export type EstadoColaboracion = 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
-
 export interface Colaboracion {
   id_colaboracion?: number;
-  estado: EstadoColaboracion;
+  estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
   justificacion?: string;
   created_at?: Date;
+
+  // * Relaciones
+  proyecto_id?: number;
+  colaborador_id?: number;
 }

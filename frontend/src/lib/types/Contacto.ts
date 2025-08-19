@@ -22,6 +22,7 @@ export interface Contacto {
     tipo_contacto: TipoContacto | string;
     valor: string;
     etiqueta?: EtiquetaContacto | string;
+    usuario_id: number; // * FK
 }
 
 

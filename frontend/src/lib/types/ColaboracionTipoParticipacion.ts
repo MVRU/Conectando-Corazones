@@ -7,7 +7,7 @@ export interface ColaboracionTipoParticipacion {
   participacion_permitida_id?: number;
   cantidad: number;
 
-  // * Objetos expandidos para read
+  // -*- Objetos expandidos para read
   colaboracion?: Colaboracion;
   participacion_permitida?: ParticipacionPermitida;
 }

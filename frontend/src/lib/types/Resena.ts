@@ -4,7 +4,7 @@ export interface Resena {
   id_objeto?: number;
   contenido: string;
   puntaje: number;
-  aprobado?: boolean;
-  username: string;
+  aprobado?: boolean; // * para moderación
   rol?: string; // ! No está en DER, agregado como opcional para testimonios de home
+  usuario_id: string; // * FK
 }

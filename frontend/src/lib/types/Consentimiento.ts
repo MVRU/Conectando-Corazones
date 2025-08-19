@@ -16,3 +16,7 @@ export interface Consentimiento {
   version: string;
   created_at?: Date;
 }
+
+// * Guards canónicos
+export const esTipoConsentimientoCanonico = (v: string): v is TipoConsentimiento =>
+  (TIPOS_CONSENTIMIENTO as readonly string[]).includes(v);

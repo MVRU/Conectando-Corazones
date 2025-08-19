@@ -1,6 +1,3 @@
-import type { Reporte } from './Reporte';
-import type { Consentimiento } from './Consentimiento';
-import type { Resena } from './Resena';
 import type { Categoria } from './Categoria';
 import type { TipoParticipacion } from './TipoParticipacion';
 import type { Direccion } from './Direccion';
@@ -17,13 +14,17 @@ export interface Usuario {
   created_at: Date;
   rol: 'institucion' | 'colaborador' | 'administrador';
   url_foto: string;
-  reportes?: Reporte[]; // ! payload grande
-  consentimientos?: Consentimiento[]; // ! payload grande
-  resenas?: Resena[]; // ! payload grande
+  estado_verificacion?: string; // ! Cálculo para simplificar
+
+  // * Relaciones
+  // -*- FKs para create/update
+  direccion_id?: number;
+
+  // -*- Objetos expandidos para read
+  contactos?: Contacto[]; // ! sirve para login
+  direccion?: Direccion;
   categorias_preferidas?: Categoria[];
   tipos_participacion_preferidas?: TipoParticipacion[];
-  direccion?: Direccion;
-  contactos?: Contacto[]; // ! payload grande
 }
 
 export interface Institucion extends Usuario {

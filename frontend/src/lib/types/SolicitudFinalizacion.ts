@@ -1,11 +1,16 @@
 
 import type { Evidencia } from './Evidencia';
+import type { Proyecto } from './Proyecto';
 export interface SolicitudFinalizacion {
   id_solicitud?: number;
-  descripcion: string;
+  estado?: string; // ! opcional porque es un cálculo, pero es relevante tenerlo
   created_at?: Date;
 
   // * RELACIONES
-  evidencia_ids?: number[]; // -*- FK para create/update
-  evidencias?: Evidencia[]; // -*- Objetos expandidos para read
+  // -*- FKs para create/update
+  proyecto_id: number;
+
+  // -*- Objetos expandidos para read
+  proyecto?: Proyecto;
+  evidencias?: Evidencia[];
 }
