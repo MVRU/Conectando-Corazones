@@ -4,7 +4,7 @@
 	export let description = '';
 	export let link = '';
 	export let linkText = '';
-	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 </script>
 
 <div

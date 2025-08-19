@@ -5,23 +5,23 @@
 	import { swipe } from '$lib/actions/swipe';
 
 	let centerIndex = 0;
-	let visibleCount = 3;
+	let cantidadVisible = 3;
 
-	function clampCenter() {
-		const maxStart = Math.max(0, mockTestimonios.length - visibleCount);
+	function limitarCentro() {
+		const maxStart = Math.max(0, mockTestimonios.length - cantidadVisible);
 		if (centerIndex < 0) centerIndex = 0;
 		if (centerIndex > maxStart) centerIndex = maxStart;
 	}
 
-	function updateVisibleCount() {
-		visibleCount = window.innerWidth < 768 ? 1 : 3;
-		clampCenter();
+	function actualizarCantidadVisible() {
+		cantidadVisible = window.innerWidth < 768 ? 1 : 3;
+		limitarCentro();
 	}
 
-	const showPrev = () => centerIndex--;
-	const showNext = () => centerIndex++;
+	const mostrarAnterior = () => centerIndex--;
+	const mostrarSiguiente = () => centerIndex++;
 
-	$: testimoniosVisibles = Array.from({ length: visibleCount }, (_, i) => {
+	$: testimoniosVisibles = Array.from({ length: cantidadVisible }, (_, i) => {
 		const index = (centerIndex + i) % mockTestimonios.length;
 		return mockTestimonios[(index + mockTestimonios.length) % mockTestimonios.length];
 	});
@@ -30,8 +30,8 @@
 	let sectionRef: HTMLElement;
 
 	onMount(() => {
-		updateVisibleCount();
-		window.addEventListener('resize', updateVisibleCount);
+		actualizarCantidadVisible();
+		window.addEventListener('resize', actualizarCantidadVisible);
 
 		const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.15
@@ -39,7 +39,7 @@
 		if (sectionRef) io.observe(sectionRef);
 
 		return () => {
-			window.removeEventListener('resize', updateVisibleCount);
+			window.removeEventListener('resize', actualizarCantidadVisible);
 			io.disconnect();
 		};
 	});
@@ -76,8 +76,8 @@
 	<!-- ! Ignorar el error que aparece, está ok -->
 	<div
 		use:swipe={{}}
-		on:swipe-left={showNext}
-		on:swipe-right={showPrev}
+		on:swipe-left={mostrarSiguiente}
+		on:swipe-right={mostrarAnterior}
 		class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
 	>
 		<!-- Contenedor de tarjetas -->
@@ -85,8 +85,8 @@
 			{#each testimoniosVisibles as testimonio, i (testimonio.contenido)}
 				<TestimoniosCard
 					{...testimonio}
-					active={i === Math.floor(visibleCount / 2)}
-					locked={i !== Math.floor(visibleCount / 2)}
+					active={i === Math.floor(cantidadVisible / 2)}
+					locked={i !== Math.floor(cantidadVisible / 2)}
 				/>
 			{/each}
 		</div>
@@ -94,7 +94,7 @@
 		<!-- Flechas únicas para todos los dispositivos -->
 		<div class="mt-6 flex w-full justify-between px-4">
 			<button
-				on:click={showPrev}
+				on:click={mostrarAnterior}
 				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 				aria-label="Anterior testimonio"
 			>
@@ -109,7 +109,7 @@
 			</button>
 
 			<button
-				on:click={showNext}
+				on:click={mostrarSiguiente}
 				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
 				aria-label="Siguiente testimonio"
 			>

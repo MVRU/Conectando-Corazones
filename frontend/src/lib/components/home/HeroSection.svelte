@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Button from '$lib/components/ui/elements/Button.svelte';
-	import Image from '$lib/components/ui/elements/Image.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import Ticker from '$lib/components/visual/Ticker.svelte';
-	import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 
 	const logos = [
 		'/instituciones/rotary.png',
@@ -11,8 +11,8 @@
 		'/instituciones/cruz-roja.png'
 	];
 
-	let showHero = false;
-	let showImages = false;
+	let mostrarHero = false;
+	let mostrarImagenes = false;
 	let sectionRef: HTMLElement;
 
 	let observer: IntersectionObserver;
@@ -22,13 +22,13 @@
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						showHero = false;
-						showImages = false;
-						setTimeout(() => (showHero = true), 50);
-						setTimeout(() => (showImages = true), 320);
+						mostrarHero = false;
+						mostrarImagenes = false;
+						setTimeout(() => (mostrarHero = true), 50);
+						setTimeout(() => (mostrarImagenes = true), 320);
 					} else {
-						showHero = false;
-						showImages = false;
+						mostrarHero = false;
+						mostrarImagenes = false;
 					}
 				});
 			},
@@ -66,7 +66,7 @@
 		<div class="flex flex-1 flex-col items-center text-center lg:items-start lg:text-left">
 			<div
 				class="-mb-6 flex w-full justify-center transition-all duration-1000 lg:justify-start"
-				class:hero-fade={!showHero}
+				class:hero-fade={!mostrarHero}
 				style="transition-delay: 100ms"
 			>
 				<Badge
@@ -77,7 +77,7 @@
 			</div>
 			<h1
 				class="custom-margin mb-4 mt-16 text-4xl font-black leading-tight tracking-tight drop-shadow-[0_6px_32px_rgba(0,137,255,0.11)] transition-all duration-1000 sm:text-5xl"
-				class:hero-fade={!showHero}
+				class:hero-fade={!mostrarHero}
 				style="transition-delay: 180ms"
 			>
 				<span
@@ -89,7 +89,7 @@
 			</h1>
 			<p
 				class="mx-auto mt-4 max-w-xl text-xl font-medium text-sky-100/90 transition-all duration-1000 sm:text-xl lg:mx-0"
-				class:hero-fade={!showHero}
+				class:hero-fade={!mostrarHero}
 				style="transition-delay: 250ms"
 			>
 				Un puente digital entre quienes tienen algo valioso para dar y quienes luchan por un mundo
@@ -97,7 +97,7 @@
 			</p>
 			<div
 				class="mt-10 flex justify-center transition-all duration-1000 lg:justify-start"
-				class:hero-fade={!showHero}
+				class:hero-fade={!mostrarHero}
 				style="transition-delay: 330ms"
 			>
 				<div
@@ -105,7 +105,7 @@
 				>
 					<Button
 						label="Registrarse"
-						href="/signin"
+						href="/registrarse"
 						variant="primary"
 						size="md"
 						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
@@ -117,7 +117,7 @@
 		<!-- *Imágenes destacadas -->
 		<div
 			class="relative grid flex-1 grid-cols-2 gap-5 transition-all duration-1000 ease-out"
-			class:hero-images={!showImages}
+			class:hero-images={!mostrarImagenes}
 		>
 			<div
 				class="rounded-4xl aspect-square w-full -translate-y-2 translate-x-3 rotate-6 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"

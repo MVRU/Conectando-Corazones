@@ -1,12 +1,12 @@
 <script lang="ts">
 	import HeroSection from '$lib/components/home/HeroSection.svelte';
-	import HowItWorksSection from '$lib/components/home/HowItWorksSection.svelte';
-	import HistorySection from '$lib/components/home/HistorySection.svelte';
-	import CallToActionSection from '$lib/components/home/CallToActionSection.svelte';
+	import ComoFuncionaSection from '$lib/components/home/ComoFuncionaSection.svelte';
+	import HistoriaSection from '$lib/components/home/HistoriaSection.svelte';
+	import CTASection from '$lib/components/home/CTASection.svelte';
 	import TestimoniosSection from '$lib/components/home/TestimoniosSection.svelte';
 	import FaqSection from '$lib/components/home/FaqSection.svelte';
 	import SoporteSection from '$lib/components/home/SoporteSection.svelte';
-	import FeaturedProjectsSection from '$lib/components/home/FeaturedProjectsSection.svelte';
+	import ProyectosDestacadosSection from '$lib/components/home/ProyectosDestacadosSection.svelte';
 	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { onMount } from 'svelte';
 
@@ -16,10 +16,10 @@
 </script>
 
 <HeroSection />
-<HowItWorksSection />
-<HistorySection />
-<CallToActionSection />
+<ComoFuncionaSection />
+<HistoriaSection />
+<CTASection />
 <TestimoniosSection />
 <FaqSection />
-<FeaturedProjectsSection />
+<ProyectosDestacadosSection />
 <SoporteSection />

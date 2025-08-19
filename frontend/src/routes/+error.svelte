@@ -5,8 +5,8 @@
 
 <script lang="ts">
 	export let error: Error;
-	export let status: number;
-	import ErrorPage from '$lib/components/errors/ErrorPage.svelte';
+	export let estado: number;
+	import PaginaError from '$lib/components/errores/PaginaError.svelte';
 </script>
 
-<ErrorPage {status} message={error?.message} />
+<PaginaError {estado} mensaje={error?.message} />

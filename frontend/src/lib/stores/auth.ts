@@ -93,7 +93,7 @@ export const authActions = {
     authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('/api/iniciar-sesion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

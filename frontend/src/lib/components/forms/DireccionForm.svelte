@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
-	import Button from '$lib/components/ui/elements/Button.svelte';
-	import Select from '$lib/components/ui/elements/Select.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import Select from '$lib/components/ui/elementos/Select.svelte';
 
 	import {
 		validarCalle,

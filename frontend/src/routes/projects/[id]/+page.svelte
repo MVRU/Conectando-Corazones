@@ -1,12 +1,14 @@
+<!-- TODO: corregir referencias a direccion y estado -->
+
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { page } from '$app/stores';
 	import { error } from '@sveltejs/kit';
 
-	import ProjectHeader from '$lib/components/projects/ProjectHeader.svelte';
-	import DetallesProyecto from '$lib/components/projects/DetallesProyecto.svelte';
-	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
+	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
+	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
+	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
@@ -107,7 +109,7 @@
 	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
 		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<!-- Header del proyecto -->
-			<ProjectHeader {proyecto} {getColorUrgencia} {getColorEstado} />
+			<ProyectoHeader {proyecto} {getColorUrgencia} {getColorEstado} />
 
 			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
 				<!-- Columna principal -->

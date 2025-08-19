@@ -1,5 +1,5 @@
 <script lang="ts">
-	import RenaperValidation from '$lib/components/validation/RenaperValidation.svelte';
+	import ValidacionRenaper from '$lib/components/validaciones/ValidacionRenaper.svelte';
 </script>
 
-<RenaperValidation currentStep={3} totalSteps={5} />
+<ValidacionRenaper pasoActual={3} pasosTotales={5} />

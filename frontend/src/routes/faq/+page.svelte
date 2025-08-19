@@ -2,41 +2,41 @@
 	import { writable, derived } from 'svelte/store';
 	import { onMount } from 'svelte';
 	import { faqs as allFaqs } from '$lib/data/faqs';
-	import SearchBar from '$lib/components/ui/elements/SearchBar.svelte';
+	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import { highlightSearch } from '$lib/utils/sanitize';
 
-	type Agrupadas = Record<string, { question: string; answer: string }[]>;
+	type Agrupadas = Record<string, { pregunta: string; respuesta: string }[]>;
 
 	// Agrupar FAQs por categoría
 	const faqsPorCategoria = allFaqs
-		.filter((faq) => faq.category && faq.category !== 'General')
+		.filter((faq) => faq.categoria && faq.categoria !== 'General')
 		.reduce((acc, faq) => {
-			const categoria = faq.category!;
+			const categoria = faq.categoria!;
 			if (!acc[categoria]) acc[categoria] = [];
-			acc[categoria].push({ question: faq.question, answer: faq.answer });
+			acc[categoria].push({ pregunta: faq.pregunta, respuesta: faq.respuesta });
 			return acc;
 		}, {} as Agrupadas);
 
-	const categorias = Object.entries(faqsPorCategoria).map(([category, questions]) => ({
-		category,
-		questions
+	const categorias = Object.entries(faqsPorCategoria).map(([categoria, preguntas]) => ({
+		categoria,
+		preguntas
 	}));
 
 	let searchQuery = writable('');
-	const filteredFaqs = derived(searchQuery, ($searchQuery) => {
+	const faqsFiltradas = derived(searchQuery, ($searchQuery) => {
 		if (!$searchQuery.trim()) return categorias;
 
 		const lowerQuery = $searchQuery.toLowerCase();
 		return categorias
 			.map((c) => {
-				const filtered = c.questions.filter(
+				const filtered = c.preguntas.filter(
 					(q) =>
-						q.question.toLowerCase().includes(lowerQuery) ||
-						q.answer.toLowerCase().includes(lowerQuery)
+						q.pregunta.toLowerCase().includes(lowerQuery) ||
+						q.respuesta.toLowerCase().includes(lowerQuery)
 				);
-				return { category: c.category, questions: filtered };
+				return { categoria: c.categoria, preguntas: filtered };
 			})
-			.filter((c) => c.questions.length > 0);
+			.filter((c) => c.preguntas.length > 0);
 	});
 
 	let searchInput: HTMLInputElement | undefined;
@@ -48,11 +48,11 @@
 	onMount(() => {
 		const hash = decodeURIComponent(location.hash.substring(1));
 		if (hash) {
-			const faq = allFaqs.find((f) => f.question.toLowerCase() === hash.toLowerCase());
+			const faq = allFaqs.find((f) => f.pregunta.toLowerCase() === hash.toLowerCase());
 			if (faq) {
-				searchQuery.set(faq.question);
+				searchQuery.set(faq.pregunta);
 				setTimeout(() => {
-					const element = document.getElementById(`faq-${encodeURIComponent(faq.question)}`);
+					const element = document.getElementById(`faq-${encodeURIComponent(faq.pregunta)}`);
 					element?.scrollIntoView({ behavior: 'smooth' });
 				}, 500);
 			}
@@ -82,7 +82,7 @@
 	</div>
 
 	<!-- Sin resultados -->
-	{#if $filteredFaqs.length === 0}
+	{#if $faqsFiltradas.length === 0}
 		<div
 			class="animate-fade-in-up rounded-xl border border-gray-200 bg-white p-10 text-center shadow-sm"
 		>
@@ -130,7 +130,7 @@
 
 	<!-- Categorías y preguntas -->
 	<div class="grid gap-8 md:grid-cols-1 lg:grid-cols-2">
-		{#each $filteredFaqs as category, i (category.category)}
+		{#each $faqsFiltradas as categoria, i (categoria.categoria)}
 			<div class="fade-slide-in" style="animation-delay: {i * 120}ms">
 				<div
 					class="rounded-xl border border-gray-100 bg-white px-6 pb-6 pt-5 shadow-sm transition-all hover:shadow-md"
@@ -138,19 +138,19 @@
 					<h3
 						class="mb-5 flex items-center justify-between border-b border-gray-100 pb-2 text-xl font-medium text-stone-700"
 					>
-						<span>{@html highlight(category.category, $searchQuery)}</span>
+						<span>{@html highlight(categoria.categoria, $searchQuery)}</span>
 					</h3>
 					<div class="space-y-3">
-						{#each category.questions as item, j (item.question)}
+						{#each categoria.preguntas as item, j (item.pregunta)}
 							<details
-								id={`faq-${encodeURIComponent(item.question)}`}
+								id={`faq-${encodeURIComponent(item.pregunta)}`}
 								class="group rounded-lg border border-gray-100 bg-gray-50 px-5 py-4 transition-all duration-300 hover:bg-gray-100"
 								style="animation-delay: {(j + 1) * 90}ms"
 							>
 								<summary
 									class="flex cursor-pointer items-center justify-between text-sm font-medium text-gray-800"
 								>
-									<span>{@html highlight(item.question, $searchQuery)}</span>
+									<span>{@html highlight(item.pregunta, $searchQuery)}</span>
 									<svg
 										class="ml-3 h-4 w-4 text-blue-500 transition-transform duration-300 group-open:rotate-180"
 										fill="none"
@@ -162,7 +162,7 @@
 									</svg>
 								</summary>
 								<p class="mt-3 text-sm leading-relaxed text-gray-600">
-									{@html highlight(item.answer, $searchQuery)}
+									{@html highlight(item.respuesta, $searchQuery)}
 								</p>
 							</details>
 						{/each}

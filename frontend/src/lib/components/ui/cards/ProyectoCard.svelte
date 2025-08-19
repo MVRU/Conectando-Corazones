@@ -4,9 +4,9 @@
 	- [ ] Implementar propiedad 'urgencia' en tipo Proyecto y mocks -->
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import Button from '$lib/components/ui/elements/Button.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
-	import ProyectoProgreso from '$lib/components/projects/ProyectoProgreso.svelte';
+	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 

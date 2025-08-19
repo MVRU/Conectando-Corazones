@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Badge from '$lib/components/ui/elements/Badge.svelte';
+	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import SoporteCard from '$lib/components/ui/cards/SoporteCard.svelte';
 
 	// Los agregué directamente acá porque son estáticos y no se usan en otros lugares -> no vale la pena crear modelo y data separada.
@@ -9,7 +9,7 @@
 			icon: 'user',
 			title: 'Sugerencias',
 			description: 'Tu opinión es muy valiosa. Si tenés ideas o propuestas, ¡queremos escucharlas!',
-			link: '/contact?tipo=sugerencia',
+			link: '/contacto?tipo=sugerencia',
 			linkText: 'Enviar sugerencias'
 		},
 		{
@@ -17,14 +17,14 @@
 			title: 'Soporte General',
 			description:
 				'Para preguntas sobre la plataforma, problemas técnicos o dudas sobre nuestros servicios.',
-			link: '/contact?tipo=soporte',
+			link: '/contacto?tipo=soporte',
 			linkText: 'Contactar a soporte'
 		},
 		{
 			icon: 'alert',
 			title: 'Denuncias y Reportes',
 			description: 'Nos tomamos muy en serio la seguridad y transparencia de nuestra comunidad.',
-			link: '/contact?tipo=denuncia',
+			link: '/contacto?tipo=denuncia',
 			linkText: 'Reportar incidencia'
 		}
 	] as const;
