@@ -1,5 +1,3 @@
-<!-- FIX: corregir atributos cuando se resuelvan las inconsistencias con el DER (español)-->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
@@ -19,28 +17,29 @@
 	import type { Direccion } from '$lib/types/Direccion';
 	import { createEventDispatcher } from 'svelte';
 
-	let sending = false;
-	let isEditingMapUrl = false;
-	let street = '';
-	let streetNumber = '';
-	let floorOrDepartment = '';
-	let provinciaId = '';
-	let localidadId = '';
+	let enviando = false;
+	let editandoUrlMapaGoogle = false;
+	let calle = '';
+	let numero = '';
+	let piso = '';
+	let departamento = '';
+	let idProvincia = '';
+	let idLocalidad = '';
 	let provincia: Provincia | undefined;
 	let localidad: Localidad | undefined;
 	let localidadesProvincia: Localidad[] = [];
-	let reference = '';
-	let googleMapsUrl = '';
+	let referencia = '';
+	let urlGoogleMaps = '';
 	let intentoEnvio = false;
 
-	export let showSkip = false;
-	export let skipLabel = 'Omitir';
+	export let mostrarOmitir = false;
+	export let etiquetaOmitir = 'Omitir';
 
 	const dispatch = createEventDispatcher();
 
-	const toStr = (n?: number) => (n == null ? '' : String(n));
+	const convertirAString = (n?: number) => (n == null ? '' : String(n));
 
-	$: provincia = provincias.find((p) => toStr(p.id_provincia) === provinciaId);
+	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
 
 	$: localidadesProvincia = provincia
 		? mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia)
@@ -48,52 +47,53 @@
 
 	$: if (
 		provincia &&
-		localidadId &&
-		!localidadesProvincia.some((l) => toStr(l.id_localidad) === localidadId)
+		idLocalidad &&
+		!localidadesProvincia.some((l) => convertirAString(l.id_localidad) === idLocalidad)
 	) {
-		localidadId = '';
+		idLocalidad = '';
 	}
 
-	$: localidad = localidadesProvincia.find((l) => toStr(l.id_localidad) === localidadId);
+	$: localidad = localidadesProvincia.find((l) => convertirAString(l.id_localidad) === idLocalidad);
 
 	// Genera la URL automáticamente
 	$: {
 		if (
-			validarCalle(street) &&
-			validarNumeroCalle(streetNumber) &&
+			validarCalle(calle) &&
+			validarNumeroCalle(numero) &&
 			validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 		) {
-			const direccionCompleta = `${street} ${streetNumber}, ${localidad?.nombre}, ${provincia?.nombre}`;
-			googleMapsUrl = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+			const direccionCompleta = `${calle} ${numero}, ${localidad?.nombre}, ${provincia?.nombre}`;
+			urlGoogleMaps = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
 		}
 	}
 
-	$: errors = {
-		street: validarCalle(street) ? '' : MENSAJES_ERROR.calleInvalida,
-		streetNumber: validarNumeroCalle(streetNumber) ? '' : MENSAJES_ERROR.numeroCalleInvalido,
-		province: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
-		location: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
+	$: errores = {
+		calle: validarCalle(calle) ? '' : MENSAJES_ERROR.calleInvalida,
+		numero: validarNumeroCalle(numero) ? '' : MENSAJES_ERROR.numeroCalleInvalido,
+		provincia: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
+		localidad: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 			? ''
 			: MENSAJES_ERROR.ciudadNoPerteneceProvincia
 	};
 
-	$: hasErrors = Object.values(errors).some((error) => error !== '');
+	$: tieneErrores = Object.values(errores).some((mensajeError) => mensajeError !== '');
 
-	function handleSubmit(event: Event) {
+	function manejarEnvio(event: Event) {
 		event.preventDefault();
 		intentoEnvio = true;
-		if (hasErrors) return;
+		if (tieneErrores) return;
 
-		sending = true;
+		enviando = true;
 
 		setTimeout(() => {
-			sending = false;
+			enviando = false;
 			const direccion: Direccion = {
-				calle: street,
-				numero: streetNumber,
-				piso: floorOrDepartment || undefined,
-				referencia: reference || undefined,
-				url_google_maps: googleMapsUrl || undefined,
+				calle,
+				numero,
+				piso: piso || undefined,
+				departamento: departamento || undefined,
+				referencia: referencia || undefined,
+				url_google_maps: urlGoogleMaps || undefined,
 				localidad_id: localidad?.id_localidad,
 				localidad
 			};
@@ -103,7 +103,7 @@
 </script>
 
 <form
-	on:submit={handleSubmit}
+	on:submit={manejarEnvio}
 	class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-200 md:p-10"
 >
 	<h3 class="mb-10 text-center text-xl font-semibold text-gray-800">
@@ -113,65 +113,69 @@
 	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 		<!-- Calle -->
 		<div>
-			<label for="street" class="mb-2 block text-sm font-semibold text-gray-700">
+			<label for="calle" class="mb-2 block text-sm font-semibold text-gray-700">
 				Calle <span class="text-red-600">*</span>
 			</label>
-			<Input id="street" bind:value={street} error={intentoEnvio ? errors.street : ''} />
+			<Input id="calle" bind:value={calle} error={intentoEnvio ? errores.calle : ''} />
 		</div>
 
 		<!-- Número -->
 		<div>
-			<label for="streetNumber" class="mb-2 block text-sm font-semibold text-gray-700">
+			<label for="numero" class="mb-2 block text-sm font-semibold text-gray-700">
 				Número <span class="text-red-600">*</span>
 			</label>
-			<Input
-				id="streetNumber"
-				bind:value={streetNumber}
-				error={intentoEnvio ? errors.streetNumber : ''}
-			/>
+			<Input id="numero" bind:value={numero} error={intentoEnvio ? errores.numero : ''} />
 		</div>
 
-		<!-- Piso / Depto -->
+		<!-- Piso -->
 		<div>
-			<label for="floorOrDepartment" class="mb-2 block text-sm font-semibold text-gray-700">
-				Piso / Departamento (opcional)
+			<label for="piso" class="mb-2 block text-sm font-semibold text-gray-700">
+				Piso (opcional)
 			</label>
-			<Input id="floorOrDepartment" bind:value={floorOrDepartment} placeholder="Ej: PB / 3B" />
+			<Input id="piso" bind:value={piso} placeholder="Ej: PB, 1, 2" />
+		</div>
+
+		<!-- Departamento -->
+		<div>
+			<label for="departamento" class="mb-2 block text-sm font-semibold text-gray-700">
+				Departamento (opcional)
+			</label>
+			<Input id="departamento" bind:value={departamento} placeholder="Ej: A, B, 101" />
 		</div>
 
 		<!-- Provincia -->
 		<Select
-			id="province"
+			id="provincia"
 			required={true}
-			placeholder="Selecciona una provincia"
+			placeholder="Seleccioná una provincia"
 			options={provincias
 				.filter((p) => p.id_provincia != null)
 				.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
-			bind:value={provinciaId}
-			error={intentoEnvio ? errors.province : ''}
+			bind:value={idProvincia}
+			error={intentoEnvio ? errores.provincia : ''}
 		/>
 
-		<!-- Ciudad -->
+		<!-- Localidad -->
 		<Select
-			id="location"
+			id="localidad"
 			required={true}
-			placeholder="Selecciona una ciudad"
+			placeholder="Seleccioná una localidad"
 			options={localidadesProvincia
 				.filter((c) => c.id_localidad != null)
 				.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
-			bind:value={localidadId}
+			bind:value={idLocalidad}
 			disabled={!provincia}
-			error={intentoEnvio ? errors.location : ''}
+			error={intentoEnvio ? errores.localidad : ''}
 		/>
 
 		<!-- Referencia -->
 		<div class="md:col-span-2">
-			<label for="reference" class="mb-2 block text-sm font-semibold text-gray-700">
+			<label for="referencia" class="mb-2 block text-sm font-semibold text-gray-700">
 				Referencia (opcional)
 			</label>
 			<input
-				id="reference"
-				bind:value={reference}
+				id="referencia"
+				bind:value={referencia}
 				placeholder="Ej: Edificio al lado de la plaza"
 				class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 			/>
@@ -179,27 +183,27 @@
 
 		<!-- Campo URL Google Maps -->
 		<div class="md:col-span-2">
-			<label for="googleMapsUrl" class="mb-2 block text-sm font-semibold text-gray-700">
+			<label for="urlGoogleMaps" class="mb-2 block text-sm font-semibold text-gray-700">
 				URL de Google Maps (opcional)
 			</label>
 			<div class="relative">
-				{#if isEditingMapUrl}
+				{#if editandoUrlMapaGoogle}
 					<!-- Modo edición: Input -->
 					<input
-						id="googleMapsUrl"
-						bind:value={googleMapsUrl}
+						id="urlGoogleMaps"
+						bind:value={urlGoogleMaps}
 						placeholder="Se genera automáticamente"
 						class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
 					/>
-				{:else if googleMapsUrl}
+				{:else if urlGoogleMaps}
 					<!-- Modo lectura: Enlace clickeable -->
 					<a
-						href={googleMapsUrl}
+						href={urlGoogleMaps}
 						target="_blank"
 						rel="noopener noreferrer"
 						class="block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-2 text-base text-blue-600 underline placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 					>
-						{googleMapsUrl}
+						{urlGoogleMaps}
 					</a>
 				{:else}
 					<!-- Sin URL: solo texto informativo -->
@@ -213,11 +217,11 @@
 				<!-- Botón de edición -->
 				<button
 					type="button"
-					on:click={() => (isEditingMapUrl = !isEditingMapUrl)}
+					on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
 					class="absolute right-0 top-0 flex h-full w-10 items-center justify-center rounded-r-xl border border-gray-300 bg-gray-100 text-blue-600 transition-all duration-300 hover:bg-gray-200 focus:outline-none"
-					aria-label={isEditingMapUrl ? 'Cancelar edición' : 'Editar URL'}
+					aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 				>
-					{#if isEditingMapUrl}
+					{#if editandoUrlMapaGoogle}
 						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
 								stroke-linecap="round"
@@ -257,13 +261,13 @@
 		</div>
 
 		<!-- Vista previa del mapa -->
-		{#if googleMapsUrl && !isEditingMapUrl}
+		{#if urlGoogleMaps && !editandoUrlMapaGoogle}
 			<div
 				class="relative mx-auto mt-10 aspect-square max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:shadow-2xl"
 			>
 				<div class="relative w-full overflow-hidden rounded-3xl bg-gray-200 shadow-md">
 					<iframe
-						src="{googleMapsUrl}&output=embed"
+						src="{urlGoogleMaps}&output=embed"
 						class="min-h-[350px] w-full border-0 sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] xl:min-h-[580px]"
 						title="Vista previa del mapa"
 						allowfullscreen
@@ -277,9 +281,9 @@
 
 	<!-- Botones de acción -->
 	<div class="mt-8 flex justify-end gap-4">
-		{#if showSkip}
+		{#if mostrarOmitir}
 			<Button
-				label={skipLabel}
+				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
 				on:click={() => dispatch('skip')}
@@ -287,10 +291,10 @@
 			/>
 		{/if}
 		<Button
-			label={sending ? 'Guardando...' : 'Continuar'}
+			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"
-			disabled={hasErrors || sending}
+			disabled={tieneErrores || enviando}
 			customClass="w-full md:w-auto"
 		/>
 	</div>

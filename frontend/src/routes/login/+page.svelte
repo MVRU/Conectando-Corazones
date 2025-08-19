@@ -250,11 +250,8 @@ TODO:
 					¿Por qué registrarse?
 				</h2>
 
-				<!-- FIX: no es una comunidad de donantes-->
-
 				<p class="mx-auto mb-6 max-w-2xl text-gray-600">
-					Al crear una cuenta podés hacer seguimiento de tus donaciones, recibir actualizaciones de
-					los proyectos que apoyás y formar parte de nuestra comunidad de donantes comprometidos.
+					Al crear una cuenta vas a poder seguir el avance de los proyectos en los que participás, recibir novedades importantes y acceder a funcionalidades exclusivas para usuarios registrados.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
 					<Button label="Ver proyectos abiertos" href="/projects" disabled={false} />

@@ -1,5 +1,3 @@
-<!-- FIX: revisar y corregir errores tras cambios en interfaces -->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elements/Button.svelte';
@@ -22,30 +20,30 @@
 	} from '$lib/utils/validaciones';
 
 	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
-	let sending = false;
+	let enviando = false;
 
-	const tipoContactoLabels: Record<TipoContacto, string> = {
+	const etiquetasTipoContacto: Record<TipoContacto, string> = {
 		telefono: 'Teléfono',
 		email: 'Correo electrónico',
 		web: 'Sitio web',
 		red_social: 'Red social'
 	};
 
-	const tipoContactoOptions = [
-		...TIPOS_CONTACTO.map((t) => ({ value: t, label: tipoContactoLabels[t] })),
+	const opcionesTipoContacto = [
+		...TIPOS_CONTACTO.map((t) => ({ value: t, label: etiquetasTipoContacto[t] })),
 		{ value: 'otro', label: 'Otro' }
 	];
 
 	const redesSociales = ['Instagram', 'Facebook', 'LinkedIn', 'WhatsApp'];
 
-	const etiquetaLabels: Record<EtiquetaContacto, string> = {
+	const etiquetasEtiqueta: Record<EtiquetaContacto, string> = {
 		principal: 'Principal',
 		secundario: 'Secundario'
 	};
 
-	const etiquetaOptions = ETIQUETAS_CONTACTO.map((e) => ({
+	const opcionesEtiqueta = ETIQUETAS_CONTACTO.map((e) => ({
 		value: e,
-		label: etiquetaLabels[e]
+		label: etiquetasEtiqueta[e]
 	}));
 
 	const dispatch = createEventDispatcher<{
@@ -53,8 +51,8 @@
 		skip: void;
 	}>();
 
-	export let showSkip = false;
-	export let skipLabel = 'Omitir';
+	export let mostrarOmitir = false;
+	export let etiquetaOmitir = 'Omitir';
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
@@ -101,30 +99,30 @@
 		(c) => c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)
 	);
 
-	$: hasErrors = !telefonoValido || contactos.some((_, i) => errors[i]);
+	$: tieneErrores = !telefonoValido || contactos.some((_, i) => errors[i]);
 
-	function addContact() {
+	function agregarContacto() {
 		contactos = [...contactos, { tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	}
 
-	function removeContact(index: number) {
+	function eliminarContacto(index: number) {
 		contactos = contactos.filter((_, i) => i !== index);
 	}
 
-	function handleSubmit(event: SubmitEvent) {
+	function manejarEnvio(event: SubmitEvent) {
 		event.preventDefault();
-		if (hasErrors) return;
+		if (tieneErrores) return;
 
-		sending = true;
+		enviando = true;
 
 		setTimeout(() => {
-			sending = false;
+			enviando = false;
 			dispatch('submit', contactos);
 		}, 800);
 	}
 </script>
 
-<form on:submit={handleSubmit}>
+<form on:submit={manejarEnvio}>
 	<div class="space-y-6">
 		{#each contactos as contacto, i (contacto)}
 			<div
@@ -140,7 +138,7 @@
 							id={'tipo-' + i}
 							bind:value={contacto.tipo_contacto}
 							disabled={i === 0}
-							options={tipoContactoOptions as unknown as Array<{ value: string; label: string }>}
+							options={opcionesTipoContacto as unknown as Array<{ value: string; label: string }>}
 							searchable={false}
 						/>
 					</div>
@@ -191,7 +189,7 @@
 										value: '',
 										label: 'Elegí una opción'
 									},
-									...etiquetaOptions
+									...opcionesEtiqueta
 								]}
 								searchable={false}
 							/>
@@ -203,7 +201,7 @@
 						<div class="ml-auto">
 							<button
 								type="button"
-								on:click={() => removeContact(i)}
+								on:click={() => eliminarContacto(i)}
 								class="cursor-pointer rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus:outline-none"
 							>
 								Eliminar
@@ -218,7 +216,7 @@
 		<div class="mt-4 flex justify-center">
 			<button
 				type="button"
-				on:click={addContact}
+				on:click={agregarContacto}
 				class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -231,9 +229,9 @@
 
 	<!-- Botones de acción -->
 	<div class="mt-8 flex justify-end gap-4">
-		{#if showSkip}
+		{#if mostrarOmitir}
 			<Button
-				label={skipLabel}
+				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
 				on:click={() => dispatch('skip')}
@@ -241,10 +239,10 @@
 			/>
 		{/if}
 		<Button
-			label={sending ? 'Guardando...' : 'Continuar'}
+			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"
-			disabled={hasErrors || sending}
+			disabled={tieneErrores || enviando}
 			customClass="w-full md:w-auto"
 		/>
 	</div>
