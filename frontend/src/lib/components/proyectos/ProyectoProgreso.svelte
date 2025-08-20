@@ -69,7 +69,7 @@
 		icono = visual.emoji(unidad);
 	}
 
-	const disabled = estadoCodigo === 'completado';
+	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
 
 	let progresoCantidad = 0;
 	let progresoTiempo = 0;
@@ -335,7 +335,7 @@
 			label="Colaborar ahora"
 			href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 			size="sm"
-			{disabled}
+			disabled={botonColaborarDeshabilitado}
 			customClass="flex-1 py-2.5 text-sm font-medium transition-all"
 		/>
 	</div>

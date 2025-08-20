@@ -3,7 +3,6 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { getColorUrgencia } from '$lib/utils/util-proyectos';
 
 	export let proyecto: Proyecto;
 	export let getColorEstado: (estado: EstadoDescripcion) => string;
@@ -11,7 +10,6 @@
 	// -*- Ubicación principal
 	const ubicacionTexto = getUbicacionTexto(proyecto);
 
-	// -*- Estado con manejo correcto de objeto expandido vs FK
 	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
 	const estadoEtiqueta = estadoLabel(estadoCodigo);
 </script>

@@ -17,8 +17,9 @@
 	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 
-	let proyecto: Proyecto | null = null;
+	let proyecto: Proyecto;
 	let provinciaNombre: string = 'Provincia';
 	let ubicacionPrincipal: ReturnType<typeof getUbicacionPrincipal>;
 	let colaboracionesActivas: Colaboracion[] = [];
@@ -260,7 +261,7 @@
 							<div class="flex justify-between">
 								<span class="text-sm text-gray-600">Ubicación</span>
 								<span class="text-sm font-medium text-gray-800">
-									{ubicacionPrincipal?.direccion?.localidad?.nombre || 'N/A'}, {provinciaNombre}
+									{getUbicacionTexto(proyecto)}
 								</span>
 							</div>
 						</div>

@@ -1,27 +1,12 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
-	import { getParticipacionVisual } from '$lib/utils/util-proyectos';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
-
-	// Variables reactivas para valores dependientes de "proyecto"
-	let percentCantidad: number = 0;
-	let color: 'green' | 'blue' | 'purple' = 'blue';
-
-	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
-		const participaciones = proyecto.participacion_permitida;
-		const totalObjetivo = participaciones.reduce((acc, p) => acc + (p.objetivo || 0), 0);
-		const totalActual = participaciones.reduce((acc, p) => acc + (p.actual || 0), 0);
-		const primerParticipacion = participaciones[0];
-
-		percentCantidad = calcularProgresoTotal(proyecto);
-	}
 
 	const formatearFechaCorta = (fecha?: string) => {
 		if (!fecha) return '—';
@@ -40,10 +25,11 @@
 		cancelado: '❌'
 	};
 	const emojiTemporizador = emojiPorEstado[estadoCodigo] || '⌛';
+	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
 
-	type MaybeUbicacion = any;
+	type AlgunaUbicacion = any;
 
-	const ubicaciones = (proyecto.ubicaciones ?? []) as MaybeUbicacion[];
+	const ubicaciones = (proyecto.ubicaciones ?? []) as AlgunaUbicacion[];
 
 	$: ubicacionPrincipal =
 		ubicaciones.find((u) => u?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
@@ -151,6 +137,7 @@
 						label="Colaborar ahora"
 						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 						size="sm"
+						disabled={botonColaborarDeshabilitado}
 						customClass="flex-1"
 					/>
 				</div>

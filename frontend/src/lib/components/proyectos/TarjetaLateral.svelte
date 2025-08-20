@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
 	import { getParticipacionVisual } from '$lib/utils/util-proyectos';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let proyecto: Proyecto;
 	export let mostrarFormulario: () => void;
