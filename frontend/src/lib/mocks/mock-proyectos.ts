@@ -1,14 +1,10 @@
 import type { Proyecto } from '$lib/types/Proyecto';
 import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import type { Institucion } from '$lib/types/Usuario';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockProyectoCategorias } from '$lib/mocks/mock-proyecto-categorias';
 import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
 import { mockProyectoUbicaciones } from '$lib/mocks/mock-proyecto-ubicaciones';
-import { mockDirecciones } from '$lib/mocks/mock-direcciones';
-
-/*
- * DECISIÓN DE DISEÑO: las ubicaciones se calculan a partir de joins para evitar duplicar direcciones.
- */
 
 // ---------- Helpers ----------
 // TODO: considerar pasarlos a utils
@@ -28,13 +24,17 @@ const colaboracionesPorId = (ids: number[] = []) =>
   elementosPorId(ids, mockColaboraciones, 'id_colaboracion');
 
 const ubicacionesPorProyecto = (id: number): ProyectoUbicacion[] =>
-  mockProyectoUbicaciones
-    .filter((u) => u.proyecto_id === id)
-    .map((u) => ({
-      ...u,
-      direccion: mockDirecciones.find((d) => d.id_direccion === u.direccion_id)
-    }))
-    .filter((u): u is ProyectoUbicacion => isDefined(u.direccion));
+  mockProyectoUbicaciones.filter((u) => u.proyecto_id === id);
+
+// ! Guard para asegurar que el objeto cumple con Institucion
+const esInstitucion = (x: unknown): x is Institucion => {
+  return (
+    !!x &&
+    typeof x === 'object' &&
+    'nombre_legal' in x &&
+    'tipo_institucion' in x
+  );
+};
 
 const proyectosBase: Proyecto[] = [
   {
@@ -61,27 +61,27 @@ const proyectosBase: Proyecto[] = [
         objetivo: 20,
         actual: 12,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   },
   {
     id_proyecto: 2,
     titulo: 'Comedores con alma',
     descripcion: 'Red de comedores comunitarios para brindar alimentos a familias vulnerables.',
     url_portada: '/img/proyectos-2.webp',
-    created_at: new Date('2025-02-10'),
-    fecha_cierre_postulaciones: new Date('2025-03-10'),
-    fecha_fin_tentativa: new Date('2025-05-10'),
+    created_at: new Date('2025-06-10'),
+    fecha_cierre_postulaciones: new Date('2025-06-25'),
+    fecha_fin_tentativa: new Date('2025-10-10'),
     id_chat_firebase: 1002,
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [3],
-    institucion_id: 2,
+    institucion_id: 11,
     evidencia_ids: [2],
     solicitud_finalizacion_ids: [2],
     estado: 'en_curso',
     participacion_permitida: [
       {
-        id_participacion_permitida: 2,
+        id_participacion_permitida: 1,
         id_proyecto: 2,
         id_tipo_participacion: 1,
         unidad: 'personas',
@@ -89,7 +89,25 @@ const proyectosBase: Proyecto[] = [
         actual: 18,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-    ],
+      {
+        id_participacion_permitida: 2,
+        id_proyecto: 2,
+        id_tipo_participacion: 2,
+        unidad: 'kg de harina',
+        objetivo: 10,
+        actual: 15,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+      },
+      {
+        id_participacion_permitida: 3,
+        id_proyecto: 2,
+        id_tipo_participacion: 3,
+        unidad: 'docenas de huevos',
+        objetivo: 6,
+        actual: 3,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+      }
+    ]
   },
   {
     id_proyecto: 3,
@@ -116,7 +134,7 @@ const proyectosBase: Proyecto[] = [
         actual: 7,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       }
-    ],
+    ]
   },
   {
     id_proyecto: 4,
@@ -130,7 +148,7 @@ const proyectosBase: Proyecto[] = [
     id_chat_firebase: 1004,
     participacion_permitida_ids: [1, 3],
     colaboracion_ids: [5],
-    institucion_id: 4,
+    institucion_id: 9,
     evidencia_ids: [4],
     solicitud_finalizacion_ids: [4],
     estado: 'en_auditoria',
@@ -143,8 +161,8 @@ const proyectosBase: Proyecto[] = [
         objetivo: 8,
         actual: 5,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   },
   {
     id_proyecto: 5,
@@ -157,7 +175,7 @@ const proyectosBase: Proyecto[] = [
     id_chat_firebase: 1005,
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [6],
-    institucion_id: 5,
+    institucion_id: 2,
     evidencia_ids: [5],
     solicitud_finalizacion_ids: [5],
     estado: 'cancelado',
@@ -170,8 +188,8 @@ const proyectosBase: Proyecto[] = [
         objetivo: 25,
         actual: 15,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   },
   {
     id_proyecto: 6,
@@ -185,7 +203,7 @@ const proyectosBase: Proyecto[] = [
     id_chat_firebase: 1006,
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [7],
-    institucion_id: 2,
+    institucion_id: 11,
     evidencia_ids: [6],
     solicitud_finalizacion_ids: [6],
     estado: 'en_curso',
@@ -198,8 +216,8 @@ const proyectosBase: Proyecto[] = [
         objetivo: 40,
         actual: 22,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   },
   {
     id_proyecto: 7,
@@ -212,7 +230,7 @@ const proyectosBase: Proyecto[] = [
     id_chat_firebase: 1007,
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [8],
-    institucion_id: 6,
+    institucion_id: 14,
     evidencia_ids: [7],
     solicitud_finalizacion_ids: [7],
     estado: 'en_curso',
@@ -225,8 +243,8 @@ const proyectosBase: Proyecto[] = [
         objetivo: 12,
         actual: 8,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   },
   {
     id_proyecto: 8,
@@ -239,7 +257,7 @@ const proyectosBase: Proyecto[] = [
     id_chat_firebase: 1008,
     participacion_permitida_ids: [1, 3],
     colaboracion_ids: [9],
-    institucion_id: 7,
+    institucion_id: 15,
     evidencia_ids: [8],
     solicitud_finalizacion_ids: [8],
     estado: 'completado',
@@ -252,15 +270,26 @@ const proyectosBase: Proyecto[] = [
         objetivo: 10,
         actual: 5,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-      },
-    ],
+      }
+    ]
   }
 ];
 
-export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
-  ...proyecto,
-  categorias: categoriasPorProyecto(proyecto.id_proyecto ?? 0),
-  colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
-  ubicaciones: ubicacionesPorProyecto(proyecto.id_proyecto ?? 0),
-  institucion: Object.values(mockUsuarios).find((u) => u.id_usuario === proyecto.institucion_id)
-}));
+export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => {
+  const posibleInstitucion = Object.values(mockUsuarios).find(
+    (u) => u.id_usuario === proyecto.institucion_id
+  );
+
+  // ! Solo asignamos si realmente es una Institución; si no, queda undefined
+  const institucion: Institucion | undefined = esInstitucion(posibleInstitucion)
+    ? posibleInstitucion
+    : undefined;
+
+  return {
+    ...proyecto,
+    categorias: categoriasPorProyecto(proyecto.id_proyecto ?? 0),
+    colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
+    ubicaciones: ubicacionesPorProyecto(proyecto.id_proyecto ?? 0),
+    institucion
+  };
+});

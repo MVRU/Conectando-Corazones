@@ -1,4 +1,5 @@
-<!-- TODO: corregir referencias a direccion y estado -->
+<!-- TODOs:
+ 	- [ ] Ordenar objetivos de forma asc por porcentaje de progreso -->
 
 <script lang="ts">
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';

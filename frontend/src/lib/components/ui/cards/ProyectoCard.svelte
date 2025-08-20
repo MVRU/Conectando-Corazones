@@ -1,7 +1,6 @@
 <!-- TODOs:
-	- [x] Corregir atributos cuando se resuelvan las inconsistencias con el DER (✅ Completado)
-	- [ ] Agregar "..." a la ubicación con un tooltip que muestra la ubicación completa
 	- [ ] Implementar propiedad 'urgencia' en tipo Proyecto y mocks -->
+
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -20,7 +19,6 @@
 	let color: 'green' | 'blue' | 'purple' = 'blue';
 	let icono: string = 'archive';
 
-	// Ahora usando participacion_permitida
 	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
 		const participaciones = proyecto.participacion_permitida;
 		const totalObjetivo = participaciones.reduce((acc, p) => acc + (p.objetivo || 0), 0);
@@ -86,6 +84,26 @@
 		cancelado: '❌'
 	};
 	const emojiTemporizador = emojiPorEstado[estadoCodigo] || '⌛';
+
+	type MaybeUbicacion = any;
+
+	const ubicaciones = (proyecto.ubicaciones ?? []) as MaybeUbicacion[];
+
+	$: ubicacionPrincipal =
+		ubicaciones.find((u) => u?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
+
+	// Es virtual si no hay ubicaciones
+	$: esVirtual = ubicaciones.length === 0;
+
+	$: ubicacionTexto = esVirtual
+		? 'Virtual'
+		: `${ubicacionPrincipal?.direccion?.localidad?.nombre || 'Ciudad'}${
+				ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre
+					? `, ${ubicacionPrincipal.direccion.localidad.provincia.nombre}`
+					: ''
+			}`;
+
+	$: ubicacionTooltip = ubicacionTexto;
 </script>
 
 <a
@@ -135,16 +153,20 @@
 					>{proyecto.institucion?.nombre_legal || 'Institución'}</span
 				>
 
-				<div class="flex items-center gap-1 text-xs text-gray-500">
-					<svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+				<!-- Ubicación (principal / virtual) con truncate + tooltip -->
+				<div class="flex min-w-0 items-center gap-1 text-xs text-gray-500">
+					<svg class="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
 						<path
 							d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11.8a2.8 2.8 0 100-5.6 2.8 2.8 0 000 5.6z"
 						/>
 					</svg>
 					<span
-						>{proyecto.ubicaciones?.[0]?.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto
-							.ubicaciones?.[0]?.direccion?.localidad?.provincia?.nombre || 'Provincia'}</span
+						class="max-w-[140px] truncate sm:max-w-[180px] md:max-w-[220px]"
+						title={ubicacionTooltip}
+						aria-label={ubicacionTooltip}
 					>
+						{ubicacionTexto}
+					</span>
 				</div>
 			</div>
 

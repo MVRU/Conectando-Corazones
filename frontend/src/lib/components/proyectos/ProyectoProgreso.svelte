@@ -1,3 +1,5 @@
+<!-- TODO: corregir para que se muestre color y emoji -->
+
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -84,8 +86,6 @@
 	}
 </script>
 
-<!-- TODO: corregir referencias a estado --> -->
-
 {#if participaciones.length > 0}
 	<div class="animate-fade-up mb-5 transform transition-all duration-300">
 		<!-- ! Etiqueta de progreso -->
@@ -139,7 +139,6 @@
 	</div>
 {/if}
 
-<!-- MODAL CON BACKDROP GLOBAL QUE DESDIBUJA TODO -->
 {#if showModal}
 	<!-- Overlay que cubre toda la página con blur -->
 	<div
