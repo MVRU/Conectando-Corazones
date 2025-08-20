@@ -99,7 +99,7 @@
 		);
 	}
 
-	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
+	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.id_estado) : 'en_curso';
 	$: colorTextoEstado = getColorEstado(estadoCodigo).split(' ')[0];
 </script>
 

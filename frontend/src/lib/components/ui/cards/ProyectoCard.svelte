@@ -75,7 +75,7 @@
 		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
 	};
 
-	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
 	const estadoTemporizador = estadoLabel(estadoCodigo);
 	const emojiPorEstado: Record<EstadoDescripcion, string> = {
 		en_curso: '🟢',

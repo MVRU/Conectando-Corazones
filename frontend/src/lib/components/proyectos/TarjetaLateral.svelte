@@ -1,5 +1,3 @@
-<!-- TODO: corregir referencias a estado y especie -->
-
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
@@ -9,7 +7,7 @@
 	export let proyecto: Proyecto;
 	export let mostrarFormulario: () => void;
 
-	const especieEmoji: Record<string, string> = {
+	const unidadEmoji: Record<string, string> = {
 		libros: '📚',
 		colchones: '🛏️',
 		alimentos: '🍽️',
@@ -18,7 +16,12 @@
 		prendas: '👕',
 		medicamentos: '💊',
 		herramientas: '🔧',
-		utiles: '✏️'
+		utiles: '✏️',
+		personas: '🙋‍♀️',
+		kilogramos: '⚖️',
+		unidades: '📦',
+		pesos: '💰',
+		dolares: '💵'
 	};
 
 	const participaciones = proyecto.participacion_permitida ?? [];
@@ -58,23 +61,24 @@
 			};
 		}
 		if (tipo === 'Especie') {
-			const especie = obj.unidad;
+			const unidad = obj.unidad || 'materiales';
 			return {
 				bg: 'bg-blue-50',
 				border: 'border-blue-200',
 				text: 'text-blue-800',
-				icon: especieEmoji[especie?.toLowerCase()] || '📦',
-				label: especie ? `donaciones de ${especie}` : 'donaciones específicas',
+				icon: unidadEmoji[unidad.toLowerCase()] || '📦',
+				label: unidad ? `donaciones de ${unidad}` : 'donaciones específicas',
 				button: 'Donar materiales'
 			};
 		}
 		if (tipo === 'Monetaria') {
+			const unidad = obj.unidad || 'pesos';
 			return {
 				bg: 'bg-green-50',
 				border: 'border-green-200',
 				text: 'text-green-800',
-				icon: '�',
-				label: 'donaciones monetarias',
+				icon: unidadEmoji[unidad.toLowerCase()] || '💰',
+				label: `donaciones monetarias (${unidad})`,
 				button: 'Donar ahora'
 			};
 		}
@@ -90,9 +94,9 @@
 
 	const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
 
-	function proyectoAbierto() {
+	function ProyectoAbierto() {
 		// Estado válido para colaborar: 'en_curso'
-		return getEstadoCodigo(proyecto.estado, proyecto.estado_id) === 'en_curso';
+		return getEstadoCodigo(proyecto.estado, proyecto.id_estado) === 'en_curso';
 	}
 </script>
 
@@ -127,7 +131,7 @@
 	{/if}
 
 	<!-- Acción -->
-	{#if proyectoAbierto()}
+	{#if ProyectoAbierto()}
 		<Button
 			label={unidadInfo.button}
 			on:click={mostrarFormulario}

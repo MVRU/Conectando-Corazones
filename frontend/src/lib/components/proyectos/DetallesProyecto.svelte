@@ -1,7 +1,7 @@
-<!-- TODO: corregir referencias a colaboradores -->
-
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import type { ColaboradorDisyuncion, Organizacion, Unipersonal } from '$lib/types/Usuario';
+	
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;
 
@@ -10,7 +10,23 @@
 	$: ciudad = ubicacionPrincipal?.direccion?.localidad?.nombre ?? 'Ciudad';
 	$: provincia = ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre ?? 'Provincia';
 
-	const colaboradores = proyecto.colaboraciones?.map((c) => c.colaborador).filter(Boolean) ?? [];
+	const colaboradores = proyecto.colaboraciones?.map((c) => c.colaborador).filter((c): c is ColaboradorDisyuncion => !!c) ?? [];
+
+	/**
+	 * * Obtiene el nombre de visualización de un colaborador
+	 * * Si es organización → muestra razon_social
+	 * * Si es unipersonal → muestra nombre + apellido
+	 */
+	function obtenerNombreColaborador(colaborador: ColaboradorDisyuncion): string {
+		
+		// Para Organizacion
+		if ('razon_social' in colaborador && colaborador.razon_social) {
+			return colaborador.razon_social;
+		}
+		
+		// Para Unipersonal o cualquier otro caso, usar nombre + apellido
+		return `${colaborador.nombre} ${colaborador.apellido}`.trim() || 'Colaborador';
+	}
 </script>
 
 <!-- Descripción -->
@@ -88,9 +104,7 @@
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">🤝</span>
 			{#if colaboradores.length > 0}
-				{colaboradores
-					.map((c) => ('razon_social' in c ? c.razon_social : `${c.nombre} ${c.apellido}`))
-					.join(', ')}
+				{colaboradores.map(obtenerNombreColaborador).join(', ')}
 			{:else}
 				Sin colaboradores
 			{/if}
