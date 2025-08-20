@@ -63,7 +63,7 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
       },
       {
-        id_participacion_permitida: 1,
+        id_participacion_permitida: 2,
         id_proyecto: 1,
         id_tipo_participacion: 1,
         unidad: 'docentes',
