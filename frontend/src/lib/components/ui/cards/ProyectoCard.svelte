@@ -89,7 +89,7 @@
 </script>
 
 <a
-	href={`/projects/${proyecto.id_proyecto}`}
+	href={`/proyectos/${proyecto.id_proyecto}`}
 	class="animate-fade-in-up group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition-all hover:shadow-lg"
 >
 	<!-- Imagen destacada -->
@@ -142,8 +142,8 @@
 						/>
 					</svg>
 					<span
-						>{proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto.direccion?.localidad
-							?.provincia?.nombre || 'Provincia'}</span
+						>{proyecto.ubicaciones?.[0]?.direccion?.localidad?.nombre || 'Ciudad'}, {proyecto
+							.ubicaciones?.[0]?.direccion?.localidad?.provincia?.nombre || 'Provincia'}</span
 					>
 				</div>
 			</div>
@@ -164,14 +164,14 @@
 				<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
 					<Button
 						label="Ver detalles"
-						href={`/projects/${proyecto.id_proyecto}`}
+						href={`/proyectos/${proyecto.id_proyecto}`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
 					/>
 					<Button
 						label="Colaborar ahora"
-						href={`/projects/${proyecto.id_proyecto}#colaborar`}
+						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 						size="sm"
 						customClass="flex-1"
 					/>

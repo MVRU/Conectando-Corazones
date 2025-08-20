@@ -4,6 +4,7 @@
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import { highlightSearch } from '$lib/utils/sanitize';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	type Agrupadas = Record<string, { pregunta: string; respuesta: string }[]>;
 
@@ -114,16 +115,16 @@
 				{/if}
 			</p>
 			{#if $searchQuery.trim() !== ''}
-				<button
-					type="button"
-					class="mt-6 inline-flex cursor-pointer items-center rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-100"
+				<Button
+					label="Limpiar búsqueda"
+					variant="secondary"
+					size="sm"
+					customClass="mx-auto block mt-6"
 					on:click={() => {
 						searchQuery.set('');
 						if (searchInput) searchInput.focus();
 					}}
-				>
-					Limpiar búsqueda
-				</button>
+				/>
 			{/if}
 		</div>
 	{/if}

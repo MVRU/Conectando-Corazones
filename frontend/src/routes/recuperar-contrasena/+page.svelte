@@ -7,6 +7,7 @@ TODO:
 -->
 
 <script lang="ts">
+	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { validarCorreo } from '$lib/utils/validaciones';
@@ -98,7 +99,7 @@ TODO:
 						<div class="mb-6 rounded-lg border border-red-200 bg-red-100 p-4">
 							<p class="mb-2 font-medium text-red-700">Por favor corrige los siguientes errores:</p>
 							<ul class="list-inside list-disc text-sm text-red-600">
-								{#each validacionErrores as error}
+								{#each validacionErrores as error (error)}
 									<li>{error}</li>
 								{/each}
 							</ul>
@@ -119,48 +120,27 @@ TODO:
 							>
 								Email *
 							</label>
-							<input
+							<Input
 								id="email"
-								bind:value={email}
 								type="email"
+								bind:value={email}
 								required
-								class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 								placeholder="tu.email@ejemplo.com"
 								disabled={cargando}
+								customClass="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							/>
 							<p class="mt-2 text-sm text-gray-500">
 								Te enviaremos un enlace para que puedas crear una nueva contraseña
 							</p>
 						</div>
 
-						<button
+						<Button
 							type="submit"
-							disabled={cargando}
-							class="w-full rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-50"
-						>
-							{#if cargando}
-								<div class="flex items-center justify-center">
-									<svg class="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-										<circle
-											class="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											stroke-width="4"
-										></circle>
-										<path
-											class="opacity-75"
-											fill="currentColor"
-											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-										></path>
-									</svg>
-									Enviando...
-								</div>
-							{:else}
-								Enviar instrucciones
-							{/if}
-						</button>
+							label="Enviar instrucciones"
+							loading={cargando}
+							loadingLabel="Enviando..."
+							customClass="w-full"
+						/>
 					</form>
 				{:else}
 					<!-- Mensaje de éxito -->

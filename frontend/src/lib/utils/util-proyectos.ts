@@ -4,6 +4,7 @@
 
 import { error } from '@sveltejs/kit';
 import type { Proyecto } from '$lib/types/Proyecto';
+import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 
@@ -16,7 +17,7 @@ const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
     cancelado: 5
 };
 
-export function encontrarProyectoPorId(idParam: string, lista: Proyecto[]): Proyecto {
+export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
     const idNumerico = Number(idParam);
 
     if (!Number.isInteger(idNumerico)) {
@@ -53,14 +54,12 @@ export function filtrarProyectos(
     }
 
     if (estado !== 'Todos') {
-        resultado = resultado.filter(
-            (p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado
-        );
+        resultado = resultado.filter((p) => ESTADO_LABELS[p.estado?.descripcion ?? 'en_curso'] === estado);
     }
 
     if (provincia !== 'Todas') {
         resultado = resultado.filter(
-            (p) => getProvinciaFromLocalidad(p.direccion?.localidad)?.nombre === provincia
+            (p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.localidad)?.nombre === provincia
         );
     }
 
@@ -74,8 +73,8 @@ export function filtrarProyectos(
     }
 
     resultado.sort((a, b) => {
-        const prioridadEstadoA = ESTADO_PRIORIDAD[a.estado ?? 'en_curso'] ?? 3;
-        const prioridadEstadoB = ESTADO_PRIORIDAD[b.estado ?? 'en_curso'] ?? 3;
+        const prioridadEstadoA = ESTADO_PRIORIDAD[a.estado?.descripcion ?? 'en_curso'] ?? 3;
+        const prioridadEstadoB = ESTADO_PRIORIDAD[b.estado?.descripcion ?? 'en_curso'] ?? 3;
 
         if (prioridadEstadoA !== prioridadEstadoB) {
             return prioridadEstadoA - prioridadEstadoB;
@@ -88,3 +87,24 @@ export function filtrarProyectos(
 
     return resultado;
 }
+
+//**
+// * Utilidades para Proyecto-Ubicación
+//  */
+
+export function seleccionarUbicacion(
+    ubicaciones: ProyectoUbicacion[],
+    tipoPreferido: string = 'principal'
+): ProyectoUbicacion | undefined {
+    const especifica = ubicaciones.find((u) => u.tipo_ubicacion === tipoPreferido);
+    if (especifica) return especifica;
+
+    for (const tipo of PRIORIDAD_TIPO) {
+        const encontrada = ubicaciones.find((u) => u.tipo_ubicacion === tipo);
+        if (encontrada) return encontrada;
+    }
+    return undefined;
+}
+
+export const getUbicacionPrincipal = (proyecto: Proyecto): ProyectoUbicacion | undefined =>
+    proyecto.ubicaciones?.find((u) => u.tipo_ubicacion === 'principal') ?? proyecto.ubicaciones?.[0];

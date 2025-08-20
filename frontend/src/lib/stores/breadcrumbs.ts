@@ -61,7 +61,7 @@ export function clearBreadcrumbs() {
 
 export const BREADCRUMB_ROUTES = {
         home: { label: 'Inicio', href: '/' },
-        proyectos: { label: 'Proyectos', href: '/projects' },
+        proyectos: { label: 'Proyectos', href: '/proyectos' },
         nosotros: { label: 'Nosotros', href: '/nosotros' },
         contacto: { label: 'Contacto', href: '/contacto' },
         faq: { label: 'Preguntas frecuentes', href: '/faq' },

@@ -9,6 +9,7 @@ export interface SolicitudFinalizacion {
   // * RELACIONES
   // -*- FKs para create/update
   proyecto_id: number;
+  evidencia_ids: number[];
 
   // -*- Objetos expandidos para read
   proyecto?: Proyecto;

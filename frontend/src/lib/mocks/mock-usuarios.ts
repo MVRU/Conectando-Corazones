@@ -31,18 +31,6 @@ export const mockUsuarios = {
         contactos: [
             { tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
         ],
-        resenas: [
-            {
-                id_resena: 1,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 1,
-                contenido:
-                    'Excelente gestión del proyecto de infraestructura escolar. Se cumplieron todos los objetivos en tiempo y forma.',
-                puntaje: 5,
-                aprobado: true,
-                username: 'admin_conectando'
-            }
-        ],
         consentimientos: [
             { id_consentimiento: 1, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-01') },
             { id_consentimiento: 2, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-01') },
@@ -76,28 +64,6 @@ export const mockUsuarios = {
             { tipo_contacto: 'email', valor: 'direccion2@escuelaesperanza.edu.ar', etiqueta: 'secundario' },
             { tipo_contacto: 'telefono', valor: '341 XXXXXXX', etiqueta: 'celular' }
         ],
-        resenas: [
-            {
-                id_resena: 2,
-                tipo_objeto: 'Usuario',
-                id_objeto: 3,
-                contenido:
-                    'Colaborador muy comprometido, ayudó mucho en la organización del proyecto de biblioteca.',
-                puntaje: 4,
-                aprobado: true,
-                username: 'escuela_esperanza'
-            },
-            {
-                id_resena: 3,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 2,
-                contenido:
-                    'El proyecto de huerta escolar fue un éxito total. Los niños aprendieron mucho y ahora tenemos alimentos frescos.',
-                puntaje: 5,
-                aprobado: true,
-                username: 'escuela_esperanza'
-            }
-        ],
         consentimientos: [
             { id_consentimiento: 4, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-15') },
             { id_consentimiento: 5, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-15') },
@@ -126,7 +92,6 @@ export const mockUsuarios = {
             localidad: getLocalidad(3),
         },
         contactos: [{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }],
-        resenas: [],
         consentimientos: [
             { id_consentimiento: 7, tipo: 'terminos', version: '1.0', created_at: new Date('2024-02-10') },
             { id_consentimiento: 8, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-02-10') }
@@ -154,28 +119,7 @@ export const mockUsuarios = {
             localidad: getLocalidad(5),
         },
         contactos: [{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }],
-        resenas: [
-            {
-                id_resena: 4,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 1,
-                contenido:
-                    'Muy buena organización del proyecto, aunque faltó más comunicación sobre los avances.',
-                puntaje: 3,
-                aprobado: true,
-                username: 'maria_g'
-            },
-            {
-                id_resena: 5,
-                tipo_objeto: 'Usuario',
-                id_objeto: 2,
-                contenido:
-                    'La institución fue muy transparente con el uso de los recursos. Recomiendo colaborar con ellos.',
-                puntaje: 5,
-                aprobado: true,
-                username: 'maria_g'
-            }
-        ],
+
         consentimientos: [
             { id_consentimiento: 9, tipo: 'terminos', version: '1.0', created_at: new Date('2024-02-01') },
             { id_consentimiento: 10, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-02-01') }
@@ -204,7 +148,7 @@ export const mockUsuarios = {
             localidad: getLocalidad(6)
         },
         contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
-        resenas: [],
+
         consentimientos: [
             {
                 id_consentimiento: 11,
@@ -244,18 +188,7 @@ export const mockUsuarios = {
             localidad: getLocalidad(3),
         },
         contactos: [{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }],
-        resenas: [
-            {
-                id_resena: 6,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 3,
-                contenido:
-                    'Excelente proyecto de asistencia alimentaria. Muy bien coordinado y con gran impacto social.',
-                puntaje: 5,
-                aprobado: true,
-                username: 'fundacion_manos'
-            }
-        ],
+
         consentimientos: [
             { id_consentimiento: 12, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-20') },
             { id_consentimiento: 13, tipo: 'privacidad', version: '1.0', created_at: new Date('2024-01-20') },
@@ -294,17 +227,7 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [
-            {
-                id_resena: 7,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 5,
-                contenido: 'Proyecto bien estructurado pero podría mejorar la comunicación con los beneficiarios.',
-                puntaje: 3,
-                aprobado: true,
-                username: 'empresa_solidaria'
-            }
-        ],
+
         consentimientos: [
             {
                 id_consentimiento: 16,
@@ -346,26 +269,7 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [
-            {
-                id_resena: 8,
-                tipo_objeto: 'Usuario',
-                id_objeto: 1,
-                contenido: 'Administración muy eficiente y rápida respuesta a consultas.',
-                puntaje: 4,
-                aprobado: true,
-                username: 'ana_m'
-            },
-            {
-                id_resena: 9,
-                tipo_objeto: 'Proyecto',
-                id_objeto: 6,
-                contenido: 'Proyecto muy necesario pero faltó mejor planificación en la logística.',
-                puntaje: 2,
-                aprobado: false,
-                username: 'ana_m'
-            }
-        ],
+
         consentimientos: [
             {
                 id_consentimiento: 18,
@@ -415,17 +319,7 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [
-            {
-                id_resena: 10,
-                tipo_objeto: 'Usuario',
-                id_objeto: 4,
-                contenido: 'Colaboración excepcional de esta organización. Muy profesionales y comprometidos.',
-                puntaje: 5,
-                aprobado: true,
-                username: 'clinica_sj'
-            }
-        ],
+
         consentimientos: [
             {
                 id_consentimiento: 21,
@@ -475,7 +369,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 
@@ -506,7 +399,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 
@@ -537,7 +429,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 
@@ -568,7 +459,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 
@@ -599,7 +489,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 
@@ -630,7 +519,6 @@ export const mockUsuarios = {
                 etiqueta: 'principal'
             }
         ],
-        resenas: [],
         consentimientos: [],
     } satisfies Institucion,
 

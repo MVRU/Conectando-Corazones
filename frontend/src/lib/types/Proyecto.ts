@@ -5,10 +5,10 @@ import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';
 import type { ColaboradorDisyuncion } from './Usuario';
-import type { Direccion } from './Direccion';
+import type { ProyectoUbicacion } from './ProyectoUbicacion';
 import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
-import type { Estado } from '$lib/types/Estado';
+import type { EstadoDescripcion } from '$lib/types/Estado';
 
 export interface Proyecto {
   id_proyecto?: number;
@@ -27,14 +27,19 @@ export interface Proyecto {
   // -*- FKS para create/update
   estado_id?: number;
   institucion_id: number;
+  participacion_permitida_ids?: number[];
+  categoria_ids?: number[];
+  colaboracion_ids?: number[];
+  evidencia_ids?: number[];
+  solicitud_finalizacion_ids?: number[];
 
   // -*- Objetos expandidos para read
-  estado?: Estado;
+  estado?: EstadoDescripcion;
   participacion_permitida?: ParticipacionPermitida[];
   categorias?: Categoria[];
   colaboraciones?: Colaboracion[];
   institucion?: Institucion;
-  direcciones?: Direccion[];
+  ubicaciones?: ProyectoUbicacion[];
   evidencias?: Evidencia[];
   solicitudes_finalizacion?: SolicitudFinalizacion[];
 }

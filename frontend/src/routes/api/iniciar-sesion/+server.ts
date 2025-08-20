@@ -1,5 +1,3 @@
-// FIX: revisar y corregir errores tras cambios en interfaces
-
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { dev } from '$app/environment';
@@ -9,7 +7,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
     const { identificador, password, rememberMe } = await request.json();
 
     const usuario = Object.values(mockUsuarios).find((u) => {
-        const email = u.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')?.valor; // ! VER
+        const email = u.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')?.valor;
         return u.username === identificador || email === identificador;
     });
 

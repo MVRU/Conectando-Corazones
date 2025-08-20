@@ -10,12 +10,13 @@
 	export let error: string | undefined = undefined;
 	export let customClass = '';
 	export let maskCuil = false;
+	export let inputRef: HTMLInputElement | null = null;
 
 	function formatCuil(val: string) {
 		const digits = val.replace(/\D/g, '').slice(0, 11);
 		if (digits.length <= 2) return digits;
-		if (digits.length <= 10) return `${digits.slice(0,2)}-${digits.slice(2)}`;
-		return `${digits.slice(0,2)}-${digits.slice(2,10)}-${digits.slice(10)}`;
+		if (digits.length <= 10) return `${digits.slice(0, 2)}-${digits.slice(2)}`;
+		return `${digits.slice(0, 2)}-${digits.slice(2, 10)}-${digits.slice(10)}`;
 	}
 
 	let internalValue = value;
@@ -39,11 +40,13 @@
 
 <div class="space-y-1">
 	<input
+		bind:this={inputRef}
 		{id}
 		{name}
 		value={maskCuil ? internalValue : value}
 		on:input={handleInput}
 		{type}
+		{...$$restProps}
 		class={clsx(
 			'w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200',
 			'focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]',

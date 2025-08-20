@@ -5,6 +5,8 @@
 	import { isSafeHref } from '$lib/utils/sanitize';
 	export let label: string = 'Hacé clic!';
 	export let disabled = false;
+	export let loading = false;
+	export let loadingLabel: string | null = null;
 	export let href: string | null = null;
 	export let target: '_blank' | '_self' | string = '_blank';
 	export let external = false;
@@ -12,13 +14,16 @@
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
 	export let customAriaLabel: string | null = null;
+	export let type: 'button' | 'submit' | 'reset' = 'submit';
 	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
+	$: isDisabled = disabled || loading;
+	$: busyLabel = loadingLabel ?? label;
 	const dispatch = createEventDispatcher();
 
 	function handleClick(event: MouseEvent) {
 		dispatch('click', event);
 
-		if (href && !disabled && isSafeHref(href)) {
+		if (href && !isDisabled && isSafeHref(href)) {
 			if (external) {
 				window.open(href, target, 'noopener');
 			} else {
@@ -33,6 +38,8 @@
 	};
 	const textSize = { md: 'text-[18px]', sm: 'text-[15px]' };
 	const iconSize = { md: 'w-5 h-5', sm: 'w-4 h-4' };
+	const rootBase =
+		'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300';
 </script>
 
 <!-- ! Variante Primary -->
@@ -40,40 +47,68 @@
 	<button
 		on:click={handleClick}
 		class={clsx(
-			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
+			rootBase,
 			rootSize[size],
 			'bg-primary hover:bg-primary-hover text-white',
-			disabled && 'cursor-not-allowed opacity-50',
+			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50 ',
 			customClass
 		)}
+		{type}
 		role="link"
 		tabindex="0"
 		aria-label={ariaLabel}
+		aria-busy={loading || undefined}
+		aria-disabled={isDisabled}
+		disabled={isDisabled}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
-		<span
-			class={clsx(
-				'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
-				textSize[size]
-			)}
-		>
-			{label}
-		</span>
-		<span
-			class={clsx('icon-animation absolute z-10 flex items-center justify-center', iconSize[size])}
-		>
+		{#if loading}
 			<svg
+				class={clsx(iconSize[size], 'z-10 animate-spin')}
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				stroke-width="4"
+				role="status"
+				aria-hidden="true"
 			>
-				<path d="M5 12h14M12 5l7 7-7 7" />
+				<circle class="opacity-25" cx="12" cy="12" r="10" />
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				/>
 			</svg>
-		</span>
+			<span class="sr-only">{busyLabel}</span>
+		{:else}
+			<span
+				class={clsx(
+					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					textSize[size]
+				)}
+			>
+				{label}
+			</span>
+			<span
+				class={clsx(
+					'icon-animation absolute z-10 flex items-center justify-center',
+					iconSize[size]
+				)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M5 12h14M12 5l7 7-7 7" />
+				</svg>
+			</span>
+		{/if}
 	</button>
 
 	<!-- ! Variante Secondary -->
@@ -81,40 +116,68 @@
 	<button
 		on:click={handleClick}
 		class={clsx(
-			'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300',
+			rootBase,
 			rootSize[size],
 			'bg-[#eff6ff] text-[rgb(var(--color-primary))] hover:bg-[#dbeafe]',
-			disabled && 'cursor-not-allowed opacity-50',
+			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50',
 			customClass
 		)}
+		{type}
 		role="link"
 		tabindex="0"
 		aria-label={ariaLabel}
+		aria-busy={loading || undefined}
+		aria-disabled={isDisabled}
+		disabled={isDisabled}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
-		<span
-			class={clsx(
-				'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
-				textSize[size]
-			)}
-		>
-			{label}
-		</span>
-		<span
-			class={clsx('icon-animation absolute z-10 flex items-center justify-center', iconSize[size])}
-		>
+		{#if loading}
 			<svg
+				class={clsx(iconSize[size], 'z-10 animate-spin')}
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 24 24"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				stroke-width="4"
+				role="status"
+				aria-hidden="true"
 			>
-				<path d="M5 12h14M12 5l7 7-7 7" />
+				<circle class="opacity-25" cx="12" cy="12" r="10" />
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				/>
 			</svg>
-		</span>
+			<span class="sr-only">{busyLabel}</span>
+		{:else}
+			<span
+				class={clsx(
+					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					textSize[size]
+				)}
+			>
+				{label}
+			</span>
+			<span
+				class={clsx(
+					'icon-animation absolute z-10 flex items-center justify-center',
+					iconSize[size]
+				)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M5 12h14M12 5l7 7-7 7" />
+				</svg>
+			</span>
+		{/if}
 	</button>
 
 	<!-- ! Variante Ghost -->
@@ -122,32 +185,61 @@
 	<button
 		on:click={handleClick}
 		class={clsx(
-			'cta-minimal-shine-btn rounded-4xl group relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden border border-blue-400 bg-white/5 font-semibold tracking-tight text-blue-400 shadow-none outline-none transition-all duration-300 focus:ring-2 focus:ring-blue-300',
+			rootBase,
+			'cta-minimal-shine-btn inline-flex border border-blue-400 bg-white/5 font-semibold text-blue-400 shadow-none outline-none focus:ring-2 focus:ring-blue-300',
 			size === 'md'
 				? 'h-12 min-w-[140px] px-8 py-3 md:h-14'
 				: 'h-9 min-w-[100px]  px-5 py-2 md:h-10',
-			disabled && 'cursor-not-allowed opacity-50',
+			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50',
 			customClass
 		)}
+		{type}
 		role="link"
 		tabindex="0"
 		aria-label={ariaLabel}
+		aria-busy={loading || undefined}
+		aria-disabled={isDisabled}
+		disabled={isDisabled}
 	>
-		<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
-			{label}
+		{#if loading}
 			<svg
-				class={clsx('transition-transform duration-300 group-hover:translate-x-1', iconSize[size])}
+				class={clsx(iconSize[size], 'z-10 animate-spin')}
 				xmlns="http://www.w3.org/2000/svg"
 				viewBox="0 0 24 24"
 				fill="none"
-				stroke="#3b82f6"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
+				stroke="currentColor"
+				stroke-width="4"
+				role="status"
+				aria-hidden="true"
 			>
-				<path d="M5 12h14M12 5l7 7-7 7" />
+				<circle class="opacity-25" cx="12" cy="12" r="10" />
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				/>
 			</svg>
-		</span>
+			<span class="sr-only">{busyLabel}</span>
+		{:else}
+			<span class="relative z-10 flex items-center gap-2 transition-colors duration-200">
+				{label}
+				<svg
+					class={clsx(
+						'transition-transform duration-300 group-hover:translate-x-1',
+						iconSize[size]
+					)}
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="#3b82f6"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M5 12h14M12 5l7 7-7 7" />
+				</svg>
+			</span>
+		{/if}
 		<span class="cta-btn-bg pointer-events-none absolute inset-0 z-0"></span>
 	</button>
 {/if}
@@ -232,6 +324,12 @@
 	}
 	.group:not(:hover) .icon-animation {
 		animation: icon-up 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	}
+
+	button[disabled] .background-animation,
+	button[disabled] .text-animation,
+	button[disabled] .icon-animation {
+		animation: none;
 	}
 
 	/**

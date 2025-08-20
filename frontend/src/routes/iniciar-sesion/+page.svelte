@@ -8,6 +8,7 @@ TODO:
 -->
 
 <script lang="ts">
+	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
@@ -86,7 +87,7 @@ TODO:
 					<div class="mb-6 rounded-lg border border-red-200 bg-red-100 p-4">
 						<p class="mb-2 font-medium text-red-700">Por favor corrige los siguientes errores:</p>
 						<ul class="list-inside list-disc text-sm text-red-600">
-							{#each erroresValidacion as error}
+							{#each erroresValidacion as error (error)}
 								<li>{error}</li>
 							{/each}
 						</ul>
@@ -107,13 +108,13 @@ TODO:
 						>
 							Usuario o correo *
 						</label>
-						<input
+						<Input
 							id="identificador"
-							bind:value={identificador}
 							type="text"
+							bind:value={identificador}
 							required
-							class="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							placeholder="admin_conectando"
+							customClass="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 						/>
 						<p class="mt-1 text-xs text-gray-500">
 							Prueba con: <code class="rounded bg-gray-100 px-1">admin_conectando</code>,
@@ -130,13 +131,13 @@ TODO:
 							Contraseña *
 						</label>
 						<div class="relative">
-							<input
+							<Input
 								id="password"
 								bind:value={password}
 								type={mostrarPassword ? 'text' : 'password'}
 								required
-								class="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 								placeholder="123456"
+								customClass="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							/>
 							<button
 								type="button"
@@ -194,34 +195,13 @@ TODO:
 						</a>
 					</div>
 
-					<button
+					<Button
 						type="submit"
-						disabled={$isLoading}
-						class="w-full rounded-lg bg-[rgb(var(--color-primary))] px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-50"
-					>
-						{#if $isLoading}
-							<div class="flex items-center justify-center">
-								<svg class="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-									<circle
-										class="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										stroke-width="4"
-									></circle>
-									<path
-										class="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
-								Iniciando sesión...
-							</div>
-						{:else}
-							Iniciar Sesión
-						{/if}
-					</button>
+						label="Iniciar Sesión"
+						loading={$isLoading}
+						loadingLabel="Iniciando sesión..."
+						customClass="w-full"
+					/>
 				</form>
 
 				<!-- Separador -->
@@ -259,7 +239,7 @@ TODO:
 					registrados.
 				</p>
 				<div class="flex flex-wrap justify-center gap-4">
-					<Button label="Ver proyectos abiertos" href="/projects" disabled={false} />
+					<Button label="Ver proyectos abiertos" href="/proyectos" disabled={false} />
 					<Button label="Registrarse" href="/registrarse" variant="secondary" disabled={false} />
 				</div>
 			</div>

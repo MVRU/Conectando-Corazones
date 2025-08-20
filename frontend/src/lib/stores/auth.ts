@@ -134,7 +134,7 @@ export const authActions = {
    */
   async logout(): Promise<void> {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      await fetch('/api/cerrar-sesion', { method: 'POST' });
     } catch (error) {
       console.error('Error al cerrar sesión:', error);
     } finally {
@@ -188,7 +188,7 @@ export const authActions = {
   async checkAuth(): Promise<void> {
     authStore.update((state) => ({ ...state, isLoading: true }));
     try {
-      const response = await fetch('/api/session');
+      const response = await fetch('/api/sesion');
       const { usuario } = (await response.json()) as { usuario: UsuarioCompleto | null };
       if (usuario) {
         authStore.update((state) => ({

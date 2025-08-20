@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import type {
@@ -178,20 +179,22 @@
 			<div class="grid grid-cols-1 gap-6 md:col-span-2">
 				<label class="block">
 					<span class="font-medium text-gray-700">Nombre completo</span>
-					<input
+					<Input
+						id="nombre"
 						type="text"
 						bind:value={nombre}
-						class="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-100 px-5 py-3 text-gray-400 shadow-sm"
+						customClass="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-100 px-5 py-3 text-gray-400 shadow-sm"
 						readonly
 						disabled
 					/>
 				</label>
 				<label class="block">
 					<span class="font-medium text-gray-700">Email</span>
-					<input
+					<Input
+						id="email"
 						type="email"
 						bind:value={email}
-						class="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-100 px-5 py-3 text-gray-400 shadow-sm"
+						customClass="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-100 px-5 py-3 text-gray-400 shadow-sm"
 						readonly
 						disabled
 					/>
@@ -200,10 +203,11 @@
 					<span class="font-medium text-gray-700"
 						>Teléfono <span class="font-normal text-gray-400">(opcional)</span></span
 					>
-					<input
+					<Input
+						id="telefono"
 						type="tel"
 						bind:value={telefono}
-						class="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
+						customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
 					/>
 				</label>
 			</div>
@@ -309,26 +313,29 @@
 		<form class="grid grid-cols-1 items-end gap-8 md:grid-cols-3">
 			<label class="block md:col-span-1">
 				<span class="font-medium text-gray-700">Contraseña actual</span>
-				<input
+				<Input
+					id="passActual"
 					type="password"
 					bind:value={passActual}
-					class="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
+					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
 				/>
 			</label>
 			<label class="block md:col-span-1">
 				<span class="font-medium text-gray-700">Nueva contraseña</span>
-				<input
+				<Input
+					id="passNueva"
 					type="password"
 					bind:value={passNueva}
-					class="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
+					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
 				/>
 			</label>
 			<label class="block md:col-span-1">
 				<span class="font-medium text-gray-700">Confirmar nueva contraseña</span>
-				<input
+				<Input
+					id="passConfirm"
 					type="password"
 					bind:value={passConfirm}
-					class="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
+					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200"
 				/>
 			</label>
 		</form>

@@ -40,7 +40,9 @@
 		...Array.from(
 			new Set(
 				proyectos
-					.map((p) => getProvinciaFromLocalidad(p.direccion?.localidad)?.nombre ?? '')
+					.map(
+						(p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? ''
+					)
 					.filter((s) => s !== '')
 			)
 		).sort()

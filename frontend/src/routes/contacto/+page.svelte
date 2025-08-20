@@ -7,6 +7,7 @@ TODO:
 -->
 
 <script lang="ts">
+	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import type { PageData } from '../contacto/$types';
@@ -141,26 +142,26 @@ TODO:
 							<label for="nombre" class="block text-sm font-medium text-gray-700">
 								Nombre completo {#if intentoEnvio}<span class="text-red-500">*</span>{/if}
 							</label>
-							<input
+							<Input
 								id="nombre"
 								name="nombre"
 								type="text"
 								placeholder="Tu nombre completo"
 								required
-								class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 							/>
 						</div>
 						<div>
 							<label for="email" class="block text-sm font-medium text-gray-700">
 								Email {#if intentoEnvio}<span class="text-red-500">*</span>{/if}
 							</label>
-							<input
+							<Input
 								id="email"
 								name="email"
 								type="email"
 								placeholder="tu.email@ejemplo.com"
 								required
-								class="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 							/>
 						</div>
 					</div>

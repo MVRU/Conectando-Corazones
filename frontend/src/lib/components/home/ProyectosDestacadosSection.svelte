@@ -69,7 +69,7 @@
 	<div class="mt-16 flex justify-center">
 		<Button
 			label="Descubrí más proyectos"
-			href="/projects"
+			href="/proyectos"
 			size="md"
 			customClass="hover:-translate-y-0.5 hover:shadow-xl active:scale-95 transition duration-200 shadow-md"
 		/>

@@ -173,11 +173,11 @@
 			<label for="referencia" class="mb-2 block text-sm font-semibold text-gray-700">
 				Referencia (opcional)
 			</label>
-			<input
+			<Input
 				id="referencia"
 				bind:value={referencia}
 				placeholder="Ej: Edificio al lado de la plaza"
-				class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+				customClass="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 			/>
 		</div>
 
@@ -189,11 +189,11 @@
 			<div class="relative">
 				{#if editandoUrlMapaGoogle}
 					<!-- Modo edición: Input -->
-					<input
+					<Input
 						id="urlGoogleMaps"
 						bind:value={urlGoogleMaps}
 						placeholder="Se genera automáticamente"
-						class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
+						customClass="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
 					/>
 				{:else if urlGoogleMaps}
 					<!-- Modo lectura: Enlace clickeable -->

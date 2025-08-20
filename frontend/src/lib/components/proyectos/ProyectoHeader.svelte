@@ -4,14 +4,17 @@
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
+	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
 	import type { Proyecto } from '$lib/types/Proyecto';
 
 	export let proyecto: Proyecto;
-	export let getColorUrgencia: (u: string) => string;
+	// export let getColorUrgencia: (u: string) => string;
 	export let getColorEstado: (estado: EstadoDescripcion) => string;
 
+	const ubicacionPrincipal = getUbicacionPrincipal(proyecto);
 	const provinciaNombre =
-		getProvinciaFromLocalidad(proyecto.direccion?.localidad)?.nombre ?? 'Provincia';
+		getProvinciaFromLocalidad(proyecto.ubicaciones?.[0]?.direccion?.localidad)?.nombre ??
+		'Provincia';
 
 	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 	const estadoEtiqueta = estadoLabel(estadoCodigo);
@@ -41,7 +44,7 @@
 				class="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium drop-shadow sm:text-base"
 			>
 				<span class="flex items-center gap-1 text-pink-200">
-					📍 {proyecto.direccion?.localidad?.nombre || 'Ciudad'}, {provinciaNombre}
+					📍 {proyecto.ubicaciones?.[0]?.direccion?.localidad?.nombre || 'Ciudad'}, {provinciaNombre}
 				</span>
 
 				<span

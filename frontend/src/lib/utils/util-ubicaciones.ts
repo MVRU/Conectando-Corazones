@@ -7,8 +7,8 @@ import { mockLocalidades } from '$lib/mocks/mock-localidades';
  * * Getters sencillos
  */
 
-export const getLocalidad = (id: number) =>
-    mockLocalidades.find(({ id_localidad }) => id_localidad === id);
+export const getLocalidad = (localidadId: number) =>
+    mockLocalidades.find(({ id_localidad }) => id_localidad === localidadId);
 
 export const getProvincia = (id: number) =>
     provincias.find(({ id_provincia }) => id_provincia === id);
@@ -27,8 +27,8 @@ export function getProvinciaFromLocalidad(localidad?: Localidad): Provincia | un
 /*
  -!- Helper para obtener localidades por ID y evitar depender del índice del arreglo mockLocalidades
  */
-export const obtenerLocalidadPorId = (id: number): Localidad | undefined =>
-    mockLocalidades.find((l) => l.id_localidad === id);
+export const obtenerLocalidadPorId = (localidadId: number): Localidad | undefined =>
+    mockLocalidades.find((l) => l.id_localidad === localidadId);
 
 /**
  * -!- Mapa de ciudades por provincia para consultas rápidas

@@ -318,14 +318,14 @@
 	<div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row sm:gap-2">
 		<Button
 			label="Ver detalles"
-			href={`/projects/${proyecto.id_proyecto}`}
+			href={`/proyectos/${proyecto.id_proyecto}`}
 			variant="secondary"
 			size="sm"
 			customClass="flex-1 py-2.5 text-sm transition-all"
 		/>
 		<Button
 			label="Colaborar ahora"
-			href={`/projects/${proyecto.id_proyecto}#colaborar`}
+			href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 			size="sm"
 			{disabled}
 			customClass="flex-1 py-2.5 text-sm font-medium transition-all"

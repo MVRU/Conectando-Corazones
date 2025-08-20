@@ -24,7 +24,7 @@
 	$: navLinks = [
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Nosotros', href: '/nosotros' },
-		{ label: 'Proyectos', href: '/projects' },
+		{ label: 'Proyectos', href: '/proyectos' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
 		{ label: 'Contacto', href: isHome ? '#support' : '/contacto' }
 	];
@@ -44,33 +44,6 @@
 		if (mostrarDropdown && !target.closest('.user-menu-container')) {
 			mostrarDropdown = false;
 		}
-	}
-
-	/**
-	 * * Obtiene el nombre de visualización según el tipo de usuario
-	 */
-	function getDisplayName(
-		usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador | null
-	): string {
-		if (!usuario) return 'Mi cuenta';
-
-		// Si es institución,
-		if (usuario.rol === 'institucion' && 'nombre_legal' in usuario && usuario.nombre_legal) {
-			return usuario.nombre_legal;
-		}
-
-		// Si es organizacion
-		if (usuario.rol === 'colaborador' && 'razon_social' in usuario && usuario.razon_social) {
-			return usuario.razon_social;
-		}
-
-		// Para cualquier otro caso (colaborador unipersonal, administradores)
-		if (usuario.nombre || usuario.apellido) {
-			return `${usuario.nombre ?? ''} ${usuario.apellido ?? ''}`.trim();
-		}
-
-		// Fallback final
-		return 'Mi cuenta';
 	}
 
 	/**
@@ -186,7 +159,7 @@
 					>
 						<img
 							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
-							alt={`Foto de perfil de ${getDisplayName($usuarioStore)}`}
+							alt={`Foto de perfil`}
 							class="h-full w-full cursor-pointer object-cover"
 						/>
 					</button>
@@ -199,7 +172,7 @@
 							<li
 								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-blue-300"
 							>
-								{getDisplayName($usuarioStore)}
+								Mi cuenta
 							</li>
 
 							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mis proyectos', href: '/mis-proyectos' }, { label: 'Configuración', href: '/configuracion' }] as item}

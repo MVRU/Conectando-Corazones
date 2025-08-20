@@ -13,12 +13,15 @@
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
+	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
 
 	let proyecto: Proyecto | null = null;
 	let provinciaNombre: string = 'Provincia';
+	let ubicacionPrincipal: ReturnType<typeof getUbicacionPrincipal>;
 
+	$: ubicacionPrincipal = proyecto ? getUbicacionPrincipal(proyecto) : undefined;
 	$: provinciaNombre =
-		getProvinciaFromLocalidad(proyecto?.direccion?.localidad)?.nombre ?? 'Provincia';
+		getProvinciaFromLocalidad(ubicacionPrincipal?.direccion?.localidad)?.nombre ?? 'Provincia';
 
 	$: {
 		const id = $page.params.id;
@@ -179,7 +182,7 @@
 
 							{#if proyecto.participacion_permitida?.length}
 								<ul class="space-y-4">
-									{#each proyecto.participacion_permitida as p, i (i)}
+									{#each proyecto.participacion_permitida as p (p.id_participacion_permitida)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
 										<li
 											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
@@ -257,7 +260,7 @@
 							<div class="flex items-center justify-between">
 								<span class="text-sm text-gray-600">Ubicación:</span>
 								<span class="text-sm font-medium">
-									{proyecto.direccion?.localidad?.nombre || 'N/A'}, {provinciaNombre}
+									{ubicacionPrincipal?.direccion?.localidad?.nombre || 'N/A'}, {provinciaNombre}
 								</span>
 							</div>
 						</div>
