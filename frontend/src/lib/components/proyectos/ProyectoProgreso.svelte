@@ -33,7 +33,7 @@
 	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
-	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
+		const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') =>
 		({

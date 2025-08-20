@@ -13,9 +13,9 @@ export const ESTADO_POR_ID: Record<number, EstadoDescripcion> = {
  * * Getters sencillos
  */
 
-export function getEstadoCodigo(estado?: EstadoDescripcion, estado_id?: number): EstadoDescripcion {
+export function getEstadoCodigo(estado?: EstadoDescripcion, id_estado?: number): EstadoDescripcion {
     if (estado) return estado;
-    if (estado_id && ESTADO_POR_ID[estado_id]) return ESTADO_POR_ID[estado_id];
+    if (id_estado && ESTADO_POR_ID[id_estado]) return ESTADO_POR_ID[id_estado];
     return 'en_curso';
 }
 

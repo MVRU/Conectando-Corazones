@@ -1,5 +1,3 @@
-<!-- TODO: corregir referencias a direccion -->
-
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import { mockProyectos as defaultProyectos } from '$lib/mocks/mock-proyectos';
@@ -40,9 +38,7 @@
 		...Array.from(
 			new Set(
 				proyectos
-					.map(
-						(p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? ''
-					)
+					.map((p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? '')
 					.filter((s) => s !== '')
 			)
 		).sort()
