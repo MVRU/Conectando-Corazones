@@ -3,6 +3,7 @@ import type { Proyecto } from '$lib/types/Proyecto';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 
 const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
     en_curso: 0,
@@ -50,9 +51,7 @@ export function filtrarProyectos(
     }
 
     if (estado !== 'Todos') {
-        resultado = resultado.filter(
-            (p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado
-        );
+        resultado = resultado.filter((p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado);
     }
 
     if (provincia !== 'Todas') {
@@ -107,3 +106,87 @@ export function seleccionarUbicacion(
 
 export const getUbicacionPrincipal = (proyecto: Proyecto): ProyectoUbicacion | undefined =>
     proyecto.ubicaciones?.find((u) => u.tipo_ubicacion === 'principal') ?? proyecto.ubicaciones?.[0];
+
+
+export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
+    const ubicacion = getUbicacionPrincipal(proyecto);
+    if (!ubicacion) return virtualLabel;
+
+    const ciudad = ubicacion.direccion?.localidad?.nombre;
+    const provincia = getProvinciaFromLocalidad(ubicacion.direccion?.localidad)?.nombre;
+
+    if (ciudad && provincia) return `${ciudad}, ${provincia}`;
+    return ciudad ?? provincia ?? virtualLabel;
+}
+
+//**
+// * Utilidades para Participación Permitida
+//  */
+
+const unidadEmoji: Record<string, string> = {
+    libros: '📚',
+    colchones: '🛏️',
+    alimentos: '🍽️',
+    juguetes: '🧸',
+    computadoras: '💻',
+    prendas: '👕',
+    medicamentos: '💊',
+    herramientas: '🔧',
+    utiles: '✏️',
+    personas: '🙋‍♀️',
+    kilogramos: '⚖️',
+    unidades: '📦',
+    pesos: '💰',
+    dolares: '💵'
+};
+
+export function getParticipacionVisual(p: ParticipacionPermitida) {
+    const unidad = p.unidad?.toLowerCase();
+    const tipo = p.tipo_participacion?.descripcion;
+    const actual = p.actual ?? 0;
+    const objetivo = p.objetivo ?? 0;
+
+    if (tipo === 'Monetaria') {
+        const formatter = new Intl.NumberFormat('es-AR');
+        return {
+            actualLabel: `$${formatter.format(actual)}`,
+            objetivoLabel: `$${formatter.format(objetivo)}`,
+            color: 'green' as const,
+            icono: unidadEmoji[unidad || 'pesos'] || '💰'
+        };
+    }
+
+    if (tipo === 'Voluntariado') {
+        const labelUnidad = unidad === 'personas' ? 'voluntarios' : unidad || 'voluntarios';
+        return {
+            actualLabel: `${actual} ${labelUnidad}`,
+            objetivoLabel: `${objetivo} ${labelUnidad}`,
+            color: 'purple' as const,
+            icono: unidadEmoji[unidad || 'personas'] || '🙋‍♀️'
+        };
+    }
+
+    const labelUnidad = unidad || 'unidades';
+    return {
+        actualLabel: `${actual} ${labelUnidad}`,
+        objetivoLabel: `${objetivo} ${labelUnidad}`,
+        color: 'blue' as const,
+        icono: unidadEmoji[unidad || 'unidades'] || '📦'
+    };
+}
+
+
+//**
+// * Utilidades para Urgencia
+//  */
+
+const URGENCIA_COLOR_MAP: Record<string, string> = {
+    Alta: 'text-red-600 bg-red-100',
+    Media: 'text-yellow-600 bg-yellow-100',
+    Baja: 'text-green-600 bg-green-100'
+};
+
+export function getColorUrgencia(urgencia?: string): string | undefined {
+    if (!urgencia) return undefined; // -*- Evita clases cuando no hay urgencia definida
+    return URGENCIA_COLOR_MAP[urgencia];
+}

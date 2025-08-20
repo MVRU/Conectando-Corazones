@@ -1,7 +1,9 @@
-<!-- TODOs:
- 	- [ ] Ordenar objetivos de forma asc por porcentaje de progreso -->
-
 <script lang="ts">
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import type { Colaboracion } from '$lib/types/Colaboracion';
+	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { page } from '$app/stores';
@@ -10,19 +12,28 @@
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
-	import type { Proyecto } from '$lib/types/Proyecto';
-	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
+	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
+	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+
+	/**
+	 * * DECISIÓN DE DISEÑO:
+	 *    -*- Se lista colaboradores activos reutilizando util-colaboraciones.
+	 */
 
 	let proyecto: Proyecto | null = null;
 	let provinciaNombre: string = 'Provincia';
 	let ubicacionPrincipal: ReturnType<typeof getUbicacionPrincipal>;
+	let colaboracionesActivas: Colaboracion[] = [];
+	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 
 	$: ubicacionPrincipal = proyecto ? getUbicacionPrincipal(proyecto) : undefined;
 	$: provinciaNombre =
 		getProvinciaFromLocalidad(ubicacionPrincipal?.direccion?.localidad)?.nombre ?? 'Provincia';
+	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
+	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
 
 	$: {
 		const id = $page.params.id;
@@ -77,16 +88,6 @@
 		});
 	}
 
-	function getColorUrgencia(urgencia: string) {
-		return (
-			{
-				Alta: 'text-red-600 bg-red-100',
-				Media: 'text-yellow-600 bg-yellow-100',
-				Baja: 'text-green-600 bg-green-100'
-			}[urgencia] || 'text-gray-600 bg-gray-100'
-		);
-	}
-
 	function getColorEstado(estado: EstadoDescripcion) {
 		return (
 			{
@@ -113,7 +114,7 @@
 	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
 		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<!-- Header del proyecto -->
-			<ProyectoHeader {proyecto} {getColorUrgencia} {getColorEstado} />
+			<ProyectoHeader {proyecto} {getColorEstado} />
 
 			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
 				<!-- Columna principal -->
@@ -183,7 +184,7 @@
 
 							{#if proyecto.participacion_permitida?.length}
 								<ul class="space-y-4">
-									{#each proyecto.participacion_permitida as p (p.id_participacion_permitida)}
+									{#each participacionesOrdenadas as p (p.id_participacion_permitida)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
 										<li
 											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
@@ -259,12 +260,33 @@
 								</span>
 							</div>
 							<div class="flex items-center justify-between">
-								<span class="text-sm text-gray-600">Ubicación:</span>
+								<span class="text-sm text-gray-600">Ubicación principal:</span>
 								<span class="text-sm font-medium">
 									{ubicacionPrincipal?.direccion?.localidad?.nombre || 'N/A'}, {provinciaNombre}
 								</span>
 							</div>
 						</div>
+					</div>
+					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow">
+						<h3 class="mb-4 text-lg font-semibold">Colaboradores</h3>
+						{#if colaboracionesActivas.length}
+							<ul class="space-y-3">
+								{#each colaboracionesActivas as colab (colab.id_colaboracion)}
+									<li class="flex items-center justify-between">
+										<span class="text-sm text-gray-600"
+											>{obtenerNombreColaborador(colab.colaborador)}</span
+										>
+										<span
+											class={`text-sm font-medium ${colab.estado === 'aprobada' ? 'text-green-600' : 'text-yellow-600'}`}
+										>
+											{colab.estado.charAt(0).toUpperCase() + colab.estado.slice(1)}
+										</span>
+									</li>
+								{/each}
+							</ul>
+						{:else}
+							<p class="text-sm text-gray-600">Sin colaboradores</p>
+						{/if}
 					</div>
 				</div>
 			</div>

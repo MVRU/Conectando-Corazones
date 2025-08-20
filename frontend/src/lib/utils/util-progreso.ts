@@ -30,6 +30,27 @@ export function calcularProgresoCantidad(participaciones: ParticipacionPermitida
 
 
 /**
+ * * Calcula el porcentaje individual de avance de una participación
+ */
+export function porcentajeParticipacion(p: ParticipacionPermitida): number {
+    const objetivo = p.objetivo ?? 0;
+    if (objetivo <= 0) return 0;
+    return Math.min(((p.actual ?? 0) / objetivo) * 100, 100);
+}
+
+/**
+ * * Ordena participaciones por porcentaje de avance (ascendente)
+ */
+export function ordenarPorProgreso(
+    participaciones: ParticipacionPermitida[] = []
+): ParticipacionPermitida[] {
+    return [...participaciones].sort(
+        (a, b) => porcentajeParticipacion(a) - porcentajeParticipacion(b)
+    );
+}
+
+
+/**
  * Calcula el porcentaje de tiempo transcurrido desde la fecha de inicio hasta la fecha de cierre
  */
 export function calcularProgresoTiempo(fechaInicio?: Date, fechaCierre?: Date): number {

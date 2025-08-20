@@ -57,9 +57,18 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 1,
         id_proyecto: 1,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad: 'libros',
         objetivo: 20,
         actual: 12,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+      },
+      {
+        id_participacion_permitida: 1,
+        id_proyecto: 1,
+        id_tipo_participacion: 1,
+        unidad: 'docentes',
+        objetivo: 10,
+        actual: 2,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       }
     ]
@@ -157,10 +166,10 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 4,
         id_proyecto: 4,
         id_tipo_participacion: 1,
-        unidad: 'personas',
-        objetivo: 8,
-        actual: 5,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+        unidad: 'ARS',
+        objetivo: 500000,
+        actual: 100000,
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Monetaria' }
       }
     ]
   },
@@ -239,10 +248,10 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 7,
         id_proyecto: 7,
         id_tipo_participacion: 1,
-        unidad: 'personas',
-        objetivo: 12,
+        unidad: 'abrigos',
+        objetivo: 50,
         actual: 8,
-        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+        tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
       }
     ]
   },

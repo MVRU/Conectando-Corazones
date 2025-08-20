@@ -1,35 +1,31 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
+	import { getParticipacionVisual } from '$lib/utils/util-proyectos';
+	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 
 	export let proyecto: Proyecto;
 	export let mostrarFormulario: () => void;
 
-	const unidadEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️',
-		personas: '🙋‍♀️',
-		kilogramos: '⚖️',
-		unidades: '📦',
-		pesos: '💰',
-		dolares: '💵'
-	};
-
-	const participaciones = proyecto.participacion_permitida ?? [];
+	const participaciones = ordenarPorProgreso(proyecto.participacion_permitida ?? []);
 	const tieneUnSoloObjetivo = participaciones.length === 1;
 	const multiplesObjetivos = participaciones.length > 1;
 	const unicoObjetivo = tieneUnSoloObjetivo ? participaciones[0] : null;
 
-	function getUnidadInfo(obj: ParticipacionPermitida | null, multiples: boolean) {
+	type UnidadInfo = {
+		bg: string;
+		border: string;
+		text: string;
+		icon: string;
+		label: string;
+		button: string;
+		objetivoLabel?: string;
+		actualLabel?: string;
+	};
+
+	function getUnidadInfo(obj: ParticipacionPermitida | null, multiples: boolean): UnidadInfo {
 		if (multiples) {
 			return {
 				bg: 'bg-yellow-50',
@@ -40,7 +36,8 @@
 				button: 'Colaborar ahora'
 			};
 		}
-		if (!obj)
+
+		if (!obj) {
 			return {
 				bg: 'bg-gray-50',
 				border: 'border-gray-200',
@@ -49,46 +46,39 @@
 				label: 'colaboración',
 				button: 'Colaborar'
 			};
-		const tipo = obj.tipo_participacion?.descripcion?.toLowerCase() || '';
-		if (tipo === 'Voluntariado') {
-			return {
-				bg: 'bg-purple-50',
-				border: 'border-purple-200',
-				text: 'text-purple-800',
-				icon: '🙋‍♀️',
-				label: 'voluntariado',
-				button: 'Postularme como voluntario'
-			};
 		}
-		if (tipo === 'Especie') {
-			const unidad = obj.unidad || 'materiales';
-			return {
-				bg: 'bg-blue-50',
-				border: 'border-blue-200',
-				text: 'text-blue-800',
-				icon: unidadEmoji[unidad.toLowerCase()] || '📦',
-				label: unidad ? `donaciones de ${unidad}` : 'donaciones específicas',
-				button: 'Donar materiales'
-			};
-		}
-		if (tipo === 'Monetaria') {
-			const unidad = obj.unidad || 'pesos';
-			return {
+
+		const { color, icono, objetivoLabel, actualLabel } = getParticipacionVisual(obj);
+
+		const colorMap = {
+			green: {
 				bg: 'bg-green-50',
 				border: 'border-green-200',
 				text: 'text-green-800',
-				icon: unidadEmoji[unidad.toLowerCase()] || '💰',
-				label: `donaciones monetarias (${unidad})`,
+				label: `donaciones monetarias (${obj.unidad || 'pesos'})`,
 				button: 'Donar ahora'
-			};
-		}
+			},
+			purple: {
+				bg: 'bg-purple-50',
+				border: 'border-purple-200',
+				text: 'text-purple-800',
+				label: 'voluntariado',
+				button: 'Postularme como voluntario'
+			},
+			blue: {
+				bg: 'bg-blue-50',
+				border: 'border-blue-200',
+				text: 'text-blue-800',
+				label: obj.unidad ? `donaciones de ${obj.unidad}` : 'donaciones específicas',
+				button: 'Donar materiales'
+			}
+		} as const;
+
 		return {
-			bg: 'bg-gray-50',
-			border: 'border-gray-200',
-			text: 'text-gray-800',
-			icon: '❓',
-			label: 'colaboración',
-			button: 'Colaborar'
+			...colorMap[color],
+			icon: icono,
+			objetivoLabel,
+			actualLabel
 		};
 	}
 
@@ -119,10 +109,9 @@
 				Este proyecto necesita <strong>{unidadInfo.label}</strong>.
 				{#if unicoObjetivo}
 					<span class="mt-1 block text-xs text-gray-500">
-						Objetivo: {unicoObjetivo.objetivo}
-						{unicoObjetivo.unidad}
+						Objetivo: {unidadInfo.objetivoLabel}
 						{#if unicoObjetivo.actual !== undefined}
-							&nbsp;|&nbsp; Actual: {unicoObjetivo.actual} {unicoObjetivo.unidad}
+							&nbsp;|&nbsp; Actual: {unidadInfo.actualLabel}
 						{/if}
 					</span>
 				{/if}

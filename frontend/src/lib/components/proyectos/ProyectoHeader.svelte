@@ -1,17 +1,15 @@
 <script lang="ts">
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
-	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
+	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import { getColorUrgencia } from '$lib/utils/util-proyectos';
 
 	export let proyecto: Proyecto;
 	export let getColorEstado: (estado: EstadoDescripcion) => string;
 
-	// -*- Ubicación principal 
-	const ubicacionPrincipal = getUbicacionPrincipal(proyecto);
-	const direccionPrincipal = ubicacionPrincipal?.direccion;
-	const provinciaNombre = getProvinciaFromLocalidad(direccionPrincipal?.localidad)?.nombre ?? 'Provincia';
+	// -*- Ubicación principal
+	const ubicacionTexto = getUbicacionTexto(proyecto);
 
 	// -*- Estado con manejo correcto de objeto expandido vs FK
 	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
@@ -42,7 +40,7 @@
 				class="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium drop-shadow sm:text-base"
 			>
 				<span class="flex items-center gap-1 text-pink-200">
-					📍 {direccionPrincipal?.localidad?.nombre || 'Ciudad'}, {provinciaNombre}
+					📍 {ubicacionTexto}
 				</span>
 
 				<span

@@ -1,12 +1,10 @@
-<!-- TODOs:
-	- [ ] Implementar propiedad 'urgencia' en tipo Proyecto y mocks -->
-
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
+	import { getParticipacionVisual } from '$lib/utils/util-proyectos';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 
 	export let proyecto!: Proyecto;
@@ -14,10 +12,7 @@
 
 	// Variables reactivas para valores dependientes de "proyecto"
 	let percentCantidad: number = 0;
-	let actualLabel: string = 'En desarrollo';
-	let objetivoLabel: string = 'Por definir';
 	let color: 'green' | 'blue' | 'purple' = 'blue';
-	let icono: string = 'archive';
 
 	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
 		const participaciones = proyecto.participacion_permitida;
@@ -26,51 +21,12 @@
 		const primerParticipacion = participaciones[0];
 
 		percentCantidad = calcularProgresoTotal(proyecto);
-
-		actualLabel =
-			primerParticipacion.unidad === 'dinero'
-				? `$${totalActual.toLocaleString('es-AR')}`
-				: primerParticipacion.unidad === 'personas'
-					? `${totalActual} voluntarios`
-					: `${totalActual} ${primerParticipacion.unidad}`;
-
-		objetivoLabel =
-			primerParticipacion.unidad === 'dinero'
-				? `$${totalObjetivo.toLocaleString('es-AR')}`
-				: primerParticipacion.unidad === 'personas'
-					? `${totalObjetivo} voluntarios`
-					: `${totalObjetivo} ${primerParticipacion.unidad}`;
-
-		color =
-			primerParticipacion.unidad === 'dinero'
-				? 'green'
-				: primerParticipacion.unidad === 'personas'
-					? 'purple'
-					: 'blue';
-
-		icono =
-			primerParticipacion.unidad === 'dinero'
-				? 'money'
-				: primerParticipacion.unidad === 'personas'
-					? 'users'
-					: 'archive';
 	}
 
 	const formatearFechaCorta = (fecha?: string) => {
 		if (!fecha) return '—';
 		const f = new Date(fecha);
 		return `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear().toString().slice(-2)}`;
-	};
-
-	const getBadgeClasses = (valor: string) => {
-		const base =
-			'rounded-full bg-white px-3 py-2 text-[11px] font-semibold shadow-sm ring-1 ring-white/40 backdrop-blur-sm';
-		const colores = {
-			alta: 'text-red-700',
-			media: 'text-orange-500',
-			baja: 'text-blue-500'
-		};
-		return `${base} ${colores[valor.toLowerCase() as keyof typeof colores] || 'text-gray-600'}`;
 	};
 
 	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);

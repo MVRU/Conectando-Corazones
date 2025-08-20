@@ -1,9 +1,12 @@
-<!-- TODO: corregir para que se muestre color y emoji -->
-
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { calcularProgresoCantidad, calcularProgresoTiempo } from '$lib/utils/util-progreso';
+	import {
+		calcularProgresoCantidad,
+		calcularProgresoTiempo,
+		ordenarPorProgreso
+	} from '$lib/utils/util-progreso';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 
@@ -33,7 +36,7 @@
 	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
-		const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') =>
 		({
@@ -55,8 +58,12 @@
 
 	const defaultVisual = { color: 'blue' as const, emoji: () => '🤝' };
 
-	$: if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
-		const { unidad, tipo_participacion } = proyecto.participacion_permitida[0] || {};
+	let participaciones: ParticipacionPermitida[] = [];
+
+	$: participaciones = ordenarPorProgreso(proyecto.participacion_permitida ?? []);
+
+	$: if (participaciones.length > 0) {
+		const { unidad, tipo_participacion } = participaciones[0] || {};
 		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
 		color = visual.color;
 		icono = visual.emoji(unidad);
@@ -64,11 +71,13 @@
 
 	const disabled = estadoCodigo === 'completado';
 
-	const participaciones = proyecto.participacion_permitida || [];
+	let progresoCantidad = 0;
+	let progresoTiempo = 0;
+	let progresoTotal = 0;
 
-	let progresoCantidad = calcularProgresoCantidad(participaciones);
-	let progresoTiempo = calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa);
-	let progresoTotal = Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo);
+	$: progresoCantidad = calcularProgresoCantidad(participaciones);
+	$: progresoTiempo = calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa);
+	$: progresoTotal = Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo);
 
 	let showModal = false;
 

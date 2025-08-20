@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import type { ColaboradorDisyuncion, Organizacion, Unipersonal } from '$lib/types/Usuario';
-	
+	import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
+	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
+
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;
 
@@ -10,23 +11,10 @@
 	$: ciudad = ubicacionPrincipal?.direccion?.localidad?.nombre ?? 'Ciudad';
 	$: provincia = ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre ?? 'Provincia';
 
-	const colaboradores = proyecto.colaboraciones?.map((c) => c.colaborador).filter((c): c is ColaboradorDisyuncion => !!c) ?? [];
-
-	/**
-	 * * Obtiene el nombre de visualización de un colaborador
-	 * * Si es organización → muestra razon_social
-	 * * Si es unipersonal → muestra nombre + apellido
-	 */
-	function obtenerNombreColaborador(colaborador: ColaboradorDisyuncion): string {
-		
-		// Para Organizacion
-		if ('razon_social' in colaborador && colaborador.razon_social) {
-			return colaborador.razon_social;
-		}
-		
-		// Para Unipersonal o cualquier otro caso, usar nombre + apellido
-		return `${colaborador.nombre} ${colaborador.apellido}`.trim() || 'Colaborador';
-	}
+	const colaboradores =
+		proyecto.colaboraciones
+			?.map((c) => c.colaborador)
+			.filter((c): c is ColaboradorDisyuncion => !!c) ?? [];
 </script>
 
 <!-- Descripción -->
@@ -92,22 +80,6 @@
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">⏳</span>
 			{formatearFecha(proyecto.fecha_fin_tentativa) || '—'}
-		</p>
-	</div>
-
-	<!-- Card: Colaboradores -->
-	<div
-		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-		style="animation-delay: 500ms"
-	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Colaboradores</h4>
-		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
-			<span class="text-lg">🤝</span>
-			{#if colaboradores.length > 0}
-				{colaboradores.map(obtenerNombreColaborador).join(', ')}
-			{:else}
-				Sin colaboradores
-			{/if}
 		</p>
 	</div>
 </div>
