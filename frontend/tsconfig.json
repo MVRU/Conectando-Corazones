@@ -5,12 +5,6 @@
 			"svelte",
 			"vite/client"
 		],
-		"baseUrl": ".",
-		"paths": {
-			"$lib/*": [
-				"src/lib/*"
-			]
-		},
 		"allowJs": true,
 		"checkJs": true,
 		"esModuleInterop": true,

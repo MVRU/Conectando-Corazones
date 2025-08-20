@@ -2,13 +2,13 @@
 	import '../app.css';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
-	import Breadcrumbs from '$lib/components/ui/navigation/Breadcrumbs.svelte';
+	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
 	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
 	import '$lib/stores/reducedMotion';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 	import { page } from '$app/stores';
-	import ScrollToTop from '$lib/components/ui/navigation/ScrollToTop.svelte';
+	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { authActions } from '$lib/stores/auth';

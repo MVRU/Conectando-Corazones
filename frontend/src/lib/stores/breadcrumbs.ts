@@ -61,10 +61,10 @@ export function clearBreadcrumbs() {
 
 export const BREADCRUMB_ROUTES = {
         home: { label: 'Inicio', href: '/' },
-        projects: { label: 'Proyectos', href: '/projects' },
-        about: { label: 'Nosotros', href: '/about' },
-        contact: { label: 'Contacto', href: '/contact' },
+        proyectos: { label: 'Proyectos', href: '/proyectos' },
+        nosotros: { label: 'Nosotros', href: '/nosotros' },
+        contacto: { label: 'Contacto', href: '/contacto' },
         faq: { label: 'Preguntas frecuentes', href: '/faq' },
-        login: { label: 'Iniciar sesión', href: '/login' },
-        signin: { label: 'Registrarse', href: '/signin' }
+        login: { label: 'Iniciar sesión', href: '/iniciar-sesion' },
+        registro: { label: 'Registrarse', href: '/registrarse' }
 };

@@ -3,7 +3,7 @@
 	let visible = false;
 	let hasAnimated = false;
 	let footerRef: HTMLElement;
-	const year = new Date().getFullYear();
+	const anio = new Date().getFullYear();
 
 	onMount(() => {
 		const obs = new IntersectionObserver(
@@ -95,10 +95,10 @@
 			<!-- *Enlaces rápidos -->
 			<nav class="flex flex-col items-center gap-1 md:items-start md:pl-12">
 				<h5 class="mb-2 text-lg font-bold text-white">Enlaces rápidos</h5>
-				<a href="/about" class="footer-link">Sobre Nosotros</a>
-				<a href="/donate" class="footer-link">Donar</a>
-				<a href="/projects" class="footer-link">Proyectos</a>
-				<a href="/contact" class="footer-link">Contacto</a>
+				<a href="/nosotros" class="footer-link">Sobre Nosotros</a>
+				<a href="/proyectos" class="footer-link">Proyectos</a>
+				<a href="/faq" class="footer-link">Preguntas Frecuentes</a>
+				<a href="/contacto" class="footer-link">Contacto</a>
 			</nav>
 
 			<!-- *Contacto -->
@@ -131,7 +131,7 @@
 			class="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-center sm:text-left"
 		>
 			<p class="break-words text-xs text-gray-300 sm:text-base">
-				&copy; {year} <span class="font-bold">Conectando Corazones</span>.
+				&copy; {anio} <span class="font-bold">Conectando Corazones</span>.
 				<span class="block sm:inline">Todos los derechos reservados.</span>
 			</p>
 			<nav

@@ -1,0 +1,15 @@
+Características:
+✅ Datos reales que se usarán en producción
+✅ Estáticos - no cambian frecuentemente
+✅ Fuente de verdad - datos oficiales/definitivos
+✅ No simulan nada - son datos reales del negocio
+
+📋 Regla Simple
+¿Es un dato que usarías en producción?
+✅ SÍ → Va en /data
+❌ NO → Va en /mocks
+Ejemplos:
+Provincias argentinas → /data ✅
+Lista de usuarios ficticios → /mocks ✅
+FAQs del sitio → /data ✅
+Proyectos de prueba → /mocks ✅
