@@ -1,0 +1,8 @@
+{
+    "label": "Marco legal",
+    "position": 3,
+    "link": {
+        "type": "doc",
+        "id": "legal/index"
+    }
+}

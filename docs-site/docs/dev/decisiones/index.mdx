@@ -1,0 +1,23 @@
+---
+title: "Guía de ADRs"
+---
+
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
+Cada decisión técnica relevante se registra como un **Architecture Decision Record** (ADR).
+
+## Numeración
+
+- Usá números secuenciales de tres dígitos (`01`, `02`, ...).
+
+## Estructura
+
+1. **Contexto**: describe el problema o necesidad.
+2. **Alternativas**: lista de opciones evaluadas.
+3. **Decisión**: explicación de la solución elegida.
+4. **Consecuencias**: impactos positivos y negativos.
+
+## Decisiones Técnicas
+{/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}
+<DocCardList items={useCurrentSidebarCategory().items} />

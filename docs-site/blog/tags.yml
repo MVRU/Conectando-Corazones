@@ -1,0 +1,5 @@
+# -*- Etiquetas para clasificar entradas del blog -*-
+lanzamiento:
+  label: Lanzamiento
+  permalink: /lanzamiento
+  description: Anuncios y novedades del proyecto
