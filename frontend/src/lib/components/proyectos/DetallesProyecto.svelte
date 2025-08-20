@@ -4,6 +4,13 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;
+
+	// -*- Ubicación normalizada para evitar comprobaciones repetidas
+	$: ubicacionPrincipal = proyecto.ubicaciones?.[0];
+	$: ciudad = ubicacionPrincipal?.direccion?.localidad?.nombre ?? 'Ciudad';
+	$: provincia = ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre ?? 'Provincia';
+
+	const colaboradores = proyecto.colaboraciones?.map((c) => c.colaborador).filter(Boolean) ?? [];
 </script>
 
 <!-- Descripción -->
@@ -31,7 +38,7 @@
 	<!-- Card: Categorías -->
 	<div
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-		style="animation-delay: 200ms"
+		style="animation-delay: 300ms"
 	>
 		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Categorías</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
@@ -47,7 +54,7 @@
 	<!-- Card: Fecha de inicio -->
 	<div
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
-		style="animation-delay: 300ms"
+		style="animation-delay: 400ms"
 	>
 		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
 			Fecha de Inicio
@@ -80,8 +87,8 @@
 		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Colaboradores</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">🤝</span>
-			{#if proyecto.colaboradores && proyecto.colaboradores.length > 0}
-				{proyecto.colaboradores
+			{#if colaboradores.length > 0}
+				{colaboradores
 					.map((c) => ('razon_social' in c ? c.razon_social : `${c.nombre} ${c.apellido}`))
 					.join(', ')}
 			{:else}

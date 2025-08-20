@@ -1,7 +1,3 @@
-/*
-* DECISIÓN DE DISEÑO: centraliza la diferentes helpers y utils para proyectos
-*/
-
 import { error } from '@sveltejs/kit';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
@@ -54,12 +50,15 @@ export function filtrarProyectos(
     }
 
     if (estado !== 'Todos') {
-        resultado = resultado.filter((p) => ESTADO_LABELS[p.estado?.descripcion ?? 'en_curso'] === estado);
+        resultado = resultado.filter(
+            (p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado
+        );
     }
 
     if (provincia !== 'Todas') {
         resultado = resultado.filter(
-            (p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.localidad)?.nombre === provincia
+            (p) =>
+                getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre === provincia
         );
     }
 
@@ -73,8 +72,8 @@ export function filtrarProyectos(
     }
 
     resultado.sort((a, b) => {
-        const prioridadEstadoA = ESTADO_PRIORIDAD[a.estado?.descripcion ?? 'en_curso'] ?? 3;
-        const prioridadEstadoB = ESTADO_PRIORIDAD[b.estado?.descripcion ?? 'en_curso'] ?? 3;
+        const prioridadEstadoA = ESTADO_PRIORIDAD[a.estado ?? 'en_curso'] ?? 3;
+        const prioridadEstadoB = ESTADO_PRIORIDAD[b.estado ?? 'en_curso'] ?? 3;
 
         if (prioridadEstadoA !== prioridadEstadoB) {
             return prioridadEstadoA - prioridadEstadoB;

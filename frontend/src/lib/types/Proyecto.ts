@@ -1,10 +1,7 @@
-// TODO: corregir relaciones (pasaje a tablas, en relaciones 1:N el FK va del lado N)
-
 import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';
-import type { ColaboradorDisyuncion } from './Usuario';
 import type { ProyectoUbicacion } from './ProyectoUbicacion';
 import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';

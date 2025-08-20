@@ -1,6 +1,7 @@
 import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import { mockDirecciones } from '$lib/mocks/mock-direcciones';
 
-export const mockProyectoUbicaciones: ProyectoUbicacion[] = [
+const ubicacionesBase: ProyectoUbicacion[] = [
     {
         id_proyecto_ubicacion: 1,
         proyecto_id: 1,
@@ -26,3 +27,13 @@ export const mockProyectoUbicaciones: ProyectoUbicacion[] = [
         tipo_ubicacion: 'alternativa'
     }
 ];
+
+export const mockProyectoUbicaciones: ProyectoUbicacion[] = ubicacionesBase.map((ubicacion) => {
+    const direccion = mockDirecciones.find((d) => d.id_direccion === ubicacion.direccion_id);
+    if (!direccion?.localidad?.provincia) {
+        throw new Error(
+            `La dirección ${ubicacion.direccion_id} no posee localidad o provincia definida`
+        );
+    }
+    return { ...ubicacion, direccion };
+});

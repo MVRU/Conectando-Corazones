@@ -1,21 +1,22 @@
 import type { Proyecto } from '$lib/types/Proyecto';
+import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
-import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import { mockProyectoCategorias } from '$lib/mocks/mock-proyecto-categorias';
 import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
 import { mockProyectoUbicaciones } from '$lib/mocks/mock-proyecto-ubicaciones';
-import { ESTADOS } from '$lib/types/Estado';
+import { mockDirecciones } from '$lib/mocks/mock-direcciones';
+
+/*
+ * DECISIÓN DE DISEÑO: las ubicaciones se calculan a partir de joins para evitar duplicar direcciones.
+ */
 
 // ---------- Helpers ----------
 // TODO: considerar pasarlos a utils
 
 const isDefined = <T>(x: T | null | undefined): x is T => x != null;
 
-const elementosPorId = <T, K extends keyof T>(
-  ids: number[] = [],
-  elementos: T[],
-  clave: K
-): T[] => ids.map((id) => elementos.find((e) => e[clave] === id)).filter(isDefined);
+const elementosPorId = <T, K extends keyof T>(ids: number[] = [], elementos: T[], clave: K): T[] =>
+  ids.map((id) => elementos.find((e) => e[clave] === id)).filter(isDefined);
 
 const categoriasPorProyecto = (id: number) =>
   mockProyectoCategorias
@@ -26,11 +27,14 @@ const categoriasPorProyecto = (id: number) =>
 const colaboracionesPorId = (ids: number[] = []) =>
   elementosPorId(ids, mockColaboraciones, 'id_colaboracion');
 
-const direccionesPorProyecto = (id: number) =>
+const ubicacionesPorProyecto = (id: number): ProyectoUbicacion[] =>
   mockProyectoUbicaciones
-    .filter((pu) => pu.proyecto_id === id)
-    .map((pu) => pu.direccion)
-    .filter(isDefined);
+    .filter((u) => u.proyecto_id === id)
+    .map((u) => ({
+      ...u,
+      direccion: mockDirecciones.find((d) => d.id_direccion === u.direccion_id)
+    }))
+    .filter((u): u is ProyectoUbicacion => isDefined(u.direccion));
 
 const proyectosBase: Proyecto[] = [
   {
@@ -45,18 +49,9 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [1, 2],
     institucion_id: 2,
-    direccion_id: 1,
     evidencia_ids: [1],
     solicitud_finalizacion_ids: [1],
     estado: 'en_curso',
-    ubicaciones: [
-      {
-        id_proyecto_ubicacion: 1,
-        proyecto_id: 1,
-        direccion_id: 1,
-        tipo_ubicacion: 'principal',
-      }
-    ],
     participacion_permitida: [
       {
         id_participacion_permitida: 1,
@@ -67,32 +62,7 @@ const proyectosBase: Proyecto[] = [
         actual: 12,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 1,
-        id_tipo_participacion: 2,
-        unidad: 'libros',
-        objetivo: 200,
-        actual: 150,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 1,
-        descripcion: 'Fotos de la entrega de libros',
-        created_at: new Date('2025-06-02'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 1,
-        created_at: new Date('2025-06-03'),
-        evidencia_ids: [1],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 2,
@@ -106,7 +76,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [3],
     institucion_id: 2,
-    direccion_id: 2,
     evidencia_ids: [2],
     solicitud_finalizacion_ids: [2],
     estado: 'en_curso',
@@ -120,32 +89,7 @@ const proyectosBase: Proyecto[] = [
         actual: 18,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 2,
-        id_tipo_participacion: 2,
-        unidad: 'platos',
-        objetivo: 1000,
-        actual: 700,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 2,
-        descripcion: 'Registro fotográfico de la entrega de alimentos',
-        created_at: new Date('2025-05-11'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 2,
-        created_at: new Date('2025-05-12'),
-        evidencia_ids: [2],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 3,
@@ -159,7 +103,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1],
     colaboracion_ids: [4],
     institucion_id: 3,
-    direccion_id: 3,
     evidencia_ids: [3],
     solicitud_finalizacion_ids: [3],
     estado: 'en_revision',
@@ -174,23 +117,6 @@ const proyectosBase: Proyecto[] = [
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       }
     ],
-    evidencias: [
-      {
-        id_evidencia: 3,
-        descripcion: 'Testimonios y fotos de los niños beneficiados',
-        created_at: new Date('2025-04-21'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 3,
-        created_at: new Date('2025-04-22'),
-        evidencia_ids: [3],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 4,
@@ -205,7 +131,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 3],
     colaboracion_ids: [5],
     institucion_id: 4,
-    direccion_id: 4,
     evidencia_ids: [4],
     solicitud_finalizacion_ids: [4],
     estado: 'en_auditoria',
@@ -219,32 +144,7 @@ const proyectosBase: Proyecto[] = [
         actual: 5,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 4,
-        id_tipo_participacion: 3,
-        unidad: 'ARS',
-        objetivo: 500000,
-        actual: 320000,
-        tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 4,
-        descripcion: 'Fotos del equipamiento entregado',
-        created_at: new Date('2025-07-02'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 4,
-        created_at: new Date('2025-07-03'),
-        evidencia_ids: [4],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 5,
@@ -258,7 +158,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [6],
     institucion_id: 5,
-    direccion_id: 5,
     evidencia_ids: [5],
     solicitud_finalizacion_ids: [5],
     estado: 'cancelado',
@@ -272,32 +171,7 @@ const proyectosBase: Proyecto[] = [
         actual: 15,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 5,
-        id_tipo_participacion: 2,
-        unidad: 'cuadernos',
-        objetivo: 100,
-        actual: 60,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 5,
-        descripcion: 'Fotos de las clases y testimonios',
-        created_at: new Date('2025-06-16'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 5,
-        created_at: new Date('2025-06-17'),
-        evidencia_ids: [5],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 6,
@@ -312,7 +186,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [7],
     institucion_id: 2,
-    direccion_id: 6,
     evidencia_ids: [6],
     solicitud_finalizacion_ids: [6],
     estado: 'en_curso',
@@ -326,32 +199,7 @@ const proyectosBase: Proyecto[] = [
         actual: 22,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 6,
-        id_tipo_participacion: 2,
-        unidad: 'alimentos',
-        objetivo: 500,
-        actual: 320,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 6,
-        descripcion: 'Fotos de la recolección y entrega',
-        created_at: new Date('2025-05-26'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 6,
-        created_at: new Date('2025-05-27'),
-        evidencia_ids: [6],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 7,
@@ -365,7 +213,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 2],
     colaboracion_ids: [8],
     institucion_id: 6,
-    direccion_id: 7,
     evidencia_ids: [7],
     solicitud_finalizacion_ids: [7],
     estado: 'en_curso',
@@ -379,32 +226,7 @@ const proyectosBase: Proyecto[] = [
         actual: 8,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 7,
-        id_tipo_participacion: 2,
-        unidad: 'prendas',
-        objetivo: 200,
-        actual: 120,
-        tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Especie' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 7,
-        descripcion: 'Fotos de la entrega de ropa',
-        created_at: new Date('2025-08-02'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 7,
-        created_at: new Date('2025-08-03'),
-        evidencia_ids: [7],
-        evidencias: []
-      }
-    ]
   },
   {
     id_proyecto: 8,
@@ -418,7 +240,6 @@ const proyectosBase: Proyecto[] = [
     participacion_permitida_ids: [1, 3],
     colaboracion_ids: [9],
     institucion_id: 7,
-    direccion_id: 8,
     evidencia_ids: [8],
     solicitud_finalizacion_ids: [8],
     estado: 'completado',
@@ -432,32 +253,7 @@ const proyectosBase: Proyecto[] = [
         actual: 5,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
       },
-      {
-        id_proyecto: 8,
-        id_tipo_participacion: 3,
-        unidad: 'ARS',
-        objetivo: 100000,
-        actual: 40000,
-        tipo_participacion: { id_tipo_participacion: 3, descripcion: 'Monetaria' }
-      }
     ],
-    evidencias: [
-      {
-        id_evidencia: 8,
-        descripcion: 'Fotos de las capacitaciones',
-        created_at: new Date('2025-07-11'),
-        archivos: [],
-        solicitudes_finalizacion: []
-      }
-    ],
-    solicitudes_finalizacion: [
-      {
-        id_solicitud: 8,
-        created_at: new Date('2025-07-12'),
-        evidencia_ids: [8],
-        evidencias: []
-      }
-    ]
   }
 ];
 
@@ -465,5 +261,6 @@ export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => ({
   ...proyecto,
   categorias: categoriasPorProyecto(proyecto.id_proyecto ?? 0),
   colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
-  direcciones: direccionesPorProyecto(proyecto.id_proyecto ?? 0)
+  ubicaciones: ubicacionesPorProyecto(proyecto.id_proyecto ?? 0),
+  institucion: Object.values(mockUsuarios).find((u) => u.id_usuario === proyecto.institucion_id)
 }));
