@@ -17,6 +17,8 @@
 		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
+		"@fontsource/raleway": "^5.2.6",
+		"aos": "^2.3.4",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
 		"@playwright/test": "^1.49.1",
@@ -42,8 +44,10 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"@fontsource/raleway": "^5.2.6",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
+		"aos": "^2.3.4",
 		"clsx": "^2.1.1",
 		"lucide-svelte": "^0.535.0",
 		"solid-js": "^1.9.7",
