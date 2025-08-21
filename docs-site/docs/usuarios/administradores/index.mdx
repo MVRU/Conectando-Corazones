@@ -2,6 +2,9 @@
 title: Administradores
 ---
 
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
 ## Responsabilidades
 
 1. Configurar parámetros globales de la plataforma y gestionar permisos de usuarios.
@@ -20,3 +23,7 @@ title: Administradores
 - Verifique la autenticidad de los usuarios antes de conceder permisos elevados.
 - Evite realizar cambios críticos desde redes públicas o dispositivos no confiables.
 - Documente las acciones administrativas para facilitar auditorías.
+
+## Secciones
+{/* Esto renderiza automáticamente las subpáginas/hijas de la categoría actual */}
+<DocCardList items={useCurrentSidebarCategory().items} />

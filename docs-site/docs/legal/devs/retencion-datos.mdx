@@ -81,7 +81,23 @@ En casos específicos, la retención puede extenderse más allá de los plazos i
 ## Auditoría y transparencia
 
 * Todos los eventos de eliminación son **registrados en un log inmutable** (`HistorialCambios`).
+* Los registros de `HistorialCambios` se purgan automáticamente a los **6 meses** del cierre del proyecto.
 * **Opcional para más transparencia:** los usuarios pueden solicitar un **certificado de eliminación** para constatar que su información fue borrada según la política vigente.
+
+{/* ! Corregir siguiendo estructura de tabla HistorialCambios */}
+
+### Ejemplo de registro de HistorialCambios
+
+```json
+{
+  "evento": "evidencia.eliminada",
+  "proyectoId": 123,
+  "evidenciaId": 456,
+  "motivo": "Solicitud de la institución",
+  "fecha": "2025-01-01T10:00:00Z"
+}
+```
+
 
 ---
 

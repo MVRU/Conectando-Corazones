@@ -1,0 +1,124 @@
+---
+slug: renaper
+title: "Integración con RENAPER"
+tags: [renaper, integracion, identidad]
+---
+
+## Introducción
+
+La integración con **RENAPER** permite validar la identidad de las personas que interactúan con la plataforma **Conectando Corazones**, reduciendo intentos de fraude y garantizando mayor calidad de los datos.
+  
+Este servicio requiere autenticación previa y el uso responsable de datos personales.
+
+---
+
+## Autenticación
+
+Para consumir los servicios de RENAPER es necesario obtener un **token de acceso** mediante el flujo *client credentials*.  
+
+1. Enviar las credenciales asignadas (`client_id`, `client_secret`).  
+2. Recibir un `access_token` temporal.  
+3. Utilizarlo en el encabezado `Authorization: Bearer <token>` en cada consulta.
+
+### Endpoint: POST `/auth/token`
+
+**Request body (JSON)**
+
+| campo          | tipo   | requerido | descripción                          |
+|----------------|--------|-----------|--------------------------------------|
+| `client_id`    | string | sí        | Identificador otorgado por RENAPER   |
+| `client_secret`| string | sí        | Clave secreta asociada al cliente    |
+
+**Respuesta 200**
+
+```json
+{
+  "access_token": "jwt",
+  "expires_in": 3600
+}
+````
+
+---
+
+## Endpoints principales
+
+### GET `/personas/{dni}`
+
+Recupera datos básicos de una persona.
+
+**Parámetros**
+
+| nombre | tipo   | ubicación | requerido | descripción         |
+| ------ | ------ | --------- | --------- | ------------------- |
+| `dni`  | string | path      | sí        | Número de documento |
+| `sexo` | string | query     | sí        | `"M"` o `"F"`       |
+
+**Respuesta 200**
+
+```json
+{
+  "nombre": "Juan",
+  "apellido": "Pérez",
+  "fecha_nacimiento": "1980-01-01"
+}
+```
+
+---
+
+### GET `/personas/{dni}/foto`
+
+Devuelve la **fotografía asociada al documento** en formato Base64.
+
+---
+
+## Manejo de errores
+
+| código | motivo                                 | acción sugerida                          |
+| ------ | -------------------------------------- | ---------------------------------------- |
+| 400    | Parámetros inválidos                   | Validar tipos y rangos antes de enviar   |
+| 401    | Credenciales inválidas o token vencido | Solicitar un nuevo token                 |
+| 404    | Persona no encontrada                  | Verificar los datos y reintentar         |
+| 429    | Límite de consultas excedido           | Implementar backoff exponencial          |
+| 500    | Error interno de RENAPER               | Reintentar más tarde o contactar soporte |
+
+---
+
+## Costos y seguridad
+
+* Cada consulta puede generar cargos → monitorear la **facturación** para evitar gastos inesperados.
+* **Protección de datos**: no almacenar información sensible más tiempo del necesario.
+* Cifrar cualquier dato persistido y nunca registrar datos personales en logs.
+* Asegurar todas las comunicaciones mediante **HTTPS**.
+
+---
+
+## Implementación en Conectando Corazones
+
+La integración se encapsula en el cliente `renaperAPI`, que centraliza las solicitudes HTTP utilizando **Axios**.
+
+### Ejemplo de uso
+
+```ts
+import { renaperAPI } from '@/utils/apiClient'; // Ajustar el alias según el proyecto
+
+async function obtenerCiudadano(dni: string) {
+  try {
+    const { data } = await renaperAPI.get(`/ciudadanos/${dni}`); // Endpoint de ejemplo
+    return data;
+  } catch (error) {
+    // Manejo de errores
+    throw error;
+  }
+}
+```
+
+---
+
+## Buenas prácticas
+
+* Validar y sanear el **DNI** antes de enviarlo.
+* Utilizar `try/catch` para capturar errores de red o de la API.
+* Registrar solicitudes para auditoría y trazabilidad.
+* Mantener las **credenciales** en variables de entorno.
+* Usar un **timeout de 10s** en el cliente Axios para evitar cuelgues por latencia.
+* Parametrizar la **base URL** mediante variables de entorno (excepto en producción, donde se fija).

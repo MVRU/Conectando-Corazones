@@ -1,0 +1,51 @@
+---
+slug: adr-02
+title: "02 - Definición de Marco Legal"
+tags: [adr]
+---
+
+import Authors from '@site/src/components/Authors';
+
+# Definición de Marco Legal
+
+#### Fecha de aprobación: ...
+<Authors names={['marina']} />
+
+---
+
+## Contexto
+El proyecto gestiona datos personales de voluntarios, organizaciones e instituciones, lo que exige cumplir con normativas de protección de datos y obtener consentimientos explícitos.
+
+---
+
+## Alternativas consideradas
+1. **Operar sin un marco legal formal**
+   - ✘ Alto riesgo de sanciones y pérdida de confianza.
+2. **Aplicar solo normas internacionales genéricas (p. ej., RGPD)**
+   - ✘ Podría no cubrir requisitos locales.
+3. **Combinar legislación argentina y europea**
+   - ✔ Cubre requisitos locales y prepara el proyecto para expansión internacional.
+   - ✘ Implica esfuerzo continuo de actualización.
+
+---
+
+## Decisión
+Se adopta un marco legal basado en la **Ley 25.326 de Protección de Datos Personales** y el **Reglamento General de Protección de Datos (RGPD)**, priorizando el consentimiento informado y la minimización de datos.
+
+**Documentación legal asociada**
+
+- [Ley 25.326](https://www.argentina.gob.ar/normativa/nacional/ley-25326-64790)
+- [RGPD](https://gdpr-info.eu/)
+
+---
+
+## Consecuencias
+
+### Positivas
+- Reduce riesgos legales y reputacionales.
+- Aumenta la confianza de usuarios y voluntarios.
+- Facilita auditorías y futuras certificaciones.
+
+### Negativas
+- Requiere asesoría legal y mantenimiento constante.
+- Puede ralentizar el desarrollo por procesos de cumplimiento.

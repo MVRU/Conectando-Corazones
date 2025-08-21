@@ -5,6 +5,7 @@ sidebar_position: 1
 # Introducción
 
 Conectando Corazones es una plataforma solidaria que vincula a instituciones que necesitan ayuda con personas u organizaciones dispuestas a brindarla.
+
 Su objetivo es facilitar proyectos transparentes y trazables que potencien el impacto colectivo.
 
 ## Flujo general
