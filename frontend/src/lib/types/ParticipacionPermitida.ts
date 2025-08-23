@@ -8,6 +8,8 @@ export interface ParticipacionPermitida {
   unidad?: string;
   objetivo: number;
   actual?: number;
+  unidad_medida?: string;
+  especie?: string;
 
   // * Relaciones, opcionales para lectura
   proyecto?: Proyecto;
