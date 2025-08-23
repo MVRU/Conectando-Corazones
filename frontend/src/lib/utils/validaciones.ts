@@ -179,3 +179,38 @@ export function validarUrl(url: string): boolean {
     const regexUrl = /^(https?:\/\/)?([\w\-])+\.{1}[\w\-]+(\.[\w\-]+)*(:[0-9]+)?(\/.*)?$/;
     return regexUrl.test(url);
 }
+
+/*
+Funciones de formateo de fechas
+ */
+export function formatearFecha(fecha?: Date | string): string {
+    if (!fecha) return 'No especificada';
+    
+    try {
+        const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+        
+        if (isNaN(fechaObj.getTime())) {
+            return 'Fecha inválida';
+        }
+        
+        return fechaObj.toLocaleDateString('es-AR', {
+            day: '2-digit',
+            month: '2-digit', 
+            year: 'numeric'
+        });
+    } catch {
+        return 'Fecha inválida';
+    }
+}
+export function esFechaFutura(fecha?: Date | string): boolean {
+    if (!fecha) return false;
+    
+    try {
+        const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+        if (isNaN(fechaObj.getTime())) return false;
+        
+        return fechaObj > new Date();
+    } catch {
+        return false;
+    }
+}

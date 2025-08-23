@@ -1,17 +1,10 @@
 <script lang="ts">
+	import { validarUrl } from '$lib/utils/validaciones';
+
 	export let value = '';
 	export let placeholder = '';
 	export let label = 'Imagen';
 	export let error: string | undefined = undefined;
-
-	function isValidUrl(url: string): boolean {
-		try {
-			new URL(url);
-			return true;
-		} catch {
-			return false;
-		}
-	}
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -39,7 +32,7 @@
 		/>
 
 		<!-- Preview de la imagen -->
-		{#if value && isValidUrl(value)}
+		{#if value && validarUrl(value)}
 			<div class="relative">
 				<img
 					src={value}
