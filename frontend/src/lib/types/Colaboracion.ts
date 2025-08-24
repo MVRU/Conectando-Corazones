@@ -5,6 +5,7 @@ export interface Colaboracion {
   estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
   justificacion?: string;
   created_at?: Date;
+  mensaje?: string;
 
   // * Relaciones
   // -*- FKs para create/update
