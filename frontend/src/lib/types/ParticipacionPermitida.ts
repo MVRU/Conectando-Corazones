@@ -5,7 +5,6 @@ export interface ParticipacionPermitida {
   id_participacion_permitida: number; // * PK de la BD
   id_proyecto?: number;
   id_tipo_participacion?: number;
-  unidad?: string;
   objetivo: number;
   actual?: number;
   unidad_medida?: string;

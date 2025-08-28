@@ -2,7 +2,7 @@ import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';
-import type { ProyectoUbicacion } from './ProyectoUbicacion';
+import type { ProyectoUbicacion } from './Proyecto_direccion';
 import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
 import type { EstadoDescripcion } from '$lib/types/Estado';
@@ -16,13 +16,12 @@ export interface Proyecto {
   fecha_cierre_postulaciones?: Date;
   fecha_fin_tentativa: Date;
   beneficiarios?: number;
-  urgencia?: string;
   id_chat_firebase?: number;
 
   // * RELACIONES
 
   // -*- FKS para create/update
-  id_estado?: number;
+  estado_id?: number;
   institucion_id: number;
   participacion_permitida_ids?: number[];
   categoria_ids?: number[];

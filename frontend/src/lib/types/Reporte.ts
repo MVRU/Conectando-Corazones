@@ -12,5 +12,5 @@ export interface Reporte {
   // * Relaciones (FKs)
   reportante_id: number; // -*- usuario que reporta
   admin_id?: number | null; // -*- usuario admin que resuelve el reporte
-  id_usuario?: number;
+  usuario_id?: number;
 }

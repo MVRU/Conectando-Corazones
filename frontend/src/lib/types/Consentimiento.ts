@@ -17,7 +17,7 @@ export interface Consentimiento {
   created_at?: Date;
 
   // * Relaciones (FKs)
-  id_usuario?: number;
+  usuario_id?: number;
 }
 
 // * Guards canónicos

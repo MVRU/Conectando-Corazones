@@ -7,6 +7,6 @@ export interface Archivo {
   fecha_vencimiento?: Date;
 
   // * Relaciones (FKs)
-  id_usuario?: number;
-  id_evidencia?: number;
+  usuario_id?: number;
+  evidencia_id?: number;
 }
