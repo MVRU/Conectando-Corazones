@@ -17,10 +17,9 @@
 		"test:e2e": "playwright test"
 	},
 	"devDependencies": {
-		"@fontsource/raleway": "^5.2.6",
-		"aos": "^2.3.4",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@fontsource/raleway": "^5.2.6",
 		"@playwright/test": "^1.49.1",
 		"@sveltejs/adapter-vercel": "^5.9.1",
 		"@sveltejs/kit": "^2.16.0",
@@ -28,6 +27,8 @@
 		"@tailwindcss/vite": "^4.0.0",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
+		"@types/aos": "^3.0.7",
+		"aos": "^2.3.4",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",

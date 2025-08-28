@@ -57,7 +57,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 1,
         id_proyecto: 1,
         id_tipo_participacion: 1,
-        unidad: 'libros',
+        unidad_medida: 'libros',
         objetivo: 20,
         actual: 12,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -66,7 +66,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 2,
         id_proyecto: 1,
         id_tipo_participacion: 1,
-        unidad: 'docentes',
+        unidad_medida: 'docentes',
         objetivo: 10,
         actual: 2,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
@@ -93,7 +93,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 1,
         id_proyecto: 2,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad_medida: 'personas',
         objetivo: 30,
         actual: 18,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
@@ -102,7 +102,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 2,
         id_proyecto: 2,
         id_tipo_participacion: 2,
-        unidad: 'kg de harina',
+        unidad_medida: 'kg de harina',
         objetivo: 10,
         actual: 15,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -111,7 +111,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 3,
         id_proyecto: 2,
         id_tipo_participacion: 3,
-        unidad: 'docenas de huevos',
+        unidad_medida: 'docenas de huevos',
         objetivo: 6,
         actual: 3,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -138,7 +138,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 3,
         id_proyecto: 3,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad_medida: 'personas',
         objetivo: 10,
         actual: 7,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
@@ -166,7 +166,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 4,
         id_proyecto: 4,
         id_tipo_participacion: 1,
-        unidad: 'ARS',
+        unidad_medida: 'ARS',
         objetivo: 500000,
         actual: 100000,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Monetaria' }
@@ -193,7 +193,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 5,
         id_proyecto: 5,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad_medida: 'personas',
         objetivo: 25,
         actual: 15,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
@@ -221,7 +221,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 6,
         id_proyecto: 6,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad_medida: 'personas',
         objetivo: 40,
         actual: 22,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
@@ -248,7 +248,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 7,
         id_proyecto: 7,
         id_tipo_participacion: 1,
-        unidad: 'abrigos',
+        unidad_medida: 'abrigos',
         objetivo: 50,
         actual: 8,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -275,7 +275,7 @@ const proyectosBase: Proyecto[] = [
         id_participacion_permitida: 8,
         id_proyecto: 8,
         id_tipo_participacion: 1,
-        unidad: 'personas',
+        unidad_medida: 'personas',
         objetivo: 10,
         actual: 5,
         tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
