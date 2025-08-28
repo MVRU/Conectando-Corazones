@@ -10,7 +10,7 @@
 	// -*- Ubicación principal
 	const ubicacionTexto = getUbicacionTexto(proyecto);
 
-	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
+	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 	const estadoEtiqueta = estadoLabel(estadoCodigo);
 </script>
 

@@ -175,7 +175,7 @@
 								Mi cuenta
 							</li>
 
-							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mis proyectos', href: '/mis-proyectos' }, { label: 'Configuración', href: '/configuracion' }] as item}
+							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mis proyectos', href: '/mis-proyectos' }, { label: 'Crear proyecto', href: '/proyectos/crear' }, { label: 'Configuración', href: '/configuracion' }] as item}
 								<li>
 									<a
 										href={item.href}

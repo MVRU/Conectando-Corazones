@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CrearProyecto from '$lib/components/proyectos/CrearProyecto.svelte';
+	import CrearProyecto from '$lib/components/institucion/CrearUnProyecto.svelte';
 </script>
 
 <CrearProyecto />

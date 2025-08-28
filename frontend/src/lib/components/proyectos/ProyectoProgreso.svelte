@@ -36,7 +36,7 @@
 	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
-	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') =>
 		({
@@ -63,10 +63,10 @@
 	$: participaciones = ordenarPorProgreso(proyecto.participacion_permitida ?? []);
 
 	$: if (participaciones.length > 0) {
-		const { unidad, tipo_participacion } = participaciones[0] || {};
+		const { unidad_medida, tipo_participacion } = participaciones[0] || {};
 		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
 		color = visual.color;
-		icono = visual.emoji(unidad);
+		icono = visual.emoji(unidad_medida);
 	}
 
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';

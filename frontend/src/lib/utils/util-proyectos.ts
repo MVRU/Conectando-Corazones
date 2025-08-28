@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit';
 import type { Proyecto } from '$lib/types/Proyecto';
-import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/Proyecto_direccion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
@@ -141,7 +141,7 @@ const unidadEmoji: Record<string, string> = {
 };
 
 export function getParticipacionVisual(p: ParticipacionPermitida) {
-    const unidad = p.unidad?.toLowerCase();
+    const unidad = p.unidad_medida?.toLowerCase();
     const tipo = p.tipo_participacion?.descripcion;
     const actual = p.actual ?? 0;
     const objetivo = p.objetivo ?? 0;

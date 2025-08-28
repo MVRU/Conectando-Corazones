@@ -1,7 +1,7 @@
 import type { Direccion } from './Direccion';
 
 // * Códigos canónicos
-export const PRIORIDAD_TIPO = ['principal', 'alternativa', 'voluntariado'] as const;
+export const PRIORIDAD_TIPO = ['principal', 'alternativa', 'virtual'] as const;
 
 export type PrioridadTipo = (typeof PRIORIDAD_TIPO)[number];
 
@@ -11,6 +11,7 @@ export interface ProyectoUbicacion {
     proyecto_id: number;
     direccion_id: number;
     tipo_ubicacion?: PrioridadTipo | string;
+    que_sehace?: string;
     direccion?: Direccion; // * Objeto expandido al leer
 }
 

@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/types/Proyecto';
-import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import type { ProyectoUbicacion } from '$lib/types/Proyecto_direccion';
 import type { Institucion } from '$lib/types/Usuario';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockProyectoCategorias } from '$lib/mocks/mock-proyecto-categorias';

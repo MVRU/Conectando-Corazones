@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
-	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
+
 
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;

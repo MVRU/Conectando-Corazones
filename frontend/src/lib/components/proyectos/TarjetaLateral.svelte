@@ -55,7 +55,7 @@
 				bg: 'bg-green-50',
 				border: 'border-green-200',
 				text: 'text-green-800',
-				label: `donaciones monetarias (${obj.unidad || 'pesos'})`,
+				label: `donaciones monetarias (${obj.unidad_medida || 'pesos'})`,
 				button: 'Donar ahora'
 			},
 			purple: {
@@ -69,7 +69,7 @@
 				bg: 'bg-blue-50',
 				border: 'border-blue-200',
 				text: 'text-blue-800',
-				label: obj.unidad ? `donaciones de ${obj.unidad}` : 'donaciones específicas',
+				label: obj.unidad_medida ? `donaciones de ${obj.unidad_medida}` : 'donaciones específicas',
 				button: 'Donar materiales'
 			}
 		} as const;
@@ -86,7 +86,7 @@
 
 	function ProyectoAbierto() {
 		// Estado válido para colaborar: 'en_curso'
-		return getEstadoCodigo(proyecto.estado, proyecto.id_estado) === 'en_curso';
+		return getEstadoCodigo(proyecto.estado, proyecto.estado_id) === 'en_curso';
 	}
 </script>
 

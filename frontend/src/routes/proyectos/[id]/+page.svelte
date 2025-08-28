@@ -95,7 +95,7 @@
 		);
 	}
 
-	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.id_estado) : 'en_curso';
+	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: colorEstado = getColorEstado(estadoCodigo);
 </script>
 
@@ -209,9 +209,9 @@
 											<!-- Contenido -->
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
-													{p.unidad === 'dinero'
+													{p.unidad_medida === 'dinero'
 														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
-														: `${p.actual || 0} / ${p.objetivo} ${p.unidad === 'personas' ? 'voluntarios' : p.unidad}`}
+														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
 												</p>
 												<div class="mt-1 flex justify-between text-xs text-gray-500">
 													<span>{porcentaje}% alcanzado</span>

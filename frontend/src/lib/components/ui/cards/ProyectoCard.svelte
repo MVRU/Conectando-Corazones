@@ -14,7 +14,7 @@
 		return `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear().toString().slice(-2)}`;
 	};
 
-	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 	const estadoTemporizador = estadoLabel(estadoCodigo);
 	const emojiPorEstado: Record<EstadoDescripcion, string> = {
 		en_curso: '🟢',

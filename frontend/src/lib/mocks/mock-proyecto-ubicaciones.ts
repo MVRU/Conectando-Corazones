@@ -1,4 +1,4 @@
-import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import type { ProyectoUbicacion } from '$lib/types/Proyecto_direccion';
 import { mockDirecciones } from '$lib/mocks/mock-direcciones';
 
 const ubicacionesBase: ProyectoUbicacion[] = [
