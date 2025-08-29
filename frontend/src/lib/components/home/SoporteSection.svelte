@@ -58,7 +58,7 @@
 			<Badge text="Estamos aquí para ayudarte" />
 		</div>
 		<h2
-			class="mb-10 text-center text-2xl font-extrabold leading-tight text-white drop-shadow transition-all duration-1000 sm:text-3xl md:text-4xl"
+			class="mb-10 text-center text-2xl leading-tight font-extrabold text-white drop-shadow transition-all duration-1000 sm:text-3xl md:text-4xl"
 			class:fade-down={visible}
 			class:fade-initial-down={!visible}
 			style="transition-delay:80ms"
@@ -68,7 +68,7 @@
 		</h2>
 		<!-- *Tarjetas de soporte -->
 		<div class="grid w-full grid-cols-1 gap-6 sm:gap-8 md:grid-cols-3">
-			{#each soportes as soporte, i}
+			{#each soportes as soporte, i (i)}
 				<div
 					class="transition-all duration-1000"
 					class:fade-up={visible}

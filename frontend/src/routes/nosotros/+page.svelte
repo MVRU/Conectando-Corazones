@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { inView } from '$lib/actions/inView';
 	import { onMount } from 'svelte';
 	import 'aos/dist/aos.css';
 	import AOS from 'aos';
@@ -20,8 +19,6 @@
 		container.appendChild(fallback);
 	}
 
-	// Animación para bloques
-	let visibleBlocks: boolean[] = Array(9).fill(false);
 	onMount(() => {
 		AOS.init({
 			duration: 900,
@@ -41,15 +38,15 @@
 		>
 			<div class="pointer-events-none absolute inset-0">
 				<div
-					class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-gradient-to-br from-blue-200/30 via-purple-200/20 to-transparent blur-3xl"
+					class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-blue-200/30 via-purple-200/20 to-transparent blur-3xl"
 				></div>
 				<div
-					class="absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-gradient-to-tr from-blue-100/30 via-pink-100/20 to-transparent blur-2xl"
+					class="absolute -right-16 -bottom-16 h-56 w-56 rounded-full bg-gradient-to-tr from-blue-100/30 via-pink-100/20 to-transparent blur-2xl"
 				></div>
 			</div>
 			<div class="mb-8 flex justify-center">
 				<span
-					class="letter-spacing-wide inline-block rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-purple-400 px-6 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow-md"
+					class="letter-spacing-wide inline-block rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-purple-400 px-6 py-2 text-sm font-semibold tracking-wide text-white uppercase shadow-md"
 				>
 					Sobre Nosotros
 				</span>
@@ -67,7 +64,7 @@
 						decoding="async"
 					/>
 				</div>
-				<h1 class="mt-10 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">
+				<h1 class="mt-10 text-4xl leading-tight font-extrabold tracking-tight sm:text-5xl">
 					<span
 						class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
 					>
@@ -77,10 +74,10 @@
 			</div>
 
 			<div class="mx-auto flex max-w-3xl flex-col gap-8 md:gap-10">
-				{#each ['Creemos que ningún niño debería irse a dormir con hambre.', 'Que ningún abuelo pase sus días en soledad, sin un abrazo, sin una palabra amable, sin una sonrisa.', 'Que las escuelas no tengan que improvisar con lo que hay, sino que puedan enseñar con todo lo que necesitan.', 'Que los hospitales no tengan que hacer milagros con lo mínimo, sino que cuenten con todo lo necesario para cuidar con dignidad.', 'Conectando Corazones nace del deseo profundo de cambiar realidades.', 'No desde un escritorio, sino desde el alma.', 'Queremos ser el puente entre quienes necesitan ayuda y quienes están dispuestos a darla.', 'Porque la empatía no tiene fronteras, y el compromiso no entiende de excusas.', 'Esta plataforma es un acto de amor. Es la mano que se extiende, el oído que escucha, el corazón que late junto al de otro.', 'Porque cuando conectamos corazones, el mundo cambia. Y cambia para bien.'] as frase, i}
+				{#each ['Creemos que ningún niño debería irse a dormir con hambre.', 'Que ningún abuelo pase sus días en soledad, sin un abrazo, sin una palabra amable, sin una sonrisa.', 'Que las escuelas no tengan que improvisar con lo que hay, sino que puedan enseñar con todo lo que necesitan.', 'Que los hospitales no tengan que hacer milagros con lo mínimo, sino que cuenten con todo lo necesario para cuidar con dignidad.', 'Conectando Corazones nace del deseo profundo de cambiar realidades.', 'No desde un escritorio, sino desde el alma.', 'Queremos ser el puente entre quienes necesitan ayuda y quienes están dispuestos a darla.', 'Porque la empatía no tiene fronteras, y el compromiso no entiende de excusas.', 'Esta plataforma es un acto de amor. Es la mano que se extiende, el oído que escucha, el corazón que late junto al de otro.', 'Porque cuando conectamos corazones, el mundo cambia. Y cambia para bien.'] as frase, i (i)}
 					<div data-aos="fade-up" data-aos-delay={i * 120} class="relative overflow-visible">
 						<blockquote
-							class="mx-auto max-w-2xl rounded-3xl border border-blue-200/40 px-7 py-8 text-center text-lg font-normal italic leading-relaxed shadow-[0_4px_28px_0_#bbeafe20] md:px-10 md:py-10 md:text-2xl"
+							class="mx-auto max-w-2xl rounded-3xl border border-blue-200/40 px-7 py-8 text-center text-lg leading-relaxed font-normal italic shadow-[0_4px_28px_0_#bbeafe20] md:px-10 md:py-10 md:text-2xl"
 							class:bg-gradient-to-b={i % 2 === 0}
 							class:from-[#e0f2fe]={i % 2 === 0}
 							class:via-[#f0faff]={i % 2 === 0}
@@ -90,11 +87,11 @@
 							class:text-gray-500={i % 2 === 1}
 						>
 							<span
-								class="absolute -left-4 -top-2 select-none text-2xl text-blue-200/60 md:text-3xl"
+								class="absolute -top-2 -left-4 text-2xl text-blue-200/60 select-none md:text-3xl"
 								>“</span
 							>
 							{frase}
-							<span class="select-none text-2xl text-blue-200/60 md:text-3xl">”</span>
+							<span class="text-2xl text-blue-200/60 select-none md:text-3xl">”</span>
 						</blockquote>
 					</div>
 				{/each}
@@ -240,7 +237,7 @@
 		</div>
 
 		<div class="grid gap-10 md:grid-cols-3">
-			{#each [{ name: 'Alexis Julian Sklate', role: 'Socio', quote: 'La solidaridad es el lenguaje universal del corazón', img: '/team/member1.jpg' }, { name: 'Marina Ana Milo', role: 'Socia', quote: 'A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando.', img: '/team/member2.jpg' }, { name: 'Martin Tomas Alvarez', role: 'Socio', quote: 'La empatía es el puente que conecta corazones', img: '/team/member3.jpg' }] as member}
+			{#each [{ name: 'Alexis Julian Sklate', role: 'Socio', quote: 'La solidaridad es el lenguaje universal del corazón', img: '/team/member1.jpg' }, { name: 'Marina Ana Milo', role: 'Socia', quote: 'A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando.', img: '/team/member2.jpg' }, { name: 'Martin Tomas Alvarez', role: 'Socio', quote: 'La empatía es el puente que conecta corazones', img: '/team/member3.jpg' }] as member, i (i)}
 				<div
 					class="group rounded-2xl border-t-4 border-blue-100 bg-white/90 p-6 text-center shadow-xl transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
 				>
@@ -256,7 +253,7 @@
 					</div>
 					<h3 class="mb-2 text-xl font-semibold tracking-wide text-gray-800">{member.name}</h3>
 					<p class="mb-2 font-medium text-blue-600">{member.role}</p>
-					<p class="italic text-gray-600">"{member.quote}"</p>
+					<p class="text-gray-600 italic">"{member.quote}"</p>
 				</div>
 			{/each}
 		</div>

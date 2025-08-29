@@ -4,6 +4,7 @@
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
@@ -27,9 +28,7 @@
 	const emojiTemporizador = emojiPorEstado[estadoCodigo] || '⌛';
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
 
-	type AlgunaUbicacion = any;
-
-	const ubicaciones = (proyecto.ubicaciones ?? []) as AlgunaUbicacion[];
+	const ubicaciones: ProyectoUbicacion[] = proyecto.ubicaciones ?? [];
 
 	$: ubicacionPrincipal =
 		ubicaciones.find((u) => u?.tipo_ubicacion === 'principal') ?? ubicaciones[0];

@@ -7,21 +7,20 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
-	import { PRIORIDAD_TIPO } from '$lib/types/Proyecto_direccion';
+	import { PRIORIDAD_TIPO } from '$lib/types/ProyectoUbicacion';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import { provincias } from '$lib/data/provincias';
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { 
+	import {
 		MENSAJES_ERROR,
 		validarUrl,
 		validarCalle,
 		validarNumeroCalle,
 		validarCiudadEnProvincia,
 		validarProvincia,
-		esFechaFutura,
+		esFechaFutura
 	} from '$lib/utils/validaciones';
-	
 
 	// Form data
 	let titulo = '';
@@ -38,15 +37,15 @@
 		// Campos de ProyectoUbicacion
 		tipo_ubicacion: string;
 		que_sehace: string;
-		
+
 		// Campos de Direccion
 		calle: string;
 		numero: string;
 		referencia: string;
-		
+
 		// Campo para la relación con Localidad
 		localidad_id: number | undefined;
-		
+
 		// Campos auxiliares para el formulario (no van al backend)
 		provincia: string; // Solo para UI - permite seleccionar localidad
 		localidad_nombre: string; // Solo para UI - nombre de la localidad seleccionada
@@ -77,22 +76,25 @@
 
 	// Función helper para obtener localidades de una provincia por nombre
 	function obtenerLocalidadesPorProvincia(nombreProvincia: string) {
-		const provincia = provincias.find(p => p.nombre === nombreProvincia);
+		const provincia = provincias.find((p) => p.nombre === nombreProvincia);
 		if (!provincia) return [];
-		return mockLocalidades.filter(l => l.id_provincia === provincia.id_provincia);
+		return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
 	}
 
 	function agregarDireccion() {
-		direcciones = [...direcciones, {
-			tipo_ubicacion: '',
-			que_sehace: '',
-			calle: '',
-			numero: '',
-			referencia: '',
-			localidad_id: undefined,
-			provincia: '',
-			localidad_nombre: ''
-		}];
+		direcciones = [
+			...direcciones,
+			{
+				tipo_ubicacion: '',
+				que_sehace: '',
+				calle: '',
+				numero: '',
+				referencia: '',
+				localidad_id: undefined,
+				provincia: '',
+				localidad_nombre: ''
+			}
+		];
 	}
 
 	function eliminarDireccion(index: number) {
@@ -103,13 +105,13 @@
 
 	function actualizarDireccion(index: number, campo: keyof DireccionFormulario, valor: any) {
 		direcciones[index] = { ...direcciones[index], [campo]: valor };
-		
+
 		// Si cambió la provincia, limpiar la localidad
 		if (campo === 'provincia') {
 			direcciones[index].localidad_nombre = '';
 			direcciones[index].localidad_id = undefined;
 		}
-		
+
 		// Si cambió a virtual, limpiar campos físicos
 		if (campo === 'tipo_ubicacion' && valor === 'virtual') {
 			direcciones[index].provincia = '';
@@ -137,29 +139,28 @@
 	}
 
 	function obtenerDescripcionTipo(tipo: string): string {
-		
 		return tipo.charAt(0).toUpperCase() + tipo.slice(1);
 	}
 
 	function obtenerIconoCategoria(descripcion: string): string {
 		const iconos: Record<string, string> = {
-			'Medioambiente': '🌱',
-			'Educación': '📚',
-			'Salud': '🏥',
+			Medioambiente: '🌱',
+			Educación: '📚',
+			Salud: '🏥',
 			'Desarrollo económico': '💼',
 			'Promoción de la paz': '🕊️',
-			'Seguridad': '🛡️',
-			'Entretenimiento': '🎭',
-			'Liderazgo': '👑',
+			Seguridad: '🛡️',
+			Entretenimiento: '🎭',
+			Liderazgo: '👑',
 			'Personas con discapacidades': '♿',
-			'Tecnología': '💻',
-			'Política': '🏛️',
-			'Religión': '⛪',
+			Tecnología: '💻',
+			Política: '🏛️',
+			Religión: '⛪',
 			'LGTBQ+': '🏳️‍🌈',
 			'Apoyo ante una crisis': '🆘',
-			'Empleo': '👷',
+			Empleo: '👷',
 			'Inmigrantes y refugiados': '🤝',
-			'Otro': '📋'
+			Otro: '📋'
 		};
 		return iconos[descripcion] || '📋';
 	}
@@ -188,7 +189,7 @@
 	// Funciones de categorías
 	function toggleCategoria(categoriaId: number) {
 		if (categoriasSeleccionadas.includes(categoriaId)) {
-			categoriasSeleccionadas = categoriasSeleccionadas.filter(id => id !== categoriaId);
+			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);
 		} else {
 			categoriasSeleccionadas = [...categoriasSeleccionadas, categoriaId];
 		}
@@ -198,22 +199,26 @@
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
 			// Remover tipo
-			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(t => t !== tipo);
+			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
 			// Remover todas las participaciones asociadas
-			participacionesPermitidas = participacionesPermitidas.filter(p => 
-				p.tipo_participacion?.descripcion !== tipo
+			participacionesPermitidas = participacionesPermitidas.filter(
+				(p) => p.tipo_participacion?.descripcion !== tipo
 			);
 		} else {
 			// Agregar tipo
 			tiposParticipacionSeleccionados = [...tiposParticipacionSeleccionados, tipo];
 			// Agregar participación base
-			participacionesPermitidas = [...participacionesPermitidas, {
-				tipo_participacion: { descripcion: tipo },
-				objetivo: 0,
-				actual: 0,
-				unidad_medida: tipo === 'Monetaria' ? 'pesos' : tipo === 'Voluntariado' ? 'personas' : 'unidades',
-				especie: tipo === 'Especie' ? '' : undefined
-			}];
+			participacionesPermitidas = [
+				...participacionesPermitidas,
+				{
+					tipo_participacion: { descripcion: tipo },
+					objetivo: 0,
+					actual: 0,
+					unidad_medida:
+						tipo === 'Monetaria' ? 'pesos' : tipo === 'Voluntariado' ? 'personas' : 'unidades',
+					especie: tipo === 'Especie' ? '' : undefined
+				}
+			];
 		}
 	}
 
@@ -225,34 +230,43 @@
 	}
 
 	function agregarItemEspecie() {
-		participacionesPermitidas = [...participacionesPermitidas, {
-			tipo_participacion: { descripcion: 'Especie' },
-			objetivo: 0,
-			unidad_medida: 'unidades',
-			especie: ''
-		}];
+		participacionesPermitidas = [
+			...participacionesPermitidas,
+			{
+				tipo_participacion: { descripcion: 'Especie' },
+				objetivo: 0,
+				unidad_medida: 'unidades',
+				especie: ''
+			}
+		];
 	}
 
 	function eliminarParticipacion(index: number) {
 		const participacion = participacionesPermitidas[index];
 		const tipo = participacion.tipo_participacion?.descripcion;
-		
+
 		// Eliminar la participación
 		participacionesPermitidas = participacionesPermitidas.filter((_, i) => i !== index);
-		
+
 		// Si era el último item de este tipo y no es "Especie", remover el tipo de seleccionados
 		if (tipo && tipo !== 'Especie') {
-			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(p => p.tipo_participacion?.descripcion === tipo);
+			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(
+				(p) => p.tipo_participacion?.descripcion === tipo
+			);
 			if (!tieneOtrosDelMismoTipo) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(t => t !== tipo);
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
 			}
 		}
-		
+
 		// Para "Especie", si no quedan items, remover el tipo
 		if (tipo === 'Especie') {
-			const tieneEspecies = participacionesPermitidas.some(p => p.tipo_participacion?.descripcion === 'Especie');
+			const tieneEspecies = participacionesPermitidas.some(
+				(p) => p.tipo_participacion?.descripcion === 'Especie'
+			);
 			if (!tieneEspecies) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(t => t !== 'Especie');
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(
+					(t) => t !== 'Especie'
+				);
 			}
 		}
 	}
@@ -264,7 +278,7 @@
 		// Validaciones básicas
 		if (!titulo.trim()) errores.titulo = MENSAJES_ERROR.obligatorio;
 		if (!descripcion.trim()) errores.descripcion = MENSAJES_ERROR.obligatorio;
-		
+
 		// Validar URL de portada si se proporciona
 		if (urlPortada && !validarUrl(urlPortada)) {
 			errores.urlPortada = MENSAJES_ERROR.urlInvalida;
@@ -294,17 +308,17 @@
 			// Validar cada dirección
 			direcciones.forEach((direccion, index) => {
 				const prefix = `direccion_${index}`;
-				
+
 				// Tipo de ubicación obligatorio
 				if (!direccion.tipo_ubicacion.trim()) {
 					errores[`${prefix}_tipo`] = 'El tipo de ubicación es obligatorio';
 				}
-				
+
 				// Qué se hace obligatorio
 				if (!direccion.que_sehace.trim()) {
 					errores[`${prefix}_que_sehace`] = 'Debe especificar qué se hace en esta dirección';
 				}
-				
+
 				// Solo validar campos físicos si no es virtual
 				if (direccion.tipo_ubicacion !== 'virtual') {
 					// Provincia obligatoria y válida
@@ -313,20 +327,23 @@
 					} else if (!validarProvincia(direccion.provincia)) {
 						errores[`${prefix}_provincia`] = MENSAJES_ERROR.provinciaInvalida;
 					}
-					
+
 					// Localidad obligatoria
 					if (!direccion.localidad_id) {
 						errores[`${prefix}_localidad`] = MENSAJES_ERROR.obligatorio;
 					}
-					
+
 					// Validar que la localidad pertenezca a la provincia
 					if (direccion.provincia && direccion.localidad_id) {
-						const provincia = provincias.find(p => p.nombre === direccion.provincia);
-						if (provincia && !validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)) {
+						const provincia = provincias.find((p) => p.nombre === direccion.provincia);
+						if (
+							provincia &&
+							!validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)
+						) {
 							errores[`${prefix}_localidad`] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
 						}
 					}
-					
+
 					// Validar dirección - calle y número son obligatorios para ubicaciones no virtuales
 					if (direccion.tipo_ubicacion !== 'virtual') {
 						// Calle es obligatoria
@@ -335,7 +352,7 @@
 						} else if (!validarCalle(direccion.calle)) {
 							errores[`${prefix}_calle`] = MENSAJES_ERROR.calleInvalida;
 						}
-						
+
 						// Número es obligatorio
 						if (!direccion.numero || direccion.numero.trim() === '') {
 							errores[`${prefix}_numero`] = MENSAJES_ERROR.obligatorio;
@@ -353,9 +370,9 @@
 					}
 				}
 			});
-			
+
 			// Validar que haya al menos una dirección principal
-			const tienesPrincipal = direcciones.some(d => d.tipo_ubicacion === 'principal');
+			const tienesPrincipal = direcciones.some((d) => d.tipo_ubicacion === 'principal');
 			if (!tienesPrincipal) {
 				errores.direcciones_principal = 'Debe tener al menos una dirección principal';
 			}
@@ -420,19 +437,19 @@
 
 	// Datos para choice cards de participación
 	const tiposParticipacionInfo = {
-		'Voluntariado': {
+		Voluntariado: {
 			icon: '🙋‍♀️',
 			titulo: 'Voluntariado',
 			descripcion: 'Necesitas personas que dediquen su tiempo',
 			color: 'blue'
 		},
-		'Monetaria': {
+		Monetaria: {
 			icon: '💰',
 			titulo: 'Dinero',
 			descripcion: 'Necesitas donaciones económicas',
 			color: 'green'
 		},
-		'Especie': {
+		Especie: {
 			icon: '📦',
 			titulo: 'En Especie',
 			descripcion: 'Necesitas materiales o productos específicos',
@@ -442,9 +459,9 @@
 
 	// Unidades comunes por tipo
 	const unidadesPorTipo = {
-		'Voluntariado': ['personas', 'horas'],
-		'Monetaria': ['pesos', 'dólares'],
-		'Especie': ['unidades', 'kilogramos', 'litros', 'metros', 'cajas', 'bolsas']
+		Voluntariado: ['personas', 'horas'],
+		Monetaria: ['pesos', 'dólares'],
+		Especie: ['unidades', 'kilogramos', 'litros', 'metros', 'cajas', 'bolsas']
 	};
 </script>
 
@@ -465,18 +482,18 @@
 			<!-- Información básica -->
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 				<h2 class="mb-6 text-xl font-semibold text-gray-900">Información Básica</h2>
-				
+
 				<div class="grid gap-6">
 					<!-- Título -->
 					<div>
-						<label for="titulo" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="titulo" class="mb-2 block text-sm font-medium text-gray-700">
 							Título del Proyecto *
 						</label>
 						<input
 							id="titulo"
 							type="text"
 							bind:value={titulo}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							placeholder="Ejemplo: Infancias felices 2025"
 							class:border-red-300={errores.titulo}
 						/>
@@ -487,14 +504,14 @@
 
 					<!-- Descripción -->
 					<div>
-						<label for="descripcion" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="descripcion" class="mb-2 block text-sm font-medium text-gray-700">
 							Descripción *
 						</label>
 						<textarea
 							id="descripcion"
 							bind:value={descripcion}
 							rows="4"
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							placeholder="Describe tu proyecto, objetivos y cómo ayudará a la comunidad..."
 							class:border-red-300={errores.descripcion}
 						></textarea>
@@ -505,14 +522,14 @@
 
 					<!-- URL Portada -->
 					<div>
-						<label for="urlPortada" class="block text-sm font-medium text-gray-700 mb-2">
+						<label for="urlPortada" class="mb-2 block text-sm font-medium text-gray-700">
 							URL de Imagen de Portada
 						</label>
 						<input
 							id="urlPortada"
 							type="url"
 							bind:value={urlPortada}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-red-300={errores.urlPortada}
 							placeholder="https://ejemplo.com/imagen.jpg"
 						/>
@@ -522,10 +539,10 @@
 					</div>
 
 					<!-- Fecha fin y beneficiarios  -->
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<!-- Fecha fin tentativa -->
 						<div>
-							<label for="fechaFin" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="fechaFin" class="mb-2 block text-sm font-medium text-gray-700">
 								Fecha de Fin Tentativa *
 							</label>
 							<input
@@ -533,7 +550,7 @@
 								type="date"
 								bind:value={fechaFinTentativa}
 								min={fechaMinima}
-								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-red-300={errores.fechaFinTentativa}
 							/>
 							{#if errores.fechaFinTentativa}
@@ -543,7 +560,7 @@
 
 						<!-- Beneficiarios -->
 						<div>
-							<label for="beneficiarios" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="beneficiarios" class="mb-2 block text-sm font-medium text-gray-700">
 								Número de Beneficiarios Estimados
 							</label>
 							<input
@@ -551,7 +568,7 @@
 								type="number"
 								bind:value={beneficiarios}
 								min="1"
-								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-red-300={errores.beneficiarios}
 								placeholder="Ejemplo: 150"
 							/>
@@ -565,56 +582,77 @@
 
 			<!-- Categorías -->
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-				<h2 class="mb-6 text-xl font-semibold text-gray-900">Seleccione al menos una categoría *</h2>
-				
-				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+				<h2 class="mb-6 text-xl font-semibold text-gray-900">
+					Seleccione al menos una categoría *
+				</h2>
+
+				<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 					{#each mockCategorias as categoria}
 						<button
 							type="button"
 							on:click={() => toggleCategoria(categoria.id_categoria || 0)}
-							class="group relative flex items-center p-3 rounded-lg border-2 border-dashed transition-all duration-200 hover:shadow-sm"
+							class="group relative flex items-center rounded-lg border-2 border-dashed p-3 transition-all duration-200 hover:shadow-sm"
 							class:border-blue-500={categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
 							class:bg-blue-50={categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
 							class:border-gray-300={!categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
 							class:bg-white={!categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
-							class:hover:border-blue-400={!categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
-							class:hover:bg-gray-50={!categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
+							class:hover:border-blue-400={!categoriasSeleccionadas.includes(
+								categoria.id_categoria || 0
+							)}
+							class:hover:bg-gray-50={!categoriasSeleccionadas.includes(
+								categoria.id_categoria || 0
+							)}
 						>
 							<!-- Icono de la categoría -->
-							<span class="text-lg mr-2 flex-shrink-0">
+							<span class="mr-2 flex-shrink-0 text-lg">
 								{obtenerIconoCategoria(categoria.descripcion)}
 							</span>
-							
+
 							<!-- Contenido -->
-							<div class="flex-1 text-left min-w-0">
-								<span class="text-xs font-medium leading-tight block"
-									class:text-blue-900={categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
-									class:text-gray-700={!categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
+							<div class="min-w-0 flex-1 text-left">
+								<span
+									class="block text-xs leading-tight font-medium"
+									class:text-blue-900={categoriasSeleccionadas.includes(
+										categoria.id_categoria || 0
+									)}
+									class:text-gray-700={!categoriasSeleccionadas.includes(
+										categoria.id_categoria || 0
+									)}
 								>
 									{categoria.descripcion}
 								</span>
 							</div>
-							
+
 							<!-- Indicador de selección -->
-							<div class="flex-shrink-0 ml-1">
+							<div class="ml-1 flex-shrink-0">
 								{#if categoriasSeleccionadas.includes(categoria.id_categoria || 0)}
-									<div class="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-										<svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-											<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+									<div class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
+										<svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+											<path
+												fill-rule="evenodd"
+												d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+												clip-rule="evenodd"
+											></path>
 										</svg>
 									</div>
 								{:else}
-									<div class="w-4 h-4 border-2 border-dashed border-gray-300 rounded-full group-hover:border-blue-300"></div>
+									<div
+										class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-300"
+									></div>
 								{/if}
 							</div>
 						</button>
 					{/each}
 				</div>
-				
+
 				{#if errores.categorias}
-					<p class="mt-4 text-sm text-red-600 flex items-center">
-						<svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+					<p class="mt-4 flex items-center text-sm text-red-600">
+						<svg class="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+							<path
+								fill-rule="evenodd"
+								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+								clip-rule="evenodd"
+							></path>
 						</svg>
 						{errores.categorias}
 					</p>
@@ -624,10 +662,10 @@
 			<!-- Tipos de Participación -->
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 				<h2 class="mb-6 text-xl font-semibold text-gray-900">Tipos de Participación *</h2>
-				
+
 				<!-- Choice Cards  -->
 				{#if Object.entries(tiposParticipacionInfo).filter(([tipo]) => !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)).length > 0}
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+					<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
 						{#each Object.entries(tiposParticipacionInfo) as [tipo, info]}
 							{#if !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)}
 								{@const clases = obtenerClasesColor(info.color, false)}
@@ -636,8 +674,8 @@
 									on:click={() => toggleTipoParticipacion(tipo as TipoParticipacionDescripcion)}
 									class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 								>
-									<div class="text-3xl mb-3">{info.icon}</div>
-									<h3 class="font-semibold text-gray-900 mb-1">{info.titulo}</h3>
+									<div class="mb-3 text-3xl">{info.icon}</div>
+									<h3 class="mb-1 font-semibold text-gray-900">{info.titulo}</h3>
 									<p class="text-sm text-gray-600">{info.descripcion}</p>
 								</button>
 							{/if}
@@ -651,17 +689,22 @@
 
 				<!-- Bloques dinámicos de participación seleccionada -->
 				{#each participacionesPermitidas as participacion, index}
-					{@const tipoInfo = tiposParticipacionInfo[participacion.tipo_participacion?.descripcion || 'Voluntariado']}
+					{@const tipoInfo =
+						tiposParticipacionInfo[participacion.tipo_participacion?.descripcion || 'Voluntariado']}
 					{@const clases = obtenerClasesColor(tipoInfo.color, true)}
 					<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
-						<div class="flex items-center justify-between mb-4">
+						<div class="mb-4 flex items-center justify-between">
 							<h4 class="flex items-center gap-2 font-medium text-gray-900">
 								<span class="text-xl">{tipoInfo.icon}</span>
 								{participacion.tipo_participacion?.descripcion}
 								{#if participacion.tipo_participacion?.descripcion === 'Especie'}
-									{@const especieItems = participacionesPermitidas.filter(p => p.tipo_participacion?.descripcion === 'Especie')}
+									{@const especieItems = participacionesPermitidas.filter(
+										(p) => p.tipo_participacion?.descripcion === 'Especie'
+									)}
 									{#if especieItems.length > 1}
-										<span class="text-sm text-gray-500">#{especieItems.findIndex(item => item === participacion) + 1}</span>
+										<span class="text-sm text-gray-500"
+											>#{especieItems.findIndex((item) => item === participacion) + 1}</span
+										>
 									{/if}
 								{/if}
 							</h4>
@@ -672,8 +715,12 @@
 								title="Eliminar"
 								aria-label="Eliminar participación"
 							>
-								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-									<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+								<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										fill-rule="evenodd"
+										d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+										clip-rule="evenodd"
+									></path>
 								</svg>
 							</button>
 						</div>
@@ -682,27 +729,32 @@
 							{#if participacion.tipo_participacion?.descripcion === 'Especie'}
 								<!-- Campo especie para "En Especie" -->
 								<div>
-									<label for="especie_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+									<label for="especie_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 										¿Qué necesitas? *
 									</label>
 									<input
 										id="especie_{index}"
 										type="text"
 										bind:value={participacion.especie}
-										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+										class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 										placeholder="Ejemplo: libros, alimentos, ropa, medicamentos..."
 										class:border-red-300={errores[`participacion_${index}_especie`]}
 									/>
 									{#if errores[`participacion_${index}_especie`]}
-										<p class="mt-1 text-sm text-red-600">{errores[`participacion_${index}_especie`]}</p>
+										<p class="mt-1 text-sm text-red-600">
+											{errores[`participacion_${index}_especie`]}
+										</p>
 									{/if}
 								</div>
 							{/if}
 
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<!-- Objetivo -->
 								<div>
-									<label for="objetivo_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+									<label
+										for="objetivo_{index}"
+										class="mb-2 block text-sm font-medium text-gray-700"
+									>
 										Objetivo *
 									</label>
 									<input
@@ -710,24 +762,26 @@
 										type="number"
 										bind:value={participacion.objetivo}
 										min="1"
-										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+										class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 										placeholder="100"
 										class:border-red-300={errores[`participacion_${index}_objetivo`]}
 									/>
 									{#if errores[`participacion_${index}_objetivo`]}
-										<p class="mt-1 text-sm text-red-600">{errores[`participacion_${index}_objetivo`]}</p>
+										<p class="mt-1 text-sm text-red-600">
+											{errores[`participacion_${index}_objetivo`]}
+										</p>
 									{/if}
 								</div>
 
 								<!-- Unidad de medida -->
 								<div>
-									<label for="unidad_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+									<label for="unidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 										Unidad de Medida
 									</label>
 									<select
 										id="unidad_{index}"
 										bind:value={participacion.unidad_medida}
-										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+										class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									>
 										{#each unidadesPorTipo[participacion.tipo_participacion?.descripcion || 'Voluntariado'] as unidad}
 											<option value={unidad}>{unidad}</option>
@@ -745,10 +799,15 @@
 						<button
 							type="button"
 							on:click={agregarItemEspecie}
-							class="inline-flex items-center px-3 py-2 border border-dashed border-orange-300 rounded-lg text-sm font-medium text-orange-700 bg-orange-50 hover:bg-orange-100 hover:border-orange-400 transition-colors"
+							class="inline-flex items-center rounded-lg border border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
 						>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+							<svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+								></path>
 							</svg>
 							Agregar otro item en especie
 						</button>
@@ -758,7 +817,7 @@
 
 			<!-- Direcciones del Proyecto -->
 			<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-				<div class="flex items-center justify-between mb-3">
+				<div class="mb-3 flex items-center justify-between">
 					<h2 class="text-xl font-semibold text-gray-900">Direcciones del Proyecto *</h2>
 				</div>
 
@@ -771,14 +830,14 @@
 
 				<!-- Lista de direcciones -->
 				{#each direcciones as direccion, index}
-					<div class="rounded-lg border border-gray-100 bg-gray-50 p-4 mb-4">
-						<div class="flex items-center justify-between mb-4">
+					<div class="mb-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
+						<div class="mb-4 flex items-center justify-between">
 							<h3 class="font-medium text-gray-900">Dirección {index + 1}</h3>
 							{#if direcciones.length > 1}
 								<button
 									type="button"
 									on:click={() => eliminarDireccion(index)}
-									class="text-red-600 hover:text-red-800 text-sm font-medium"
+									class="text-sm font-medium text-red-600 hover:text-red-800"
 								>
 									Eliminar
 								</button>
@@ -788,14 +847,15 @@
 						<div class="grid gap-4">
 							<!-- Tipo de ubicación -->
 							<div>
-								<label for="tipo_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+								<label for="tipo_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 									Tipo de Ubicación *
 								</label>
 								<select
 									id="tipo_{index}"
 									value={direccion.tipo_ubicacion}
-									on:change={(e) => actualizarDireccion(index, 'tipo_ubicacion', e.currentTarget.value)}
-									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+									on:change={(e) =>
+										actualizarDireccion(index, 'tipo_ubicacion', e.currentTarget.value)}
+									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									class:border-red-300={errores[`direccion_${index}_tipo`]}
 								>
 									<option value="">Seleccionar tipo</option>
@@ -810,7 +870,10 @@
 
 							<!-- Qué se hace en esta dirección -->
 							<div>
-								<label for="que_sehace_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+								<label
+									for="que_sehace_{index}"
+									class="mb-2 block text-sm font-medium text-gray-700"
+								>
 									¿Qué se hace en esta dirección? *
 								</label>
 								<textarea
@@ -818,28 +881,34 @@
 									value={direccion.que_sehace}
 									on:input={(e) => actualizarDireccion(index, 'que_sehace', e.currentTarget.value)}
 									rows="3"
-									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 resize-none"
+									class="focus:ring-opacity-20 w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									class:border-red-300={errores[`direccion_${index}_que_sehace`]}
 									placeholder={obtenerPlaceholderQueSehace(direccion.tipo_ubicacion)}
 								></textarea>
 								{#if errores[`direccion_${index}_que_sehace`]}
-									<p class="mt-1 text-sm text-red-600">{errores[`direccion_${index}_que_sehace`]}</p>
+									<p class="mt-1 text-sm text-red-600">
+										{errores[`direccion_${index}_que_sehace`]}
+									</p>
 								{/if}
 							</div>
 
 							{#if direccion.tipo_ubicacion !== 'virtual'}
 								<!-- Provincia y Localidad -->
-								<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+								<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<!-- Provincia -->
 									<div>
-										<label for="provincia_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+										<label
+											for="provincia_{index}"
+											class="mb-2 block text-sm font-medium text-gray-700"
+										>
 											Provincia *
 										</label>
 										<select
 											id="provincia_{index}"
 											value={direccion.provincia}
-											on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
-											class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+											on:change={(e) =>
+												actualizarDireccion(index, 'provincia', e.currentTarget.value)}
+											class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 											class:border-red-300={errores[`direccion_${index}_provincia`]}
 										>
 											<option value="">Seleccionar provincia</option>
@@ -848,21 +917,30 @@
 											{/each}
 										</select>
 										{#if errores[`direccion_${index}_provincia`]}
-											<p class="mt-1 text-sm text-red-600">{errores[`direccion_${index}_provincia`]}</p>
+											<p class="mt-1 text-sm text-red-600">
+												{errores[`direccion_${index}_provincia`]}
+											</p>
 										{/if}
 									</div>
 
 									<!-- Localidad -->
 									<div>
-										<label for="localidad_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+										<label
+											for="localidad_{index}"
+											class="mb-2 block text-sm font-medium text-gray-700"
+										>
 											Localidad *
 										</label>
 										<select
 											id="localidad_{index}"
 											value={direccion.localidad_id || ''}
 											on:change={(e) => {
-												const localidadId = e.currentTarget.value ? parseInt(e.currentTarget.value) : undefined;
-												const localidad = obtenerLocalidadesPorProvincia(direccion.provincia).find(l => l.id_localidad === localidadId);
+												const localidadId = e.currentTarget.value
+													? parseInt(e.currentTarget.value)
+													: undefined;
+												const localidad = obtenerLocalidadesPorProvincia(direccion.provincia).find(
+													(l) => l.id_localidad === localidadId
+												);
 												// Actualizar manualmente para evitar problemas de tipos
 												direcciones[index] = {
 													...direcciones[index],
@@ -872,7 +950,7 @@
 												direcciones = direcciones; // Trigger reactivity
 											}}
 											disabled={!direccion.provincia}
-											class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 disabled:bg-gray-100"
+											class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
 											class:border-red-300={errores[`direccion_${index}_localidad`]}
 										>
 											<option value="">Seleccionar localidad</option>
@@ -881,16 +959,18 @@
 											{/each}
 										</select>
 										{#if errores[`direccion_${index}_localidad`]}
-											<p class="mt-1 text-sm text-red-600">{errores[`direccion_${index}_localidad`]}</p>
+											<p class="mt-1 text-sm text-red-600">
+												{errores[`direccion_${index}_localidad`]}
+											</p>
 										{/if}
 									</div>
 								</div>
 
 								<!-- Calle y Número -->
-								<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+								<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 									<!-- Calle -->
 									<div class="md:col-span-2">
-										<label for="calle_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+										<label for="calle_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 											Calle *
 										</label>
 										<input
@@ -898,7 +978,7 @@
 											type="text"
 											value={direccion.calle}
 											on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
-											class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+											class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 											class:border-red-300={errores[`direccion_${index}_calle`]}
 											placeholder="Nombre de la calle"
 										/>
@@ -909,7 +989,10 @@
 
 									<!-- Número -->
 									<div>
-										<label for="numero_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+										<label
+											for="numero_{index}"
+											class="mb-2 block text-sm font-medium text-gray-700"
+										>
 											Número *
 										</label>
 										<input
@@ -917,27 +1000,33 @@
 											type="text"
 											value={direccion.numero}
 											on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
-											class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+											class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 											class:border-red-300={errores[`direccion_${index}_numero`]}
 											placeholder="1234"
 										/>
 										{#if errores[`direccion_${index}_numero`]}
-											<p class="mt-1 text-sm text-red-600">{errores[`direccion_${index}_numero`]}</p>
+											<p class="mt-1 text-sm text-red-600">
+												{errores[`direccion_${index}_numero`]}
+											</p>
 										{/if}
 									</div>
 								</div>
 
 								<!-- Referencia -->
 								<div>
-									<label for="referencia_{index}" class="block text-sm font-medium text-gray-700 mb-2">
+									<label
+										for="referencia_{index}"
+										class="mb-2 block text-sm font-medium text-gray-700"
+									>
 										Referencia
 									</label>
 									<input
 										id="referencia_{index}"
 										type="text"
 										value={direccion.referencia}
-										on:input={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
-										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+										on:input={(e) =>
+											actualizarDireccion(index, 'referencia', e.currentTarget.value)}
+										class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 										placeholder="Ejemplo: Frente a la plaza principal"
 									/>
 								</div>
@@ -951,7 +1040,7 @@
 					<button
 						type="button"
 						on:click={agregarDireccion}
-						class="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50"
+						class="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
 					>
 						<span class="text-xl">+</span>
 						Agregar Dirección
@@ -961,18 +1050,8 @@
 
 			<!-- Botones -->
 			<div class="flex justify-end gap-4">
-				<Button
-					label="Cancelar"
-					variant="secondary"
-					size="md"
-					type="button"
-				/>
-				<Button
-					label="Crear Proyecto"
-					variant="primary"
-					size="md"
-					type="submit"
-				/>
+				<Button label="Cancelar" variant="secondary" size="md" type="button" />
+				<Button label="Crear Proyecto" variant="primary" size="md" type="submit" />
 			</div>
 		</form>
 	</div>

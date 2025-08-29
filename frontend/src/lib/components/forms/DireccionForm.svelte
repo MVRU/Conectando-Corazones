@@ -208,7 +208,7 @@
 				{:else}
 					<!-- Sin URL: solo texto informativo -->
 					<p
-						class="rounded-xl border border-gray-300 bg-gray-50 px-4 py-2 text-base italic text-gray-400"
+						class="rounded-xl border border-gray-300 bg-gray-50 px-4 py-2 text-base text-gray-400 italic"
 					>
 						Se genera automáticamente
 					</p>
@@ -218,7 +218,7 @@
 				<button
 					type="button"
 					on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
-					class="absolute right-0 top-0 flex h-full w-10 items-center justify-center rounded-r-xl border border-gray-300 bg-gray-100 text-blue-600 transition-all duration-300 hover:bg-gray-200 focus:outline-none"
+					class="absolute top-0 right-0 flex h-full w-10 items-center justify-center rounded-r-xl border border-gray-300 bg-gray-100 text-blue-600 transition-all duration-300 hover:bg-gray-200 focus:outline-none"
 					aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 				>
 					{#if editandoUrlMapaGoogle}

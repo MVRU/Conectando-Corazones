@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
-	import { highlightSearch } from '$lib/utils/sanitize';
+	import Highlight from '$lib/components/ui/Highlight.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	type Agrupadas = Record<string, { pregunta: string; respuesta: string }[]>;
@@ -41,10 +41,6 @@
 	});
 
 	let searchInput: HTMLInputElement | undefined;
-
-	function highlight(text: string, query: string): string {
-		return highlightSearch(text, query);
-	}
 
 	onMount(() => {
 		const hash = decodeURIComponent(location.hash.substring(1));
@@ -134,12 +130,12 @@
 		{#each $faqsFiltradas as categoria, i (categoria.categoria)}
 			<div class="fade-slide-in" style="animation-delay: {i * 120}ms">
 				<div
-					class="rounded-xl border border-gray-100 bg-white px-6 pb-6 pt-5 shadow-sm transition-all hover:shadow-md"
+					class="rounded-xl border border-gray-100 bg-white px-6 pt-5 pb-6 shadow-sm transition-all hover:shadow-md"
 				>
 					<h3
 						class="mb-5 flex items-center justify-between border-b border-gray-100 pb-2 text-xl font-medium text-stone-700"
 					>
-						<span>{@html highlight(categoria.categoria, $searchQuery)}</span>
+						<Highlight text={categoria.categoria} query={$searchQuery} />
 					</h3>
 					<div class="space-y-3">
 						{#each categoria.preguntas as item, j (item.pregunta)}
@@ -151,7 +147,7 @@
 								<summary
 									class="flex cursor-pointer items-center justify-between text-sm font-medium text-gray-800"
 								>
-									<span>{@html highlight(item.pregunta, $searchQuery)}</span>
+									<Highlight text={item.pregunta} query={$searchQuery} />
 									<svg
 										class="ml-3 h-4 w-4 text-blue-500 transition-transform duration-300 group-open:rotate-180"
 										fill="none"
@@ -162,8 +158,8 @@
 										<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
 									</svg>
 								</summary>
-								<p class="mt-3 text-sm leading-relaxed text-gray-600">
-									{@html highlight(item.respuesta, $searchQuery)}
+								<p class="mt-3 overflow-hidden text-sm leading-relaxed text-ellipsis text-gray-600">
+									<Highlight text={item.respuesta} query={$searchQuery} />
 								</p>
 							</details>
 						{/each}

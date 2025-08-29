@@ -47,7 +47,7 @@
 			</div>
 			<!-- *h2 (sin <br> en mobile, con <br> en desktop) -->
 			<h2
-				class="cta-animate-title text-2xl font-extrabold leading-tight drop-shadow sm:text-3xl md:text-4xl"
+				class="cta-animate-title text-2xl leading-tight font-extrabold drop-shadow sm:text-3xl md:text-4xl"
 			>
 				<span class="sm:hidden">Descubrí lo que ganás al ser parte de esta red solidaria.</span>
 				<span class="hidden sm:inline"
@@ -91,10 +91,10 @@
 			style="transition-delay: .23s"
 		>
 			<div
-				class="cta-img-outer group relative h-64 w-44 overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px] md:h-[480px] md:w-[350px]"
+				class="cta-img-outer group relative h-64 w-44 overflow-visible rounded-[2rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px] md:h-[480px] md:w-[350px]"
 			>
 				<div
-					class="absolute left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
+					class="absolute top-0 left-0 h-full w-full overflow-hidden rounded-[2rem]"
 					style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 					tabindex="-1"
 				>

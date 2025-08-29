@@ -13,7 +13,7 @@
 		{#each contactos as contacto (contacto)}
 			<div class="space-y-4 divide-y divide-gray-100 text-xs sm:text-sm">
 				{#if contacto.tipo_contacto}
-					<div class="flex flex-col gap-2 pb-3 pt-0 sm:flex-row sm:items-start sm:pt-0">
+					<div class="flex flex-col gap-2 pt-0 pb-3 sm:flex-row sm:items-start sm:pt-0">
 						<div
 							class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
 						>
@@ -30,7 +30,7 @@
 							{/if}
 						</div>
 						<div class="sm:pl-2">
-							<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							<p class="mb-0.5 text-[10px] font-semibold tracking-wide text-gray-400 uppercase">
 								Tipo de contacto
 							</p>
 							<p class="font-medium text-gray-700">{contacto.tipo_contacto}</p>
@@ -39,14 +39,14 @@
 				{/if}
 
 				{#if contacto.valor}
-					<div class="flex flex-col gap-2 pb-3 pt-3 sm:flex-row sm:items-start">
+					<div class="flex flex-col gap-2 pt-3 pb-3 sm:flex-row sm:items-start">
 						<div
 							class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
 						>
 							🔢
 						</div>
 						<div class="sm:pl-2">
-							<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							<p class="mb-0.5 text-[10px] font-semibold tracking-wide text-gray-400 uppercase">
 								Valor
 							</p>
 							{#if contacto.tipo_contacto === 'email'}
@@ -54,7 +54,7 @@
 									href={`mailto:${contacto.valor}`}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="break-all font-medium text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2"
+									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-none"
 								>
 									{contacto.valor}
 								</a>
@@ -63,7 +63,7 @@
 									href={`https://${contacto.valor.replace(/^https?:\/\//, '')}`}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="break-all font-medium text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2"
+									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-none"
 								>
 									{contacto.valor}
 								</a>
@@ -75,14 +75,14 @@
 				{/if}
 
 				{#if contacto.etiqueta}
-					<div class="flex flex-col gap-2 pb-3 pt-3 sm:flex-row sm:items-start">
+					<div class="flex flex-col gap-2 pt-3 pb-3 sm:flex-row sm:items-start">
 						<div
 							class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-lg text-gray-500"
 						>
 							🏷️
 						</div>
 						<div class="sm:pl-2">
-							<p class="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+							<p class="mb-0.5 text-[10px] font-semibold tracking-wide text-gray-400 uppercase">
 								Etiqueta
 							</p>
 							<p class="font-medium text-gray-700">{contacto.etiqueta}</p>

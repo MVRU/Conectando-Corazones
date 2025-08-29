@@ -58,7 +58,7 @@
     "
 >
 	<div
-		class="duration-900 mx-auto mb-12 max-w-5xl text-center opacity-0 transition delay-100 data-[visible]:transform-none data-[visible]:opacity-100"
+		class="mx-auto mb-12 max-w-5xl text-center opacity-0 transition delay-100 duration-900 data-[visible]:transform-none data-[visible]:opacity-100"
 		data-visible={visible}
 		style="transform:translateY({visible ? 0 : '24px'}); opacity:{visible ? 1 : 0};"
 	>
@@ -95,7 +95,7 @@
 		<div class="mt-6 flex w-full justify-between px-4">
 			<button
 				on:click={mostrarAnterior}
-				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
 				aria-label="Anterior testimonio"
 			>
 				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +110,7 @@
 
 			<button
 				on:click={mostrarSiguiente}
-				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-400"
+				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
 				aria-label="Siguiente testimonio"
 			>
 				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

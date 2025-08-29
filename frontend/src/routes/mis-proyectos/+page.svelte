@@ -94,7 +94,7 @@
 		style="transition: all 0.8s ease-out; transition-delay: 200ms"
 	>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			{#each dashboardOptions as option}
+			{#each dashboardOptions as option, i (i)}
 				<button
 					class="group relative overflow-hidden rounded-2xl border transition-all duration-300 {selectedDashboard ===
 					option.key
@@ -117,7 +117,7 @@
 					</div>
 					{#if selectedDashboard === option.key}
 						<div
-							class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400"
+							class="absolute right-0 bottom-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400"
 							transition:fade={{ duration: 300 }}
 						></div>
 					{/if}

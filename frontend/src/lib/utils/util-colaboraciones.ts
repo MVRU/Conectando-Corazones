@@ -6,11 +6,11 @@ import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
  * @param colaborador - Datos del colaborador (puede ser undefined)
  */
 export function obtenerNombreColaborador(colaborador?: ColaboradorDisyuncion): string {
-    if (!colaborador) return 'Colaborador';
-    if ('razon_social' in colaborador && colaborador.razon_social) {
-        return colaborador.razon_social;
-    }
-    return `${colaborador.nombre} ${colaborador.apellido}`.trim() || 'Colaborador';
+	if (!colaborador) return 'Colaborador';
+	if ('razon_social' in colaborador && colaborador.razon_social) {
+		return colaborador.razon_social;
+	}
+	return `${colaborador.nombre} ${colaborador.apellido}`.trim() || 'Colaborador';
 }
 
 /**
@@ -18,5 +18,5 @@ export function obtenerNombreColaborador(colaborador?: ColaboradorDisyuncion): s
  * @param colaboraciones - Lista de colaboraciones del proyecto
  */
 export function colaboracionesVisibles(colaboraciones: Colaboracion[] = []): Colaboracion[] {
-    return colaboraciones.filter((c) => c.estado === 'pendiente' || c.estado === 'aprobada');
+	return colaboraciones.filter((c) => c.estado === 'pendiente' || c.estado === 'aprobada');
 }

@@ -38,7 +38,9 @@
 		...Array.from(
 			new Set(
 				proyectos
-					.map((p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? '')
+					.map(
+						(p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? ''
+					)
 					.filter((s) => s !== '')
 			)
 		).sort()
@@ -72,7 +74,7 @@
 	}
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-2 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-2 pb-6 sm:px-10 lg:px-20">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-2 text-center">
 		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
@@ -138,7 +140,7 @@
 						<select
 							id="filtro-participacion"
 							bind:value={filtroParticipacionSeleccionado}
-							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						>
 							{#each tiposParticipacion as tipo (tipo)}
 								<option value={tipo}>{tipo}</option>
@@ -154,7 +156,7 @@
 						<select
 							id="filtro-estado"
 							bind:value={estadoSeleccionado}
-							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						>
 							{#each estadosDisponibles as estado (estado)}
 								<option value={estado}>{estado}</option>
@@ -170,7 +172,7 @@
 						<select
 							id="filtro-provincia"
 							bind:value={provinciaSeleccionada}
-							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						>
 							{#each provinciasDisponibles as provincia (provincia)}
 								<option value={provincia}>{provincia}</option>

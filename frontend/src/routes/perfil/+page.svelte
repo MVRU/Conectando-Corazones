@@ -2,43 +2,23 @@
  	- [ ] Rehacer todo para cuando los types y los datos coincidan con DER -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { authActions, usuario as usuarioStore } from '$lib/stores/auth';
-	import type {
-		Usuario,
-		Institucion,
-		Colaborador,
-		Organizacion,
-		Unipersonal
-	} from '$lib/types/Usuario';
 	import Loader from '$lib/components/feedback/Loader.svelte';
+	import { onMount } from 'svelte';
+	import type { Usuario } from '$lib/types/Usuario';
+	import { onDestroy } from 'svelte';
 
 	let usuario: Usuario | null = null;
-	let institucionUsuario: Institucion | null = null;
-	let colaboradorUsuario: Colaborador | null = null;
-	let organizacionUsuario: Organizacion | null = null;
-	let unipersonalUsuario: Unipersonal | null = null;
 
-	onMount(async () => {
-		await authActions.login('admin_conectando', '123456');
+	const unsubscribe = usuarioStore.subscribe((value) => {
+		usuario = value;
 	});
 
-	$: if ($usuarioStore) {
-		usuario = $usuarioStore;
+	onMount(async () => {
+		await authActions.login('escuela_esperanza', '123456');
+	});
 
-		if (usuario?.rol === 'institucion') {
-			institucionUsuario = usuario as Institucion;
-		} else if (usuario?.rol === 'colaborador') {
-			colaboradorUsuario = usuario as Colaborador;
-
-			// Determinar si es organización o unipersonal
-			if ('razon_social' in colaboradorUsuario) {
-				organizacionUsuario = colaboradorUsuario as Organizacion;
-			} else {
-				unipersonalUsuario = colaboradorUsuario as Unipersonal;
-			}
-		}
-	}
+	onDestroy(() => unsubscribe());
 </script>
 
 <div class="mx-auto max-w-6xl px-4 py-10">

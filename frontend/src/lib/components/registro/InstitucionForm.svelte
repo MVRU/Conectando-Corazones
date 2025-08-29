@@ -263,7 +263,7 @@
 			/>
 			<button
 				type="button"
-				class="absolute right-3 top-9 flex h-6 w-6 items-center justify-center focus:outline-none"
+				class="absolute top-9 right-3 flex h-6 w-6 items-center justify-center focus:outline-none"
 				aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 				on:click={() => (mostrarPassword = !mostrarPassword)}
 			>
@@ -299,7 +299,7 @@
 			/>
 			<button
 				type="button"
-				class="absolute right-3 top-9 flex h-6 w-6 items-center justify-center focus:outline-none"
+				class="absolute top-9 right-3 flex h-6 w-6 items-center justify-center focus:outline-none"
 				aria-label={mostrarRepassword
 					? 'Ocultar repetición de contraseña'
 					: 'Mostrar repetición de contraseña'}

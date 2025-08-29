@@ -6,7 +6,7 @@
 </script>
 
 <div
-	class="faq-item duration-400 group rounded-2xl border border-[#e9ecf7] bg-white/80 shadow transition-shadow hover:shadow-lg"
+	class="faq-item group rounded-2xl border border-[#e9ecf7] bg-white/80 shadow transition-shadow duration-400 hover:shadow-lg"
 >
 	<button
 		type="button"
@@ -15,9 +15,9 @@
 		on:click={() => (open = !open)}
 	>
 		<span class="text-base font-medium text-[#2e386b] sm:text-lg">{question}</span>
-		<span class="duration-400 transition-transform" style="will-change: transform;">
+		<span class="transition-transform duration-400" style="will-change: transform;">
 			<svg
-				class="duration-400 h-6 w-6 text-blue-400 transition-transform group-hover:scale-110"
+				class="h-6 w-6 text-blue-400 transition-transform duration-400 group-hover:scale-110"
 				style="transform: rotate({open ? 180 : 0}deg);"
 				fill="none"
 				stroke="currentColor"

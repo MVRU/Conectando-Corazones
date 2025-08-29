@@ -1,17 +1,16 @@
-
 import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
 export interface Colaboracion {
-  id_colaboracion?: number;
-  estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
-  justificacion?: string;
-  created_at?: Date;
-  mensaje?: string;
+	id_colaboracion?: number;
+	estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
+	justificacion?: string;
+	created_at?: Date;
+	mensaje?: string;
 
-  // * Relaciones
-  // -*- FKs para create/update
-  proyecto_id?: number;
-  colaborador_id?: number;
+	// * Relaciones
+	// -*- FKs para create/update
+	proyecto_id?: number;
+	colaborador_id?: number;
 
-  // -*- Objetos expandidos para read
-  colaborador?: ColaboradorDisyuncion;
+	// -*- Objetos expandidos para read
+	colaborador?: ColaboradorDisyuncion;
 }

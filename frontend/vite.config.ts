@@ -7,7 +7,6 @@ import { defineConfig } from 'vite';
  *	-*- Las pruebas se gestionan en vitest.config.ts
  */
 
-
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()]
 });

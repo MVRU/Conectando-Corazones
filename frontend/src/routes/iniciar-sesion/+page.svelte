@@ -141,7 +141,7 @@ TODO:
 							/>
 							<button
 								type="button"
-								class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+								class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 								on:click={() => (mostrarPassword = !mostrarPassword)}
 							>
 								{#if mostrarPassword}

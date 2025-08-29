@@ -27,9 +27,9 @@
 
 		<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent"></div>
 
-		<div class="absolute bottom-0 left-0 right-0 px-6 pb-6 pt-10 text-white sm:px-8 lg:px-10">
+		<div class="absolute right-0 bottom-0 left-0 px-6 pt-10 pb-6 text-white sm:px-8 lg:px-10">
 			<h1
-				class="max-w-4xl text-2xl font-extrabold leading-snug drop-shadow-md sm:text-3xl lg:text-4xl"
+				class="max-w-4xl text-2xl leading-snug font-extrabold drop-shadow-md sm:text-3xl lg:text-4xl"
 			>
 				{proyecto.titulo}
 			</h1>

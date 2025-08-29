@@ -59,7 +59,7 @@
 	</h1>
 
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	<p class="mb-2 mt-4 text-2xl font-semibold">{@html titulo}</p>
+	<p class="mt-4 mb-2 text-2xl font-semibold">{@html titulo}</p>
 
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	<p class="mb-10 max-w-md text-gray-600">{@html descripcion}</p>

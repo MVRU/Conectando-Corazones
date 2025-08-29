@@ -33,7 +33,10 @@
 	let icono = '🤝';
 
 	const hoy = new Date();
-	const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
+	/**
+	 * ! REVISAR: no estamos usando la fecha de inicio o creación del proyecto en ningún lado. ¿Tendríamos que mostrarla en algún lado?
+	 */
+	// const inicio = proyecto.created_at ? new Date(proyecto.created_at) : null;
 	const cierre = proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null;
 
 	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
@@ -130,7 +133,7 @@
 			<div class="mt-2 text-right">
 				<button
 					type="button"
-					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:outline-none focus:ring-2 focus:ring-sky-200"
+					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:ring-2 focus:ring-sky-200 focus:outline-none"
 					on:click={() => (showModal = true)}
 					aria-label="Ver cómo se calcula el progreso"
 				>
@@ -173,8 +176,8 @@
 			}}
 		>
 			<!-- Encabezado -->
-			<div class="flex items-center justify-between border-b border-gray-100 px-5 pb-4 pt-5">
-				<h2 id="modal-title" class="text-base font-semibold leading-tight text-gray-800">
+			<div class="flex items-center justify-between border-b border-gray-100 px-5 pt-5 pb-4">
+				<h2 id="modal-title" class="text-base leading-tight font-semibold text-gray-800">
 					{step === 0
 						? 'Cálculo del progreso'
 						: step === 1
@@ -185,7 +188,7 @@
 				</h2>
 				<button
 					type="button"
-					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					on:click={() => {
 						showModal = false;
 						step = 0;
@@ -204,7 +207,7 @@
 			</div>
 
 			<!-- Contenido -->
-			<div class="space-y-4 px-5 pb-5 pt-4 text-sm text-gray-700">
+			<div class="space-y-4 px-5 pt-4 pb-5 text-sm text-gray-700">
 				{#if step === 0}
 					<p class="text-gray-800">El progreso combina dos métricas:</p>
 					<ul class="space-y-2 text-sm">
@@ -275,11 +278,11 @@
 			</div>
 
 			<!-- Navegación -->
-			<div class="flex items-center justify-between border-t border-gray-100 px-5 pb-5 pt-2">
+			<div class="flex items-center justify-between border-t border-gray-100 px-5 pt-2 pb-5">
 				{#if step > 0}
 					<button
 						type="button"
-						class="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200"
+						class="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 focus:ring-2 focus:ring-gray-200 focus:outline-none"
 						on:click={() => step--}
 					>
 						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

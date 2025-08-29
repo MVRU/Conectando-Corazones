@@ -26,7 +26,7 @@
 			bind:value
 			on:input={handleInput}
 			{placeholder}
-			class="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] {error
+			class="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:outline-none {error
 				? 'border-red-500 ring-red-500 focus:ring-red-500'
 				: ''}"
 		/>
@@ -52,7 +52,7 @@
 					on:click={() => {
 						value = '';
 					}}
-					class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm text-white transition-colors hover:bg-red-600"
+					class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm text-white transition-colors hover:bg-red-600"
 				>
 					×
 				</button>

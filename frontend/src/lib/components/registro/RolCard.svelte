@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 

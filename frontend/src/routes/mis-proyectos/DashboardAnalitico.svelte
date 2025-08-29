@@ -139,7 +139,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			<div class="rounded-xl bg-blue-50 p-4">
 				<h4 class="text-sm font-medium text-blue-600">Proyectos</h4>
 				<div class="mt-2 flex h-16 items-end justify-center gap-1">
-					{#each tendenciasMensuales as mes, i}
+					{#each tendenciasMensuales as mes, i (i)}
 						<div class="flex flex-col items-center">
 							<div
 								class="w-4 rounded-t bg-blue-500 transition-all duration-1000"
@@ -154,7 +154,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			<div class="rounded-xl bg-green-50 p-4">
 				<h4 class="text-sm font-medium text-green-600">Donaciones (k$)</h4>
 				<div class="mt-2 flex h-16 items-end justify-center gap-1">
-					{#each tendenciasMensuales as mes, i}
+					{#each tendenciasMensuales as mes, i (i)}
 						<div class="flex flex-col items-center">
 							<div
 								class="w-4 rounded-t bg-green-500 transition-all duration-1000"
@@ -170,7 +170,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			<div class="rounded-xl bg-orange-50 p-4">
 				<h4 class="text-sm font-medium text-orange-600">Beneficiarios</h4>
 				<div class="mt-2 flex h-16 items-end justify-center gap-1">
-					{#each tendenciasMensuales as mes, i}
+					{#each tendenciasMensuales as mes, i (i)}
 						<div class="flex flex-col items-center">
 							<div
 								class="w-4 rounded-t bg-orange-500 transition-all duration-1000"
@@ -195,7 +195,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 		<h2 class="mb-6 text-xl font-bold text-gray-900">⏱️ Timeline de Proyectos Activos</h2>
 
 		<div class="space-y-6">
-			{#each proyectosDetallados as proyecto, i}
+			{#each proyectosDetallados as proyecto, i (i)}
 				<div
 					class="relative border-l-2 border-blue-200 pb-6 pl-8 last:border-l-0"
 					class:opacity-0={!animate}
@@ -203,7 +203,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 				>
 					<!-- Punto del timeline -->
 					<div
-						class="absolute -left-2 top-0 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
+						class="absolute top-0 -left-2 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
 					></div>
 
 					<div class="rounded-xl bg-gray-50 p-4">
@@ -230,7 +230,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 						<div class="mt-4">
 							<h4 class="mb-2 text-xs font-medium text-gray-700">Progreso histórico:</h4>
 							<div class="flex h-8 items-end gap-1">
-								{#each proyecto.historial as punto, j}
+								{#each proyecto.historial as punto, j (j)}
 									<div class="flex flex-col items-center">
 										<div
 											class="w-2 rounded-t bg-blue-400 transition-all duration-1000"
@@ -324,7 +324,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			<h2 class="mb-6 text-lg font-bold text-gray-900">🏢 Análisis de Instituciones</h2>
 
 			<div class="space-y-3">
-				{#each instituciones as institucion, i}
+				{#each instituciones as institucion, i (i)}
 					<div
 						class="flex items-center justify-between rounded-lg border border-gray-100 p-3 transition-colors hover:bg-gray-50"
 						class:opacity-0={!animate}

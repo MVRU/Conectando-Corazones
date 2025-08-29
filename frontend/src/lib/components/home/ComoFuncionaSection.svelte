@@ -14,7 +14,7 @@ TODO:
 </script>
 
 <section
-	class="py-50 relative isolate w-full overflow-hidden bg-white px-4 md:px-8"
+	class="relative isolate w-full overflow-hidden bg-white px-4 py-50 md:px-8"
 	use:inView={{
 		onChange: (v) => (inViewSection = v),
 		rootMargin: '0px 0px -15% 0px',
@@ -22,14 +22,14 @@ TODO:
 	}}
 >
 	<span
-		class="pointer-events-none absolute -left-24 -top-16 h-72 w-72 rounded-full
+		class="pointer-events-none absolute -top-16 -left-24 h-72 w-72 rounded-full
 	             bg-[#007fff]/10 blur-3xl"
 	></span>
 
 	<!-- *Encabezado -->
 	<header
-		class="duration-600 relative mx-auto mb-12 max-w-4xl
-                       text-center transition-transform ease-out
+		class="relative mx-auto mb-12 max-w-4xl text-center
+                       transition-transform duration-600 ease-out
                        md:max-w-3xl"
 		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
@@ -39,7 +39,7 @@ TODO:
 			<Badge text="¿Cómo funciona?" customColor="#0066d5" />
 		</div>
 
-		<h2 class="mt-4 text-3xl font-extrabold leading-snug text-gray-900 sm:text-4xl">
+		<h2 class="mt-4 text-3xl leading-snug font-extrabold text-gray-900 sm:text-4xl">
 			Es simple,
 			<span class="text-gray-500"> conectamos <br />necesidades con soluciones. </span>
 		</h2>
@@ -47,8 +47,8 @@ TODO:
 
 	<!-- *Grid de pasos -->
 	<div
-		class="duration-600 relative mx-auto grid max-w-7xl
-                       gap-8 transition-opacity
+		class="relative mx-auto grid max-w-7xl gap-8
+                       transition-opacity duration-600
                        ease-out sm:grid-cols-2 lg:grid-cols-3"
 		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
@@ -61,7 +61,7 @@ TODO:
 
 	<!-- *CTA -->
 	<div
-		class="duration-600 relative mt-12 flex justify-center transition-opacity"
+		class="relative mt-12 flex justify-center transition-opacity duration-600"
 		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
 	>

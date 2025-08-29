@@ -13,13 +13,11 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	// Filtro en_curso
-	let proyectos: Proyecto[] = mockProyectos.filter(p => 
-		p.estado === 'en_curso'
-	);
+	let proyectos: Proyecto[] = mockProyectos.filter((p) => p.estado === 'en_curso');
 
-	proyectos = proyectos.map(proyecto => ({
+	proyectos = proyectos.map((proyecto) => ({
 		...proyecto,
-		colaboraciones: mockColaboraciones.filter(c => c.proyecto_id === proyecto.id_proyecto)
+		colaboraciones: mockColaboraciones.filter((c) => c.proyecto_id === proyecto.id_proyecto)
 	}));
 
 	let proyectoSeleccionado: Proyecto = proyectos[0] || mockProyectos[0];
@@ -41,10 +39,8 @@
 	function aceptarColaboracion(colaboracionId: number) {
 		// Actualizar estado en el proyecto seleccionado
 		if (proyectoSeleccionado.colaboraciones) {
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map(c => 
-				c.id_colaboracion === colaboracionId 
-					? { ...c, estado: 'aprobada' as const }
-					: c
+			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+				c.id_colaboracion === colaboracionId ? { ...c, estado: 'aprobada' as const } : c
 			);
 		}
 
@@ -66,32 +62,38 @@
 	function confirmarRechazo() {
 		if (colaboracionARechazar && proyectoSeleccionado.colaboraciones) {
 			const justificacion = justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
-			
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map(c => 
-				c.id_colaboracion === colaboracionARechazar 
+
+			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+				c.id_colaboracion === colaboracionARechazar
 					? { ...c, estado: 'rechazada' as const, justificacion }
 					: c
 			);
 
-			console.log(`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`);
+			console.log(
+				`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`
+			);
 		}
-		
+
 		cerrarModalRechazo();
 	}
 
 	function obtenerEmailColaborador(colaboracion: Colaboracion): string | undefined {
 		const contactos = colaboracion.colaborador?.contactos;
-		return contactos?.find(c => c.tipo_contacto === 'email')?.valor;
+		return contactos?.find((c) => c.tipo_contacto === 'email')?.valor;
 	}
 
 	function obtenerTelefonoColaborador(colaboracion: Colaboracion): string | undefined {
 		const contactos = colaboracion.colaborador?.contactos;
-		return contactos?.find(c => c.tipo_contacto === 'telefono')?.valor;
+		return contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor;
 	}
 
 	function getTipoIcon(colaboracion: Colaboracion): string {
 		// verificamos colaboradores (organizaciones o personas)
-		if (colaboracion.colaborador && 'tipo_colaborador' in colaboracion.colaborador && colaboracion.colaborador.tipo_colaborador === 'organizacion') {
+		if (
+			colaboracion.colaborador &&
+			'tipo_colaborador' in colaboracion.colaborador &&
+			colaboracion.colaborador.tipo_colaborador === 'organizacion'
+		) {
 			return '🏢';
 		}
 		return '👤';
@@ -100,10 +102,13 @@
 	function getTipoLabel(colaboracion: Colaboracion): string {
 		if (!colaboracion.colaborador) return 'Colaborador';
 		// verificamos colaboradores (organizaciones o personas)
-		if ('tipo_colaborador' in colaboracion.colaborador && colaboracion.colaborador.tipo_colaborador === 'organizacion') {
+		if (
+			'tipo_colaborador' in colaboracion.colaborador &&
+			colaboracion.colaborador.tipo_colaborador === 'organizacion'
+		) {
 			return 'Organización';
 		}
-		
+
 		// Si es unipersonal, mostrar "Persona"
 		return 'Persona';
 	}
@@ -113,15 +118,15 @@
 	}
 
 	function getColaboracionesPendientes(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.filter(c => c.estado === 'pendiente')?.length || 0;
+		return proyecto.colaboraciones?.filter((c) => c.estado === 'pendiente')?.length || 0;
 	}
 
 	function getColaboracionesAprobadas(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.filter(c => c.estado === 'aprobada')?.length || 0;
+		return proyecto.colaboraciones?.filter((c) => c.estado === 'aprobada')?.length || 0;
 	}
 
 	function getColaboracionesRechazadas(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.filter(c => c.estado === 'rechazada')?.length || 0;
+		return proyecto.colaboraciones?.filter((c) => c.estado === 'rechazada')?.length || 0;
 	}
 
 	function calcularDiasActivo(fecha: Date | undefined): number {
@@ -134,8 +139,8 @@
 
 	// Estadísticas del proyecto seleccionado
 	$: colaboraciones = proyectoSeleccionado.colaboraciones || [];
-	$: pendientes = colaboraciones.filter(c => c.estado === 'pendiente');
-	$: aprobadas = colaboraciones.filter(c => c.estado === 'aprobada');
+	$: pendientes = colaboraciones.filter((c) => c.estado === 'pendiente');
+	$: aprobadas = colaboraciones.filter((c) => c.estado === 'aprobada');
 </script>
 
 <svelte:head>
@@ -147,7 +152,9 @@
 	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">Solicitudes de colaboración recibidas</h1>
+			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">
+				Solicitudes de colaboración recibidas
+			</h1>
 			<p class="mt-2 text-gray-600">Gestiona las solicitudes de colaboración para tus proyectos</p>
 		</div>
 
@@ -157,7 +164,10 @@
 				<div class="mb-4 flex items-center justify-between">
 					<h2 class="text-lg font-semibold text-gray-900">Seleccionar proyecto</h2>
 					<span class="text-sm text-gray-500">
-						{proyectos.length} proyecto{proyectos.length !== 1 ? 's' : ''} total{proyectos.length !== 1 ? 'es' : ''}
+						{proyectos.length} proyecto{proyectos.length !== 1 ? 's' : ''} total{proyectos.length !==
+						1
+							? 'es'
+							: ''}
 					</span>
 				</div>
 
@@ -170,7 +180,7 @@
 						<select
 							id="project-select"
 							bind:value={proyectoSeleccionadoId}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						>
 							{#each proyectos as proyecto}
 								<option value={proyecto.id_proyecto}>
@@ -267,13 +277,15 @@
 			</div>
 		{/if}
 		<!-- Dos columnas: Solicitudes + Colaboradores activos -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+		<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
 			<!-- Solicitudes de colaboración (pendientes) -->
 			<div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 				<div class="border-b border-gray-200 px-6 py-4">
 					<div class="flex items-center justify-between">
 						<h2 class="text-lg font-semibold text-gray-900">Solicitudes de colaboración</h2>
-						<span class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800">
+						<span
+							class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800"
+						>
 							{pendientes.length} pendiente{pendientes.length !== 1 ? 's' : ''}
 						</span>
 					</div>
@@ -285,7 +297,8 @@
 							<div class="mb-4 text-4xl">📥</div>
 							<h3 class="mb-2 text-lg font-medium text-gray-900">No hay solicitudes pendientes</h3>
 							<p class="text-gray-500">
-								Cuando recibas solicitudes de colaboración aparecerán aquí para que puedas gestionarlas.
+								Cuando recibas solicitudes de colaboración aparecerán aquí para que puedas
+								gestionarlas.
 							</p>
 						</div>
 					{:else}
@@ -300,7 +313,9 @@
 													{obtenerNombreColaborador(colaboracion.colaborador)}
 												</h3>
 												<p class="text-sm text-gray-500">
-													{getTipoLabel(colaboracion)} • Postulado el {formatearFecha(colaboracion.created_at)}
+													{getTipoLabel(colaboracion)} • Postulado el {formatearFecha(
+														colaboracion.created_at
+													)}
 												</p>
 											</div>
 										</div>
@@ -372,7 +387,9 @@
 				<div class="border-b border-gray-200 px-6 py-4">
 					<div class="flex items-center justify-between">
 						<h2 class="text-lg font-semibold text-gray-900">Colaboradores activos</h2>
-						<span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+						<span
+							class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+						>
 							{aprobadas.length} activo{aprobadas.length !== 1 ? 's' : ''}
 						</span>
 					</div>
@@ -384,7 +401,8 @@
 							<div class="mb-4 text-4xl">🤝</div>
 							<h3 class="mb-2 text-lg font-medium text-gray-900">Aún no tienes colaboradores</h3>
 							<p class="text-gray-500">
-								Los colaboradores aceptados aparecerán aquí. Revisa las solicitudes pendientes para encontrar personas dispuestas a ayudar.
+								Los colaboradores aceptados aparecerán aquí. Revisa las solicitudes pendientes para
+								encontrar personas dispuestas a ayudar.
 							</p>
 						</div>
 					{:else}
@@ -410,7 +428,9 @@
 									</div>
 
 									<div class="flex items-center gap-2">
-										<span class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
+										<span
+											class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
+										>
 											✓ Activo
 										</span>
 									</div>
@@ -457,9 +477,12 @@
 	<!-- svelte-ignore a11y-click-events-have-key-events -->
 	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div class="fixed inset-0 z-50 flex items-center justify-center" on:click={cerrarModalRechazo}>
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="bg-white rounded-lg shadow-2xl border border-gray-200 max-w-md w-full mx-4 p-6" on:click|stopPropagation>
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div
+			class="mx-4 w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-2xl"
+			on:click|stopPropagation
+		>
 			<div class="mb-4">
 				<h3 class="text-lg font-semibold text-gray-900">Rechazar solicitud de colaboración</h3>
 				<p class="mt-2 text-sm text-gray-600">
@@ -468,14 +491,14 @@
 			</div>
 
 			<div class="mb-6">
-				<label for="justificacion-rechazo" class="block text-sm font-medium text-gray-700 mb-2">
+				<label for="justificacion-rechazo" class="mb-2 block text-sm font-medium text-gray-700">
 					Justificación del rechazo:
 				</label>
 				<textarea
 					id="justificacion-rechazo"
 					bind:value={justificacionRechazo}
 					rows="4"
-					class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+					class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
 					placeholder="Ejemplo: No cumple con los requisitos específicos del proyecto..."
 				></textarea>
 			</div>

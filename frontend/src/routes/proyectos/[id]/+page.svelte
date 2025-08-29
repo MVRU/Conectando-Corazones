@@ -13,21 +13,14 @@
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
-	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-	import { getUbicacionPrincipal } from '$lib/utils/util-proyectos';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 
 	let proyecto: Proyecto;
-	let provinciaNombre: string = 'Provincia';
-	let ubicacionPrincipal: ReturnType<typeof getUbicacionPrincipal>;
 	let colaboracionesActivas: Colaboracion[] = [];
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 
-	$: ubicacionPrincipal = proyecto ? getUbicacionPrincipal(proyecto) : undefined;
-	$: provinciaNombre =
-		getProvinciaFromLocalidad(ubicacionPrincipal?.direccion?.localidad)?.nombre ?? 'Provincia';
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
 
@@ -105,7 +98,7 @@
 </svelte:head>
 
 {#if proyecto}
-	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
+	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
 		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<!-- Header del proyecto -->
 			<ProyectoHeader {proyecto} {getColorEstado} />
@@ -298,7 +291,7 @@
 		</div>
 	</main>
 {:else}
-	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
+	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
 		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<p>Cargando proyecto...</p>
 		</div>
