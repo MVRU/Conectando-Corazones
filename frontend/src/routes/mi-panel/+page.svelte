@@ -7,6 +7,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { goto } from '$app/navigation';
+
 	import { fly, fade } from 'svelte/transition';
 	import DashboardGeneral from './DashboardGeneral.svelte';
 	import DashboardAnalitico from './DashboardAnalitico.svelte';
@@ -68,11 +71,7 @@
 		style="transition: all 0.6s ease-out"
 	>
 		<div class="mb-4 flex justify-center">
-			<Badge
-				text="Panel de Control"
-				customClass="text-blue-600 shadow-sm backdrop-blur"
-				customColor="rgb(var(--color-primary))"
-			/>
+			<Badge text="Panel de control" />
 		</div>
 		<h1 class="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl">
 			<span
@@ -82,12 +81,39 @@
 			</span>
 		</h1>
 		<p class="mx-auto max-w-2xl text-lg text-gray-600">
-			Explora diferentes perspectivas de tu participación en proyectos solidarios
+			Explorá diferentes perspectivas de tu participación en proyectos solidarios
 		</p>
 	</div>
 
-	<!-- Selector de Dashboard -->
+	<!-- Acciones rápidas -->
 	<div
+		class="mx-auto mb-10 max-w-3xl rounded-2xl border border-blue-100 bg-white/60 p-4 shadow-sm backdrop-blur"
+	>
+		<p class="mb-3 text-center text-sm text-gray-600">
+			Creé estos accesos directos para ir probando
+		</p>
+		<div class="flex flex-col items-center justify-center gap-3 sm:flex-row">
+			<Button
+				label="Crear proyecto"
+				variant="primary"
+				size="md"
+				type="button"
+				on:click={() => goto('/proyectos/crear')}
+			/>
+
+			<Button
+				label="Solicitudes de colaboración"
+				variant="secondary"
+				size="md"
+				type="button"
+				on:click={() => goto('/institucion/solicitudes-colaboracion')}
+			/>
+		</div>
+	</div>
+</main>
+
+<!-- Selector de Dashboard -->
+<!-- <div
 		class="mb-8"
 		class:opacity-0={!animate}
 		class:translate-y-4={!animate}
@@ -117,7 +143,7 @@
 					</div>
 					{#if selectedDashboard === option.key}
 						<div
-							class="absolute right-0 bottom-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400"
+							class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-blue-400"
 							transition:fade={{ duration: 300 }}
 						></div>
 					{/if}
@@ -126,7 +152,7 @@
 		</div>
 	</div>
 
-	<!-- Dashboard Content -->
+	Dashboard Content 
 	<div
 		class="transition-all duration-500"
 		class:opacity-0={!animate}
@@ -151,4 +177,4 @@
 			</div>
 		{/if}
 	</div>
-</main>
+	 -->

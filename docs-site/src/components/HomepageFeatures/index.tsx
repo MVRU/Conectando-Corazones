@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import styles from './styles.module.css';
 
-type LucideIcon = (props: React.SVGProps<SVGSVGElement>) => JSX.Element;
+type LucideIcon = React.ComponentType<React.SVGProps<SVGSVGElement>>;
 
 type FeatureItem = {
   title: string;

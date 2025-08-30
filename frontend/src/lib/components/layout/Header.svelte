@@ -148,7 +148,7 @@
 						aria-haspopup="true"
 						aria-expanded={mostrarDropdown}
 						on:click={toggleDropdown}
-						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-blue-400/50 focus:outline-none"
+						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
 					>
 						<img
 							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
@@ -163,12 +163,12 @@
 							style="animation:scaleIn .3s cubic-bezier(0.16, 1, 0.3, 1) forwards;"
 						>
 							<li
-								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold tracking-wider text-blue-300 uppercase"
+								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-blue-300"
 							>
 								Mi cuenta
 							</li>
 
-							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mis proyectos', href: '/mis-proyectos' }, { label: 'Crear proyecto', href: '/proyectos/crear' }, { label: 'Configuración', href: '/configuracion' }] as item, i (i)}
+							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mi panel', href: '/mi-panel' }, { label: 'Crear proyecto', href: '/proyectos/crear' }, { label: 'Configuración', href: '/configuracion' }] as item, i (i)}
 								<li>
 									<a
 										href={item.href}
@@ -201,7 +201,7 @@
 			<!-- Hamburguesa -->
 			<button
 				aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
-				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-blue-100 transition-all duration-300 hover:bg-blue-600/30 focus:ring-2 focus:ring-blue-400/50 focus:outline-none md:hidden"
+				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-blue-100 transition-all duration-300 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-400/50 md:hidden"
 				on:click={() => (menuAbierto = !menuAbierto)}
 			>
 				<svg
@@ -227,7 +227,7 @@
 	<!-- Menú Mobile -->
 	{#if menuAbierto}
 		<nav
-			class="absolute top-full right-0 left-0 z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
+			class="absolute left-0 right-0 top-full z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
 			style="animation:slideUp .4s cubic-bezier(0.22, 1, 0.36, 1) forwards;"
 		>
 			<div class="flex flex-col gap-1 px-5 py-4">
