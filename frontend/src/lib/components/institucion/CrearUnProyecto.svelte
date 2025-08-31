@@ -1,6 +1,17 @@
 <!--
+! Quedó demasiado largo y asqueroso el código, perdón, corrigí varias cosas y agregué bastantes validaciones
+! en cuanto pueda lo voy a dividir en componentes reutilizables y más atómicos
+	-!- Introduje algunos DTOs para la implementación futura del backend, voy a ver cómo los organizo, ignorar por ahora
+
 * Componente: CrearProyecto
 * Descripción: Formulario para que las instituciones creen nuevos proyectos
+
+TODOs:
+	- [ ] Pasar funciones a utils
+	- [ ] Quitar interfaces creadas y usar Interfaces ya definidas o crear DTOs (no acá)
+	- [ ] Cambiar "que_sehace" por "que_se_hace"
+	- [ ] ¿Corregir interfaces según Issue #34?
+
 -->
 
 <script lang="ts">
@@ -25,7 +36,7 @@
 
 	type ParticipacionForm = Partial<ParticipacionPermitida> & { unidad_medida_otra?: string };
 
-	// DTOs para payload de creación
+	// DTOs para payload de creación (IGNORAR)
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/types/dto/ParticipacionPermitidaCreate';
 
@@ -320,11 +331,11 @@
 
 	function toKey(s: string): string {
 		return (s ?? '')
-			.normalize('NFD') // separa acentos
-			.replace(/[\u0300-\u036f]/g, '') // quita acentos
+			.normalize('NFD')
+			.replace(/[\u0300-\u036f]/g, '')
 			.toLowerCase()
 			.trim()
-			.replace(/\s+/g, ' '); // colapsa espacios
+			.replace(/\s+/g, ' ');
 	}
 
 	// Catálogo (normalizado) de categorías existentes
@@ -499,9 +510,9 @@
 		value: any
 	) {
 		participacionesPermitidas[index] = { ...participacionesPermitidas[index], [field]: value };
-		participacionesPermitidas = participacionesPermitidas; // reactividad
+		participacionesPermitidas = participacionesPermitidas;
 
-		// Limpieza de errores dinámica
+		// Limpieza de errores
 		if (field === 'unidad_medida_otra') {
 			const err = validarUnidadMedidaOtra(
 				String(value ?? ''),
