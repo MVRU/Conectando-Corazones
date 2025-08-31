@@ -6,5 +6,5 @@ export interface Resena {
 	puntaje: number;
 	aprobado?: boolean; // * para moderación
 	rol?: string; // ! No está en DER, agregado como opcional para testimonios de home
-	usuario_id: string; // * FK
+	username?: string; // * FK
 }
