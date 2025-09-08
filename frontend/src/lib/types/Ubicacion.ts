@@ -7,5 +7,8 @@ export interface Ubicacion {
   tipo_ubicacion: TipoUbicacion;
   que_se_hace: string;
   direccion_id: number; // FK hacia Direccion
+  
+  // Relación opcional para lectura
+  direccion?: import('./Direccion').Direccion;
 } 
 

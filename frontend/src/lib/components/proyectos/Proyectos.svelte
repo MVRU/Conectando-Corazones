@@ -39,7 +39,7 @@
 			new Set(
 				proyectos
 					.map(
-						(p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre ?? ''
+						(p) => getProvinciaFromLocalidad(p.ubicaciones?.[0]?.ubicacion?.direccion?.localidad)?.nombre ?? ''
 					)
 					.filter((s) => s !== '')
 			)

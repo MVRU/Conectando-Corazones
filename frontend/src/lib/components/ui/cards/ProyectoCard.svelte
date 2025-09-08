@@ -31,16 +31,16 @@
 	const ubicaciones: ProyectoUbicacion[] = proyecto.ubicaciones ?? [];
 
 	$: ubicacionPrincipal =
-		ubicaciones.find((u) => u?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
+		ubicaciones.find((u) => u?.ubicacion?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
 
-	// Es virtual si no hay ubicaciones
-	$: esVirtual = ubicaciones.length === 0;
+	// Es virtual 
+	$: esVirtual = ubicaciones.some((u) => u?.ubicacion?.tipo_ubicacion === 'virtual');
 
 	$: ubicacionTexto = esVirtual
 		? 'Virtual'
-		: `${ubicacionPrincipal?.direccion?.localidad?.nombre || 'Ciudad'}${
-				ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre
-					? `, ${ubicacionPrincipal.direccion.localidad.provincia.nombre}`
+		: `${ubicacionPrincipal?.ubicacion?.direccion?.localidad?.nombre || 'Ciudad'}${
+				ubicacionPrincipal?.ubicacion?.direccion?.localidad?.provincia?.nombre
+					? `, ${ubicacionPrincipal.ubicacion.direccion.localidad.provincia.nombre}`
 					: ''
 			}`;
 
