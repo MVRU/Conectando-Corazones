@@ -3,7 +3,16 @@
  * -!- Para agregar los tipos de participaciones permitidas y sus objetivos.
  -->
 <script lang="ts">
-	import { obtenerClasesColor, objetivoListo, objetivoTexto } from '$lib/utils/util-proyecto-form';
+	import {
+		obtenerClasesColor,
+		objetivoListo,
+		objetivoTexto,
+		toKey,
+		normalizarUnidadLibre,
+		validarUnidadLibre ,
+		normalizarEspecie ,
+		validarEspecie 
+	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/types/forms/CrearProyectoForm';
@@ -13,14 +22,6 @@
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
 
-	function toKey(s: string): string {
-		return (s ?? '')
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.toLowerCase()
-			.trim()
-			.replace(/\s+/g, ' ');
-	}
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -31,25 +32,7 @@
 		return lista.map(toKey).includes(key);
 	}
 
-	// Normaliza y valida unidad libre (cuando se elige "Otra")
-	function normalizarUnidadLibre(s: string): string {
-		return (s ?? '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('es-AR');
-	}
-
-	function validarUnidadLibre(s: string, tipo?: TipoParticipacionDescripcion): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = normalizarUnidadLibre(s);
-		if (!v) return 'Este campo es obligatorio';
-		if (v.length < 2) return 'Debe tener al menos 2 caracteres';
-		if (v.length > 40) return 'Máximo 40 caracteres';
-		if (!/^\p{L}/u.test(v)) return 'Debe comenzar con una letra';
-		if (!/\p{L}/u.test(v)) return 'Debe incluir al menos una letra';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		if (!/^[\p{L}\p{N} .,'/%()-]+$/u.test(v)) return 'Usá letras, números y signos comunes';
-		if (esUnidadRepetida(tipo, v)) return 'Esa unidad ya existe. Elegíla de la lista.';
-		return null;
-	}
-
+	
 	function validarUnidadMedidaOtra(s: string, tipo?: TipoParticipacionDescripcion): string | null {
 		if (s == null) return 'Este campo es obligatorio';
 		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
@@ -65,24 +48,6 @@
 		return null;
 	}
 
-	function normalizarEspecie(s: string): string {
-		return (s ?? '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('es-AR');
-	}
-
-	function validarEspecie(s: string): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = normalizarEspecie(s);
-		if (!v) return 'Este campo es obligatorio';
-		if (v.length < 3) return 'Debe tener al menos 3 caracteres';
-		if (v.length > 60) return 'Máximo 60 caracteres';
-		if (!/^\p{L}/u.test(v)) return 'Debe comenzar con una letra';
-		if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		const ban = ['n/a', 'na', '-', 'ninguna', 'ninguno', 'no se', 'nose'];
-		if (ban.includes(v)) return 'Por favor, especificá un ítem válido';
-		if (!/^[\p{L}\p{N} .,'/%()-]+$/u.test(v)) return 'Usá solo letras, números y signos comunes';
-		return null;
-	}
 
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
@@ -131,12 +96,15 @@
 				...participacionesPermitidas[index],
 				unidad_medida_otra: norm
 			};
-			const err = validarUnidadLibre(
-				norm,
-				participacionesPermitidas[index].tipo_participacion?.descripcion as
-					| TipoParticipacionDescripcion
-					| undefined
-			);
+			const err = validarUnidadLibre(norm, {
+				esRepetida: (t) =>
+					esUnidadRepetida(
+						participacionesPermitidas[index].tipo_participacion?.descripcion as
+							| TipoParticipacionDescripcion
+							| undefined,
+						t
+					)
+			});
 			if (err) errores[`participacion_${index}_unidad_otra`] = err;
 			else limpiarError(`participacion_${index}_unidad_otra`);
 		}

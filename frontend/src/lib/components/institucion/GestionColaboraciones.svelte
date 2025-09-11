@@ -11,6 +11,14 @@
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+    import {
+        getTipoIcon,
+        getTipoLabel,
+        getColaboracionesCount,
+        getColaboracionesPendientes,
+        getColaboracionesAprobadas,
+        calcularDiasActivo
+    } from '$lib/utils/util-colaboraciones';
 
 	// Filtro en_curso
 	let proyectos: Proyecto[] = mockProyectos.filter((p) => p.estado === 'en_curso');
@@ -87,55 +95,10 @@
 		return contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor;
 	}
 
-	function getTipoIcon(colaboracion: Colaboracion): string {
-		// verificamos colaboradores (organizaciones o personas)
-		if (
-			colaboracion.colaborador &&
-			'tipo_colaborador' in colaboracion.colaborador &&
-			colaboracion.colaborador.tipo_colaborador === 'organizacion'
-		) {
-			return '🏢';
-		}
-		return '👤';
-	}
-
-	function getTipoLabel(colaboracion: Colaboracion): string {
-		if (!colaboracion.colaborador) return 'Colaborador';
-		// verificamos colaboradores (organizaciones o personas)
-		if (
-			'tipo_colaborador' in colaboracion.colaborador &&
-			colaboracion.colaborador.tipo_colaborador === 'organizacion'
-		) {
-			return 'Organización';
-		}
-
-		// Si es unipersonal, mostrar "Persona"
-		return 'Persona';
-	}
-
-	function getColaboracionesCount(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.length || 0;
-	}
-
-	function getColaboracionesPendientes(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.filter((c) => c.estado === 'pendiente')?.length || 0;
-	}
-
-	function getColaboracionesAprobadas(proyecto: Proyecto): number {
-		return proyecto.colaboraciones?.filter((c) => c.estado === 'aprobada')?.length || 0;
-	}
-
 	function getColaboracionesRechazadas(proyecto: Proyecto): number {
 		return proyecto.colaboraciones?.filter((c) => c.estado === 'rechazada')?.length || 0;
 	}
 
-	function calcularDiasActivo(fecha: Date | undefined): number {
-		if (!fecha) return 0;
-		const fechaCreacion = new Date(fecha);
-		const hoy = new Date();
-		const diferencia = hoy.getTime() - fechaCreacion.getTime();
-		return Math.floor(diferencia / (1000 * 3600 * 24));
-	}
 
 	// Estadísticas del proyecto seleccionado
 	$: colaboraciones = proyectoSeleccionado.colaboraciones || [];
@@ -445,7 +408,7 @@
 												class="text-blue-600 transition-colors hover:text-blue-800"
 											>
 												{obtenerEmailColaborador(colaboracion)}
-											</a>
+												</a>
 										</p>
 									</div>
 								{/if}

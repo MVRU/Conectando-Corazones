@@ -16,11 +16,11 @@
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
 
-	function obtenerLocalidadesPorProvincia(nombreProvincia: string) {
-		const provincia = provincias.find((p) => p.nombre === nombreProvincia);
-		if (!provincia) return [];
-		return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
-	}
+    function obtenerLocalidadesPorProvincia(nombreProvincia: string) {
+        const provincia = provincias.find((p) => p.nombre === nombreProvincia);
+        if (!provincia) return [];
+        return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
+    }
 
 	function agregarUbicacion() {
 		ubicaciones = [

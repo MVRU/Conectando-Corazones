@@ -6,8 +6,8 @@
 * Descripción: form para que las instituciones creen nuevos proyectos
 
 TODOs:
-	- [ ] Pasar funciones a utils
-	- [ ] Quitar interfaces creadas y usar Interfaces ya definidas o crear DTOs (no acá)
+	- [x] Pasar funciones a utils
+	- [x] Quitar interfaces creadas y usar Interfaces ya definidas o crear DTOs (no acá)
 	- [x] Cambiar "que_sehace" por "que_se_hace"
 	- [x] ¿Corregir interfaces según Issue #34?
 
@@ -73,14 +73,7 @@ TODOs:
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
-	function toKey(s: string): string {
-		return (s ?? '')
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.toLowerCase()
-			.trim()
-			.replace(/\s+/g, ' ');
-	}
+	import { toKey } from '$lib/utils/util-proyecto-form';
 	const categoriasKeys = mockCategorias.map((c) => toKey(c.descripcion || '')).filter(Boolean);
 	function esCategoriaRepetida(s: string): boolean {
 		const key = toKey(s);
@@ -139,17 +132,7 @@ TODOs:
 	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
 	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
 
-	function validarUnidadMedidaOtra(s: string): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
-		if (v.length < 2) return 'Debe tener al menos 2 caracteres';
-		if (v.length > 40) return 'Máximo 40 caracteres';
-		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/%()-]+$/u.test(v))
-			return 'Usá letras, números y signos comunes';
-		return null;
-	}
+	import { validarUnidadMedidaOtra } from '$lib/utils/util-proyecto-form';
 
 	function validarFormulario(): boolean {
 		errores = {};
