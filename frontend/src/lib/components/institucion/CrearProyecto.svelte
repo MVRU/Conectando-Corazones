@@ -1,16 +1,7 @@
+
 <!--
-! Quedó demasiado largo y asqueroso el código, perdón, corrigí varias cosas y agregué bastantes validaciones
-! en cuanto pueda lo voy a dividir en componentes reutilizables y más atómicos
-	-!- Introduje algunos DTOs para la implementación futura del backend, voy a ver cómo los organizo, ignorar por ahora
-
-* Descripción: form para que las instituciones creen nuevos proyectos
-
-TODOs:
-	- [x] Pasar funciones a utils
-	- [x] Quitar interfaces creadas y usar Interfaces ya definidas o crear DTOs (no acá)
-	- [x] Cambiar "que_sehace" por "que_se_hace"
-	- [x] ¿Corregir interfaces según Issue #34?
-
+	Formulario completo para que las instituciones creen nuevos proyectos.
+	Incluye: información básica, categorías, tipos de participación y ubicaciones.
 -->
 
 <script lang="ts">
