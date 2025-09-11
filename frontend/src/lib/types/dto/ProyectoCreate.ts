@@ -1,5 +1,5 @@
-import type { PrioridadTipo } from '$lib/types/ProyectoUbicacion';
 import type { ParticipacionPermitidaCreate } from './ParticipacionPermitidaCreate';
+import type { UbicacionCreate } from './UbicacionCreate';
 
 export interface ProyectoCreate {
   titulo: string;
@@ -10,15 +10,6 @@ export interface ProyectoCreate {
   institucion_id?: number;
   categoria_ids: number[];
   participaciones: ParticipacionPermitidaCreate[];
-  ubicaciones: {
-    tipo_ubicacion: PrioridadTipo;
-    que_sehace: string;
-    direccion: {
-      calle: string;
-      numero: string;
-      referencia?: string;
-      localidad_id: number;
-    };
-  }[];
+  ubicaciones: UbicacionCreate[];
 }
 

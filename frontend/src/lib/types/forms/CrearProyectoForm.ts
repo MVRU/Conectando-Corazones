@@ -1,11 +1,16 @@
-import type { PrioridadTipo } from '$lib/types/ProyectoUbicacion';
+import type { TipoUbicacion } from '$lib/types/Ubicacion';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+import type { Direccion } from '$lib/types/Direccion';
 
 // Tipos específicos del formulario de creación de proyecto
 
+export interface UbicacionFormulario {
+  tipo_ubicacion: TipoUbicacion | '';
+  que_se_hace: string;
+  direccion: DireccionFormulario;
+}
+
 export interface DireccionFormulario {
-  tipo_ubicacion: PrioridadTipo | '';
-  que_sehace: string;
   calle: string;
   numero: string;
   referencia: string;

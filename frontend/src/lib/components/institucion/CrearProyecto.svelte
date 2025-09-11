@@ -8,8 +8,8 @@
 TODOs:
 	- [ ] Pasar funciones a utils
 	- [ ] Quitar interfaces creadas y usar Interfaces ya definidas o crear DTOs (no acá)
-	- [ ] Cambiar "que_sehace" por "que_se_hace"
-	- [ ] ¿Corregir interfaces según Issue #34?
+	- [x] Cambiar "que_sehace" por "que_se_hace"
+	- [x] ¿Corregir interfaces según Issue #34?
 
 -->
 
@@ -19,8 +19,8 @@ TODOs:
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
 	import ProyectoParticipaciones from './ProyectoParticipaciones.svelte';
 	import ProyectoDirecciones from './ProyectoDirecciones.svelte';
-	import type { ParticipacionForm, DireccionFormulario } from '$lib/types/forms/CrearProyectoForm';
-	import type { PrioridadTipo } from '$lib/types/ProyectoUbicacion';
+	import type { ParticipacionForm, UbicacionFormulario, DireccionFormulario } from '$lib/types/forms/CrearProyectoForm';
+	import type { TipoUbicacion } from '$lib/types/Ubicacion';
 	import { provincias } from '$lib/data/provincias';
 	import {
 		MENSAJES_ERROR,
@@ -51,16 +51,18 @@ TODOs:
 	let categoriasSeleccionadas: number[] = [];
 	let categoriaOtraDescripcion = '';
 
-	let direcciones: DireccionFormulario[] = [
+	let ubicaciones: UbicacionFormulario[] = [
 		{
 			tipo_ubicacion: 'principal',
-			que_sehace: '',
-			calle: '',
-			numero: '',
-			referencia: '',
-			localidad_id: undefined,
-			provincia: '',
-			localidad_nombre: ''
+			que_se_hace: '',
+			direccion: {
+				calle: '',
+				numero: '',
+				referencia: '',
+				localidad_id: undefined,
+				provincia: '',
+				localidad_nombre: ''
+			}
 		}
 	];
 
@@ -134,7 +136,7 @@ TODOs:
 	$: if (fechaFinTentativa && esFechaFutura(fechaFinTentativa)) limpiarError('fechaFinTentativa');
 	$: if (beneficiarios && beneficiarios > 0) limpiarError('beneficiarios');
 	$: if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
-	$: if (direcciones.length > 0) limpiarError('direcciones');
+	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
 	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
 
 	function validarUnidadMedidaOtra(s: string): string | null {
@@ -173,66 +175,66 @@ TODOs:
 			? validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
 			: null;
 		if (errCatOtra) errores.categoria_otra = errCatOtra;
-		if (direcciones.length === 0) errores.direcciones = 'Debe agregar al menos una ubicación';
-		// Cómputos para requerimiento condicional de "que_sehace"
-		const ubicacionesConTipo = direcciones
-			.map((d, i) => ({ i, tipo: (d.tipo_ubicacion || '').trim() }))
+		if (ubicaciones.length === 0) errores.ubicaciones = 'Debe agregar al menos una ubicación';
+		// Cómputos para requerimiento condicional de "que_se_hace"
+		const ubicacionesConTipo = ubicaciones
+			.map((u, i) => ({ i, tipo: (u.tipo_ubicacion || '').trim() }))
 			.filter((x) => x.tipo);
 		const esUnicaBasica =
 			ubicacionesConTipo.length === 1 &&
 			(ubicacionesConTipo[0]?.tipo === 'principal' || ubicacionesConTipo[0]?.tipo === 'virtual');
 		const indiceUnicaBasica = esUnicaBasica ? ubicacionesConTipo[0].i : -1;
 
-		direcciones.forEach((direccion, index) => {
-			const prefix = `direccion_${index}`;
-			if (direccion.tipo_ubicacion === '') errores[`${prefix}_tipo`] = MENSAJES_ERROR.obligatorio;
-			if (direccion.tipo_ubicacion !== 'virtual') {
-				if (!direccion.provincia) {
+		ubicaciones.forEach((ubicacion, index) => {
+			const prefix = `ubicacion_${index}`;
+			if (ubicacion.tipo_ubicacion === '') errores[`${prefix}_tipo`] = MENSAJES_ERROR.obligatorio;
+			if (ubicacion.tipo_ubicacion !== 'virtual') {
+				if (!ubicacion.direccion.provincia) {
 					errores[`${prefix}_provincia`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarProvincia(direccion.provincia)) {
+				} else if (!validarProvincia(ubicacion.direccion.provincia)) {
 					errores[`${prefix}_provincia`] = MENSAJES_ERROR.provinciaInvalida;
 				}
-				if (!direccion.localidad_id) {
+				if (!ubicacion.direccion.localidad_id) {
 					errores[`${prefix}_localidad`] = MENSAJES_ERROR.obligatorio;
 				} else {
-					const provincia = provincias.find((p) => p.nombre === direccion.provincia);
+					const provincia = provincias.find((p) => p.nombre === ubicacion.direccion.provincia);
 					if (
 						provincia &&
-						!validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)
+						!validarCiudadEnProvincia(ubicacion.direccion.localidad_id, provincia.id_provincia)
 					) {
 						errores[`${prefix}_localidad`] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
 					}
 				}
-				if (!direccion.calle) {
+				if (!ubicacion.direccion.calle) {
 					errores[`${prefix}_calle`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarCalle(direccion.calle)) {
+				} else if (!validarCalle(ubicacion.direccion.calle)) {
 					errores[`${prefix}_calle`] = MENSAJES_ERROR.calleInvalida;
 				}
-				if (!direccion.numero) {
+				if (!ubicacion.direccion.numero) {
 					errores[`${prefix}_numero`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarNumeroCalle(direccion.numero)) {
+				} else if (!validarNumeroCalle(ubicacion.direccion.numero)) {
 					errores[`${prefix}_numero`] = MENSAJES_ERROR.numeroCalleInvalido;
 				}
 			}
 
 			// Validación de "qué se hace": requerida excepto si es la única básica
-			const q = (direccion.que_sehace || '').normalize('NFC').trim().replace(/\s+/g, ' ');
+			const q = (ubicacion.que_se_hace || '').normalize('NFC').trim().replace(/\s+/g, ' ');
 			if (index !== indiceUnicaBasica) {
 				if (!q || q.length < 10) {
-					errores[`${prefix}_que_sehace`] = 'Describí brevemente qué se hace (mín. 10 caracteres)';
+					errores[`${prefix}_que_se_hace`] = 'Describí brevemente qué se hace (mín. 10 caracteres)';
 				}
 			}
 		});
 
 		// Reglas adicionales de ubicaciones
-		const principalCount = direcciones.filter(
-			(d) => (d.tipo_ubicacion || '').trim() === 'principal'
+		const principalCount = ubicaciones.filter(
+			(u) => (u.tipo_ubicacion || '').trim() === 'principal'
 		).length;
 		if (principalCount > 1)
-			errores.direcciones_principal = 'Solo puede haber una ubicación de tipo "Principal".';
-		const firstTipo = (direcciones[0]?.tipo_ubicacion || '').trim();
+			errores.ubicaciones_principal = 'Solo puede haber una ubicación de tipo "Principal".';
+		const firstTipo = (ubicaciones[0]?.tipo_ubicacion || '').trim();
 		if (firstTipo && firstTipo !== 'principal' && firstTipo !== 'virtual') {
-			errores.direcciones_principal = 'La primera ubicación debe ser Principal o Virtual.';
+			errores.ubicaciones_principal = 'La primera ubicación debe ser Principal o Virtual.';
 		}
 
 		if (tiposParticipacionSeleccionados.length === 0) {
@@ -314,16 +316,16 @@ TODOs:
 			especie: p.tipo_participacion?.descripcion === 'Especie' ? p.especie || '' : undefined
 		}));
 
-		const ubicaciones = direcciones
-			.filter((d) => d.tipo_ubicacion !== '')
-			.map((d) => ({
-				tipo_ubicacion: d.tipo_ubicacion as PrioridadTipo,
-				que_sehace: d.que_sehace,
+		const ubicacionesCargadas = ubicaciones
+			.filter((u) => u.tipo_ubicacion !== '')
+			.map((u) => ({
+				tipo_ubicacion: u.tipo_ubicacion as TipoUbicacion,
+				que_se_hace: u.que_se_hace,
 				direccion: {
-					calle: d.calle,
-					numero: d.numero,
-					referencia: d.referencia || undefined,
-					localidad_id: d.localidad_id as number
+					calle: u.direccion.calle,
+					numero: u.direccion.numero,
+					referencia: u.direccion.referencia || undefined,
+					localidad_id: u.direccion.localidad_id as number
 				}
 			}));
 
@@ -335,7 +337,7 @@ TODOs:
 			beneficiarios,
 			categoria_ids: categoriasSeleccionadas.filter((id) => Number.isFinite(id) && id > 0),
 			participaciones,
-			ubicaciones
+			ubicaciones: ubicacionesCargadas
 		};
 		console.log('Payload listo', payload);
 	}
@@ -374,7 +376,7 @@ TODOs:
 				{limpiarError}
 			/>
 
-			<ProyectoDirecciones bind:direcciones {errores} {limpiarError} />
+			<ProyectoDirecciones bind:ubicaciones {errores} {limpiarError} />
 
 			<div class="flex justify-end">
 				<Button type="submit" label="Crear proyecto" />
