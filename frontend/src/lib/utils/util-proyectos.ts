@@ -57,7 +57,7 @@ export function filtrarProyectos(
 	if (provincia !== 'Todas') {
 		resultado = resultado.filter(
 			(p) =>
-				getProvinciaFromLocalidad(p.ubicaciones?.[0]?.direccion?.localidad)?.nombre === provincia
+				getProvinciaFromLocalidad(p.ubicaciones?.[0]?.ubicacion?.direccion?.localidad)?.nombre === provincia
 		);
 	}
 
@@ -94,25 +94,25 @@ export function seleccionarUbicacion(
 	ubicaciones: ProyectoUbicacion[],
 	tipoPreferido: string = 'principal'
 ): ProyectoUbicacion | undefined {
-	const especifica = ubicaciones.find((u) => u.tipo_ubicacion === tipoPreferido);
+	const especifica = ubicaciones.find((u) => u.ubicacion?.tipo_ubicacion === tipoPreferido);
 	if (especifica) return especifica;
 
 	for (const tipo of PRIORIDAD_TIPO) {
-		const encontrada = ubicaciones.find((u) => u.tipo_ubicacion === tipo);
+		const encontrada = ubicaciones.find((u) => u.ubicacion?.tipo_ubicacion === tipo);
 		if (encontrada) return encontrada;
 	}
 	return undefined;
 }
 
 export const getUbicacionPrincipal = (proyecto: Proyecto): ProyectoUbicacion | undefined =>
-	proyecto.ubicaciones?.find((u) => u.tipo_ubicacion === 'principal') ?? proyecto.ubicaciones?.[0];
+	proyecto.ubicaciones?.find((u) => u.ubicacion?.tipo_ubicacion === 'principal') ?? proyecto.ubicaciones?.[0];
 
 export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
 	const ubicacion = getUbicacionPrincipal(proyecto);
 	if (!ubicacion) return virtualLabel;
 
-	const ciudad = ubicacion.direccion?.localidad?.nombre;
-	const provincia = getProvinciaFromLocalidad(ubicacion.direccion?.localidad)?.nombre;
+	const ciudad = ubicacion.ubicacion?.direccion?.localidad?.nombre;
+	const provincia = getProvinciaFromLocalidad(ubicacion.ubicacion?.direccion?.localidad)?.nombre;
 
 	if (ciudad && provincia) return `${ciudad}, ${provincia}`;
 	return ciudad ?? provincia ?? virtualLabel;
