@@ -30,10 +30,10 @@
 	});
 </script>
 
-<section class="pb-70 w-full bg-white px-4 pt-20 md:px-8">
+<section class="w-full bg-white px-4 pt-20 pb-70 md:px-8">
 	<div
 		bind:this={sectionRef}
-		class="rounded-4xl relative mx-auto max-w-5xl overflow-hidden bg-gradient-to-b from-[rgb(var(--base-color))] to-[#27273e] px-6 pt-12 text-white shadow-2xl sm:px-10 sm:pt-16"
+		class="relative mx-auto max-w-5xl overflow-hidden rounded-4xl bg-gradient-to-b from-[rgb(var(--base-color))] to-[#27273e] px-6 pt-12 text-white shadow-2xl sm:px-10 sm:pt-16"
 		style="
 			opacity: {visible ? 1 : 0};
 			filter: blur({visible ? 0 : 5}px);
@@ -63,7 +63,7 @@
 			</div>
 
 			<h2
-				class="mx-auto mt-4 max-w-xl text-2xl font-bold leading-tight drop-shadow-lg sm:text-3xl md:text-4xl"
+				class="mx-auto mt-4 max-w-xl text-2xl leading-tight font-bold drop-shadow-lg sm:text-3xl md:text-4xl"
 			>
 				¿Y si pudiéramos conectar a quienes necesitan ayuda con quienes desean brindarla?
 			</h2>
@@ -71,7 +71,7 @@
 		<!-- Imagen destacada -->
 		<div class="flex flex-1 items-end justify-center pt-10">
 			<div
-				class="history-img-outer duration-600 group relative overflow-visible rounded-[2rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30"
+				class="history-img-outer group relative overflow-visible rounded-[2rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-600 hover:ring-blue-400/30"
 				style="
 					opacity: {visible ? 1 : 0};
 					filter: blur({visible ? 0 : 13}px) brightness({visible ? 1 : 0.94});
@@ -81,7 +81,7 @@
 				"
 			>
 				<div
-					class="left-0 top-0 h-full w-full overflow-hidden rounded-[2rem]"
+					class="top-0 left-0 h-full w-full overflow-hidden rounded-[2rem]"
 					style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 					tabindex="-1"
 				>

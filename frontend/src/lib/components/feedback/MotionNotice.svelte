@@ -98,7 +98,7 @@
 
 			{#if expanded}
 				<span
-					class="w-full flex-1 whitespace-normal text-balance break-words text-sm leading-snug text-red-900"
+					class="w-full flex-1 text-sm leading-snug text-balance break-words whitespace-normal text-red-900"
 				>
 					Las animaciones se deshabilitaron para mejorar el rendimiento.
 				</span>

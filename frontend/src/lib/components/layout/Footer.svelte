@@ -130,7 +130,7 @@
 		<div
 			class="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:items-center sm:text-left"
 		>
-			<p class="break-words text-xs text-gray-300 sm:text-base">
+			<p class="text-xs break-words text-gray-300 sm:text-base">
 				&copy; {anio} <span class="font-bold">Conectando Corazones</span>.
 				<span class="block sm:inline">Todos los derechos reservados.</span>
 			</p>

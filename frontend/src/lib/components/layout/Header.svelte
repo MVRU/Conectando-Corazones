@@ -4,13 +4,6 @@
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { page } from '$app/stores';
 	import { isAuthenticated, usuario as usuarioStore, authActions } from '$lib/stores/auth';
-	import type {
-		Usuario,
-		Institucion,
-		Organizacion,
-		Unipersonal,
-		Administrador
-	} from '$lib/types/Usuario';
 
 	let menuAbierto = false;
 	let visible = false;
@@ -127,7 +120,7 @@
 			class="hidden items-center gap-8 md:flex"
 			style="opacity:{visible ? 1 : 0}; transform:translateY({visible ? 0 : '12px'});"
 		>
-			{#each navLinks as { label, href }, i}
+			{#each navLinks as { label, href }, i (i)}
 				<a
 					{href}
 					class="group relative px-1 py-2 text-base font-medium text-blue-100 transition-colors duration-200 hover:text-white"
@@ -159,7 +152,7 @@
 					>
 						<img
 							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
-							alt={`Foto de perfil`}
+							alt="Foto de perfil"
 							class="h-full w-full cursor-pointer object-cover"
 						/>
 					</button>
@@ -175,7 +168,7 @@
 								Mi cuenta
 							</li>
 
-							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mis proyectos', href: '/mis-proyectos' }, { label: 'Configuración', href: '/configuracion' }] as item}
+							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mi panel', href: '/mi-panel' }, { label: 'Crear proyecto', href: '/proyectos/crear' }, { label: 'Configuración', href: '/configuracion' }] as item, i (i)}
 								<li>
 									<a
 										href={item.href}
@@ -248,7 +241,7 @@
 					</a>
 				{/if}
 
-				{#each navLinks as { label, href }, i}
+				{#each navLinks as { label, href }, i (i)}
 					<a
 						{href}
 						class="group flex items-center rounded-lg px-4 py-3 text-base font-medium text-blue-100 transition-colors duration-200 hover:bg-blue-500/10 hover:text-white"

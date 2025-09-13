@@ -1,7 +1,6 @@
 /// <reference types="svelte" />
 /// <reference types="vite/client" />
-/// <reference path="$lib/types/svelte-jsx.d.ts" />
-
+import '$lib/types/svelte-jsx';
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
@@ -19,4 +18,4 @@ declare global {
 	}
 }
 
-export { };
+export {};

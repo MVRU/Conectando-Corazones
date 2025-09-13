@@ -112,7 +112,7 @@ TODO:
 				<div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4">
 					<p class="mb-2 text-sm font-semibold text-red-600">Faltan datos:</p>
 					<ul class="list-inside list-disc text-sm text-red-500">
-						{#each validationErrors as error}
+						{#each validationErrors as error, i (i)}
 							<li>{error}</li>
 						{/each}
 					</ul>
@@ -191,7 +191,7 @@ TODO:
 							rows="5"
 							required
 							placeholder="Escribí tu mensaje aquí..."
-							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						></textarea>
 					</div>
 

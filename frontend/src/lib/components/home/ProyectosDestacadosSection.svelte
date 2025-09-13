@@ -12,7 +12,7 @@
 		const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.18
 		});
-		sectionRef && io.observe(sectionRef);
+		if (sectionRef) io.observe(sectionRef);
 		return () => io.disconnect();
 	});
 </script>

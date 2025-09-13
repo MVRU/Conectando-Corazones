@@ -4,6 +4,7 @@
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones: boolean = false;
@@ -14,7 +15,7 @@
 		return `${f.getDate()}/${f.getMonth() + 1}/${f.getFullYear().toString().slice(-2)}`;
 	};
 
-	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.id_estado);
+	const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 	const estadoTemporizador = estadoLabel(estadoCodigo);
 	const emojiPorEstado: Record<EstadoDescripcion, string> = {
 		en_curso: '🟢',
@@ -27,21 +28,19 @@
 	const emojiTemporizador = emojiPorEstado[estadoCodigo] || '⌛';
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
 
-	type AlgunaUbicacion = any;
-
-	const ubicaciones = (proyecto.ubicaciones ?? []) as AlgunaUbicacion[];
+	const ubicaciones: ProyectoUbicacion[] = proyecto.ubicaciones ?? [];
 
 	$: ubicacionPrincipal =
-		ubicaciones.find((u) => u?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
+		ubicaciones.find((u) => u?.ubicacion?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
 
-	// Es virtual si no hay ubicaciones
-	$: esVirtual = ubicaciones.length === 0;
+	// Es virtual 
+	$: esVirtual = ubicaciones.some((u) => u?.ubicacion?.tipo_ubicacion === 'virtual');
 
 	$: ubicacionTexto = esVirtual
 		? 'Virtual'
-		: `${ubicacionPrincipal?.direccion?.localidad?.nombre || 'Ciudad'}${
-				ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre
-					? `, ${ubicacionPrincipal.direccion.localidad.provincia.nombre}`
+		: `${ubicacionPrincipal?.ubicacion?.direccion?.localidad?.nombre || 'Ciudad'}${
+				ubicacionPrincipal?.ubicacion?.direccion?.localidad?.provincia?.nombre
+					? `, ${ubicacionPrincipal.ubicacion.direccion.localidad.provincia.nombre}`
 					: ''
 			}`;
 

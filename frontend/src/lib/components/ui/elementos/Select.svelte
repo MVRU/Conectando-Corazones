@@ -41,7 +41,6 @@
 	};
 
 	$: selectedOption = options.find((opt) => opt.value === value);
-	$: displayValue = isTyping ? searchValue : selectedOption ? selectedOption.label : placeholder;
 
 	$: filteredOptions = (() => {
 		if (!isOpen) return [];
@@ -168,7 +167,7 @@
 				'w-full rounded-xl border bg-white text-left shadow-sm transition-all duration-200',
 				sizeClasses[size],
 				'border-gray-300 text-gray-900 placeholder:text-gray-400',
-				'focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200',
+				'focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none',
 				error ? 'border-red-300 focus:ring-red-400' : 'hover:border-gray-400',
 				disabled && 'cursor-not-allowed bg-gray-100 text-gray-500 placeholder:text-gray-400'
 			)}
@@ -184,7 +183,7 @@
 		<button
 			type="button"
 			class={clsx(
-				'absolute right-3 top-1/2 -translate-y-1/2 transform',
+				'absolute top-1/2 right-3 -translate-y-1/2 transform',
 				'cursor-pointer text-gray-400 transition-transform duration-200'
 			)}
 			aria-label="Toggle dropdown"
@@ -204,7 +203,7 @@
 			>
 				<!-- Lista de opciones -->
 				<div class="max-h-52 overflow-auto overscroll-contain">
-					{#each filteredOptions as option}
+					{#each filteredOptions as option (option.value)}
 						<button
 							type="button"
 							class={clsx(

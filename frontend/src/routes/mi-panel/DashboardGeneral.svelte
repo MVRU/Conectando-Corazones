@@ -8,7 +8,6 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fly } from 'svelte/transition';
 	import ProgressBar from '$lib/components/ui/elementos/ProgressBar.svelte';
 
 	// Datos simulados basados en los KPIs de la imagen
@@ -70,7 +69,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 100ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">📊</div>
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">📊</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-blue-600">Total Proyectos</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.totalProyectos}</p>
@@ -92,7 +91,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 200ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">💰</div>
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">💰</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-green-600">Total Donado</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">
@@ -109,7 +108,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 300ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">🏢</div>
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">🏢</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-purple-600">Instituciones</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.instituciones}</p>
@@ -124,7 +123,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 400ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">❤️</div>
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">❤️</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-orange-600">Beneficiarios</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.beneficiarios}</p>

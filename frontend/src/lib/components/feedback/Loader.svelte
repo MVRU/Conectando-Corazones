@@ -19,28 +19,28 @@
 -->
 
 <script lang="ts">
-        export let size: number = 50;
-        export let loading = false;
-        export let message: string = 'Cargando...';
-        export let overlayColor: string = '#ffffff';
-        export let overlayOpacity: number = 0.6;
+	export let size: number = 50;
+	export let loading = false;
+	export let message: string = 'Cargando...';
+	export let overlayColor: string = '#ffffff';
+	export let overlayOpacity: number = 0.6;
 </script>
 
 {#if loading}
-        <div
-                class="pointer-events-none absolute bottom-0 left-0 right-0 top-0 z-30 flex items-center justify-center backdrop-blur-sm"
-                style={`background-color: ${overlayColor}; opacity: ${overlayOpacity};`}
-        >
-                <div class="pointer-events-auto relative flex flex-col items-center justify-center">
-                        <img
-                                src="/logo-2.png"
-                                alt={message}
-                                class="animate-pulse-soft"
-                                style={`width: ${size}px; height: ${size}px; opacity: 0.85; filter: drop-shadow(0 0 5px rgba(0,0,0,0.1));`}
-                        />
-                        <span class="animate-fade-in mt-2 text-sm text-gray-500">{message}</span>
-                </div>
-        </div>
+	<div
+		class="pointer-events-none absolute top-0 right-0 bottom-0 left-0 z-30 flex items-center justify-center backdrop-blur-sm"
+		style={`background-color: ${overlayColor}; opacity: ${overlayOpacity};`}
+	>
+		<div class="pointer-events-auto relative flex flex-col items-center justify-center">
+			<img
+				src="/logo-2.png"
+				alt={message}
+				class="animate-pulse-soft"
+				style={`width: ${size}px; height: ${size}px; opacity: 0.85; filter: drop-shadow(0 0 5px rgba(0,0,0,0.1));`}
+			/>
+			<span class="animate-fade-in mt-2 text-sm text-gray-500">{message}</span>
+		</div>
+	</div>
 {/if}
 
 <style>

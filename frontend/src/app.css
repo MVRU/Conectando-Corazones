@@ -5,142 +5,138 @@
 
 /* Paleta de colores */
 :root {
-    /* Botón primario */
-    --color-primary: 0 127 255;
-    --color-primary-hover: 66 161 255;
+	/* Botón primario */
+	--color-primary: 0 127 255;
+	--color-primary-hover: 66 161 255;
 
-    /* Color para fondo y subtítulos*/
-    --base-color: 15 16 41;
+	/* Color para fondo y subtítulos*/
+	--base-color: 15 16 41;
 
-    /* Colores base */
-    --white-color: 255 255 255;
-    --black-color: 0 0 0;
-    --gray-color: 243 244 246;
-    --accent: 222 28 56;
+	/* Colores base */
+	--white-color: 255 255 255;
+	--black-color: 0 0 0;
+	--gray-color: 243 244 246;
+	--accent: 222 28 56;
 
-    /* Márgenes y espaciados */
-    --spacing-2xs: 0.5em;
-    --spacing-xs: 0.6em;
-    --spacing-sm: 0.7em;
-    --spacing-md-sm: 0.8em;
-    --spacing-md: 0.9em;
-    --spacing-md-lg: 1em;
-    --spacing-lg: 1.1em;
-    --spacing-lg-xl: 1.2em;
-    --spacing-xl: 1.25em;
-    --spacing-xl-2xl: 1.3em;
-    --spacing-2xl: 1.4em;
-    --spacing-3xl: 1.5em;
+	/* Márgenes y espaciados */
+	--spacing-2xs: 0.5em;
+	--spacing-xs: 0.6em;
+	--spacing-sm: 0.7em;
+	--spacing-md-sm: 0.8em;
+	--spacing-md: 0.9em;
+	--spacing-md-lg: 1em;
+	--spacing-lg: 1.1em;
+	--spacing-lg-xl: 1.2em;
+	--spacing-xl: 1.25em;
+	--spacing-xl-2xl: 1.3em;
+	--spacing-2xl: 1.4em;
+	--spacing-3xl: 1.5em;
 }
 
-
-
 body {
-    font-family: 'Inter', system-ui, sans-serif;
-    line-height: var(--spacing-3xl);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    /* ! para evitar scroll horizontal global */
-    overflow-x: hidden;
+	font-family: 'Inter', system-ui, sans-serif;
+	line-height: var(--spacing-3xl);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	/* ! para evitar scroll horizontal global */
+	overflow-x: hidden;
 }
 
 p,
 ul,
 ol {
-    font-family: 'Inter', system-ui, sans-serif;
-    line-height: var(--spacing-3xl);
+	font-family: 'Inter', system-ui, sans-serif;
+	line-height: var(--spacing-3xl);
 }
-
 
 /* Estilos globales personalizados */
 
 html {
-    font-family: Inter, system-ui, sans-serif;
-    scroll-behavior: smooth;
+	font-family: Inter, system-ui, sans-serif;
+	scroll-behavior: smooth;
 }
 
 h1 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 600;
 }
 
 h2 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    line-height: var(--spacing-xl-2xl);
-    margin-top: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 600;
+	line-height: var(--spacing-xl-2xl);
+	margin-top: var(--spacing-lg);
+	margin-bottom: var(--spacing-md);
 }
 
 h3 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    line-height: var(--spacing-xl);
-    margin-top: var(--spacing-md-lg);
-    margin-bottom: var(--spacing-md-sm);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 600;
+	line-height: var(--spacing-xl);
+	margin-top: var(--spacing-md-lg);
+	margin-bottom: var(--spacing-md-sm);
 }
 
 h4 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    line-height: var(--spacing-xl-2xl);
-    margin-top: var(--spacing-md-lg);
-    margin-bottom: var(--spacing-sm);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 600;
+	line-height: var(--spacing-xl-2xl);
+	margin-top: var(--spacing-md-lg);
+	margin-bottom: var(--spacing-sm);
 }
 
 h5 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 600;
-    line-height: var(--spacing-lg);
-    margin-top: var(--spacing-md-lg);
-    margin-bottom: var(--spacing-xs);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 600;
+	line-height: var(--spacing-lg);
+	margin-top: var(--spacing-md-lg);
+	margin-bottom: var(--spacing-xs);
 }
 
 h6 {
-    font-family: 'Inter', system-ui, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-    line-height: var(--spacing-2xl);
-    margin-top: var(--spacing-md-lg);
-    margin-bottom: var(--spacing-2xs);
+	font-family: 'Inter', system-ui, sans-serif;
+	font-weight: 700;
+	letter-spacing: -0.04em;
+	line-height: var(--spacing-2xl);
+	margin-top: var(--spacing-md-lg);
+	margin-bottom: var(--spacing-2xs);
 }
 
 /* Fuente personalizada (Inter) */
 .font-inter {
-    font-family: 'Inter', system-ui, sans-serif;
+	font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* Background colors */
 .bg-primary {
-    background-color: rgb(var(--color-primary));
+	background-color: rgb(var(--color-primary));
 }
 
 .hover\:bg-primary-hover:hover {
-    background-color: rgb(var(--color-primary-hover));
+	background-color: rgb(var(--color-primary-hover));
 }
 
 .bg-base-color {
-    background-color: rgb(var(--base-color));
+	background-color: rgb(var(--base-color));
 }
 
 /* Respeta usuarios que prefieren menos animaciones -> para mejorar rendimiento */
 @media (prefers-reduced-motion: reduce) {
-
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }
 
 html.reduced-motion *,
 html.reduced-motion *::before,
 html.reduced-motion *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
 }

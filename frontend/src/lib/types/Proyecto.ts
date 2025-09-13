@@ -16,13 +16,12 @@ export interface Proyecto {
   fecha_cierre_postulaciones?: Date;
   fecha_fin_tentativa: Date;
   beneficiarios?: number;
-  urgencia?: string;
   id_chat_firebase?: number;
 
   // * RELACIONES
 
   // -*- FKS para create/update
-  id_estado?: number;
+  estado_id?: number;
   institucion_id: number;
   participacion_permitida_ids?: number[];
   categoria_ids?: number[];

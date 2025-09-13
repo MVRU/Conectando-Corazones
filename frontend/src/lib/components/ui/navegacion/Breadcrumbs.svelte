@@ -91,12 +91,12 @@
 		aria-label="Breadcrumb"
 	>
 		<!--  *MOBILE  -->
-		<ol class="flex items-center gap-1 whitespace-nowrap text-[15px] font-medium sm:hidden">
+		<ol class="flex items-center gap-1 text-[15px] font-medium whitespace-nowrap sm:hidden">
 			<!-- primero -->
-			<li class="flex min-w-0 max-w-[120px] items-center">
+			<li class="flex max-w-[120px] min-w-0 items-center">
 				<a
 					href={breadcrumbs[0].href}
-					class="group block max-w-[100px] truncate rounded-full bg-white px-3 py-2 text-gray-900 shadow-md ring-1 ring-inset ring-gray-100 transition-all hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-400"
+					class="group block max-w-[100px] truncate rounded-full bg-white px-3 py-2 text-gray-900 shadow-md ring-1 ring-gray-100 transition-all ring-inset hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-400"
 					title={breadcrumbs[0].label}
 				>
 					{truncate(breadcrumbs[0].label, MOBILE_MAX_LABEL)}
@@ -134,9 +134,9 @@
 
 					{#if showPopover}
 						<div
-							class="breadcrumb-popover animate-fade-in absolute left-1/2 top-[120%] z-50 mt-2 w-64 max-w-[95vw] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg backdrop-blur"
+							class="breadcrumb-popover animate-fade-in absolute top-[120%] left-1/2 z-50 mt-2 w-64 max-w-[95vw] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg backdrop-blur"
 						>
-							{#each breadcrumbs.slice(1, -1) as middleItem}
+							{#each breadcrumbs.slice(1, -1) as middleItem, i (i)}
 								<a
 									href={middleItem.href}
 									class="block truncate rounded-lg px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
@@ -167,7 +167,7 @@
 			{/if}
 
 			<!-- último -->
-			<li class="flex min-w-0 max-w-[120px] items-center">
+			<li class="flex max-w-[120px] min-w-0 items-center">
 				<span
 					class="block max-w-[100px] cursor-pointer truncate rounded-full border border-blue-100 bg-blue-50 px-3 py-2 font-bold text-blue-700 shadow-md"
 					aria-current="page"
@@ -179,7 +179,7 @@
 		</ol>
 
 		<!--  *DESKTOP  -->
-		<ol class="hidden items-center gap-2 whitespace-nowrap text-[16px] font-medium sm:flex">
+		<ol class="hidden items-center gap-2 text-[16px] font-medium whitespace-nowrap sm:flex">
 			{#if breadcrumbs.length <= visibleCrumbsCount}
 				<!-- ! todos entran -->
 				{#each breadcrumbs as item, index (item.href ?? item.label)}
@@ -266,9 +266,9 @@
 
 						{#if showPopover}
 							<div
-								class="breadcrumb-popover animate-fade-in absolute left-1/2 top-full z-50 mt-2 w-56 max-w-[90vw] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg backdrop-blur"
+								class="breadcrumb-popover animate-fade-in absolute top-full left-1/2 z-50 mt-2 w-56 max-w-[90vw] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-2 shadow-lg backdrop-blur"
 							>
-								{#each breadcrumbs.slice(1, -(visibleCrumbsCount - 1)) as middleItem}
+								{#each breadcrumbs.slice(1, -(visibleCrumbsCount - 1)) as middleItem, i (i)}
 									<a
 										href={middleItem.href}
 										class="block truncate rounded-lg px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"

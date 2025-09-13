@@ -1,20 +1,8 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
-	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 
 	export let proyecto: Proyecto;
 	export let formatearFecha: (fecha: Date | string | undefined) => string;
-
-	// -*- Ubicación normalizada para evitar comprobaciones repetidas
-	$: ubicacionPrincipal = proyecto.ubicaciones?.[0];
-	$: ciudad = ubicacionPrincipal?.direccion?.localidad?.nombre ?? 'Ciudad';
-	$: provincia = ubicacionPrincipal?.direccion?.localidad?.provincia?.nombre ?? 'Provincia';
-
-	const colaboradores =
-		proyecto.colaboraciones
-			?.map((c) => c.colaborador)
-			.filter((c): c is ColaboradorDisyuncion => !!c) ?? [];
 </script>
 
 <!-- Descripción -->
@@ -32,7 +20,7 @@
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 		style="animation-delay: 100ms"
 	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Institución</h4>
+		<h4 class="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">Institución</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">🏛️</span>
 			{proyecto.institucion?.nombre_legal || proyecto.institucion?.nombre || 'No disponible'}
@@ -44,7 +32,7 @@
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 		style="animation-delay: 300ms"
 	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">Categorías</h4>
+		<h4 class="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">Categorías</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
 			<span class="text-lg">🏷️</span>
 			{#if proyecto.categorias && proyecto.categorias.length > 0}
@@ -60,7 +48,7 @@
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 		style="animation-delay: 400ms"
 	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+		<h4 class="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
 			Fecha de Inicio
 		</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">
@@ -74,7 +62,7 @@
 		class="animate-fade-up rounded-lg border border-gray-100 bg-white p-5 shadow-sm transition-all hover:shadow-md"
 		style="animation-delay: 400ms"
 	>
-		<h4 class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">
+		<h4 class="mb-1 text-xs font-semibold tracking-wide text-gray-500 uppercase">
 			Fecha de Cierre Tentativa
 		</h4>
 		<p class="flex items-center gap-2 text-sm font-medium text-gray-800 sm:text-base">

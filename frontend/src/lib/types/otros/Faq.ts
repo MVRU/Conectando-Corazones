@@ -1,5 +1,5 @@
 export interface Faq {
-    pregunta: string;
-    respuesta: string;
-    categoria?: string;
+	pregunta: string;
+	respuesta: string;
+	categoria?: string;
 }

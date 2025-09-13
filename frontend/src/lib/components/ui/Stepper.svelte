@@ -16,7 +16,7 @@
 	<ol
 		class="hidden flex-wrap items-center justify-center gap-x-4 gap-y-4 text-sm text-gray-500 sm:flex"
 	>
-		{#each Array(total) as _, i}
+		{#each Array(total), i (i)}
 			<li class="flex flex-col items-center">
 				<div class="flex items-center">
 					<div

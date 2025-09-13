@@ -24,9 +24,9 @@ class MockResizeObserver {
 	constructor(callback: ResizeObserverCallback) {
 		this.callback = callback;
 	}
-	observe() { }
-	unobserve() { }
-	disconnect() { }
+	observe() {}
+	unobserve() {}
+	disconnect() {}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

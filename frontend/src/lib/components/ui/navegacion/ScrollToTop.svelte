@@ -30,7 +30,7 @@
 <button
 	on:click={scrollToTop}
 	aria-label="Volver arriba"
-	class="fixed bottom-7 right-5 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700"
+	class="fixed right-5 bottom-7 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700"
 	style="
 		opacity: {isVisible ? 1 : 0};
 		pointer-events: {isVisible ? 'auto' : 'none'};

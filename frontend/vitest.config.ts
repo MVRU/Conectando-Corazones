@@ -9,13 +9,13 @@ import { svelteTesting } from '@testing-library/svelte/vite';
  */
 
 export default defineConfig({
-    plugins: [tailwindcss(), sveltekit(), svelteTesting()],
-    test: {
-        environment: 'jsdom',
-        clearMocks: true,
-        include: ['src/**/*.{test,spec}.{js,ts}'],
-        exclude: ['src/lib/server/**'],
-        setupFiles: ['./vitest-setup-client.ts'],
-        environmentMatchGlobs: [['src/lib/server/**', 'node']]
-    }
+	plugins: [tailwindcss(), sveltekit(), svelteTesting()],
+	test: {
+		environment: 'jsdom',
+		clearMocks: true,
+		include: ['src/**/*.{test,spec}.{js,ts}'],
+		exclude: ['src/lib/server/**'],
+		setupFiles: ['./vitest-setup-client.ts'],
+		environmentMatchGlobs: [['src/lib/server/**', 'node']]
+	}
 });
