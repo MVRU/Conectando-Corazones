@@ -35,6 +35,7 @@
 	let mostrarModalRechazo = false;
 	let colaboracionARechazar: number | null = null;
 	let justificacionRechazo = '';
+	let rechazoTocado = false;
 
 	// cuando cambia el ID seleccionado, actualiza el proyecto
 	$: if (proyectoSeleccionadoId) {
@@ -68,17 +69,19 @@
 	}
 
 	function confirmarRechazo() {
-		if (colaboracionARechazar && proyectoSeleccionado.colaboraciones) {
-			const justificacion = justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
+		rechazoTocado = true;
+		const texto = justificacionRechazo.trim();
+		if (!texto) return;
 
+		if (colaboracionARechazar && proyectoSeleccionado.colaboraciones) {
 			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
 				c.id_colaboracion === colaboracionARechazar
-					? { ...c, estado: 'rechazada' as const, justificacion }
+					? { ...c, estado: 'rechazada' as const, justificacion: texto }
 					: c
 			);
 
 			console.log(
-				`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`
+				`Colaboración ${colaboracionARechazar} rechazada con justificación: ${texto}`
 			);
 		}
 
@@ -449,7 +452,7 @@
 			<div class="mb-4">
 				<h3 class="text-lg font-semibold text-gray-900">Rechazar solicitud de colaboración</h3>
 				<p class="mt-2 text-sm text-gray-600">
-					Coloque una justificación del por qué rechaza la solicitud de colaboración (opcional)
+					Coloque una justificación del por qué rechaza la solicitud de colaboración <span class="font-medium text-red-600">(obligatorio)</span>
 				</p>
 			</div>
 
@@ -464,6 +467,9 @@
 					class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
 					placeholder="Ejemplo: No cumple con los requisitos específicos del proyecto..."
 				></textarea>
+				{#if rechazoTocado && !justificacionRechazo.trim().length}
+					<p class="mt-2 text-sm text-red-600">Este campo es obligatorio.</p>
+				{/if}
 			</div>
 
 			<div class="flex justify-end space-x-3">
@@ -481,6 +487,7 @@
 					size="sm"
 					type="button"
 					on:click={confirmarRechazo}
+					disabled={!justificacionRechazo.trim().length}
 					customClass="!bg-red-600 hover:!bg-red-700 !text-white"
 				/>
 			</div>

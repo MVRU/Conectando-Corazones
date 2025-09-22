@@ -12,10 +12,14 @@
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+    import TarjetaLateral from '$lib/components/proyectos/TarjetaLateral.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
+	import { usuario } from '$lib/stores/auth';
+    import { goto } from '$app/navigation';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	let proyecto: Proyecto;
 	let colaboracionesActivas: Colaboracion[] = [];
@@ -90,6 +94,59 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: colorEstado = getColorEstado(estadoCodigo);
+
+// Visibilidad: solo la institución dueña del proyecto debe ver las solicitudes
+$: puedeVerSolicitudes = !!(
+  proyecto &&
+  $usuario?.rol === 'institucion' &&
+  $usuario?.id_usuario === proyecto.institucion_id
+);
+
+function mostrarFormularioColaboracion() {
+    abrirModalSolicitud = true;
+}
+
+// Estado del modal de solicitud
+let abrirModalSolicitud = false;
+let mensajeSolicitud = '';
+let enviandoSolicitud = false;
+let intentoEnvioSolicitud = false;
+let solicitudEnviada = false;
+
+function cancelarSolicitud() {
+    abrirModalSolicitud = false;
+    mensajeSolicitud = '';
+    intentoEnvioSolicitud = false;
+    solicitudEnviada = false;
+}
+
+function enviarSolicitud() {
+    if (!proyecto) return;
+
+    // Reglas: debe estar autenticado como colaborador y mensaje obligatorio
+    intentoEnvioSolicitud = true;
+    const esColaborador = $usuario?.rol === 'colaborador';
+    const mensajeOk = mensajeSolicitud.trim().length > 0;
+    if (!esColaborador || !mensajeOk) return;
+    enviandoSolicitud = true;
+    // Simulación de guardado en memoria
+    setTimeout(() => {
+        const nueva: Colaboracion = {
+            id_colaboracion: Math.floor(Math.random() * 1000000),
+            estado: 'pendiente',
+            justificacion: undefined,
+            created_at: new Date(),
+            mensaje: mensajeSolicitud.trim(),
+            proyecto_id: proyecto.id_proyecto,
+            colaborador_id: $usuario?.id_usuario
+        };
+
+        proyecto.colaboraciones = [...(proyecto.colaboraciones ?? []), nueva];
+        colaboracionesActivas = colaboracionesVisibles(proyecto.colaboraciones);
+        enviandoSolicitud = false;
+        solicitudEnviada = true;
+    }, 600);
+}
 </script>
 
 <svelte:head>
@@ -260,32 +317,37 @@
 						</div>
 					</div>
 
-					<!-- Colaboradores -->
-					<div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-						<h3 class="mb-5 text-lg font-semibold text-gray-900">Solicitudes de colaboración</h3>
-						{#if colaboracionesActivas.length}
-							<ul class="space-y-3">
-								{#each colaboracionesActivas as colab (colab.id_colaboracion)}
-									<li class="flex justify-between border-b border-gray-100 pb-2 last:border-b-0">
-										<span class="text-sm text-gray-700">
-											{obtenerNombreColaborador(colab.colaborador)}
-										</span>
-										<span
-											class={`text-xs font-semibold ${
-												colab.estado === 'aprobada'
-													? 'bg-emerald-50 text-emerald-600'
-													: 'bg-amber-50 text-amber-600'
-											} rounded-full px-2.5 py-1`}
-										>
-											{colab.estado === 'aprobada' ? 'Aprobada' : 'Pendiente'}
-										</span>
-									</li>
-								{/each}
-							</ul>
-						{:else}
-							<p class="text-sm text-gray-500">No hay colaboradores activos.</p>
-						{/if}
-					</div>
+					<!-- CTA Colaborar -->
+					<TarjetaLateral {proyecto} mostrarFormulario={mostrarFormularioColaboracion} />
+
+					<!-- Colaboradores: visible solo para la institución dueña del proyecto -->
+					{#if puedeVerSolicitudes}
+						<div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
+							<h3 class="mb-5 text-lg font-semibold text-gray-900">Solicitudes de colaboración</h3>
+							{#if colaboracionesActivas.length}
+								<ul class="space-y-3">
+									{#each colaboracionesActivas as colab (colab.id_colaboracion)}
+										<li class="flex justify-between border-b border-gray-100 pb-2 last:border-b-0">
+											<span class="text-sm text-gray-700">
+												{obtenerNombreColaborador(colab.colaborador)}
+											</span>
+											<span
+												class={`text-xs font-semibold ${
+													colab.estado === 'aprobada'
+														? 'bg-emerald-50 text-emerald-600'
+														: 'bg-amber-50 text-amber-600'
+												} rounded-full px-2.5 py-1`}
+											>
+												{colab.estado === 'aprobada' ? 'Aprobada' : 'Pendiente'}
+											</span>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="text-sm text-gray-500">No hay colaboradores activos.</p>
+							{/if}
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -296,6 +358,49 @@
 			<p>Cargando proyecto...</p>
 		</div>
 	</main>
+{/if}
+
+{#if abrirModalSolicitud}
+    <!-- Modal solicitud de colaboración -->
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" on:click={cancelarSolicitud}>
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-xl" on:click|stopPropagation>
+            <h3 class="text-xl font-semibold text-gray-900">Solicitar colaboración</h3>
+            <p class="mt-1 text-sm text-gray-600">Proyecto: <span class="font-medium">{proyecto?.titulo}</span></p>
+
+            {#if !$usuario || $usuario.rol !== 'colaborador'}
+                <div class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+                    Debés iniciar sesión como colaborador para enviar una solicitud.
+                </div>
+                <div class="mt-5 flex justify-end gap-3">
+                    <Button label="Cerrar" variant="secondary" size="sm" type="button" on:click={cancelarSolicitud} />
+                </div>
+            {:else}
+                {#if solicitudEnviada}
+                    <div class="mt-4 rounded-lg bg-emerald-50 p-4 text-sm text-emerald-700">
+                        ¡Tu solicitud fue enviada! La institución respondera en la brevedad.
+                    </div>
+                    <div class="mt-5 flex justify-end gap-3">
+                        <Button label="Cerrar" variant="secondary" size="sm" type="button" on:click={cancelarSolicitud} />
+                    </div>
+                {:else}
+                    <label for="mensaje-sol" class="mt-4 block text-sm font-medium text-gray-700">Mensaje para la institución <span class="text-red-600">*</span></label>
+                    <textarea id="mensaje-sol" class="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none" rows="4" bind:value={mensajeSolicitud} placeholder="Ejemplo: Quiero colaborar como voluntario los fines de semana..."></textarea>
+                    {#if intentoEnvioSolicitud && !mensajeSolicitud.trim().length}
+                        <p class="mt-2 text-sm text-red-600">El mensaje es obligatorio.</p>
+                    {/if}
+
+                    <div class="mt-5 flex justify-end gap-3">
+                        <Button label="Cancelar" variant="secondary" size="sm" type="button" on:click={cancelarSolicitud} />
+                        <Button label={enviandoSolicitud ? 'Enviando...' : 'Enviar solicitud'} variant="primary" size="sm" type="button" on:click={enviarSolicitud} disabled={enviandoSolicitud} />
+                    </div>
+                {/if}
+            {/if}
+        </div>
+    </div>
 {/if}
 
 <style>
