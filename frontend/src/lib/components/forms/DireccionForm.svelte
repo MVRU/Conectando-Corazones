@@ -19,21 +19,23 @@
 
 	let enviando = false;
 	let editandoUrlMapaGoogle = false;
-	let calle = '';
-	let numero = '';
-	let piso = '';
-	let departamento = '';
-	let idProvincia = '';
-	let idLocalidad = '';
 	let provincia: Provincia | undefined;
 	let localidad: Localidad | undefined;
 	let localidadesProvincia: Localidad[] = [];
-	let referencia = '';
 	let urlGoogleMaps = '';
 	let intentoEnvio = false;
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+
+	// Props para pre-llenar el formulario
+	export let calle = '';
+	export let numero = '';
+	export let piso = '';
+	export let departamento = '';
+	export let referencia = '';
+	export let idProvincia = '';
+	export let idLocalidad = '';
 
 	const dispatch = createEventDispatcher();
 
@@ -261,7 +263,7 @@
 		</div>
 
 		<!-- Vista previa del mapa -->
-		{#if urlGoogleMaps && !editandoUrlMapaGoogle}
+		<!-- {#if urlGoogleMaps && !editandoUrlMapaGoogle}
 			<div
 				class="relative mx-auto mt-10 aspect-square max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:shadow-2xl"
 			>
@@ -276,7 +278,7 @@
 					></iframe>
 				</div>
 			</div>
-		{/if}
+		{/if} -->
 	</div>
 
 	<!-- Botones de acción -->
