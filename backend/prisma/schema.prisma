@@ -1,8 +1,299 @@
+// Configuración para desarrollo (SQLite) y producción (PostgreSQL)
+// Para cambiar a PostgreSQL, solo cambiar el provider y la DATABASE_URL
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
+}
+
+// ===== MODELOS PRINCIPALES =====
+
+model Provincia {
+  id_provincia Int      @id @default(autoincrement())
+  nombre       String   @unique
+  nombre_corto String?
+  codigo_iso   String?
+
+  // Relaciones
+  localidades Localidad[]
+
+  @@map("provincias")
+}
+
+model Localidad {
+  id_localidad  Int      @id @default(autoincrement())
+  codigo_postal String
+  nombre        String
+  id_provincia  Int
+
+  // Relaciones
+  provincia  Provincia   @relation(fields: [id_provincia], references: [id_provincia])
+  direcciones Direccion[]
+
+  @@unique([codigo_postal, nombre], name: "codigo_postal_nombre")
+  @@map("localidades")
+}
+
+model Direccion {
+  id_direccion     Int     @id @default(autoincrement())
+  calle            String
+  numero           String
+  piso             String?
+  departamento     String?
+  referencia       String?
+  url_google_maps  String?
+  localidad_id     Int
+
+  // Relaciones
+  localidad        Localidad @relation(fields: [localidad_id], references: [id_localidad])
+  usuarios         Usuario[]
+  ubicaciones      Ubicacion[]
+
+  @@map("direcciones")
+}
+
+model Usuario {
+  id_usuario        Int      @id @default(autoincrement())
+  username          String   @unique
+  password          String?
+  nombre            String
+  apellido          String
+  fecha_nacimiento  DateTime?
+  estado            String
+  created_at        DateTime @default(now())
+  rol               String   // 'institucion' | 'colaborador' | 'administrador'
+  url_foto          String
+  estado_verificacion String?
+  direccion_id      Int?
+
+  // Campos específicos para Institucion
+  nombre_legal      String?
+  tipo_institucion  String?
+
+  // Campos específicos para Colaborador
+  tipo_colaborador  String?
+
+  // Campos específicos para Organizacion
+  razon_social      String?
+  con_fines_de_lucro Boolean?
+
+  // Relaciones
+  direccion         Direccion?     @relation(fields: [direccion_id], references: [id_direccion])
+  contactos         Contacto[]
+  consentimientos   Consentimiento[]
+  archivos          Archivo[]
+  proyectos_creados Proyecto[]     @relation("ProyectoInstitucion")
+  colaboraciones    Colaboracion[]
+
+  @@map("usuarios")
+}
+
+model Contacto {
+  id_contacto   Int     @id @default(autoincrement())
+  tipo_contacto String
+  valor         String
+  etiqueta      String?
+  usuario_id    Int
+
+  // Relaciones
+  usuario       Usuario @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("contactos")
+}
+
+model Consentimiento {
+  id_consentimiento Int      @id @default(autoincrement())
+  tipo              String
+  version           String
+  created_at        DateTime @default(now())
+  usuario_id        Int
+
+  // Relaciones
+  usuario           Usuario @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("consentimientos")
+}
+
+model Archivo {
+  id_archivo        Int       @id @default(autoincrement())
+  url               String
+  descripcion       String?
+  tipo_mime         String?
+  created_at        DateTime  @default(now())
+  fecha_vencimiento DateTime?
+  usuario_id        Int?
+  evidencia_id      Int?
+
+  // Relaciones
+  usuario           Usuario?   @relation(fields: [usuario_id], references: [id_usuario])
+  evidencia         Evidencia? @relation(fields: [evidencia_id], references: [id_evidencia])
+
+  @@map("archivos")
+}
+
+model Estado {
+  id_estado   Int    @id @default(autoincrement())
+  descripcion String @unique
+
+  // Relaciones
+  proyectos   Proyecto[]
+
+  @@map("estados")
+}
+
+model Categoria {
+  id_categoria Int    @id @default(autoincrement())
+  descripcion  String @unique
+
+  // Relaciones many-to-many con Proyecto
+  proyectos    ProyectoCategoria[]
+
+  @@map("categorias")
+}
+
+model TipoParticipacion {
+  id_tipo_participacion Int    @id @default(autoincrement())
+  descripcion           String @unique
+
+  // Relaciones
+  participaciones_permitidas ParticipacionPermitida[]
+
+  @@map("tipos_participacion")
+}
+
+model Ubicacion {
+  id_ubicacion    Int    @id @default(autoincrement())
+  tipo_ubicacion  String // 'principal' | 'alternativa' | 'virtual'
+  que_se_hace     String
+  direccion_id    Int
+
+  // Relaciones
+  direccion       Direccion @relation(fields: [direccion_id], references: [id_direccion])
+  proyecto_ubicaciones ProyectoUbicacion[]
+
+  @@map("ubicaciones")
+}
+
+model Proyecto {
+  id_proyecto                Int       @id @default(autoincrement())
+  titulo                     String
+  descripcion                String
+  url_portada                String?
+  created_at                 DateTime  @default(now())
+  fecha_cierre_postulaciones DateTime?
+  fecha_fin_tentativa        DateTime
+  beneficiarios              Int?
+  id_chat_firebase           Int?
+  estado_id                  Int
+  institucion_id             Int
+
+  // Relaciones
+  estado                     Estado     @relation(fields: [estado_id], references: [id_estado])
+  institucion                Usuario    @relation("ProyectoInstitucion", fields: [institucion_id], references: [id_usuario])
+  participaciones_permitidas ParticipacionPermitida[]
+  categorias                 ProyectoCategoria[]
+  colaboraciones             Colaboracion[]
+  ubicaciones                ProyectoUbicacion[]
+  evidencias                 Evidencia[]
+  solicitudes_finalizacion   SolicitudFinalizacion[]
+
+  @@map("proyectos")
+}
+
+model ParticipacionPermitida {
+  id_participacion_permitida Int     @id @default(autoincrement())
+  id_proyecto                Int
+  id_tipo_participacion      Int
+  objetivo                   Int
+  actual                     Int?
+  unidad_medida              String?
+  especie                    String?
+
+  // Relaciones
+  proyecto                   Proyecto         @relation(fields: [id_proyecto], references: [id_proyecto])
+  tipo_participacion         TipoParticipacion @relation(fields: [id_tipo_participacion], references: [id_tipo_participacion])
+
+  @@map("participaciones_permitidas")
+}
+
+model ProyectoCategoria {
+  id_proyecto  Int
+  id_categoria Int
+
+  // Relaciones
+  proyecto     Proyecto  @relation(fields: [id_proyecto], references: [id_proyecto])
+  categoria    Categoria @relation(fields: [id_categoria], references: [id_categoria])
+
+  @@id([id_proyecto, id_categoria])
+  @@map("proyecto_categorias")
+}
+
+model ProyectoUbicacion {
+  id_proyecto_ubicacion Int @id @default(autoincrement())
+  proyecto_id           Int
+  ubicacion_id          Int
+
+  // Relaciones
+  proyecto              Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
+  ubicacion             Ubicacion @relation(fields: [ubicacion_id], references: [id_ubicacion])
+
+  @@map("proyecto_ubicaciones")
+}
+
+model Colaboracion {
+  id_colaboracion Int       @id @default(autoincrement())
+  estado          String    // 'pendiente' | 'aprobada' | 'rechazada' | 'anulada'
+  justificacion   String?
+  created_at      DateTime  @default(now())
+  mensaje         String?
+  proyecto_id     Int
+  colaborador_id  Int
+
+  // Relaciones
+  proyecto        Proyecto @relation(fields: [proyecto_id], references: [id_proyecto])
+  colaborador     Usuario  @relation(fields: [colaborador_id], references: [id_usuario])
+
+  @@map("colaboraciones")
+}
+
+model Evidencia {
+  id_evidencia Int       @id @default(autoincrement())
+  descripcion  String
+  created_at   DateTime  @default(now())
+  proyecto_id  Int?
+
+  // Relaciones
+  proyecto     Proyecto? @relation(fields: [proyecto_id], references: [id_proyecto])
+  archivos     Archivo[]
+  solicitudes_finalizacion SolicitudFinalizacionEvidencia[]
+
+  @@map("evidencias")
+}
+
+model SolicitudFinalizacion {
+  id_solicitud Int       @id @default(autoincrement())
+  estado       String?
+  created_at   DateTime  @default(now())
+  proyecto_id  Int
+
+  // Relaciones
+  proyecto     Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
+  evidencias   SolicitudFinalizacionEvidencia[]
+
+  @@map("solicitudes_finalizacion")
+}
+
+model SolicitudFinalizacionEvidencia {
+  id_solicitud Int
+  id_evidencia Int
+
+  // Relaciones
+  solicitud    SolicitudFinalizacion @relation(fields: [id_solicitud], references: [id_solicitud])
+  evidencia    Evidencia             @relation(fields: [id_evidencia], references: [id_evidencia])
+
+  @@id([id_solicitud, id_evidencia])
+  @@map("solicitud_finalizacion_evidencias")
 }
