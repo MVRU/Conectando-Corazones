@@ -61,7 +61,7 @@
 <!-- ! Fondo decorativo -->
 <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
-	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
+	class="absolute bottom-0 left-0 right-0 top-[80%] -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
 	style="background-size: 100% 400px; background-repeat: repeat-y;"
 ></div>
 
@@ -114,7 +114,7 @@
 				<Stepper current={2} total={5} />
 			</div>
 			<button
-				class="group mb-6 flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
 				type="button"
 				on:click={() => (etapa = 'select')}
 			>

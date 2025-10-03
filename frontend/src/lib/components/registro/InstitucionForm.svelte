@@ -198,18 +198,24 @@
 		</span>
 		<div class="grid gap-4 md:grid-cols-3">
 			{#each opcionesTipoInstitucion as opcion}
-				<label
-					class="flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 p-4 text-base font-semibold text-gray-900 shadow-sm transition hover:border-[rgb(var(--color-primary))]"
-				>
-					<input
-						type="radio"
-						class="sr-only"
-						name="tipo_institucion"
-						value={opcion.value}
-						bind:group={opcionTipoInstitucion}
-					/>
-					{opcion.label}
-				</label>
+				{#key opcion.value}
+					<div class="relative">
+						<input
+							id={`tipo-institucion-${opcion.value}`}
+							type="radio"
+							class="peer sr-only"
+							name="tipo_institucion"
+							value={opcion.value}
+							bind:group={opcionTipoInstitucion}
+						/>
+						<label
+							for={`tipo-institucion-${opcion.value}`}
+							class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 text-base font-semibold text-gray-900 shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:shadow-md peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-checked:shadow-md peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
+						>
+							{opcion.label}
+						</label>
+					</div>
+				{/key}
 			{/each}
 		</div>
 

@@ -189,7 +189,7 @@
 					<button
 						type="button"
 						class={clsx(
-							'rounded-full px-4 py-1 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--color-primary))]',
+							'rounded-full px-4 py-1 transition focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--color-primary))]',
 							modoActivo === boton.id
 								? 'bg-[rgb(var(--color-primary))] text-white shadow'
 								: 'text-gray-600 hover:text-gray-900'

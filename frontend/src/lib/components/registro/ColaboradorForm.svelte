@@ -131,36 +131,44 @@
 			Tipo de colaborador/a <span class="text-red-600">*</span>
 		</span>
 		<div class="grid gap-4 md:grid-cols-2">
-			<label
-				class="flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 p-4 shadow-sm transition hover:border-[rgb(var(--color-primary))]"
-			>
+			<div class="relative">
 				<input
+					id="tipo-colaborador-unipersonal"
 					type="radio"
-					class="sr-only"
+					class="peer sr-only"
 					name="tipo_colaborador"
 					value="unipersonal"
 					bind:group={tipoColaborador}
 				/>
-				<span class="text-base font-semibold text-gray-900">Unipersonal</span>
-				<span class="text-sm text-gray-600">
-					Sos una persona física que colabora con proyectos solidarios.
-				</span>
-			</label>
-			<label
-				class="flex cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 p-4 shadow-sm transition hover:border-[rgb(var(--color-primary))]"
-			>
+				<label
+					for="tipo-colaborador-unipersonal"
+					class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:shadow-md peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-checked:shadow-md peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
+				>
+					<span class="text-base font-semibold text-gray-900">Unipersonal</span>
+					<span class="text-sm text-gray-600">
+						Sos una persona física que colabora con proyectos solidarios.
+					</span>
+				</label>
+			</div>
+			<div class="relative">
 				<input
+					id="tipo-colaborador-organizacion"
 					type="radio"
-					class="sr-only"
+					class="peer sr-only"
 					name="tipo_colaborador"
 					value="organizacion"
 					bind:group={tipoColaborador}
 				/>
-				<span class="text-base font-semibold text-gray-900">Organización</span>
-				<span class="text-sm text-gray-600">
-					Representás a una entidad que ofrece recursos o acompañamiento.
-				</span>
-			</label>
+				<label
+					for="tipo-colaborador-organizacion"
+					class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:shadow-md peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-checked:shadow-md peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
+				>
+					<span class="text-base font-semibold text-gray-900">Organización</span>
+					<span class="text-sm text-gray-600">
+						Representás a una entidad que ofrece recursos o acompañamiento.
+					</span>
+				</label>
+			</div>
 		</div>
 	</section>
 

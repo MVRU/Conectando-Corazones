@@ -16,16 +16,11 @@ export const MENSAJES_ERROR = {
 		'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial',
 	usuarioInvalido:
 		'El nombre de usuario debe tener entre 3 y 30 caracteres y solo puede contener letras, números, puntos, guiones bajos o guiones',
-	cuitInvalid: 'El CUIT es inválido', // ! Quitar cuando corrijamos signin
-	cuilInvalid: 'El CUIL es inválido', // ! Quitar cuando corrijamos signin
 	contrasenasNoCoinciden: 'Las contraseñas no coinciden',
 	requisitoEdad: 'Debés tener al menos 18 años',
-	documentTypeRequired: 'Por favor, especificá el tipo de documento', // ! Quitar cuando corrijamos signin
 	tipoInstitucionObligatorio: 'Debe especificar el tipo de institución',
-	specifyDocument: 'Debe especificar el documento', // ! Quitar cuando corrijamos signin
 	nombreInvalido: 'Nombre inválido. Solo se permiten letras y espacios.',
 	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
-	dniInvalid: 'DNI inválido. Debe ser un número entre 7 y 8 dígitos.', // ! Quitar cuando corrijamos signin
 	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
 	numeroCalleInvalido: 'Número inválido. Debe ser un número positivo.',
 	pisoInvalido: 'Piso inválido. Puede ser un número o "PB".', // ! Este no lo estamos implementando -> revisar
@@ -54,42 +49,6 @@ export function validarUsername(username: string): boolean {
 	return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
 }
 
-export function isValidCuit(cuit: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	if (!cuit) return false;
-	if (!/^\d{11}$/.test(cuit)) return false;
-	const prefix = cuit.slice(0, 2);
-	const number = cuit.slice(2, 10);
-	const check = cuit.slice(10);
-	const digits = prefix + number;
-	const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-	let sum = 0;
-	for (let i = 0; i < digits.length; i++) {
-		sum += parseInt(digits[i]) * weights[i];
-	}
-	const mod = sum % 11;
-	const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
-	return check === calculatedCheckDigit.toString();
-}
-
-export function isValidCuil(cuil: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	if (!cuil) return false;
-	if (!/^\d{11}$/.test(cuil)) return false;
-	const prefix = cuil.slice(0, 2);
-	const number = cuil.slice(2, 10);
-	const check = cuil.slice(10);
-	const digits = prefix + number;
-	const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-	let sum = 0;
-	for (let i = 0; i < digits.length; i++) {
-		sum += parseInt(digits[i]) * weights[i];
-	}
-	const mod = sum % 11;
-	const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
-	return check === calculatedCheckDigit.toString();
-}
-
 export function esAdulto(fecha: Date): boolean {
 	if (!(fecha instanceof Date) || isNaN(fecha.getTime())) return false;
 	const hoy = new Date();
@@ -108,12 +67,6 @@ export function validarNombre(nombre: string): boolean {
 
 export function validarApellido(apellido: string): boolean {
 	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellido.trim());
-}
-
-export function isValidDni(dni: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	const dniNum = parseInt(dni, 10);
-	return /^\d{7,8}$/.test(dni) && dniNum >= 1000000 && dniNum <= 99999999;
 }
 
 export function validarRazonSocial(nombre: string): boolean {
