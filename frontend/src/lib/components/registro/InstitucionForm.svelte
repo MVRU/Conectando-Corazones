@@ -232,7 +232,11 @@
 	<div class="mt-10 flex justify-end">
 		<Button
 			label={enviando ? 'Enviando...' : 'Continuar'}
-			disabled={enviando || tieneErrores}
+			disabled={enviando}
+			ariaDisabled={tieneErrores}
+			customAriaLabel={tieneErrores
+				? 'Corregí los campos con error antes de continuar'
+				: 'Continuar con el registro de la institución'}
 			customClass="w-full rounded-xl bg-[rgb(var(--base-color))] px-8 py-3 font-semibold text-white shadow-md transition hover:shadow-xl disabled:opacity-60 md:w-auto"
 		/>
 	</div>
