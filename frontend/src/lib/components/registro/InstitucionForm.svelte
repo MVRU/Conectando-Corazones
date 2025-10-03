@@ -8,6 +8,8 @@
 		validarUsername,
 		validarNombre,
 		validarApellido,
+		validarCorreo,
+		validarContrasena,
 		esAdulto,
 		validarUrl,
 		MENSAJES_ERROR
@@ -19,23 +21,30 @@
 
 	type InstitucionFormData = Pick<
 		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
-	> &
-		Pick<InstitucionTipo, 'nombre_legal' | 'tipo_institucion'>;
+		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto' | 'email'
+	> & {
+		password: string;
+		passwordConfirm: string;
+	} & Pick<InstitucionTipo, 'nombre_legal' | 'tipo_institucion'>;
 
-	let enviando = false;
-	let intentoEnvio = false;
-	let archivoFoto: File | null = null;
-
-	let institucion: InstitucionFormData = {
+	const crearInstitucionInicial = (): InstitucionFormData => ({
 		username: '',
+		email: '',
+		password: '',
+		passwordConfirm: '',
 		nombre: '',
 		apellido: '',
 		fecha_nacimiento: undefined,
 		url_foto: '',
 		nombre_legal: '',
 		tipo_institucion: 'escuela'
-	};
+	});
+
+	let enviando = false;
+	let intentoEnvio = false;
+	let archivoFoto: File | null = null;
+
+	let institucion: InstitucionFormData = crearInstitucionInicial();
 
 	let fechaNacimiento: Date | null = null;
 	const opcionesTipoInstitucion: Array<{ value: string; label: string }> = [
@@ -49,6 +58,21 @@
 	let opcionTipoInstitucion: (typeof opcionesTipoInstitucion)[number]['value'] = 'escuela';
 	let tipoInstitucionPersonalizado = '';
 
+	function resetFormulario() {
+		institucion = crearInstitucionInicial();
+		fechaNacimiento = null;
+		opcionTipoInstitucion = 'escuela';
+		tipoInstitucionPersonalizado = '';
+		archivoFoto = null;
+		enviando = false;
+		intentoEnvio = false;
+	}
+
+	function handleReset(event: Event) {
+		event.preventDefault();
+		resetFormulario();
+	}
+
 	$: institucion.fecha_nacimiento = fechaNacimiento ?? undefined;
 	$: institucion.tipo_institucion =
 		opcionTipoInstitucion === 'otro' ? tipoInstitucionPersonalizado.trim() : opcionTipoInstitucion;
@@ -58,6 +82,21 @@
 			? MENSAJES_ERROR.obligatorio
 			: !validarUsername(institucion.username)
 				? MENSAJES_ERROR.usuarioInvalido
+				: '',
+		email: !institucion.email.trim()
+			? MENSAJES_ERROR.obligatorio
+			: !validarCorreo(institucion.email.trim())
+				? MENSAJES_ERROR.correoInvalido
+				: '',
+		password: !institucion.password
+			? MENSAJES_ERROR.obligatorio
+			: !validarContrasena(institucion.password)
+				? MENSAJES_ERROR.requisitosContrasena
+				: '',
+		passwordConfirm: !institucion.passwordConfirm
+			? MENSAJES_ERROR.obligatorio
+			: institucion.passwordConfirm !== institucion.password
+				? MENSAJES_ERROR.contrasenasNoCoinciden
 				: '',
 		nombre: !institucion.nombre.trim()
 			? MENSAJES_ERROR.obligatorio
@@ -105,7 +144,12 @@
 	}
 </script>
 
-<form on:submit={handleSubmit} class="mx-auto max-w-4xl space-y-10">
+<form
+	on:submit={handleSubmit}
+	on:reset={handleReset}
+	class="mx-auto max-w-4xl space-y-10"
+	novalidate
+>
 	<header class="space-y-3 text-center">
 		<h2 class="text-3xl font-extrabold tracking-tight text-[rgb(var(--base-color))]">
 			Registro de institución
@@ -126,69 +170,119 @@
 				name="username"
 				bind:value={institucion.username}
 				placeholder="ej: escuela-esperanza"
+				autocomplete="username"
 				error={intentoEnvio ? errores.username : ''}
 			/>
 		</div>
 
 		<div>
-			<FotoPerfilUploader
-				id="url_foto"
-				name="url_foto"
-				bind:url={institucion.url_foto}
-				bind:file={archivoFoto}
-				error={intentoEnvio ? errores.url_foto : ''}
-			/>
-		</div>
-
-		<div>
-			<label for="nombre" class="font-semibold text-gray-800">
-				Nombre del representante legal <span class="text-red-600">*</span>
+			<label for="email" class="font-semibold text-gray-800">
+				Correo electrónico <span class="text-red-600">*</span>
 			</label>
 			<Input
-				id="nombre"
-				name="nombre"
-				bind:value={institucion.nombre}
-				placeholder="Nombre"
-				error={intentoEnvio ? errores.nombre : ''}
+				id="email"
+				name="email"
+				type="email"
+				bind:value={institucion.email}
+				placeholder="ej: contacto@institucion.org"
+				autocomplete="email"
+				error={intentoEnvio ? errores.email : ''}
 			/>
 		</div>
 
 		<div>
-			<label for="apellido" class="font-semibold text-gray-800">
-				Apellido del representante legal <span class="text-red-600">*</span>
+			<label for="password" class="font-semibold text-gray-800">
+				Contraseña <span class="text-red-600">*</span>
 			</label>
 			<Input
-				id="apellido"
-				name="apellido"
-				bind:value={institucion.apellido}
-				placeholder="Apellido"
-				error={intentoEnvio ? errores.apellido : ''}
+				id="password"
+				name="password"
+				type="password"
+				bind:value={institucion.password}
+				placeholder="Ingresá una contraseña segura"
+				autocomplete="new-password"
+				error={intentoEnvio ? errores.password : ''}
 			/>
 		</div>
 
 		<div>
-			<label for="fecha_nacimiento" class="font-semibold text-gray-800">
-				Fecha de nacimiento del representante legal <span class="text-red-600">*</span>
-			</label>
-			<DatePicker
-				id="fecha_nacimiento"
-				name="fecha_nacimiento"
-				bind:value={fechaNacimiento}
-				error={intentoEnvio ? errores.fecha_nacimiento : ''}
-			/>
-		</div>
-
-		<div>
-			<label for="nombre_legal" class="font-semibold text-gray-800">
-				Nombre legal de la institución <span class="text-red-600">*</span>
+			<label for="passwordConfirm" class="font-semibold text-gray-800">
+				Confirmá la contraseña <span class="text-red-600">*</span>
 			</label>
 			<Input
-				id="nombre_legal"
-				name="nombre_legal"
-				bind:value={institucion.nombre_legal}
-				placeholder="Razón social registrada"
-				error={intentoEnvio ? errores.nombre_legal : ''}
+				id="passwordConfirm"
+				name="passwordConfirm"
+				type="password"
+				bind:value={institucion.passwordConfirm}
+				placeholder="Repetí la contraseña"
+				autocomplete="new-password"
+				error={intentoEnvio ? errores.passwordConfirm : ''}
 			/>
+		</div>
+	</section>
+
+	<section class="grid grid-cols-1 gap-8 md:grid-cols-2">
+		<div class="md:col-span-2">
+			<div>
+				<FotoPerfilUploader
+					id="url_foto"
+					name="url_foto"
+					bind:url={institucion.url_foto}
+					bind:file={archivoFoto}
+					error={intentoEnvio ? errores.url_foto : ''}
+				/>
+			</div>
+
+			<div>
+				<label for="nombre" class="font-semibold text-gray-800">
+					Nombre del representante legal <span class="text-red-600">*</span>
+				</label>
+				<Input
+					id="nombre"
+					name="nombre"
+					bind:value={institucion.nombre}
+					placeholder="Nombre"
+					error={intentoEnvio ? errores.nombre : ''}
+				/>
+			</div>
+
+			<div>
+				<label for="apellido" class="font-semibold text-gray-800">
+					Apellido del representante legal <span class="text-red-600">*</span>
+				</label>
+				<Input
+					id="apellido"
+					name="apellido"
+					bind:value={institucion.apellido}
+					placeholder="Apellido"
+					error={intentoEnvio ? errores.apellido : ''}
+				/>
+			</div>
+
+			<div>
+				<label for="fecha_nacimiento" class="font-semibold text-gray-800">
+					Fecha de nacimiento del representante legal <span class="text-red-600">*</span>
+				</label>
+				<DatePicker
+					id="fecha_nacimiento"
+					name="fecha_nacimiento"
+					bind:value={fechaNacimiento}
+					error={intentoEnvio ? errores.fecha_nacimiento : ''}
+				/>
+			</div>
+
+			<div>
+				<label for="nombre_legal" class="font-semibold text-gray-800">
+					Nombre legal de la institución <span class="text-red-600">*</span>
+				</label>
+				<Input
+					id="nombre_legal"
+					name="nombre_legal"
+					bind:value={institucion.nombre_legal}
+					placeholder="Razón social registrada"
+					error={intentoEnvio ? errores.nombre_legal : ''}
+				/>
+			</div>
 		</div>
 	</section>
 

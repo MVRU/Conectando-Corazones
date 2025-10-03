@@ -9,6 +9,8 @@
 		validarUsername,
 		validarNombre,
 		validarApellido,
+		validarCorreo,
+		validarContrasena,
 		esAdulto,
 		validarUrl,
 		MENSAJES_ERROR
@@ -24,45 +26,88 @@
 
 	type ColaboradorFormData = Pick<
 		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
-	> &
-		Pick<ColaboradorTipo, 'tipo_colaborador'>;
+		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto' | 'email'
+	> & {
+		password: string;
+		passwordConfirm: string;
+	} & Pick<ColaboradorTipo, 'tipo_colaborador'>;
 
 	type OrganizacionFormData = Pick<OrganizacionTipo, 'razon_social'> & {
 		con_fines_de_lucro: boolean | null;
 	};
+
+	const crearColaboradorInicial = (): ColaboradorFormData => ({
+		username: '',
+		email: '',
+		password: '',
+		passwordConfirm: '',
+		nombre: '',
+		apellido: '',
+		fecha_nacimiento: undefined,
+		url_foto: '',
+		tipo_colaborador: 'unipersonal'
+	});
+
+	const crearOrganizacionInicial = (): OrganizacionFormData => ({
+		razon_social: '',
+		con_fines_de_lucro: null
+	});
 
 	let enviando = false;
 	let intentoEnvio = false;
 	let tipoColaborador: 'unipersonal' | 'organizacion' = 'unipersonal';
 	let archivoFoto: File | null = null;
 
-	let colaborador: ColaboradorFormData = {
-		username: '',
-		nombre: '',
-		apellido: '',
-		fecha_nacimiento: undefined,
-		url_foto: '',
-		tipo_colaborador: 'unipersonal'
-	};
-
+	let colaborador: ColaboradorFormData = crearColaboradorInicial();
 	let fechaNacimiento: Date | null = null;
-	let organizacion: OrganizacionFormData = {
-		razon_social: '',
-		con_fines_de_lucro: null
-	};
+	let organizacion: OrganizacionFormData = crearOrganizacionInicial();
 	let conFinesDeLucroSeleccion = '';
+
+	function resetFormulario() {
+		tipoColaborador = 'unipersonal';
+		colaborador = crearColaboradorInicial();
+		organizacion = crearOrganizacionInicial();
+		fechaNacimiento = null;
+		conFinesDeLucroSeleccion = '';
+		archivoFoto = null;
+		enviando = false;
+		intentoEnvio = false;
+	}
+
+	function handleReset(event: Event) {
+		event.preventDefault();
+		resetFormulario();
+	}
 
 	$: colaborador.tipo_colaborador = tipoColaborador;
 	$: colaborador.fecha_nacimiento = fechaNacimiento ?? undefined;
 	$: organizacion.con_fines_de_lucro =
 		conFinesDeLucroSeleccion === '' ? null : conFinesDeLucroSeleccion === 'true';
+	$: if (tipoColaborador === 'unipersonal') {
+		organizacion = crearOrganizacionInicial();
+		conFinesDeLucroSeleccion = '';
+	}
 
 	$: errores = {
 		username: !colaborador.username.trim()
 			? MENSAJES_ERROR.obligatorio
 			: !validarUsername(colaborador.username)
 				? MENSAJES_ERROR.usuarioInvalido
+				: '',
+		email: !colaborador.email.trim()
+			? MENSAJES_ERROR.obligatorio
+			: !validarCorreo(colaborador.email.trim())
+				? MENSAJES_ERROR.correoInvalido
+				: '',
+		password: !colaborador.password
+			? MENSAJES_ERROR.obligatorio
+			: !validarContrasena(colaborador.password)
+				? MENSAJES_ERROR.requisitosContrasena
+				: '',
+		passwordConfirm: !colaborador.passwordConfirm
+			? MENSAJES_ERROR.obligatorio
+			: colaborador.passwordConfirm !== colaborador.password
+				? MENSAJES_ERROR.contrasenasNoCoinciden
 				: '',
 		nombre: !colaborador.nombre.trim()
 			? MENSAJES_ERROR.obligatorio
@@ -115,7 +160,12 @@
 	}
 </script>
 
-<form on:submit={handleSubmit} class="mx-auto max-w-4xl space-y-10">
+<form
+	on:submit={handleSubmit}
+	on:reset={handleReset}
+	class="mx-auto max-w-4xl space-y-10"
+	novalidate
+>
 	<header class="space-y-3 text-center">
 		<h2 class="text-3xl font-extrabold tracking-tight text-[rgb(var(--base-color))]">
 			Registro de colaborador/a
@@ -139,6 +189,7 @@
 					name="tipo_colaborador"
 					value="unipersonal"
 					bind:group={tipoColaborador}
+					on:change={() => (intentoEnvio = false)}
 				/>
 				<label
 					for="tipo-colaborador-unipersonal"
@@ -158,6 +209,7 @@
 					name="tipo_colaborador"
 					value="organizacion"
 					bind:group={tipoColaborador}
+					on:change={() => (intentoEnvio = false)}
 				/>
 				<label
 					for="tipo-colaborador-organizacion"
@@ -182,11 +234,59 @@
 				name="username"
 				bind:value={colaborador.username}
 				placeholder="ej: solidario123"
+				autocomplete="username"
 				error={intentoEnvio ? errores.username : ''}
 			/>
 		</div>
 
 		<div>
+			<label for="email" class="font-semibold text-gray-800">
+				Correo electrónico <span class="text-red-600">*</span>
+			</label>
+			<Input
+				id="email"
+				name="email"
+				type="email"
+				bind:value={colaborador.email}
+				placeholder="ej: persona@correo.com"
+				autocomplete="email"
+				error={intentoEnvio ? errores.email : ''}
+			/>
+		</div>
+
+		<div>
+			<label for="password" class="font-semibold text-gray-800">
+				Contraseña <span class="text-red-600">*</span>
+			</label>
+			<Input
+				id="password"
+				name="password"
+				type="password"
+				bind:value={colaborador.password}
+				placeholder="Ingresá una contraseña segura"
+				autocomplete="new-password"
+				error={intentoEnvio ? errores.password : ''}
+			/>
+		</div>
+
+		<div>
+			<label for="passwordConfirm" class="font-semibold text-gray-800">
+				Confirmá la contraseña <span class="text-red-600">*</span>
+			</label>
+			<Input
+				id="passwordConfirm"
+				name="passwordConfirm"
+				type="password"
+				bind:value={colaborador.passwordConfirm}
+				placeholder="Repetí la contraseña"
+				autocomplete="new-password"
+				error={intentoEnvio ? errores.passwordConfirm : ''}
+			/>
+		</div>
+	</section>
+
+	<section class="grid grid-cols-1 gap-8 md:grid-cols-2">
+		<div class="md:col-span-2">
 			<FotoPerfilUploader
 				id="url_foto"
 				name="url_foto"
