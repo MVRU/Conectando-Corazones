@@ -20,31 +20,39 @@
 		Colaborador as ColaboradorTipo,
 		Organizacion as OrganizacionTipo
 	} from '$lib/types/Usuario';
+	import type { Contacto } from '$lib/types/Contacto';
 	import { enfocarPrimerCampoConError } from '$lib/utils/forms';
 
 	const dispatch = createEventDispatcher();
 
 	type ColaboradorFormData = Pick<
 		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto' | 'email'
+		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
 	> & {
 		password: string;
 		passwordConfirm: string;
+		contactos: Contacto[];
 	} & Pick<ColaboradorTipo, 'tipo_colaborador'>;
 
 	type OrganizacionFormData = Pick<OrganizacionTipo, 'razon_social'> & {
 		con_fines_de_lucro: boolean | null;
 	};
 
+	const crearContactoPrincipal = (): Contacto => ({
+		tipo_contacto: 'email',
+		etiqueta: 'principal',
+		valor: ''
+	});
+
 	const crearColaboradorInicial = (): ColaboradorFormData => ({
 		username: '',
-		email: '',
 		password: '',
 		passwordConfirm: '',
 		nombre: '',
 		apellido: '',
 		fecha_nacimiento: undefined,
 		url_foto: '',
+		contactos: [crearContactoPrincipal()],
 		tipo_colaborador: 'unipersonal'
 	});
 
@@ -59,6 +67,7 @@
 	let archivoFoto: File | null = null;
 
 	let colaborador: ColaboradorFormData = crearColaboradorInicial();
+	let contactoPrincipal: Contacto = colaborador.contactos[0];
 	let fechaNacimiento: Date | null = null;
 	let organizacion: OrganizacionFormData = crearOrganizacionInicial();
 	let conFinesDeLucroSeleccion = '';
@@ -66,6 +75,7 @@
 	function resetFormulario() {
 		tipoColaborador = 'unipersonal';
 		colaborador = crearColaboradorInicial();
+		contactoPrincipal = colaborador.contactos[0];
 		organizacion = crearOrganizacionInicial();
 		fechaNacimiento = null;
 		conFinesDeLucroSeleccion = '';
@@ -88,15 +98,20 @@
 		conFinesDeLucroSeleccion = '';
 	}
 
+	$: if (contactoPrincipal) {
+		contactoPrincipal.tipo_contacto = 'email';
+		contactoPrincipal.etiqueta = 'principal';
+	}
+
 	$: errores = {
 		username: !colaborador.username.trim()
 			? MENSAJES_ERROR.obligatorio
 			: !validarUsername(colaborador.username)
 				? MENSAJES_ERROR.usuarioInvalido
 				: '',
-		email: !colaborador.email.trim()
+		email: !contactoPrincipal.valor.trim()
 			? MENSAJES_ERROR.obligatorio
-			: !validarCorreo(colaborador.email.trim())
+			: !validarCorreo(contactoPrincipal.valor.trim())
 				? MENSAJES_ERROR.correoInvalido
 				: '',
 		password: !colaborador.password
@@ -247,7 +262,7 @@
 				id="email"
 				name="email"
 				type="email"
-				bind:value={colaborador.email}
+				bind:value={contactoPrincipal.valor}
 				placeholder="ej: persona@correo.com"
 				autocomplete="email"
 				error={intentoEnvio ? errores.email : ''}

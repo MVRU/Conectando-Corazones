@@ -17,6 +17,7 @@
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
+	import type { Contacto } from '$lib/types/Contacto';
 
 	let cargada = false; // para saber si la página terminó de cargar
 	let etapa:
@@ -31,6 +32,7 @@
 		| 'error' = 'select';
 
 	let rol: 'institucion' | 'colaborador' = 'institucion';
+	let emailPrincipal = '';
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
@@ -42,10 +44,34 @@
 		etapa = 'form';
 	}
 
+	function obtenerEmailPrincipal(contactos: Contacto[] = []): string {
+		const principal = contactos.find(
+			(contacto) =>
+				contacto.tipo_contacto === 'email' && (contacto.etiqueta ?? 'principal') === 'principal'
+		);
+		return principal?.valor ?? '';
+	}
+
 	/**
 	 * ! Los colaboradores no necesitan verificar su identidad con RENAPER, así que saltamos directamente al email
 	 * */
-	function onFormSubmit() {
+	type DetalleColaborador = {
+		colaborador: { contactos: Contacto[] };
+		organizacion: unknown;
+		archivoFoto: File | null;
+	};
+
+	type DetalleInstitucion = {
+		institucion: { contactos: Contacto[] };
+		archivoFoto: File | null;
+	};
+
+	function onFormSubmit(event: CustomEvent<DetalleColaborador | DetalleInstitucion>) {
+		const contactos =
+			'colaborador' in event.detail
+				? event.detail.colaborador.contactos
+				: event.detail.institucion.contactos;
+		emailPrincipal = obtenerEmailPrincipal(contactos);
 		etapa = rol === 'colaborador' ? 'email' : 'verificando';
 	}
 </script>
@@ -152,6 +178,7 @@
 			<ValidacionEmail
 				pasoActual={4}
 				pasosTotales={5}
+				emailDestino={emailPrincipal}
 				on:continue={() => (etapa = 'verificado')}
 				on:back={() => (etapa = 'form')}
 			/>

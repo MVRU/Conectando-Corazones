@@ -15,27 +15,35 @@
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
 	import type { Usuario, Institucion as InstitucionTipo } from '$lib/types/Usuario';
+	import type { Contacto } from '$lib/types/Contacto';
 	import { enfocarPrimerCampoConError } from '$lib/utils/forms';
 
 	const dispatch = createEventDispatcher();
 
 	type InstitucionFormData = Pick<
 		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto' | 'email'
+		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
 	> & {
 		password: string;
 		passwordConfirm: string;
+		contactos: Contacto[];
 	} & Pick<InstitucionTipo, 'nombre_legal' | 'tipo_institucion'>;
+
+	const crearContactoPrincipal = (): Contacto => ({
+		tipo_contacto: 'email',
+		etiqueta: 'principal',
+		valor: ''
+	});
 
 	const crearInstitucionInicial = (): InstitucionFormData => ({
 		username: '',
-		email: '',
 		password: '',
 		passwordConfirm: '',
 		nombre: '',
 		apellido: '',
 		fecha_nacimiento: undefined,
 		url_foto: '',
+		contactos: [crearContactoPrincipal()],
 		nombre_legal: '',
 		tipo_institucion: 'escuela'
 	});
@@ -45,6 +53,7 @@
 	let archivoFoto: File | null = null;
 
 	let institucion: InstitucionFormData = crearInstitucionInicial();
+	let contactoPrincipal: Contacto = institucion.contactos[0];
 
 	let fechaNacimiento: Date | null = null;
 	const opcionesTipoInstitucion: Array<{ value: string; label: string }> = [
@@ -60,6 +69,7 @@
 
 	function resetFormulario() {
 		institucion = crearInstitucionInicial();
+		contactoPrincipal = institucion.contactos[0];
 		fechaNacimiento = null;
 		opcionTipoInstitucion = 'escuela';
 		tipoInstitucionPersonalizado = '';
@@ -77,15 +87,20 @@
 	$: institucion.tipo_institucion =
 		opcionTipoInstitucion === 'otro' ? tipoInstitucionPersonalizado.trim() : opcionTipoInstitucion;
 
+	$: if (contactoPrincipal) {
+		contactoPrincipal.tipo_contacto = 'email';
+		contactoPrincipal.etiqueta = 'principal';
+	}
+
 	$: errores = {
 		username: !institucion.username.trim()
 			? MENSAJES_ERROR.obligatorio
 			: !validarUsername(institucion.username)
 				? MENSAJES_ERROR.usuarioInvalido
 				: '',
-		email: !institucion.email.trim()
+		email: !contactoPrincipal.valor.trim()
 			? MENSAJES_ERROR.obligatorio
-			: !validarCorreo(institucion.email.trim())
+			: !validarCorreo(contactoPrincipal.valor.trim())
 				? MENSAJES_ERROR.correoInvalido
 				: '',
 		password: !institucion.password
@@ -183,7 +198,7 @@
 				id="email"
 				name="email"
 				type="email"
-				bind:value={institucion.email}
+				bind:value={contactoPrincipal.valor}
 				placeholder="ej: contacto@institucion.org"
 				autocomplete="email"
 				error={intentoEnvio ? errores.email : ''}
