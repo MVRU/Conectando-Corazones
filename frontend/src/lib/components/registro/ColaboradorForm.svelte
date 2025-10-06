@@ -1,3 +1,5 @@
+<!-- * DECISIÓN DE DISEÑO: este form encapsula validaciones de UI y delega el registro al contenedor para cumplir SRP. -->
+
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
@@ -15,28 +17,18 @@
 		validarUrl,
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
-	import type {
-		Usuario,
-		Colaborador as ColaboradorTipo,
-		Organizacion as OrganizacionTipo
-	} from '$lib/types/Usuario';
 	import type { Contacto } from '$lib/types/Contacto';
+	import {
+		type ColaboradorFormData,
+		type ColaboradorFormSubmitDetail,
+		type OrganizacionFormData
+	} from '$lib/types/forms/registro';
 	import { enfocarPrimerCampoConError } from '$lib/utils/forms';
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{ submit: ColaboradorFormSubmitDetail }>();
 
-	type ColaboradorFormData = Pick<
-		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
-	> & {
-		password: string;
-		passwordConfirm: string;
-		contactos: Contacto[];
-	} & Pick<ColaboradorTipo, 'tipo_colaborador'>;
-
-	type OrganizacionFormData = Pick<OrganizacionTipo, 'razon_social'> & {
-		con_fines_de_lucro: boolean | null;
-	};
+	export let procesando = false;
+	export let errorGeneral: string | null = null;
 
 	const crearContactoPrincipal = (): Contacto => ({
 		tipo_contacto: 'email',
@@ -61,7 +53,6 @@
 		con_fines_de_lucro: null
 	});
 
-	let enviando = false;
 	let intentoEnvio = false;
 	let tipoColaborador: 'unipersonal' | 'organizacion' = 'unipersonal';
 	let archivoFoto: File | null = null;
@@ -80,7 +71,6 @@
 		fechaNacimiento = null;
 		conFinesDeLucroSeleccion = '';
 		archivoFoto = null;
-		enviando = false;
 		intentoEnvio = false;
 	}
 
@@ -161,17 +151,21 @@
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
+		if (procesando) {
+			return;
+		}
 		intentoEnvio = true;
 		if (tieneErrores) {
 			enfocarPrimerCampoConError();
 			return;
 		}
 
-		enviando = true;
-		setTimeout(() => {
-			enviando = false;
-			dispatch('submit', { colaborador, organizacion, archivoFoto });
-		}, 800);
+		const detalle: ColaboradorFormSubmitDetail = {
+			colaborador: { ...colaborador },
+			organizacion: { ...organizacion },
+			archivoFoto
+		};
+		dispatch('submit', detalle);
 	}
 </script>
 
@@ -190,6 +184,16 @@
 			datos.
 		</p>
 	</header>
+
+	{#if errorGeneral}
+		<div
+			class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+			role="alert"
+			aria-live="assertive"
+		>
+			{errorGeneral}
+		</div>
+	{/if}
 
 	<section class="space-y-4">
 		<span class="font-semibold text-gray-800">
@@ -393,12 +397,15 @@
 
 	<div class="mt-10 flex justify-end">
 		<Button
-			label={enviando ? 'Enviando...' : 'Continuar'}
-			disabled={enviando}
-			ariaDisabled={tieneErrores}
-			customAriaLabel={tieneErrores
-				? 'Corregí los campos con error antes de continuar'
-				: 'Continuar con el registro de colaborador o colaboradora'}
+			type="submit"
+			label={procesando ? 'Registrando...' : 'Continuar'}
+			disabled={procesando}
+			ariaDisabled={tieneErrores || procesando}
+			customAriaLabel={procesando
+				? 'Estamos registrando tu cuenta, aguardá un instante'
+				: tieneErrores
+					? 'Corregí los campos con error antes de continuar'
+					: 'Continuar con el registro de colaborador o colaboradora'}
 			customClass="w-full rounded-xl bg-[rgb(var(--base-color))] px-8 py-3 font-semibold text-white shadow-md transition hover:shadow-xl disabled:opacity-60 md:w-auto"
 		/>
 	</div>

@@ -1,7 +1,9 @@
 <!-- TODOs:
-	- [ ] Corregir atributos cuando se resuelvan las inconsistencias con el DER 
- 	- [ ] Ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true -->
+ 	- [ ] Ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true
+        - [ ] Agregar registro con proveedores federados: Google, Facebook, etc., cuando auth lo soporte
+         -->
 
+<!-- * DECISIÓN DE DISEÑO: Este contenedor coordina formularios, autenticación y pasos del onboarding manteniendo la lógica de dominio fuera de los componentes de UI. -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import InstitucionForm from '$lib/components/registro/InstitucionForm.svelte';
@@ -18,6 +20,15 @@
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import type { Contacto } from '$lib/types/Contacto';
+	import type {
+		ColaboradorFormSubmitDetail,
+		InstitucionFormSubmitDetail
+	} from '$lib/types/forms/registro';
+	import { authActions } from '$lib/stores/auth';
+	import {
+		mapColaboradorFormToRegisterInput,
+		mapInstitucionFormToRegisterInput
+	} from '$lib/services/auth/registration.mapper';
 
 	let cargada = false; // para saber si la página terminó de cargar
 	let etapa:
@@ -33,46 +44,129 @@
 
 	let rol: 'institucion' | 'colaborador' = 'institucion';
 	let emailPrincipal = '';
+	let registrando = false;
+	let autenticandoProveedor = false;
+	let errorRegistro: string | null = null;
+
+	$: procesandoFormulario = registrando || autenticandoProveedor;
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
 		cargada = true;
 	});
 
+	function resetFeedback() {
+		errorRegistro = null;
+	}
+
 	function elegir(r: 'institucion' | 'colaborador') {
 		rol = r;
+		resetFeedback();
 		etapa = 'form';
 	}
 
-	function obtenerEmailPrincipal(contactos: Contacto[] = []): string {
-		const principal = contactos.find(
-			(contacto) =>
-				contacto.tipo_contacto === 'email' && (contacto.etiqueta ?? 'principal') === 'principal'
-		);
-		return principal?.valor ?? '';
+	function manejarError(error: unknown, fallback: string): string {
+		if (error instanceof Error) {
+			const mensaje = error.message?.trim();
+			if (mensaje) {
+				return mensaje;
+			}
+		}
+		return fallback;
 	}
 
-	/**
-	 * ! Los colaboradores no necesitan verificar su identidad con RENAPER, así que saltamos directamente al email
-	 * */
-	type DetalleColaborador = {
-		colaborador: { contactos: Contacto[] };
-		organizacion: unknown;
-		archivoFoto: File | null;
-	};
+	function deducirEmail(contactos: Contacto[] = [], fallback: string = ''): string {
+		for (const contacto of contactos) {
+			if (!contacto) continue;
+			const tipo = (contacto.tipo_contacto ?? 'email').toLowerCase();
+			const etiqueta = (contacto.etiqueta ?? 'principal').toLowerCase();
+			const valor = contacto.valor?.trim();
+			if (valor && tipo.includes('mail') && etiqueta === 'principal') {
+				return valor.toLowerCase();
+			}
+		}
+		return fallback.trim().toLowerCase();
+	}
 
-	type DetalleInstitucion = {
-		institucion: { contactos: Contacto[] };
-		archivoFoto: File | null;
-	};
+	async function registrarColaborador(event: CustomEvent<ColaboradorFormSubmitDetail>) {
+		if (procesandoFormulario) {
+			return;
+		}
+		resetFeedback();
+		let mapping;
+		try {
+			mapping = mapColaboradorFormToRegisterInput(event.detail);
+		} catch (error) {
+			errorRegistro = manejarError(error, 'Revisá los datos ingresados antes de continuar.');
+			return;
+		}
 
-	function onFormSubmit(event: CustomEvent<DetalleColaborador | DetalleInstitucion>) {
-		const contactos =
-			'colaborador' in event.detail
-				? event.detail.colaborador.contactos
-				: event.detail.institucion.contactos;
-		emailPrincipal = obtenerEmailPrincipal(contactos);
-		etapa = rol === 'colaborador' ? 'email' : 'verificando';
+		registrando = true;
+		try {
+			await authActions.registerColaborador(mapping.input);
+			emailPrincipal = mapping.emailPrincipal;
+			etapa = 'email';
+		} catch (error) {
+			errorRegistro = manejarError(
+				error,
+				'No pudimos completar el registro. Intentá nuevamente en unos instantes.'
+			);
+		} finally {
+			registrando = false;
+		}
+	}
+
+	async function registrarInstitucion(event: CustomEvent<InstitucionFormSubmitDetail>) {
+		if (procesandoFormulario) {
+			return;
+		}
+		resetFeedback();
+		let mapping;
+		try {
+			mapping = mapInstitucionFormToRegisterInput(event.detail);
+		} catch (error) {
+			errorRegistro = manejarError(error, 'Revisá los datos ingresados antes de continuar.');
+			return;
+		}
+
+		registrando = true;
+		try {
+			await authActions.registerInstitucion(mapping.input);
+			emailPrincipal = mapping.emailPrincipal;
+			etapa = 'verificando';
+		} catch (error) {
+			errorRegistro = manejarError(
+				error,
+				'No pudimos completar el registro. Intentá nuevamente en unos instantes.'
+			);
+		} finally {
+			registrando = false;
+		}
+	}
+
+	async function handleGoogleSignIn() {
+		if (procesandoFormulario) {
+			return;
+		}
+		resetFeedback();
+		autenticandoProveedor = true;
+		try {
+			const usuario = await authActions.signInWithGoogle(rol);
+			emailPrincipal = deducirEmail(usuario?.contactos ?? [], usuario?.username ?? '');
+			etapa = 'verificado';
+		} catch (error) {
+			errorRegistro = manejarError(
+				error,
+				'No pudimos iniciar sesión con Google. Intentá nuevamente.'
+			);
+		} finally {
+			autenticandoProveedor = false;
+		}
+	}
+
+	function volverASeleccion() {
+		resetFeedback();
+		etapa = 'select';
 	}
 </script>
 
@@ -142,7 +236,7 @@
 			<button
 				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
 				type="button"
-				on:click={() => (etapa = 'select')}
+				on:click={volverASeleccion}
 			>
 				<svg
 					xmlns="http://www.w3.org/2000/svg"
@@ -161,10 +255,36 @@
 				Volver a elegir tipo de cuenta
 			</button>
 
+			<div
+				class="mb-10 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-white/80 p-4 text-center shadow-sm sm:flex-row sm:items-center sm:justify-between sm:text-left"
+			>
+				<p class="text-sm text-gray-600">
+					También podés crear tu cuenta usando tu perfil de Google para acelerar el proceso.
+				</p>
+				<Button
+					type="button"
+					variant="secondary"
+					label={autenticandoProveedor ? 'Conectando...' : 'Continuar con Google'}
+					loading={autenticandoProveedor}
+					disabled={registrando}
+					on:click={handleGoogleSignIn}
+					customAriaLabel="Registrarme utilizando Google"
+					customClass="w-full sm:w-auto"
+				/>
+			</div>
+
 			{#if rol === 'institucion'}
-				<InstitucionForm on:submit={onFormSubmit} />
+				<InstitucionForm
+					on:submit={registrarInstitucion}
+					procesando={procesandoFormulario}
+					errorGeneral={errorRegistro}
+				/>
 			{:else}
-				<ColaboradorForm on:submit={onFormSubmit} />
+				<ColaboradorForm
+					on:submit={registrarColaborador}
+					procesando={procesandoFormulario}
+					errorGeneral={errorRegistro}
+				/>
 			{/if}
 		{:else if etapa === 'verificando'}
 			<ValidacionRenaper
@@ -172,7 +292,10 @@
 				pasosTotales={5}
 				on:success={() => (etapa = 'email')}
 				on:retry={() => (etapa = 'verificando')}
-				on:back={() => (etapa = 'form')}
+				on:back={() => {
+					resetFeedback();
+					etapa = 'form';
+				}}
 			/>
 		{:else if etapa === 'email'}
 			<ValidacionEmail
@@ -180,7 +303,10 @@
 				pasosTotales={5}
 				emailDestino={emailPrincipal}
 				on:continue={() => (etapa = 'verificado')}
-				on:back={() => (etapa = 'form')}
+				on:back={() => {
+					resetFeedback();
+					etapa = 'form';
+				}}
 			/>
 		{:else if etapa === 'verificado'}
 			<div class="mb-20">

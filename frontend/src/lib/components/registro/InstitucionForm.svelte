@@ -1,3 +1,5 @@
+<!-- * DECISIÓN DE DISEÑO: este form encapsula validaciones de UI y delega el registro al contenedor para cumplir SRP. -->
+
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
@@ -14,20 +16,17 @@
 		validarUrl,
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
-	import type { Usuario, Institucion as InstitucionTipo } from '$lib/types/Usuario';
 	import type { Contacto } from '$lib/types/Contacto';
+	import {
+		type InstitucionFormData,
+		type InstitucionFormSubmitDetail
+	} from '$lib/types/forms/registro';
 	import { enfocarPrimerCampoConError } from '$lib/utils/forms';
 
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{ submit: InstitucionFormSubmitDetail }>();
 
-	type InstitucionFormData = Pick<
-		Usuario,
-		'username' | 'nombre' | 'apellido' | 'fecha_nacimiento' | 'url_foto'
-	> & {
-		password: string;
-		passwordConfirm: string;
-		contactos: Contacto[];
-	} & Pick<InstitucionTipo, 'nombre_legal' | 'tipo_institucion'>;
+	export let procesando = false;
+	export let errorGeneral: string | null = null;
 
 	const crearContactoPrincipal = (): Contacto => ({
 		tipo_contacto: 'email',
@@ -48,7 +47,6 @@
 		tipo_institucion: 'escuela'
 	});
 
-	let enviando = false;
 	let intentoEnvio = false;
 	let archivoFoto: File | null = null;
 
@@ -74,7 +72,6 @@
 		opcionTipoInstitucion = 'escuela';
 		tipoInstitucionPersonalizado = '';
 		archivoFoto = null;
-		enviando = false;
 		intentoEnvio = false;
 	}
 
@@ -145,17 +142,20 @@
 
 	function handleSubmit(event: Event) {
 		event.preventDefault();
+		if (procesando) {
+			return;
+		}
 		intentoEnvio = true;
 		if (tieneErrores) {
 			enfocarPrimerCampoConError();
 			return;
 		}
 
-		enviando = true;
-		setTimeout(() => {
-			enviando = false;
-			dispatch('submit', { institucion, archivoFoto });
-		}, 800);
+		const detalle: InstitucionFormSubmitDetail = {
+			institucion: { ...institucion },
+			archivoFoto
+		};
+		dispatch('submit', detalle);
 	}
 </script>
 
@@ -174,6 +174,16 @@
 			continuar.
 		</p>
 	</header>
+
+	{#if errorGeneral}
+		<div
+			class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+			role="alert"
+			aria-live="assertive"
+		>
+			{errorGeneral}
+		</div>
+	{/if}
 
 	<section class="grid grid-cols-1 gap-8 md:grid-cols-2">
 		<div>
@@ -346,12 +356,15 @@
 
 	<div class="mt-10 flex justify-end">
 		<Button
-			label={enviando ? 'Enviando...' : 'Continuar'}
-			disabled={enviando}
-			ariaDisabled={tieneErrores}
-			customAriaLabel={tieneErrores
-				? 'Corregí los campos con error antes de continuar'
-				: 'Continuar con el registro de la institución'}
+			type="submit"
+			label={procesando ? 'Registrando...' : 'Continuar'}
+			disabled={procesando}
+			ariaDisabled={tieneErrores || procesando}
+			customAriaLabel={procesando
+				? 'Estamos registrando tu institución, aguardá un instante'
+				: tieneErrores
+					? 'Corregí los campos con error antes de continuar'
+					: 'Continuar con el registro de la institución'}
 			customClass="w-full rounded-xl bg-[rgb(var(--base-color))] px-8 py-3 font-semibold text-white shadow-md transition hover:shadow-xl disabled:opacity-60 md:w-auto"
 		/>
 	</div>
