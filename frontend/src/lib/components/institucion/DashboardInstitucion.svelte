@@ -18,59 +18,45 @@
 		Settings,
 		Home,
 		LogOut,
-		ShieldCheck, // Icono para verificación
-		Star, // Para las reseñas
-		Lightbulb // Para ideas/sugerencias
+		ShieldCheck,
+		Star,
+		Lightbulb
 	} from 'lucide-svelte';
-
-	// -------------------- DESIGN TOKENS (ISO 9241-110/210 compliance) --------------------
-
 	// Base / fondos
-	const BG_900 = '#0F112D'; // Fondo principal (azul noche)
-	const BG_850_GRADIENT_END = '#1A1C3B'; // Fin del gradiente vertical
-	const BG_CARD = '#19203F'; // NUEVO COLOR: Fondos de tarjeta y modales (azul oscuro profundo)
-
+	const BG_900 = '#0F112D';
+	const BG_850_GRADIENT_END = '#1A1C3B';
+	const BG_CARD = '#19203F';
 	// Primarios (acción/acento)
-	const PRIMARY_300 = '#5ED4FB'; // Celeste luminoso (parte alta del gradiente)
-	const PRIMARY_500 = '#0B98FA'; // Azul eléctrico (CTA, acento principal)
-
+	const PRIMARY_300 = '#5ED4FB';
+	const PRIMARY_500 = '#0B98FA';
 	// Tipografía en dark
-	const TEXT_100 = '#EAF2FF'; // Títulos y textos principales (alto contraste)
-	const TEXT_300 = '#C3D1E8'; // Párrafos secundarios (buen contraste)
-	const TEXT_400 = '#A9B4CF'; // Apoyos/ayudas visuales (muted)
-
+	const TEXT_100 = '#EAF2FF';
+	const TEXT_300 = '#C3D1E8';
+	const TEXT_400 = '#A9B4CF';
 	// Realces y bordes suaves
-	const BORDER_SUBTLE = '#2D3560'; // Borde sutil y elegante para separación (ajustado ligeramente para el nuevo BG_CARD)
-	const RING_AZURE_10 = 'rgba(104, 195, 255, 0.10)'; // Anillos/realces muy sutiles (10%)
-	const RING_AZURE_25 = 'rgba(104, 195, 255, 0.25)'; // Anillos/realces más fuertes (25%)
-
+	const BORDER_SUBTLE = '#2D3560';
+	const RING_AZURE_10 = 'rgba(104, 195, 255, 0.10)';
+	const RING_AZURE_25 = 'rgba(104, 195, 255, 0.25)';
 	// Gradientes predefinidos
 	const GRADIENT_CTA = `linear-gradient(180deg, ${PRIMARY_300} 0%, ${PRIMARY_500} 100%)`;
-	// FIX: Eliminando saltos de línea y espacios en blanco innecesarios en el template literal para asegurar la correcta aplicación del CSS.
 	const GRADIENT_BG = `radial-gradient(800px 520px at 72% 36%, rgba(66,143,255,0.08), transparent 60%), linear-gradient(180deg, ${BG_900} 0%, ${BG_850_GRADIENT_END} 100%)`;
-
-	// Colores funcionales (manteniendo los anteriores)
-	const WARNING_COLOR = '#FFC107'; // Amarillo/Oro para advertencias
-	const ERROR_COLOR = '#FF5C77'; // Rojo sofisticado para errores/urgencia
-	const INFO_COLOR = '#00E5FF'; // Cyan para información
-
+	// Colores funcionales
+	const WARNING_COLOR = '#FFC107';
+	const ERROR_COLOR = '#FF5C77';
+	const INFO_COLOR = '#00E5FF';
 	// -------------------- LÓGICA DE ESTADO --------------------
 	type ViewMode = 'dashboard' | 'projects' | 'chat' | 'profile' | 'settings';
 	let viewMode: ViewMode = 'dashboard';
 	let isMobileMenuOpen: boolean = false;
-
-	// Se eliminan isRightSidebarOpen y toggleSidebar, ya que la barra derecha se integra en la izquierda.
 	function toggleMobileMenu() {
 		isMobileMenuOpen = !isMobileMenuOpen;
 	}
-
 	// Datos de ejemplo para las métricas del dashboard
 	const metrics = [
-		{ label: 'Proyectos totales', value: '1', icon: Briefcase, color: PRIMARY_500 }, // Cambiado a Primary para Hope/Action
+		{ label: 'Proyectos totales', value: '1', icon: Briefcase, color: PRIMARY_500 },
 		{ label: 'Colaboradores totales', value: '0', icon: Users, color: WARNING_COLOR },
 		{ label: 'Próx. Finalización', value: '20 días', icon: Gauge, color: ERROR_COLOR }
 	];
-
 	const navItems: { label: string; icon: any; view: ViewMode }[] = [
 		{ label: 'Dashboard', icon: Home, view: 'dashboard' },
 		{ label: 'Proyectos', icon: Briefcase, view: 'projects' },
@@ -78,7 +64,7 @@
 		{ label: 'Perfil', icon: User, view: 'profile' },
 		{ label: 'Configuración', icon: Settings, view: 'settings' }
 	];
-
+	// Acciones Rápidas (Lista genérica - ahora solo se usa en 'dashboard')
 	const quickActions = [
 		'Ver solicitudes',
 		'Cargar evidencia',
@@ -87,7 +73,6 @@
 		'Ver progresos',
 		'Solicitar cierre'
 	];
-
 	const chatItems = [
 		{
 			name: 'Luz para Aprender',
@@ -95,16 +80,15 @@
 			time: 'Hace 5m',
 			statusColor: ERROR_COLOR,
 			isUnread: true
-		},
-		{
-			name: 'Patio de colores',
-			lastMessage: '¡Borrador creado!',
-			time: 'Hace 1h',
-			statusColor: PRIMARY_500,
-			isUnread: false
 		}
+		// {
+		// 	name: 'Patio de colores',
+		// 	lastMessage: '¡Borrador creado!',
+		// 	time: 'Hace 1h',
+		// 	statusColor: PRIMARY_500,
+		// 	isUnread: false
+		// }
 	];
-
 	const projectItems = [
 		{
 			id: 1,
@@ -121,19 +105,16 @@
 			statusColor: PRIMARY_500
 		}
 	];
-
 	const luzParaAprenderProgress = [
 		{ label: 'Donación monetaria', percent: 15, color: WARNING_COLOR },
-		{ label: 'Lámparas LED', percent: 40, color: PRIMARY_500 }, // Cambiado a Primary Blue
+		{ label: 'Lámparas LED', percent: 40, color: PRIMARY_500 },
 		{ label: 'Electricistas', percent: 80, color: ERROR_COLOR }
 	];
-
 	const ayudaTypes = [
 		{ label: 'Voluntariado', percent: 32, color: INFO_COLOR },
 		{ label: 'Monetaria', percent: 33, color: WARNING_COLOR },
 		{ label: 'En especie', percent: 35, color: ERROR_COLOR }
 	];
-
 	function getDonutGradient() {
 		let gradientString = 'conic-gradient(';
 		let currentPercent = 0;
@@ -141,7 +122,6 @@
 			const start = currentPercent;
 			currentPercent += item.percent;
 			const end = currentPercent;
-
 			if (index < ayudaTypes.length - 1) {
 				gradientString += `${item.color} ${start}% ${end}%, `;
 			} else {
@@ -150,13 +130,102 @@
 		});
 		return gradientString + ')';
 	}
-
 	const donutGradient = getDonutGradient();
-
 	let selectedProject = projectItems[0];
+
+	// ---- Quick actions dinámicas según la vista seleccionada ----
+	type QuickAction = {
+		label: string;
+		icon: any;
+		badge: string | null;
+		statusColor?: string;
+	};
+
+	$: dynamicQuickActions = (mode: ViewMode): QuickAction[] => {
+		switch (mode) {
+			case 'projects':
+				// Mapea proyectos a acciones
+				return projectItems.map((p) => ({
+					label: p.name,
+					icon: Briefcase,
+					badge: p.status === 'En Curso' ? '!' : null,
+					statusColor: p.statusColor
+				}));
+
+			case 'chat':
+				// Mapea chats a acciones
+				return chatItems.map((c) => ({
+					label: c.name,
+					icon: MessageSquare,
+					badge: c.isUnread ? '!' : null,
+					statusColor: c.statusColor
+				}));
+
+			case 'dashboard':
+			case 'profile':
+			case 'settings':
+			default:
+				// Acciones genéricas del dashboard
+				return quickActions.map((action) => ({
+					label: action,
+					icon: LayoutGrid,
+					badge: action === 'Ver solicitudes' ? '3' : null,
+					statusColor: ERROR_COLOR
+				}));
+		}
+	};
+
+	import { onMount } from 'svelte';
+
+	// --- Config de anchos del sidebar (solo desktop) ---
+	const SIDEBAR_W_COLLAPSED = 80;
+	const SIDEBAR_W_EXPANDED = 280;
+
+	let isSidebarExpanded = false;
+	let isDesktop = false;
+
+	function updateIsDesktop() {
+		isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+	}
+
+	function applySidebarWidthVar() {
+		// En desktop aplicamos 80px/280px; en mobile, el lateral tipo drawer no empuja el main
+		const w = isDesktop ? (isSidebarExpanded ? SIDEBAR_W_EXPANDED : SIDEBAR_W_COLLAPSED) : 0;
+		document.documentElement.style.setProperty('--sidebar-w', `${w}px`);
+	}
+
+	function handleEnter() {
+		if (!isDesktop) return;
+		isSidebarExpanded = true;
+	}
+
+	function handleLeave() {
+		if (!isDesktop) return;
+		isSidebarExpanded = false;
+	}
+
+	onMount(() => {
+		updateIsDesktop();
+		applySidebarWidthVar();
+
+		const mq = window.matchMedia('(min-width: 1024px)');
+		const onChange = () => {
+			updateIsDesktop();
+			applySidebarWidthVar();
+		};
+		mq.addEventListener?.('change', onChange);
+		window.addEventListener('resize', onChange);
+
+		return () => {
+			mq.removeEventListener?.('change', onChange);
+			window.removeEventListener('resize', onChange);
+		};
+	});
+
+	// Reaplicar cuando cambie el estado o el modo móvil/desktop
+	$: applySidebarWidthVar();
 </script>
 
-<!-- Carga de fuente Inter para un look moderno -->
 <svelte:head>
 	<link
 		href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
@@ -171,27 +240,32 @@
         color: {TEXT_100};
     "
 >
-	<!-- -------------------- BARRA DE NAVEGACIÓN PRINCIPAL (Fija y Lateral IZQUIERDA) -------------------- -->
+	<!-- -------------------- BARRA DE NAVEGACIÓN PRINCIPAL (MINIMALISTA) -------------------- -->
 	<nav
-		class="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col p-6 transition-transform duration-300 ease-out lg:w-[320px] lg:items-start lg:p-6 {isMobileMenuOpen
+		class="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col p-6 transition-transform duration-300 ease-out lg:w-[200px] lg:items-center lg:p-4 {isMobileMenuOpen
 			? 'translate-x-0'
 			: '-translate-x-full'} lg:translate-x-0"
 		style="
             background: {BG_CARD};
             border-right: 1px solid {BORDER_SUBTLE};
-            box-shadow: 0 4px 18px rgba(0,0,32,0.18); /* shadow-1 */
-            overflow-y: auto; /* Habilitar scroll para todo el contenido lateral */
+            box-shadow: 0 4px 18px rgba(0,0,32,0.18);
+            overflow-y: auto;
         "
 	>
-		<!-- 1. Links de Navegación (Grid 3x2) -->
-		<div class="space-y-6">
-			<h3 class="text-xs font-medium uppercase tracking-widest" style="color: {TEXT_400};">
+		<!-- 1. Links de Navegación -->
+		<div class="w-full space-y-4">
+			<h3
+				class="text-xs font-medium uppercase tracking-widest lg:hidden"
+				style="color: {TEXT_400};"
+			>
 				Navegación principal
 			</h3>
-			<div class="grid grid-cols-2 gap-3">
+			<div class="grid grid-cols-2 gap-2">
 				{#each navItems as item}
 					<button
-						class="group flex h-28 w-full flex-col items-center justify-center rounded-[18px] p-3 text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg"
+						class="group flex h-28 w-full flex-col items-center justify-center rounded-[18px] p-3 text-sm font-semibold transition-all duration-200
+                                hover:scale-[1.03] hover:shadow-lg
+                                lg:h-[90px] lg:w-full lg:p-0"
 						class:shadow-lg={viewMode === item.view}
 						class:hover:bg-[#343954]={viewMode !== item.view}
 						class:ring-2={viewMode === item.view}
@@ -205,62 +279,200 @@
 						on:click={() => (viewMode = item.view)}
 						title={item.label}
 					>
-						<svelte:component this={item.icon} class="mb-2 h-7 w-7 shrink-0" />
-						<span class="truncate">{item.label}</span>
+						<svelte:component
+							this={item.icon}
+							class="mb-2 h-7 w-7 shrink-0 
+                                    lg:mb-0 lg:h-5 lg:w-5"
+						/>
+						<span class="truncate lg:hidden">{item.label}</span>
 					</button>
 				{/each}
 			</div>
 		</div>
 
-		<!-- 2. Sección de Acciones Rápidas (Movida del antiguo sidebar derecho) -->
+		<!-- 2. Sección de Acciones Rápidas (AHORA con layout por vista) -->
 		<div class="mt-8 border-t pt-6" style="border-color: {BORDER_SUBTLE};">
-			<h3 class="mb-4 text-xs font-medium uppercase tracking-widest" style="color: {TEXT_400};">
-				Acciones rápidas
+			<h3
+				class="mb-4 text-xs font-medium uppercase tracking-widest lg:hidden"
+				style="color: {TEXT_400};"
+			>
+				{#if viewMode === 'projects'}
+					Mis Proyectos
+				{:else if viewMode === 'chat'}
+					Conversaciones Recientes
+				{:else}
+					Acciones rápidas
+				{/if}
 			</h3>
-			<div class="grid grid-cols-1 gap-4">
-				{#each quickActions as action}
-					<!-- Botones de Acción Rápida - Alineado a la izquierda, badge a la derecha -->
-					<button
-						class="relative flex items-center justify-between rounded-[18px] px-4 py-3 text-base font-semibold transition-all duration-200 hover:scale-[1.01] hover:ring-2 focus:outline-none focus:ring-2 active:scale-[0.99]"
-						style="
-                            border: 1px solid {BORDER_SUBTLE};
-                            background: {BG_900}; /* Fondo de botón de acción rápida (BG_900) */
-                            color: {TEXT_100};
-                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                            --tw-ring-color: {RING_AZURE_10};
-                        "
-					>
-						<span class="flex-1 text-left">{action}</span>
-						<!-- Badge para Ver solicitudes (Actualizado a la derecha) -->{#if action === 'Ver solicitudes'}
-							<span
-								class="ml-4 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold"
-								style="background: {ERROR_COLOR}; color: white; line-height: 1; box-shadow: 0 0 5px rgba(255, 92, 119, 0.5);"
+
+			<!-- CHAT: listado de conversaciones -->
+			{#if viewMode === 'chat'}
+				<ul class="flex flex-col gap-3">
+					{#each chatItems as c}
+						<li>
+							<button
+								class="group flex w-full items-center gap-3 rounded-[16px] px-3 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
+								style="
+              background: {BG_900};
+              border: 1px solid {BORDER_SUBTLE};
+              color: {TEXT_100};
+              --tw-ring-color: {RING_AZURE_10};
+              box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            "
+								title={`Abrir chat: ${c.name}`}
 							>
-								3
-							</span>
-						{/if}
-					</button>
-				{/each}
-			</div>
+								<!-- Avatar/Icono -->
+								<div
+									class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+									style="background: {c.statusColor}1A; border: 1px solid {c.statusColor}40;"
+								>
+									<MessageSquare class="h-5 w-5" style="color: {c.statusColor};" />
+								</div>
+
+								<!-- Texto -->
+								<div class="min-w-0 flex-1 text-left">
+									<p class="truncate text-sm font-semibold" style="color:{TEXT_100};">
+										{c.name}
+									</p>
+									<p class="truncate text-xs" style="color:{TEXT_400};">
+										{c.lastMessage}
+									</p>
+								</div>
+
+								<!-- Hora y no leído -->
+								<div class="flex flex-col items-end gap-1">
+									<span class="text-[11px] font-medium" style="color:{TEXT_400};">{c.time}</span>
+									{#if c.isUnread}
+										<span
+											class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold"
+											style="background:{ERROR_COLOR}; color:white;">•</span
+										>
+									{/if}
+								</div>
+							</button>
+						</li>
+					{/each}
+				</ul>
+
+				<!-- PROJECTS: tarjetas compactas de proyecto -->
+			{:else if viewMode === 'projects'}
+				<ul class="flex flex-col gap-3">
+					{#each projectItems as p}
+						<li>
+							<button
+								class="group flex w-full items-center gap-3 rounded-[16px] px-3 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
+								style="
+              background: {BG_900};
+              border: 1px solid {BORDER_SUBTLE};
+              color: {TEXT_100};
+              --tw-ring-color: {RING_AZURE_10};
+              box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+            "
+								title={`Abrir proyecto: ${p.name}`}
+								on:click={() => {
+									selectedProject = p;
+									viewMode = 'projects';
+								}}
+							>
+								<!-- Icono/Badge -->
+								<div
+									class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+									style="background:{p.statusColor}1A; border:1px solid {p.statusColor}40;"
+								>
+									<Briefcase class="h-5 w-5" style="color:{p.statusColor};" />
+								</div>
+
+								<!-- Contenido -->
+								<div class="min-w-0 flex-1 text-left">
+									<div class="flex items-center gap-2">
+										<p class="truncate text-sm font-semibold" style="color:{TEXT_100};">
+											{p.name}
+										</p>
+										<!-- Estado pill -->
+										<span
+											class="inline-flex items-center rounded-full px-2 py-[2px] text-[11px] font-semibold"
+											style="background:{p.statusColor}1A; border:1px solid {p.statusColor}55; color:{p.statusColor};"
+										>
+											{p.status}
+										</span>
+									</div>
+									<p class="text-xs" style="color:{TEXT_400};">
+										Cierre estimado: <span style="color:{TEXT_300}; font-weight:600;">{p.date}</span
+										>
+									</p>
+								</div>
+
+								<!-- Chevron -->
+								<ChevronRight
+									class="h-4 w-4 opacity-60 transition-opacity group-hover:opacity-100"
+									style="color:{TEXT_400};"
+								/>
+							</button>
+						</li>
+					{/each}
+				</ul>
+
+				<!-- DEFAULT: acciones rápidas clásicas -->
+			{:else}
+				<div class="grid grid-cols-1 gap-3">
+					{#each dynamicQuickActions(viewMode) as action}
+						<button
+							class="group relative flex items-center justify-between rounded-[16px] px-4 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
+							style="
+            border: 1px solid {BORDER_SUBTLE};
+            background: {BG_900};
+            color: {TEXT_100};
+            --tw-ring-color: {RING_AZURE_10};
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+          "
+						>
+							<div class="flex items-center gap-3">
+								<div
+									class="flex h-8 w-8 items-center justify-center rounded-lg"
+									style="background: {action.statusColor ||
+										ERROR_COLOR}1A; border:1px solid {action.statusColor || ERROR_COLOR}40;"
+								>
+									<svelte:component
+										this={action.icon}
+										class="h-4 w-4"
+										style="color:{action.statusColor || ERROR_COLOR};"
+									/>
+								</div>
+								<span class="text-sm font-semibold">{action.label}</span>
+							</div>
+
+							{#if action.badge}
+								<span
+									class="ml-4 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ring-2"
+									style="background:{action.statusColor ||
+										ERROR_COLOR}; color:white; --tw-ring-color:{BG_900};"
+								>
+									{action.badge}
+								</span>
+							{/if}
+						</button>
+					{/each}
+				</div>
+			{/if}
 		</div>
 	</nav>
 
-	<!-- Overlay de menú móvil -->{#if isMobileMenuOpen}
+	<!-- Overlay de menú móvil -->
+	{#if isMobileMenuOpen}
 		<div class="fixed inset-0 z-40 bg-black/60 lg:hidden" on:click={toggleMobileMenu}></div>
 	{/if}
 
 	<!-- -------------------- CONTENIDO PRINCIPAL -------------------- -->
-	<!-- Ajuste del margen para el nuevo ancho del nav (320px) y remoción de margen derecho. -->
 	<main
-		class="ml-0 p-4 transition-all duration-300 ease-out lg:ml-[320px] lg:p-8"
+		class="ml-0 p-4 transition-all duration-300 ease-out lg:ml-[200px] lg:p-8"
 		style="min-height: 100vh;"
 	>
-		<!-- Botón de Menú Móvil (Hamburguesa) --><button
+		<button
 			on:click={toggleMobileMenu}
 			class="fixed right-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-[18px] p-3 shadow-xl transition-all duration-300 hover:scale-[1.05] focus:outline-none focus:ring-4 active:scale-[0.98] lg:hidden"
 			style="
                 background: {PRIMARY_500};
-                box-shadow: 0 5px 20px {PRIMARY_500}80; /* Glow sutil */
+                box-shadow: 0 5px 20px {PRIMARY_500}80;
                 color: white;
                 --tw-ring-color: {RING_AZURE_25};
             "
@@ -270,10 +482,9 @@
 		</button>
 
 		<section class="mx-auto max-w-[1280px] pt-12 lg:pt-8">
-			<!-- 1. ENCABEZADO Y ACCIONES RÁPIDAS (Espaciado generoso) -->
+			<!-- ENCABEZADO -->
 			<header class="mb-12 flex flex-col justify-between gap-6 sm:flex-row sm:items-end md:mb-16">
 				<div class="mb-0">
-					<!-- Micro-encabezado (Eyebrow) -->
 					<div class="mb-4 flex items-center gap-2">
 						<span
 							class="h-2 w-2 rounded-full"
@@ -283,8 +494,6 @@
 							Cada acción cuenta
 						</p>
 					</div>
-
-					<!-- H1 Bicolor -->
 					<h1
 						class="text-5xl font-extrabold leading-[1.05] tracking-tighter sm:text-6xl lg:text-[64px]"
 						style="color: {TEXT_100};"
@@ -295,8 +504,6 @@
 							Mi panel
 						</span>
 					</h1>
-
-					<!-- Párrafo secundario -->
 					<p
 						class="mt-4 max-w-[70ch] text-lg font-medium leading-relaxed"
 						style="color: {TEXT_300};"
@@ -305,9 +512,8 @@
 					</p>
 				</div>
 
-				<!-- Botones de Acción y Notificación (Solo visibles en Dashboard) -->{#if viewMode === 'dashboard'}
+				{#if viewMode === 'dashboard'}
 					<div class="flex flex-wrap items-center gap-4">
-						<!-- Botón Primario: Crear Proyecto (CTA con píldora y gradiente) -->
 						<button
 							class="flex items-center gap-2 rounded-full px-8 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.03] focus:outline-none focus:ring-4 active:scale-[0.98]"
 							style="
@@ -319,15 +525,13 @@
 							<Plus class="h-5 w-5" />
 							Crear Proyecto
 						</button>
-
-						<!-- Botón de Notificación -->
 						<button
 							class="relative flex h-12 w-12 items-center justify-center rounded-[18px] transition-all duration-200 hover:scale-[1.05] focus:outline-none focus:ring-2 active:scale-[0.98]"
 							style="
-                                background: {BG_CARD}; /* Fondo de la tarjeta/botón */
+                                background: {BG_CARD};
                                 border: 1px solid {BORDER_SUBTLE};
                                 box-shadow: 0 4px 18px rgba(0,0,32,0.18);
-                                color: {WARNING_COLOR};
+                                color: {PRIMARY_500};
                                 --tw-ring-color: {RING_AZURE_25};
                             "
 						>
@@ -343,51 +547,49 @@
 				{/if}
 			</header>
 
-			<!-- -------------------- 2. LAYOUT PRINCIPAL (Contenido dinámico) -------------------- -->
+			<!-- CONTENIDO DINÁMICO -->
 			<div class="grid grid-cols-1 gap-12 xl:grid-cols-1">
-				<!-- Contenido Principal (única columna) -->
 				<div class="space-y-12">
 					{#if viewMode === 'dashboard'}
-						<!-- A. Filtros (Barra Sticky) -->
-						<div
-							class="sticky top-0 z-30 mb-10 rounded-b-xl pb-4 pt-1 transition-all duration-300"
-							style="
-                                background: {BG_CARD}; /* Fondo del contenedor sticky */
-                                box-shadow: 0 4px 18px rgba(0,0,32,0.18);
-                                border-bottom: 1px solid {BORDER_SUBTLE};
-                            "
-						>
-							<div
-								class="flex flex-col items-center justify-center gap-4 px-4 md:flex-row lg:px-0"
-								style="min-height: 4.5rem;"
-							>
-								<!-- Grupo de Filtros -->
-								<div class="flex flex-wrap items-center justify-center gap-3">
-									<Filter class="h-5 w-5 shrink-0" style="color: {PRIMARY_500};" />
+						<div class="sticky top-0 z-30 mb-10 transition-all duration-300">
+							<div class="flex justify-center px-4 lg:px-0">
+								<div
+									class="inline-flex w-fit flex-wrap items-center gap-2 rounded-2xl px-3 py-2"
+									style="background: {BG_CARD};
+									border: 1px solid {BORDER_SUBTLE};
+									box-shadow: 0 2px 10px rgba(0,0,32,0.12);"
+								>
+									<Filter class="h-5 w-5 shrink-0" style="color: {TEXT_400};" />
 
 									{#each ['Período', 'Categoría', 'Estado', 'Tipo de ayuda', 'Ubicación'] as label}
-										<div class="relative">
-											<!-- SELECT ELEMENT: Fondo y estilo consistentes -->
+										<div class="relative rounded-full">
 											<select
-												class="rounded-[12px] px-5 py-2.5 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2"
+												class="rounded-full px-4 py-2 text-sm font-medium transition-[border-color,box-shadow,color] duration-150 focus:outline-none focus:ring-2"
 												style="
-                                                    border: 1px solid {BORDER_SUBTLE};
-                                                    background: {BG_900}; /* Fondo oscuro al select (BG_900) */
-                                                    color: {TEXT_300};
-                                                    --tw-ring-color: {RING_AZURE_10};
-                                                    -webkit-appearance: none;
-                                                    -moz-appearance: none;
-                                                    appearance: none;
-                                                    padding-right: 2.5rem;
-                                                "
-												on:mouseenter={(e) => (e.currentTarget.style.borderColor = PRIMARY_500)}
-												on:mouseleave={(e) => (e.currentTarget.style.borderColor = BORDER_SUBTLE)}
+              border: none;
+              background: transparent;
+              color: {TEXT_300};
+              --tw-ring-color: {RING_AZURE_10};
+              -webkit-appearance: none;
+              -moz-appearance: none;
+              appearance: none;
+              padding-right: 2rem;
+            "
+												on:focus={(e) =>
+													(e.currentTarget.parentElement!.style.borderColor = PRIMARY_500)}
+												on:blur={(e) =>
+													(e.currentTarget.parentElement!.style.borderColor = BORDER_SUBTLE)}
+												on:mouseenter={(e) =>
+													(e.currentTarget.parentElement!.style.borderColor = BORDER_SUBTLE)}
+												on:mouseleave={(e) =>
+													(e.currentTarget.parentElement!.style.borderColor = BORDER_SUBTLE)}
 											>
 												<option disabled selected>{label}</option>
 												<option style="background: {BG_CARD}; color: {TEXT_100};">Opción A</option>
 												<option style="background: {BG_CARD}; color: {TEXT_100};">Opción B</option>
 											</select>
-											<!-- Flecha customizada para mayor consistencia visual -->
+
+											<!-- Chevron sutil -->
 											<span
 												class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
 												style="color: {TEXT_400};"
@@ -400,17 +602,16 @@
 							</div>
 						</div>
 
-						<!-- B. Métricas Destacadas y Avance Global -->
 						<div class="grid grid-cols-1 gap-8 md:grid-cols-4 md:items-stretch">
-							<!-- Tarjetas de Métricas -->{#each metrics as metric}
+							{#each metrics as metric}
 								<div
 									class="rounded-[28px] p-7 shadow-xl transition-all duration-200 hover:scale-[1.02] hover:ring-2 active:scale-[1.0]"
 									style="
-                                        background: {BG_CARD}; /* Fondo de la tarjeta */
+                                        background: {BG_CARD};
                                         border: 1px solid {BORDER_SUBTLE};
-                                        box-shadow: 0 8px 28px rgba(0,0,0,0.22); /* shadow-2 */
+                                        box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                         --tw-ring-color: {metric.color};
-                                        background-image: linear-gradient(135deg, {BG_CARD}, #20243E); /* Ligeramente ajustado */
+                                        background-image: linear-gradient(135deg, {BG_CARD}, #20243E);
                                     "
 								>
 									<div class="flex items-start justify-between">
@@ -440,12 +641,7 @@
 									</p>
 								</div>
 							{/each}
-
-							<!-- Avance Global (Bloque de texto) -->
-							<div
-								class="flex flex-col justify-center rounded-[28px] p-7 md:col-span-1"
-								style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
-							>
+							<div class="flex flex-col justify-center rounded-[28px] p-7 md:col-span-1">
 								<h3 class="mb-2 text-2xl font-bold" style="color: {TEXT_100};">
 									Avance Global: <span style="color: {PRIMARY_500};">24%</span>
 								</h3>
@@ -460,15 +656,13 @@
 								</div>
 							</div>
 						</div>
-
-						<!-- C. Alerta Importante (Elegante y no estridente) -->
 						<div class="grid grid-cols-1">
 							<div class="md:col-span-2">
 								<div
 									class="flex cursor-pointer items-center justify-between gap-5 rounded-2xl p-5 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
 									style="
                                         border: 1px solid {ERROR_COLOR};
-                                        background: #201323; /* Tono rojizo más oscuro */
+                                        background: #201323;
                                         color: {TEXT_100};
                                         box-shadow: 0 4px 18px rgba(255, 92, 108, 0.25);
                                         --tw-ring-color: {ERROR_COLOR};
@@ -495,24 +689,18 @@
 								</div>
 							</div>
 						</div>
-
-						<!-- D. Secciones Secundarias (Seguimiento de Objetivos, Tipos de Ayuda y Actividad de Colaboradores) -->
-						<!-- CAMBIO CLAVE: De md:grid-cols-3 a lg:grid-cols-2 para mayor anchura -->
 						<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-							<!-- 1. Seguimiento de Objetivos (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
-                                    box-shadow: 0 8px 28px rgba(0,0,0,0.22); /* shadow-2 */
+                                    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
 							>
 								<h3 class="mb-6 text-2xl font-bold" style="color: {TEXT_100};">
 									Seguimiento de objetivos
 								</h3>
-
-								<!-- Card del proyecto: Luz para Aprender -->
 								<div
 									class="rounded-[18px] p-6 transition-all duration-200 hover:scale-[1.01] hover:bg-[#20284F]"
 									style="border: 1px solid {PRIMARY_500}; background: {BG_900}; box-shadow: 0 4px 18px rgba(0,0,32,0.40);"
@@ -521,7 +709,6 @@
 										Luz para Aprender
 									</h4>
 									<p class="text-sm font-semibold" style="color: {ERROR_COLOR};">En Curso</p>
-
 									<div class="mt-4 space-y-3">
 										{#each luzParaAprenderProgress as goal}
 											<div class="flex flex-col gap-1">
@@ -541,20 +728,16 @@
 											</div>
 										{/each}
 									</div>
-
-									<!-- CTAs sutiles (Ver todos los proyectos) -->
 									<div
 										class="mt-6 flex flex-wrap justify-end gap-3 border-t pt-4"
 										style="border-color: {BORDER_SUBTLE};"
 									>
-										<!-- Botón de acción: Fondo BG_CARD -->
 										<button
 											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#20284F] hover:shadow-md focus:ring-2 active:scale-[0.98]"
 											style="background: {BG_CARD}; color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
 										>
 											Subir evidencia
 										</button>
-										<!-- Botón de acción: Fondo BG_CARD -->
 										<button
 											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#20284F] hover:shadow-md focus:ring-2 active:scale-[0.98]"
 											style="background: {BG_CARD}; color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
@@ -563,13 +746,11 @@
 										</button>
 									</div>
 								</div>
-
-								<!-- Card de Creación de Proyecto (Look de aire) -->
 								<div
 									class="mt-8 cursor-pointer rounded-[18px] border-2 border-dashed p-7 text-center transition-all duration-200 hover:scale-[1.01] hover:bg-[#20284F] active:scale-[0.99]"
 									style="
                                         border-color: {PRIMARY_300};
-                                        background: {BG_900}; /* Fondo de la tarjeta */ 
+                                        background: {BG_900};
                                         box-shadow: 0 4px 12px {PRIMARY_500}20;
                                     "
 								>
@@ -579,8 +760,6 @@
 										Todo gran impacto empieza en blanco. ¡Empecemos a escribirlo juntos!
 									</p>
 								</div>
-
-								<!-- NUEVO CTA: Ver todos los proyectos -->
 								<a
 									href="#"
 									class="mt-8 flex items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
@@ -589,18 +768,15 @@
 									Ver todos los proyectos <ChevronRight class="h-4 w-4" />
 								</a>
 							</div>
-
-							<!-- 2. Porcentaje de tipos de ayuda (1/2) -->
 							<div
 								class="rounded-[28px] p-7 text-center shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
 							>
 								<h3 class="mb-10 text-2xl font-bold" style="color: {TEXT_100};">Tipos de ayuda</h3>
-
 								<div
 									class="relative mx-auto grid h-52 w-52 place-items-center rounded-full"
 									style="
@@ -610,11 +786,10 @@
                                         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
                                     "
 								>
-									<!-- Círculo interior para el centro -->
 									<div
 										class="flex h-full w-full flex-col items-center justify-center rounded-full text-center shadow-inner"
 										style="
-                                            background: {BG_CARD}; /* Fondo de la tarjeta */
+                                            background: {BG_CARD};
                                             border: 4px solid {BG_900}; 
                                         "
 									>
@@ -624,7 +799,6 @@
 										</p>
 									</div>
 								</div>
-
 								<div class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm">
 									{#each ayudaTypes as item}
 										<span class="flex items-center gap-2 font-medium" style="color: {TEXT_400};">
@@ -638,12 +812,10 @@
 									{/each}
 								</div>
 							</div>
-
-							<!-- 3. Actividad de Colaboradores (1/2 - Se expande a 100% en pantallas medianas) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl lg:col-span-2"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -651,10 +823,7 @@
 								<h3 class="mb-6 text-2xl font-bold" style="color: {TEXT_100};">
 									Actividad de colaboradores
 								</h3>
-
-								<!-- Contenido interno ajustado para un layout de dos columnas interno si hay espacio -->
 								<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-									<!-- Card: Top Colaboradores (Look de aire) -->
 									<div
 										class="rounded-[18px] p-5 text-center"
 										style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
@@ -669,8 +838,6 @@
 											Aún no hay datos suficientes. ¡Animá a la comunidad a unirse!
 										</p>
 									</div>
-
-									<!-- Card: Actividades Recientes (Look de aire) -->
 									<div
 										class="rounded-[18px] p-5 text-center"
 										style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
@@ -689,15 +856,11 @@
 								</div>
 							</div>
 						</div>
-
-						<!-- E. Novedades, Reseñas y Aspectos a Mejorar (Nuevo layout de 2 columnas) -->
-						<!-- CAMBIO CLAVE: De lg:grid-cols-3 a md:grid-cols-2 para mayor anchura -->
 						<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-							<!-- 1. Últimas Reseñas (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -708,13 +871,10 @@
 										Promedio 4.8
 									</span>
 								</div>
-
-								<!-- Reseña Card -->
 								<div
 									class="rounded-[18px] p-6 text-center"
 									style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
 								>
-									<!-- Estrellas -->
 									<div class="mb-4 flex justify-center gap-1">
 										{#each Array(5) as _, i}
 											<Star
@@ -731,8 +891,6 @@
 										— Equipo de Conectando Corazones
 									</p>
 								</div>
-
-								<!-- CTA Sutil: Ver todas las reseñas (Modificado) -->
 								<a
 									href="#"
 									class="mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
@@ -741,12 +899,10 @@
 									Ver todas las reseñas <ChevronRight class="h-4 w-4" />
 								</a>
 							</div>
-
-							<!-- 2. Aspectos a Mejorar (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -754,8 +910,6 @@
 								<h3 class="mb-4 text-2xl font-bold" style="color: {TEXT_100};">
 									Aspectos a mejorar
 								</h3>
-
-								<!-- Mensaje de apoyo -->
 								<div
 									class="rounded-[18px] border-2 border-dashed p-6 text-center"
 									style="border-color: {WARNING_COLOR}; background: {BG_900}; box-shadow: 0 4px 12px {WARNING_COLOR}20;"
@@ -772,8 +926,6 @@
 										más.
 									</p>
 								</div>
-
-								<!-- CTA Sutil: Ver todas las sugerencias (Modificado) -->
 								<a
 									href="#"
 									class="mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
@@ -782,12 +934,10 @@
 									Ver todas las sugerencias <ChevronRight class="h-4 w-4" />
 								</a>
 							</div>
-
-							<!-- 3. Novedades (Ajustado para 1/1 en pantallas grandes si se usa 2 columnas) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl md:col-span-2"
 								style="
-                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    background: {BG_CARD};
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -797,7 +947,7 @@
 									class="rounded-[18px] border-2 border-dashed p-6"
 									style="
                                         border-color: {PRIMARY_300};
-                                        background: {BG_900}; /* Fondo de la tarjeta interna */ 
+                                        background: {BG_900};
                                         box-shadow: 0 4px 12px {PRIMARY_300}20;
                                     "
 								>
@@ -811,7 +961,6 @@
 										Explorá las nuevas funcionalidades pensadas para tu región.
 									</p>
 								</div>
-								<!-- CTA Sutil: Ver Últimas Noticias -->
 								<a
 									href="#"
 									class="mt-6 flex items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
@@ -822,7 +971,6 @@
 							</div>
 						</div>
 					{:else if viewMode === 'projects'}
-						<!-- Contenido principal para la vista de PROYECTOS -->
 						<div
 							class="flex h-full min-h-[70vh] flex-col space-y-8 rounded-[28px] p-10"
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
@@ -830,7 +978,6 @@
 							<h2 class="text-4xl font-extrabold" style="color: {TEXT_100};">
 								{selectedProject.name}
 							</h2>
-
 							<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 								<div class="space-y-4">
 									<p class="text-2xl font-bold" style="color: {PRIMARY_500};">Estado Actual</p>
@@ -861,8 +1008,6 @@
 									</p>
 								</div>
 							</div>
-
-							<!-- FIX: GRADIENT BUTTON - Usando variable que funciona correctamente para gradientes -->
 							<button
 								class="mt-6 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98] sm:w-auto"
 								style="
@@ -876,13 +1021,11 @@
 							</button>
 						</div>
 					{:else if viewMode === 'chat'}
-						<!-- Contenido de la conversación -->
 						<div
 							class="flex h-full min-h-[70vh] flex-col rounded-[28px] p-10"
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
 						>
 							<div class="flex-1 space-y-6 overflow-y-auto pr-2">
-								<!-- Mensaje del Usuario (Tú) - Fondo BG_900 (más oscuro) -->
 								<div
 									class="ml-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -898,8 +1041,6 @@
 										>12:30 PM</span
 									>
 								</div>
-
-								<!-- Mensaje del Colaborador (1) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -915,8 +1056,6 @@
 										>12:35 PM</span
 									>
 								</div>
-
-								<!-- Mensaje del Colaborador (2) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -932,8 +1071,6 @@
 										>12:42 PM</span
 									>
 								</div>
-
-								<!-- Mensaje del Colaborador (3) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -950,8 +1087,6 @@
 										>12:43 PM</span
 									>
 								</div>
-
-								<!-- Mensaje del Colaborador (4) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -967,8 +1102,6 @@
 										>12:44 PM</span
 									>
 								</div>
-
-								<!-- Mensaje del Usuario (Tú) - Fondo BG_900 (más oscuro) -->
 								<div
 									class="ml-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -985,26 +1118,20 @@
 									>
 								</div>
 							</div>
-							<!-- Área de entrada de mensaje -->
 							<div class="mt-6 border-t pt-6" style="border-color: {BORDER_SUBTLE};">
-								<!-- Input con fondo BG_900 -->
 								<input
 									type="text"
 									placeholder="Escribí un mensaje..."
 									class="w-full rounded-[18px] p-4 text-base focus:outline-none focus:ring-2"
 									style="
-                                        background: {BG_900}; /* Fondo oscuro para el input (BG_900) */
+                                        background: {BG_900};
                                         border: 1px solid {BORDER_SUBTLE};
-                                        color: {TEXT_100}; /* Texto de alto contraste */
-                                        caret-color: {PRIMARY_300}; /* Cursor visible */
+                                        color: {TEXT_100};
+                                        caret-color: {PRIMARY_300};
                                         --tw-ring-color: {RING_AZURE_10};
                                         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                                        /* Asegurar que el placeholder sea visible */
-                                        --webkit-input-placeholder-color: {TEXT_400};
-                                        --moz-placeholder-color: {TEXT_400};
                                     "
 								/>
-								<!-- Botón Enviar con gradiente -->
 								<button
 									class="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 									style="
@@ -1013,13 +1140,12 @@
                                         --tw-ring-color: {RING_AZURE_10};
                                     "
 								>
-									<ChevronRight class="h-5 w-5" />
 									Enviar Mensaje
+									<ChevronRight class="h-5 w-5" />
 								</button>
 							</div>
 						</div>
 					{:else if viewMode === 'profile'}
-						<!-- Contenido principal para la vista de PERFIL -->
 						<div
 							class="flex h-full min-h-[70vh] flex-col space-y-10 rounded-[28px] p-10"
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
@@ -1030,9 +1156,7 @@
 							>
 								Perfil de la Institución
 							</h2>
-
 							<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-								<!-- Estado de Verificación -->
 								<div
 									class="space-y-3 rounded-[18px] p-6"
 									style="background: {BG_900}; border: 2px solid {PRIMARY_500}; box-shadow: 0 0 12px {PRIMARY_500}30;"
@@ -1056,8 +1180,6 @@
 										Próxima verificación: Octubre 2026.
 									</p>
 								</div>
-
-								<!-- Información General -->
 								<div
 									class="space-y-4 rounded-[18px] p-6"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 4px 18px rgba(0,0,32,0.18);"
@@ -1078,80 +1200,10 @@
 									<p class="text-lg leading-relaxed" style="color: {TEXT_100};">
 										<span class="block text-sm font-bold" style="color: {TEXT_400};"
 											>Ubicación:</span
-										> Escuela primaria de Rosario, Santa Fe, Argentina.
+										> Escuela Esperanza, Rosario, Santa Fe, Argentina.
 									</p>
 								</div>
 							</div>
-
-							<!-- Opciones de Privacidad (Radio Buttons) -->
-							<div class="space-y-6">
-								<p class="text-2xl font-bold" style="color: {PRIMARY_500};">
-									Visibilidad de Datos de Contacto
-								</p>
-
-								{#each [{ label: 'Dirección de la escuela', key: 'address' }, { label: 'Correo electrónico (Email)', key: 'email' }, { label: 'Teléfono de contacto', key: 'phone' }] as item}
-									<div
-										class="flex flex-col items-start justify-between gap-4 rounded-[18px] p-5 md:flex-row md:items-center"
-										style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
-									>
-										<label
-											class="text-lg font-semibold"
-											for="{item.key}-privacy"
-											style="color: {TEXT_100};">{item.label}</label
-										>
-										<div class="flex flex-wrap gap-6">
-											<!-- Hidden -->
-											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
-												<input
-													type="radio"
-													id="{item.key}-hidden"
-													name="{item.key}-privacy"
-													value="hidden"
-													class="h-4 w-4"
-													style="border-color: {ERROR_COLOR}; background-color: {BG_CARD}; accent-color: {ERROR_COLOR};"
-												/>
-												<label for="{item.key}-hidden" style="color: {TEXT_400};"
-													>Oculto para todos</label
-												>
-											</div>
-											<!-- Public -->
-											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
-												<input
-													type="radio"
-													id="{item.key}-public"
-													name="{item.key}-privacy"
-													value="public"
-													class="h-4 w-4"
-													checked
-													style="border-color: {PRIMARY_500}; background-color: {BG_CARD}; accent-color: {PRIMARY_500};"
-												/>
-												<label for="{item.key}-public" style="color: {TEXT_400};"
-													>Visible para todos</label
-												>
-											</div>
-											<!-- Collaborators -->
-											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
-												<input
-													type="radio"
-													id="{item.key}-collaborators"
-													name="{item.key}-privacy"
-													value="collaborators"
-													class="h-4 w-4"
-													style="border-color: {WARNING_COLOR}; background-color: {BG_CARD}; accent-color: {WARNING_COLOR};"
-												/>
-												<label for="{item.key}-collaborators" style="color: {TEXT_400};"
-													>Solo colaboradores activos</label
-												>
-											</div>
-										</div>
-									</div>
-								{/each}
-							</div>
-
-							<!-- Botón Guardar Cambios (Gradiente) -->
 							<button
 								class="mt-8 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 								style="
@@ -1161,11 +1213,10 @@
                                 "
 							>
 								<Settings class="h-5 w-5" />
-								Guardar Cambios
+								Editar perfil
 							</button>
 						</div>
 					{:else if viewMode === 'settings'}
-						<!-- Contenido principal para la vista de CONFIGURACIÓN -->
 						<div
 							class="flex h-full min-h-[70vh] flex-col space-y-10 rounded-[28px] p-10"
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
@@ -1176,12 +1227,10 @@
 							>
 								Configuración de Privacidad
 							</h2>
-
 							<div class="space-y-6">
 								<p class="text-2xl font-bold" style="color: {PRIMARY_500};">
 									Visibilidad de Datos de Contacto
 								</p>
-
 								{#each [{ label: 'Dirección de la escuela', key: 'address' }, { label: 'Correo electrónico (Email)', key: 'email' }, { label: 'Teléfono de contacto', key: 'phone' }] as item}
 									<div
 										class="flex flex-col items-start justify-between gap-4 rounded-[18px] p-5 md:flex-row md:items-center"
@@ -1193,9 +1242,7 @@
 											style="color: {TEXT_100};">{item.label}</label
 										>
 										<div class="flex flex-wrap gap-6">
-											<!-- Hidden -->
 											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
 													id="{item.key}-hidden-settings"
@@ -1208,9 +1255,7 @@
 													>Oculto para todos</label
 												>
 											</div>
-											<!-- Public -->
 											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
 													id="{item.key}-public-settings"
@@ -1224,9 +1269,7 @@
 													>Visible para todos</label
 												>
 											</div>
-											<!-- Collaborators -->
 											<div class="flex items-center gap-2">
-												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
 													id="{item.key}-collaborators-settings"
@@ -1243,8 +1286,6 @@
 									</div>
 								{/each}
 							</div>
-
-							<!-- Botón Guardar Cambios (Gradiente) -->
 							<button
 								class="mt-8 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 								style="
@@ -1258,7 +1299,6 @@
 							</button>
 						</div>
 					{:else}
-						<!-- Contenido para otras vistas (General fallback) -->
 						<div
 							class="flex h-full min-h-[70vh] flex-col items-center justify-center space-y-10 rounded-[28px] p-10 text-center"
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
@@ -1295,36 +1335,26 @@
 </div>
 
 <style>
-	/* Aplicando la fuente Inter globalmente para la tipografía geométrica moderna */
 	.text-inter {
 		font-family: 'Inter', sans-serif;
 	}
-	/* Estilos para el placeholder en inputs */
 	input::placeholder {
 		color: var(--webkit-input-placeholder-color);
-		opacity: 1; /* Firefox */
+		opacity: 1;
 	}
 	input::-ms-input-placeholder {
 		color: var(--webkit-input-placeholder-color);
 	}
-	/* FIX: Asegura que el color del texto de las opciones en el select sea visible */
 	select option {
-		/* Usamos el valor hardcodeado de BG_CARD (#19203F) ya que las variables de script no funcionan directamente en bloques <style> sin preprocesadores. */
 		background: #19203f;
-		color: #eaf2ff; /* TEXT_100 para alto contraste */
+		color: #eaf2ff;
 	}
-	/* Media Query para el ajuste de diseño en pantallas grandes */
 	@media (min-width: 1024px) {
-		/* Ajustar el ancho del nav y el margen del main para el nuevo layout consolidado */
 		nav {
-			width: 320px;
+			width: 200px;
 		}
 		main {
-			margin-left: 320px !important;
+			margin-left: 200px !important;
 		}
-	}
-	/* Ocultar en el modo móvil solo el logo (ya que el nav cambia completamente de layout en mobile) */
-	.lg\:items-start .hidden.lg\:block {
-		display: block;
 	}
 </style>
