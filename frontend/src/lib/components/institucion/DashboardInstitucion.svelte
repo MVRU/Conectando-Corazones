@@ -46,10 +46,8 @@
 
 	// Gradientes predefinidos
 	const GRADIENT_CTA = `linear-gradient(180deg, ${PRIMARY_300} 0%, ${PRIMARY_500} 100%)`;
-	const GRADIENT_BG = `
-        radial-gradient(800px 520px at 72% 36%, rgba(66,143,255,0.08), transparent 60%), 
-        linear-gradient(180deg, ${BG_900} 0%, ${BG_850_GRADIENT_END} 100%)
-    `;
+	// FIX: Eliminando saltos de línea y espacios en blanco innecesarios en el template literal para asegurar la correcta aplicación del CSS.
+	const GRADIENT_BG = `radial-gradient(800px 520px at 72% 36%, rgba(66,143,255,0.08), transparent 60%), linear-gradient(180deg, ${BG_900} 0%, ${BG_850_GRADIENT_END} 100%)`;
 
 	// Colores funcionales (manteniendo los anteriores)
 	const WARNING_COLOR = '#FFC107'; // Amarillo/Oro para advertencias
@@ -59,13 +57,9 @@
 	// -------------------- LÓGICA DE ESTADO --------------------
 	type ViewMode = 'dashboard' | 'projects' | 'chat' | 'profile' | 'settings';
 	let viewMode: ViewMode = 'dashboard';
-	let isSidebarOpen: boolean = true;
 	let isMobileMenuOpen: boolean = false;
 
-	function toggleSidebar() {
-		isSidebarOpen = !isSidebarOpen;
-	}
-
+	// Se eliminan isRightSidebarOpen y toggleSidebar, ya que la barra derecha se integra en la izquierda.
 	function toggleMobileMenu() {
 		isMobileMenuOpen = !isMobileMenuOpen;
 	}
@@ -162,6 +156,14 @@
 	let selectedProject = projectItems[0];
 </script>
 
+<!-- Carga de fuente Inter para un look moderno -->
+<svelte:head>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
+		rel="stylesheet"
+	/>
+</svelte:head>
+
 <div
 	class="text-inter relative min-h-screen w-full font-sans antialiased"
 	style="
@@ -169,64 +171,77 @@
         color: {TEXT_100};
     "
 >
-	<!-- -------------------- BARRA DE NAVEGACIÓN PRINCIPAL (Fija y Lateral) -------------------- -->
+	<!-- -------------------- BARRA DE NAVEGACIÓN PRINCIPAL (Fija y Lateral IZQUIERDA) -------------------- -->
 	<nav
-		class="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col p-6 transition-transform duration-300 ease-out lg:w-[100px] lg:items-center lg:p-4 {isMobileMenuOpen
+		class="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col p-6 transition-transform duration-300 ease-out lg:w-[320px] lg:items-start lg:p-6 {isMobileMenuOpen
 			? 'translate-x-0'
 			: '-translate-x-full'} lg:translate-x-0"
 		style="
-            background: {BG_CARD}; /* Usando el nuevo color BG_CARD para la sidebar */
+            background: {BG_CARD};
             border-right: 1px solid {BORDER_SUBTLE};
             box-shadow: 0 4px 18px rgba(0,0,32,0.18); /* shadow-1 */
+            overflow-y: auto; /* Habilitar scroll para todo el contenido lateral */
         "
 	>
-		<!-- Links de Navegación -->
-		<div class="flex-1 space-y-3">
-			{#each navItems as item}
-				<button
-					class="group flex w-full items-center justify-start rounded-[18px] p-3 text-base font-semibold transition-all duration-200 hover:scale-[1.01] lg:justify-center lg:p-4"
-					class:shadow-lg={viewMode === item.view}
-					class:hover:bg-[#343954]={viewMode !== item.view}
-					class:ring-2={viewMode === item.view}
-					style:background={viewMode === item.view ? BG_900 : 'transparent'}
-					style:box-shadow={viewMode === item.view ? `0 0 10px ${PRIMARY_500}30` : 'none'}
-					style:border={viewMode === item.view
-						? `1px solid ${PRIMARY_500}`
-						: `1px solid transparent`}
-					style:color={viewMode === item.view ? PRIMARY_500 : TEXT_400}
-					style:--tw-ring-color={RING_AZURE_25}
-					on:click={() => (viewMode = item.view)}
-					title={item.label}
-				>
-					<svelte:component this={item.icon} class="h-6 w-6 shrink-0" />
-					<span class="ml-4 truncate lg:hidden">{item.label}</span>
-				</button>
-			{/each}
+		<!-- 1. Links de Navegación (Grid 3x2) -->
+		<div class="space-y-6">
+			<h3 class="text-xs font-medium uppercase tracking-widest" style="color: {TEXT_400};">
+				Navegación principal
+			</h3>
+			<div class="grid grid-cols-2 gap-3">
+				{#each navItems as item}
+					<button
+						class="group flex h-28 w-full flex-col items-center justify-center rounded-[18px] p-3 text-sm font-semibold transition-all duration-200 hover:scale-[1.03] hover:shadow-lg"
+						class:shadow-lg={viewMode === item.view}
+						class:hover:bg-[#343954]={viewMode !== item.view}
+						class:ring-2={viewMode === item.view}
+						style:background={viewMode === item.view ? BG_900 : 'transparent'}
+						style:box-shadow={viewMode === item.view ? `0 0 10px ${PRIMARY_500}30` : 'none'}
+						style:border={viewMode === item.view
+							? `1px solid ${PRIMARY_500}`
+							: `1px solid ${BORDER_SUBTLE}`}
+						style:color={viewMode === item.view ? PRIMARY_500 : TEXT_400}
+						style:--tw-ring-color={RING_AZURE_25}
+						on:click={() => (viewMode = item.view)}
+						title={item.label}
+					>
+						<svelte:component this={item.icon} class="mb-2 h-7 w-7 shrink-0" />
+						<span class="truncate">{item.label}</span>
+					</button>
+				{/each}
+			</div>
 		</div>
 
-		<!-- Perfil y Logout -->
-		<div class="mt-8 border-t pt-4" style="border-color: {BORDER_SUBTLE};">
-			<div
-				class="flex items-center justify-start gap-3 rounded-[18px] p-3 transition-colors duration-200 hover:bg-[#343954] lg:justify-center"
-			>
-				<div
-					class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-yellow-600 text-lg font-bold text-white shadow-md"
-				>
-					E
-				</div>
-				<div class="text-sm lg:hidden">
-					<p class="font-bold" style="color: {TEXT_100};">Escuela Esperanza</p>
-					<p class="text-xs" style="color: {TEXT_400};">Institución verificada</p>
-				</div>
+		<!-- 2. Sección de Acciones Rápidas (Movida del antiguo sidebar derecho) -->
+		<div class="mt-8 border-t pt-6" style="border-color: {BORDER_SUBTLE};">
+			<h3 class="mb-4 text-xs font-medium uppercase tracking-widest" style="color: {TEXT_400};">
+				Acciones rápidas
+			</h3>
+			<div class="grid grid-cols-1 gap-4">
+				{#each quickActions as action}
+					<!-- Botones de Acción Rápida - Alineado a la izquierda, badge a la derecha -->
+					<button
+						class="relative flex items-center justify-between rounded-[18px] px-4 py-3 text-base font-semibold transition-all duration-200 hover:scale-[1.01] hover:ring-2 focus:outline-none focus:ring-2 active:scale-[0.99]"
+						style="
+                            border: 1px solid {BORDER_SUBTLE};
+                            background: {BG_900}; /* Fondo de botón de acción rápida (BG_900) */
+                            color: {TEXT_100};
+                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                            --tw-ring-color: {RING_AZURE_10};
+                        "
+					>
+						<span class="flex-1 text-left">{action}</span>
+						<!-- Badge para Ver solicitudes (Actualizado a la derecha) -->{#if action === 'Ver solicitudes'}
+							<span
+								class="ml-4 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+								style="background: {ERROR_COLOR}; color: white; line-height: 1; box-shadow: 0 0 5px rgba(255, 92, 119, 0.5);"
+							>
+								3
+							</span>
+						{/if}
+					</button>
+				{/each}
 			</div>
-			<button
-				class="group mt-3 flex w-full items-center justify-start rounded-[18px] p-3 text-base font-semibold transition-all duration-200 hover:bg-[#343954] lg:justify-center lg:p-4"
-				style="color: {TEXT_400};"
-				title="Cerrar Sesión"
-			>
-				<LogOut class="h-6 w-6 shrink-0" style="color: {ERROR_COLOR};" />
-				<span class="ml-4 truncate lg:hidden">Cerrar Sesión</span>
-			</button>
 		</div>
 	</nav>
 
@@ -234,9 +249,10 @@
 		<div class="fixed inset-0 z-40 bg-black/60 lg:hidden" on:click={toggleMobileMenu}></div>
 	{/if}
 
-	<!-- -------------------- CONTENIDO PRINCIPAL (ajustado por el nav lateral) -------------------- -->
+	<!-- -------------------- CONTENIDO PRINCIPAL -------------------- -->
+	<!-- Ajuste del margen para el nuevo ancho del nav (320px) y remoción de margen derecho. -->
 	<main
-		class="ml-0 p-4 transition-all duration-300 ease-out lg:ml-[100px] lg:p-8"
+		class="ml-0 p-4 transition-all duration-300 ease-out lg:ml-[320px] lg:p-8"
 		style="min-height: 100vh;"
 	>
 		<!-- Botón de Menú Móvil (Hamburguesa) --><button
@@ -291,7 +307,8 @@
 
 				<!-- Botones de Acción y Notificación (Solo visibles en Dashboard) -->{#if viewMode === 'dashboard'}
 					<div class="flex flex-wrap items-center gap-4">
-						<!-- Botón Primario: Crear Proyecto (CTA con píldora y gradiente) --><button
+						<!-- Botón Primario: Crear Proyecto (CTA con píldora y gradiente) -->
+						<button
 							class="flex items-center gap-2 rounded-full px-8 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.03] focus:outline-none focus:ring-4 active:scale-[0.98]"
 							style="
                                 background: {GRADIENT_CTA};
@@ -303,10 +320,11 @@
 							Crear Proyecto
 						</button>
 
-						<!-- Botón de Notificación --><button
+						<!-- Botón de Notificación -->
+						<button
 							class="relative flex h-12 w-12 items-center justify-center rounded-[18px] transition-all duration-200 hover:scale-[1.05] focus:outline-none focus:ring-2 active:scale-[0.98]"
 							style="
-                                background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                background: {BG_CARD}; /* Fondo de la tarjeta/botón */
                                 border: 1px solid {BORDER_SUBTLE};
                                 box-shadow: 0 4px 18px rgba(0,0,32,0.18);
                                 color: {WARNING_COLOR};
@@ -325,21 +343,16 @@
 				{/if}
 			</header>
 
-			<!-- -------------------- 2. LAYOUT PRINCIPAL -------------------- -->
-			<div
-				class="grid grid-cols-1 gap-12 {isSidebarOpen &&
-				(viewMode === 'dashboard' || viewMode === 'chat' || viewMode === 'projects')
-					? 'xl:grid-cols-[1fr_300px]'
-					: 'xl:grid-cols-1'}"
-			>
-				<!-- Contenido Principal (izquierda - DASHBOARD & OTROS MODOS) -->
+			<!-- -------------------- 2. LAYOUT PRINCIPAL (Contenido dinámico) -------------------- -->
+			<div class="grid grid-cols-1 gap-12 xl:grid-cols-1">
+				<!-- Contenido Principal (única columna) -->
 				<div class="space-y-12">
 					{#if viewMode === 'dashboard'}
 						<!-- A. Filtros (Barra Sticky) -->
 						<div
 							class="sticky top-0 z-30 mb-10 rounded-b-xl pb-4 pt-1 transition-all duration-300"
 							style="
-                                background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                background: {BG_CARD}; /* Fondo del contenedor sticky */
                                 box-shadow: 0 4px 18px rgba(0,0,32,0.18);
                                 border-bottom: 1px solid {BORDER_SUBTLE};
                             "
@@ -354,22 +367,27 @@
 
 									{#each ['Período', 'Categoría', 'Estado', 'Tipo de ayuda', 'Ubicación'] as label}
 										<div class="relative">
+											<!-- SELECT ELEMENT: Fondo y estilo consistentes -->
 											<select
-												class="appearance-none rounded-[12px] px-5 py-2.5 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2"
+												class="rounded-[12px] px-5 py-2.5 text-sm font-medium transition-colors duration-200 focus:outline-none focus:ring-2"
 												style="
                                                     border: 1px solid {BORDER_SUBTLE};
-                                                    background: {BG_900}; /* Ajustado para mejor contraste */
+                                                    background: {BG_900}; /* Fondo oscuro al select (BG_900) */
                                                     color: {TEXT_300};
-                                                    padding-right: 2.5rem;
                                                     --tw-ring-color: {RING_AZURE_10};
+                                                    -webkit-appearance: none;
+                                                    -moz-appearance: none;
+                                                    appearance: none;
+                                                    padding-right: 2.5rem;
                                                 "
 												on:mouseenter={(e) => (e.currentTarget.style.borderColor = PRIMARY_500)}
 												on:mouseleave={(e) => (e.currentTarget.style.borderColor = BORDER_SUBTLE)}
 											>
 												<option disabled selected>{label}</option>
-												<option style="background: {BG_900}; color: {TEXT_100};">Opción A</option>
-												<option style="background: {BG_900}; color: {TEXT_100};">Opción B</option>
+												<option style="background: {BG_CARD}; color: {TEXT_100};">Opción A</option>
+												<option style="background: {BG_CARD}; color: {TEXT_100};">Opción B</option>
 											</select>
+											<!-- Flecha customizada para mayor consistencia visual -->
 											<span
 												class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
 												style="color: {TEXT_400};"
@@ -388,7 +406,7 @@
 								<div
 									class="rounded-[28px] p-7 shadow-xl transition-all duration-200 hover:scale-[1.02] hover:ring-2 active:scale-[1.0]"
 									style="
-                                        background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                        background: {BG_CARD}; /* Fondo de la tarjeta */
                                         border: 1px solid {BORDER_SUBTLE};
                                         box-shadow: 0 8px 28px rgba(0,0,0,0.22); /* shadow-2 */
                                         --tw-ring-color: {metric.color};
@@ -424,7 +442,10 @@
 							{/each}
 
 							<!-- Avance Global (Bloque de texto) -->
-							<div class="flex flex-col justify-center rounded-[28px] p-7 md:col-span-1">
+							<div
+								class="flex flex-col justify-center rounded-[28px] p-7 md:col-span-1"
+								style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
+							>
 								<h3 class="mb-2 text-2xl font-bold" style="color: {TEXT_100};">
 									Avance Global: <span style="color: {PRIMARY_500};">24%</span>
 								</h3>
@@ -476,12 +497,13 @@
 						</div>
 
 						<!-- D. Secciones Secundarias (Seguimiento de Objetivos, Tipos de Ayuda y Actividad de Colaboradores) -->
-						<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
-							<!-- 1. Seguimiento de Objetivos (1/3) -->
+						<!-- CAMBIO CLAVE: De md:grid-cols-3 a lg:grid-cols-2 para mayor anchura -->
+						<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+							<!-- 1. Seguimiento de Objetivos (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22); /* shadow-2 */
                                 "
@@ -525,15 +547,17 @@
 										class="mt-6 flex flex-wrap justify-end gap-3 border-t pt-4"
 										style="border-color: {BORDER_SUBTLE};"
 									>
+										<!-- Botón de acción: Fondo BG_CARD -->
 										<button
-											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#343954] hover:shadow-md focus:ring-2 active:scale-[0.98]"
-											style="color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
+											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#20284F] hover:shadow-md focus:ring-2 active:scale-[0.98]"
+											style="background: {BG_CARD}; color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
 										>
 											Subir evidencia
 										</button>
+										<!-- Botón de acción: Fondo BG_CARD -->
 										<button
-											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#343954] hover:shadow-md focus:ring-2 active:scale-[0.98]"
-											style="color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
+											class="rounded-full px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:bg-[#20284F] hover:shadow-md focus:ring-2 active:scale-[0.98]"
+											style="background: {BG_CARD}; color: {PRIMARY_500}; border: 1px solid {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
 										>
 											Actualizar progreso
 										</button>
@@ -545,7 +569,7 @@
 									class="mt-8 cursor-pointer rounded-[18px] border-2 border-dashed p-7 text-center transition-all duration-200 hover:scale-[1.01] hover:bg-[#20284F] active:scale-[0.99]"
 									style="
                                         border-color: {PRIMARY_300};
-                                        background: {BG_900}; /* Ajustado para mejor contraste */ 
+                                        background: {BG_900}; /* Fondo de la tarjeta */ 
                                         box-shadow: 0 4px 12px {PRIMARY_500}20;
                                     "
 								>
@@ -566,11 +590,11 @@
 								</a>
 							</div>
 
-							<!-- 2. Porcentaje de tipos de ayuda (1/3) -->
+							<!-- 2. Porcentaje de tipos de ayuda (1/2) -->
 							<div
 								class="rounded-[28px] p-7 text-center shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -590,7 +614,7 @@
 									<div
 										class="flex h-full w-full flex-col items-center justify-center rounded-full text-center shadow-inner"
 										style="
-                                            background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                            background: {BG_CARD}; /* Fondo de la tarjeta */
                                             border: 4px solid {BG_900}; 
                                         "
 									>
@@ -615,11 +639,11 @@
 								</div>
 							</div>
 
-							<!-- 3. Actividad de Colaboradores (1/3) -->
+							<!-- 3. Actividad de Colaboradores (1/2 - Se expande a 100% en pantallas medianas) -->
 							<div
-								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
+								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl lg:col-span-2"
 								style="
-                                    background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -628,85 +652,52 @@
 									Actividad de colaboradores
 								</h3>
 
-								<!-- Card: Top Colaboradores (Look de aire) -->
-								<div
-									class="mb-6 rounded-[18px] p-5 text-center"
-									style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
-								>
-									<h4 class="mb-3 text-lg font-bold" style="color: {PRIMARY_500};">
-										Top Colaboradores
-									</h4>
-									<div class="flex items-center justify-center py-6">
-										<Users class="h-10 w-10" style="color: {TEXT_400};" />
+								<!-- Contenido interno ajustado para un layout de dos columnas interno si hay espacio -->
+								<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+									<!-- Card: Top Colaboradores (Look de aire) -->
+									<div
+										class="rounded-[18px] p-5 text-center"
+										style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
+									>
+										<h4 class="mb-3 text-lg font-bold" style="color: {PRIMARY_500};">
+											Top Colaboradores
+										</h4>
+										<div class="flex items-center justify-center py-6">
+											<Users class="h-10 w-10" style="color: {TEXT_400};" />
+										</div>
+										<p class="text-sm" style="color: {TEXT_400};">
+											Aún no hay datos suficientes. ¡Animá a la comunidad a unirse!
+										</p>
 									</div>
-									<p class="text-sm" style="color: {TEXT_400};">
-										Aún no hay datos suficientes. ¡Animá a la comunidad a unirse!
-									</p>
-								</div>
 
-								<!-- Card: Actividades Recientes (Look de aire) -->
-								<div
-									class="rounded-[18px] p-5 text-center"
-									style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
-								>
-									<h4 class="mb-3 text-lg font-bold" style="color: {PRIMARY_300};">
-										Actividades más recientes
-									</h4>
-									<div class="flex items-center justify-center py-6">
-										<TrendingUp class="h-10 w-10 rotate-90" style="color: {TEXT_400};" />
+									<!-- Card: Actividades Recientes (Look de aire) -->
+									<div
+										class="rounded-[18px] p-5 text-center"
+										style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
+									>
+										<h4 class="mb-3 text-lg font-bold" style="color: {PRIMARY_300};">
+											Actividades más recientes
+										</h4>
+										<div class="flex items-center justify-center py-6">
+											<TrendingUp class="h-10 w-10 rotate-90" style="color: {TEXT_400};" />
+										</div>
+										<p class="text-sm" style="color: {TEXT_400};">
+											La actividad comenzará a registrarse tan pronto como inicies un nuevo
+											proyecto.
+										</p>
 									</div>
-									<p class="text-sm" style="color: {TEXT_400};">
-										La actividad comenzará a registrarse tan pronto como inicies un nuevo proyecto.
-									</p>
 								</div>
 							</div>
 						</div>
 
-						<!-- E. Novedades, Reseñas y Aspectos a Mejorar (Nuevo layout de 3 columnas) -->
-						<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-							<!-- 1. Novedades (Ajustado para 1/3) -->
+						<!-- E. Novedades, Reseñas y Aspectos a Mejorar (Nuevo layout de 2 columnas) -->
+						<!-- CAMBIO CLAVE: De lg:grid-cols-3 a md:grid-cols-2 para mayor anchura -->
+						<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+							<!-- 1. Últimas Reseñas (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD};
-                                    border: 1px solid {BORDER_SUBTLE};
-                                    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
-                                "
-							>
-								<h3 class="mb-4 text-2xl font-bold" style="color: {TEXT_100};">Novedades</h3>
-								<div
-									class="rounded-[18px] border-2 border-dashed p-6"
-									style="
-                                        border-color: {PRIMARY_300};
-                                        background: {BG_900}; 
-                                        box-shadow: 0 4px 12px {PRIMARY_300}20;
-                                    "
-								>
-									<p class="text-lg font-bold" style="color: {PRIMARY_300};">
-										¡Lanzamiento en Argentina!
-									</p>
-									<p class="mt-2 text-xl font-bold" style="color: {TEXT_100};">
-										Conectando Corazones ya está operativo en Rosario.
-									</p>
-									<p class="mt-1 text-base" style="color: {TEXT_300};">
-										Explorá las nuevas funcionalidades pensadas para tu región.
-									</p>
-								</div>
-								<!-- CTA Sutil: Ver Últimas Noticias -->
-								<a
-									href="#"
-									class="mt-6 flex items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
-									style="color: {PRIMARY_500};"
-								>
-									Ver últimas noticias <ChevronRight class="h-4 w-4" />
-								</a>
-							</div>
-
-							<!-- 2. Últimas Reseñas (Nuevo) -->
-							<div
-								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
-								style="
-                                    background: {BG_CARD};
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -751,11 +742,11 @@
 								</a>
 							</div>
 
-							<!-- 3. Aspectos a Mejorar (Nuevo) -->
+							<!-- 2. Aspectos a Mejorar (1/2) -->
 							<div
 								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
 								style="
-                                    background: {BG_CARD};
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
                                     border: 1px solid {BORDER_SUBTLE};
                                     box-shadow: 0 8px 28px rgba(0,0,0,0.22);
                                 "
@@ -789,6 +780,44 @@
 									style="color: {PRIMARY_500};"
 								>
 									Ver todas las sugerencias <ChevronRight class="h-4 w-4" />
+								</a>
+							</div>
+
+							<!-- 3. Novedades (Ajustado para 1/1 en pantallas grandes si se usa 2 columnas) -->
+							<div
+								class="rounded-[28px] p-7 shadow-xl transition-shadow duration-300 hover:shadow-2xl md:col-span-2"
+								style="
+                                    background: {BG_CARD}; /* Fondo de la tarjeta */
+                                    border: 1px solid {BORDER_SUBTLE};
+                                    box-shadow: 0 8px 28px rgba(0,0,0,0.22);
+                                "
+							>
+								<h3 class="mb-4 text-2xl font-bold" style="color: {TEXT_100};">Novedades</h3>
+								<div
+									class="rounded-[18px] border-2 border-dashed p-6"
+									style="
+                                        border-color: {PRIMARY_300};
+                                        background: {BG_900}; /* Fondo de la tarjeta interna */ 
+                                        box-shadow: 0 4px 12px {PRIMARY_300}20;
+                                    "
+								>
+									<p class="text-lg font-bold" style="color: {PRIMARY_300};">
+										¡Lanzamiento en Argentina!
+									</p>
+									<p class="mt-2 text-xl font-bold" style="color: {TEXT_100};">
+										Conectando Corazones ya está operativo en Rosario.
+									</p>
+									<p class="mt-1 text-base" style="color: {TEXT_300};">
+										Explorá las nuevas funcionalidades pensadas para tu región.
+									</p>
+								</div>
+								<!-- CTA Sutil: Ver Últimas Noticias -->
+								<a
+									href="#"
+									class="mt-6 flex items-center justify-end gap-1 text-sm font-semibold transition-colors duration-200 hover:text-white"
+									style="color: {PRIMARY_500};"
+								>
+									Ver últimas noticias <ChevronRight class="h-4 w-4" />
 								</a>
 							</div>
 						</div>
@@ -833,6 +862,7 @@
 								</div>
 							</div>
 
+							<!-- FIX: GRADIENT BUTTON - Usando variable que funciona correctamente para gradientes -->
 							<button
 								class="mt-6 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98] sm:w-auto"
 								style="
@@ -852,6 +882,7 @@
 							style="background: {BG_CARD}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 8px 28px rgba(0,0,0,0.22);"
 						>
 							<div class="flex-1 space-y-6 overflow-y-auto pr-2">
+								<!-- Mensaje del Usuario (Tú) - Fondo BG_900 (más oscuro) -->
 								<div
 									class="ml-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -868,9 +899,10 @@
 									>
 								</div>
 
+								<!-- Mensaje del Colaborador (1) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
-									style="background: #252A4A; border: 1px solid #4A567C; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
 								>
 									<p class="text-sm font-bold" style="color: {ERROR_COLOR};">
 										Lumina Cooperativa · Colaborador (Empresa)
@@ -884,9 +916,10 @@
 									>
 								</div>
 
+								<!-- Mensaje del Colaborador (2) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
-									style="background: #252A4A; border: 1px solid #4A567C; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
 								>
 									<p class="text-sm font-bold" style="color: {ERROR_COLOR};">
 										Sembrar Futuro · Colaborador (ONG)
@@ -899,9 +932,11 @@
 										>12:42 PM</span
 									>
 								</div>
+
+								<!-- Mensaje del Colaborador (3) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
-									style="background: #252A4A; border: 1px solid #4A567C; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
 								>
 									<p class="text-sm font-bold" style="color: {ERROR_COLOR};">
 										Lucas · Colaborador (Ing. Eléctrica de la UTN)
@@ -915,9 +950,11 @@
 										>12:43 PM</span
 									>
 								</div>
+
+								<!-- Mensaje del Colaborador (4) - Fondo BG_900 (FIX: Usando token) -->
 								<div
 									class="mr-auto max-w-[70%] rounded-[18px] p-4"
-									style="background: #252A4A; border: 1px solid #4A567C; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
 								>
 									<p class="text-sm font-bold" style="color: {ERROR_COLOR};">
 										Sofía · Colaboradora (Ing. Eléctrica de la UTN)
@@ -931,6 +968,7 @@
 									>
 								</div>
 
+								<!-- Mensaje del Usuario (Tú) - Fondo BG_900 (más oscuro) -->
 								<div
 									class="ml-auto max-w-[70%] rounded-[18px] p-4"
 									style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
@@ -949,18 +987,24 @@
 							</div>
 							<!-- Área de entrada de mensaje -->
 							<div class="mt-6 border-t pt-6" style="border-color: {BORDER_SUBTLE};">
+								<!-- Input con fondo BG_900 -->
 								<input
 									type="text"
 									placeholder="Escribí un mensaje..."
 									class="w-full rounded-[18px] p-4 text-base focus:outline-none focus:ring-2"
 									style="
-                                        background: {BG_900}; /* Ajustado para mejor contraste */
+                                        background: {BG_900}; /* Fondo oscuro para el input (BG_900) */
                                         border: 1px solid {BORDER_SUBTLE};
-                                        color: {TEXT_100};
+                                        color: {TEXT_100}; /* Texto de alto contraste */
+                                        caret-color: {PRIMARY_300}; /* Cursor visible */
                                         --tw-ring-color: {RING_AZURE_10};
                                         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                                        /* Asegurar que el placeholder sea visible */
+                                        --webkit-input-placeholder-color: {TEXT_400};
+                                        --moz-placeholder-color: {TEXT_400};
                                     "
 								/>
+								<!-- Botón Enviar con gradiente -->
 								<button
 									class="mt-3 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 									style="
@@ -1039,17 +1083,85 @@
 								</div>
 							</div>
 
+							<!-- Opciones de Privacidad (Radio Buttons) -->
+							<div class="space-y-6">
+								<p class="text-2xl font-bold" style="color: {PRIMARY_500};">
+									Visibilidad de Datos de Contacto
+								</p>
+
+								{#each [{ label: 'Dirección de la escuela', key: 'address' }, { label: 'Correo electrónico (Email)', key: 'email' }, { label: 'Teléfono de contacto', key: 'phone' }] as item}
+									<div
+										class="flex flex-col items-start justify-between gap-4 rounded-[18px] p-5 md:flex-row md:items-center"
+										style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);"
+									>
+										<label
+											class="text-lg font-semibold"
+											for="{item.key}-privacy"
+											style="color: {TEXT_100};">{item.label}</label
+										>
+										<div class="flex flex-wrap gap-6">
+											<!-- Hidden -->
+											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
+												<input
+													type="radio"
+													id="{item.key}-hidden"
+													name="{item.key}-privacy"
+													value="hidden"
+													class="h-4 w-4"
+													style="border-color: {ERROR_COLOR}; background-color: {BG_CARD}; accent-color: {ERROR_COLOR};"
+												/>
+												<label for="{item.key}-hidden" style="color: {TEXT_400};"
+													>Oculto para todos</label
+												>
+											</div>
+											<!-- Public -->
+											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
+												<input
+													type="radio"
+													id="{item.key}-public"
+													name="{item.key}-privacy"
+													value="public"
+													class="h-4 w-4"
+													checked
+													style="border-color: {PRIMARY_500}; background-color: {BG_CARD}; accent-color: {PRIMARY_500};"
+												/>
+												<label for="{item.key}-public" style="color: {TEXT_400};"
+													>Visible para todos</label
+												>
+											</div>
+											<!-- Collaborators -->
+											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
+												<input
+													type="radio"
+													id="{item.key}-collaborators"
+													name="{item.key}-privacy"
+													value="collaborators"
+													class="h-4 w-4"
+													style="border-color: {WARNING_COLOR}; background-color: {BG_CARD}; accent-color: {WARNING_COLOR};"
+												/>
+												<label for="{item.key}-collaborators" style="color: {TEXT_400};"
+													>Solo colaboradores activos</label
+												>
+											</div>
+										</div>
+									</div>
+								{/each}
+							</div>
+
+							<!-- Botón Guardar Cambios (Gradiente) -->
 							<button
-								class="mt-6 flex items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98] sm:w-auto"
+								class="mt-8 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 								style="
-                                    background: linear-gradient(135deg, {WARNING_COLOR} 0%, #FFD700 100%);
-                                    color: {BG_900};
-                                    box-shadow: 0 5px 20px {WARNING_COLOR}40;
-                                    --tw-ring-color: {WARNING_COLOR}30;
+                                    background: {GRADIENT_CTA};
+                                    box-shadow: 0 5px 20px {PRIMARY_500}40;
+                                    --tw-ring-color: {RING_AZURE_10};
                                 "
 							>
-								<User class="h-5 w-5" />
-								Editar Perfil
+								<Settings class="h-5 w-5" />
+								Guardar Cambios
 							</button>
 						</div>
 					{:else if viewMode === 'settings'}
@@ -1083,44 +1195,47 @@
 										<div class="flex flex-wrap gap-6">
 											<!-- Hidden -->
 											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
-													id="{item.key}-hidden"
-													name="{item.key}-privacy"
+													id="{item.key}-hidden-settings"
+													name="{item.key}-privacy-settings"
 													value="hidden"
 													class="h-4 w-4"
-													style="color: {ERROR_COLOR}; background-color: {ERROR_COLOR}; accent-color: {ERROR_COLOR};"
+													style="border-color: {ERROR_COLOR}; background-color: {BG_CARD}; accent-color: {ERROR_COLOR};"
 												/>
-												<label for="{item.key}-hidden" style="color: {TEXT_400};"
+												<label for="{item.key}-hidden-settings" style="color: {TEXT_400};"
 													>Oculto para todos</label
 												>
 											</div>
 											<!-- Public -->
 											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
-													id="{item.key}-public"
-													name="{item.key}-privacy"
+													id="{item.key}-public-settings"
+													name="{item.key}-privacy-settings"
 													value="public"
 													class="h-4 w-4"
 													checked
-													style="color: {PRIMARY_500}; background-color: {PRIMARY_500}; accent-color: {PRIMARY_500};"
+													style="border-color: {PRIMARY_500}; background-color: {BG_CARD}; accent-color: {PRIMARY_500};"
 												/>
-												<label for="{item.key}-public" style="color: {TEXT_400};"
+												<label for="{item.key}-public-settings" style="color: {TEXT_400};"
 													>Visible para todos</label
 												>
 											</div>
 											<!-- Collaborators -->
 											<div class="flex items-center gap-2">
+												<!-- Radio button con estilos de dark mode -->
 												<input
 													type="radio"
-													id="{item.key}-collaborators"
-													name="{item.key}-privacy"
+													id="{item.key}-collaborators-settings"
+													name="{item.key}-privacy-settings"
 													value="collaborators"
 													class="h-4 w-4"
-													style="color: {WARNING_COLOR}; background-color: {WARNING_COLOR}; accent-color: {WARNING_COLOR};"
+													style="border-color: {WARNING_COLOR}; background-color: {BG_CARD}; accent-color: {WARNING_COLOR};"
 												/>
-												<label for="{item.key}-collaborators" style="color: {TEXT_400};"
+												<label for="{item.key}-collaborators-settings" style="color: {TEXT_400};"
 													>Solo colaboradores activos</label
 												>
 											</div>
@@ -1129,6 +1244,7 @@
 								{/each}
 							</div>
 
+							<!-- Botón Guardar Cambios (Gradiente) -->
 							<button
 								class="mt-8 flex w-full items-center justify-center gap-2 rounded-full px-7 py-3 text-base font-bold text-white transition-all duration-200 hover:scale-[1.01] focus:outline-none focus:ring-4 active:scale-[0.98]"
 								style="
@@ -1173,204 +1289,8 @@
 						</div>
 					{/if}
 				</div>
-
-				<!-- Sidebar (Derecha): Acciones Rápidas / Conversaciones / Proyectos -->{#if isSidebarOpen && (viewMode === 'dashboard' || viewMode === 'chat' || viewMode === 'projects')}
-					<aside
-						class="sticky top-8 overflow-y-auto rounded-[28px] p-7 shadow-xl xl:self-start"
-						style="
-                            background: {BG_CARD}; /* Usando el nuevo color BG_CARD */
-                            border: 1px solid {BORDER_SUBTLE};
-                            box-shadow: 0 8px 28px rgba(0,0,0,0.22);
-                            max-height: 90vh;
-                        "
-					>
-						<!-- BOTÓN: Ocultar (Solo en Desktop) --><button
-							on:click={toggleSidebar}
-							class="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-xl shadow-xl transition-all duration-200 hover:scale-[1.1] focus:outline-none focus:ring-4 active:scale-[0.98] xl:flex"
-							style="
-                                background: {PRIMARY_500};
-                                border: 1px solid {PRIMARY_500};
-                                color: white;
-                                box-shadow: 0 0 8px {PRIMARY_500}50;
-                                --tw-ring-color: {RING_AZURE_25};
-                            "
-						>
-							<ChevronRight
-								class="h-6 w-6"
-								title="Ocultar {viewMode === 'dashboard'
-									? 'Acciones Rápidas'
-									: viewMode === 'chat'
-										? 'Chats'
-										: 'Proyectos'}"
-							/>
-						</button>
-
-						<!-- Título de la Sidebar -->
-						<h2
-							class="mb-6 border-b pb-3 text-2xl font-extrabold"
-							style="color: {TEXT_100}; border-color: {BORDER_SUBTLE}; padding-right: 3rem;"
-						>
-							{#if viewMode === 'dashboard'}
-								Acciones rápidas
-							{:else if viewMode === 'chat'}
-								Chats activos
-							{:else if viewMode === 'projects'}
-								Mis proyectos ({projectItems.length})
-							{/if}
-						</h2>
-
-						<!-- Contenido específico de la Sidebar -->{#if viewMode === 'dashboard'}
-							<!-- Acciones Rápidas (Vista Dashboard) -->
-							<div class="grid grid-cols-1 gap-4">
-								{#each quickActions as action}
-									<button
-										class="relative rounded-[18px] px-4 py-3 text-base font-semibold transition-all duration-200 hover:scale-[1.01] hover:ring-2 focus:outline-none focus:ring-2 active:scale-[0.99]"
-										style="
-                                            border: 1px solid {BORDER_SUBTLE};
-                                            background: {BG_900}; /* Ajustado */
-                                            color: {TEXT_100};
-                                            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                                            --tw-ring-color: {RING_AZURE_10};
-                                            text-align: left;
-                                        "
-									>
-										{action}
-										<!-- Badge para Ver solicitudes (Actualizado) -->{#if action === 'Ver solicitudes'}
-											<span
-												class="absolute right-4 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold"
-												style="background: {ERROR_COLOR}; color: white; line-height: 1; box-shadow: 0 0 5px rgba(255, 92, 119, 0.5);"
-											>
-												3
-											</span>
-										{/if}
-									</button>
-								{/each}
-							</div>
-						{:else if viewMode === 'chat'}
-							<!-- Interfaz de Chats (Vista Chat) -->
-							<div class="space-y-4">
-								{#each chatItems as chat}
-									<div
-										class="flex cursor-pointer items-center gap-4 rounded-[18px] p-3 transition-colors duration-200 hover:bg-[#20284F] focus:ring-2"
-										style="
-                                            border: 1px solid {chat.isUnread
-											? PRIMARY_500
-											: BORDER_SUBTLE};
-                                            background: {chat.isUnread
-											? BG_900
-											: BG_CARD}; /* Ajustado para chat activo */
-                                            box-shadow: {chat.isUnread
-											? `0 3px 10px ${PRIMARY_500}30`
-											: 'none'}; 
-                                            --tw-ring-color: {RING_AZURE_10};
-                                        "
-									>
-										<!-- Avatar Placeholder -->
-										<div
-											class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-base font-bold"
-											style="
-                                                background: {PRIMARY_500};
-                                                color: white;
-                                                box-shadow: 0 0 8px {PRIMARY_500}40;
-                                            "
-										>
-											{chat.name.charAt(0)}
-											<span
-												class="absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2"
-												style="background: {chat.statusColor}; ring-color: {BG_CARD};"
-												title="Estado"
-											></span>
-										</div>
-										<div class="flex-1 overflow-hidden">
-											<p
-												class="truncate font-semibold"
-												style="color: {chat.isUnread ? TEXT_100 : TEXT_300};"
-											>
-												{chat.name}
-											</p>
-											<p
-												class="truncate text-sm"
-												style="color: {chat.isUnread ? TEXT_300 : TEXT_400};"
-											>
-												{chat.lastMessage}
-											</p>
-										</div>
-										<div class="flex flex-col items-end">
-											<span class="shrink-0 text-xs" style="color: {TEXT_400};">{chat.time}</span>
-											{#if chat.isUnread}
-												<span
-													class="mt-1 h-2 w-2 rounded-full"
-													style="background: {ERROR_COLOR};"
-													title="Mensaje no leído"
-												></span>
-											{/if}
-										</div>
-									</div>
-								{/each}
-								<button
-									class="mt-4 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-base font-semibold transition-colors duration-200 hover:bg-[#20284F] focus:ring-2 active:scale-[0.99]"
-									style="border: 1px solid {BORDER_SUBTLE}; color: {PRIMARY_500}; --tw-ring-color: {RING_AZURE_10};"
-								>
-									<Plus class="h-5 w-5" /> Iniciar nuevo chat
-								</button>
-							</div>
-						{:else if viewMode === 'projects'}
-							<!-- Lista de Proyectos (Vista Projects) -->
-							<div class="space-y-4">
-								{#each projectItems as project}
-									<button
-										on:click={() => (selectedProject = project)}
-										class="flex w-full cursor-pointer items-center gap-4 rounded-[18px] p-3 text-left transition-colors duration-200 hover:bg-[#20284F] focus:ring-2 active:scale-[0.99]"
-										style="
-                                            border: 1px solid {project === selectedProject
-											? PRIMARY_500
-											: BORDER_SUBTLE};
-                                            background: {project === selectedProject
-											? BG_900
-											: BG_CARD}; /* Ajustado para proyecto activo */
-                                            box-shadow: {project === selectedProject
-											? `0 3px 10px ${PRIMARY_500}30`
-											: 'none'};
-                                            --tw-ring-color: {RING_AZURE_10};
-                                        "
-									>
-										<div class="flex-1 overflow-hidden">
-											<p class="truncate font-semibold" style="color: {TEXT_100};">
-												{project.name}
-											</p>
-											<p class="truncate text-sm" style="color: {project.statusColor};">
-												{project.status}
-											</p>
-										</div>
-										<div class="flex flex-col items-end">
-											<span class="shrink-0 text-xs" style="color: {TEXT_400};">{project.date}</span
-											>
-										</div>
-									</button>
-								{/each}
-							</div>
-						{/if}
-					</aside>
-				{/if}
 			</div>
 		</section>
-
-		<!-- Botón fijo para restaurar el sidebar cuando está oculto (Solo en Desktop) -->{#if (viewMode === 'dashboard' || viewMode === 'projects' || viewMode === 'chat') && !isSidebarOpen}
-			<div class="fixed right-0 top-1/2 z-50 hidden -translate-y-1/2 p-4 xl:block">
-				<button
-					on:click={toggleSidebar}
-					class="flex h-16 w-8 items-center justify-center rounded-l-[18px] rounded-r-none shadow-xl transition-all duration-200 hover:scale-x-[1.1] focus:outline-none focus:ring-4 active:scale-[0.98]"
-					style="
-                        background: {PRIMARY_500};
-                        box-shadow: 0 5px 15px {PRIMARY_500}50;
-                        --tw-ring-color: {RING_AZURE_25};
-                        color: white;
-                    "
-				>
-					<ChevronLeft class="h-6 w-6" title="Expandir Acciones Rápidas" />
-				</button>
-			</div>
-		{/if}
 	</main>
 </div>
 
@@ -1378,5 +1298,33 @@
 	/* Aplicando la fuente Inter globalmente para la tipografía geométrica moderna */
 	.text-inter {
 		font-family: 'Inter', sans-serif;
+	}
+	/* Estilos para el placeholder en inputs */
+	input::placeholder {
+		color: var(--webkit-input-placeholder-color);
+		opacity: 1; /* Firefox */
+	}
+	input::-ms-input-placeholder {
+		color: var(--webkit-input-placeholder-color);
+	}
+	/* FIX: Asegura que el color del texto de las opciones en el select sea visible */
+	select option {
+		/* Usamos el valor hardcodeado de BG_CARD (#19203F) ya que las variables de script no funcionan directamente en bloques <style> sin preprocesadores. */
+		background: #19203f;
+		color: #eaf2ff; /* TEXT_100 para alto contraste */
+	}
+	/* Media Query para el ajuste de diseño en pantallas grandes */
+	@media (min-width: 1024px) {
+		/* Ajustar el ancho del nav y el margen del main para el nuevo layout consolidado */
+		nav {
+			width: 320px;
+		}
+		main {
+			margin-left: 320px !important;
+		}
+	}
+	/* Ocultar en el modo móvil solo el logo (ya que el nav cambia completamente de layout en mobile) */
+	.lg\:items-start .hidden.lg\:block {
+		display: block;
 	}
 </style>
