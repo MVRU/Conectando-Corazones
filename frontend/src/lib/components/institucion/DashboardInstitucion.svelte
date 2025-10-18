@@ -31,6 +31,7 @@
 	// Primarios (acción/acento)
 	const PRIMARY_300 = '#5ED4FB';
 	const PRIMARY_500 = '#0B98FA';
+	const GREEN = '#34d399';
 
 	// Tipografía en dark
 	const TEXT_100 = '#EAF2FF';
@@ -99,7 +100,7 @@
 			name: 'Luz para Aprender',
 			status: 'En Curso',
 			date: '30/10/2025',
-			statusColor: ERROR_COLOR
+			statusColor: GREEN
 		},
 		{
 			id: 2,
@@ -737,7 +738,7 @@
 									<h4 class="mb-1 text-xl font-bold" style="color: {TEXT_100};">
 										Luz para Aprender
 									</h4>
-									<p class="text-sm font-semibold" style="color: {ERROR_COLOR};">En Curso</p>
+									<p class="text-sm font-semibold" style="color: {GREEN};">En Curso</p>
 
 									<div class="mt-4 space-y-3">
 										{#each luzParaAprenderProgress as goal}
@@ -1056,7 +1057,7 @@
                                 "
 							>
 								<DownloadCloud class="h-5 w-5" />
-								Ver Evidencia y Documentación
+								Ver Evidencia
 							</button>
 						</div>
 					{:else if viewMode === 'chat'}
