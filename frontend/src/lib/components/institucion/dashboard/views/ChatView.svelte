@@ -1,8 +1,9 @@
 <script lang="ts">
-	import { afterUpdate } from 'svelte';
-	import { Send } from 'lucide-svelte';
+	import { afterUpdate, onDestroy, onMount } from 'svelte';
+	import { FileText, Image, Info, Send, Users } from 'lucide-svelte';
 
-	import type { ChatItem, ChatMessage, ChatThread } from '../types';
+	import { chatMetadata } from '../data';
+	import type { ChatItem, ChatMessage, ChatMetadata, ChatThread } from '../types';
 	import { BG_CARD, BORDER_SUBTLE, PRIMARY_500, TEXT_100, TEXT_300, TEXT_400 } from '../tokens';
 
 	export let chatSummary: ChatItem | null = null;
@@ -12,22 +13,42 @@
 	let conversationContainer: HTMLDivElement | null = null;
 	let conversationMessages: ChatMessage[] = [];
 	let lastThreadId: number | null = null;
+	let metadata: ChatMetadata | null = null;
+	let galleryAttachments: ChatMetadata['attachments'] = [];
+	let evidenceAttachments: ChatMetadata['attachments'] = [];
+	let isPanelOpen = false;
+
+	const panelId = 'chat-details-panel';
+	const desktopMediaQuery = '(min-width: 1024px)';
+	let mediaList: MediaQueryList | null = null;
+	let mediaListener: ((event: MediaQueryListEvent) => void) | null = null;
+	let removeMediaListener: (() => void) | null = null;
 
 	const messageFormatter = new Intl.DateTimeFormat('es-CO', {
 		dateStyle: 'medium',
 		timeStyle: 'short'
 	});
+	const attachmentFormatter = new Intl.DateTimeFormat('es-CO', {
+		dateStyle: 'medium'
+	});
 
-	// -*- Alineamos el estado local con la conversación activa solo cuando cambia el hilo seleccionado.
 	$: {
-		const currentId = thread?.chatId ?? null;
+		const currentId = thread?.chatId ?? chatSummary?.id ?? null;
 		if (currentId !== lastThreadId) {
 			conversationMessages = thread ? [...thread.messages] : [];
 			lastThreadId = currentId;
+			metadata = currentId ? (chatMetadata[currentId] ?? null) : null;
+			galleryAttachments = metadata
+				? metadata.attachments.filter((item) => item.category === 'galeria')
+				: [];
+			evidenceAttachments = metadata
+				? metadata.attachments.filter((item) => item.category === 'evidencia')
+				: [];
 		}
 	}
 
 	$: hasMessages = conversationMessages.length > 0;
+	$: participantCount = metadata ? 1 /* institución */ + (metadata.collaborators?.length ?? 0) : 0;
 
 	afterUpdate(() => {
 		if (!conversationContainer) return;
@@ -37,9 +58,43 @@
 		}
 	});
 
+	onMount(() => {
+		if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+		mediaList = window.matchMedia(desktopMediaQuery);
+		isPanelOpen = mediaList.matches;
+
+		mediaListener = (event: MediaQueryListEvent) => {
+			isPanelOpen = event.matches;
+		};
+
+		if (!mediaList) return;
+
+		if (typeof mediaList.addEventListener === 'function') {
+			mediaList.addEventListener('change', mediaListener);
+			removeMediaListener = () => mediaList?.removeEventListener('change', mediaListener!);
+		} else if (typeof mediaList.addListener === 'function') {
+			mediaList.addListener(mediaListener);
+			removeMediaListener = () => mediaList?.removeListener(mediaListener!);
+		}
+	});
+
+	onDestroy(() => {
+		if (removeMediaListener) {
+			removeMediaListener();
+		}
+	});
+
 	function formatTimestamp(isoDate: string): string {
 		try {
 			return messageFormatter.format(new Date(isoDate));
+		} catch (error) {
+			return isoDate;
+		}
+	}
+
+	function formatAttachmentDate(isoDate: string): string {
+		try {
+			return attachmentFormatter.format(new Date(isoDate));
 		} catch (error) {
 			return isoDate;
 		}
@@ -59,6 +114,24 @@
 
 		conversationMessages = [...conversationMessages, nextMessage];
 		messageDraft = '';
+	}
+
+	function getParticipantLabel(kind: ChatMetadata['institution']['kind']): string {
+		switch (kind) {
+			case 'empresa':
+				return 'Empresa';
+			case 'ong':
+				return 'ONG';
+			case 'voluntario':
+				return 'Voluntariado';
+			default:
+				return 'Institución';
+		}
+	}
+
+	function togglePanel() {
+		if (!metadata) return;
+		isPanelOpen = !isPanelOpen;
 	}
 </script>
 
@@ -80,7 +153,7 @@
 		aria-live="polite"
 	>
 		<header
-			class="flex items-center justify-between gap-4 border-b px-6 py-5"
+			class="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-5"
 			style={`border-color: ${BORDER_SUBTLE};`}
 		>
 			<div class="flex items-center gap-4">
@@ -96,70 +169,158 @@
 					<span class="text-sm" style="color: {TEXT_400};">Último mensaje: {chatSummary.time}</span>
 				</div>
 			</div>
-			<span class="hidden text-sm font-medium md:inline" style={`color: ${TEXT_300};`}>
-				Conversación segura y encriptada
-			</span>
+			<div class="flex items-center gap-3">
+				{#if metadata}
+					<span
+						class="hidden text-sm font-medium text-white/70 md:inline-flex md:items-center md:gap-2"
+					>
+						<Users class="h-4 w-4" aria-hidden="true" />
+						{participantCount} integrantes
+					</span>
+				{/if}
+				<button
+					class="details-toggle"
+					type="button"
+					on:click={togglePanel}
+					aria-expanded={metadata ? isPanelOpen : false}
+					aria-controls={panelId}
+					disabled={!metadata}
+				>
+					<Info class="h-4 w-4" aria-hidden="true" />
+					<span>Detalles del chat</span>
+				</button>
+			</div>
 		</header>
 
-		<div class="flex h-full flex-1 flex-col gap-4 px-4 py-6 md:px-6">
-			<div
-				class="conversation space-y-4 overflow-y-auto pr-2"
-				bind:this={conversationContainer}
-				role="list"
-			>
-				{#if !hasMessages}
-					<p
-						class="rounded-2xl bg-black/20 px-4 py-3 text-center text-sm"
-						style={`color: ${TEXT_300};`}
-					>
-						No hay mensajes registrados para este chat aún.
-					</p>
-				{:else}
-					{#each conversationMessages as message (message.id)}
-						<article
-							class="message-item"
-							class:message-item--outgoing={message.direction === 'outgoing'}
-							class:message-item--incoming={message.direction === 'incoming'}
-							role="listitem"
+		<div class="chat-body">
+			<div class="chat-main">
+				<div class="conversation" bind:this={conversationContainer} role="list">
+					{#if !hasMessages}
+						<p class="empty-conversation">No hay mensajes registrados para este chat aún.</p>
+					{:else}
+						{#each conversationMessages as message (message.id)}
+							<article
+								class="message-item"
+								class:message-item--outgoing={message.direction === 'outgoing'}
+								class:message-item--incoming={message.direction === 'incoming'}
+								role="listitem"
+							>
+								<div class="message-meta">
+									<span class="message-author">{message.author}</span>
+									<time class="message-timestamp" datetime={message.sentAt}>
+										{formatTimestamp(message.sentAt)}
+									</time>
+								</div>
+								<p class="message-content">{message.content}</p>
+							</article>
+						{/each}
+					{/if}
+				</div>
+
+				<form class="message-form" on:submit|preventDefault={handleSend}>
+					<label class="sr-only" for="chat-message-input">Escribe un mensaje</label>
+					<div class="message-input">
+						<textarea
+							id="chat-message-input"
+							bind:value={messageDraft}
+							class="message-textarea"
+							placeholder="Escribe un mensaje"
+							rows="1"
+							on:keydown={(event) => {
+								if (event.key === 'Enter' && !event.shiftKey) {
+									event.preventDefault();
+									handleSend();
+								}
+							}}
+						></textarea>
+						<button
+							class="send-button"
+							style={`background: ${PRIMARY_500}; color: ${TEXT_100}; box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);`}
+							type="submit"
+							aria-label="Enviar mensaje"
 						>
-							<div class="message-meta">
-								<span class="message-author">{message.author}</span>
-								<time class="message-timestamp" datetime={message.sentAt}>
-									{formatTimestamp(message.sentAt)}
-								</time>
-							</div>
-							<p class="message-content">{message.content}</p>
-						</article>
-					{/each}
-				{/if}
+							<Send class="h-5 w-5" aria-hidden="true" />
+						</button>
+					</div>
+				</form>
 			</div>
 
-			<form class="message-form" on:submit|preventDefault={handleSend}>
-				<label class="sr-only" for="chat-message-input">Escribe un mensaje</label>
-				<div class="message-input">
-					<textarea
-						id="chat-message-input"
-						bind:value={messageDraft}
-						class="message-textarea"
-						placeholder="Escribe un mensaje"
-						rows="1"
-						on:keydown={(event) => {
-							if (event.key === 'Enter' && !event.shiftKey) {
-								event.preventDefault();
-								handleSend();
-							}
-						}}
-					></textarea>
-					<button
-						class="send-button"
-						style={`background: ${PRIMARY_500}; color: ${TEXT_100}; box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);`}
-						type="submit"
-						aria-label="Enviar mensaje"
-					>
-						<Send class="h-5 w-5" aria-hidden="true" />
-					</button>
-				</div>
-			</form>
+			{#if metadata}
+				<aside
+					id={panelId}
+					class="chat-panel"
+					hidden={!isPanelOpen}
+					aria-hidden={!isPanelOpen}
+					aria-label="Información del chat"
+				>
+					<div class="panel-section">
+						<div class="panel-section__header">
+							<Users class="h-5 w-5" aria-hidden="true" />
+							<h3>Integrantes</h3>
+						</div>
+						<dl class="panel-list">
+							<div class="panel-card">
+								<dt>
+									<span class="panel-chip">{getParticipantLabel(metadata.institution.kind)}</span>
+									{metadata.institution.name}
+								</dt>
+								<dd>{metadata.institution.description}</dd>
+								<dd class="panel-contact">{metadata.institution.contact}</dd>
+							</div>
+							{#each metadata.collaborators as participant (participant.id)}
+								<div class="panel-card">
+									<dt>
+										<span class="panel-chip">{getParticipantLabel(participant.kind)}</span>
+										{participant.name}
+									</dt>
+									<dd>{participant.description}</dd>
+									<dd class="panel-contact">{participant.contact}</dd>
+								</div>
+							{/each}
+						</dl>
+					</div>
+
+					<div class="panel-section">
+						<div class="panel-section__header">
+							<Image class="h-5 w-5" aria-hidden="true" />
+							<h3>Galería</h3>
+						</div>
+						<ul class="panel-list" role="list">
+							{#each galleryAttachments as file (file.id)}
+								<li class="panel-card">
+									<p class="panel-card__title">{file.name}</p>
+									<p class="panel-card__meta">{file.description}</p>
+									<p class="panel-card__date">
+										Actualizado {formatAttachmentDate(file.uploadedAt)}
+									</p>
+								</li>
+							{:else}
+								<li class="panel-empty">Sin archivos de galería cargados.</li>
+							{/each}
+						</ul>
+					</div>
+
+					<div class="panel-section">
+						<div class="panel-section__header">
+							<FileText class="h-5 w-5" aria-hidden="true" />
+							<h3>Evidencias</h3>
+						</div>
+						<ul class="panel-list" role="list">
+							{#each evidenceAttachments as file (file.id)}
+								<li class="panel-card">
+									<p class="panel-card__title">{file.name}</p>
+									<p class="panel-card__meta">{file.description}</p>
+									<p class="panel-card__date">
+										Actualizado {formatAttachmentDate(file.uploadedAt)}
+									</p>
+								</li>
+							{:else}
+								<li class="panel-empty">Sin evidencias registradas hasta el momento.</li>
+							{/each}
+						</ul>
+					</div>
+				</aside>
+			{/if}
 		</div>
 	</section>
 {/if}
@@ -169,8 +330,58 @@
 		min-height: clamp(480px, 68vh, 640px);
 	}
 
+	.details-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.55rem 1rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: rgba(13, 20, 48, 0.6);
+		color: var(--bubble-text);
+		font-size: 0.85rem;
+		font-weight: 600;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.details-toggle:hover:not(:disabled) {
+		transform: translateY(-1px);
+		border-color: rgba(255, 255, 255, 0.24);
+		box-shadow: 0 10px 24px rgba(11, 152, 250, 0.2);
+	}
+
+	.details-toggle:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
+	.chat-body {
+		display: flex;
+		flex-direction: column;
+		gap: 1.75rem;
+		padding: 1.5rem;
+	}
+
+	.chat-main {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		flex: 1;
+		min-height: 0;
+	}
+
 	.conversation {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		padding-right: 0.75rem;
+		max-height: clamp(280px, 48vh, 420px);
+		overflow-y: auto;
 		scrollbar-width: thin;
+		flex: 1;
 	}
 
 	.conversation::-webkit-scrollbar {
@@ -180,6 +391,16 @@
 	.conversation::-webkit-scrollbar-thumb {
 		background: rgba(255, 255, 255, 0.18);
 		border-radius: 9999px;
+	}
+
+	.empty-conversation {
+		align-self: center;
+		padding: 0.75rem 1rem;
+		border-radius: 1rem;
+		background: rgba(8, 12, 34, 0.6);
+		color: var(--bubble-muted);
+		font-size: 0.9rem;
+		text-align: center;
 	}
 
 	.message-item {
@@ -192,6 +413,119 @@
 		background: linear-gradient(180deg, rgba(18, 26, 63, 0.75), rgba(18, 26, 63, 0.92));
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		color: var(--bubble-text);
+	}
+
+	.chat-panel {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding: 1.25rem;
+		border-radius: 20px;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: linear-gradient(160deg, rgba(15, 23, 55, 0.85), rgba(9, 13, 38, 0.95));
+		box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32);
+		max-height: clamp(280px, 48vh, 420px);
+		overflow-y: auto;
+		scrollbar-width: thin;
+		min-height: 0;
+	}
+
+	.chat-panel::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	.chat-panel::-webkit-scrollbar-thumb {
+		background: rgba(255, 255, 255, 0.18);
+		border-radius: 9999px;
+	}
+
+	.panel-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.panel-section + .panel-section {
+		border-top: 1px solid rgba(255, 255, 255, 0.06);
+		padding-top: 1.25rem;
+	}
+
+	.panel-section__header {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: var(--bubble-text);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+	}
+
+	.panel-section__header h3 {
+		font-size: inherit;
+		font-weight: inherit;
+	}
+
+	.panel-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.panel-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.45rem;
+		padding: 0.85rem 1rem;
+		border-radius: 16px;
+		background: rgba(12, 18, 45, 0.7);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.panel-card__title {
+		font-weight: 600;
+		color: var(--bubble-text);
+	}
+
+	.panel-card__meta,
+	.panel-contact {
+		color: var(--bubble-muted);
+		font-size: 0.85rem;
+		line-height: 1.4;
+	}
+
+	.panel-card__date {
+		color: var(--bubble-meta);
+		font-size: 0.78rem;
+	}
+
+	.panel-contact {
+		font-weight: 600;
+	}
+
+	.panel-chip {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.15rem 0.55rem;
+		margin-right: 0.5rem;
+		border-radius: 9999px;
+		background: rgba(11, 152, 250, 0.16);
+		border: 1px solid rgba(11, 152, 250, 0.35);
+		color: var(--bubble-text);
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.panel-empty {
+		padding: 0.75rem 1rem;
+		border-radius: 12px;
+		background: rgba(8, 12, 34, 0.55);
+		color: var(--bubble-muted);
+		font-size: 0.85rem;
+		text-align: center;
 	}
 
 	.message-item--outgoing {
@@ -282,6 +616,33 @@
 
 	.send-button:active {
 		transform: scale(0.96);
+	}
+
+	@media (min-width: 768px) {
+		.chat-body {
+			padding: 1.75rem 2rem;
+		}
+
+		.conversation,
+		.chat-panel {
+			max-height: clamp(360px, 52vh, 520px);
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.chat-body {
+			flex-direction: row;
+			align-items: stretch;
+		}
+
+		.conversation,
+		.chat-panel {
+			max-height: none;
+		}
+
+		.chat-panel {
+			flex: 0 0 320px;
+		}
 	}
 
 	@media (max-width: 640px) {

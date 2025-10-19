@@ -37,12 +37,32 @@
 	const DESKTOP_TOP_OFFSET = 'clamp(1rem, 2vw, 1.5rem)';
 	const MIN_DESKTOP_WIDTH = 200;
 	const MAX_DESKTOP_WIDTH = 360;
+	const DEFAULT_NAV_COLUMNS = 4;
+	const COMPACT_NAV_COLUMNS = 2;
+	const NAV_COMPACT_BREAKPOINT = 220;
+	const SECONDARY_SECTION_LABELS: Record<ViewMode, string> = {
+		dashboard: 'Acciones rápidas',
+		projects: 'Proyectos activos',
+		chat: 'Conversaciones',
+		profile: 'Acciones rápidas',
+		settings: 'Acciones rápidas'
+	};
 	let isResizing = false;
 	let startX = 0;
 	let startWidth = 0;
 	let previousUserSelect: string | null = null;
 	let previousCursor: string | null = null;
+	let navGridColumns = DEFAULT_NAV_COLUMNS;
+	let secondarySectionLabel = SECONDARY_SECTION_LABELS.dashboard;
+	let isChatView = false;
+	let isProjectsView = false;
 
+	$: navGridColumns =
+		sidebarWidth <= NAV_COMPACT_BREAKPOINT ? COMPACT_NAV_COLUMNS : DEFAULT_NAV_COLUMNS;
+	$: secondarySectionLabel =
+		SECONDARY_SECTION_LABELS[viewMode] ?? SECONDARY_SECTION_LABELS.dashboard;
+	$: isChatView = viewMode === 'chat';
+	$: isProjectsView = viewMode === 'projects';
 	function handleViewChange(nextView: ViewMode) {
 		dispatch('changeView', nextView);
 	}
@@ -115,21 +135,22 @@
 >
 	<!-- * Ajustamos el padding con safe-area para que la superposición móvil respete notches y no sea tapada por el header. -->
 	<div
-		class="flex h-full w-full flex-col gap-8 px-6 pb-6 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:px-4 lg:pt-4"
+		class="flex h-full w-full flex-col gap-6 px-6 pb-6 pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] lg:px-4 lg:pt-4"
 		data-testid="navigation-sidebar-content"
 	>
-		<div class="w-full space-y-4">
+		<div class="w-full space-y-3">
 			<h3
 				class="text-xs font-medium uppercase tracking-widest lg:hidden"
 				style="color: {TEXT_400};"
 			>
 				Navegación principal
 			</h3>
-			<!-- * El grid 4x2 evita scroll horizontal en desktop estrecho y mantiene memoria muscular en móvil. -->
+			<!-- * Ajustamos el grid para que degrade columnas manteniendo accesos visibles incluso en anchos estrechos. -->
 			<div
-				class="grid grid-cols-4 grid-rows-2 justify-items-center gap-3 rounded-3xl p-2 lg:gap-4"
+				class="nav-grid rounded-3xl p-2"
 				role="group"
 				aria-label="Navegación principal compacta"
+				style={`--nav-columns:${navGridColumns};`}
 			>
 				{#each navItems as item (item.view)}
 					<button
@@ -157,22 +178,16 @@
 			</div>
 		</div>
 
-		<div class="w-full border-t pt-6" style="border-color: {BORDER_SUBTLE};">
+		<div class="w-full border-t pt-5" style="border-color: {BORDER_SUBTLE};">
 			<h3
 				class="mb-4 text-xs font-medium uppercase tracking-widest lg:hidden"
 				style="color: {TEXT_400};"
 			>
-				{#if viewMode === 'projects'}
-					Mis Proyectos
-				{:else if viewMode === 'chat'}
-					Conversaciones Recientes
-				{:else}
-					Acciones rápidas
-				{/if}
+				{secondarySectionLabel}
 			</h3>
 
-			{#if viewMode === 'chat'}
-				<ul class="flex flex-col gap-3" aria-label="Lista de chats recientes">
+			{#if isChatView}
+				<ul class="flex flex-col gap-3" aria-label="Listado de conversaciones">
 					{#each chatItems as chat (chat.id)}
 						<li>
 							<button
@@ -217,8 +232,8 @@
 						</li>
 					{/each}
 				</ul>
-			{:else if viewMode === 'projects'}
-				<ul class="flex flex-col gap-3" aria-label="Lista de proyectos">
+			{:else if isProjectsView}
+				<ul class="flex flex-col gap-3" aria-label="Listado de proyectos activos">
 					{#each projectItems as project (project.id)}
 						<li>
 							<button
@@ -262,37 +277,46 @@
 					{/each}
 				</ul>
 			{:else}
-				<div class="grid grid-cols-1 gap-3" aria-label="Accesos rápidos">
-					{#each quickActions as action (action.label)}
-						<button
-							class="group relative flex items-center justify-between rounded-[16px] px-4 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
-							style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; color: {TEXT_100}; --tw-ring-color: {RING_AZURE_10}; box-shadow: 0 2px 8px rgba(0,0,0,0.25);"
-							type="button"
-						>
-							<div class="flex items-center gap-3">
-								<div
-									class="flex h-8 w-8 items-center justify-center rounded-lg"
-									style="background: {action.statusColor ??
-										ERROR_COLOR}1A; border:1px solid {action.statusColor ?? ERROR_COLOR}40;"
-								>
-									<svelte:component
-										this={action.icon}
-										class="h-4 w-4"
-										style="color:{action.statusColor ?? ERROR_COLOR};"
-									/>
+				<section class="space-y-3" aria-label={secondarySectionLabel}>
+					<p
+						id="quick-actions-heading-desktop"
+						class="hidden text-xs font-medium uppercase tracking-widest lg:block"
+						style="color: {TEXT_400};"
+					>
+						{secondarySectionLabel}
+					</p>
+					<div class="grid grid-cols-1 gap-3" aria-label="Accesos rápidos">
+						{#each quickActions as action (action.label)}
+							<button
+								class="group relative flex items-center justify-between rounded-[16px] px-4 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
+								style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; color: {TEXT_100}; --tw-ring-color: {RING_AZURE_10}; box-shadow: 0 2px 8px rgba(0,0,0,0.25);"
+								type="button"
+							>
+								<div class="flex items-center gap-3">
+									<div
+										class="flex h-8 w-8 items-center justify-center rounded-lg"
+										style="background: {action.statusColor ??
+											ERROR_COLOR}1A; border:1px solid {action.statusColor ?? ERROR_COLOR}40;"
+									>
+										<svelte:component
+											this={action.icon}
+											class="h-4 w-4"
+											style="color:{action.statusColor ?? ERROR_COLOR};"
+										/>
+									</div>
+									<span class="text-sm font-semibold">{action.label}</span>
 								</div>
-								<span class="text-sm font-semibold">{action.label}</span>
-							</div>
-							{#if action.badge}
-								<span
-									class="ml-4 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ring-2"
-									style="background:{action.statusColor ??
-										ERROR_COLOR}; color:white; --tw-ring-color:{BG_900};">{action.badge}</span
-								>
-							{/if}
-						</button>
-					{/each}
-				</div>
+								{#if action.badge}
+									<span
+										class="ml-4 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ring-2"
+										style="background:{action.statusColor ??
+											ERROR_COLOR}; color:white; --tw-ring-color:{BG_900};">{action.badge}</span
+									>
+								{/if}
+							</button>
+						{/each}
+					</div>
+				</section>
 			{/if}
 		</div>
 
@@ -308,6 +332,19 @@
 <style>
 	.sidebar-shell {
 		height: 100dvh;
+	}
+
+	.nav-grid {
+		display: grid;
+		grid-template-columns: repeat(var(--nav-columns, 4), minmax(3.25rem, 1fr));
+		justify-items: center;
+		gap: clamp(0.5rem, 0.9vw, 0.75rem);
+	}
+
+	@media (min-width: 1024px) {
+		.nav-grid {
+			gap: 1rem;
+		}
 	}
 
 	@media (min-width: 1024px) {

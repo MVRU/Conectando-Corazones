@@ -1,7 +1,7 @@
 // -*- DECISIÓN DE DISEÑO: Reunimos funciones puras reutilizables para mantener el componente principal enfocado en la vista.
 import { Briefcase, LayoutGrid, MessageSquare } from 'lucide-svelte';
 
-import type { AidType, GradKey, QuickAction, ViewMode } from './types';
+import type { AidDonutSegment, AidType, GradKey, QuickAction, ViewMode } from './types';
 import { quickActionLabels } from './data';
 import { ERROR_COLOR, PRIMARY_500 } from './tokens';
 
@@ -38,7 +38,12 @@ export function midHex(color: GradKey): string {
 	);
 }
 
+
 export function getDonutGradient(segments: AidType[]): string {
+	if (!segments.length) {
+		return 'conic-gradient(#1f2937 0 100%)';
+	}
+
 	let gradientString = 'conic-gradient(';
 	let currentPercent = 0;
 
@@ -52,6 +57,36 @@ export function getDonutGradient(segments: AidType[]): string {
 	});
 
 	return `${gradientString})`;
+}
+
+
+export function buildDonutSegments(aidTypes: AidType[], radius: number): AidDonutSegment[] {
+	if (!aidTypes.length || radius <= 0) {
+		return [];
+	}
+
+	const circumference = 2 * Math.PI * radius;
+	let accumulatedPercent = 0;
+
+	return aidTypes.map((item) => {
+		const startPercent = accumulatedPercent;
+		const remainingPercent = Math.max(0, 100 - accumulatedPercent);
+		const clampedPercent = Math.max(0, Math.min(remainingPercent, item.percent));
+		accumulatedPercent += clampedPercent;
+
+		const visibleLength = (circumference * clampedPercent) / 100;
+		const dashArray = `${visibleLength} ${circumference}`;
+		const dashOffset = circumference * (1 - startPercent / 100);
+
+		return {
+			...item,
+			startPercent,
+			endPercent: accumulatedPercent,
+			percent: clampedPercent,
+			dashArray,
+			dashOffset
+		} satisfies AidDonutSegment;
+	});
 }
 
 export function computeQuickActions(

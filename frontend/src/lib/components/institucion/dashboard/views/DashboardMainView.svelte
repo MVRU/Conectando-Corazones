@@ -1,13 +1,11 @@
-<!--
-*- DECISIÓN DE DISEÑO: Esta vista resume el dashboard en secciones autocontenidas para facilitar pruebas A/B.
--->
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import type { TransitionConfig } from 'svelte/transition';
 	import { ChevronDown, ChevronRight, TrendingUp, Users } from 'lucide-svelte';
 	import Button from '../../../ui/elementos/Button.svelte';
 
-	import type { AidType, Metric, ProgressSegment } from '../types';
+	import type { AidDonutSegment, AidType, Metric, ProgressSegment } from '../types';
 	import { filtersResetLabel } from '../data';
 	import {
 		BG_900,
@@ -22,13 +20,31 @@
 		TEXT_400,
 		WARNING_COLOR
 	} from '../tokens';
-	import { getDonutGradient, getGradientCSS, getGradientClass, midHex } from '../helpers';
+	import {
+		buildDonutSegments,
+		getDonutGradient,
+		getGradientCSS,
+		getGradientClass,
+		midHex
+	} from '../helpers';
+
+	type DashboardInteractions = {
+		viewAllReviews: undefined;
+		viewAllSuggestions: undefined;
+	};
+
+	const dispatch = createEventDispatcher<DashboardInteractions>();
 
 	export let filters: string[] = [];
 	export let metrics: Metric[] = [];
 	export let progressSegments: ProgressSegment[] = [];
 	export let aidTypes: AidType[] = [];
 	export let pendingRequests = 3;
+
+	const DONUT_VIEWBOX = 160;
+	const DONUT_RADIUS = 56;
+	const DONUT_CENTER = DONUT_VIEWBOX / 2;
+	const DONUT_STROKE_WIDTH = 18;
 
 	const filterHeadingId = 'dashboard-filter-toolbar';
 	const filterToolbarOffset =
@@ -62,7 +78,48 @@
 		};
 	};
 
+	let donutSegments: AidDonutSegment[] = [];
+	let hoveredAidType: AidType | null = null;
+	let pinnedAidType: AidType | null = null;
+	let activeAidType: AidType | null = null;
+
+	const isSameAidType = (a: AidType | null | undefined, b: AidType | null | undefined): boolean =>
+		Boolean(a && b && a.label === b.label);
+
+	const togglePinnedAidType = (segment: AidType): void => {
+		pinnedAidType = isSameAidType(pinnedAidType, segment) ? null : segment;
+	};
+
+	const handleSegmentKeyDown = (event: KeyboardEvent, segment: AidType): void => {
+		if (event.key === 'Enter' || event.key === ' ') {
+			event.preventDefault();
+			togglePinnedAidType(segment);
+		}
+
+		if (event.key === 'Escape') {
+			pinnedAidType = null;
+			hoveredAidType = null;
+		}
+	};
+
+	const clearHoveredAidType = (): void => {
+		hoveredAidType = null;
+	};
+
+	const clearPinnedAidType = (): void => {
+		pinnedAidType = null;
+	};
+
+	const handleViewAllReviews = (): void => {
+		dispatch('viewAllReviews');
+	};
+
+	const handleViewAllSuggestions = (): void => {
+		dispatch('viewAllSuggestions');
+	};
+
 	$: donutGradient = getDonutGradient(aidTypes);
+	$: donutSegments = buildDonutSegments(aidTypes, DONUT_RADIUS);
 	$: totalAidPercent = aidTypes.reduce((acc, item) => acc + (item?.percent ?? 0), 0);
 	$: topAidType = aidTypes.reduce<AidType | undefined>((winner, current) => {
 		const winnerPercent = winner?.percent ?? -Infinity;
@@ -71,9 +128,27 @@
 	}, undefined);
 	$: hasAidData = aidTypes.length > 0 && totalAidPercent > 0;
 	$: totalAidPercentRounded = Math.round(totalAidPercent);
-	$: dominantAidCopy = hasAidData
-		? `${topAidType?.label ?? 'Sin datos'} lidera (${topAidType?.percent ?? 0}%)`
+	$: activeAidType = hoveredAidType ?? pinnedAidType;
+	$: defaultInsightCopy = hasAidData
+		? `${topAidType?.label ?? 'Sin datos'} lidera con ${topAidType?.percent ?? 0}% del soporte.`
 		: 'A\u00FAn no registraste apoyos';
+	$: dominantAidCopy = activeAidType?.insight ?? defaultInsightCopy;
+	$: centerPrimaryLabel = hasAidData
+		? (activeAidType?.label ?? `${totalAidPercentRounded}%`)
+		: '0 personas beneficiadas a\u00FAn';
+	$: centerSecondaryLabel = hasAidData
+		? (activeAidType?.insight ?? 'Seleccion\u00E1 un segmento para ver el detalle.')
+		: 'Sum\u00E1 registros para comenzar a medir el impacto.';
+
+	$: {
+		if (pinnedAidType && !aidTypes.some((item) => item.label === pinnedAidType?.label)) {
+			pinnedAidType = null;
+		}
+
+		if (hoveredAidType && !aidTypes.some((item) => item.label === hoveredAidType?.label)) {
+			hoveredAidType = null;
+		}
+	}
 </script>
 
 <div class="space-y-10">
@@ -192,7 +267,7 @@
 				style="border: 1px solid {PRIMARY_500}; background: {BG_900}; box-shadow: 0 4px 18px rgba(0,0,32,0.40);"
 			>
 				<h4 class="mb-1 text-xl font-bold" style="color: {TEXT_100};">Luz para Aprender</h4>
-				<p class="text-sm font-semibold" style="color: {GREEN};">En Curso</p>
+
 				<div class="mt-4 space-y-3">
 					{#each progressSegments as goal (goal.label)}
 						<div class="flex flex-col gap-1">
@@ -267,33 +342,91 @@
 				Visualiz&aacute; c&oacute;mo se reparte el soporte entre las iniciativas activas.
 			</p>
 			<div
-				class="relative mx-auto grid h-48 w-48 place-items-center rounded-full shadow-lg transition-transform duration-300 hover:scale-[1.02] sm:h-56 sm:w-56"
-				style={`background: ${donutGradient}; padding: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);`}
+				class="relative mx-auto grid h-48 w-48 place-items-center rounded-full shadow-xl transition-transform duration-300 focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-transparent hover:scale-[1.02] sm:h-56 sm:w-56"
+				style={`background: ${donutGradient}; padding: 18px; box-shadow: 0 16px 40px rgba(8, 12, 32, 0.45);`}
+				on:mouseleave={clearHoveredAidType}
+				role="presentation"
 			>
-				<div
-					class="flex h-full w-full flex-col items-center justify-center gap-1 rounded-full text-center shadow-inner"
-					style="background: {BG_CARD}; border: 6px solid {BG_900};"
+				<svg
+					class="pointer-events-none absolute inset-4 h-auto w-auto"
+					viewBox={`0 0 ${DONUT_VIEWBOX} ${DONUT_VIEWBOX}`}
+					role="list"
+					aria-label="Distribución de tipos de ayuda"
 				>
-					<p class="text-4xl font-black tracking-tight" style="color: {TEXT_100};">
-						{hasAidData ? `${totalAidPercentRounded}%` : '0%'}
+					<circle
+						cx={DONUT_CENTER}
+						cy={DONUT_CENTER}
+						r={DONUT_RADIUS}
+						fill="transparent"
+						stroke={BORDER_SUBTLE}
+						stroke-width={DONUT_STROKE_WIDTH}
+						stroke-linecap="round"
+						opacity="0.3"
+						aria-hidden="true"
+					/>
+					{#each donutSegments as segment (segment.label)}
+						<circle
+							cx={DONUT_CENTER}
+							cy={DONUT_CENTER}
+							r={DONUT_RADIUS}
+							fill="transparent"
+							stroke={midHex(segment.grad)}
+							stroke-width={DONUT_STROKE_WIDTH}
+							stroke-linecap="round"
+							class="pointer-events-auto transition-all duration-300"
+							style={`stroke-dasharray: ${segment.dashArray}; stroke-dashoffset: ${segment.dashOffset}; filter: drop-shadow(0 0 12px ${midHex(segment.grad)}40); opacity: ${
+								isSameAidType(activeAidType, segment) ? 1 : 0.7
+							};`}
+							transform={`rotate(-90 ${DONUT_CENTER} ${DONUT_CENTER})`}
+							tabindex="0"
+							role="button"
+							aria-pressed={isSameAidType(pinnedAidType, segment)}
+							aria-label={`${segment.label}: ${segment.percent}% (${segment.insight})`}
+							on:mouseenter={() => {
+								hoveredAidType = segment;
+							}}
+							on:focus={() => {
+								hoveredAidType = segment;
+							}}
+							on:mouseleave={clearHoveredAidType}
+							on:blur={clearHoveredAidType}
+							on:click={() => togglePinnedAidType(segment)}
+							on:keydown={(event) => handleSegmentKeyDown(event, segment)}
+						/>
+					{/each}
+				</svg>
+				<div
+					class="z-10 flex h-full w-full flex-col items-center justify-center gap-1 rounded-full border text-center shadow-inner"
+					style="background: {BG_CARD}; border-color: {BG_900}; padding: 1.75rem;"
+					aria-live="polite"
+				>
+					<p class="text-center text-lg font-black leading-tight" style="color: {TEXT_100};">
+						{centerPrimaryLabel}
 					</p>
-					<p
-						class="text-[11px] font-semibold uppercase tracking-[0.35em]"
-						style="color: {TEXT_400};"
-					>
-						Cobertura
+					<p class="text-center text-xs font-semibold tracking-[0.14em]" style="color: {TEXT_400};">
+						{centerSecondaryLabel}
 					</p>
+					{#if pinnedAidType}
+						<button
+							type="button"
+							class="mt-1 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+							style={`color:${PRIMARY_500}; border:1px solid ${PRIMARY_500}; background:${PRIMARY_500}14;`}
+							on:click={clearPinnedAidType}
+						>
+							Liberar selección
+						</button>
+					{/if}
 				</div>
 			</div>
 			<div
 				class="mt-6 rounded-2xl border px-4 py-3 text-left transition-colors duration-200"
 				style="border-color:{BORDER_SUBTLE}; background:{BG_900}; color:{TEXT_300};"
 			>
-				<p class="text-sm font-semibold" style="color: {TEXT_100};">{dominantAidCopy}</p>
+				<p class="text-sm font-semibold" style="color: {TEXT_100};">
+					{activeAidType ? `${activeAidType.label} · ${activeAidType.percent}%` : 'Visión general'}
+				</p>
 				<p class="mt-1 text-xs" style="color: {TEXT_400};">
-					{hasAidData
-						? `Registraste ${aidTypes.length === 1 ? '1 tipo' : `${aidTypes.length} tipos`} de ayuda.`
-						: 'Sum&aacute; registros para identificar d&oacute;nde se focaliza la ayuda.'}
+					{dominantAidCopy}
 				</p>
 			</div>
 			<div class="mt-8 grid w-full gap-4 text-sm sm:grid-cols-2">
@@ -304,17 +437,23 @@
 							style="border-color:{BORDER_SUBTLE}; background:{BG_900};"
 						>
 							<div class="flex items-center justify-between gap-2">
-								<span class="flex items-center gap-2 font-medium" style="color: {TEXT_300};">
+								<span class="flex items-center gap-2 font-medium" style="color:{TEXT_300};">
 									<span
 										class="h-3 w-3 rounded-full shadow-md"
 										style={`background-image: ${getGradientCSS(item.grad)}; box-shadow: 0 0 10px ${midHex(item.grad)}40;`}
 									></span>
 									{item.label}
 								</span>
-								<span class="font-bold tracking-tight" style="color: {TEXT_100};"
-									>{item.percent}%</span
-								>
+								<span class="font-bold tracking-tight" style="color: {TEXT_100};">
+									{item.percent}%
+								</span>
 							</div>
+							<p
+								class="text-xs font-semibold uppercase tracking-[0.12em]"
+								style={`color:${PRIMARY_500};`}
+							>
+								{item.insight}
+							</p>
 							<div
 								class="h-1.5 w-full overflow-hidden rounded-full"
 								style="background: {BORDER_SUBTLE};"
@@ -399,15 +538,16 @@
 					— Equipo de Conectando Corazones
 				</p>
 			</div>
-			<a
-				href="#"
-				class="group mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-all duration-200 hover:text-white"
+			<button
+				type="button"
+				class="group mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-all duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
 				style="color: {PRIMARY_500};"
+				on:click={handleViewAllReviews}
 			>
 				Ver todas las rese&ntilde;as <ChevronRight
 					class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
 				/>
-			</a>
+			</button>
 		</article>
 		<article
 			class="rounded-[28px] p-7 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
@@ -426,15 +566,16 @@
 					Cuando los primeros proyectos se completen, este espacio te ayudará a crecer aún más.
 				</p>
 			</div>
-			<a
-				href="#"
-				class="group mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-all duration-200 hover:text-white"
+			<button
+				type="button"
+				class="group mt-6 flex w-full items-center justify-end gap-1 text-sm font-semibold transition-all duration-200 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
 				style="color: {PRIMARY_500};"
+				on:click={handleViewAllSuggestions}
 			>
 				Ver todas las sugerencias <ChevronRight
 					class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
 				/>
-			</a>
+			</button>
 		</article>
 	</section>
 </div>

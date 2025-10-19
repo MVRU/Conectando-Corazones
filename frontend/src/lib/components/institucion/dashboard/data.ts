@@ -9,13 +9,14 @@ import {
 	MessageSquare,
 	Plus,
 	ShieldCheck,
-	TrendingUp,
+	TrendingUp,	
 	Users
 } from 'lucide-svelte';
 
 import type {
 	AidType,
 	ChatItem,
+	ChatMetadataMap,
 	ChatThread,
 	InstitutionIdentity,
 	Metric,
@@ -168,9 +169,24 @@ export const luzParaAprenderProgress: ProgressSegment[] = [
 ];
 
 export const ayudaTypes: AidType[] = [
-	{ label: 'Voluntariado', percent: 32, grad: 'purple' },
-	{ label: 'Monetaria', percent: 33, grad: 'green' },
-	{ label: 'En especie', percent: 35, grad: 'blue' }
+	{
+		label: 'Voluntariado',
+		percent: 32,
+		grad: 'purple',
+		insight: '2 voluntarios activos'
+	},
+	{
+		label: 'Monetaria',
+		percent: 33,
+		grad: 'green',
+		insight: '$50.000 ARS comprometidos'
+	},
+	{
+		label: 'En especie',
+		percent: 35,
+		grad: 'blue',
+		insight: 'Cables y lámparas de luz LED'
+	}
 ];
 
 export const filterLabels = ['Período', 'Categoría', 'Estado', 'Tipo de ayuda', 'Ubicación'];
@@ -250,6 +266,88 @@ export const verificationDocuments: VerificationDocument[] = [
                 detail: 'Servicio eléctrico emitido en junio de 2025 a nombre de la institución.'
         }
 ];
+
+export const chatMetadata: ChatMetadataMap = {
+	1: {
+		chatId: 1,
+		institution: {
+			id: 'institucion-escuela-esperanza',
+			name: 'Escuela Esperanza',
+			role: 'Institución',
+			kind: 'institucion',
+			description: 'Comunidad educativa liderada por Patricia González, directora del plantel.',
+			contact: 'Patricia González • Directora'
+		},
+		collaborators: [
+			{
+				id: 'colaborador-lumina-cooperativa',
+				name: 'Lumina Cooperativa',
+				role: 'Colaborador',
+				kind: 'empresa',
+				description: 'Empresa especialista en soluciones energéticas comunitarias.',
+				contact: 'Equipo de proyectos estratégicos'
+			},
+			{
+				id: 'colaborador-sembrar-futuro',
+				name: 'Sembrar Futuro',
+				role: 'Colaborador',
+				kind: 'ong',
+				description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
+				contact: 'Coordinación de donaciones'
+			},
+			{
+				id: 'voluntario-lucas-utn',
+				name: 'Lucas',
+				role: 'Colaborador',
+				kind: 'voluntario',
+				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+				contact: 'Lucas • UTN FRRo'
+			},
+			{
+				id: 'voluntaria-sofia-utn',
+				name: 'Sofía',
+				role: 'Colaborador',
+				kind: 'voluntario',
+				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+				contact: 'Sofía • UTN FRRo'
+			}
+		],
+		attachments: [
+			{
+				id: 'galeria-escuela-exterior',
+				name: 'Fachada actual del colegio',
+				category: 'galeria',
+				fileType: 'image',
+				description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
+				uploadedAt: '2025-02-11'
+			},
+			{
+				id: 'galeria-salon-nocturno',
+				name: 'Aula iluminada con lámparas LED',
+				category: 'galeria',
+				fileType: 'image',
+				description: 'Registro fotográfico del piloto nocturno realizado con voluntarios.',
+				uploadedAt: '2025-02-16'
+			},
+			{
+				id: 'evidencia-factura-led-001',
+				name: 'Factura lámparas LED - febrero',
+				category: 'evidencia',
+				fileType: 'pdf',
+				description: 'Factura emitida por proveedor de luminarias homologadas.',
+				uploadedAt: '2025-02-12'
+			},
+			{
+				id: 'evidencia-comprobante-transf-002',
+				name: 'Comprobante transferencia Sembrar Futuro',
+				category: 'evidencia',
+				fileType: 'pdf',
+				description: 'Documento que acredita la donación recibida para la compra de materiales.',
+				uploadedAt: '2025-02-14'
+			}
+		]
+	}
+};
 
 export const adminObservations: ObservationItem[] = [
         {

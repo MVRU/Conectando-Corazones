@@ -30,6 +30,14 @@ export interface AidType {
 	label: string;
 	percent: number;
 	grad: GradKey;
+	insight: string;
+}
+
+export interface AidDonutSegment extends AidType {
+	startPercent: number;
+	endPercent: number;
+	dashArray: string;
+	dashOffset: number;
 }
 
 export interface QuickAction {
@@ -63,6 +71,40 @@ export interface ChatThread {
 	subject: string;
 	messages: ChatMessage[];
 }
+
+export type ParticipantKind = 'institucion' | 'empresa' | 'ong' | 'voluntario';
+
+export interface ChatParticipant {
+	id: string;
+	name: string;
+	role: 'Institución' | 'Colaborador';
+	kind: ParticipantKind;
+	description: string;
+	contact: string;
+}
+
+export type AttachmentCategory = 'galeria' | 'evidencia';
+
+export type AttachmentFileType = 'image' | 'pdf';
+
+export interface ChatAttachment {
+	id: string;
+	name: string;
+	category: AttachmentCategory;
+	fileType: AttachmentFileType;
+	description: string;
+	uploadedAt: string;
+}
+
+export interface ChatMetadata {
+	chatId: number;
+	institution: ChatParticipant;
+	collaborators: ChatParticipant[];
+	attachments: ChatAttachment[];
+}
+
+export type ChatMetadataMap = Record<number, ChatMetadata>;
+
 
 export interface ProjectItem {
 	id: number;
