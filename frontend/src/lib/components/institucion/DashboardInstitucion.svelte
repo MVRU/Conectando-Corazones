@@ -51,8 +51,8 @@
 </script>
 
 <div
-	class="text-inter relative min-h-screen w-full font-sans antialiased"
-	style={`background: ${GRADIENT_BG}; color: ${TEXT_100}; --sidebar-width: ${sidebarWidth}px;`}
+	class="dashboard-layout text-inter relative min-h-screen w-full font-sans antialiased lg:flex lg:items-start lg:gap-8"
+	style={`background: ${GRADIENT_BG}; color: ${TEXT_100};`}
 >
 	<NavigationSidebar
 		{navItems}
@@ -74,7 +74,10 @@
 		></div>
 	{/if}
 
-	<main class="dashboard-main ml-0 p-4 transition-all duration-300 ease-out lg:p-8" style="min-height: 100vh;">
+	<main
+		class="dashboard-main relative z-10 ml-0 min-w-0 flex-1 p-4 transition-all duration-300 ease-out lg:p-8"
+		style="min-height: 100vh;"
+	>
 		<button
 			on:click={toggleMobileMenu}
 			class="fixed right-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-[18px] p-3 shadow-xl transition-all duration-300 hover:scale-[1.05] focus:outline-none focus:ring-4 active:scale-[0.98] lg:hidden"
@@ -117,14 +120,8 @@
 	}
 
 	@media (min-width: 1024px) {
-		.dashboard-main {
-			margin-left: var(--sidebar-width, 260px);
-		}
-	}
-
-	@media (max-width: 1023px) {
-		.dashboard-main {
-			margin-left: 0;
+		.dashboard-layout {
+			align-items: flex-start;
 		}
 	}
 </style>
