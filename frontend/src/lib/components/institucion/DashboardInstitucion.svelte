@@ -27,6 +27,7 @@
 	let viewMode: ViewMode = 'dashboard';
 	let isMobileMenuOpen = false;
 	let selectedProject: ProjectItem = projectItems[0];
+	let sidebarWidth = 260;
 
 	$: quickActions = computeQuickActions(viewMode, projectItems.length, unreadChats);
 
@@ -51,7 +52,7 @@
 
 <div
 	class="text-inter relative min-h-screen w-full font-sans antialiased"
-	style="background: {GRADIENT_BG}; color: {TEXT_100};"
+	style={`background: ${GRADIENT_BG}; color: ${TEXT_100}; --sidebar-width: ${sidebarWidth}px;`}
 >
 	<NavigationSidebar
 		{navItems}
@@ -60,6 +61,7 @@
 		{chatItems}
 		{projectItems}
 		{isMobileMenuOpen}
+		bind:sidebarWidth
 		on:changeView={handleViewChange}
 		on:selectProject={handleSelectProject}
 	/>
@@ -72,10 +74,7 @@
 		></div>
 	{/if}
 
-	<main
-		class="ml-0 p-4 transition-all duration-300 ease-out lg:ml-[200px] lg:p-8"
-		style="min-height: 100vh;"
-	>
+	<main class="dashboard-main ml-0 p-4 transition-all duration-300 ease-out lg:p-8" style="min-height: 100vh;">
 		<button
 			on:click={toggleMobileMenu}
 			class="fixed right-4 top-4 z-50 flex h-12 w-12 items-center justify-center rounded-[18px] p-3 shadow-xl transition-all duration-300 hover:scale-[1.05] focus:outline-none focus:ring-4 active:scale-[0.98] lg:hidden"
@@ -115,5 +114,17 @@
 <style>
 	.text-inter {
 		font-family: 'Inter', sans-serif;
+	}
+
+	@media (min-width: 1024px) {
+		.dashboard-main {
+			margin-left: var(--sidebar-width, 260px);
+		}
+	}
+
+	@media (max-width: 1023px) {
+		.dashboard-main {
+			margin-left: 0;
+		}
 	}
 </style>

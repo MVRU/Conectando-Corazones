@@ -2,7 +2,7 @@
 *- DECISIÓN DE DISEÑO: Separar la barra lateral mantiene el componente principal enfocado y facilita futuros rediseños.
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { ChevronRight, MessageSquare, Briefcase } from 'lucide-svelte';
 
 	import {
@@ -26,6 +26,16 @@
 	export let chatItems: ChatItem[] = [];
 	export let projectItems: ProjectItem[] = [];
 	export let isMobileMenuOpen = false;
+	export let sidebarWidth = 260;
+
+	const DESKTOP_TOP_OFFSET = 'clamp(1rem, 2vw, 1.5rem)';
+	const MIN_DESKTOP_WIDTH = 200;
+	const MAX_DESKTOP_WIDTH = 360;
+	let isResizing = false;
+	let startX = 0;
+	let startWidth = 0;
+	let previousUserSelect: string | null = null;
+	let previousCursor: string | null = null;
 
 	function handleViewChange(nextView: ViewMode) {
 		dispatch('changeView', nextView);
@@ -34,13 +44,63 @@
 	function handleProjectSelection(projectId: number) {
 		dispatch('selectProject', projectId);
 	}
+
+	function startResize(event: MouseEvent) {
+		if (window.innerWidth < 1024) return;
+		isResizing = true;
+		startX = event.clientX;
+		startWidth = sidebarWidth;
+		previousUserSelect = document.body.style.userSelect;
+		previousCursor = document.body.style.cursor;
+		document.body.style.userSelect = 'none';
+		document.body.style.cursor = 'col-resize';
+		window.addEventListener('mousemove', handleResize);
+		window.addEventListener('mouseup', stopResize);
+	}
+
+	function handleResize(event: MouseEvent) {
+		if (!isResizing) return;
+		const delta = event.clientX - startX;
+		const nextWidth = Math.max(MIN_DESKTOP_WIDTH, Math.min(MAX_DESKTOP_WIDTH, startWidth + delta));
+		if (nextWidth !== sidebarWidth) {
+			sidebarWidth = nextWidth;
+		}
+	}
+
+	function stopResize() {
+		if (!isResizing) return;
+		isResizing = false;
+		window.removeEventListener('mousemove', handleResize);
+		window.removeEventListener('mouseup', stopResize);
+		if (previousUserSelect !== null) {
+			document.body.style.userSelect = previousUserSelect;
+			previousUserSelect = null;
+		} else {
+			document.body.style.removeProperty('user-select');
+		}
+		if (previousCursor !== null) {
+			document.body.style.cursor = previousCursor;
+			previousCursor = null;
+		} else {
+			document.body.style.removeProperty('cursor');
+		}
+	}
+
+	onDestroy(() => {
+		window.removeEventListener('mousemove', handleResize);
+		window.removeEventListener('mouseup', stopResize);
+		if (isResizing) {
+			stopResize();
+		}
+	});
 </script>
 
 <nav
-	class="fixed left-0 top-0 z-50 flex h-full w-[280px] flex-col p-6 transition-transform duration-300 ease-out lg:w-[200px] lg:translate-x-0 lg:items-center lg:p-4"
+	class="sidebar-shell fixed left-0 top-0 z-50 flex flex-col p-6 transition-transform duration-300 ease-out lg:translate-x-0 lg:items-center lg:p-4 relative"
 	class:translate-x-0={isMobileMenuOpen}
 	class:-translate-x-full={!isMobileMenuOpen}
-	style="background: {BG_CARD}; border-right: 1px solid {BORDER_SUBTLE}; box-shadow: 0 4px 18px rgba(0,0,32,0.18); overflow-y: auto;"
+	class:cursor-col-resize={isResizing}
+	style={`--sidebar-top:${DESKTOP_TOP_OFFSET}; width:${sidebarWidth}px; min-width:${sidebarWidth}px; background:${BG_CARD}; border-right:1px solid ${BORDER_SUBTLE}; box-shadow:0 4px 18px rgba(0,0,32,0.18); overflow-y:auto;`}
 	aria-label="Barra de navegación institucional"
 >
 	<div class="w-full space-y-4">
@@ -196,4 +256,38 @@
 			</div>
 		{/if}
 	</div>
+
+	<div
+		class="sidebar-resizer absolute right-0 top-0 hidden h-full w-2 cursor-col-resize lg:block"
+		on:mousedown={startResize}
+		role="presentation"
+		aria-hidden="true"
+	></div>
 </nav>
+
+<style>
+	.sidebar-shell {
+		height: 100%;
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar-shell {
+			top: var(--sidebar-top, 1.5rem);
+			bottom: var(--sidebar-top, 1.5rem);
+			border-radius: 24px;
+			height: auto;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar-resizer {
+			background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.08), transparent);
+			transition: background 0.2s ease;
+		}
+
+		.sidebar-resizer:hover,
+		.sidebar-resizer:active {
+			background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.18), transparent);
+		}
+	}
+</style>

@@ -4,7 +4,8 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 	import type { TransitionConfig } from 'svelte/transition';
-	import { ChevronDown, ChevronRight, TrendingUp, Users } from 'lucide-svelte';
+	import { ChevronDown, ChevronRight, Filter, TrendingUp, Users } from 'lucide-svelte';
+	import Button from '../../../ui/elementos/Button.svelte';
 
 	import type { AidType, Metric, ProgressSegment } from '../types';
 	import { filtersResetLabel } from '../data';
@@ -73,43 +74,41 @@
 
 <div class="space-y-10">
 	<section
-		class="rounded-xl border"
-		in:fadeFly={{ fade: { duration: 220 }, fly: { y: 18, duration: 320 } }}
-		style="background: {BG_CARD}; border-color: {BORDER_SUBTLE}; box-shadow: 0 2px 12px rgba(0,0,32,0.12);"
+		class="filter-toolbar sticky z-30 w-full overflow-hidden rounded-2xl border backdrop-blur-lg"
+		in:fadeFly={{ fade: { duration: 200 }, fly: { y: 14, duration: 280 } }}
+		style="top: clamp(0.75rem, 2vw, 1.75rem); background: {BG_900}E6; border-color: {BORDER_SUBTLE}; box-shadow: 0 14px 30px rgba(8,12,32,0.25);"
 	>
-		<div class="grid grid-cols-1 items-center gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
+		<div class="relative flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
+			<div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]" style="color:{TEXT_400};">
+				<Filter class="h-4 w-4" style="color:{PRIMARY_500};" />
+				<span>Filtrar</span>
+			</div>
+			<Button
+				label={filtersResetLabel}
+				variant="ghost"
+				size="sm"
+				type="button"
+				customClass="min-w-fit rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em]"
+			/>
+		</div>
+		<div class="border-t border-white/5"></div>
+		<div class="grid grid-cols-1 gap-2.5 p-3.5 sm:grid-cols-2 lg:grid-cols-5">
 			{#each filters as filterLabel (filterLabel)}
-				<div class="relative col-span-1 transition-transform duration-200 hover:-translate-y-0.5">
+				<div class="group relative col-span-1 transition-all duration-200 hover:-translate-y-0.5">
 					<select
-						class="peer w-full appearance-none rounded-lg border bg-transparent pr-8 text-sm font-medium backdrop-blur focus:outline-none focus:ring-2 focus:ring-offset-0"
-						style="color:{TEXT_300}; border-color:{BORDER_SUBTLE}; padding-top:.45rem; padding-bottom:.45rem;"
+						class="filter-select peer w-full rounded-xl border border-white/10 bg-transparent px-3.5 py-2.5 pr-10 text-sm font-medium text-white/90 shadow-[0_12px_26px_-18px_rgba(8,12,32,0.6)] transition-all duration-200 focus:outline-none focus:ring-2"
+						style="--tw-ring-color:{PRIMARY_500}; color:{TEXT_100}; background: linear-gradient(135deg, {BG_900}D9, {BG_CARD}F0);"
 						aria-label={filterLabel}
 					>
 						<option disabled selected>{filterLabel}</option>
 						<option style="background:{BG_CARD}; color:{TEXT_100};">Opción A</option>
 						<option style="background:{BG_CARD}; color:{TEXT_100};">Opción B</option>
 					</select>
-					<span
-						class="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 opacity-60 transition-opacity peer-focus:opacity-100"
-						style="color:{TEXT_400};"
-					>
+					<span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-1 text-white/60 transition-all duration-200 peer-focus:text-white">
 						<ChevronDown class="h-3.5 w-3.5" />
 					</span>
 				</div>
 			{/each}
-			<div class="col-span-1 flex w-full items-center justify-end sm:col-span-2 lg:col-span-1">
-				<button
-					type="button"
-					class="group inline-flex items-center gap-1 text-sm font-semibold tracking-tight opacity-90 transition-transform duration-200 hover:opacity-100 focus:outline-none focus-visible:underline"
-					style="color:{PRIMARY_300};"
-				>
-					{filtersResetLabel}
-					<ChevronRight
-						class="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-						style="color:{PRIMARY_300};"
-					/>
-				</button>
-			</div>
 		</div>
 	</section>
 
@@ -428,3 +427,33 @@
 		</article>
 	</section>
 </div>
+
+<style>
+	:global(.filter-toolbar) {
+		position: relative;
+	}
+
+	:global(.filter-toolbar::before) {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		border-radius: inherit;
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.08),
+			0 8px 18px rgba(8, 12, 32, 0.22);
+	}
+
+	:global(.filter-select) {
+		-webkit-appearance: none;
+		appearance: none;
+		background-color: transparent;
+		background-image: none !important;
+		padding-right: 2.75rem;
+	}
+
+	:global(.filter-select::-ms-expand) {
+		display: none;
+	}
+</style>
