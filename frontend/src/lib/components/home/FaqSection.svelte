@@ -3,7 +3,6 @@
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import { inView } from '$lib/actions/inView';
-	import { reducedMotion } from '$lib/stores/reducedMotion';
 
 	let faqVisible = false;
 	let imagenVisible = false;
@@ -14,19 +13,18 @@
 
 <section
 	id="faq"
-	class="w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 py-50 sm:px-4 md:px-8"
+	class="py-50 w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 sm:px-4 md:px-8"
 >
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
 		<!-- *Contenido -->
 		<div
 			class="flex flex-col justify-center transition-all duration-1000"
-			class:duration-0={$reducedMotion}
 			class:faq-appear={faqVisible}
 			class:faq-hidden={!faqVisible}
 			use:inView={{ onChange: (v) => (faqVisible = v), threshold: 0.12 }}
 		>
 			<h2
-				class="mb-6 text-center text-2xl leading-tight font-extrabold tracking-tight text-[--base-color] sm:text-3xl md:text-left"
+				class="mb-6 text-center text-2xl font-extrabold leading-tight tracking-tight text-[--base-color] sm:text-3xl md:text-left"
 			>
 				Respuestas claras y concisas<br class="hidden sm:inline" />
 				<span class="block text-gray-500">para empezar tu camino solidario.</span>
@@ -48,14 +46,13 @@
 
 		<!-- *Imagen aparece debajo en mobile -->
 		<div
-			class="group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-800 hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
-			class:duration-0={$reducedMotion}
+			class="duration-800 group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl shadow-blue-950/20 ring-2 ring-blue-400/10 transition-all hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
 			class:img-appear={imagenVisible}
 			class:img-hidden={!imagenVisible}
 			use:inView={{ onChange: (v) => (imagenVisible = v), threshold: 0.12 }}
 		>
 			<div
-				class="top-0 left-0 h-full w-full overflow-hidden rounded-[1.6rem]"
+				class="left-0 top-0 h-full w-full overflow-hidden rounded-[1.6rem]"
 				style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 				tabindex="-1"
 			>
