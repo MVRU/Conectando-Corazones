@@ -5,6 +5,9 @@
 
 /* Paleta de colores */
 :root {
+	/* -*- DECISIÓN DE DISEÑO: se declara la altura base del header para reutilizarla como offset en componentes sticky */
+	--app-header-height: 4.5rem;
+
 	/* Botón primario */
 	--color-primary: 0 127 255;
 	--color-primary-hover: 66 161 255;

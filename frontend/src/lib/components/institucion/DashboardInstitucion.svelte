@@ -6,12 +6,14 @@
 	import DashboardHeader from './dashboard/DashboardHeader.svelte';
 	import DashboardMainView from './dashboard/views/DashboardMainView.svelte';
 	import ProjectsView from './dashboard/views/ProjectsView.svelte';
+	import ChatView from './dashboard/views/ChatView.svelte';
 	import ProfileView from './dashboard/views/ProfileView.svelte';
 	import SettingsView from './dashboard/views/SettingsView.svelte';
 	import PlaceholderView from './dashboard/views/PlaceholderView.svelte';
 	import {
 		ayudaTypes,
 		chatItems,
+		chatThreads,
 		filterLabels,
 		luzParaAprenderProgress,
 		metrics,
@@ -27,9 +29,12 @@
 	let viewMode: ViewMode = 'dashboard';
 	let isMobileMenuOpen = false;
 	let selectedProject: ProjectItem = projectItems[0];
+	let selectedChatId: number | null = chatItems[0]?.id ?? null;
 	let sidebarWidth = 260;
 
 	$: quickActions = computeQuickActions(viewMode, projectItems.length, unreadChats);
+	$: selectedChat = chatItems.find((chat) => chat.id === selectedChatId) ?? null;
+	$: activeThread = chatThreads.find((thread) => thread.chatId === selectedChatId) ?? null;
 
 	function toggleMobileMenu() {
 		isMobileMenuOpen = !isMobileMenuOpen;
@@ -48,6 +53,16 @@
 			selectedProject = project;
 		}
 	}
+
+	function handleSelectChat(event: CustomEvent<number>) {
+		selectedChatId = event.detail;
+		if (viewMode !== 'chat') {
+			viewMode = 'chat';
+		}
+		if (isMobileMenuOpen) {
+			isMobileMenuOpen = false;
+		}
+	}
 </script>
 
 <div
@@ -59,11 +74,13 @@
 		{viewMode}
 		{quickActions}
 		{chatItems}
+		{selectedChatId}
 		{projectItems}
 		{isMobileMenuOpen}
 		bind:sidebarWidth
 		on:changeView={handleViewChange}
 		on:selectProject={handleSelectProject}
+		on:selectChat={handleSelectChat}
 	/>
 
 	{#if isMobileMenuOpen}
@@ -107,6 +124,8 @@
 				<ProfileView />
 			{:else if viewMode === 'settings'}
 				<SettingsView />
+			{:else if viewMode === 'chat'}
+				<ChatView chatSummary={selectedChat} thread={activeThread} />
 			{:else}
 				<PlaceholderView {viewMode} />
 			{/if}

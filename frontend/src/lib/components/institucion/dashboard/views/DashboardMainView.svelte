@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 	import type { TransitionConfig } from 'svelte/transition';
-	import { ChevronDown, ChevronRight, Filter, TrendingUp, Users } from 'lucide-svelte';
+	import { ChevronDown, ChevronRight, TrendingUp, Users } from 'lucide-svelte';
 	import Button from '../../../ui/elementos/Button.svelte';
 
 	import type { AidType, Metric, ProgressSegment } from '../types';
@@ -29,6 +29,10 @@
 	export let progressSegments: ProgressSegment[] = [];
 	export let aidTypes: AidType[] = [];
 	export let pendingRequests = 3;
+
+	const filterHeadingId = 'dashboard-filter-toolbar';
+	const filterToolbarOffset =
+		'calc(var(--app-header-height, 72px) + clamp(0.75rem, 1.6vw, 1.5rem))';
 
 	type FadeFlyOptions = {
 		fade?: Parameters<typeof fade>[1];
@@ -74,38 +78,45 @@
 
 <div class="space-y-10">
 	<section
-		class="filter-toolbar sticky z-30 w-full overflow-hidden rounded-2xl border backdrop-blur-lg"
+		class="filter-toolbar sticky z-40 w-full overflow-hidden rounded-2xl border backdrop-blur-lg"
 		in:fadeFly={{ fade: { duration: 200 }, fly: { y: 14, duration: 280 } }}
-		style="top: clamp(0.75rem, 2vw, 1.75rem); background: {BG_900}E6; border-color: {BORDER_SUBTLE}; box-shadow: 0 14px 30px rgba(8,12,32,0.25);"
+		aria-labelledby={filterHeadingId}
+		style={`--filter-toolbar-offset: ${filterToolbarOffset}; top: var(--filter-toolbar-offset); background: ${BG_900}E8; border-color: ${BORDER_SUBTLE}; box-shadow: 0 12px 28px rgba(8,12,32,0.22);`}
 	>
-		<div class="relative flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
-			<div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em]" style="color:{TEXT_400};">
-				<Filter class="h-4 w-4" style="color:{PRIMARY_500};" />
-				<span>Filtrar</span>
-			</div>
+		<div
+			class="flex flex-col gap-2 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4"
+		>
+			<h2 id={filterHeadingId} class="sr-only">Filtros del dashboard</h2>
+			<p class="text-xs font-semibold uppercase tracking-[0.14em] text-white/60">
+				Ajustá los datos mostrados
+			</p>
 			<Button
 				label={filtersResetLabel}
 				variant="ghost"
 				size="sm"
 				type="button"
-				customClass="min-w-fit rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-[0.1em]"
+				customClass="min-w-fit rounded-lg px-3.5 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-white/80 hover:text-white"
 			/>
 		</div>
-		<div class="border-t border-white/5"></div>
+		<div class="border-t border-white/10"></div>
 		<div class="grid grid-cols-1 gap-2.5 p-3.5 sm:grid-cols-2 lg:grid-cols-5">
 			{#each filters as filterLabel (filterLabel)}
-				<div class="group relative col-span-1 transition-all duration-200 hover:-translate-y-0.5">
+				<div
+					class="group relative col-span-1 transition-transform duration-200 hover:-translate-y-0.5"
+				>
 					<select
-						class="filter-select peer w-full rounded-xl border border-white/10 bg-transparent px-3.5 py-2.5 pr-10 text-sm font-medium text-white/90 shadow-[0_12px_26px_-18px_rgba(8,12,32,0.6)] transition-all duration-200 focus:outline-none focus:ring-2"
-						style="--tw-ring-color:{PRIMARY_500}; color:{TEXT_100}; background: linear-gradient(135deg, {BG_900}D9, {BG_CARD}F0);"
+						class="filter-select peer w-full rounded-lg border border-white/10 bg-transparent px-3 py-2 pr-9 text-sm font-medium text-white/90 shadow-[0_8px_22px_-16px_rgba(8,12,32,0.55)] transition-colors duration-200 focus:border-white/20 focus:outline-none focus:ring-2"
+						style="--tw-ring-color:{PRIMARY_500}; color:{TEXT_100}; background: linear-gradient(135deg, {BG_900}F2, {BG_CARD}F5);"
 						aria-label={filterLabel}
 					>
 						<option disabled selected>{filterLabel}</option>
 						<option style="background:{BG_CARD}; color:{TEXT_100};">Opción A</option>
 						<option style="background:{BG_CARD}; color:{TEXT_100};">Opción B</option>
 					</select>
-					<span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-1 text-white/60 transition-all duration-200 peer-focus:text-white">
-						<ChevronDown class="h-3.5 w-3.5" />
+					<span
+						class="bg-white/8 pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-white/60 transition-all duration-200 peer-focus:text-white"
+					>
+						<ChevronDown class="h-3 w-3" />
 					</span>
 				</div>
 			{/each}
@@ -450,7 +461,7 @@
 		appearance: none;
 		background-color: transparent;
 		background-image: none !important;
-		padding-right: 2.75rem;
+		padding-right: 2.5rem;
 	}
 
 	:global(.filter-select::-ms-expand) {

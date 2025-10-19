@@ -18,13 +18,19 @@
 		TEXT_400
 	} from './tokens';
 	import type { ChatItem, NavItem, ProjectItem, QuickAction, ViewMode } from './types';
-	const dispatch = createEventDispatcher<{ changeView: ViewMode; selectProject: number }>();
+
+	const dispatch = createEventDispatcher<{
+		changeView: ViewMode;
+		selectProject: number;
+		selectChat: number;
+	}>();
 
 	export let navItems: NavItem[] = [];
 	export let viewMode: ViewMode = 'dashboard';
 	export let quickActions: QuickAction[] = [];
 	export let chatItems: ChatItem[] = [];
 	export let projectItems: ProjectItem[] = [];
+	export let selectedChatId: number | null = null;
 	export let isMobileMenuOpen = false;
 	export let sidebarWidth = 260;
 
@@ -43,6 +49,10 @@
 
 	function handleProjectSelection(projectId: number) {
 		dispatch('selectProject', projectId);
+	}
+
+	function handleChatSelection(chatId: number) {
+		dispatch('selectChat', chatId);
 	}
 
 	function startResize(event: MouseEvent) {
@@ -163,12 +173,23 @@
 
 			{#if viewMode === 'chat'}
 				<ul class="flex flex-col gap-3" aria-label="Lista de chats recientes">
-					{#each chatItems as chat (chat.name)}
+					{#each chatItems as chat (chat.id)}
 						<li>
 							<button
 								class="group flex w-full items-center gap-3 rounded-[16px] px-3 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
-								style="background: {BG_900}; border: 1px solid {BORDER_SUBTLE}; color: {TEXT_100}; --tw-ring-color: {RING_AZURE_10}; box-shadow: 0 2px 8px rgba(0,0,0,0.25);"
+								class:ring-2={selectedChatId === chat.id}
+								style="background: {BG_900}; color: {TEXT_100}; --tw-ring-color: {RING_AZURE_10}; box-shadow: 0 2px 8px rgba(0,0,0,0.25);"
+								style:border={selectedChatId === chat.id
+									? `1px solid ${chat.statusColor}`
+									: `1px solid ${BORDER_SUBTLE}`}
+								style:transform={selectedChatId === chat.id ? 'scale(1.01)' : 'scale(1)'}
 								title={`Abrir chat: ${chat.name}`}
+								aria-pressed={selectedChatId === chat.id}
+								on:click={() => {
+									handleChatSelection(chat.id);
+									handleViewChange('chat');
+								}}
+								type="button"
 							>
 								<div
 									class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"

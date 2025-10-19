@@ -40,11 +40,28 @@ export interface QuickAction {
 }
 
 export interface ChatItem {
+	id: number;
 	name: string;
 	lastMessage: string;
 	time: string;
 	statusColor: string;
 	isUnread: boolean;
+}
+
+export type MessageDirection = 'incoming' | 'outgoing';
+
+export interface ChatMessage {
+	id: number;
+	author: string;
+	content: string;
+	sentAt: string;
+	direction: MessageDirection;
+}
+
+export interface ChatThread {
+	chatId: number;
+	subject: string;
+	messages: ChatMessage[];
 }
 
 export interface ProjectItem {
@@ -56,8 +73,61 @@ export interface ProjectItem {
 }
 
 export interface BannerMessage {
-	title: string;
-	highlight: string;
-	description: string;
-	cta: string;
+        title: string;
+        highlight: string;
+        description: string;
+        cta: string;
+}
+
+export type DocumentStatus = 'Aprobado' | 'Pendiente' | 'Rechazado';
+
+export interface VerificationDocument {
+        label: string;
+        status: DocumentStatus;
+        detail: string;
+}
+
+export type ObservationType = 'info' | 'alert' | 'action';
+
+export interface ObservationItem {
+        message: string;
+        recordedAt: string;
+        type: ObservationType;
+}
+
+export type RiskLevel = 'none' | 'low' | 'medium' | 'high';
+
+export interface ReportingStatus {
+        hasReports: boolean;
+        message: string;
+        lastUpdate: string;
+        riskLevel: RiskLevel;
+}
+
+export interface VerificationSummary {
+        status: string;
+        description: string;
+        method: string;
+        lastReview: string;
+        nextReview: string;
+        reviewer: string;
+        reliabilityLevel: string;
+        documentsReviewed: number;
+}
+
+export interface LegalRepresentative {
+        name: string;
+        idType: string;
+        idNumber: string;
+        email: string;
+}
+
+export interface InstitutionIdentity {
+        name: string;
+        registrationId: string;
+        sector: string;
+        location: string;
+        legalRepresentative: LegalRepresentative;
+        contactPhone: string;
+        website?: string;
 }

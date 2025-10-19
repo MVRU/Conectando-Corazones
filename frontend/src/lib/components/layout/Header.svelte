@@ -59,6 +59,15 @@
 		}
 	}
 
+	const updateHeaderHeight = () => {
+		if (typeof document === 'undefined') {
+			return;
+		}
+
+		const height = headerRef?.offsetHeight ?? 0;
+		document.documentElement.style.setProperty('--app-header-height', `${height}px`);
+	};
+
 	onMount(() => {
 		const observer = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.1
@@ -78,12 +87,27 @@
 			lastScrollY = current;
 		};
 
+		updateHeaderHeight();
+
+		const resizeObserver =
+			typeof ResizeObserver !== 'undefined'
+				? new ResizeObserver(() => updateHeaderHeight())
+				: undefined;
+
+		if (resizeObserver && headerRef) {
+			resizeObserver.observe(headerRef);
+		}
+
+		window.addEventListener('resize', updateHeaderHeight, { passive: true });
+
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		return () => {
 			observer.disconnect();
+			resizeObserver?.disconnect();
 			window.removeEventListener('scroll', handleScroll);
 			window.removeEventListener('click', closeDropdownOnClickOutside);
+			window.removeEventListener('resize', updateHeaderHeight);
 		};
 	});
 </script>
@@ -100,6 +124,7 @@
 <!-- Header principal -->
 <header
 	bind:this={headerRef}
+	data-app-header
 	class="sticky top-0 z-50 w-full bg-[rgb(var(--base-color))] text-white shadow-[0_2px_6px_rgba(0,0,0,.22)] transition-transform duration-500"
 	style="transform:translateY({mostrarHeader ? 0 : -110}%);"
 >
