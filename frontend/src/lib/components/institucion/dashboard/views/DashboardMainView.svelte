@@ -39,7 +39,7 @@
 	export let metrics: Metric[] = [];
 	export let progressSegments: ProgressSegment[] = [];
 	export let aidTypes: AidType[] = [];
-	export let pendingRequests = 3;
+	export let pendingRequests = 4;
 
 	const DONUT_VIEWBOX = 160;
 	const DONUT_RADIUS = 56;

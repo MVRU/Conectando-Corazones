@@ -92,7 +92,8 @@ export function buildDonutSegments(aidTypes: AidType[], radius: number): AidDonu
 export function computeQuickActions(
 	viewMode: ViewMode,
 	projectCount: number,
-	unreadChats: number
+		unreadChats: number,
+	pendingRequests: number
 ): QuickAction[] {
 	switch (viewMode) {
 		case 'projects':
@@ -117,8 +118,14 @@ export function computeQuickActions(
 			return quickActionLabels.map((label) => ({
 				label,
 				icon: LayoutGrid,
-				badge: label === 'Ver solicitudes' ? '3' : null,
-				statusColor: label === 'Ver solicitudes' ? ERROR_COLOR : PRIMARY_500
+					badge:
+					label === 'Ver solicitudes'
+						? pendingRequests > 0
+							? pendingRequests.toString()
+							: null
+						: null,
+				statusColor: label === 'Ver solicitudes' ? ERROR_COLOR : PRIMARY_500,
+				view: label === 'Ver solicitudes' ? 'collaborations' : undefined
 			}));
 	}
 }

@@ -5,6 +5,7 @@
 	import NavigationSidebar from './dashboard/NavigationSidebar.svelte';
 	import DashboardHeader from './dashboard/DashboardHeader.svelte';
 	import DashboardMainView from './dashboard/views/DashboardMainView.svelte';
+	import CollaborationRequestsView from './dashboard/views/CollaborationRequestsView.svelte';
 	import ProjectsView from './dashboard/views/ProjectsView.svelte';
 	import ChatView from './dashboard/views/ChatView.svelte';
 	import ProfileView from './dashboard/views/ProfileView.svelte';
@@ -12,8 +13,10 @@
 	import PlaceholderView from './dashboard/views/PlaceholderView.svelte';
 	import {
 		ayudaTypes,
+		activeCollaborators,
 		chatItems,
 		chatThreads,
+		collaborationRequests,
 		filterLabels,
 		luzParaAprenderProgress,
 		metrics,
@@ -25,6 +28,7 @@
 	import { GRADIENT_BG, PRIMARY_500, RING_AZURE_25, TEXT_100 } from './dashboard/tokens';
 
 	const unreadChats = chatItems.filter((chat) => chat.isUnread).length;
+	const pendingRequestsCount = collaborationRequests.length;
 
 	let viewMode: ViewMode = 'dashboard';
 	let isMobileMenuOpen = false;
@@ -32,7 +36,13 @@
 	let selectedChatId: number | null = chatItems[0]?.id ?? null;
 	let sidebarWidth = 260;
 
-	$: quickActions = computeQuickActions(viewMode, projectItems.length, unreadChats);
+	$: quickActions = computeQuickActions(
+		viewMode,
+		projectItems.length,
+		unreadChats,
+		pendingRequestsCount
+	);
+
 	$: selectedChat = chatItems.find((chat) => chat.id === selectedChatId) ?? null;
 	$: activeThread = chatThreads.find((thread) => thread.chatId === selectedChatId) ?? null;
 
@@ -116,7 +126,13 @@
 					{metrics}
 					progressSegments={luzParaAprenderProgress}
 					aidTypes={ayudaTypes}
-					pendingRequests={3}
+					pendingRequests={pendingRequestsCount}
+				/>
+			{:else if viewMode === 'collaborations'}
+				<CollaborationRequestsView
+					project={selectedProject}
+					requests={collaborationRequests}
+					{activeCollaborators}
 				/>
 			{:else if viewMode === 'projects'}
 				<ProjectsView project={selectedProject} />

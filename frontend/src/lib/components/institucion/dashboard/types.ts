@@ -1,7 +1,14 @@
 // -*- DECISIÓN DE DISEÑO: Definimos tipados compartidos para reforzar el contrato entre vistas y datos.
+
 import type { ComponentType } from 'svelte';
 
-export type ViewMode = 'dashboard' | 'projects' | 'chat' | 'profile' | 'settings';
+export type ViewMode =
+	| 'dashboard'
+	| 'projects'
+	| 'chat'
+	| 'profile'
+	| 'settings'
+	| 'collaborations';
 
 export type IconComponent = ComponentType;
 
@@ -30,6 +37,7 @@ export interface AidType {
 	label: string;
 	percent: number;
 	grad: GradKey;
+	
 	insight: string;
 }
 
@@ -45,8 +53,8 @@ export interface QuickAction {
 	icon: IconComponent;
 	badge: string | null;
 	statusColor?: string;
+	view?: ViewMode;
 }
-
 export interface ChatItem {
 	id: number;
 	name: string;
@@ -112,6 +120,28 @@ export interface ProjectItem {
 	status: string;
 	date: string;
 	statusColor: string;
+}
+
+export type CollaborationKind = 'empresa' | 'ong' | 'voluntariado';
+
+export interface CollaborationRequest {
+	id: string;
+	collaboratorName: string;
+	organizationName: string;
+	kind: CollaborationKind;
+	email: string;
+	submittedAt: string;
+	message: string;
+	experienceSummary: string;
+}
+
+export interface ActiveCollaborator {
+	id: string;
+	name: string;
+	role: string;
+	email: string;
+	joinedAt: string;
+	contribution: string;
 }
 
 export interface BannerMessage {

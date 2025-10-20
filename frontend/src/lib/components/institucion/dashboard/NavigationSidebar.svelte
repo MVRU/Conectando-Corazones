@@ -42,6 +42,7 @@
 	const NAV_COMPACT_BREAKPOINT = 220;
 	const SECONDARY_SECTION_LABELS: Record<ViewMode, string> = {
 		dashboard: 'Acciones rápidas',
+		collaborations: 'Solicitudes pendientes',
 		projects: 'Proyectos activos',
 		chat: 'Conversaciones',
 		profile: 'Acciones rápidas',
@@ -73,6 +74,12 @@
 
 	function handleChatSelection(chatId: number) {
 		dispatch('selectChat', chatId);
+	}
+
+	function handleQuickAction(action: QuickAction) {
+		if (action.view) {
+			handleViewChange(action.view);
+		}
 	}
 
 	function startResize(event: MouseEvent) {
@@ -291,6 +298,7 @@
 								class="group relative flex items-center justify-between rounded-[16px] px-4 py-3 transition-all duration-200 hover:scale-[1.01] hover:ring-2 active:scale-[0.99]"
 								style="border: 1px solid {BORDER_SUBTLE}; background: {BG_900}; color: {TEXT_100}; --tw-ring-color: {RING_AZURE_10}; box-shadow: 0 2px 8px rgba(0,0,0,0.25);"
 								type="button"
+								on:click={() => handleQuickAction(action)}
 							>
 								<div class="flex items-center gap-3">
 									<div

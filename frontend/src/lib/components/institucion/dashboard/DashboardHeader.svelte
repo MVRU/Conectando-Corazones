@@ -19,7 +19,7 @@
 	} from './tokens';
 
 	export let viewMode: ViewMode = 'dashboard';
-	export let contextSubtitle = 'Escuela Esperanza · Octubre 2025 · Rosario, Santa Fe, Argentina';
+	export let contextSubtitle = 'Escuela Esperanza · Noviembre 2025 · Rosario, Santa Fe, Argentina';
 </script>
 
 <header class="mb-8 flex flex-col justify-between gap-6 sm:flex-row sm:items-end md:mb-10">

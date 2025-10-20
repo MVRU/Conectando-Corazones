@@ -18,12 +18,14 @@ import type {
 	ChatItem,
 	ChatMetadataMap,
 	ChatThread,
+	ActiveCollaborator,
 	InstitutionIdentity,
 	Metric,
 	NavItem,
 	ObservationItem,
 	ProgressSegment,
 	ProjectItem,
+	CollaborationRequest,
 	ReportingStatus,
 	VerificationDocument,
 	VerificationSummary,
@@ -64,18 +66,10 @@ export const chatItems: ChatItem[] = [
 	},
 	{
 		id: 2,
-		name: 'Fundación Sonrisas',
-		lastMessage: 'Confirmamos el envío de kits escolares.',
+		name: 'Patio de Colores',
+		lastMessage: 'Borrador',
 		time: 'Hace 2h',
 		statusColor: PRIMARY_500,
-		isUnread: false
-	},
-	{
-		id: 3,
-		name: 'Equipo Conectando',
-		lastMessage: 'Recordatorio de reunión semanal.',
-		time: 'Ayer',
-		statusColor: WARNING_COLOR,
 		isUnread: false
 	}
 ];
@@ -87,58 +81,52 @@ export const chatThreads: ChatThread[] = [
 		messages: [
 			{
 				id: 101,
-				author: 'Coordinación Conectando',
+				author: 'Mariano · Lumina Cooperativa (Colaborador)',
 				content:
-					'Hola, ¿cómo avanzan con la revisión del presupuesto? Podemos apoyar si necesitan.',
-				sentAt: '2025-02-15T08:30:00-05:00',
+					'¡Un gusto, Patricia! Desde Lumina Cooperativa confirmamos la donación de los cables y soportes. Estarán listos para retirar el miércoles por la mañana.',
+				sentAt: '2025-11-03T08:30:00-05:00',
 				direction: 'incoming'
 			},
 			{
 				id: 102,
-				author: 'Institución',
+				author: 'Clara · Sembrar Futuro (Colaboradora)',
 				content:
-					'Buenos días, estamos afinando los últimos detalles. Confirmamos hoy antes de las 17:00.',
-				sentAt: '2025-02-15T08:41:00-05:00',
-				direction: 'outgoing'
+					'Buenos días, nosotros enviaremos las lámparas LED mañana. Son de bajo consumo y larga duración. Les comparto el comprobante de entrega apenas salga el envío!',
+				sentAt: '2025-11-03T08:41:00-05:00',
+				direction: 'incoming'
 			},
 			{
 				id: 103,
-				author: 'Coordinación Conectando',
-				content: 'Perfecto, quedamos atentos. ¡Gracias!',
-				sentAt: '2025-02-15T08:45:00-05:00',
+				author: 'Lucas · Voluntario UTN (Colaborador)',
+				content: 'Con Sofía podemos pasar el viernes a la escuela para comenzar la instalación. Si todo está en condiciones, en un día dejamos las tres aulas listas.',
+				sentAt: '2025-11-03T08:45:00-05:00',
 				direction: 'incoming'
+			},
+			{
+				id: 104,
+				author: 'Sofía · Voluntaria UTN (Colaboradora)',
+				content: 'Sí, y podemos registrar fotos del antes y después para subir como evidencia al sistema. Así queda trazado todo el proceso!',
+				sentAt: '2025-11-03T08:47:00-05:00',
+				direction: 'incoming'
+			},
+			{
+				id: 105,
+				author: 'Patricia · Escuela Esperanza (Institución)',
+				content: 'Mil gracias a todos! ❤️ Los chicos van a estar felices. Apenas finalicen los trabajos, validamos el proyecto en la plataforma.',
+				sentAt: '2025-11-03T08:50:00-05:00',
+				direction: 'outgoing'
 			}
 		]
 	},
 	{
 		chatId: 2,
-		subject: 'Fundación Sonrisas',
+		subject: 'Patio de Colores',
 		messages: [
 			{
 				id: 201,
-				author: 'Fundación Sonrisas',
-				content: 'Los kits escolares salieron hoy. Llegarán el jueves a primera hora.',
+				author: 'Conectando Corazones (Sistema)',
+				content: '¡Este proyecto es un borrador!',
 				sentAt: '2025-02-14T15:12:00-05:00',
-				direction: 'incoming'
-			},
-			{
-				id: 202,
-				author: 'Institución',
-				content: 'Muchas gracias por la confirmación. Avisamos al equipo logístico.',
-				sentAt: '2025-02-14T15:20:00-05:00',
-				direction: 'outgoing'
-			}
-		]
-	},
-	{
-		chatId: 3,
-		subject: 'Equipo Conectando',
-		messages: [
-			{
-				id: 301,
-				author: 'Equipo Conectando',
-				content: 'Recordatorio: la reunión de seguimiento es mañana a las 10:00.',
-				sentAt: '2025-02-14T09:00:00-05:00',
 				direction: 'incoming'
 			}
 		]
@@ -155,12 +143,56 @@ export const projectItems: ProjectItem[] = [
 	},
 	{
 		id: 2,
-		name: 'Patio de colores',
+		name: 'Patio de Colores',
 		status: 'Borrador',
 		date: '25/11/2025',
 		statusColor: PRIMARY_500
 	}
 ];
+
+export const collaborationRequests: CollaborationRequest[] = [
+];
+
+export const activeCollaborators: ActiveCollaborator[] = [
+        {
+                id: 'active-lumina-cooperativa',
+                name: 'Lumina Cooperativa',
+                role: 'Mariano Ponce · Empresa eléctrica',
+                email: 'alianzas@luminacooperativa.com.ar',
+                joinedAt: '03/11/2025',
+                contribution:
+                        'Instalación del cableado principal y supervisión de soportes en los pabellones A y B conforme a normas IRAM.'
+        },
+ {
+                id: 'active-sembrar-futuro',
+                name: 'Sembrar Futuro',
+                role: 'Clara Medina · ONG',
+                email: 'coordinacion@sembrarfuturo.org',
+                joinedAt: '03/11/2025',
+                contribution:
+                        'Donación de 60 lámparas LED y coordinación del transporte hasta la Escuela Esperanza.'
+        },
+        {
+                id: 'active-lucas-ferreyra',
+                name: 'Lucas Ferreyra',
+                role: 'Voluntario UTN FRRo · Ing. Eléctrica',
+                email: 'lucas.ferreyra@frro.utn.edu.ar',
+                joinedAt: '03/11/2025',
+                contribution:
+                        'Asistencia en tendido interno, pruebas de seguridad y mentoría para el personal de mantenimiento.'
+        },
+        {
+                id: 'active-sofia-mansilla',
+                name: 'Sofía Mansilla',
+                role: 'Voluntaria UTN FRRo · Ing. Eléctrica',
+                email: 'sofia.mansilla@frro.utn.edu.ar',
+                joinedAt: '03/11/2025',
+                contribution:
+                        'Coordinación de instalación de luminarias y talleres básicos de mantenimiento para docentes.'
+        }
+];
+
+
 
 export const luzParaAprenderProgress: ProgressSegment[] = [
 	{ label: 'Donación monetaria', percent: 15, grad: 'green' },
@@ -210,11 +242,12 @@ export const trendingIcon = TrendingUp;
 export const quickActionIcon = LayoutGrid;
 
 export const viewModeLabels: Record<ViewMode, string> = {
-        dashboard: 'Mi panel',
-        projects: 'Proyectos',
-        chat: 'Mensajes',
-        profile: 'Perfil',
-        settings: 'Configuración'
+	dashboard: 'Mi panel',
+	collaborations: 'Colaboraciones',
+	projects: 'Proyectos',
+	chat: 'Mensajes',
+	profile: 'Perfil',
+	settings: 'Configuración'
 };
 
 export const institutionIdentity: InstitutionIdentity = {
@@ -297,19 +330,19 @@ export const chatMetadata: ChatMetadataMap = {
 			},
 			{
 				id: 'voluntario-lucas-utn',
-				name: 'Lucas',
+				name: 'Lucas Ferreyra',
 				role: 'Colaborador',
 				kind: 'voluntario',
 				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-				contact: 'Lucas • UTN FRRo'
+				contact: 'Lucas Ferreyra • UTN FRRo'
 			},
 			{
 				id: 'voluntaria-sofia-utn',
-				name: 'Sofía',
+				name: 'Sofía Mansilla',
 				role: 'Colaborador',
 				kind: 'voluntario',
 				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-				contact: 'Sofía • UTN FRRo'
+				contact: 'Sofía Mansilla • UTN FRRo'
 			}
 		],
 		attachments: [
