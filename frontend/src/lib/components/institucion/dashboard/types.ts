@@ -114,6 +114,8 @@ export interface EvidenceRecord {
         evidenceFlow: EvidenceFlow;
         uploadedBy: string;
         previewUrl?: string | null;
+        previewImageUrl?: string | null;
+        previewImageAlt?: string | null;
 }
 
 export interface EvidenceUploadContext {

@@ -189,7 +189,10 @@ export const evidenceUploadContext: EvidenceUploadContext = {
                 uploadedAt: '2025-11-03T09:20:00-03:00',
                 evidenceFlow: 'entrada',
                 uploadedBy: 'Clara Medina · Sembrar Futuro',
-                previewUrl: '/evidencias/comprobante_transferencia.webp'
+                previewUrl: '/evidencias/comprobante_transferencia.pdf',
+                previewImageUrl: '/evidencias/comprobante_transferencia.webp',
+                previewImageAlt:
+                        'Recibo bancario firmado que certifica la transferencia realizada para la compra de lámparas LED.'
         }
 };
 
