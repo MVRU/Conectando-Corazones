@@ -82,7 +82,7 @@ export const chatThreads: ChatThread[] = [
 			{
 				id: 101,
 				author: 'Mariano Ponce',
-				organization: 'Lumina Cooperativa',
+				organization: 'Lumina Cooperativa · Empresa',
 				role: 'Colaborador',
 				content:
 					'¡Un gusto, Patricia! Desde Lumina Cooperativa confirmamos la donación de los cables y soportes. Estarán listos para retirar el miércoles por la mañana.',
@@ -93,7 +93,7 @@ export const chatThreads: ChatThread[] = [
 			{
 				id: 102,
 				author: 'Clara Medina',
-				organization: 'Sembrar Futuro',
+				organization: 'Sembrar Futuro · ONG',
 				role: 'Colaborador',
 				content:
 					'Buenos días, nosotros enviaremos las lámparas LED mañana. Son de bajo consumo y larga duración. Les comparto el comprobante de entrega apenas salga el envío!',
@@ -104,7 +104,7 @@ export const chatThreads: ChatThread[] = [
 			{
 				id: 103,
 				author: 'Lucas Ferreyra',
-				organization: 'Voluntariado UTN FRRo',
+				organization: 'Estudiante UTN FRRo',
 				role: 'Colaborador',
 				content:
 					'Con Sofía podemos pasar el viernes a la escuela para comenzar la instalación. Si todo está en condiciones, en un día dejamos las tres aulas listas.',
@@ -115,7 +115,7 @@ export const chatThreads: ChatThread[] = [
 			{
 				id: 104,
 				author: 'Sofía Mansilla',
-				organization: 'Voluntariado UTN FRRo',
+				organization: 'Estudiante UTN FRRo',
 				role: 'Colaborador',
 				content:
 					'Sí, y podemos registrar fotos del antes y después para subir como evidencia al sistema. Así queda trazado todo el proceso!',
@@ -401,8 +401,9 @@ export const chatMetadata: ChatMetadataMap = {
 				fileExtension: 'pdf',
 				description: 'Factura emitida por proveedor de luminarias homologadas.',
 				uploadedAt: '2025-11-12',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'entrada'
+                                previewImage: '/img/pdf-portada.svg',
+                                evidenceFlow: 'entrada',
+                                downloadUrl: '/docs/evidencias/factura-led-001.pdf'
 			},
 			{
 				id: 'evidencia-comprobante-transf-002',
@@ -412,8 +413,9 @@ export const chatMetadata: ChatMetadataMap = {
 				fileExtension: 'pdf',
 				description: 'Documento que acredita la donación recibida para la compra de materiales.',
 				uploadedAt: '2025-11-14',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'salida'
+                                previewImage: '/img/pdf-portada.svg',
+                                evidenceFlow: 'salida',
+                                downloadUrl: '/docs/evidencias/comprobante-transf-002.pdf'
 			},
 			{
 				id: 'evidencia-registro-fotografico',
@@ -423,11 +425,51 @@ export const chatMetadata: ChatMetadataMap = {
 				fileExtension: 'jpg',
 				description: 'Fotos de los trabajos en progreso compartidas por voluntariado.',
 				uploadedAt: '2025-11-18',
-				previewImage: '/img/jpg-portada.svg',
-				evidenceFlow: 'entrada'
-			}
-		]
-	}
+                                previewImage: '/img/jpg-portada.svg',
+                                evidenceFlow: 'entrada',
+                                downloadUrl: '/docs/evidencias/registro-fotografico.jpg'
+                        }
+                ],
+                project: {
+                        name: 'Luz para Aprender',
+                        location:
+                                'Escuela Esperanza · Calle José Ingenieros 1842, Barrio Ludueña, Rosario, Santa Fe',
+                        tentativeClosure: '23/11/2025',
+                        remainingDays: 20,
+                        objectives: [
+                                {
+                                        id: 'objetivo-tableros-conexion',
+                                        progressLabel: '0/3 tableros de conexión',
+                                        resourceType: 'en especie',
+                                        sponsor: 'Lumina Cooperativa'
+                                },
+                                {
+                                        id: 'objetivo-interruptores-seguridad',
+                                        progressLabel: '0/6 interruptores de seguridad certificados',
+                                        resourceType: 'en especie',
+                                        sponsor: 'Lumina Cooperativa'
+                                },
+                                {
+                                        id: 'objetivo-cableado-ignifugo',
+                                        progressLabel: '0/50 metros de cableado ignífugo',
+                                        resourceType: 'en especie',
+                                        sponsor: 'Lumina Cooperativa'
+                                },
+                                {
+                                        id: 'objetivo-lamparas-led',
+                                        progressLabel: '$0/$180.000 ARS para lámparas LED',
+                                        resourceType: 'monetaria',
+                                        sponsor: 'Sembrar Futuro'
+                                },
+                                {
+                                        id: 'objetivo-voluntariado-instalacion',
+                                        progressLabel: '2/2 voluntarios para instalación',
+                                        resourceType: 'voluntariado',
+                                        sponsor: 'Lucas y Sofía'
+                                }
+                        ]
+                }
+        }
 };
 
 

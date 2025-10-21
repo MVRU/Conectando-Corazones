@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { FileText, Image, Users, X } from 'lucide-svelte';
+	import { CalendarDays, FileText, Image, MapPin, Target, Users, X } from 'lucide-svelte';
 
-	import type { AttachmentFormat, ChatAttachment, ChatMetadata, ChatParticipant } from '../types';
+	import type {
+		AttachmentFormat,
+		ChatAttachment,
+		ChatMetadata,
+		ChatObjective,
+		ChatParticipant
+	} from '../types';
 	import { TEXT_100, TEXT_300, TEXT_400 } from '../tokens';
 
 	const PANEL_ID = 'chat-details-panel';
@@ -27,6 +33,9 @@
 	export let metadata: ChatMetadata | null = null;
 	export let open = false;
 
+	let projectInfo: ChatMetadata['project'] | null = null;
+	let objectiveItems: ChatObjective[] = [];
+
 	$: galleryAttachments = metadata
 		? metadata.attachments.filter((item) => item.category === 'galeria')
 		: [];
@@ -35,6 +44,11 @@
 		: [];
 	$: participantCount = metadata ? 1 + (metadata.collaborators?.length ?? 0) : 0;
 	$: participantEntries = metadata ? [metadata.institution, ...metadata.collaborators] : [];
+	$: projectInfo = metadata?.project ?? null;
+	$: objectiveItems = projectInfo?.objectives ?? [];
+	$: closureSuffix = projectInfo
+		? `faltan ${projectInfo.remainingDays} día${projectInfo.remainingDays === 1 ? '' : 's'}`
+		: '';
 
 	function formatAttachmentDate(isoDate: string): string {
 		try {
@@ -97,6 +111,53 @@
 					<X class="h-4 w-4" aria-hidden="true" />
 				</button>
 			</header>
+
+			{#if projectInfo}
+				<div class="panel-section panel-section--project">
+					<div class="panel-section__header">
+						<Target class="h-5 w-5" aria-hidden="true" />
+						<h3>Proyecto {projectInfo.name}</h3>
+					</div>
+					<div class="project-meta" role="list">
+						<div class="project-meta__item" role="listitem">
+							<MapPin class="h-5 w-5" aria-hidden="true" />
+							<div>
+								<p class="project-meta__label">Lugar</p>
+								<p class="project-meta__value">{projectInfo.location}</p>
+							</div>
+						</div>
+						<div class="project-meta__item" role="listitem">
+							<CalendarDays class="h-5 w-5" aria-hidden="true" />
+							<div>
+								<p class="project-meta__label">Cierre tentativo</p>
+								<p class="project-meta__value">
+									{projectInfo.tentativeClosure}
+									{#if closureSuffix}
+										<span class="project-meta__hint">({closureSuffix})</span>
+									{/if}
+								</p>
+							</div>
+						</div>
+					</div>
+					<div class="project-objectives">
+						<h4>Objetivos</h4>
+						<ul role="list">
+							{#each objectiveItems as objective (objective.id)}
+								<li class="objective-item">
+									<span class="objective-progress">{objective.progressLabel}</span>
+									<div class="objective-badges" aria-label="Detalles del objetivo">
+										<span class="objective-badge objective-badge--type"
+											>{objective.resourceType}</span
+										>
+										<span class="objective-badge objective-badge--sponsor">{objective.sponsor}</span
+										>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					</div>
+				</div>
+			{/if}
 
 			<div class="panel-section">
 				<div class="panel-section__header">
@@ -175,6 +236,17 @@
 									>
 										{resolveEvidenceBadge(file)}
 									</span>
+									<a
+										class="panel-download"
+										href={file.downloadUrl ?? '#'}
+										rel={file.downloadUrl ? 'noopener noreferrer' : undefined}
+										target={file.downloadUrl ? '_blank' : undefined}
+										download={file.downloadUrl ? '' : undefined}
+										aria-label={`Descargar ${file.name}`}
+										aria-disabled={!file.downloadUrl}
+									>
+										↓
+									</a>
 								</div>
 								<p class="panel-card__meta">{file.description}</p>
 								<p class="panel-card__date">Actualizado {formatAttachmentDate(file.uploadedAt)}</p>
@@ -277,6 +349,221 @@
 		padding-top: 1.25rem;
 	}
 
+	.panel-section--project {
+		gap: 1.5rem;
+	}
+
+	.project-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+
+	.project-meta__item {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		border-radius: 16px;
+		padding: 0.75rem 0.95rem;
+		background: rgba(14, 20, 48, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.project-meta__label {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--panel-muted);
+	}
+
+	.project-meta__value {
+		font-size: 0.88rem;
+		color: var(--panel-text);
+		line-height: 1.45;
+	}
+
+	.project-meta__hint {
+		margin-left: 0.35rem;
+		color: var(--panel-muted);
+		font-size: 0.75rem;
+	}
+
+	.project-objectives {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.project-objectives h4 {
+		font-size: 0.95rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--panel-text);
+	}
+
+	.project-objectives ul {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+	}
+
+	.objective-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding: 0.65rem 0.8rem;
+		border-radius: 14px;
+		background: rgba(13, 20, 48, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+	}
+
+	.objective-progress {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--panel-text);
+	}
+
+	.objective-badges {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.objective-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.2rem 0.55rem;
+		border-radius: 9999px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+
+	.objective-badge--type {
+		background: rgba(11, 152, 250, 0.16);
+		border: 1px solid rgba(11, 152, 250, 0.4);
+		color: rgba(224, 242, 254, 0.95);
+	}
+
+	.objective-badge--sponsor {
+		background: rgba(132, 204, 22, 0.16);
+		border: 1px solid rgba(132, 204, 22, 0.35);
+		color: rgba(236, 253, 245, 0.95);
+	}
+
+	.panel-section + .panel-section {
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		padding-top: 1.25rem;
+	}
+
+	.panel-section--project {
+		gap: 1.5rem;
+	}
+
+	.project-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+
+	.project-meta__item {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		border-radius: 16px;
+		padding: 0.75rem 0.95rem;
+		background: rgba(14, 20, 48, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.project-meta__label {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--panel-muted);
+	}
+
+	.project-meta__value {
+		font-size: 0.88rem;
+		color: var(--panel-text);
+		line-height: 1.45;
+	}
+
+	.project-meta__hint {
+		margin-left: 0.35rem;
+		color: var(--panel-muted);
+		font-size: 0.75rem;
+	}
+
+	.project-objectives {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.project-objectives h4 {
+		font-size: 0.95rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--panel-text);
+	}
+
+	.project-objectives ul {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
+	}
+
+	.objective-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+		padding: 0.65rem 0.8rem;
+		border-radius: 14px;
+		background: rgba(13, 20, 48, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.07);
+	}
+
+	.objective-progress {
+		font-size: 0.85rem;
+		font-weight: 600;
+		color: var(--panel-text);
+	}
+
+	.objective-badges {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.objective-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.2rem 0.55rem;
+		border-radius: 9999px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+
+	.objective-badge--type {
+		background: rgba(11, 152, 250, 0.16);
+		border: 1px solid rgba(11, 152, 250, 0.4);
+		color: rgba(224, 242, 254, 0.95);
+	}
+
+	.objective-badge--sponsor {
+		background: rgba(132, 204, 22, 0.16);
+		border: 1px solid rgba(132, 204, 22, 0.35);
+		color: rgba(236, 253, 245, 0.95);
+	}
+
 	.panel-section__header {
 		display: flex;
 		align-items: center;
@@ -311,7 +598,6 @@
 		object-fit: cover;
 		border: 2px solid rgba(255, 255, 255, 0.16);
 	}
-
 	.panel-member__identity {
 		display: inline-flex;
 		align-items: center;
@@ -468,6 +754,66 @@
 		color: #0f766e;
 	}
 
+	.panel-download {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		margin-left: 0.35rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(9, 13, 38, 0.75);
+		color: var(--panel-text);
+		font-size: 0.9rem;
+		text-decoration: none;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.panel-download:hover:not([aria-disabled='true']) {
+		transform: translateY(-1px);
+		border-color: rgba(11, 152, 250, 0.5);
+		box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);
+	}
+
+	.panel-download[aria-disabled='true'] {
+		opacity: 0.4;
+		pointer-events: none;
+	}
+
+	.panel-download {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		margin-left: 0.35rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		background: rgba(9, 13, 38, 0.75);
+		color: var(--panel-text);
+		font-size: 0.9rem;
+		text-decoration: none;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.panel-download:hover:not([aria-disabled='true']) {
+		transform: translateY(-1px);
+		border-color: rgba(11, 152, 250, 0.5);
+		box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);
+	}
+
+	.panel-download[aria-disabled='true'] {
+		opacity: 0.4;
+		pointer-events: none;
+	}
+
 	@keyframes slide-in {
 		from {
 			transform: translateX(28px);
@@ -487,16 +833,36 @@
 			grid-template-columns: auto;
 		}
 
-		.chat-panel {
-			border-radius: 20px;
-			height: auto;
-			max-height: calc(100vh - 80px);
-			margin-left: 1.25rem;
-			box-shadow: -12px 24px 60px rgba(4, 10, 30, 0.55);
+		@keyframes slide-in {
+			from {
+				transform: translateX(28px);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
 		}
 
-		.panel-overlay {
-			display: none;
+		@media (min-width: 1024px) {
+			.panel-layer {
+				inset: 40px 40px 40px auto;
+				pointer-events: auto;
+				grid-template-columns: auto;
+			}
+
+			.chat-panel {
+				border-radius: 20px;
+				height: auto;
+				max-height: calc(100vh - 80px);
+				margin-left: 1.25rem;
+				box-shadow: -12px 24px 60px rgba(4, 10, 30, 0.55);
+			}
+
+			.panel-overlay {
+				display: none;
+			}
 		}
 	}
 </style>

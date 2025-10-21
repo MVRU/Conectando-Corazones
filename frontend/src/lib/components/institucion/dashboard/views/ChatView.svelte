@@ -24,6 +24,7 @@
 	let conversationMessages: ChatMessage[] = [];
 	let lastThreadId: number | null = null;
 	const panelId = 'chat-details-panel';
+	const STATUS_BADGE_LABEL = 'En curso';
 
 	const messageFormatter = new Intl.DateTimeFormat('es-CO', {
 		dateStyle: 'medium',
@@ -86,6 +87,11 @@
 		if (!metadata) return;
 		dispatch('toggleDetails', { open: !detailsOpen });
 	}
+
+	function handleViewEvidenceCTA() {
+		if (!metadata) return;
+		dispatch('toggleDetails', { open: true });
+	}
 </script>
 
 {#if !chatSummary}
@@ -102,7 +108,7 @@
 {:else}
 	<section
 		class="chat-wrapper flex min-h-[60vh] flex-col rounded-[28px]"
-		style={`background: ${BG_CARD}; border: 1px solid ${BORDER_SUBTLE}; box-shadow: 0 18px 40px rgba(5,10,45,0.35); color: ${TEXT_100}; --bubble-text:${TEXT_100}; --bubble-meta:${TEXT_300}; --bubble-muted:${TEXT_400}; --divider:${BORDER_SUBTLE};`}
+		style={`background: ${BG_CARD}; border: 1px solid ${BORDER_SUBTLE}; box-shadow: 0 18px 40px rgba(5,10,45,0.35); color: ${TEXT_100}; --bubble-text:${TEXT_100}; --bubble-meta:${TEXT_300}; --bubble-muted:${TEXT_400}; --divider:${BORDER_SUBTLE}; --bubble-incoming-bg:linear-gradient(180deg, rgba(15,24,55,0.92), rgba(13,20,48,0.88)); --bubble-outgoing-bg:linear-gradient(180deg, #E0F3FF, #C8E4FF); --bubble-outgoing-text:#062441; --bubble-outgoing-muted:rgba(8,40,85,0.68); --bubble-outgoing-meta:rgba(8,40,85,0.62);`}
 		aria-live="polite"
 	>
 		<header
@@ -121,7 +127,7 @@
 					<div class="flex items-center gap-2">
 						<h2 class="text-lg font-semibold" style="color: {TEXT_100};">{chatSummary.name}</h2>
 						{#if metadata}
-							<span class="chat-role-badge">{metadata.institution.role}</span>
+							<span class="chat-role-badge">{STATUS_BADGE_LABEL}</span>
 						{/if}
 					</div>
 					<span class="text-sm" style="color: {TEXT_400};">Último mensaje: {chatSummary.time}</span>
@@ -371,15 +377,15 @@
 		max-width: min(80%, 520px);
 		padding: 0.95rem 1.15rem;
 		border-radius: 20px;
-		background: linear-gradient(180deg, rgba(18, 26, 63, 0.75), rgba(18, 26, 63, 0.92));
+		background: var(--bubble-incoming-bg);
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		color: var(--bubble-text);
 	}
 
 	.message-item--outgoing {
-		background: linear-gradient(180deg, rgba(11, 152, 250, 0.85), rgba(11, 152, 250, 0.75));
-		border-color: rgba(11, 152, 250, 0.45);
-		color: #041021;
+		background: var(--bubble-outgoing-bg);
+		border-color: rgba(11, 152, 250, 0.25);
+		color: var(--bubble-outgoing-text);
 	}
 
 	.message-meta {
@@ -421,7 +427,7 @@
 	}
 
 	.message-item--outgoing .message-organization {
-		color: rgba(4, 16, 33, 0.7);
+		color: var(--bubble-outgoing-muted);
 		text-align: right;
 	}
 
@@ -452,7 +458,7 @@
 	}
 
 	.message-item--outgoing .message-role[data-role='Institución'] {
-		color: #041021;
+		color: var(--bubble-outgoing-text);
 	}
 
 	.message-timestamp {
@@ -461,7 +467,7 @@
 	}
 
 	.message-item--outgoing .message-timestamp {
-		color: rgba(4, 16, 33, 0.65);
+		color: var(--bubble-outgoing-meta);
 	}
 
 	.message-content {
@@ -472,6 +478,37 @@
 
 	.message-form {
 		margin-top: auto;
+	}
+
+	.chat-cta {
+		margin-top: 1rem;
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.chat-cta__button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		padding: 0.65rem 1.5rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(255, 255, 255, 0.16);
+		background: rgba(11, 152, 250, 0.15);
+		color: var(--bubble-text);
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.chat-cta__button:hover {
+		transform: translateY(-1px);
+		border-color: rgba(11, 152, 250, 0.4);
+		box-shadow: 0 14px 32px rgba(11, 152, 250, 0.32);
 	}
 
 	.message-input {

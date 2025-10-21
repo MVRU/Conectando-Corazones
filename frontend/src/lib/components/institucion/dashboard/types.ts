@@ -104,22 +104,40 @@ export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' 
 export type EvidenceFlow = 'entrada' | 'salida';
 
 export interface ChatAttachment {
-	id: string;
-	name: string;
-	category: AttachmentCategory;
-	fileType: AttachmentFileType;
-	fileExtension: AttachmentFormat;
-	description: string;
-	uploadedAt: string;
-	previewImage?: string | null;
-	evidenceFlow?: EvidenceFlow;
+        id: string;
+        name: string;
+        category: AttachmentCategory;
+        fileType: AttachmentFileType;
+        fileExtension: AttachmentFormat;
+        description: string;
+        uploadedAt: string;
+        previewImage?: string | null;
+        evidenceFlow?: EvidenceFlow;
+        downloadUrl?: string | null;
+}
+
+export interface ChatObjective {
+        id: string;
+        progressLabel: string;
+        resourceType: string;
+        sponsor: string;
+}
+
+export interface ChatProjectInfo {
+        name: string;
+        location: string;
+        tentativeClosure: string;
+        remainingDays: number;
+        objectives: ChatObjective[];
 }
 export interface ChatMetadata {
-	chatId: number;
-	institution: ChatParticipant;
-	collaborators: ChatParticipant[];
-	attachments: ChatAttachment[];
+        chatId: number;
+        institution: ChatParticipant;
+        collaborators: ChatParticipant[];
+        attachments: ChatAttachment[];
+        project: ChatProjectInfo;
 }
+
 
 export type ChatMetadataMap = Record<number, ChatMetadata>;
 
