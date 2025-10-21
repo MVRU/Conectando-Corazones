@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 120" role="img" aria-labelledby="title-img desc-img">
+  <title id="title-img">Imagen</title>
+  <desc id="desc-img">Icono de archivo de imagen con degradado verde y miniatura con montañas.</desc>
+  <defs>
+    <linearGradient id="imgGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#0f766e" />
+    </linearGradient>
+    <linearGradient id="imgFold" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#d1fae5" />
+      <stop offset="100%" stop-color="#6ee7b7" />
+    </linearGradient>
+  </defs>
+  <path d="M20 4h36l20 20v84a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8z" fill="url(#imgGradient)" stroke="#0f766e" stroke-width="4" />
+  <path d="M56 4v20a4 4 0 0 0 4 4h16z" fill="url(#imgFold)" />
+  <rect x="24" y="48" width="48" height="36" rx="6" fill="rgba(15,118,110,0.25)" stroke="#d1fae5" stroke-width="3" />
+  <path d="M30 74l10-12 10 10 8-8 8 10" fill="none" stroke="#6ee7b7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="38" cy="60" r="4" fill="#d1fae5" />
+</svg>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 120" role="img" aria-labelledby="title-zip desc-zip">
+  <title id="title-zip">Archivo comprimido</title>
+  <desc id="desc-zip">Icono morado de archivo comprimido con cremallera central.</desc>
+  <defs>
+    <linearGradient id="zipGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+    <linearGradient id="zipFold" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ede9fe" />
+      <stop offset="100%" stop-color="#c4b5fd" />
+    </linearGradient>
+  </defs>
+  <path d="M20 4h36l20 20v84a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8z" fill="url(#zipGradient)" stroke="#5b21b6" stroke-width="4" />
+  <path d="M56 4v20a4 4 0 0 0 4 4h16z" fill="url(#zipFold)" />
+  <rect x="42" y="36" width="12" height="52" rx="3" fill="rgba(255,255,255,0.35)" />
+  <g fill="#f5f3ff">
+    <rect x="45" y="38" width="6" height="6" rx="2" />
+    <rect x="45" y="48" width="6" height="6" rx="2" />
+    <rect x="45" y="58" width="6" height="6" rx="2" />
+    <rect x="45" y="68" width="6" height="6" rx="2" />
+  </g>
+  <path d="M42 88h12v10a6 6 0 0 1-6 6 6 6 0 0 1-6-6z" fill="#ede9fe" stroke="#f5f3ff" stroke-width="2" />
+</svg>

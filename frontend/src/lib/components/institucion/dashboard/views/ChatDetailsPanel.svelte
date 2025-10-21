@@ -19,6 +19,13 @@
 		ChatParticipant
 	} from '../types';
 	import { TEXT_100, TEXT_300, TEXT_400 } from '../tokens';
+	import {
+		buildRelationTooltip,
+		isAiGeneratedEvidence,
+		resolveEvidenceFlowLabel,
+		resolveEvidenceFlowVariant,
+		resolveRelatedEvidenceName
+	} from '../utils/evidence';
 
 	const PANEL_ID = 'chat-details-panel';
 	const GENERIC_AVATAR = '/users/avatar-generico.svg';
@@ -30,8 +37,11 @@
 		png: '/img/file-evidence-image.svg',
 		webp: '/img/file-evidence-image.svg',
 		docx: '/img/file-evidence-doc.svg',
-		xlsx: '/img/file-evidence-doc.svg'
+		xlsx: '/img/file-evidence-doc.svg',
+		zip: '/img/zip-portada.svg'
 	};
+
+	const DEFAULT_EVIDENCE_ICON = '/img/file-evidence-doc.svg';
 
 	const attachmentFormatter = new Intl.DateTimeFormat('es-CO', {
 		dateStyle: 'medium'
@@ -77,7 +87,11 @@
 	function resolveAttachmentPreview(attachment: ChatAttachment): string {
 		if (attachment.previewImage) return attachment.previewImage;
 		if (attachment.category === 'galeria') return '/img/prueba.png';
-		return EVIDENCE_ICON_BY_EXTENSION[attachment.fileExtension];
+		return EVIDENCE_ICON_BY_EXTENSION[attachment.fileExtension] ?? DEFAULT_EVIDENCE_ICON;
+	}
+
+	function resolveRelationTooltip(attachment: ChatAttachment): string | null {
+		return buildRelationTooltip(attachment, evidenceAttachments);
 	}
 
 	function resolveObjectiveSponsors(objective: ChatObjective): string[] {
@@ -243,7 +257,13 @@
 				<ul class="evidence-list" role="list">
 					{#if hasEvidence}
 						{#each evidenceAttachments as file (file.id)}
-							<li class="evidence-item">
+							{@const evidenceFlowLabel = resolveEvidenceFlowLabel(file.evidenceFlow)}
+							{@const evidenceFlowVariant = resolveEvidenceFlowVariant(file.evidenceFlow)}
+							<li
+								class="evidence-item"
+								class:evidence-item--ai={isAiGeneratedEvidence(file)}
+								data-flow={file.evidenceFlow}
+							>
 								<div class="evidence-icon" aria-hidden="true">
 									<img
 										src={resolveAttachmentPreview(file)}
@@ -252,8 +272,32 @@
 									/>
 								</div>
 								<div class="evidence-info">
-									<span class="evidence-name">{file.name}</span>
-									<span class="evidence-extension">{file.fileExtension.toUpperCase()}</span>
+									<div class="evidence-title-row">
+										<span class="evidence-name">{file.name}</span>
+									</div>
+									<div class="evidence-meta" aria-label="Metadatos de la evidencia">
+										<span class="evidence-extension"
+											>{file.fileExtension.toUpperCase()} · {file.evidenceFlow}</span
+										>
+										{#if file.relatedEvidenceId}
+											{@const relationTooltip = resolveRelationTooltip(file)}
+											{#if relationTooltip}
+												<span
+													class="evidence-relation"
+													role="img"
+													aria-label={relationTooltip}
+													title={relationTooltip}
+													data-related={resolveRelatedEvidenceName(file, evidenceAttachments) ?? ''}
+												>
+													🔗
+												</span>
+											{/if}
+										{/if}
+									</div>
+									<!-- <p class="evidence-description">{file.description}</p>
+									<span class="evidence-date"
+										>Actualizado {formatAttachmentDate(file.uploadedAt)}</span
+									> -->
 								</div>
 							</li>
 						{/each}
@@ -553,41 +597,82 @@
 	.evidence-item {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		align-items: center;
-		gap: 0.65rem;
-		padding: 0.55rem 0.8rem;
-		border-radius: 12px;
+		align-items: stretch;
+		gap: 0.75rem;
+		padding: 0.75rem 0.95rem;
+		border-radius: 16px;
 		background: rgba(9, 13, 38, 0.65);
 		border: 1px solid rgba(255, 255, 255, 0.08);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.evidence-item::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 55%);
+	}
+
+	.evidence-item--ai {
+		border-color: rgba(168, 85, 247, 0.6);
+		background: linear-gradient(140deg, rgba(76, 29, 149, 0.55), rgba(17, 24, 39, 0.8));
+		box-shadow: 0 0 22px rgba(168, 85, 247, 0.25);
+	}
+
+	.evidence-item--ai::after {
+		opacity: 1;
+		background: radial-gradient(circle at top right, rgba(244, 114, 182, 0.35), transparent 60%);
+		animation: shimmer 3.5s ease-in-out infinite;
+		will-change: transform, opacity;
 	}
 
 	.evidence-icon {
-		width: 48px;
-		height: 48px;
+		width: 52px;
+		height: 52px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		border-radius: 12px;
+		border-radius: 14px;
 		background: rgba(15, 23, 55, 0.75);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		border: 1px solid rgba(255, 255, 255, 0.12);
 	}
 
 	.evidence-icon img {
-		width: 28px;
-		height: 28px;
+		width: 30px;
+		height: 30px;
 		object-fit: contain;
 	}
 
 	.evidence-info {
 		display: flex;
 		flex-direction: column;
-		gap: 0.2rem;
+		gap: 0.35rem;
+	}
+
+	.evidence-title-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
 	}
 
 	.evidence-name {
-		font-size: 0.85rem;
+		font-size: 0.9rem;
 		font-weight: 600;
 		color: var(--panel-text);
+		line-height: 1.35;
+	}
+
+	.evidence-meta {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.4rem;
 	}
 
 	.evidence-extension {
@@ -597,6 +682,40 @@
 		text-transform: uppercase;
 		color: var(--panel-muted);
 	}
+
+	.evidence-relation {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.35rem;
+		height: 1.35rem;
+		border-radius: 9999px;
+		background: rgba(148, 163, 184, 0.12);
+		border: 1px solid rgba(148, 163, 184, 0.25);
+		font-size: 0.78rem;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.evidence-relation:hover {
+		transform: translateY(-1px);
+		border-color: rgba(125, 211, 252, 0.4);
+		box-shadow: 0 10px 18px rgba(125, 211, 252, 0.25);
+	}
+
+	/* .evidence-description {
+		font-size: 0.74rem;
+		color: rgba(203, 213, 225, 0.95);
+		line-height: 1.45;
+	}
+
+	.evidence-date {
+		font-size: 0.68rem;
+		color: rgba(148, 163, 184, 0.9);
+	} */
+
 	.panel-section + .panel-section {
 		border-top: 1px solid rgba(255, 255, 255, 0.08);
 		padding-top: 1.25rem;
@@ -870,6 +989,23 @@
 		to {
 			transform: translateX(0);
 			opacity: 1;
+		}
+	}
+
+	@keyframes shimmer {
+		0% {
+			opacity: 0.7;
+			transform: scale(0.98);
+		}
+
+		50% {
+			opacity: 1;
+			transform: scale(1.02);
+		}
+
+		100% {
+			opacity: 0.7;
+			transform: scale(0.98);
 		}
 	}
 

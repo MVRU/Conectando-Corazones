@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 120" role="img" aria-labelledby="title-doc desc-doc">
+  <title id="title-doc">Documento</title>
+  <desc id="desc-doc">Icono estilizado de un archivo de documento con tonos azules.</desc>
+  <defs>
+    <linearGradient id="docGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+    <linearGradient id="docFold" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#bfdbfe" />
+      <stop offset="100%" stop-color="#60a5fa" />
+    </linearGradient>
+  </defs>
+  <path d="M20 4h36l20 20v84a8 8 0 0 1-8 8H20a8 8 0 0 1-8-8V12a8 8 0 0 1 8-8z" fill="url(#docGradient)" stroke="#1e3a8a" stroke-width="4" />
+  <path d="M56 4v20a4 4 0 0 0 4 4h16z" fill="url(#docFold)" />
+  <g fill="#e0f2fe">
+    <rect x="28" y="48" width="40" height="6" rx="3" />
+    <rect x="28" y="62" width="32" height="6" rx="3" opacity="0.85" />
+    <rect x="28" y="76" width="36" height="6" rx="3" opacity="0.7" />
+  </g>
+</svg>

@@ -273,362 +273,300 @@ export const viewModeLabels: Record<ViewMode, string> = {
 };
 
 export const institutionIdentity: InstitutionIdentity = {
-        name: 'Escuela Esperanza',
-        registrationId: 'CUIT 30-71234567-4',
-        sector: 'Educación primaria',
-        location: 'Rosario, Santa Fe, Argentina',
-        legalRepresentative: {
-                name: 'Patricia González',
-                idType: 'DNI',
-                idNumber: '23.456.789',
-                email: 'patricia.gonzalez@escuelaesperanza.org'
-        },
-        contactPhone: '+54 9 341 555 1234',
-        website: 'https://escuelaesperanza.org'
+	name: 'Escuela Esperanza',
+	registrationId: 'CUIT 30-71234567-4',
+	sector: 'Educación primaria',
+	location: 'Rosario, Santa Fe, Argentina',
+	legalRepresentative: {
+		name: 'Patricia González',
+		idType: 'DNI',
+		idNumber: '23.456.789',
+		email: 'patricia.gonzalez@escuelaesperanza.org'
+	},
+	contactPhone: '+54 9 341 555 1234',
+	website: 'https://escuelaesperanza.org'
 };
 
 export const verificationSummary: VerificationSummary = {
-        status: 'Verificada',
-        description:
-                'La identidad institucional y del representante legal fueron confirmadas manualmente por el equipo administrador.',
-        method: 'Validación manual de documentación oficial',
-        lastReview: '12 de noviembre de 2025',
-        nextReview: '12 de noviembre de 2026',
-        reviewer: 'Carolina Torres (Administradora de confianza)',
-        reliabilityLevel: 'Alta',
-        documentsReviewed: 4
+	status: 'Verificada',
+	description:
+		'La identidad institucional y del representante legal fueron confirmadas manualmente por el equipo administrador.',
+	method: 'Validación manual de documentación oficial',
+	lastReview: '12 de noviembre de 2025',
+	nextReview: '12 de noviembre de 2026',
+	reviewer: 'Carolina Torres (Administradora de confianza)',
+	reliabilityLevel: 'Alta',
+	documentsReviewed: 4
 };
 
 export const verificationDocuments: VerificationDocument[] = [
-        {
-                label: 'Acta constitutiva y estatuto actualizado',
-                status: 'Aprobado',
-                detail: 'Documento firmado y sellado en noviembre de 2025.'
-        },
-        {
-                label: 'Identificación del representante legal (DNI)',
-                status: 'Aprobado',
-                detail: 'Fotografía a color verificada manualmente.'
-        },
-        {
-                label: 'Constancia de CUIT',
-                status: 'Aprobado',
-                detail: 'Número fiscal coincide con la documentación presentada en noviembre de 2025.'
-        },
-        {
-                label: 'Comprobante de domicilio institucional',
-                status: 'Aprobado',
-                detail: 'Servicio eléctrico emitido en noviembre de 2025 a nombre de la institución.'
-        }
+	{
+		label: 'Acta constitutiva y estatuto actualizado',
+		status: 'Aprobado',
+		detail: 'Documento firmado y sellado en noviembre de 2025.'
+	},
+	{
+		label: 'Identificación del representante legal (DNI)',
+		status: 'Aprobado',
+		detail: 'Fotografía a color verificada manualmente.'
+	},
+	{
+		label: 'Constancia de CUIT',
+		status: 'Aprobado',
+		detail: 'Número fiscal coincide con la documentación presentada en noviembre de 2025.'
+	},
+	{
+		label: 'Comprobante de domicilio institucional',
+		status: 'Aprobado',
+		detail: 'Servicio eléctrico emitido en noviembre de 2025 a nombre de la institución.'
+	}
 ];
 
 export const chatMetadata: ChatMetadataMap = {
-  1: {
-    chatId: 1,
-    institution: {
-      id: 'institucion-escuela-esperanza',
-      name: 'Escuela Esperanza',
-      role: 'Institución',
-      kind: 'institucion',
-      description: 'Comunidad educativa liderada por Patricia González, directora del plantel.',
-      contact: 'Patricia González • Directora',
-      avatar: '/users/escuela-esperanza.jpg'
-    },
-    collaborators: [
-      {
-        id: 'colaborador-lumina-cooperativa',
-        name: 'Lumina Cooperativa',
-        role: 'Colaborador',
-        kind: 'empresa',
-        description: 'Empresa especialista en soluciones energéticas comunitarias.',
-        contact: 'Equipo de proyectos estratégicos',
-        avatar: '/users/lumina-cooperativa.svg'
-      },
-      {
-        id: 'colaborador-sembrar-futuro',
-        name: 'Sembrar Futuro',
-        role: 'Colaborador',
-        kind: 'ong',
-        description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
-        contact: 'Coordinación de donaciones',
-        avatar: '/users/sembrar-futuro.svg'
-      },
-      {
-        id: 'voluntario-lucas-utn',
-        name: 'Lucas Ferreyra',
-        role: 'Colaborador',
-        kind: 'voluntario',
-        description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-        contact: 'Lucas Ferreyra • UTN FRRo',
-        avatar: '/users/avatar-generico.svg'
-      },
-      {
-        id: 'voluntaria-sofia-utn',
-        name: 'Sofía Mansilla',
-        role: 'Colaborador',
-        kind: 'voluntario',
-        description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-        contact: 'Sofía Mansilla • UTN FRRo',
-        avatar: '/users/avatar-generico.svg'
-      }
-    ],
-    attachments: [
-      // GALERÍA (soporte visual del relato)
-      {
-        id: 'galeria-escuela-exterior',
-        name: 'Fachada actual del colegio',
-        category: 'galeria',
-        fileType: 'image',
-        fileExtension: 'png',
-        description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
-        uploadedAt: '2025-11-11',
-        previewImage: '/img/escuela-esperanza-antes.png'
-      },
-      {
-        id: 'galeria-salon-nocturno',
-        name: 'foto_aula_iluminada.jpg',
-        category: 'galeria',
-        fileType: 'image',
-        fileExtension: 'jpg',
-        description: 'Registro fotográfico nocturno realizado por voluntarios.',
-        uploadedAt: '2025-11-16',
-        previewImage: '/img/aula-iluminada.png'
-      },
+	1: {
+		chatId: 1,
+		institution: {
+			id: 'institucion-escuela-esperanza',
+			name: 'Escuela Esperanza',
+			role: 'Institución',
+			kind: 'institucion',
+			description: 'Comunidad educativa liderada por Patricia González, directora del plantel.',
+			contact: 'Patricia González • Directora',
+			avatar: '/users/escuela-esperanza.jpg'
+		},
+		collaborators: [
+			{
+				id: 'colaborador-lumina-cooperativa',
+				name: 'Lumina Cooperativa',
+				role: 'Colaborador',
+				kind: 'empresa',
+				description: 'Empresa especialista en soluciones energéticas comunitarias.',
+				contact: 'Equipo de proyectos estratégicos',
+				avatar: '/users/lumina-cooperativa.svg'
+			},
+			{
+				id: 'colaborador-sembrar-futuro',
+				name: 'Sembrar Futuro',
+				role: 'Colaborador',
+				kind: 'ong',
+				description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
+				contact: 'Coordinación de donaciones',
+				avatar: '/users/sembrar-futuro.svg'
+			},
+			{
+				id: 'voluntario-lucas-utn',
+				name: 'Lucas Ferreyra',
+				role: 'Colaborador',
+				kind: 'voluntario',
+				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+				contact: 'Lucas Ferreyra • UTN FRRo',
+				avatar: '/users/avatar-generico.svg'
+			},
+			{
+				id: 'voluntaria-sofia-utn',
+				name: 'Sofía Mansilla',
+				role: 'Colaborador',
+				kind: 'voluntario',
+				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+				contact: 'Sofía Mansilla • UTN FRRo',
+				avatar: '/users/avatar-generico.svg'
+			}
+		],
+		attachments: [
+			// GALERÍA (soporte visual del relato)
+			{
+				id: 'galeria-escuela-exterior',
+				name: 'Fachada actual del colegio',
+				category: 'galeria',
+				fileType: 'image',
+				fileExtension: 'png',
+				description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
+				uploadedAt: '2025-11-11',
+				previewImage: '/img/escuela-esperanza-antes.png'
+			},
+			{
+				id: 'galeria-salon-nocturno',
+				name: 'foto_aula_iluminada.jpg',
+				category: 'galeria',
+				fileType: 'image',
+				fileExtension: 'jpg',
+				description: 'Registro fotográfico nocturno realizado por voluntarios.',
+				uploadedAt: '2025-11-16',
+				previewImage: '/img/aula-iluminada.png'
+			},
 
-      // ——— OBJETIVO MONETARIO (Sembrar Futuro) ———
-      {
-        id: 'evidencia-factura-led-001',
-        name: 'factura_lamparas_LED.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Factura emitida por proveedor de luminarias homologadas.',
-        uploadedAt: '2025-11-12',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'entrada', // la sube la ONG con la compra
-        downloadUrl: '/docs/evidencias/factura-led-001.pdf'
-      },
-      {
-        id: 'evidencia-comprobante-transf-002',
-        name: 'comprobante_transferencia.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Comprobante de transferencia realizada por la ONG para la compra de lámparas.',
-        uploadedAt: '2025-11-14',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'entrada', // CORREGIDO: la sube el colaborador (ONG)
-        downloadUrl: '/docs/evidencias/comprobante-transf-002.pdf'
-      },
-      {
-        id: 'evidencia-acuse-recepcion-donacion-001',
-        name: 'acuse_recepcion_donacion.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Acuse de recepción del monto donado firmado por la institución.',
-        uploadedAt: '2025-11-15',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida', // valida la institución
-        downloadUrl: '/docs/evidencias/acuse-recepcion-donacion-001.pdf'
-      },
-      {
-        id: 'evidencia-factura-asociada-compra-002',
-        name: 'factura_compra_lamparas_asociada.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Factura final asociada a la donación monetaria (uso del dinero).',
-        uploadedAt: '2025-11-16',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida',
-        downloadUrl: '/docs/evidencias/factura-asociada-compra-002.pdf'
-      },
+			// ——— OBJETIVO MONETARIO (Sembrar Futuro) ———
+			{
+				id: 'evidencia-comprobante-transf-002',
+				name: 'comprobante_transferencia.pdf',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description:
+					'Comprobante de transferencia realizada por la ONG para la compra de lámparas.',
+				uploadedAt: '2025-11-14',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'entrada',
+				relatedEvidenceId: ['evidencia-acuse-recepcion-donacion-001'],
+				downloadUrl: '/docs/evidencias/comprobante-transf-002.pdf'
+			},
+			{
+				id: 'evidencia-factura-asociada-compra-002',
+				name: 'factura_compra_lamparas.pdf',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description: 'Factura final asociada a la donación monetaria (uso del dinero).',
+				uploadedAt: '2025-11-16',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'salida',
+				relatedEvidenceId: ['evidencia-factura-led-001'],
+				downloadUrl: '/docs/evidencias/factura-asociada-compra-002.pdf'
+			},
 
-      // ——— OBJETIVO EN ESPECIE (Lumina Cooperativa) ———
-      {
-        id: 'evidencia-remito-lumina-001',
-        name: 'remito_entrega_lumina.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Remito de entrega de materiales: cableado, tableros e interruptores.',
-        uploadedAt: '2025-11-13',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'entrada', // lo sube la empresa
-        downloadUrl: '/docs/evidencias/remito-lumina-001.pdf'
-      },
-      {
-        id: 'evidencia-foto-materiales-entrada-001',
-        name: 'materiales_recibidos_entrada.jpg',
-        category: 'evidencia',
-        fileType: 'image',
-        fileExtension: 'jpg',
-        description: 'Fotografía de materiales donados al momento de la entrega.',
-        uploadedAt: '2025-11-13',
-        previewImage: '/img/jpg-portada.svg',
-        evidenceFlow: 'entrada', // la puede subir la empresa al entregar
-        downloadUrl: '/docs/evidencias/materiales-entrada-001.jpg'
-      },
-      {
-        id: 'evidencia-acta-recepcion-materiales-001',
-        name: 'acta_recepcion_materiales.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Acta de recepción y conformidad de materiales por parte de la institución.',
-        uploadedAt: '2025-11-14',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida', // valida la institución
-        downloadUrl: '/docs/evidencias/acta-recepcion-materiales-001.pdf'
-      },
+			// ——— OBJETIVO EN ESPECIE (Lumina Cooperativa) ———
+			{
+				id: 'evidencia-remito-lumina-001',
+				name: 'remito_entrega_lumina.pdf',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description: 'Remito de entrega de materiales: cableado, tableros e interruptores.',
+				uploadedAt: '2025-11-13',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'entrada',
+				relatedEvidenceId: ['evidencia-foto-materiales-001'],
+				downloadUrl: '/docs/evidencias/remito-lumina-001.pdf'
+			},
+			{
+				id: 'evidencia-foto-materiales-001',
+				name: 'materiales_recibidos.jpg',
+				category: 'evidencia',
+				fileType: 'image',
+				fileExtension: 'jpg',
+				description: 'Fotografía de materiales donados al momento de la entrega.',
+				uploadedAt: '2025-11-13',
+				previewImage: '/img/jpg-portada.svg',
+				evidenceFlow: 'salida',
+				relatedEvidenceId: ['evidencia-remito-lumina-001'],
+				downloadUrl: '/docs/evidencias/materiales-entrada-001.jpg'
+			},
 
-      // ——— OBJETIVO VOLUNTARIADO (Lucas y Sofía) ———
-      {
-        id: 'evidencia-plan-trabajo-voluntarios-001',
-        name: 'plan_trabajo_voluntariado.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Plan de trabajo de instalación presentado por Lucas y Sofía (cronograma y tareas).',
-        uploadedAt: '2025-11-15',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'entrada', // lo suben los voluntarios
-        downloadUrl: '/docs/evidencias/plan-trabajo-voluntariado-001.pdf'
-      },
-      {
-        id: 'evidencia-registro-asistencia-vol-001',
-        name: 'registro_asistencia_voluntarios.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Registro de asistencia de voluntarios durante la instalación nocturna.',
-        uploadedAt: '2025-11-16',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'entrada', // lo suben los voluntarios
-        downloadUrl: '/docs/evidencias/registro-asistencia-vol-001.pdf'
-      },
-      {
-        id: 'evidencia-registro-fotografico',
-        name: 'foto_instalación.jpg',
-        category: 'evidencia',
-        fileType: 'image',
-        fileExtension: 'jpg',
-        description: 'Fotos de los trabajos en progreso compartidas por voluntariado.',
-        uploadedAt: '2025-11-18',
-        previewImage: '/img/jpg-portada.svg',
-        evidenceFlow: 'entrada',
-        downloadUrl: '/docs/evidencias/registro-fotografico.jpg'
-      },
-      {
-        id: 'evidencia-checklist-seguridad-001',
-        name: 'checklist_seguridad_instalacion.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Checklist de seguridad eléctrica completado y validado por la institución.',
-        uploadedAt: '2025-11-18',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida', // valida la institución
-        downloadUrl: '/docs/evidencias/checklist-seguridad-001.pdf'
-      },
-      {
-        id: 'evidencia-reporte-instalacion-001',
-        name: 'reporte_tecnico_instalacion.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Reporte técnico final de instalación y verificación de luminarias.',
-        uploadedAt: '2025-11-19',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida', // valida la institución (con firma)
-        downloadUrl: '/docs/evidencias/reporte-instalacion-001.pdf'
-      },
-      {
-        id: 'evidencia-antes-despues-001',
-        name: 'antes_despues_aulas.zip',
-        category: 'evidencia',
-        fileType: 'zip',
-        fileExtension: 'zip',
-        description: 'Paquete de fotos antes/después de las tres aulas iluminadas.',
-        uploadedAt: '2025-11-19',
-        previewImage: '/img/zip-portada.svg',
-        evidenceFlow: 'salida',
-        downloadUrl: '/docs/evidencias/antes-despues-aulas-001.zip'
-      },
+			// ——— OBJETIVO VOLUNTARIADO (Lucas y Sofía) ———
+			{
+				id: 'evidencia-plan-trabajo-voluntarios-001',
+				name: 'plan_trabajo_voluntariado.pdf',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description:
+					'Plan de trabajo de instalación presentado por Lucas y Sofía (cronograma y tareas).',
+				uploadedAt: '2025-11-15',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'entrada',
+				relatedEvidenceId: ['evidencia-antes-despues-001'],
+				downloadUrl: '/docs/evidencias/plan-trabajo-voluntariado-001.pdf'
+			},
+			{
+				id: 'evidencia-registro-fotografico',
+				name: 'foto_instalación.jpg',
+				category: 'evidencia',
+				fileType: 'image',
+				fileExtension: 'jpg',
+				description: 'Fotos de los trabajos en progreso compartidas por voluntariado.',
+				uploadedAt: '2025-11-18',
+				previewImage: '/img/jpg-portada.svg',
+				evidenceFlow: 'entrada',
+				relatedEvidenceId: ['evidencia-antes-despues-001'],
+				downloadUrl: '/docs/evidencias/registro-fotografico.jpg'
+			},
+			{
+				id: 'evidencia-antes-despues-001',
+				name: 'antes_despues_aulas.zip',
+				category: 'evidencia',
+				fileType: 'archive',
+				fileExtension: 'zip',
+				description: 'Paquete de fotos antes/después de las tres aulas iluminadas.',
+				uploadedAt: '2025-11-19',
+				previewImage: '/img/zip-portada.svg',
+				evidenceFlow: 'salida',
+				relatedEvidenceId: ['evidencia-plan-trabajo-voluntarios-001', 'evidencia-registro-fotografico'],
+				downloadUrl: '/docs/evidencias/antes-despues-aulas-001.zip'
+			},
 
-      // ——— CIERRE DEL PROYECTO ———
-      {
-        id: 'evidencia-reporte-cierre-ia-001',
-        name: 'reporte_cierre_IA.pdf',
-        category: 'evidencia',
-        fileType: 'pdf',
-        fileExtension: 'pdf',
-        description: 'Reporte de cierre con IA: resumen de impacto, hallazgos y sugerencias de mejora.',
-        uploadedAt: '2025-11-20',
-        previewImage: '/img/pdf-portada.svg',
-        evidenceFlow: 'salida',
-        downloadUrl: '/docs/evidencias/reporte-cierre-ia-001.pdf'
-      }
-    ],
-    project: {
-      name: 'Luz para Aprender',
-      location:
-        'Escuela Esperanza · Calle José Ingenieros 1842, Barrio Ludueña, Rosario, Santa Fe',
-      tentativeClosure: '23/11/2025',
-      remainingDays: 20,
-      evidenceArchiveUrl: '/docs/evidencias/luz-para-aprender-evidencias.zip',
-      objectives: [
-        {
-          id: 'objetivo-tableros-conexion',
-          progressLabel: '0/3 tableros de conexión',
-          resourceType: 'en especie',
-          sponsors: ['Lumina Cooperativa']
-        },
-        {
-          id: 'objetivo-interruptores-seguridad',
-          progressLabel: '0/6 interruptores de seguridad certificados',
-          resourceType: 'en especie',
-          sponsors: ['Lumina Cooperativa']
-        },
-        {
-          id: 'objetivo-cableado-ignifugo',
-          progressLabel: '0/50 metros de cableado ignífugo',
-          resourceType: 'en especie',
-          sponsors: ['Lumina Cooperativa']
-        },
-        {
-          id: 'objetivo-lamparas-led',
-          progressLabel: '$0/$180.000 ARS para lámparas LED',
-          resourceType: 'monetaria',
-          sponsors: ['Sembrar Futuro']
-        },
-        {
-          id: 'objetivo-voluntariado-instalacion',
-          progressLabel: '2/2 voluntarios para instalación',
-          resourceType: 'voluntariado',
-          sponsors: ['Lucas', 'Sofía']
-        }
-      ]
-    }
-  }
+			// ——— CIERRE DEL PROYECTO ———
+			{
+				id: 'evidencia-reporte-cierre-ia-001',
+				name: 'reporte_cierre_IA.pdf',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description:
+					'Reporte de cierre con IA: resumen de impacto, hallazgos y sugerencias de mejora.',
+				uploadedAt: '2025-11-20',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'salida',
+				relatedEvidenceId: null,
+				isAiGenerated: true,
+				downloadUrl: '/docs/evidencias/reporte-cierre-ia-001.pdf'
+			}
+		],
+		project: {
+			name: 'Luz para Aprender',
+			location: 'Escuela Esperanza · Calle José Ingenieros 1842, Barrio Ludueña, Rosario, Santa Fe',
+			tentativeClosure: '23/11/2025',
+			remainingDays: 20,
+			evidenceArchiveUrl: '/docs/evidencias/luz-para-aprender-evidencias.zip',
+			objectives: [
+				{
+					id: 'objetivo-tableros-conexion',
+					progressLabel: '0/3 tableros de conexión',
+					resourceType: 'en especie',
+					sponsors: ['Lumina Cooperativa']
+				},
+				{
+					id: 'objetivo-interruptores-seguridad',
+					progressLabel: '0/6 interruptores de seguridad certificados',
+					resourceType: 'en especie',
+					sponsors: ['Lumina Cooperativa']
+				},
+				{
+					id: 'objetivo-cableado-ignifugo',
+					progressLabel: '0/50 metros de cableado ignífugo',
+					resourceType: 'en especie',
+					sponsors: ['Lumina Cooperativa']
+				},
+				{
+					id: 'objetivo-lamparas-led',
+					progressLabel: '$0/$180.000 ARS para lámparas LED',
+					resourceType: 'monetaria',
+					sponsors: ['Sembrar Futuro']
+				},
+				{
+					id: 'objetivo-voluntariado-instalacion',
+					progressLabel: '2/2 voluntarios para instalación',
+					resourceType: 'voluntariado',
+					sponsors: ['Lucas', 'Sofía']
+				}
+			]
+		}
+	}
 };
 
-
-
 export const adminObservations: ObservationItem[] = [
-        {
-                message: 'Documentación completa y vigente. Mantener copias digitalizadas con firmas visibles.',
-                recordedAt: '12/11/2025 10:45 (GMT-3)',
-                type: 'info'
-        }
+	{
+		message: 'Documentación completa y vigente. Mantener copias digitalizadas con firmas visibles.',
+		recordedAt: '12/11/2025 10:45 (GMT-3)',
+		type: 'info'
+	}
 ];
 
 export const reportingStatus: ReportingStatus = {
-        hasReports: false,
-        message: 'Sin reportes ni denuncias de la comunidad. La institución está catalogada como confiable.',
-        lastUpdate: '12 de noviembre de 2025',
-        riskLevel: 'none'
+	hasReports: false,
+	message:
+		'Sin reportes ni denuncias de la comunidad. La institución está catalogada como confiable.',
+	lastUpdate: '12 de noviembre de 2025',
+	riskLevel: 'none'
 };
 
 export const filtersResetLabel = 'Limpiar';

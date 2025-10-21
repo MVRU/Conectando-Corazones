@@ -97,26 +97,30 @@ export interface ChatParticipant {
 
 export type AttachmentCategory = 'galeria' | 'evidencia';
 
-export type AttachmentFileType = 'image' | 'pdf';
+export type AttachmentFileType = 'image' | 'pdf' | 'archive';
 
-export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx';
+export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx' | 'zip';
 
 export type EvidenceFlow = 'entrada' | 'salida';
 
 export interface ChatAttachment {
-        id: string;
-        name: string;
-        category: AttachmentCategory;
-        fileType: AttachmentFileType;
-        fileExtension: AttachmentFormat;
-        description: string;
-        uploadedAt: string;
-        previewImage?: string | null;
-        evidenceFlow?: EvidenceFlow;
-        downloadUrl?: string | null;
+	id: string;
+	name: string;
+	category: AttachmentCategory;
+	fileType: AttachmentFileType;
+	fileExtension: AttachmentFormat;
+	description: string;
+	uploadedAt: string;
+	previewImage?: string | null;
+	evidenceFlow?: EvidenceFlow;
+	relatedEvidenceId?: string[] | null;
+	isAiGenerated?: boolean;
+	downloadUrl?: string | null;
 }
 
+
 export interface ChatObjective {
+
         id: string;
         progressLabel: string;
         resourceType: string;
