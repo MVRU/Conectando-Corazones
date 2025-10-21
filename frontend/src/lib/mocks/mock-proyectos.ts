@@ -34,12 +34,12 @@ const esInstitucion = (x: unknown): x is Institucion => {
 const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 1,
-		titulo: 'Un libro, un sueño',
-		descripcion: 'Campaña para recolectar libros infantiles y donarlos a niños de bajos recursos.',
-		url_portada: '/img/proyectos-1.webp',
+		titulo: 'Luz para aprender',
+		descripcion: 'En la Escuela Esperanza, cada día los chicos y chicas estudian casi a oscuras. Las lámparas se quemaron y el edificio no cuenta con una instalación eléctrica segura. Sin embargo, la voluntad de aprender nunca se apagó. Este proyecto busca llevar nueva iluminación LED y cableado seguro a todas las aulas, creando un ambiente digno y luminoso para más de 200 alumnos.',
+		url_portada: '/img/prueba.png',
 		created_at: new Date('2025-03-01'),
 		fecha_cierre_postulaciones: new Date('2025-08-01'),
-		fecha_fin_tentativa: new Date('2025-10-01'),
+		fecha_fin_tentativa: new Date('2025-10-31'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [1, 2],

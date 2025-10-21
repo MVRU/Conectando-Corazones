@@ -9,6 +9,7 @@
 	import ProfileView from './dashboard/views/ProfileView.svelte';
 	import SettingsView from './dashboard/views/SettingsView.svelte';
 	import PlaceholderView from './dashboard/views/PlaceholderView.svelte';
+	import EvidenceUploadView from './dashboard/views/EvidenceUploadView.svelte';
 	import {
 		ayudaTypes,
 		activeCollaborators,
@@ -20,7 +21,8 @@
 		luzParaAprenderProgress,
 		metrics,
 		navItems,
-		projectItems
+		projectItems,
+		evidenceUploadContext
 	} from './dashboard/data';
 	import { computeQuickActions } from './dashboard/helpers';
 	import type { ProjectItem, ViewMode } from './dashboard/types';
@@ -102,6 +104,10 @@
 	function handleCloseChatPanel() {
 		isChatDetailsOpen = false;
 	}
+
+	const handleEvidenceCancel = () => {
+		viewMode = 'dashboard';
+	};
 </script>
 
 <div
@@ -165,6 +171,8 @@
 				/>
 			{:else if viewMode === 'projects'}
 				<ProjectsView project={selectedProject} />
+			{:else if viewMode === 'evidence'}
+				<EvidenceUploadView context={evidenceUploadContext} on:cancel={handleEvidenceCancel} />
 			{:else if viewMode === 'profile'}
 				<ProfileView />
 			{:else if viewMode === 'settings'}

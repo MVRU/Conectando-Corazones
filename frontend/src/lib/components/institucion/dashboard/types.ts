@@ -3,12 +3,13 @@
 import type { ComponentType } from 'svelte';
 
 export type ViewMode =
-	| 'dashboard'
-	| 'projects'
-	| 'chat'
-	| 'profile'
-	| 'settings'
-	| 'collaborations';
+        | 'dashboard'
+        | 'projects'
+        | 'chat'
+        | 'profile'
+        | 'settings'
+        | 'collaborations'
+        | 'evidence';
 
 export type IconComponent = ComponentType;
 
@@ -102,6 +103,27 @@ export type AttachmentFileType = 'image' | 'pdf' | 'archive';
 export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx' | 'zip';
 
 export type EvidenceFlow = 'entrada' | 'salida';
+
+export interface EvidenceRecord {
+        id: string;
+        fileName: string;
+        fileExtension: AttachmentFormat;
+        mimeType: string;
+        description: string;
+        uploadedAt: string;
+        evidenceFlow: EvidenceFlow;
+        uploadedBy: string;
+        previewUrl?: string | null;
+}
+
+export interface EvidenceUploadContext {
+        projectName: string;
+        entryEvidence: EvidenceRecord;
+        allowedFormats: AttachmentFormat[];
+        maxFileSizeMB: number;
+        instructions: string;
+        uploadingEntity: string;
+}
 
 export type ObjectiveStatus = 'completed' | 'in_progress' | 'pending';
 

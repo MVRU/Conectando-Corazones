@@ -45,6 +45,7 @@
 		collaborations: 'Solicitudes pendientes',
 		projects: 'Proyectos activos',
 		chat: 'Conversaciones',
+		evidence: 'Documentación',
 		profile: 'Acciones rápidas',
 		settings: 'Acciones rápidas'
 	};

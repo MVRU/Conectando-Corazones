@@ -115,17 +115,22 @@ export function computeQuickActions(
 				}
 			];
 		default:
-			return quickActionLabels.map((label) => ({
-				label,
-				icon: LayoutGrid,
-					badge:
-					label === 'Ver solicitudes'
-						? pendingRequests > 0
-							? pendingRequests.toString()
-							: null
-						: null,
-				statusColor: label === 'Ver solicitudes' ? ERROR_COLOR : PRIMARY_500,
-				view: label === 'Ver solicitudes' ? 'collaborations' : undefined
-			}));
-	}
+		 return quickActionLabels.map((label) => {
+                                const isRequests = label === 'Ver solicitudes';
+                                const isEvidence = label === 'Cargar evidencia';
+
+                                return {
+                                        label,
+                                        icon: LayoutGrid,
+                                        badge:
+                                                isRequests
+                                                        ? pendingRequests > 0
+                                                                ? pendingRequests.toString()
+                                                                : null
+                                                        : null,
+                                        statusColor: isRequests ? ERROR_COLOR : PRIMARY_500,
+                                        view: isRequests ? 'collaborations' : isEvidence ? 'evidence' : undefined
+                                } satisfies QuickAction;
+                        });
+        }
 }

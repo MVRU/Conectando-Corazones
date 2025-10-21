@@ -27,9 +27,10 @@ import type {
 	ProjectItem,
 	CollaborationRequest,
 	ReportingStatus,
-	VerificationDocument,
-	VerificationSummary,
-	ViewMode
+	      VerificationDocument,
+        VerificationSummary,
+        ViewMode,
+        EvidenceUploadContext
 } from './types';
 import { ERROR_COLOR, GREEN, PRIMARY_500, WARNING_COLOR } from './tokens';
 
@@ -171,6 +172,26 @@ export const projectItems: ProjectItem[] = [
 		statusColor: PRIMARY_500
 	}
 ];
+
+export const evidenceUploadContext: EvidenceUploadContext = {
+        projectName: 'Luz para Aprender',
+        uploadingEntity: 'Patricia González · Escuela Esperanza',
+        instructions:
+                'Subí la evidencia de salida para confirmar el cierre del proyecto. Asegurate de que los archivos sean legibles y estén completos.',
+        maxFileSizeMB: 25,
+        allowedFormats: ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'docx', 'xlsx', 'zip'],
+        entryEvidence: {
+                id: 'entrada-comprobante-transferencia',
+                fileName: 'comprobante_transferencia.pdf',
+                fileExtension: 'pdf',
+                mimeType: 'application/pdf',
+                description: 'Comprobante de transferencia para iniciar la compra de lámparas LED.',
+                uploadedAt: '2025-11-03T09:20:00-03:00',
+                evidenceFlow: 'entrada',
+                uploadedBy: 'Clara Medina · Sembrar Futuro',
+                previewUrl: '/evidencias/comprobante_transferencia.webp'
+        }
+};
 
 export const collaborationRequests: CollaborationRequest[] = [
 ];
