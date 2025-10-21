@@ -1,0 +1,14 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Avatar genérico</title>
+  <desc id="desc">Figura circular abstracta para representar a un usuario sin foto</desc>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0F1C3A" />
+      <stop offset="100%" stop-color="#274D72" />
+    </linearGradient>
+  </defs>
+  <circle cx="80" cy="80" r="78" fill="url(#bg)" stroke="#82B6E4" stroke-width="4" />
+  <circle cx="80" cy="62" r="30" fill="#F5F8FB" fill-opacity="0.85" />
+  <path d="M32 136c12-32 44-36 48-36s36 4 48 36" fill="#F5F8FB" fill-opacity="0.72" />
+  <path d="M32 136c12-32 44-36 48-36s36 4 48 36" fill="none" stroke="#F5F8FB" stroke-opacity="0.3" stroke-width="6" />
+</svg>

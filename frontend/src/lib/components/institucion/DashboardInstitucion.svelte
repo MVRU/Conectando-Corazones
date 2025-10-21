@@ -1,6 +1,3 @@
-<!--
-*- DECISIÓN DE DISEÑO: Este contenedor orquesta el dashboard modularizado y gestiona el estado mínimo necesario.
--->
 <script lang="ts">
 	import NavigationSidebar from './dashboard/NavigationSidebar.svelte';
 	import DashboardHeader from './dashboard/DashboardHeader.svelte';
@@ -8,6 +5,7 @@
 	import CollaborationRequestsView from './dashboard/views/CollaborationRequestsView.svelte';
 	import ProjectsView from './dashboard/views/ProjectsView.svelte';
 	import ChatView from './dashboard/views/ChatView.svelte';
+	import ChatDetailsPanel from './dashboard/views/ChatDetailsPanel.svelte';
 	import ProfileView from './dashboard/views/ProfileView.svelte';
 	import SettingsView from './dashboard/views/SettingsView.svelte';
 	import PlaceholderView from './dashboard/views/PlaceholderView.svelte';
@@ -16,6 +14,7 @@
 		activeCollaborators,
 		chatItems,
 		chatThreads,
+		chatMetadata,
 		collaborationRequests,
 		filterLabels,
 		luzParaAprenderProgress,
@@ -35,6 +34,7 @@
 	let selectedProject: ProjectItem = projectItems[0];
 	let selectedChatId: number | null = chatItems[0]?.id ?? null;
 	let sidebarWidth = 260;
+	let isChatDetailsOpen = false;
 
 	$: quickActions = computeQuickActions(
 		viewMode,
@@ -45,6 +45,15 @@
 
 	$: selectedChat = chatItems.find((chat) => chat.id === selectedChatId) ?? null;
 	$: activeThread = chatThreads.find((thread) => thread.chatId === selectedChatId) ?? null;
+	$: selectedMetadata = selectedChatId ? (chatMetadata[selectedChatId] ?? null) : null;
+
+	$: if (viewMode !== 'chat') {
+		isChatDetailsOpen = false;
+	}
+
+	$: if (!selectedMetadata) {
+		isChatDetailsOpen = false;
+	}
 
 	function toggleMobileMenu() {
 		isMobileMenuOpen = !isMobileMenuOpen;
@@ -72,6 +81,26 @@
 		if (isMobileMenuOpen) {
 			isMobileMenuOpen = false;
 		}
+	}
+
+	function handleToggleChatDetails(event: CustomEvent<{ open: boolean }>) {
+		if (!selectedMetadata) {
+			isChatDetailsOpen = false;
+			return;
+		}
+		isChatDetailsOpen = event.detail.open;
+	}
+
+	function handleRequestChatDetails(event: CustomEvent<{ open: boolean }>) {
+		if (!selectedMetadata) {
+			isChatDetailsOpen = false;
+			return;
+		}
+		isChatDetailsOpen = event.detail.open;
+	}
+
+	function handleCloseChatPanel() {
+		isChatDetailsOpen = false;
 	}
 </script>
 
@@ -141,7 +170,21 @@
 			{:else if viewMode === 'settings'}
 				<SettingsView />
 			{:else if viewMode === 'chat'}
-				<ChatView chatSummary={selectedChat} thread={activeThread} />
+				<div class="chat-view-region">
+					<ChatView
+						chatSummary={selectedChat}
+						thread={activeThread}
+						metadata={selectedMetadata}
+						detailsOpen={isChatDetailsOpen}
+						on:toggleDetails={handleToggleChatDetails}
+						on:requestAutoOpen={handleRequestChatDetails}
+					/>
+					<ChatDetailsPanel
+						metadata={selectedMetadata}
+						open={isChatDetailsOpen}
+						on:close={handleCloseChatPanel}
+					/>
+				</div>
 			{:else}
 				<PlaceholderView {viewMode} />
 			{/if}
@@ -152,6 +195,10 @@
 <style>
 	.text-inter {
 		font-family: 'Inter', sans-serif;
+	}
+
+	.chat-view-region {
+		position: relative;
 	}
 
 	@media (min-width: 1024px) {

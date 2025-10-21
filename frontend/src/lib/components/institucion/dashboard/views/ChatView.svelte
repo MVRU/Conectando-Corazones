@@ -1,35 +1,33 @@
 <script lang="ts">
-	import { afterUpdate, onDestroy, onMount } from 'svelte';
-	import { FileText, Image, Info, Send, Users } from 'lucide-svelte';
+	import { afterUpdate, createEventDispatcher } from 'svelte';
+	import { Info, Send, Users } from 'lucide-svelte';
 
-	import { chatMetadata } from '../data';
 	import type { ChatItem, ChatMessage, ChatMetadata, ChatThread } from '../types';
 	import { BG_CARD, BORDER_SUBTLE, PRIMARY_500, TEXT_100, TEXT_300, TEXT_400 } from '../tokens';
 
+	type ChatViewEvents = {
+		toggleDetails: { open: boolean };
+	};
+
+	const INSTITUTION_AVATAR = '/users/escuela-esperanza.jpg';
+	const GENERIC_AVATAR = '/users/avatar-generico.svg';
+
 	export let chatSummary: ChatItem | null = null;
 	export let thread: ChatThread | null = null;
+	export let metadata: ChatMetadata | null = null;
+	export let detailsOpen = false;
+
+	const dispatch = createEventDispatcher<ChatViewEvents>();
 
 	let messageDraft = '';
 	let conversationContainer: HTMLDivElement | null = null;
 	let conversationMessages: ChatMessage[] = [];
 	let lastThreadId: number | null = null;
-	let metadata: ChatMetadata | null = null;
-	let galleryAttachments: ChatMetadata['attachments'] = [];
-	let evidenceAttachments: ChatMetadata['attachments'] = [];
-	let isPanelOpen = false;
-
 	const panelId = 'chat-details-panel';
-	const desktopMediaQuery = '(min-width: 1024px)';
-	let mediaList: MediaQueryList | null = null;
-	let mediaListener: ((event: MediaQueryListEvent) => void) | null = null;
-	let removeMediaListener: (() => void) | null = null;
 
 	const messageFormatter = new Intl.DateTimeFormat('es-CO', {
 		dateStyle: 'medium',
 		timeStyle: 'short'
-	});
-	const attachmentFormatter = new Intl.DateTimeFormat('es-CO', {
-		dateStyle: 'medium'
 	});
 
 	$: {
@@ -37,50 +35,17 @@
 		if (currentId !== lastThreadId) {
 			conversationMessages = thread ? [...thread.messages] : [];
 			lastThreadId = currentId;
-			metadata = currentId ? (chatMetadata[currentId] ?? null) : null;
-			galleryAttachments = metadata
-				? metadata.attachments.filter((item) => item.category === 'galeria')
-				: [];
-			evidenceAttachments = metadata
-				? metadata.attachments.filter((item) => item.category === 'evidencia')
-				: [];
 		}
 	}
 
 	$: hasMessages = conversationMessages.length > 0;
-	$: participantCount = metadata ? 1 /* institución */ + (metadata.collaborators?.length ?? 0) : 0;
+	$: participantCount = metadata ? 1 + (metadata.collaborators?.length ?? 0) : 0;
 
 	afterUpdate(() => {
 		if (!conversationContainer) return;
 		const lastMessage = conversationContainer.lastElementChild as HTMLElement | null;
-		if (lastMessage) {
+		if (lastMessage && typeof lastMessage.scrollIntoView === 'function') {
 			lastMessage.scrollIntoView({ behavior: 'smooth', block: 'end' });
-		}
-	});
-
-	onMount(() => {
-		if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
-		mediaList = window.matchMedia(desktopMediaQuery);
-		isPanelOpen = mediaList.matches;
-
-		mediaListener = (event: MediaQueryListEvent) => {
-			isPanelOpen = event.matches;
-		};
-
-		if (!mediaList) return;
-
-		if (typeof mediaList.addEventListener === 'function') {
-			mediaList.addEventListener('change', mediaListener);
-			removeMediaListener = () => mediaList?.removeEventListener('change', mediaListener!);
-		} else if (typeof mediaList.addListener === 'function') {
-			mediaList.addListener(mediaListener);
-			removeMediaListener = () => mediaList?.removeListener(mediaListener!);
-		}
-	});
-
-	onDestroy(() => {
-		if (removeMediaListener) {
-			removeMediaListener();
 		}
 	});
 
@@ -92,46 +57,34 @@
 		}
 	}
 
-	function formatAttachmentDate(isoDate: string): string {
-		try {
-			return attachmentFormatter.format(new Date(isoDate));
-		} catch (error) {
-			return isoDate;
-		}
-	}
-
 	function handleSend() {
 		const trimmed = messageDraft.trim();
 		if (!trimmed) return;
 
 		const nextMessage: ChatMessage = {
 			id: Date.now(),
-			author: 'Institución',
+			author: 'Patricia González',
+			organization: 'Escuela Esperanza',
+			role: 'Institución',
 			content: trimmed,
 			sentAt: new Date().toISOString(),
-			direction: 'outgoing'
+			direction: 'outgoing',
+			avatar: INSTITUTION_AVATAR
 		};
 
 		conversationMessages = [...conversationMessages, nextMessage];
 		messageDraft = '';
 	}
 
-	function getParticipantLabel(kind: ChatMetadata['institution']['kind']): string {
-		switch (kind) {
-			case 'empresa':
-				return 'Empresa';
-			case 'ong':
-				return 'ONG';
-			case 'voluntario':
-				return 'Voluntariado';
-			default:
-				return 'Institución';
-		}
+	function resolveAvatar(message: ChatMessage): string {
+		if (message.avatar) return message.avatar;
+		if (message.role === 'Institución') return INSTITUTION_AVATAR;
+		return GENERIC_AVATAR;
 	}
 
-	function togglePanel() {
+	function handleDetailsToggle() {
 		if (!metadata) return;
-		isPanelOpen = !isPanelOpen;
+		dispatch('toggleDetails', { open: !detailsOpen });
 	}
 </script>
 
@@ -157,15 +110,20 @@
 			style={`border-color: ${BORDER_SUBTLE};`}
 		>
 			<div class="flex items-center gap-4">
-				<div
-					class="flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold uppercase"
-					style={`background:${PRIMARY_500}1a; color:${PRIMARY_500}; border:1px solid ${PRIMARY_500}55;`}
-					aria-hidden="true"
-				>
-					{chatSummary.name.slice(0, 2)}
+				<div class="chat-summary-avatar" aria-hidden="true">
+					<img
+						src={metadata?.institution.avatar ?? INSTITUTION_AVATAR}
+						alt={`Avatar de ${metadata?.institution.name ?? chatSummary.name}`}
+						loading="lazy"
+					/>
 				</div>
 				<div class="flex flex-col">
-					<h2 class="text-lg font-semibold" style="color: {TEXT_100};">{chatSummary.name}</h2>
+					<div class="flex items-center gap-2">
+						<h2 class="text-lg font-semibold" style="color: {TEXT_100};">{chatSummary.name}</h2>
+						{#if metadata}
+							<span class="chat-role-badge">{metadata.institution.role}</span>
+						{/if}
+					</div>
 					<span class="text-sm" style="color: {TEXT_400};">Último mensaje: {chatSummary.time}</span>
 				</div>
 			</div>
@@ -181,8 +139,8 @@
 				<button
 					class="details-toggle"
 					type="button"
-					on:click={togglePanel}
-					aria-expanded={metadata ? isPanelOpen : false}
+					on:click={handleDetailsToggle}
+					aria-expanded={metadata ? detailsOpen : false}
 					aria-controls={panelId}
 					disabled={!metadata}
 				>
@@ -199,20 +157,43 @@
 						<p class="empty-conversation">No hay mensajes registrados para este chat aún.</p>
 					{:else}
 						{#each conversationMessages as message (message.id)}
-							<article
-								class="message-item"
-								class:message-item--outgoing={message.direction === 'outgoing'}
-								class:message-item--incoming={message.direction === 'incoming'}
+							<div
+								class="message-row"
+								class:message-row--outgoing={message.direction === 'outgoing'}
 								role="listitem"
 							>
-								<div class="message-meta">
-									<span class="message-author">{message.author}</span>
-									<time class="message-timestamp" datetime={message.sentAt}>
-										{formatTimestamp(message.sentAt)}
-									</time>
+								<div class="message-avatar" aria-hidden="true">
+									<img
+										src={resolveAvatar(message)}
+										alt={`Avatar de ${message.author}`}
+										loading="lazy"
+									/>
 								</div>
-								<p class="message-content">{message.content}</p>
-							</article>
+								<article
+									class="message-item"
+									class:message-item--outgoing={message.direction === 'outgoing'}
+									class:message-item--incoming={message.direction === 'incoming'}
+									data-role={message.role}
+								>
+									<header class="message-meta">
+										<div class="message-identity">
+											<div class="message-identity__header">
+												<span class="message-author">{message.author}</span>
+												<span class="message-role" data-role={message.role}>{message.role}</span>
+											</div>
+											{#if message.organization}
+												<span class="message-organization">{message.organization}</span>
+											{/if}
+										</div>
+									</header>
+									<p class="message-content">{message.content}</p>
+									<footer class="message-footer">
+										<time class="message-timestamp" datetime={message.sentAt}>
+											{formatTimestamp(message.sentAt)}
+										</time>
+									</footer>
+								</article>
+							</div>
 						{/each}
 					{/if}
 				</div>
@@ -244,83 +225,6 @@
 					</div>
 				</form>
 			</div>
-
-			{#if metadata}
-				<aside
-					id={panelId}
-					class="chat-panel"
-					hidden={!isPanelOpen}
-					aria-hidden={!isPanelOpen}
-					aria-label="Información del chat"
-				>
-					<div class="panel-section">
-						<div class="panel-section__header">
-							<Users class="h-5 w-5" aria-hidden="true" />
-							<h3>Integrantes</h3>
-						</div>
-						<dl class="panel-list">
-							<div class="panel-card">
-								<dt>
-									<span class="panel-chip">{getParticipantLabel(metadata.institution.kind)}</span>
-									{metadata.institution.name}
-								</dt>
-								<dd>{metadata.institution.description}</dd>
-								<dd class="panel-contact">{metadata.institution.contact}</dd>
-							</div>
-							{#each metadata.collaborators as participant (participant.id)}
-								<div class="panel-card">
-									<dt>
-										<span class="panel-chip">{getParticipantLabel(participant.kind)}</span>
-										{participant.name}
-									</dt>
-									<dd>{participant.description}</dd>
-									<dd class="panel-contact">{participant.contact}</dd>
-								</div>
-							{/each}
-						</dl>
-					</div>
-
-					<div class="panel-section">
-						<div class="panel-section__header">
-							<Image class="h-5 w-5" aria-hidden="true" />
-							<h3>Galería</h3>
-						</div>
-						<ul class="panel-list" role="list">
-							{#each galleryAttachments as file (file.id)}
-								<li class="panel-card">
-									<p class="panel-card__title">{file.name}</p>
-									<p class="panel-card__meta">{file.description}</p>
-									<p class="panel-card__date">
-										Actualizado {formatAttachmentDate(file.uploadedAt)}
-									</p>
-								</li>
-							{:else}
-								<li class="panel-empty">Sin archivos de galería cargados.</li>
-							{/each}
-						</ul>
-					</div>
-
-					<div class="panel-section">
-						<div class="panel-section__header">
-							<FileText class="h-5 w-5" aria-hidden="true" />
-							<h3>Evidencias</h3>
-						</div>
-						<ul class="panel-list" role="list">
-							{#each evidenceAttachments as file (file.id)}
-								<li class="panel-card">
-									<p class="panel-card__title">{file.name}</p>
-									<p class="panel-card__meta">{file.description}</p>
-									<p class="panel-card__date">
-										Actualizado {formatAttachmentDate(file.uploadedAt)}
-									</p>
-								</li>
-							{:else}
-								<li class="panel-empty">Sin evidencias registradas hasta el momento.</li>
-							{/each}
-						</ul>
-					</div>
-				</aside>
-			{/if}
 		</div>
 	</section>
 {/if}
@@ -328,6 +232,38 @@
 <style>
 	.chat-wrapper {
 		min-height: clamp(480px, 68vh, 640px);
+	}
+
+	.chat-summary-avatar {
+		position: relative;
+		display: inline-flex;
+		height: 3rem;
+		width: 3rem;
+		overflow: hidden;
+		border-radius: 9999px;
+		border: 2px solid rgba(255, 255, 255, 0.18);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32);
+	}
+
+	.chat-summary-avatar img {
+		height: 100%;
+		width: 100%;
+		object-fit: cover;
+	}
+
+	.chat-role-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.1rem 0.45rem;
+		border-radius: 9999px;
+		background: rgba(15, 154, 255, 0.18);
+		border: 1px solid rgba(15, 154, 255, 0.35);
+		font-size: 0.62rem;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--bubble-text);
 	}
 
 	.details-toggle {
@@ -376,12 +312,11 @@
 	.conversation {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
-		padding-right: 0.75rem;
-		max-height: clamp(280px, 48vh, 420px);
+		gap: 1.25rem;
+		padding: 0.5rem;
+		max-height: clamp(320px, 52vh, 520px);
 		overflow-y: auto;
 		scrollbar-width: thin;
-		flex: 1;
 	}
 
 	.conversation::-webkit-scrollbar {
@@ -403,193 +338,162 @@
 		text-align: center;
 	}
 
+	.message-row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.9rem;
+	}
+
+	.message-row--outgoing {
+		flex-direction: row-reverse;
+	}
+
+	.message-avatar {
+		position: relative;
+		height: 2.5rem;
+		width: 2.5rem;
+		border-radius: 9999px;
+		overflow: hidden;
+		border: 2px solid rgba(255, 255, 255, 0.16);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+	}
+
+	.message-avatar img {
+		height: 100%;
+		width: 100%;
+		object-fit: cover;
+	}
+
 	.message-item {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.75rem;
 		max-width: min(80%, 520px);
-		padding: 0.75rem 1rem;
+		padding: 0.95rem 1.15rem;
 		border-radius: 20px;
 		background: linear-gradient(180deg, rgba(18, 26, 63, 0.75), rgba(18, 26, 63, 0.92));
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		color: var(--bubble-text);
 	}
 
-	.chat-panel {
-		display: flex;
-		flex-direction: column;
-		gap: 1.25rem;
-		padding: 1.25rem;
-		border-radius: 20px;
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		background: linear-gradient(160deg, rgba(15, 23, 55, 0.85), rgba(9, 13, 38, 0.95));
-		box-shadow: 0 16px 38px rgba(0, 0, 0, 0.32);
-		max-height: clamp(280px, 48vh, 420px);
-		overflow-y: auto;
-		scrollbar-width: thin;
-		min-height: 0;
-	}
-
-	.chat-panel::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.chat-panel::-webkit-scrollbar-thumb {
-		background: rgba(255, 255, 255, 0.18);
-		border-radius: 9999px;
-	}
-
-	.panel-section {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.panel-section + .panel-section {
-		border-top: 1px solid rgba(255, 255, 255, 0.06);
-		padding-top: 1.25rem;
-	}
-
-	.panel-section__header {
-		display: flex;
-		align-items: center;
-		gap: 0.6rem;
-		font-size: 0.95rem;
-		font-weight: 700;
-		color: var(--bubble-text);
-		text-transform: uppercase;
-		letter-spacing: 0.08em;
-	}
-
-	.panel-section__header h3 {
-		font-size: inherit;
-		font-weight: inherit;
-	}
-
-	.panel-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.panel-card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.45rem;
-		padding: 0.85rem 1rem;
-		border-radius: 16px;
-		background: rgba(12, 18, 45, 0.7);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-	}
-
-	.panel-card__title {
-		font-weight: 600;
-		color: var(--bubble-text);
-	}
-
-	.panel-card__meta,
-	.panel-contact {
-		color: var(--bubble-muted);
-		font-size: 0.85rem;
-		line-height: 1.4;
-	}
-
-	.panel-card__date {
-		color: var(--bubble-meta);
-		font-size: 0.78rem;
-	}
-
-	.panel-contact {
-		font-weight: 600;
-	}
-
-	.panel-chip {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.15rem 0.55rem;
-		margin-right: 0.5rem;
-		border-radius: 9999px;
-		background: rgba(11, 152, 250, 0.16);
-		border: 1px solid rgba(11, 152, 250, 0.35);
-		color: var(--bubble-text);
-		font-size: 0.65rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-	}
-
-	.panel-empty {
-		padding: 0.75rem 1rem;
-		border-radius: 12px;
-		background: rgba(8, 12, 34, 0.55);
-		color: var(--bubble-muted);
-		font-size: 0.85rem;
-		text-align: center;
-	}
-
 	.message-item--outgoing {
-		margin-left: auto;
-		background: linear-gradient(180deg, rgba(11, 152, 250, 0.28), rgba(11, 152, 250, 0.55));
-		border-color: rgba(11, 152, 250, 0.65);
-	}
-
-	.message-item--incoming {
-		margin-right: auto;
+		background: linear-gradient(180deg, rgba(11, 152, 250, 0.85), rgba(11, 152, 250, 0.75));
+		border-color: rgba(11, 152, 250, 0.45);
+		color: #041021;
 	}
 
 	.message-meta {
 		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.message-item--outgoing .message-meta {
+		align-items: flex-end;
+	}
+
+	.message-identity {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		width: 100%;
+	}
+
+	.message-identity__header {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
 		flex-wrap: wrap;
-		align-items: baseline;
-		gap: 0.5rem;
-		font-size: 0.75rem;
-		color: var(--bubble-meta);
+	}
+
+	.message-item--outgoing .message-identity__header {
+		justify-content: flex-end;
 	}
 
 	.message-author {
 		font-weight: 600;
-		color: var(--bubble-text);
+		font-size: 0.95rem;
 	}
 
-	.message-timestamp {
+	.message-organization {
+		font-size: 0.8rem;
 		color: var(--bubble-muted);
 	}
 
+	.message-item--outgoing .message-organization {
+		color: rgba(4, 16, 33, 0.7);
+		text-align: right;
+	}
+
+	.message-role {
+		padding: 0.08rem 0.45rem;
+		border-radius: 9999px;
+		font-size: 0.65rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+	}
+
+	.message-footer {
+		display: flex;
+		justify-content: flex-end;
+	}
+
+	.message-role[data-role='Colaborador'] {
+		background: rgba(56, 189, 248, 0.2);
+		color: rgba(186, 230, 253, 1);
+		border: 1px solid rgba(56, 189, 248, 0.45);
+	}
+
+	.message-role[data-role='Institución'] {
+		background: rgba(34, 211, 238, 0.25);
+		color: rgba(224, 242, 254, 1);
+		border: 1px solid rgba(20, 184, 166, 0.4);
+	}
+
+	.message-item--outgoing .message-role[data-role='Institución'] {
+		color: #041021;
+	}
+
+	.message-timestamp {
+		font-size: 0.78rem;
+		color: var(--bubble-meta);
+	}
+
+	.message-item--outgoing .message-timestamp {
+		color: rgba(4, 16, 33, 0.65);
+	}
+
 	.message-content {
-		font-size: 0.95rem;
-		line-height: 1.5;
+		font-size: 0.98rem;
+		line-height: 1.65;
 		white-space: pre-wrap;
-		word-break: break-word;
 	}
 
 	.message-form {
-		border-top: 1px solid var(--divider);
-		padding-top: 1rem;
+		margin-top: auto;
 	}
 
 	.message-input {
 		display: flex;
+		gap: 1rem;
 		align-items: flex-end;
-		gap: 0.75rem;
-		background: rgba(8, 12, 34, 0.65);
-		border-radius: 24px;
-		padding: 0.75rem 1rem;
-		border: 1px solid rgba(255, 255, 255, 0.05);
-		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+		padding: 0.85rem;
+		border-radius: 18px;
+		background: rgba(12, 19, 47, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 	}
 
 	.message-textarea {
 		flex: 1;
 		resize: none;
-		border: none;
 		background: transparent;
-		color: var(--bubble-text);
-		font-size: 1rem;
-		line-height: 1.5;
-		min-height: 24px;
-		max-height: 120px;
+		border: none;
 		outline: none;
+		color: var(--bubble-text);
+		font-size: 0.95rem;
+		line-height: 1.5;
 	}
 
 	.message-textarea::placeholder {
@@ -600,9 +504,9 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 44px;
-		height: 44px;
-		border-radius: 50%;
+		width: 2.75rem;
+		height: 2.75rem;
+		border-radius: 9999px;
 		border: none;
 		transition:
 			transform 0.2s ease,
@@ -610,7 +514,7 @@
 	}
 
 	.send-button:hover {
-		transform: scale(1.05);
+		transform: translateY(-1px);
 		box-shadow: 0 12px 28px rgba(11, 152, 250, 0.45);
 	}
 
@@ -618,40 +522,32 @@
 		transform: scale(0.96);
 	}
 
-	@media (min-width: 768px) {
-		.chat-body {
-			padding: 1.75rem 2rem;
-		}
-
-		.conversation,
-		.chat-panel {
-			max-height: clamp(360px, 52vh, 520px);
-		}
-	}
-
-	@media (min-width: 1024px) {
-		.chat-body {
-			flex-direction: row;
-			align-items: stretch;
-		}
-
-		.conversation,
-		.chat-panel {
-			max-height: none;
-		}
-
-		.chat-panel {
-			flex: 0 0 320px;
-		}
-	}
-
 	@media (max-width: 640px) {
-		.chat-wrapper {
-			border-radius: 20px;
+		.chat-body {
+			padding: 1.25rem;
+			gap: 1.25rem;
+		}
+
+		.conversation {
+			max-height: none;
 		}
 
 		.message-item {
 			max-width: 100%;
+		}
+
+		.message-meta {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 0.35rem;
+		}
+
+		.message-item--outgoing .message-meta {
+			align-items: flex-end;
+		}
+
+		.message-footer {
+			justify-content: flex-start;
 		}
 	}
 </style>

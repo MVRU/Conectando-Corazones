@@ -67,11 +67,14 @@ export interface ChatItem {
 export type MessageDirection = 'incoming' | 'outgoing';
 
 export interface ChatMessage {
-	id: number;
-	author: string;
-	content: string;
-	sentAt: string;
-	direction: MessageDirection;
+        id: number;
+        author: string;
+        organization?: string;
+        role: 'Colaborador' | 'Institución';
+        content: string;
+        sentAt: string;
+        direction: MessageDirection;
+        avatar?: string | null;
 }
 
 export interface ChatThread {
@@ -83,27 +86,34 @@ export interface ChatThread {
 export type ParticipantKind = 'institucion' | 'empresa' | 'ong' | 'voluntario';
 
 export interface ChatParticipant {
-	id: string;
-	name: string;
-	role: 'Institución' | 'Colaborador';
-	kind: ParticipantKind;
-	description: string;
-	contact: string;
-}
+        id: string;
+        name: string;
+        role: 'Institución' | 'Colaborador';
+        kind: ParticipantKind;
+        description: string;
+        contact: string;
+        avatar?: string | null;
+}	
 
 export type AttachmentCategory = 'galeria' | 'evidencia';
 
 export type AttachmentFileType = 'image' | 'pdf';
+
+export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' | 'xlsx';
+
+export type EvidenceFlow = 'entrada' | 'salida';
 
 export interface ChatAttachment {
 	id: string;
 	name: string;
 	category: AttachmentCategory;
 	fileType: AttachmentFileType;
+	fileExtension: AttachmentFormat;
 	description: string;
 	uploadedAt: string;
+	previewImage?: string | null;
+	evidenceFlow?: EvidenceFlow;
 }
-
 export interface ChatMetadata {
 	chatId: number;
 	institution: ChatParticipant;

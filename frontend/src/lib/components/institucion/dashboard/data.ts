@@ -81,40 +81,58 @@ export const chatThreads: ChatThread[] = [
 		messages: [
 			{
 				id: 101,
-				author: 'Mariano · Lumina Cooperativa (Colaborador)',
+				author: 'Mariano Ponce',
+				organization: 'Lumina Cooperativa',
+				role: 'Colaborador',
 				content:
 					'¡Un gusto, Patricia! Desde Lumina Cooperativa confirmamos la donación de los cables y soportes. Estarán listos para retirar el miércoles por la mañana.',
-				sentAt: '2025-11-03T08:30:00-05:00',
-				direction: 'incoming'
+				sentAt: '2025-11-03T08:30:00-03:00',
+				direction: 'incoming',
+				avatar: '/users/lumina-cooperativa.svg'
 			},
 			{
 				id: 102,
-				author: 'Clara · Sembrar Futuro (Colaboradora)',
+				author: 'Clara Medina',
+				organization: 'Sembrar Futuro',
+				role: 'Colaborador',
 				content:
 					'Buenos días, nosotros enviaremos las lámparas LED mañana. Son de bajo consumo y larga duración. Les comparto el comprobante de entrega apenas salga el envío!',
-				sentAt: '2025-11-03T08:41:00-05:00',
-				direction: 'incoming'
+				sentAt: '2025-11-03T08:41:00-03:00',
+				direction: 'incoming',
+				avatar: '/users/sembrar-futuro.svg'
 			},
 			{
 				id: 103,
-				author: 'Lucas · Voluntario UTN (Colaborador)',
-				content: 'Con Sofía podemos pasar el viernes a la escuela para comenzar la instalación. Si todo está en condiciones, en un día dejamos las tres aulas listas.',
-				sentAt: '2025-11-03T08:45:00-05:00',
-				direction: 'incoming'
+				author: 'Lucas Ferreyra',
+				organization: 'Voluntariado UTN FRRo',
+				role: 'Colaborador',
+				content:
+					'Con Sofía podemos pasar el viernes a la escuela para comenzar la instalación. Si todo está en condiciones, en un día dejamos las tres aulas listas.',
+				sentAt: '2025-11-03T08:45:00-03:00',
+				direction: 'incoming',
+				avatar: null
 			},
 			{
 				id: 104,
-				author: 'Sofía · Voluntaria UTN (Colaboradora)',
-				content: 'Sí, y podemos registrar fotos del antes y después para subir como evidencia al sistema. Así queda trazado todo el proceso!',
-				sentAt: '2025-11-03T08:47:00-05:00',
-				direction: 'incoming'
+				author: 'Sofía Mansilla',
+				organization: 'Voluntariado UTN FRRo',
+				role: 'Colaborador',
+				content:
+					'Sí, y podemos registrar fotos del antes y después para subir como evidencia al sistema. Así queda trazado todo el proceso!',
+				sentAt: '2025-11-03T08:47:00-03:00',
+				direction: 'incoming',
+				avatar: null
 			},
 			{
 				id: 105,
-				author: 'Patricia · Escuela Esperanza (Institución)',
-				content: 'Mil gracias a todos! ❤️ Los chicos van a estar felices. Apenas finalicen los trabajos, validamos el proyecto en la plataforma.',
-				sentAt: '2025-11-03T08:50:00-05:00',
-				direction: 'outgoing'
+				author: 'Patricia González',
+				organization: 'Escuela Esperanza',
+				role: 'Institución',
+				content:
+					'Mil gracias a todos. ❤️ Los chicos van a estar felices. Apenas finalicen los trabajos, validamos el proyecto en la plataforma.',
+				sentAt: '2025-11-03T08:50:00-03:00',
+				direction: 'outgoing',
+				avatar: '/users/escuela-esperanza.jpg'
 			}
 		]
 	},
@@ -124,23 +142,27 @@ export const chatThreads: ChatThread[] = [
 		messages: [
 			{
 				id: 201,
-				author: 'Conectando Corazones (Sistema)',
-				content: '¡Este proyecto es un borrador!',
-				sentAt: '2025-02-14T15:12:00-05:00',
-				direction: 'incoming'
+				author: 'Conectando Corazones',
+				organization: 'Sistema',
+				role: 'Colaborador',
+				content:
+					'¡Este proyecto es un borrador! Recordá completarlo antes de compartirlo con tus contactos.',
+				sentAt: '2025-11-10T15:12:00-03:00',
+				direction: 'incoming',
+				avatar: '/users/admin-default.png'
 			}
 		]
 	}
 ];
 
 export const projectItems: ProjectItem[] = [
-	{
-		id: 1,
-		name: 'Luz para Aprender',
-		status: 'En Curso',
-		date: '30/10/2025',
-		statusColor: GREEN
-	},
+        {
+                id: 1,
+                name: 'Luz para Aprender',
+                status: 'En Curso',
+                date: '23/11/2025',
+                statusColor: GREEN
+        },
 	{
 		id: 2,
 		name: 'Patio de Colores',
@@ -270,8 +292,8 @@ export const verificationSummary: VerificationSummary = {
         description:
                 'La identidad institucional y del representante legal fueron confirmadas manualmente por el equipo administrador.',
         method: 'Validación manual de documentación oficial',
-        lastReview: '12 de octubre de 2025',
-        nextReview: '12 de octubre de 2026',
+        lastReview: '12 de noviembre de 2025',
+        nextReview: '12 de noviembre de 2026',
         reviewer: 'Carolina Torres (Administradora de confianza)',
         reliabilityLevel: 'Alta',
         documentsReviewed: 4
@@ -281,7 +303,7 @@ export const verificationDocuments: VerificationDocument[] = [
         {
                 label: 'Acta constitutiva y estatuto actualizado',
                 status: 'Aprobado',
-                detail: 'Documento firmado y sellado en julio de 2024.'
+                detail: 'Documento firmado y sellado en noviembre de 2025.'
         },
         {
                 label: 'Identificación del representante legal (DNI)',
@@ -291,101 +313,106 @@ export const verificationDocuments: VerificationDocument[] = [
         {
                 label: 'Constancia de CUIT',
                 status: 'Aprobado',
-                detail: 'Número fiscal coincide con la documentación presentada.'
+                detail: 'Número fiscal coincide con la documentación presentada en noviembre de 2025.'
         },
         {
                 label: 'Comprobante de domicilio institucional',
                 status: 'Aprobado',
-                detail: 'Servicio eléctrico emitido en junio de 2025 a nombre de la institución.'
+                detail: 'Servicio eléctrico emitido en noviembre de 2025 a nombre de la institución.'
         }
 ];
 
 export const chatMetadata: ChatMetadataMap = {
-	1: {
-		chatId: 1,
-		institution: {
-			id: 'institucion-escuela-esperanza',
-			name: 'Escuela Esperanza',
-			role: 'Institución',
-			kind: 'institucion',
-			description: 'Comunidad educativa liderada por Patricia González, directora del plantel.',
-			contact: 'Patricia González • Directora'
-		},
-		collaborators: [
-			{
-				id: 'colaborador-lumina-cooperativa',
-				name: 'Lumina Cooperativa',
-				role: 'Colaborador',
-				kind: 'empresa',
-				description: 'Empresa especialista en soluciones energéticas comunitarias.',
-				contact: 'Equipo de proyectos estratégicos'
-			},
-			{
-				id: 'colaborador-sembrar-futuro',
-				name: 'Sembrar Futuro',
-				role: 'Colaborador',
-				kind: 'ong',
-				description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
-				contact: 'Coordinación de donaciones'
-			},
-			{
-				id: 'voluntario-lucas-utn',
-				name: 'Lucas Ferreyra',
-				role: 'Colaborador',
-				kind: 'voluntario',
-				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-				contact: 'Lucas Ferreyra • UTN FRRo'
-			},
-			{
-				id: 'voluntaria-sofia-utn',
-				name: 'Sofía Mansilla',
-				role: 'Colaborador',
-				kind: 'voluntario',
-				description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
-				contact: 'Sofía Mansilla • UTN FRRo'
-			}
-		],
-		attachments: [
-			{
-				id: 'galeria-escuela-exterior',
-				name: 'Fachada actual del colegio',
-				category: 'galeria',
-				fileType: 'image',
-				description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
-				uploadedAt: '2025-02-11'
-			},
-			{
-				id: 'galeria-salon-nocturno',
-				name: 'Aula iluminada con lámparas LED',
-				category: 'galeria',
-				fileType: 'image',
-				description: 'Registro fotográfico del piloto nocturno realizado con voluntarios.',
-				uploadedAt: '2025-02-16'
-			},
-			{
-				id: 'evidencia-factura-led-001',
-				name: 'Factura lámparas LED - febrero',
-				category: 'evidencia',
-				fileType: 'pdf',
-				description: 'Factura emitida por proveedor de luminarias homologadas.',
-				uploadedAt: '2025-02-12'
-			},
-			{
-				id: 'evidencia-comprobante-transf-002',
-				name: 'Comprobante transferencia Sembrar Futuro',
-				category: 'evidencia',
-				fileType: 'pdf',
-				description: 'Documento que acredita la donación recibida para la compra de materiales.',
-				uploadedAt: '2025-02-14'
-			}
-		]
-	}
+        1: {
+                chatId: 1,
+                institution: {
+                        id: 'institucion-escuela-esperanza',
+                        name: 'Escuela Esperanza',
+                        role: 'Institución',
+                        kind: 'institucion',
+                        description: 'Comunidad educativa liderada por Patricia González, directora del plantel.',
+                        contact: 'Patricia González • Directora',
+                        avatar: '/users/escuela-esperanza.jpg'
+                },
+                collaborators: [
+                        {
+                                id: 'colaborador-lumina-cooperativa',
+                                name: 'Lumina Cooperativa',
+                                role: 'Colaborador',
+                                kind: 'empresa',
+                                description: 'Empresa especialista en soluciones energéticas comunitarias.',
+                                contact: 'Equipo de proyectos estratégicos',
+                                avatar: '/users/avatar-generico.svg'
+                        },
+                        {
+                                id: 'colaborador-sembrar-futuro',
+                                name: 'Sembrar Futuro',
+                                role: 'Colaborador',
+                                kind: 'ong',
+                                description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
+                                contact: 'Coordinación de donaciones',
+                                avatar: '/users/avatar-generico.svg'
+                        },
+                        {
+                                id: 'voluntario-lucas-utn',
+                                name: 'Lucas Ferreyra',
+                                role: 'Colaborador',
+                                kind: 'voluntario',
+                                description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+                                contact: 'Lucas Ferreyra • UTN FRRo',
+                                avatar: '/users/avatar-generico.svg'
+                        },
+                        {
+                                id: 'voluntaria-sofia-utn',
+                                name: 'Sofía Mansilla',
+                                role: 'Colaborador',
+                                kind: 'voluntario',
+                                description: 'Estudiante de ingeniería eléctrica de la UTN FRRo.',
+                                contact: 'Sofía Mansilla • UTN FRRo',
+                                avatar: '/users/avatar-generico.svg'
+                        }
+                ],
+                attachments: [
+                        {
+                                id: 'galeria-escuela-exterior',
+                                name: 'Fachada actual del colegio',
+                                category: 'galeria',
+                                fileType: 'image',
+                                description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
+                                uploadedAt: '2025-11-11'
+                        },
+                        {
+                                id: 'galeria-salon-nocturno',
+                                name: 'Aula iluminada con lámparas LED',
+                                category: 'galeria',
+                                fileType: 'image',
+                                description: 'Registro fotográfico del piloto nocturno realizado con voluntarios.',
+                                uploadedAt: '2025-11-16'
+                        },
+                        {
+                                id: 'evidencia-factura-led-001',
+                                name: 'Factura lámparas LED - noviembre',
+                                category: 'evidencia',
+                                fileType: 'pdf',
+                                description: 'Factura emitida por proveedor de luminarias homologadas.',
+                                uploadedAt: '2025-11-12'
+                        },
+                        {
+                                id: 'evidencia-comprobante-transf-002',
+                                name: 'Comprobante transferencia Sembrar Futuro',
+                                category: 'evidencia',
+                                fileType: 'pdf',
+                                description: 'Documento que acredita la donación recibida para la compra de materiales.',
+                                uploadedAt: '2025-11-14'
+                        }
+                ]
+        }
 };
 
 export const adminObservations: ObservationItem[] = [
         {
                 message: 'Documentación completa y vigente. Mantener copias digitalizadas con firmas visibles.',
-                recordedAt: '12/10/2025 10:45 (GMT-3)',
+                recordedAt: '12/11/2025 10:45 (GMT-3)',
                 type: 'info'
         }
 ];
@@ -393,8 +420,8 @@ export const adminObservations: ObservationItem[] = [
 export const reportingStatus: ReportingStatus = {
         hasReports: false,
         message: 'Sin reportes ni denuncias de la comunidad. La institución está catalogada como confiable.',
-        lastUpdate: '12 de octubre de 2025',
+        lastUpdate: '12 de noviembre de 2025',
         riskLevel: 'none'
-};	
+};
 
 export const filtersResetLabel = 'Limpiar';
