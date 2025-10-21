@@ -103,28 +103,30 @@ export type AttachmentFormat = 'pdf' | 'jpg' | 'jpeg' | 'png' | 'webp' | 'docx' 
 
 export type EvidenceFlow = 'entrada' | 'salida';
 
+export type ObjectiveStatus = 'completed' | 'in_progress' | 'pending';
+
 export interface ChatAttachment {
-	id: string;
-	name: string;
-	category: AttachmentCategory;
-	fileType: AttachmentFileType;
-	fileExtension: AttachmentFormat;
-	description: string;
-	uploadedAt: string;
-	previewImage?: string | null;
-	evidenceFlow?: EvidenceFlow;
-	relatedEvidenceId?: string[] | null;
-	isAiGenerated?: boolean;
-	downloadUrl?: string | null;
+        id: string;
+        name: string;
+        category: AttachmentCategory;
+        fileType: AttachmentFileType;
+        fileExtension: AttachmentFormat;
+        description: string;
+        uploadedAt: string;
+        previewImage?: string | null;
+        evidenceFlow?: EvidenceFlow;
+        relatedEvidenceId?: string[] | null;
+        uploadedBy?: string | null;
+        isAiGenerated?: boolean;
+        downloadUrl?: string | null;
 }
-
-
 export interface ChatObjective {
 
         id: string;
         progressLabel: string;
         resourceType: string;
         sponsors: string[];
+		status: ObjectiveStatus;
 }
 
 export interface ChatProjectInfo {

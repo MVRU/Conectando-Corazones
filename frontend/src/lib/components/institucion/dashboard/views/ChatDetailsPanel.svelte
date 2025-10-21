@@ -3,10 +3,11 @@
 	import {
 		CalendarDays,
 		CheckCircle2,
+		Circle,
 		FileText,
 		Image,
+		Loader2,
 		MapPin,
-		Target,
 		Users,
 		X
 	} from 'lucide-svelte';
@@ -16,7 +17,8 @@
 		ChatAttachment,
 		ChatMetadata,
 		ChatObjective,
-		ChatParticipant
+		ChatParticipant,
+		ObjectiveStatus
 	} from '../types';
 	import { TEXT_100, TEXT_300, TEXT_400 } from '../tokens';
 	import {
@@ -24,7 +26,7 @@
 		isAiGeneratedEvidence,
 		resolveEvidenceFlowLabel,
 		resolveEvidenceFlowVariant,
-		resolveRelatedEvidenceName
+		resolveRelatedEvidenceNames
 	} from '../utils/evidence';
 
 	const PANEL_ID = 'chat-details-panel';
@@ -48,6 +50,53 @@
 	});
 
 	const dispatch = createEventDispatcher<{ close: void }>();
+
+	type StatusVisual = {
+		label: string;
+		icon: typeof CheckCircle2;
+		iconClass: string;
+		badgeClass: string;
+	};
+
+	const OBJECTIVE_STATUS_META: Record<ObjectiveStatus, StatusVisual> = {
+		completed: {
+			label: 'Completado',
+			icon: CheckCircle2,
+			iconClass: 'objective-icon--completed',
+			badgeClass: 'objective-status--completed'
+		},
+		in_progress: {
+			label: 'En progreso',
+			icon: Loader2,
+			iconClass: 'objective-icon--progress',
+			badgeClass: 'objective-status--progress'
+		},
+		pending: {
+			label: 'No iniciado',
+			icon: Circle,
+			iconClass: 'objective-icon--pending',
+			badgeClass: 'objective-status--pending'
+		}
+	};
+
+	function resolveObjectiveStatusMeta(status: ObjectiveStatus | undefined): StatusVisual {
+		return OBJECTIVE_STATUS_META[status ?? 'pending'];
+	}
+
+	function formatResourceType(type: string): string {
+		const normalized = type.trim().toLowerCase();
+		const labels: Record<string, string> = {
+			monetaria: 'Donación monetaria',
+			'en especie': 'Donación en especie',
+			voluntariado: 'Voluntariado'
+		};
+		return labels[normalized] ?? type;
+	}
+
+	function resolveEvidenceUploader(attachment: ChatAttachment): string {
+		const uploader = attachment.uploadedBy?.trim();
+		return uploader && uploader.length > 0 ? uploader : 'Autor no registrado';
+	}
 
 	export let metadata: ChatMetadata | null = null;
 	export let open = false;
@@ -94,6 +143,12 @@
 		return buildRelationTooltip(attachment, evidenceAttachments);
 	}
 
+	function resolveRelationLabel(attachment: ChatAttachment): string | null {
+		const names = resolveRelatedEvidenceNames(attachment, evidenceAttachments);
+		if (names.length === 0) return null;
+		return names.join(' · ');
+	}
+
 	function resolveObjectiveSponsors(objective: ChatObjective): string[] {
 		return objective.sponsors.map((sponsor) => sponsor.trim()).filter(Boolean);
 	}
@@ -123,7 +178,6 @@
 			<header class="panel-header">
 				<div class="panel-title">
 					<span>Detalles del chat</span>
-					<span class="panel-subtitle">{participantCount} participantes</span>
 				</div>
 				<button
 					type="button"
@@ -164,7 +218,7 @@
 					<div class="project-team">
 						<div class="project-team__header">
 							<Users class="h-5 w-5" aria-hidden="true" />
-							<h4>Integrantes</h4>
+							<h4>Integrantes ({participantCount})</h4>
 						</div>
 						<ul class="panel-members" role="list">
 							{#each participantEntries as participant (participant.id)}
@@ -189,19 +243,28 @@
 						<h4>Objetivos</h4>
 						<ul class="objective-list" role="list">
 							{#each objectiveItems as objective (objective.id)}
-								<li class="objective-row">
-									<span class="objective-icon" aria-hidden="true">
-										<CheckCircle2 aria-hidden="true" />
+								{@const statusMeta = resolveObjectiveStatusMeta(objective.status)}
+								{@const sponsors = resolveObjectiveSponsors(objective)}
+								<li class="objective-row" data-status={objective.status}>
+									<span class={`objective-icon ${statusMeta.iconClass}`} aria-hidden="true">
+										<svelte:component
+											this={statusMeta.icon}
+											class="objective-icon__svg"
+											aria-hidden="true"
+										/>
 									</span>
 									<div class="objective-content">
-										<span class="objective-label">{objective.progressLabel}</span>
-										<div class="objective-tags" aria-label="Detalles del objetivo">
-											<span class="objective-tag objective-tag--type">{objective.resourceType}</span
-											>
-											{#each resolveObjectiveSponsors(objective) as sponsor (sponsor)}
-												<span class="objective-tag objective-tag--sponsor">{sponsor}</span>
-											{/each}
+										<div class="objective-header">
+											<p class="objective-label">{objective.progressLabel}</p>
 										</div>
+										<p class="objective-details">
+											<span class="panel-card__meta">
+												{formatResourceType(objective.resourceType)}
+												{#if sponsors.length > 0}
+													· {sponsors.join(', ')}
+												{/if}
+											</span>
+										</p>
 									</div>
 								</li>
 							{/each}
@@ -228,7 +291,6 @@
 							<div class="panel-card__body">
 								<p class="panel-card__title">{file.name}</p>
 								<p class="panel-card__meta">{file.description}</p>
-								<p class="panel-card__date">Actualizado {formatAttachmentDate(file.uploadedAt)}</p>
 							</div>
 						</li>
 					{:else}
@@ -259,6 +321,8 @@
 						{#each evidenceAttachments as file (file.id)}
 							{@const evidenceFlowLabel = resolveEvidenceFlowLabel(file.evidenceFlow)}
 							{@const evidenceFlowVariant = resolveEvidenceFlowVariant(file.evidenceFlow)}
+							{@const relationTooltip = resolveRelationTooltip(file)}
+							{@const relationLabel = resolveRelationLabel(file)}
 							<li
 								class="evidence-item"
 								class:evidence-item--ai={isAiGeneratedEvidence(file)}
@@ -276,22 +340,12 @@
 										<span class="evidence-name">{file.name}</span>
 									</div>
 									<div class="evidence-meta" aria-label="Metadatos de la evidencia">
-										<span class="evidence-extension"
-											>{file.fileExtension.toUpperCase()} · {file.evidenceFlow}</span
-										>
-										{#if file.relatedEvidenceId}
-											{@const relationTooltip = resolveRelationTooltip(file)}
-											{#if relationTooltip}
-												<span
-													class="evidence-relation"
-													role="img"
-													aria-label={relationTooltip}
-													title={relationTooltip}
-													data-related={resolveRelatedEvidenceName(file, evidenceAttachments) ?? ''}
-												>
-													🔗
-												</span>
-											{/if}
+										{#if evidenceFlowLabel}
+											{@const flowClass = evidenceFlowVariant
+												? `evidence-chip--${evidenceFlowVariant}`
+												: 'evidence-chip--neutral'}
+											<span class={`evidence-chip ${flowClass}`}>{evidenceFlowLabel}</span>
+											<span class="panel-card__meta">{resolveEvidenceUploader(file)}</span>
 										{/if}
 									</div>
 									<!-- <p class="evidence-description">{file.description}</p>
@@ -460,75 +514,135 @@
 	.objective-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.6rem;
+		gap: 0.65rem;
 	}
 
 	.objective-row {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		align-items: flex-start;
-		gap: 0.65rem;
-		padding: 0.65rem 0.85rem;
+		gap: 0.75rem;
+		padding: 0.75rem 1rem;
 		border-radius: 14px;
-		background: rgba(13, 20, 48, 0.6);
-		border: 1px solid rgba(255, 255, 255, 0.07);
+		background: rgba(12, 18, 42, 0.6);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		border-left: 3px solid rgba(148, 163, 184, 0.35);
+	}
+
+	.objective-row[data-status='completed'] {
+		border-left-color: rgba(34, 197, 94, 0.7);
+	}
+
+	.objective-row[data-status='in_progress'] {
+		border-left-color: rgba(250, 204, 21, 0.7);
+	}
+
+	.objective-row[data-status='pending'] {
+		border-left-color: rgba(148, 163, 184, 0.5);
 	}
 
 	.objective-icon {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.2rem;
-		height: 1.2rem;
-		color: rgba(165, 180, 252, 0.9);
-		margin-top: 0.15rem;
+		width: 1.25rem;
+		height: 1.25rem;
+		margin-top: 0.1rem;
 	}
 
-	.objective-icon :global(svg) {
+	.objective-icon__svg {
 		width: 100%;
 		height: 100%;
+	}
+
+	.objective-icon--completed {
+		color: rgba(134, 239, 172, 0.95);
+	}
+
+	.objective-icon--progress {
+		color: rgba(253, 224, 71, 0.9);
+	}
+
+	.objective-icon--pending {
+		color: rgba(148, 163, 184, 0.85);
+	}
+
+	.objective-icon--progress .objective-icon__svg {
+		animation: objective-spin 1.6s linear infinite;
 	}
 
 	.objective-content {
 		display: flex;
 		flex-direction: column;
-		gap: 0.35rem;
+		gap: 0.45rem;
+	}
+
+	.objective-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.65rem;
 	}
 
 	.objective-label {
-		font-size: 0.86rem;
+		font-size: 0.88rem;
 		font-weight: 600;
 		color: var(--panel-text);
 	}
 
-	.objective-tags {
-		display: inline-flex;
-		flex-wrap: wrap;
-		gap: 0.32rem;
-	}
-
-	.objective-tag {
+	.objective-status {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		padding: 0.18rem 0.5rem;
+		gap: 0.25rem;
+		padding: 0.18rem 0.6rem;
 		border-radius: 9999px;
-		font-size: 0.68rem;
-		font-weight: 600;
-		letter-spacing: 0.04em;
+		font-size: 0.7rem;
+		letter-spacing: 0.06em;
 		text-transform: uppercase;
 	}
 
-	.objective-tag--type {
-		background: rgba(11, 152, 250, 0.14);
-		border: 1px solid rgba(11, 152, 250, 0.35);
-		color: rgba(224, 242, 254, 0.94);
+	.objective-status--completed {
+		background: rgba(22, 163, 74, 0.18);
+		color: rgba(187, 247, 208, 0.95);
 	}
 
-	.objective-tag--sponsor {
-		background: rgba(167, 243, 208, 0.18);
-		border: 1px solid rgba(74, 222, 128, 0.3);
-		color: rgba(222, 247, 236, 0.95);
+	.objective-status--progress {
+		background: rgba(250, 204, 21, 0.18);
+		color: rgba(254, 249, 195, 0.95);
+	}
+
+	.objective-status--pending {
+		background: rgba(148, 163, 184, 0.18);
+		color: rgba(226, 232, 240, 0.85);
+	}
+
+	.objective-details {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.objective-meta {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		font-size: 0.72rem;
+		color: var(--panel-muted);
+		padding: 0.15rem 0.45rem;
+		border-radius: 9999px;
+		background: rgba(148, 163, 184, 0.12);
+	}
+
+	.objective-meta--type {
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		color: rgba(191, 219, 254, 0.95);
+		background: rgba(59, 130, 246, 0.18);
+	}
+
+	.objective-meta--sponsor {
+		background: rgba(45, 212, 191, 0.14);
+		color: rgba(167, 243, 208, 0.95);
 	}
 
 	.project-team {
@@ -675,34 +789,60 @@
 		gap: 0.4rem;
 	}
 
-	.evidence-extension {
-		font-size: 0.72rem;
-		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--panel-muted);
-	}
-
-	.evidence-relation {
+	.evidence-chip {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		width: 1.35rem;
-		height: 1.35rem;
+		gap: 0.25rem;
+		padding: 0.18rem 0.55rem;
 		border-radius: 9999px;
+		font-size: 0.72rem;
+		font-weight: 500;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
 		background: rgba(148, 163, 184, 0.12);
-		border: 1px solid rgba(148, 163, 184, 0.25);
-		font-size: 0.78rem;
-		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease,
-			border-color 0.2s ease;
+		color: rgba(226, 232, 240, 0.85);
 	}
 
-	.evidence-relation:hover {
-		transform: translateY(-1px);
-		border-color: rgba(125, 211, 252, 0.4);
-		box-shadow: 0 10px 18px rgba(125, 211, 252, 0.25);
+	.evidence-chip--entrada {
+		background: rgba(34, 197, 94, 0.18);
+		color: rgba(187, 247, 208, 0.95);
+	}
+
+	.evidence-chip--salida {
+		background: rgba(239, 68, 68, 0.18);
+		color: rgba(254, 202, 202, 0.95);
+	}
+
+	.evidence-chip--neutral {
+		background: rgba(148, 163, 184, 0.14);
+		color: rgba(226, 232, 240, 0.8);
+	}
+
+	.evidence-chip--uploader {
+		background: rgba(59, 130, 246, 0.14);
+		color: rgba(191, 219, 254, 0.95);
+		text-transform: none;
+		letter-spacing: 0;
+	}
+
+	.evidence-relations {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 0.25rem;
+		padding: 0.25rem 0.55rem;
+		border-radius: 12px;
+		font-size: 0.72rem;
+		color: rgba(191, 219, 254, 0.85);
+		background: rgba(148, 163, 184, 0.1);
+	}
+
+	.evidence-relations__icon {
+		font-size: 0.85rem;
+	}
+
+	.evidence-relations__label {
+		line-height: 1.2;
 	}
 
 	/* .evidence-description {
@@ -978,6 +1118,16 @@
 		color: var(--panel-muted);
 		text-align: center;
 		font-size: 0.9rem;
+	}
+
+	@keyframes objective-spin {
+		from {
+			transform: rotate(0deg);
+		}
+
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	@keyframes slide-in {

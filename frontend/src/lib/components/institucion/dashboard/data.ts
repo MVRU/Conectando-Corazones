@@ -386,29 +386,30 @@ export const chatMetadata: ChatMetadataMap = {
 			},
 			{
 				id: 'galeria-salon-nocturno',
-				name: 'foto_aula_iluminada.jpg',
+				name: 'Foto de aula iluminada',
 				category: 'galeria',
 				fileType: 'image',
 				fileExtension: 'jpg',
-				description: 'Registro fotográfico nocturno realizado por voluntarios.',
+				description: 'Fotografía nocturna realizada por voluntarios.',
 				uploadedAt: '2025-11-16',
 				previewImage: '/img/aula-iluminada.png'
 			},
 
 			// ——— OBJETIVO MONETARIO (Sembrar Futuro) ———
 			{
-				id: 'evidencia-comprobante-transf-002',
-				name: 'comprobante_transferencia.pdf',
-				category: 'evidencia',
-				fileType: 'pdf',
-				fileExtension: 'pdf',
-				description:
-					'Comprobante de transferencia realizada por la ONG para la compra de lámparas.',
-				uploadedAt: '2025-11-14',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'entrada',
-				relatedEvidenceId: ['evidencia-acuse-recepcion-donacion-001'],
-				downloadUrl: '/docs/evidencias/comprobante-transf-002.pdf'
+					id: 'evidencia-comprobante-transf-002',
+					name: 'comprobante_transferencia.pdf',
+					category: 'evidencia',
+					fileType: 'pdf',
+					fileExtension: 'pdf',
+					description:
+							'Comprobante de transferencia realizada por la ONG para la compra de lámparas.',
+					uploadedAt: '2025-11-14',
+					previewImage: '/img/pdf-portada.svg',
+					evidenceFlow: 'entrada',
+					relatedEvidenceId: ['evidencia-acuse-recepcion-donacion-001'],
+					uploadedBy: 'Sembrar Futuro',
+					downloadUrl: '/docs/evidencias/comprobante-transf-002.pdf'
 			},
 			{
 				id: 'evidencia-factura-asociada-compra-002',
@@ -421,8 +422,9 @@ export const chatMetadata: ChatMetadataMap = {
 				previewImage: '/img/pdf-portada.svg',
 				evidenceFlow: 'salida',
 				relatedEvidenceId: ['evidencia-factura-led-001'],
+				uploadedBy: 'Patricia González',
 				downloadUrl: '/docs/evidencias/factura-asociada-compra-002.pdf'
-			},
+                        },
 
 			// ——— OBJETIVO EN ESPECIE (Lumina Cooperativa) ———
 			{
@@ -432,12 +434,13 @@ export const chatMetadata: ChatMetadataMap = {
 				fileType: 'pdf',
 				fileExtension: 'pdf',
 				description: 'Remito de entrega de materiales: cableado, tableros e interruptores.',
-				uploadedAt: '2025-11-13',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'entrada',
-				relatedEvidenceId: ['evidencia-foto-materiales-001'],
-				downloadUrl: '/docs/evidencias/remito-lumina-001.pdf'
-			},
+                                uploadedAt: '2025-11-13',
+                                previewImage: '/img/pdf-portada.svg',
+                                evidenceFlow: 'entrada',
+                                relatedEvidenceId: ['evidencia-foto-materiales-001'],
+                                uploadedBy: 'Lumina Cooperativa',
+                                downloadUrl: '/docs/evidencias/remito-lumina-001.pdf'
+                        },
 			{
 				id: 'evidencia-foto-materiales-001',
 				name: 'materiales_recibidos.jpg',
@@ -445,12 +448,13 @@ export const chatMetadata: ChatMetadataMap = {
 				fileType: 'image',
 				fileExtension: 'jpg',
 				description: 'Fotografía de materiales donados al momento de la entrega.',
-				uploadedAt: '2025-11-13',
-				previewImage: '/img/jpg-portada.svg',
-				evidenceFlow: 'salida',
-				relatedEvidenceId: ['evidencia-remito-lumina-001'],
-				downloadUrl: '/docs/evidencias/materiales-entrada-001.jpg'
-			},
+                                uploadedAt: '2025-11-13',
+                                previewImage: '/img/jpg-portada.svg',
+                                evidenceFlow: 'salida',
+                                relatedEvidenceId: ['evidencia-remito-lumina-001'],
+                                uploadedBy: 'Patricia González',
+                                downloadUrl: '/docs/evidencias/materiales-entrada-001.jpg'
+                        },
 
 			// ——— OBJETIVO VOLUNTARIADO (Lucas y Sofía) ———
 			{
@@ -461,12 +465,13 @@ export const chatMetadata: ChatMetadataMap = {
 				fileExtension: 'pdf',
 				description:
 					'Plan de trabajo de instalación presentado por Lucas y Sofía (cronograma y tareas).',
-				uploadedAt: '2025-11-15',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'entrada',
-				relatedEvidenceId: ['evidencia-antes-despues-001'],
-				downloadUrl: '/docs/evidencias/plan-trabajo-voluntariado-001.pdf'
-			},
+                                uploadedAt: '2025-11-15',
+                                previewImage: '/img/pdf-portada.svg',
+                                evidenceFlow: 'entrada',
+                                relatedEvidenceId: ['evidencia-antes-despues-001'],
+                                uploadedBy: 'Lucas Ferreyra',
+                                downloadUrl: '/docs/evidencias/plan-trabajo-voluntariado-001.pdf'
+                        },
 			{
 				id: 'evidencia-registro-fotografico',
 				name: 'foto_instalación.jpg',
@@ -474,12 +479,13 @@ export const chatMetadata: ChatMetadataMap = {
 				fileType: 'image',
 				fileExtension: 'jpg',
 				description: 'Fotos de los trabajos en progreso compartidas por voluntariado.',
-				uploadedAt: '2025-11-18',
-				previewImage: '/img/jpg-portada.svg',
-				evidenceFlow: 'entrada',
-				relatedEvidenceId: ['evidencia-antes-despues-001'],
-				downloadUrl: '/docs/evidencias/registro-fotografico.jpg'
-			},
+                                uploadedAt: '2025-11-18',
+                                previewImage: '/img/jpg-portada.svg',
+                                evidenceFlow: 'entrada',
+                                relatedEvidenceId: ['evidencia-antes-despues-001'],
+                                uploadedBy: 'Sofía Mansilla',
+                                downloadUrl: '/docs/evidencias/registro-fotografico.jpg'
+                        },
 			{
 				id: 'evidencia-antes-despues-001',
 				name: 'antes_despues_aulas.zip',
@@ -487,12 +493,13 @@ export const chatMetadata: ChatMetadataMap = {
 				fileType: 'archive',
 				fileExtension: 'zip',
 				description: 'Paquete de fotos antes/después de las tres aulas iluminadas.',
-				uploadedAt: '2025-11-19',
-				previewImage: '/img/zip-portada.svg',
-				evidenceFlow: 'salida',
-				relatedEvidenceId: ['evidencia-plan-trabajo-voluntarios-001', 'evidencia-registro-fotografico'],
-				downloadUrl: '/docs/evidencias/antes-despues-aulas-001.zip'
-			},
+                                uploadedAt: '2025-11-19',
+                                previewImage: '/img/zip-portada.svg',
+                                evidenceFlow: 'salida',
+                                relatedEvidenceId: ['evidencia-plan-trabajo-voluntarios-001', 'evidencia-registro-fotografico'],
+                                uploadedBy: 'Patricia González',
+                                downloadUrl: '/docs/evidencias/antes-despues-aulas-001.zip'
+                        },
 
 			// ——— CIERRE DEL PROYECTO ———
 			{
@@ -503,13 +510,14 @@ export const chatMetadata: ChatMetadataMap = {
 				fileExtension: 'pdf',
 				description:
 					'Reporte de cierre con IA: resumen de impacto, hallazgos y sugerencias de mejora.',
-				uploadedAt: '2025-11-20',
-				previewImage: '/img/pdf-portada.svg',
-				evidenceFlow: 'salida',
-				relatedEvidenceId: null,
-				isAiGenerated: true,
-				downloadUrl: '/docs/evidencias/reporte-cierre-ia-001.pdf'
-			}
+                                uploadedAt: '2025-11-20',
+                                previewImage: '/img/pdf-portada.svg',
+                                evidenceFlow: 'salida',
+                                relatedEvidenceId: null,
+                                isAiGenerated: true,
+                                uploadedBy: 'Conectando Corazones',
+                                downloadUrl: '/docs/evidencias/reporte-cierre-ia-001.pdf'
+                        }
 		],
 		project: {
 			name: 'Luz para Aprender',
@@ -517,40 +525,45 @@ export const chatMetadata: ChatMetadataMap = {
 			tentativeClosure: '23/11/2025',
 			remainingDays: 20,
 			evidenceArchiveUrl: '/docs/evidencias/luz-para-aprender-evidencias.zip',
-			objectives: [
-				{
-					id: 'objetivo-tableros-conexion',
-					progressLabel: '0/3 tableros de conexión',
-					resourceType: 'en especie',
-					sponsors: ['Lumina Cooperativa']
-				},
-				{
-					id: 'objetivo-interruptores-seguridad',
-					progressLabel: '0/6 interruptores de seguridad certificados',
-					resourceType: 'en especie',
-					sponsors: ['Lumina Cooperativa']
-				},
-				{
-					id: 'objetivo-cableado-ignifugo',
-					progressLabel: '0/50 metros de cableado ignífugo',
-					resourceType: 'en especie',
-					sponsors: ['Lumina Cooperativa']
-				},
-				{
-					id: 'objetivo-lamparas-led',
-					progressLabel: '$0/$180.000 ARS para lámparas LED',
-					resourceType: 'monetaria',
-					sponsors: ['Sembrar Futuro']
-				},
-				{
-					id: 'objetivo-voluntariado-instalacion',
-					progressLabel: '2/2 voluntarios para instalación',
-					resourceType: 'voluntariado',
-					sponsors: ['Lucas', 'Sofía']
-				}
-			]
-		}
-	}
+                        objectives: [
+                                {
+                                        id: 'objetivo-tableros-conexion',
+                                        progressLabel: '0/3 tableros de conexión instalados',
+                                        resourceType: 'en especie',
+                                        sponsors: ['Lumina Cooperativa'],
+                                        status: 'pending'
+                                },
+                                {
+                                        id: 'objetivo-interruptores-seguridad',
+                                        progressLabel: '3/6 interruptores de seguridad certificados',
+                                        resourceType: 'en especie',
+                                        sponsors: ['Lumina Cooperativa'],
+                                        status: 'in_progress'
+                                },
+                                {
+                                        id: 'objetivo-cableado-ignifugo',
+                                        progressLabel: '50/50 metros de cableado ignífugo',
+                                        resourceType: 'en especie',
+                                        sponsors: ['Lumina Cooperativa'],
+                                        status: 'completed'
+                                },
+                                {
+                                        id: 'objetivo-lamparas-led',
+                                        progressLabel: '$0 / $180.000 ARS para lámparas LED',
+                                        resourceType: 'monetaria',
+                                        sponsors: ['Sembrar Futuro'],
+                                        status: 'pending'
+                                },
+                                {
+                                        id: 'objetivo-voluntariado-instalacion',
+                                        progressLabel: '2/2 voluntarios para instalación',
+                                        resourceType: 'voluntariado',
+                                        sponsors: ['Lucas', 'Sofía'],
+                                        status: 'completed'
+                                }
+                        ]
+                }
+        }
 };
 
 export const adminObservations: ObservationItem[] = [

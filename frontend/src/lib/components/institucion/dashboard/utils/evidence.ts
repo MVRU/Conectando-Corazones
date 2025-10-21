@@ -22,14 +22,18 @@ export function resolveEvidenceFlowVariant(flow?: EvidenceFlow): 'entrada' | 'sa
 	return FLOW_VARIANT[flow];
 }
 
-export function resolveRelatedEvidenceName(
-	attachment: ChatAttachment,
-	evidenceCollection: ChatAttachment[]
-): string | null {
-	if (!attachment.relatedEvidenceId) return null;
-	const related = evidenceCollection.find((item) => item.id && item.id === attachment.relatedEvidenceId
-);
-	return related?.name ?? null;
+export function resolveRelatedEvidenceNames(
+        attachment: ChatAttachment,
+        evidenceCollection: ChatAttachment[]
+): string[] {
+        const identifiers = attachment.relatedEvidenceId?.filter(Boolean) ?? [];
+        if (identifiers.length === 0) return [];
+
+        const names = identifiers
+                .map((identifier) => evidenceCollection.find((item) => item.id === identifier)?.name ?? identifier)
+                .filter((value): value is string => Boolean(value));
+
+        return Array.from(new Set(names));
 }
 
 export function isAiGeneratedEvidence(attachment: ChatAttachment): boolean {
@@ -37,10 +41,13 @@ export function isAiGeneratedEvidence(attachment: ChatAttachment): boolean {
 }
 
 export function buildRelationTooltip(
-	attachment: ChatAttachment,
-	evidenceCollection: ChatAttachment[]
+        attachment: ChatAttachment,
+        evidenceCollection: ChatAttachment[]
 ): string | null {
-	const relatedName = resolveRelatedEvidenceName(attachment, evidenceCollection);
-	if (!relatedName) return null;
-	return `Relacionada con ${relatedName}`;
+        const relatedNames = resolveRelatedEvidenceNames(attachment, evidenceCollection);
+        if (relatedNames.length === 0) return null;
+        if (relatedNames.length === 1) {
+                return `Relacionada con ${relatedNames[0]}`;
+        }
+        return `Relacionada con: ${relatedNames.join(', ')}`;
 }
