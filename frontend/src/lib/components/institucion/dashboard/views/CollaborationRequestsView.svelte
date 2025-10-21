@@ -52,7 +52,7 @@
 <section class="space-y-8">
 	<header class="space-y-2">
 		<p class="text-xs font-semibold uppercase tracking-[0.18em]" style="color: {TEXT_400};">
-			Gestión de alianzas
+			Gestión de colaboradores
 		</p>
 		<h2 class="text-3xl font-extrabold tracking-tight sm:text-[40px]" style="color: {TEXT_100};">
 			Solicitudes de colaboración recibidas
@@ -253,13 +253,6 @@
 					</p>
 				</div>
 			{/if}
-
-			<div
-				class="rounded-2xl border border-dashed px-4 py-3 text-xs"
-				style="border-color: rgba(148, 163, 184, 0.32); color: {TEXT_400};"
-			>
-				Recordá documentar la decisión en el acta interna de la institución.
-			</div>
 		</aside>
 	</div>
 </section>

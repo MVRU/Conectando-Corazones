@@ -120,7 +120,7 @@ export interface ChatObjective {
         id: string;
         progressLabel: string;
         resourceType: string;
-        sponsor: string;
+        sponsors: string[];
 }
 
 export interface ChatProjectInfo {
@@ -129,6 +129,7 @@ export interface ChatProjectInfo {
         tentativeClosure: string;
         remainingDays: number;
         objectives: ChatObjective[];
+        evidenceArchiveUrl?: string | null;
 }
 export interface ChatMetadata {
         chatId: number;

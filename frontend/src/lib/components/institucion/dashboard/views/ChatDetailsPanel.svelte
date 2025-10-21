@@ -1,6 +1,15 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { CalendarDays, FileText, Image, MapPin, Target, Users, X } from 'lucide-svelte';
+	import {
+		CalendarDays,
+		CheckCircle2,
+		FileText,
+		Image,
+		MapPin,
+		Target,
+		Users,
+		X
+	} from 'lucide-svelte';
 
 	import type {
 		AttachmentFormat,
@@ -46,6 +55,9 @@
 	$: participantEntries = metadata ? [metadata.institution, ...metadata.collaborators] : [];
 	$: projectInfo = metadata?.project ?? null;
 	$: objectiveItems = projectInfo?.objectives ?? [];
+	$: evidenceArchiveUrl = projectInfo?.evidenceArchiveUrl ?? null;
+	$: hasEvidenceArchive = Boolean(evidenceArchiveUrl);
+	$: hasEvidence = evidenceAttachments.length > 0;
 	$: closureSuffix = projectInfo
 		? `faltan ${projectInfo.remainingDays} día${projectInfo.remainingDays === 1 ? '' : 's'}`
 		: '';
@@ -68,11 +80,8 @@
 		return EVIDENCE_ICON_BY_EXTENSION[attachment.fileExtension];
 	}
 
-	function resolveEvidenceBadge(attachment: ChatAttachment): string {
-		const formatLabel = attachment.fileExtension.toUpperCase();
-		if (attachment.evidenceFlow === 'entrada') return `${formatLabel} · Entrada`;
-		if (attachment.evidenceFlow === 'salida') return `${formatLabel} · Salida`;
-		return formatLabel;
+	function resolveObjectiveSponsors(objective: ChatObjective): string[] {
+		return objective.sponsors.map((sponsor) => sponsor.trim()).filter(Boolean);
 	}
 
 	function handleClose() {
@@ -115,8 +124,7 @@
 			{#if projectInfo}
 				<div class="panel-section panel-section--project">
 					<div class="panel-section__header">
-						<Target class="h-5 w-5" aria-hidden="true" />
-						<h3>Proyecto {projectInfo.name}</h3>
+						<h3>Proyecto "{projectInfo.name}"</h3>
 					</div>
 					<div class="project-meta" role="list">
 						<div class="project-meta__item" role="listitem">
@@ -139,18 +147,47 @@
 							</div>
 						</div>
 					</div>
+					<div class="project-team">
+						<div class="project-team__header">
+							<Users class="h-5 w-5" aria-hidden="true" />
+							<h4>Integrantes</h4>
+						</div>
+						<ul class="panel-members" role="list">
+							{#each participantEntries as participant (participant.id)}
+								<li class="panel-member">
+									<img
+										class="panel-member__avatar"
+										src={resolveParticipantAvatar(participant)}
+										alt={`Avatar de ${participant.name}`}
+										loading="lazy"
+									/>
+									<div class="panel-member__identity">
+										<span class="panel-member__name">{participant.name}</span>
+										<span class="panel-member__badge" data-role={participant.role}
+											>{participant.role}</span
+										>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					</div>
 					<div class="project-objectives">
 						<h4>Objetivos</h4>
-						<ul role="list">
+						<ul class="objective-list" role="list">
 							{#each objectiveItems as objective (objective.id)}
-								<li class="objective-item">
-									<span class="objective-progress">{objective.progressLabel}</span>
-									<div class="objective-badges" aria-label="Detalles del objetivo">
-										<span class="objective-badge objective-badge--type"
-											>{objective.resourceType}</span
-										>
-										<span class="objective-badge objective-badge--sponsor">{objective.sponsor}</span
-										>
+								<li class="objective-row">
+									<span class="objective-icon" aria-hidden="true">
+										<CheckCircle2 aria-hidden="true" />
+									</span>
+									<div class="objective-content">
+										<span class="objective-label">{objective.progressLabel}</span>
+										<div class="objective-tags" aria-label="Detalles del objetivo">
+											<span class="objective-tag objective-tag--type">{objective.resourceType}</span
+											>
+											{#each resolveObjectiveSponsors(objective) as sponsor (sponsor)}
+												<span class="objective-tag objective-tag--sponsor">{sponsor}</span>
+											{/each}
+										</div>
 									</div>
 								</li>
 							{/each}
@@ -158,31 +195,6 @@
 					</div>
 				</div>
 			{/if}
-
-			<div class="panel-section">
-				<div class="panel-section__header">
-					<Users class="h-5 w-5" aria-hidden="true" />
-					<h3>Integrantes</h3>
-				</div>
-				<ul class="panel-members" role="list">
-					{#each participantEntries as participant (participant.id)}
-						<li class="panel-member">
-							<img
-								class="panel-member__avatar"
-								src={resolveParticipantAvatar(participant)}
-								alt={`Avatar de ${participant.name}`}
-								loading="lazy"
-							/>
-							<div class="panel-member__identity">
-								<span class="panel-member__name">{participant.name}</span>
-								<span class="panel-member__badge" data-role={participant.role}
-									>{participant.role}</span
-								>
-							</div>
-						</li>
-					{/each}
-				</ul>
-			</div>
 
 			<div class="panel-section">
 				<div class="panel-section__header">
@@ -211,50 +223,43 @@
 				</ul>
 			</div>
 
-			<div class="panel-section">
+			<div class="panel-section panel-section--evidence">
 				<div class="panel-section__header">
 					<FileText class="h-5 w-5" aria-hidden="true" />
 					<h3>Evidencias</h3>
 				</div>
-				<ul class="panel-list" role="list">
-					{#each evidenceAttachments as file (file.id)}
-						<li class="panel-card panel-card--evidence">
-							<div class="panel-evidence" aria-hidden="true">
-								<img
-									src={resolveAttachmentPreview(file)}
-									alt={`Portada de ${file.name}`}
-									loading="lazy"
-								/>
-							</div>
-							<div class="panel-card__body">
-								<div class="panel-card__headline">
-									<p class="panel-card__title">{file.name}</p>
-									<span
-										class="panel-evidence__badge"
-										data-flow={file.evidenceFlow}
-										data-format={file.fileExtension}
-									>
-										{resolveEvidenceBadge(file)}
-									</span>
-									<a
-										class="panel-download"
-										href={file.downloadUrl ?? '#'}
-										rel={file.downloadUrl ? 'noopener noreferrer' : undefined}
-										target={file.downloadUrl ? '_blank' : undefined}
-										download={file.downloadUrl ? '' : undefined}
-										aria-label={`Descargar ${file.name}`}
-										aria-disabled={!file.downloadUrl}
-									>
-										↓
-									</a>
+				{#if hasEvidenceArchive}
+					<a
+						class="evidence-download-all"
+						href={evidenceArchiveUrl ?? '#'}
+						rel={evidenceArchiveUrl ? 'noopener noreferrer' : undefined}
+						download={evidenceArchiveUrl ? '' : undefined}
+						aria-label="Descargar todas las evidencias"
+						aria-disabled={!hasEvidence}
+					>
+						Descargar evidencias
+					</a>
+				{/if}
+				<ul class="evidence-list" role="list">
+					{#if hasEvidence}
+						{#each evidenceAttachments as file (file.id)}
+							<li class="evidence-item">
+								<div class="evidence-icon" aria-hidden="true">
+									<img
+										src={resolveAttachmentPreview(file)}
+										alt={`Icono de ${file.fileExtension.toUpperCase()}`}
+										loading="lazy"
+									/>
 								</div>
-								<p class="panel-card__meta">{file.description}</p>
-								<p class="panel-card__date">Actualizado {formatAttachmentDate(file.uploadedAt)}</p>
-							</div>
-						</li>
+								<div class="evidence-info">
+									<span class="evidence-name">{file.name}</span>
+									<span class="evidence-extension">{file.fileExtension.toUpperCase()}</span>
+								</div>
+							</li>
+						{/each}
 					{:else}
 						<li class="panel-empty">Sin evidencias registradas hasta el momento.</li>
-					{/each}
+					{/if}
 				</ul>
 			</div>
 		</aside>
@@ -285,6 +290,8 @@
 		height: 100%;
 		max-height: 100vh;
 		overflow-y: auto;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
 		border-radius: 0;
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		background: linear-gradient(160deg, rgba(15, 23, 55, 0.92), rgba(9, 13, 38, 0.97));
@@ -294,6 +301,10 @@
 		flex-direction: column;
 		gap: 1.25rem;
 		animation: slide-in 0.25s ease forwards;
+	}
+
+	.chat-panel::-webkit-scrollbar {
+		display: none;
 	}
 
 	.panel-header {
@@ -402,58 +413,190 @@
 		color: var(--panel-text);
 	}
 
-	.project-objectives ul {
+	.objective-list {
 		display: flex;
 		flex-direction: column;
-		gap: 0.65rem;
+		gap: 0.6rem;
 	}
 
-	.objective-item {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		padding: 0.65rem 0.8rem;
+	.objective-row {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: flex-start;
+		gap: 0.65rem;
+		padding: 0.65rem 0.85rem;
 		border-radius: 14px;
 		background: rgba(13, 20, 48, 0.6);
 		border: 1px solid rgba(255, 255, 255, 0.07);
 	}
 
-	.objective-progress {
+	.objective-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.2rem;
+		height: 1.2rem;
+		color: rgba(165, 180, 252, 0.9);
+		margin-top: 0.15rem;
+	}
+
+	.objective-icon :global(svg) {
+		width: 100%;
+		height: 100%;
+	}
+
+	.objective-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.objective-label {
+		font-size: 0.86rem;
+		font-weight: 600;
+		color: var(--panel-text);
+	}
+
+	.objective-tags {
+		display: inline-flex;
+		flex-wrap: wrap;
+		gap: 0.32rem;
+	}
+
+	.objective-tag {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.18rem 0.5rem;
+		border-radius: 9999px;
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+
+	.objective-tag--type {
+		background: rgba(11, 152, 250, 0.14);
+		border: 1px solid rgba(11, 152, 250, 0.35);
+		color: rgba(224, 242, 254, 0.94);
+	}
+
+	.objective-tag--sponsor {
+		background: rgba(167, 243, 208, 0.18);
+		border: 1px solid rgba(74, 222, 128, 0.3);
+		color: rgba(222, 247, 236, 0.95);
+	}
+
+	.project-team {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.project-team__header {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.project-team__header h4 {
+		font-size: 0.92rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--panel-text);
+	}
+
+	.panel-section--evidence {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+	}
+
+	.evidence-download-all {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.4rem;
+		width: fit-content;
+		padding: 0.4rem 0.85rem;
+		border-radius: 9999px;
+		border: 1px solid rgba(148, 163, 184, 0.35);
+		background: rgba(19, 27, 54, 0.65);
+		color: var(--panel-text);
+		font-size: 0.78rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition:
+			transform 0.2s ease,
+			box-shadow 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.evidence-download-all:hover:not([aria-disabled='true']) {
+		transform: translateY(-1px);
+		border-color: rgba(96, 165, 250, 0.5);
+		box-shadow: 0 12px 26px rgba(96, 165, 250, 0.25);
+	}
+
+	.evidence-download-all[aria-disabled='true'] {
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	.evidence-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.evidence-item {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		align-items: center;
+		gap: 0.65rem;
+		padding: 0.55rem 0.8rem;
+		border-radius: 12px;
+		background: rgba(9, 13, 38, 0.65);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.evidence-icon {
+		width: 48px;
+		height: 48px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 12px;
+		background: rgba(15, 23, 55, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.evidence-icon img {
+		width: 28px;
+		height: 28px;
+		object-fit: contain;
+	}
+
+	.evidence-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.2rem;
+	}
+
+	.evidence-name {
 		font-size: 0.85rem;
 		font-weight: 600;
 		color: var(--panel-text);
 	}
 
-	.objective-badges {
-		display: inline-flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-
-	.objective-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.2rem 0.55rem;
-		border-radius: 9999px;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.05em;
+	.evidence-extension {
+		font-size: 0.72rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
+		color: var(--panel-muted);
 	}
-
-	.objective-badge--type {
-		background: rgba(11, 152, 250, 0.16);
-		border: 1px solid rgba(11, 152, 250, 0.4);
-		color: rgba(224, 242, 254, 0.95);
-	}
-
-	.objective-badge--sponsor {
-		background: rgba(132, 204, 22, 0.16);
-		border: 1px solid rgba(132, 204, 22, 0.35);
-		color: rgba(236, 253, 245, 0.95);
-	}
-
 	.panel-section + .panel-section {
 		border-top: 1px solid rgba(255, 255, 255, 0.08);
 		padding-top: 1.25rem;
@@ -518,50 +661,68 @@
 		gap: 0.65rem;
 	}
 
-	.objective-item {
-		display: flex;
-		flex-direction: column;
-		gap: 0.4rem;
-		padding: 0.65rem 0.8rem;
-		border-radius: 14px;
-		background: rgba(13, 20, 48, 0.6);
-		border: 1px solid rgba(255, 255, 255, 0.07);
+	.panel-section + .panel-section {
+		border-top: 1px solid rgba(255, 255, 255, 0.08);
+		padding-top: 1.25rem;
 	}
 
-	.objective-progress {
-		font-size: 0.85rem;
-		font-weight: 600;
+	.panel-section--project {
+		gap: 1.5rem;
+	}
+
+	.project-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+	}
+
+	.project-meta__item {
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-start;
+		border-radius: 16px;
+		padding: 0.75rem 0.95rem;
+		background: rgba(14, 20, 48, 0.75);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+	}
+
+	.project-meta__label {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: var(--panel-muted);
+	}
+
+	.project-meta__value {
+		font-size: 0.88rem;
+		color: var(--panel-text);
+		line-height: 1.45;
+	}
+
+	.project-meta__hint {
+		margin-left: 0.35rem;
+		color: var(--panel-muted);
+		font-size: 0.75rem;
+	}
+
+	.project-objectives {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.project-objectives h4 {
+		font-size: 0.95rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
 		color: var(--panel-text);
 	}
 
-	.objective-badges {
-		display: inline-flex;
-		flex-wrap: wrap;
-		gap: 0.4rem;
-	}
-
-	.objective-badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.2rem 0.55rem;
-		border-radius: 9999px;
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.05em;
-		text-transform: uppercase;
-	}
-
-	.objective-badge--type {
-		background: rgba(11, 152, 250, 0.16);
-		border: 1px solid rgba(11, 152, 250, 0.4);
-		color: rgba(224, 242, 254, 0.95);
-	}
-
-	.objective-badge--sponsor {
-		background: rgba(132, 204, 22, 0.16);
-		border: 1px solid rgba(132, 204, 22, 0.35);
-		color: rgba(236, 253, 245, 0.95);
+	.project-objectives ul {
+		display: flex;
+		flex-direction: column;
+		gap: 0.65rem;
 	}
 
 	.panel-section__header {
@@ -674,13 +835,6 @@
 		min-width: 0;
 	}
 
-	.panel-card__headline {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-	}
-
 	.panel-card__title {
 		font-weight: 600;
 		color: var(--panel-text);
@@ -705,113 +859,6 @@
 		color: var(--panel-muted);
 		text-align: center;
 		font-size: 0.9rem;
-	}
-
-	.panel-card--evidence {
-		align-items: center;
-	}
-
-	.panel-card--evidence .panel-evidence {
-		width: 54px;
-		height: 60px;
-		border-radius: 12px;
-		border: 1px solid rgba(255, 255, 255, 0.12);
-		background: rgba(7, 12, 32, 0.65);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-	}
-
-	.panel-card--evidence .panel-evidence img {
-		width: 70%;
-		height: auto;
-	}
-
-	.panel-evidence__badge {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.15rem 0.45rem;
-		border-radius: 9999px;
-		font-size: 0.68rem;
-		font-weight: 700;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: rgba(15, 23, 42, 0.95);
-		background: rgba(241, 245, 249, 0.82);
-		border: 1px solid rgba(148, 163, 184, 0.35);
-		white-space: nowrap;
-	}
-
-	.panel-evidence__badge[data-flow='entrada'] {
-		background: rgba(219, 234, 254, 0.88);
-		color: #1d4ed8;
-	}
-
-	.panel-evidence__badge[data-flow='salida'] {
-		background: rgba(222, 247, 236, 0.88);
-		color: #0f766e;
-	}
-
-	.panel-download {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		margin-left: 0.35rem;
-		border-radius: 9999px;
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		background: rgba(9, 13, 38, 0.75);
-		color: var(--panel-text);
-		font-size: 0.9rem;
-		text-decoration: none;
-		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease,
-			border-color 0.2s ease;
-	}
-
-	.panel-download:hover:not([aria-disabled='true']) {
-		transform: translateY(-1px);
-		border-color: rgba(11, 152, 250, 0.5);
-		box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);
-	}
-
-	.panel-download[aria-disabled='true'] {
-		opacity: 0.4;
-		pointer-events: none;
-	}
-
-	.panel-download {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.75rem;
-		height: 1.75rem;
-		margin-left: 0.35rem;
-		border-radius: 9999px;
-		border: 1px solid rgba(255, 255, 255, 0.18);
-		background: rgba(9, 13, 38, 0.75);
-		color: var(--panel-text);
-		font-size: 0.9rem;
-		text-decoration: none;
-		transition:
-			transform 0.2s ease,
-			box-shadow 0.2s ease,
-			border-color 0.2s ease;
-	}
-
-	.panel-download:hover:not([aria-disabled='true']) {
-		transform: translateY(-1px);
-		border-color: rgba(11, 152, 250, 0.5);
-		box-shadow: 0 10px 24px rgba(11, 152, 250, 0.35);
-	}
-
-	.panel-download[aria-disabled='true'] {
-		opacity: 0.4;
-		pointer-events: none;
 	}
 
 	@keyframes slide-in {
