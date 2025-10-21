@@ -342,7 +342,7 @@ export const chatMetadata: ChatMetadataMap = {
                                 kind: 'empresa',
                                 description: 'Empresa especialista en soluciones energéticas comunitarias.',
                                 contact: 'Equipo de proyectos estratégicos',
-                                avatar: '/users/avatar-generico.svg'
+                                avatar: '/users/lumina-cooperativa.svg'
                         },
                         {
                                 id: 'colaborador-sembrar-futuro',
@@ -351,7 +351,7 @@ export const chatMetadata: ChatMetadataMap = {
                                 kind: 'ong',
                                 description: 'ONG que dona lámparas LED y acompaña el despliegue comunitario.',
                                 contact: 'Coordinación de donaciones',
-                                avatar: '/users/avatar-generico.svg'
+                                avatar: '/users/sembrar-futuro.svg'
                         },
                         {
                                 id: 'voluntario-lucas-utn',
@@ -372,42 +372,64 @@ export const chatMetadata: ChatMetadataMap = {
                                 avatar: '/users/avatar-generico.svg'
                         }
                 ],
-                attachments: [
-                        {
-                                id: 'galeria-escuela-exterior',
-                                name: 'Fachada actual del colegio',
-                                category: 'galeria',
-                                fileType: 'image',
-                                description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
-                                uploadedAt: '2025-11-11'
-                        },
-                        {
-                                id: 'galeria-salon-nocturno',
-                                name: 'Aula iluminada con lámparas LED',
-                                category: 'galeria',
-                                fileType: 'image',
-                                description: 'Registro fotográfico del piloto nocturno realizado con voluntarios.',
-                                uploadedAt: '2025-11-16'
-                        },
-                        {
-                                id: 'evidencia-factura-led-001',
-                                name: 'Factura lámparas LED - noviembre',
-                                category: 'evidencia',
-                                fileType: 'pdf',
-                                description: 'Factura emitida por proveedor de luminarias homologadas.',
-                                uploadedAt: '2025-11-12'
-                        },
-                        {
-                                id: 'evidencia-comprobante-transf-002',
-                                name: 'Comprobante transferencia Sembrar Futuro',
-                                category: 'evidencia',
-                                fileType: 'pdf',
-                                description: 'Documento que acredita la donación recibida para la compra de materiales.',
-                                uploadedAt: '2025-11-14'
-                        }
-                ]
-        }
+             attachments: [
+			{
+				id: 'galeria-escuela-exterior',
+				name: 'Fachada actual del colegio',
+				category: 'galeria',
+				fileType: 'image',
+				fileExtension: 'png',
+				description: 'Fotografía de la entrada principal antes de la instalación eléctrica.',
+				uploadedAt: '2025-11-11',
+				previewImage: '/img/escuela-esperanza-antes.png'
+			},
+			{
+				id: 'galeria-salon-nocturno',
+				name: 'Aula iluminada con lámparas LED',
+				category: 'galeria',
+				fileType: 'image',
+				fileExtension: 'webp',
+				description: 'Registro fotográfico nocturno realizado por voluntarios.',
+				uploadedAt: '2025-11-16',
+				previewImage: '/img/aula-iluminada.png'
+			},
+			{
+				id: 'evidencia-factura-led-001',
+				name: 'Factura lámparas LED - noviembre',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description: 'Factura emitida por proveedor de luminarias homologadas.',
+				uploadedAt: '2025-11-12',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'entrada'
+			},
+			{
+				id: 'evidencia-comprobante-transf-002',
+				name: 'Comprobante transferencia Sembrar Futuro',
+				category: 'evidencia',
+				fileType: 'pdf',
+				fileExtension: 'pdf',
+				description: 'Documento que acredita la donación recibida para la compra de materiales.',
+				uploadedAt: '2025-11-14',
+				previewImage: '/img/pdf-portada.svg',
+				evidenceFlow: 'salida'
+			},
+			{
+				id: 'evidencia-registro-fotografico',
+				name: 'Registro fotográfico de instalación',
+				category: 'evidencia',
+				fileType: 'image',
+				fileExtension: 'jpg',
+				description: 'Fotos de los trabajos en progreso compartidas por voluntariado.',
+				uploadedAt: '2025-11-18',
+				previewImage: '/img/jpg-portada.svg',
+				evidenceFlow: 'entrada'
+			}
+		]
+	}
 };
+
 
 export const adminObservations: ObservationItem[] = [
         {

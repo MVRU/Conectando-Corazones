@@ -10,8 +10,8 @@
 
 	const EVIDENCE_ICON_BY_EXTENSION: Record<AttachmentFormat, string> = {
 		pdf: '/img/pdf-portada.svg',
-		jpg: '/img/file-evidence-image.svg',
-		jpeg: '/img/file-evidence-image.svg',
+		jpg: '/img/jpg-portada.svg',
+		jpeg: '/img/jpg-portada.svg',
 		png: '/img/file-evidence-image.svg',
 		webp: '/img/file-evidence-image.svg',
 		docx: '/img/file-evidence-doc.svg',
