@@ -155,7 +155,10 @@ export const mockUsuarios = {
 			localidad: getLocalidad(5)
 		},
 		contactos: [
-			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }
+			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },
+			{ tipo_contacto: 'telefono', valor: '341 44443665', etiqueta: 'celular secundario' },
+			{ tipo_contacto: 'web', valor: 'https://www.maria-gonzalez.com.ar', etiqueta: 'principal' }
 		],
 
 		consentimientos: [
