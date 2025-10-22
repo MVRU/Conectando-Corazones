@@ -136,6 +136,8 @@ export interface ClosureEvidence {
         uploadedBy: string;
         uploadedAt: string;
         fileUrl?: string | null;
+     fileName?: string | null;
+        isAiGenerated?: boolean;
 }
 
 export interface ObjectiveApproval {
@@ -160,7 +162,16 @@ export interface ProjectClosureSummary {
                 headline: string;
                 description: string;
                 subcopy?: string;
-        };
+          };
+        closingRemark: CollaboratorRemark;
+}
+
+export interface CollaboratorRemark {
+        author: string;
+        role: string;
+        avatar?: string | null;
+        message: string;
+        recordedAt: string;
 }
 
 export type ObjectiveStatus = 'completed' | 'in_progress' | 'pending';

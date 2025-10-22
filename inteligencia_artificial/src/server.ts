@@ -1,4 +1,3 @@
-// src/server.ts
 import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
@@ -18,7 +17,7 @@ app.get("/health", (req, res) => {
 // Endpoint demo para project.completed (solo para pruebas locales)
 // Imprime el payload en consola y devuelve confirmación inmediata.
 app.post("/webhooks/project-completed", (req, res) => {
-  const payload = req.body;
+  const payload = (req.body ?? {}) as Record<string, unknown>;
   console.log("=== Evento project.completed recibido ===");
   console.log(JSON.stringify(payload, null, 2));
   console.log("=========================================");
@@ -26,14 +25,13 @@ app.post("/webhooks/project-completed", (req, res) => {
   return res.status(200).json({
     ok: true,
     receivedAt: new Date().toISOString(),
-    projectId: payload?.project?.id ?? null
+    projectId: (payload.project as { id?: string } | undefined)?.id ?? null
   });
 });
 
-const PORT = process.env.PORT ?? 3000;
+const PORT = Number(process.env.PORT ?? "3000");
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT} (PID: ${process.pid})`);
 });
 
 export default app;
-// src/server.ts

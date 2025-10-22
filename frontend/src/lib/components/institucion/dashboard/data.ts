@@ -198,56 +198,6 @@ export const evidenceUploadContext: EvidenceUploadContext = {
 };
 
 
-export const projectClosureSummary: ProjectClosureSummary = {
-        projectName: 'Luz para Aprender',
-        readinessLabel: 'Los 4 colaboradores validaron las evidencias finales.',
-        progressPercent: 100,
-        lastUpdatedAt: '2025-11-12T19:45:00-03:00',
-        objectives: [
-                {
-                        id: 'tableros-conexion',
-                        title: '3 tableros de conexión instalados',
-                        approvals: { approved: 4, required: 4 },
-                        evidences: [
-                        ]
-                },
-                {
-                        id: 'interruptores-seguridad',
-                        title: '6 interruptores de seguridad certificados',
-                        approvals: { approved: 4, required: 4 },
-                        evidences: [
-                        ]
-                },
-                {
-                        id: 'cableado-ignifugo',
-                        title: '50 metros de cableado ignífugo',
-                        approvals: { approved: 4, required: 4 },
-                        evidences: [
-                        ]
-                },
-                {
-                        id: 'lamparas-led',
-                        title: '$180.000 ARS para lámparas LED',
-                        approvals: { approved: 4, required: 4 },
-                        evidences: [
-                        ]
-                },
-                {
-                        id: 'voluntarios-instalacion',
-                        title: '2 voluntarios para instalación',
-                        approvals: { approved: 4, required: 4 },
-                        evidences: [
-                        ]
-                }
-        ],
-        aiNotice: {
-                headline: 'Reporte inteligente en preparación',
-                description:
-                        'La IA de Conectando Corazones está sintetizando aprendizajes, métricas de impacto y reseñas de cada colaborador.',
-                subcopy:
-                        'Lo recibirás minutos después de cerrar el proyecto, listo para compartirlo con tu comunidad.'
-        }
-};
 
 export const collaborationRequests: CollaborationRequest[] = [
 ];
@@ -420,7 +370,7 @@ export const chatMetadata: ChatMetadataMap = {
 				role: 'Colaborador',
 				kind: 'empresa',
 				description: 'Empresa especialista en soluciones energéticas comunitarias.',
-				contact: 'Equipo de proyectos estratégicos',
+				contact: 'Empresa eléctrica',
 				avatar: '/users/lumina-cooperativa.svg'
 			},
 			{
@@ -642,6 +592,101 @@ export const chatMetadata: ChatMetadataMap = {
                                 }
                         ]
                 }
+        }
+};
+
+const closureChat = chatMetadata[1];
+const closureAttachmentsIndex = new Map(
+        closureChat?.attachments.map((attachment) => [attachment.id, attachment]) ?? []
+);
+
+const flowSortOrder: Record<'entrada' | 'salida', number> = {
+        entrada: 0,
+        salida: 1
+};
+
+const buildClosureEvidence = (attachmentId: string) => {
+        const attachment = closureAttachmentsIndex.get(attachmentId);
+        if (!attachment || attachment.category !== 'evidencia') {
+                return null;
+        }
+
+        const fallbackUploader = closureChat?.institution.name ?? 'Equipo Conectando Corazones';
+
+        return {
+                id: attachment.id,
+                title: attachment.description,
+                description: `Archivo: ${attachment.name}`,
+                evidenceFlow: attachment.evidenceFlow ?? 'entrada',
+                uploadedBy: attachment.uploadedBy ?? fallbackUploader,
+                uploadedAt: attachment.uploadedAt,
+                fileUrl: attachment.downloadUrl ?? null,
+                isAiGenerated: attachment.isAiGenerated ?? false
+        } satisfies ProjectClosureSummary['objectives'][number]['evidences'][number];
+};
+
+const selectEvidences = (attachmentIds: string[]) =>
+        attachmentIds
+                .map((attachmentId) => buildClosureEvidence(attachmentId))
+                .filter((item): item is NonNullable<ReturnType<typeof buildClosureEvidence>> => Boolean(item))
+                // -*- Riesgo: si se elimina un adjunto referenciado, la evidencia dejará de mostrarse hasta actualizar el mapeo.
+                .sort((a, b) => {
+                        const flowComparison = flowSortOrder[a.evidenceFlow] - flowSortOrder[b.evidenceFlow];
+                        if (flowComparison !== 0) {
+                                return flowComparison;
+                        }
+                        return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+                });
+
+export const projectClosureSummary: ProjectClosureSummary = {
+        projectName: 'Luz para Aprender',
+        readinessLabel: 'Los 4 colaboradores validaron las evidencias finales sin observaciones.',
+        progressPercent: 100,
+        lastUpdatedAt: '2025-11-20T09:15:00-03:00',
+        objectives: [
+                {
+                        id: 'aporte-monetario',
+                        title: 'Aporte monetario invertido en lámparas LED',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: selectEvidences([
+                                'evidencia-comprobante-transf-002',
+                                'evidencia-factura-asociada-compra-002'
+                        ])
+                },
+                {
+                        id: 'materiales-instalados',
+                        title: 'Materiales eléctricos recibidos e instalados',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: selectEvidences([
+                                'evidencia-remito-lumina-001',
+                                'evidencia-foto-materiales-001'
+                        ])
+                },
+                {
+                        id: 'voluntariado-finalizado',
+                        title: 'Voluntariado completado con resultados visibles',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: selectEvidences([
+                                'evidencia-plan-trabajo-voluntarios-001',
+                                'evidencia-registro-fotografico',
+                                'evidencia-antes-despues-001'
+                        ])
+                }
+        ],
+        aiNotice: {
+                headline: 'Reporte inteligente en preparación',
+                description:
+                        'La IA de Conectando Corazones está sintetizando aprendizajes, métricas de impacto y reseñas de cada colaborador.',
+                subcopy:
+                        'Lo recibirás minutos después de cerrar el proyecto, listo para compartirlo con tu comunidad.'
+        },
+        closingRemark: {
+                author: closureChat?.collaborators[0]?.name ?? 'Equipo colaborador',
+                role: closureChat?.collaborators[0]?.contact ?? 'Colaborador confirmado',
+                avatar: closureChat?.collaborators[0]?.avatar ?? null,
+                message:
+                        'Revisamos cada respaldo y está impecable. De nuestra parte, aprobamos el cierre y quedamos disponibles para celebrarlo con la comunidad.',
+                recordedAt: '2025-11-20T09:00:00-03:00'
         }
 };
 

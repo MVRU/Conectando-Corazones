@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { CheckCircle2, Clock3, FileBadge2, Sparkles } from 'lucide-svelte';
+	import { CheckCircle2, Clock3, FileBadge2, MessageSquareHeart, Sparkles } from 'lucide-svelte';
 	import type { ClosureEvidence, ProjectClosureSummary } from '../types';
 	import {
 		BG_CARD,
@@ -35,6 +35,11 @@
 		}
 	};
 
+	const flowSortOrder: Record<ClosureEvidence['evidenceFlow'], number> = {
+		entrada: 0,
+		salida: 1
+	};
+
 	const getObjectiveHeadingId = (id: string): string => `${id}-heading`;
 	const getObjectiveDescriptionId = (id: string): string => `${id}-approvals`;
 
@@ -49,6 +54,17 @@
 	const handleFinalize = () => {
 		dispatch('finalize');
 	};
+
+	$: sortedObjectives = summary.objectives.map((objective) => ({
+		...objective,
+		evidences: [...objective.evidences].sort((a, b) => {
+			const flowDiff = flowSortOrder[a.evidenceFlow] - flowSortOrder[b.evidenceFlow];
+			if (flowDiff !== 0) {
+				return flowDiff;
+			}
+			return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
+		})
+	}));
 </script>
 
 <section class="space-y-8" aria-labelledby={sectionHeadingId}>
@@ -59,7 +75,7 @@
 		<div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
 			<div class="space-y-3">
 				<p class="text-xs font-semibold uppercase tracking-[0.2em]" style={`color:${TEXT_400};`}>
-					Proyecto listo para cerrar
+					Proyecto listo para cerrar • {summary.projectName}
 				</p>
 				<h2
 					id={sectionHeadingId}
@@ -122,7 +138,7 @@
 	</header>
 
 	<ol class="space-y-6" aria-label="Objetivos alcanzados y sus evidencias">
-		{#each summary.objectives as objective, index (objective.id)}
+		{#each sortedObjectives as objective, index (objective.id)}
 			<li>
 				<article
 					class="rounded-3xl border p-6 shadow-lg transition-transform duration-200 hover:-translate-y-1"
@@ -166,28 +182,44 @@
 										>
 											<FileBadge2 class="h-5 w-5" aria-hidden="true" />
 										</span>
-										<div class="space-y-1">
+										<div class="space-y-2">
 											<div class="flex flex-wrap items-center gap-2">
 												<span
 													class={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${flowStyles[evidence.evidenceFlow].classes}`}
 												>
 													{flowStyles[evidence.evidenceFlow].label}
+													<span class="sr-only"> para {objective.title}</span>
 												</span>
 												<p class="text-sm font-semibold uppercase tracking-[0.12em] text-white/60">
 													{formatDate(evidence.uploadedAt)}
 												</p>
 											</div>
-											<p class="text-lg font-semibold" style={`color:${TEXT_100};`}>
+											<p class="text-lg font-semibold leading-tight" style={`color:${TEXT_100};`}>
 												{evidence.title}
 											</p>
-											<p class="text-sm leading-relaxed" style={`color:${TEXT_300};`}>
-												{evidence.description}
-											</p>
+											{#if evidence.description}
+												<p class="text-sm leading-relaxed" style={`color:${TEXT_300};`}>
+													{evidence.description}
+												</p>
+											{/if}
+											{#if evidence.fileName}
+												<p class="text-xs uppercase tracking-[0.2em]" style={`color:${TEXT_400};`}>
+													{evidence.fileName}
+												</p>
+											{/if}
 											<p class="text-sm" style={`color:${TEXT_400};`}>
 												Subido por <span class="font-semibold text-white/80"
 													>{evidence.uploadedBy}</span
 												>
 											</p>
+											{#if evidence.isAiGenerated}
+												<p
+													class="inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-white/70"
+												>
+													<Sparkles class="h-3.5 w-3.5" aria-hidden="true" />
+													Generado con IA de Conectando Corazones
+												</p>
+											{/if}
 										</div>
 									</div>
 									{#if evidence.fileUrl}
@@ -198,7 +230,9 @@
 												href={evidence.fileUrl}
 												rel="noreferrer noopener"
 												target="_blank"
-												aria-label={`Ver archivo ${evidence.title}`}
+												download
+												referrerpolicy="no-referrer"
+												aria-label={`Ver archivo ${evidence.fileName ?? evidence.title}`}
 											>
 												Ver archivo
 											</a>
@@ -217,52 +251,105 @@
 		class="rounded-3xl border p-6 sm:p-8"
 		style={`background: linear-gradient(160deg, rgba(19,28,58,0.95), rgba(9,15,40,0.92)); border-color:${BORDER_SUBTLE};`}
 	>
-		<div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-			<div class="space-y-2">
-				<h3 class="text-2xl font-semibold" style={`color:${TEXT_100};`}>
-					Confirmá el cierre cuando estés lista
-				</h3>
-				<p class="max-w-xl text-sm leading-relaxed" style={`color:${TEXT_300};`}>
-					Al cerrarlo notificaremos a los colaboradores y archivaremos todas las evidencias
-					temporalmente para protegerte, cumpliendo con la Ley 25.326 de Protección de Datos
-					Personales y normativas asociadas.
-				</p>
-			</div>
-			<button
-				type="button"
-				class="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-3 text-base font-semibold text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 md:w-auto"
-				style={`background:${GRADIENT_CTA}; box-shadow:0 12px 28px ${PRIMARY_500}33;`}
-				on:click={handleFinalize}
+		<div class="space-y-6">
+			<section
+				aria-labelledby="collaborator-remark"
+				class="rounded-3xl border p-5"
+				style={`background: rgba(21,27,56,0.9); border-color:${PRIMARY_500}33;`}
 			>
-				<span class="relative z-10">Cerrar proyecto</span>
-				<span
-					class="absolute inset-0 z-0 scale-105 bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-40"
-				></span>
-			</button>
-		</div>
+				<div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+					<div class="flex items-start gap-3">
+						{#if summary.closingRemark.avatar}
+							<img
+								src={summary.closingRemark.avatar}
+								alt={`Avatar de ${summary.closingRemark.author}`}
+								class="h-12 w-12 flex-shrink-0 rounded-2xl object-cover"
+								loading="lazy"
+							/>
+						{:else}
+							<div
+								class="flex h-12 w-12 items-center justify-center rounded-2xl"
+								style={`background:${PRIMARY_500}1f; color:${PRIMARY_500};`}
+								aria-hidden="true"
+							>
+								<MessageSquareHeart class="h-5 w-5" />
+							</div>
+						{/if}
+						<div class="space-y-1">
+							<p
+								id="collaborator-remark"
+								class="text-base font-semibold"
+								style={`color:${TEXT_100};`}
+							>
+								{summary.closingRemark.author}
+							</p>
+							<p class="text-sm" style={`color:${TEXT_400};`}>
+								{summary.closingRemark.role}
+							</p>
+							<p class="text-sm leading-relaxed" style={`color:${TEXT_300};`}>
+								“{summary.closingRemark.message}”
+							</p>
+							<p class="text-xs uppercase tracking-[0.22em]" style={`color:${TEXT_400};`}>
+								{formatDate(summary.closingRemark.recordedAt)}
+							</p>
+						</div>
+					</div>
+					<div
+						class="rounded-2xl border px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em]"
+						style={`border-color:${PRIMARY_500}66; color:${PRIMARY_500};`}
+					>
+						Evidencia validada
+					</div>
+				</div>
+			</section>
 
-		<div
-			class="mt-6 flex flex-col gap-4 rounded-3xl border p-5 text-center sm:text-left md:flex-row md:items-center"
-			style={`background: radial-gradient(circle at top, ${INFO_COLOR}0F, transparent 65%), rgba(24,32,68,0.85); border-color:${PRIMARY_500}40;`}
-		>
-			<div
-				class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl"
-				style={`background:${PRIMARY_500}1f; color:${PRIMARY_500};`}
-			>
-				<Sparkles class="h-7 w-7" aria-hidden="true" />
-			</div>
-			<div class="space-y-2 text-sm leading-relaxed">
-				<p class="text-base font-semibold" style={`color:${TEXT_100};`}>
-					{summary.aiNotice.headline}
-				</p>
-				<p style={`color:${TEXT_300};`}>
-					{summary.aiNotice.description}
-				</p>
-				{#if summary.aiNotice.subcopy}
-					<p class="text-xs uppercase tracking-[0.22em]" style={`color:${TEXT_400};`}>
-						{summary.aiNotice.subcopy}
+			<div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+				<div class="space-y-2">
+					<h3 class="text-2xl font-semibold" style={`color:${TEXT_100};`}>
+						Confirmá el cierre cuando estés lista
+					</h3>
+					<p class="max-w-xl text-sm leading-relaxed" style={`color:${TEXT_300};`}>
+						Al cerrarlo notificaremos a los colaboradores y archivaremos todas las evidencias
+						temporalmente para protegerte, cumpliendo con la Ley 25.326 de Protección de Datos
+						Personales y normativas asociadas.
 					</p>
-				{/if}
+				</div>
+				<button
+					type="button"
+					class="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full px-8 py-3 text-base font-semibold text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 md:w-auto"
+					style={`background:${GRADIENT_CTA}; box-shadow:0 12px 28px ${PRIMARY_500}33;`}
+					on:click={handleFinalize}
+				>
+					<span class="relative z-10">Cerrar proyecto</span>
+					<span
+						class="absolute inset-0 z-0 scale-105 bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-40"
+					></span>
+				</button>
+			</div>
+
+			<div
+				class="flex flex-col gap-4 rounded-3xl border p-5 text-center sm:text-left md:flex-row md:items-center"
+				style={`background: radial-gradient(circle at top, ${INFO_COLOR}0F, transparent 65%), rgba(24,32,68,0.85); border-color:${PRIMARY_500}40;`}
+			>
+				<div
+					class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl"
+					style={`background:${PRIMARY_500}1f; color:${PRIMARY_500};`}
+				>
+					<Sparkles class="h-7 w-7" aria-hidden="true" />
+				</div>
+				<div class="space-y-2 text-sm leading-relaxed">
+					<p class="text-base font-semibold" style={`color:${TEXT_100};`}>
+						{summary.aiNotice.headline}
+					</p>
+					<p style={`color:${TEXT_300};`}>
+						{summary.aiNotice.description}
+					</p>
+					{#if summary.aiNotice.subcopy}
+						<p class="text-xs uppercase tracking-[0.22em]" style={`color:${TEXT_400};`}>
+							{summary.aiNotice.subcopy}
+						</p>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</footer>

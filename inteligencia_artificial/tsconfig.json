@@ -2,18 +2,18 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "rootDir": "./src",
+    "outDir": "./dist",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "ESNext",
-    "target": "esnext",
+    "module": "NodeNext",
+    "target": "es2022",
     "types": [],
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
+    "lib": ["es2022", "dom"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-     "outDir": "dist",
      
     // For nodejs:
     // "lib": ["esnext"],
@@ -45,5 +45,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-  }
+ },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }
