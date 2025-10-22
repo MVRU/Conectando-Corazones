@@ -1,0 +1,1 @@
+Creé esta carpeta para las pruebas con la IA.
