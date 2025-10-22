@@ -1,5 +1,4 @@
-// -*- DECISIÓN DE DISEÑO: Reunimos funciones puras reutilizables para mantener el componente principal enfocado en la vista.
-import { Briefcase, LayoutGrid, MessageSquare } from 'lucide-svelte';
+import { Briefcase, LayoutGrid, MessageSquare, ShieldCheck } from 'lucide-svelte';
 
 import type { AidDonutSegment, AidType, GradKey, QuickAction, ViewMode } from './types';
 import { quickActionLabels } from './data';
@@ -115,13 +114,14 @@ export function computeQuickActions(
 				}
 			];
 		default:
-		 return quickActionLabels.map((label) => {
+                        return quickActionLabels.map((label) => {
                                 const isRequests = label === 'Ver solicitudes';
                                 const isEvidence = label === 'Cargar evidencia';
+                                const isClosure = label === 'Solicitar cierre';
 
                                 return {
                                         label,
-                                        icon: LayoutGrid,
+                                        icon: isClosure ? ShieldCheck : LayoutGrid,
                                         badge:
                                                 isRequests
                                                         ? pendingRequests > 0
@@ -129,7 +129,13 @@ export function computeQuickActions(
                                                                 : null
                                                         : null,
                                         statusColor: isRequests ? ERROR_COLOR : PRIMARY_500,
-                                        view: isRequests ? 'collaborations' : isEvidence ? 'evidence' : undefined
+                                        view: isRequests
+                                                ? 'collaborations'
+                                                : isEvidence
+                                                        ? 'evidence'
+                                                        : isClosure
+                                                                ? 'closure'
+                                                                : undefined
                                 } satisfies QuickAction;
                         });
         }

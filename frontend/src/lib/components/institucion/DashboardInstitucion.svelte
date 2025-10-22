@@ -10,6 +10,7 @@
 	import SettingsView from './dashboard/views/SettingsView.svelte';
 	import PlaceholderView from './dashboard/views/PlaceholderView.svelte';
 	import EvidenceUploadView from './dashboard/views/EvidenceUploadView.svelte';
+	import ProjectClosureRequestView from './dashboard/views/ProjectClosureRequestView.svelte';
 	import {
 		ayudaTypes,
 		activeCollaborators,
@@ -22,7 +23,8 @@
 		metrics,
 		navItems,
 		projectItems,
-		evidenceUploadContext
+		evidenceUploadContext,
+		projectClosureSummary
 	} from './dashboard/data';
 	import { computeQuickActions } from './dashboard/helpers';
 	import type { ProjectItem, ViewMode } from './dashboard/types';
@@ -177,6 +179,8 @@
 				<ProfileView />
 			{:else if viewMode === 'settings'}
 				<SettingsView />
+			{:else if viewMode === 'closure'}
+				<ProjectClosureRequestView summary={projectClosureSummary} />
 			{:else if viewMode === 'chat'}
 				<div class="chat-view-region">
 					<ChatView

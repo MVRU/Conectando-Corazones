@@ -47,7 +47,8 @@
 		chat: 'Conversaciones',
 		evidence: 'Documentación',
 		profile: 'Acciones rápidas',
-		settings: 'Acciones rápidas'
+		settings: 'Acciones rápidas',
+		closure: 'Solicitud de cierre'
 	};
 	let isResizing = false;
 	let startX = 0;

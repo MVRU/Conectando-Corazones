@@ -14,23 +14,24 @@ import {
 } from 'lucide-svelte';
 
 import type {
-	AidType,
-	ChatItem,
-	ChatMetadataMap,
-	ChatThread,
-	ActiveCollaborator,
-	InstitutionIdentity,
-	Metric,
-	NavItem,
-	ObservationItem,
-	ProgressSegment,
-	ProjectItem,
-	CollaborationRequest,
-	ReportingStatus,
-	      VerificationDocument,
+        AidType,
+        ChatItem,
+        ChatMetadataMap,
+        ChatThread,
+        ActiveCollaborator,
+        InstitutionIdentity,
+        Metric,
+        NavItem,
+        ObservationItem,
+        ProgressSegment,
+        ProjectItem,
+        CollaborationRequest,
+        ReportingStatus,
+        VerificationDocument,
         VerificationSummary,
         ViewMode,
-        EvidenceUploadContext
+        EvidenceUploadContext,
+        ProjectClosureSummary
 } from './types';
 import { ERROR_COLOR, GREEN, PRIMARY_500, WARNING_COLOR } from './tokens';
 
@@ -196,6 +197,58 @@ export const evidenceUploadContext: EvidenceUploadContext = {
         }
 };
 
+
+export const projectClosureSummary: ProjectClosureSummary = {
+        projectName: 'Luz para Aprender',
+        readinessLabel: 'Los 4 colaboradores validaron las evidencias finales.',
+        progressPercent: 100,
+        lastUpdatedAt: '2025-11-12T19:45:00-03:00',
+        objectives: [
+                {
+                        id: 'tableros-conexion',
+                        title: '3 tableros de conexión instalados',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: [
+                        ]
+                },
+                {
+                        id: 'interruptores-seguridad',
+                        title: '6 interruptores de seguridad certificados',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: [
+                        ]
+                },
+                {
+                        id: 'cableado-ignifugo',
+                        title: '50 metros de cableado ignífugo',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: [
+                        ]
+                },
+                {
+                        id: 'lamparas-led',
+                        title: '$180.000 ARS para lámparas LED',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: [
+                        ]
+                },
+                {
+                        id: 'voluntarios-instalacion',
+                        title: '2 voluntarios para instalación',
+                        approvals: { approved: 4, required: 4 },
+                        evidences: [
+                        ]
+                }
+        ],
+        aiNotice: {
+                headline: 'Reporte inteligente en preparación',
+                description:
+                        'La IA de Conectando Corazones está sintetizando aprendizajes, métricas de impacto y reseñas de cada colaborador.',
+                subcopy:
+                        'Lo recibirás minutos después de cerrar el proyecto, listo para compartirlo con tu comunidad.'
+        }
+};
+
 export const collaborationRequests: CollaborationRequest[] = [
 ];
 
@@ -288,12 +341,14 @@ export const trendingIcon = TrendingUp;
 export const quickActionIcon = LayoutGrid;
 
 export const viewModeLabels: Record<ViewMode, string> = {
-	dashboard: 'Mi panel',
-	collaborations: 'Colaboraciones',
-	projects: 'Proyectos',
-	chat: 'Mensajes',
-	profile: 'Perfil',
-	settings: 'Configuración'
+        dashboard: 'Mi panel',
+        collaborations: 'Colaboraciones',
+        projects: 'Proyectos',
+        chat: 'Mensajes',
+        profile: 'Perfil',
+        settings: 'Configuración',
+        evidence: 'Carga de evidencias',
+        closure: 'Solicitud de cierre'
 };
 
 export const institutionIdentity: InstitutionIdentity = {

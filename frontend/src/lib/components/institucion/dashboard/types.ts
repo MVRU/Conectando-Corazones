@@ -9,7 +9,8 @@ export type ViewMode =
         | 'profile'
         | 'settings'
         | 'collaborations'
-        | 'evidence';
+        | 'evidence'
+        | 'closure';
 
 export type IconComponent = ComponentType;
 
@@ -125,6 +126,41 @@ export interface EvidenceUploadContext {
         maxFileSizeMB: number;
         instructions: string;
         uploadingEntity: string;
+}
+
+export interface ClosureEvidence {
+        id: string;
+        title: string;
+        description: string;
+        evidenceFlow: EvidenceFlow;
+        uploadedBy: string;
+        uploadedAt: string;
+        fileUrl?: string | null;
+}
+
+export interface ObjectiveApproval {
+        approved: number;
+        required: number;
+}
+
+export interface ProjectClosureObjective {
+        id: string;
+        title: string;
+        approvals: ObjectiveApproval;
+        evidences: ClosureEvidence[];
+}
+
+export interface ProjectClosureSummary {
+        projectName: string;
+        readinessLabel: string;
+        progressPercent: number;
+        lastUpdatedAt: string;
+        objectives: ProjectClosureObjective[];
+        aiNotice: {
+                headline: string;
+                description: string;
+                subcopy?: string;
+        };
 }
 
 export type ObjectiveStatus = 'completed' | 'in_progress' | 'pending';
