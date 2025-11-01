@@ -1,6 +1,7 @@
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
 import { getLocalidad } from '$lib/utils/util-ubicaciones';
+import { mockCategorias } from '$lib/mocks/mock-categorias';
 
 export const mockUsuarios = {
 	admin1: {
@@ -160,6 +161,12 @@ export const mockUsuarios = {
 			{ tipo_contacto: 'telefono', valor: '341 44443665', etiqueta: 'celular secundario' },
 			{ tipo_contacto: 'web', valor: 'https://www.maria-gonzalez.com.ar', etiqueta: 'principal' }
 		],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación
+			mockCategorias[2], // Apoyo ante una crisis
+			mockCategorias[16], // Salud
+			mockCategorias[0] // Alimentación y nutrición
+		],
 
 		consentimientos: [
 			{
@@ -199,6 +206,11 @@ export const mockUsuarios = {
 			localidad: getLocalidad(6)
 		},
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación (índice 4)
+			mockCategorias[2], // Cultura y arte (índice 2)
+			mockCategorias[9] // Liderazgo (índice 9)
+		],
 
 		consentimientos: [
 			{
