@@ -104,11 +104,13 @@
 					class="drop-shadow-lg transition-transform duration-400 hover:scale-105 active:scale-95"
 				>
 					<Button
-						label="Registrarse"
-						href="/registrarse"
+						label="Tu Voz Importa"
+						href="https://docs.google.com/forms/d/e/1FAIpQLSd2ATCFzwuTLpmbNgFssKjGfk0GEpZD6NeygSyhdF10fuk23A/viewform?usp=sharing&ouid=105997224151194228520"
 						variant="primary"
 						size="md"
-						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
+						external={true}
+						target="_blank"
+						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3"
 					/>
 				</div>
 			</div>
