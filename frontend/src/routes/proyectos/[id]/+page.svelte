@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import type { Colaboracion } from '$lib/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 
@@ -10,12 +9,13 @@
 	import { error } from '@sveltejs/kit';
 
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
-	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
-	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
+	import { formatearFecha } from '$lib/utils/validaciones';
+
 
 	let proyecto: Proyecto;
 	let colaboracionesActivas: Colaboracion[] = [];
@@ -49,47 +49,18 @@
 		return 'pendiente';
 	}
 
-	// -*- Helper para normalizar fechas // TODO: pasar a archivo utils
-	function toDateOrNull(fecha: string | Date | undefined | null): Date | null {
-		if (!fecha) return null;
-		if (fecha instanceof Date) return isNaN(fecha.getTime()) ? null : fecha;
-		const d = new Date(fecha);
-		return isNaN(d.getTime()) ? null : d;
-	}
-
-	function diasRestantes(fechaFin: string | Date | undefined): number {
-		const fin = toDateOrNull(fechaFin);
-		if (!fin) return 0;
-		const hoy = new Date();
-		const diferencia = fin.getTime() - hoy.getTime();
-		return Math.max(Math.ceil(diferencia / (1000 * 60 * 60 * 24)), 0);
-	}
-
-	function formatearFecha(fecha: string | Date | undefined): string {
-		const d = toDateOrNull(fecha);
-		if (!d) return 'Fecha no disponible';
-		return d.toLocaleDateString('es-ES', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
-	}
-
-	function getColorEstado(estado: EstadoDescripcion) {
-		return (
-			{
-				en_curso: 'text-green-600 bg-green-100',
-				pendiente_solicitud_cierre: 'text-orange-600 bg-orange-100',
-				en_revision: 'text-gray-600 bg-gray-100',
-				en_auditoria: 'text-gray-600 bg-gray-100',
-				completado: 'text-blue-600 bg-blue-100',
-				cancelado: 'text-gray-600 bg-gray-100'
-			}[estado] || 'text-gray-600 bg-gray-100'
-		);
+	function getColorCirculoEstado(estado: string): string {
+		const colores: Record<string, string> = {
+			en_curso: 'bg-green-500',
+			en_revision: 'bg-yellow-500', 
+			completado: 'bg-blue-500',
+			cancelado: 'bg-red-500'
+		};
+		return colores[estado] || 'bg-gray-500';
 	}
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
-	$: colorEstado = getColorEstado(estadoCodigo);
+	$: colorCirculoEstado = getColorCirculoEstado(estadoCodigo);
 </script>
 
 <svelte:head>
@@ -98,219 +69,294 @@
 </svelte:head>
 
 {#if proyecto}
-	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
-		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
-			<!-- Header del proyecto -->
-			<ProyectoHeader {proyecto} {getColorEstado} />
+	<main class="min-h-screen bg-gray-50 py-8">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<!-- 1. Encabezado visual -->
+			<div class="mb-8">
+				<ProyectoHeader {proyecto} />
+			</div>
 
-			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
-				<!-- Columna principal -->
-				<div class="animate-fade-up order-2 space-y-10 lg:order-1 lg:col-span-2">
-					<!-- Progreso del proyecto -->
-					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
-					>
-						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
-						<ProyectoProgreso {proyecto} variant="extended" />
+			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+				<!-- Contenido principal -->
+				<div class="space-y-8 lg:col-span-2">
+					<!-- 2. Descripción principal -->
+					<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+						<p class="text-lg leading-relaxed text-gray-700">
+							{proyecto.descripcion}
+						</p>
+					</div>
 
-						<div class="mt-8">
-							<h3
-								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
-							>
-								<span>
-									{(proyecto.participacion_permitida?.length || 0) === 1 ? 'Objetivo' : 'Objetivos'}
-								</span>
-								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
-									{#if proyecto.created_at}
-										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-											<svg
-												class="h-4 w-4 text-gray-600"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-												/>
-											</svg>
-											<span class="text-xs font-medium text-gray-700">
-												Inicio: {formatearFecha(proyecto.created_at)}
-											</span>
-										</div>
-									{/if}
-									{#if proyecto.fecha_fin_tentativa}
-										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-											<svg
-												class="h-4 w-4 text-gray-600"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-												/>
-											</svg>
-											<span class="text-xs font-medium text-gray-700">
-												Finaliza: {formatearFecha(proyecto.fecha_fin_tentativa)}
-											</span>
-										</div>
-										<div class="rounded-full bg-blue-50 px-3 py-1.5">
-											<span class="text-xs font-semibold text-blue-700">
-												{diasRestantes(proyecto.fecha_fin_tentativa)} días restantes
-											</span>
-										</div>
-									{/if}
-								</div>
-							</h3>
+					<!-- 3. Cuatro cards (2 arriba y 2 abajo) -->
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+						<!-- Personas alcanzadas -->
+						<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center gap-2">
+								<span class="text-lg">👥</span>
+								<h3 class="text-sm font-medium text-gray-600">Personas alcanzadas</h3>
+							</div>
+							<p class="mt-2 text-lg font-semibold text-gray-900">
+								{proyecto.participacion_permitida?.reduce((total, p) => {
+									if (p.unidad_medida === 'personas') {
+										return total + (p.actual || 0);
+									}
+									return total;
+								}, 0) || 0}
+							</p>
+							<p class="mt-1 text-sm text-gray-500">aprox.</p>
+						</div>
 
+						<!-- Categoría -->
+						<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center gap-2">
+								<span class="text-lg">🏷️</span>
+								<h3 class="text-sm font-medium text-gray-600">Categoría</h3>
+							</div>
+							<p class="mt-2 text-lg font-semibold text-gray-900">
+								{proyecto.categorias?.[0]?.descripcion || 'Sin categoría'}
+							</p>
+						</div>
+
+						<!-- Fecha de inicio -->
+						<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center gap-2">
+								<span class="text-lg">📅</span>
+								<h3 class="text-sm font-medium text-gray-600">Fecha de inicio</h3>
+							</div>
+							<p class="mt-2 text-lg font-semibold text-gray-900">
+								{proyecto.created_at ? formatearFecha(proyecto.created_at) : 'No definida'}
+							</p>
+						</div>
+
+						<!-- Fecha de cierre tentativa -->
+						<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center gap-2">
+								<span class="text-lg">⏰</span>
+								<h3 class="text-sm font-medium text-gray-600">Fecha de cierre tentativa</h3>
+							</div>
+							<p class="mt-2 text-lg font-semibold text-gray-900">
+								{proyecto.fecha_fin_tentativa ? formatearFecha(proyecto.fecha_fin_tentativa) : 'No definida'}
+							</p>
+						</div>
+					</div>
+
+					<!-- 4. Progreso y Objetivos: Tarjeta unificada -->
+					<div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+						<!-- Progreso General -->
+						<div class="mb-6">
+							<h3 class="mb-3 text-lg font-medium text-gray-800">Progreso General</h3>
+							<ProyectoProgreso {proyecto} variant="extended" />
+						</div>
+
+						<!-- Objetivos Específicos -->
+						<div>
+							<h3 class="mb-4 text-lg font-medium text-gray-800">Objetivos Específicos</h3>
 							{#if proyecto.participacion_permitida?.length}
-								<ul class="space-y-4">
+								<ul class="space-y-3">
 									{#each participacionesOrdenadas as p (p.id_participacion_permitida)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
-										<li
-											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
-										>
-											<!-- Ícono -->
-											<div class="flex-shrink-0">
+										<li class="flex items-start gap-3 rounded-lg border border-gray-100 p-4 transition-colors hover:bg-gray-50">
+											<span class="text-lg">
 												{#if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
-													>
-														✅
-													</div>
+													✅
 												{:else if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
-													>
-														⏳
-													</div>
+													⏳
 												{:else}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500"
-													>
-														📦
-													</div>
+													📦
 												{/if}
-											</div>
-
-											<!-- Contenido -->
-											<div class="flex w-full flex-col">
+											</span>
+											
+											<div class="flex-1">
 												<p class="font-medium text-gray-800">
-													{p.unidad_medida === 'dinero'
-														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
-														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
+													{#if p.unidad_medida === 'dinero'}
+														${(p.actual || 0).toLocaleString('es-AR')} / ${p.objetivo.toLocaleString('es-AR')}
+													{:else}
+														{p.actual || 0} / {p.objetivo} {p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}
+													{/if}
 												</p>
-												<div class="mt-1 flex justify-between text-xs text-gray-500">
-													<span>{porcentaje}% alcanzado</span>
-												</div>
+												<p class="text-sm text-gray-600">
+													{porcentaje}% alcanzado
+												</p>
 											</div>
 										</li>
 									{/each}
 								</ul>
 							{:else}
-								<p class="text-sm text-gray-500">
-									No hay participaciones definidas para este proyecto.
-								</p>
+								<p class="text-gray-500">No hay objetivos definidos para este proyecto.</p>
 							{/if}
 						</div>
-					</section>
-
-					<!-- Detalles del proyecto -->
-					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
-					>
-						<DetallesProyecto {proyecto} {formatearFecha} />
-					</section>
+					</div>
 				</div>
 
-				<!-- Columna Lateral -->
-				<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
-					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow">
-						<h3 class="mb-5 text-lg font-semibold text-gray-900">Información</h3>
-						<div class="space-y-4">
-							<div class="flex justify-between border-b border-gray-100 pb-3">
-								<span class="text-sm text-gray-600">Estado</span>
-								<span
-									class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${colorEstado}`}
-								>
-									<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-										<circle cx="10" cy="10" r="8" />
-									</svg>
-									{estadoLabel(estadoCodigo)}
-								</span>
+				<!-- 5. Sidebar: Información -->
+				<div class="lg:col-span-1">
+					<div class="rounded-xl border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6 shadow-lg">
+						<div class="mb-6 flex items-center gap-2">
+							<span class="text-2xl">ℹ️</span>
+							<h3 class="text-lg font-bold text-gray-900">Información del Proyecto</h3>
+						</div>
+						
+						<div class="space-y-6">
+							<!-- Institución -->
+							<div class="relative">
+								<div class="mb-2 flex items-center gap-2">
+									<span class="text-sm">🏛️</span>
+									<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Institución</h4>
+								</div>
+								<div class="rounded-lg bg-white/70 p-3 shadow-sm border border-gray-100">
+									<p class="text-sm font-semibold text-gray-900 leading-relaxed">
+										{proyecto.institucion?.nombre_legal || 'No especificada'}
+									</p>
+								</div>
 							</div>
-							<div class="flex justify-between border-b border-gray-100 pb-3">
-								<span class="text-sm text-gray-600">Institución</span>
-								<span class="text-sm font-medium text-gray-800">
-									{proyecto.institucion?.nombre_legal || 'N/A'}
-								</span>
+
+							<!-- Estado -->
+							<div class="relative">
+								<div class="mb-2 flex items-center gap-2">
+									<span class="text-sm">📊</span>
+									<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</h4>
+								</div>
+								<div class="rounded-lg bg-white/70 p-3 shadow-sm border border-gray-100">
+									<div class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-gradient-to-r from-gray-50 to-gray-100 border border-gray-200">
+										<div class="h-3 w-3 rounded-full {colorCirculoEstado} shadow-sm"></div>
+										<span class="text-sm font-semibold text-gray-800">
+											{estadoLabel(estadoCodigo)}
+										</span>
+									</div>
+								</div>
 							</div>
-							<div class="flex justify-between">
-								<span class="text-sm text-gray-600">Ubicación</span>
-								<span class="text-sm font-medium text-gray-800">
-									{getUbicacionTexto(proyecto)}
-								</span>
+
+							<!-- Ubicaciones -->
+							<div class="relative">
+								<div class="mb-3 flex items-center gap-2">
+									<span class="text-sm">📍</span>
+									<h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Ubicaciones</h4>
+								</div>
+								{#if proyecto.ubicaciones?.length}
+									<div class="space-y-3">
+										{#each proyecto.ubicaciones as proyectoUbicacion}
+											{@const ubicacion = proyectoUbicacion.ubicacion}
+											<div class="rounded-lg bg-white/70 p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+												<div class="flex items-start gap-2">
+													<span class="text-xs mt-1">
+														{#if ubicacion?.modalidad === 'virtual'}
+															💻
+														{:else}
+															🏢
+														{/if}
+													</span>
+													<div class="flex-1">
+														<div class="flex items-center gap-2 mb-2">
+															<p class="text-sm font-semibold text-gray-900">
+																{ubicacion?.tipo_ubicacion || 'Tipo no especificado'}
+															</p>
+															<span class="px-2 py-1 text-xs font-medium rounded-full {
+																ubicacion?.modalidad === 'virtual' 
+																	? 'bg-blue-100 text-blue-800' 
+																	: 'bg-green-100 text-green-800'
+															}">
+																{ubicacion?.modalidad || 'modalidad no especificada'}
+															</span>
+														</div>
+														
+														{#if ubicacion?.modalidad === 'presencial'}
+															<div class="space-y-1 text-xs text-gray-600">
+																<p class="flex items-center gap-1">
+																	<span class="text-xs">🛣️</span>
+																	{ubicacion.calle} {ubicacion.numero}
+																</p>
+																{#if ubicacion.piso || ubicacion.departamento}
+																	<p class="flex items-center gap-1">
+																		<span class="text-xs">🏠</span>
+																		{#if ubicacion.piso}Piso {ubicacion.piso}{/if}
+																		{#if ubicacion.departamento}, Depto {ubicacion.departamento}{/if}
+																	</p>
+																{/if}
+																{#if ubicacion.referencia}
+																	<p class="flex items-center gap-1">
+																		<span class="text-xs">📍</span>
+																		{ubicacion.referencia}
+																	</p>
+																{/if}
+																{#if ubicacion.localidad}
+																	<p class="flex items-center gap-1">
+																		<span class="text-xs">🏘️</span>
+																		{ubicacion.localidad.nombre}
+																		{#if ubicacion.localidad.provincia}, {ubicacion.localidad.provincia.nombre}{/if}
+																	</p>
+																{/if}
+																{#if ubicacion.url_google_maps}
+																	<p class="flex items-center gap-1">
+																		<span class="text-xs">🗺️</span>
+																		<a 
+																			href={ubicacion.url_google_maps} 
+																			target="_blank" 
+																			rel="noopener noreferrer"
+																			class="text-blue-600 hover:text-blue-800 underline"
+																		>
+																			Ver en Google Maps
+																		</a>
+																	</p>
+																{/if}
+															</div>
+														{:else if ubicacion?.modalidad === 'virtual'}
+															<div class="space-y-1 text-xs text-gray-600">
+																<p class="flex items-center gap-1">
+																	<span class="text-xs">🔗</span>
+																	<a 
+																		href={ubicacion.url_virtual} 
+																		target="_blank" 
+																		rel="noopener noreferrer"
+																		class="text-blue-600 hover:text-blue-800 underline"
+																	>
+																		Acceder a la reunión virtual
+																	</a>
+																</p>
+															</div>
+														{:else}
+															<p class="text-xs text-gray-500 italic">Información de ubicación no disponible</p>
+														{/if}
+													</div>
+												</div>
+											</div>
+										{/each}
+									</div>
+								{:else}
+									<div class="rounded-lg bg-white/70 p-4 shadow-sm border border-gray-100">
+										<p class="text-sm text-gray-500 italic">No hay ubicaciones especificadas</p>
+									</div>
+								{/if}
 							</div>
 						</div>
 					</div>
-
-					<!-- Colaboradores -->
-					<div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-						<h3 class="mb-5 text-lg font-semibold text-gray-900">Solicitudes de colaboración</h3>
-						{#if colaboracionesActivas.length}
-							<ul class="space-y-3">
-								{#each colaboracionesActivas as colab (colab.id_colaboracion)}
-									<li class="flex justify-between border-b border-gray-100 pb-2 last:border-b-0">
-										<span class="text-sm text-gray-700">
-											{obtenerNombreColaborador(colab.colaborador)}
-										</span>
-										<span
-											class={`text-xs font-semibold ${
-												colab.estado === 'aprobada'
-													? 'bg-emerald-50 text-emerald-600'
-													: 'bg-amber-50 text-amber-600'
-											} rounded-full px-2.5 py-1`}
-										>
-											{colab.estado === 'aprobada' ? 'Aprobada' : 'Pendiente'}
-										</span>
-									</li>
-								{/each}
-							</ul>
-						{:else}
-							<p class="text-sm text-gray-500">No hay colaboradores activos.</p>
-						{/if}
-					</div>
 				</div>
+			</div>
+
+			<!-- Botones de acción -->
+			<div class="mt-12 flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
+				<Button
+					label="← Volver a Proyectos"
+					href="/proyectos"
+					variant="secondary"
+					size="md"
+					customClass="px-8 py-3 text-base font-medium transition-all hover:scale-105"
+				/>
+				<Button
+					label="Colaborar Ahora"
+					href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
+					variant="primary"
+					size="md"
+					disabled={estadoCodigo !== 'en_curso'}
+					customClass="px-8 py-3 text-base font-bold bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 transition-all hover:scale-105"
+				/>
 			</div>
 		</div>
 	</main>
 {:else}
-	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
-		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
-			<p>Cargando proyecto...</p>
+	<main class="min-h-screen bg-gray-50 py-8">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+			<div class="flex items-center justify-center">
+				<p class="text-gray-500">Cargando proyecto...</p>
+			</div>
 		</div>
 	</main>
 {/if}
-
-<style>
-	@keyframes fade-up {
-		from {
-			opacity: 0;
-			transform: translateY(16px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.animate-fade-up {
-		animation: fade-up 0.5s ease-out both;
-	}
-</style>

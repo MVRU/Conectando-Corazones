@@ -33,16 +33,25 @@
 	$: ubicacionPrincipal =
 		ubicaciones.find((u) => u?.ubicacion?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
 
-	// Es virtual 
-	$: esVirtual = ubicaciones.some((u) => u?.ubicacion?.tipo_ubicacion === 'virtual');
+	// Es virtual - verificamos por modalidad 
+	$: esVirtual = ubicaciones.some((u) => u?.ubicacion?.modalidad === 'virtual');
+
+	//para verificar si es ubicación presencial
+	function esUbicacionPresencial(ubicacion: any): ubicacion is import('$lib/types/Ubicacion').UbicacionPresencial {
+		return ubicacion?.modalidad === 'presencial';
+	}
 
 	$: ubicacionTexto = esVirtual
 		? 'Virtual'
-		: `${ubicacionPrincipal?.ubicacion?.direccion?.localidad?.nombre || 'Ciudad'}${
-				ubicacionPrincipal?.ubicacion?.direccion?.localidad?.provincia?.nombre
-					? `, ${ubicacionPrincipal.ubicacion.direccion.localidad.provincia.nombre}`
-					: ''
-			}`;
+		: (() => {
+			const ubicacion = ubicacionPrincipal?.ubicacion;
+			if (esUbicacionPresencial(ubicacion)) {
+				const localidad = ubicacion.localidad?.nombre || 'Ciudad';
+				const provincia = ubicacion.localidad?.provincia?.nombre;
+				return provincia ? `${localidad}, ${provincia}` : localidad;
+			}
+			return 'Ciudad';
+		})();
 
 	$: ubicacionTooltip = ubicacionTexto;
 </script>
@@ -75,14 +84,6 @@
 
 		<!-- Gradiente oscuro sutil -->
 		<div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent">
-			<!-- TODO: Implementar cuando la propiedad 'urgencia' esté disponible en el tipo Proyecto -->
-			<!-- {#if proyecto.urgencia}
-				<div class="absolute right-4 top-4">
-					<span class={getBadgeClasses(proyecto.urgencia)}>
-						<span>Urgencia {proyecto.urgencia}</span>
-					</span>
-				</div>
-			{/if} -->
 		</div>
 	</div>
 

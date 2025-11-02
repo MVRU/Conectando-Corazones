@@ -11,6 +11,8 @@ export interface Proyecto {
   id_proyecto?: number;
   titulo: string;
   descripcion: string;
+  resumen: string;
+  aprendizajes: string;
   url_portada?: string;
   created_at?: Date;
   fecha_cierre_postulaciones?: Date;

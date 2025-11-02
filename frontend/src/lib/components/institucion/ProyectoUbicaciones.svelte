@@ -1,20 +1,18 @@
 <!--
-* Componente: ProyectoDirecciones
+* Componente: ProyectoUbicaciones
   -*- Para agregar las ubicaciones del proyecto
  -->
 <script lang="ts">
 	import { provincias } from '$lib/data/provincias';
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
-	import { TIPO_UBICACION, type TipoUbicacion } from '$lib/types/Ubicacion';
-	import type { UbicacionFormulario, DireccionFormulario } from '$lib/types/forms/CrearProyectoForm';
+	import { TIPO_UBICACION, MODALIDAD_UBICACION, type TipoUbicacion, type ModalidadUbicacion } from '$lib/types/Ubicacion';
+	import type { UbicacionFormulario, DireccionPresencialFormulario } from '$lib/types/forms/CrearProyectoForm';
 	import {
-		obtenerPlaceholderQueSehace,
 		obtenerDescripcionTipo
 	} from '$lib/utils/util-proyecto-form';
 
 	export let ubicaciones: UbicacionFormulario[] = [];
 	export let errores: Record<string, string> = {};
-	export let limpiarError: (campo: string) => void;
 
     function obtenerLocalidadesPorProvincia(nombreProvincia: string) {
         const provincia = provincias.find((p) => p.nombre === nombreProvincia);
@@ -27,44 +25,31 @@
 			...ubicaciones,
 			{
 				tipo_ubicacion: '',
-				que_se_hace: '',
-				direccion: {
+				modalidad: '',
+				direccion_presencial: {
 					calle: '',
 					numero: '',
 					referencia: '',
 					localidad_id: undefined,
 					provincia: '',
 					localidad_nombre: ''
-				}
+				},
+				url_virtual: ''
 			}
 		];
 	}
 
-	const TIPOS_PRIMERA_UBICACION = ['principal', 'virtual'] as const;
-
-	function getIndicePrincipal(): number {
-		return ubicaciones.findIndex((u) => (u.tipo_ubicacion || '').trim() === 'principal');
+	function esTipoPredefinido(tipo: string): boolean {
+		return ['principal', 'voluntariado'].includes(tipo);
 	}
 
-	function esTipoPermitidoPrimeraUbicacion(tipo: string): boolean {
-		return TIPOS_PRIMERA_UBICACION.includes(tipo as (typeof TIPOS_PRIMERA_UBICACION)[number]);
-	}
-
-	function tiposPermitidosPara(index: number): ReadonlyArray<TipoUbicacion> {
-		const base = TIPO_UBICACION as ReadonlyArray<TipoUbicacion>;
-		if (index === 0) {
-			return base.filter((t) =>
-				esTipoPermitidoPrimeraUbicacion(t as TipoUbicacion)
-			) as ReadonlyArray<TipoUbicacion>;
+	function manejarCambioTipo(index: number, valor: string) {
+		if (valor === 'personalizado') {
+			// Si selecciona "personalizado", cambiar a un valor que active el input
+			actualizarUbicacion(index, 'tipo_ubicacion', 'personalizado_input');
+		} else {
+			actualizarUbicacion(index, 'tipo_ubicacion', valor);
 		}
-		const indicePrincipal = getIndicePrincipal();
-		const seleccionado = (ubicaciones[index]?.tipo_ubicacion || '') as TipoUbicacion | '';
-		if (indicePrincipal !== -1 && indicePrincipal !== index) {
-			return seleccionado === 'principal'
-				? base
-				: (base.filter((t) => t !== 'principal') as ReadonlyArray<TipoUbicacion>);
-		}
-		return base;
 	}
 
 	function eliminarUbicacion(index: number) {
@@ -76,28 +61,37 @@
 
 	function actualizarUbicacion(
 		index: number,
-		campo: 'tipo_ubicacion' | 'que_se_hace',
+		campo: 'tipo_ubicacion' | 'modalidad',
 		valor: string
 	) {
-		if (campo === 'tipo_ubicacion' && valor.trim() === 'principal') {
-			const indicePrincipal = getIndicePrincipal();
-			if (indicePrincipal !== -1 && indicePrincipal !== index) {
-				errores[`ubicacion_${index}_tipo`] = 'Ya existe una ubicación de tipo "Principal".';
-				return;
-			} else {
-				limpiarError(`ubicacion_${index}_tipo`);
-			}
-		}
-		if (campo === 'tipo_ubicacion' && index === 0) {
-			const v = valor.trim();
-			if (!esTipoPermitidoPrimeraUbicacion(v)) {
-				return;
-			}
-		}
+		// Simplemente actualizamos el valor sin restricciones
 		ubicaciones[index] = { ...ubicaciones[index], [campo]: valor };
 		ubicaciones = ubicaciones;
-		if (campo === 'tipo_ubicacion' && valor === 'virtual') {
-			ubicaciones[index].direccion = {
+		
+		// Limpiar datos cuando cambia modalidad
+		if (campo === 'modalidad') {
+			if (valor === 'virtual') {
+				ubicaciones[index].direccion_presencial = {
+					calle: '',
+					numero: '',
+					referencia: '',
+					localidad_id: undefined,
+					provincia: '',
+					localidad_nombre: ''
+				};
+			} else if (valor === 'presencial') {
+				ubicaciones[index].url_virtual = '';
+			}
+		}
+	}
+
+	function actualizarDireccion(
+		index: number,
+		campo: keyof DireccionPresencialFormulario,
+		valor: string | number | undefined
+	) {
+		if (!ubicaciones[index].direccion_presencial) {
+			ubicaciones[index].direccion_presencial = {
 				calle: '',
 				numero: '',
 				referencia: '',
@@ -106,21 +100,14 @@
 				localidad_nombre: ''
 			};
 		}
-	}
-
-	function actualizarDireccion(
-		index: number,
-		campo: keyof DireccionFormulario,
-		valor: string | number | undefined
-	) {
 		ubicaciones[index] = {
 			...ubicaciones[index],
-			direccion: { ...ubicaciones[index].direccion, [campo]: valor }
+			direccion_presencial: { ...ubicaciones[index].direccion_presencial!, [campo]: valor }
 		};
 		ubicaciones = ubicaciones;
 		if (campo === 'provincia') {
-			ubicaciones[index].direccion.localidad_nombre = '';
-			ubicaciones[index].direccion.localidad_id = undefined;
+			ubicaciones[index].direccion_presencial!.localidad_nombre = '';
+			ubicaciones[index].direccion_presencial!.localidad_id = undefined;
 		}
 	}
 
@@ -165,42 +152,93 @@
 					<label for="tipo_{index}" class="mb-2 block text-sm font-medium text-gray-700"
 						>Tipo de ubicación *</label
 					>
-					<select
-						id="tipo_{index}"
-						value={ubicacion.tipo_ubicacion}
-						on:change={(e) => actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-						class:border-red-300={errores[`ubicacion_${index}_tipo`]}
-					>
-						<option value="">Seleccionar tipo</option>
-						{#each tiposPermitidosPara(index) as tipo (tipo)}
-							<option value={tipo}>{obtenerDescripcionTipo(tipo)}</option>
-						{/each}
-					</select>
+					{#if esTipoPredefinido(ubicacion.tipo_ubicacion) || ubicacion.tipo_ubicacion === ''}
+						<!-- Dropdown para tipos predefinidos -->
+						<select
+							id="tipo_{index}"
+							value={ubicacion.tipo_ubicacion}
+							on:change={(e) => manejarCambioTipo(index, e.currentTarget.value)}
+							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class:border-red-300={errores[`ubicacion_${index}_tipo`]}
+						>
+							<option value="">Seleccionar tipo</option>
+							{#each TIPO_UBICACION as tipo (tipo)}
+								<option value={tipo}>{obtenerDescripcionTipo(tipo)}</option>
+							{/each}
+							<option value="personalizado">Otro...</option>
+						</select>
+					{:else}
+						<!-- Input para tipos personalizados -->
+						<div class="flex gap-2">
+							<input
+								id="tipo_{index}"
+								type="text"
+								value={ubicacion.tipo_ubicacion === 'personalizado_input' ? '' : ubicacion.tipo_ubicacion}
+								on:input={(e) => actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
+								placeholder="Escriba el tipo de ubicación..."
+								class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class:border-red-300={errores[`ubicacion_${index}_tipo`]}
+							/>
+							<button
+								type="button"
+								on:click={() => actualizarUbicacion(index, 'tipo_ubicacion', '')}
+								class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+								title="Volver a opciones predefinidas"
+							>
+								↺
+							</button>
+						</div>
+					{/if}
 					{#if errores[`ubicacion_${index}_tipo`]}
 						<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_tipo`]}</p>
 					{/if}
 				</div>
 
 				<div>
-					<label for="que_se_hace_{index}" class="mb-2 block text-sm font-medium text-gray-700"
-						>¿Qué se hace en esta ubicación?{indiceUnicaBasica !== index ? ' *' : ''}</label
+					<label for="modalidad_{index}" class="mb-2 block text-sm font-medium text-gray-700"
+						>Modalidad *</label
 					>
-					<textarea
-						id="que_se_hace_{index}"
-						value={ubicacion.que_se_hace}
-						on:input={(e) => actualizarUbicacion(index, 'que_se_hace', e.currentTarget.value)}
-						rows="3"
-						class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-						class:border-red-300={errores[`ubicacion_${index}_que_se_hace`]}
-						placeholder={obtenerPlaceholderQueSehace(ubicacion.tipo_ubicacion)}
-					></textarea>
-					{#if errores[`ubicacion_${index}_que_se_hace`]}
-						<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_que_se_hace`]}</p>
+					<select
+						id="modalidad_{index}"
+						value={ubicacion.modalidad}
+						on:change={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+						class:border-red-300={errores[`ubicacion_${index}_modalidad`]}
+					>
+						<option value="">Seleccionar modalidad</option>
+						{#each MODALIDAD_UBICACION as modalidad (modalidad)}
+							<option value={modalidad}>{modalidad === 'presencial' ? 'Presencial' : 'Virtual'}</option>
+						{/each}
+					</select>
+					{#if errores[`ubicacion_${index}_modalidad`]}
+						<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_modalidad`]}</p>
 					{/if}
 				</div>
 
-				{#if ubicacion.tipo_ubicacion !== 'virtual'}
+				{#if ubicacion.modalidad === 'virtual'}
+					<div>
+						<label for="url_virtual_{index}" class="mb-2 block text-sm font-medium text-gray-700"
+							>URL Virtual *</label
+						>
+						<input
+							id="url_virtual_{index}"
+							type="url"
+							value={ubicacion.url_virtual || ''}
+							on:input={(e) => {
+								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
+								ubicaciones = ubicaciones;
+							}}
+							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class:border-red-300={errores[`ubicacion_${index}_url_virtual`]}
+							placeholder="https://meet.google.com/abc-defg-hij"
+						/>
+						{#if errores[`ubicacion_${index}_url_virtual`]}
+							<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_url_virtual`]}</p>
+						{/if}
+					</div>
+				{/if}
+
+				{#if ubicacion.modalidad === 'presencial'}
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
 							<label for="provincia_{index}" class="mb-2 block text-sm font-medium text-gray-700"
@@ -208,7 +246,7 @@
 							>
 							<select
 								id="provincia_{index}"
-								value={ubicacion.direccion.provincia}
+								value={ubicacion.direccion_presencial?.provincia}
 								on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
 								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 								class:border-red-300={errores[`ubicacion_${index}_provincia`]}
@@ -228,30 +266,30 @@
 							>
 							<select
 								id="localidad_{index}"
-								value={ubicacion.direccion.localidad_id || ''}
+								value={ubicacion.direccion_presencial?.localidad_id || ''}
 								on:change={(e) => {
 									const localidadId = e.currentTarget.value
 										? parseInt(e.currentTarget.value)
 										: undefined;
-									const localidad = obtenerLocalidadesPorProvincia(ubicacion.direccion.provincia).find(
+									const localidad = obtenerLocalidadesPorProvincia(ubicacion.direccion_presencial?.provincia || '').find(
 										(l) => l.id_localidad === localidadId
 									);
 									ubicaciones[index] = {
 										...ubicaciones[index],
-										direccion: {
-											...ubicaciones[index].direccion,
+										direccion_presencial: {
+											...ubicaciones[index].direccion_presencial!,
 											localidad_id: localidadId,
 											localidad_nombre: localidad?.nombre || ''
 										}
 									};
 									ubicaciones = ubicaciones;
 								}}
-								disabled={!ubicacion.direccion.provincia}
+								disabled={!ubicacion.direccion_presencial?.provincia}
 								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20 disabled:bg-gray-100"
 								class:border-red-300={errores[`ubicacion_${index}_localidad`]}
 							>
 								<option value="">Seleccionar localidad</option>
-								{#each obtenerLocalidadesPorProvincia(ubicacion.direccion.provincia) as localidad (localidad.id_localidad)}
+								{#each obtenerLocalidadesPorProvincia(ubicacion.direccion_presencial?.provincia || '') as localidad (localidad.id_localidad)}
 									<option value={localidad.id_localidad}>{localidad.nombre}</option>
 								{/each}
 							</select>
@@ -269,7 +307,7 @@
 								<input
 									id="calle_{index}"
 									type="text"
-									value={ubicacion.direccion.calle}
+									value={ubicacion.direccion_presencial?.calle}
 									on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
 									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 									class:border-red-300={errores[`ubicacion_${index}_calle`]}
@@ -286,7 +324,7 @@
 								<input
 									id="numero_{index}"
 									type="text"
-									value={ubicacion.direccion.numero}
+									value={ubicacion.direccion_presencial?.numero}
 									on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
 									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 									class:border-red-300={errores[`ubicacion_${index}_numero`]}
@@ -304,7 +342,7 @@
 						>
 						<textarea
 							id="referencia_{index}"
-							value={ubicacion.direccion.referencia}
+							value={ubicacion.direccion_presencial?.referencia}
 							on:input={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
 							class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
