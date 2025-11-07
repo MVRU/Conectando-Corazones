@@ -191,7 +191,7 @@
 		{#if etapa === 'select'}
 			<div in:fly={{ y: 20, opacity: 0, duration: 400 }} out:fade={{ duration: 200 }}>
 				<div class="mb-20">
-					<Stepper current={1} total={5} />
+					<Stepper current={1} total={4} />
 				</div>
 				<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
 					<span class="block">Unite a</span>
@@ -232,7 +232,7 @@
 			</div>
 		{:else if etapa === 'form'}
 			<div class="mb-20">
-				<Stepper current={2} total={5} />
+				<Stepper current={2} total={4} />
 			</div>
 			<button
 				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -290,7 +290,7 @@
 		{:else if etapa === 'verificando'}
 			<ValidacionInstitucion
 				pasoActual={3}
-				pasosTotales={5}
+				pasosTotales={4}
 				on:submit={() => (etapa = 'email')}
 				on:skip={() => (etapa = 'email')}
 				on:cancel={() => {
@@ -298,20 +298,20 @@
 					etapa = 'form';
 				}}
 			/>
-		{:else if etapa === 'email'}
+			<!-- {:else if etapa === 'email'}
 			<ValidacionEmail
 				pasoActual={4}
-				pasosTotales={5}
+				pasosTotales={4}
 				emailDestino={emailPrincipal}
 				on:continue={() => (etapa = 'verificado')}
 				on:back={() => {
 					resetFeedback();
 					etapa = 'form';
 				}}
-			/>
+			/> -->
 		{:else if etapa === 'verificado'}
 			<div class="mb-20">
-				<Stepper current={5} total={5} />
+				<Stepper current={4} total={4} />
 			</div>
 			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
 				<div class="rounded-full bg-green-100 p-4 shadow-xl">
@@ -340,7 +340,7 @@
 			</div>
 		{:else if etapa === 'contacto'}
 			<div class="mb-20">
-				<Stepper current={5} total={5} />
+				<Stepper current={4} total={4} />
 			</div>
 
 			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
@@ -358,17 +358,18 @@
 			</main>
 		{:else if etapa === 'direccion'}
 			<div class="mb-20">
-				<Stepper current={5} total={5} />
+				<Stepper current={4} total={4} />
 			</div>
 
 			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
 				<div class="text-center">
 					<h2 class="mb-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
-						Ingresá la dirección de la sede
+						Contanos desde dónde ayudás
 					</h2>
 					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
-						Completá con la dirección principal donde funciona la institución u organización. Más
-						adelante podrás agregar otras direcciones si lo preferís.
+						Seleccioná la provincia y localidad donde funciona tu institución u organización. Esto
+						nos ayuda a mostrarte proyectos y colaboradores cercanos. Más adelante podrás agregar
+						otras sedes si lo necesitás.
 					</p>
 				</div>
 
@@ -380,7 +381,7 @@
 			</div>
 		{:else if etapa === 'exito'}
 			<div class="mb-20">
-				<Stepper current={6} total={5} />
+				<Stepper current={5} total={5} />
 			</div>
 
 			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">

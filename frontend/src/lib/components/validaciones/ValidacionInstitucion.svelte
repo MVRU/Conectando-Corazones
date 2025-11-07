@@ -19,6 +19,8 @@
 	let aceptoDeclaracion = false;
 	let errorFormulario: string | null = null;
 
+	$: botonEnviarDeshabilitado = !aceptoDeclaracion;
+
 	const renaperDisponible = false;
 
 	function actualizarArchivos(event: Event) {
@@ -236,6 +238,8 @@
 							label="Enviar"
 							on:click={enviarDocumentos}
 							customClass="w-full sm:w-auto"
+							disabled={botonEnviarDeshabilitado}
+							ariaDisabled={botonEnviarDeshabilitado}
 						/>
 					</div>
 				</div>

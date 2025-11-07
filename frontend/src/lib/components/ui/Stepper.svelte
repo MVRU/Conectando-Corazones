@@ -1,12 +1,12 @@
 <script lang="ts">
 	export let current = 1;
-	export let total = 5;
+	export let total = 4;
 
 	const stepsLabels = [
 		'Tipo de cuenta',
 		'Datos de cuenta',
 		'Identidad',
-		'Verificación de email',
+		// 'Verificación de email',
 		'Dirección y contacto'
 	];
 </script>
