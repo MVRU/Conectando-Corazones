@@ -13,7 +13,8 @@
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import ValidacionRenaper from '$lib/components/validaciones/ValidacionRenaper.svelte';
+	// import ValidacionRenaper from '$lib/components/validaciones/ValidacionRenaper.svelte';
+	import ValidacionInstitucion from '$lib/components/validaciones/ValidacionInstitucion.svelte';
 	import ValidacionEmail from '$lib/components/validaciones/ValidacionEmail.svelte';
 	import DireccionForm from '$lib/components/forms/DireccionForm.svelte';
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
@@ -287,12 +288,12 @@
 				/>
 			{/if}
 		{:else if etapa === 'verificando'}
-			<ValidacionRenaper
+			<ValidacionInstitucion
 				pasoActual={3}
 				pasosTotales={5}
-				on:success={() => (etapa = 'email')}
-				on:retry={() => (etapa = 'verificando')}
-				on:back={() => {
+				on:submit={() => (etapa = 'email')}
+				on:skip={() => (etapa = 'email')}
+				on:cancel={() => {
 					resetFeedback();
 					etapa = 'form';
 				}}
