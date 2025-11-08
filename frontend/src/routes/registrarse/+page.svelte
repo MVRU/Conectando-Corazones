@@ -27,6 +27,11 @@
 	} from '$lib/types/forms/registro';
 	import { authActions } from '$lib/stores/auth';
 	import {
+		getNextStageAfterAccountStep,
+		type RegistroEtapa,
+		type RegistroRol
+	} from '$lib/services/auth/registration-flow';
+	import {
 		mapColaboradorFormToRegisterInput,
 		mapInstitucionFormToRegisterInput
 	} from '$lib/services/auth/registration.mapper';
@@ -34,17 +39,9 @@
 	let cargada = false; // para saber si la página terminó de cargar
 
 	const TOTAL_PASOS = 5;
-	let etapa:
-		| 'select'
-		| 'form'
-		| 'verificando'
-		| 'verificado'
-		| 'contacto'
-		| 'direccion'
-		| 'exito'
-		| 'error' = 'select';
+	let etapa: RegistroEtapa = 'select';
 
-	let rol: 'institucion' | 'colaborador' = 'institucion';
+	let rol: RegistroRol = 'institucion';
 	let registrando = false;
 	let autenticandoProveedor = false;
 	let errorRegistro: string | null = null;
@@ -60,7 +57,7 @@
 		errorRegistro = null;
 	}
 
-	function elegir(r: 'institucion' | 'colaborador') {
+	function elegir(r: RegistroRol) {
 		rol = r;
 		resetFeedback();
 		etapa = 'form';
@@ -92,7 +89,7 @@
 		registrando = true;
 		try {
 			await authActions.registerColaborador(mapping.input);
-			etapa = 'verificado';
+			etapa = getNextStageAfterAccountStep(rol);
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -119,7 +116,7 @@
 		registrando = true;
 		try {
 			await authActions.registerInstitucion(mapping.input);
-			etapa = 'verificando';
+			etapa = getNextStageAfterAccountStep(rol);
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -138,7 +135,7 @@
 		autenticandoProveedor = true;
 		try {
 			await authActions.signInWithGoogle(rol);
-			etapa = 'verificado';
+			etapa = getNextStageAfterAccountStep(rol);
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -282,10 +279,6 @@
 					etapa = 'form';
 				}}
 			/>
-		{:else if etapa === 'verificado'}
-			<div class="mb-20">
-				<Stepper current={3} total={TOTAL_PASOS} />
-			</div>
 		{:else if etapa === 'contacto'}
 			<div class="mb-20">
 				<Stepper current={4} total={TOTAL_PASOS} />
@@ -315,9 +308,9 @@
 						Contanos desde dónde ayudás
 					</h2>
 					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
-						Seleccioná la provincia y localidad donde funciona tu institución u organización. Esto
-						nos ayuda a mostrarte proyectos y colaboradores cercanos. Más adelante podrás agregar
-						otras sedes si lo necesitás.
+						Seleccioná la provincia y localidad donde funciona tu organización o donde te encontrás
+						para colaborar. Esta información nos ayuda a conectarte con iniciativas cercanas. Podrás
+						sumar más ubicaciones luego desde tu panel.
 					</p>
 				</div>
 
