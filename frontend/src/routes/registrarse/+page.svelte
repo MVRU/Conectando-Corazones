@@ -14,8 +14,8 @@
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	// import ValidacionRenaper from '$lib/components/validaciones/ValidacionRenaper.svelte';
+	// import ValidacionEmail from '$lib/components/validaciones/ValidacionEmail.svelte';
 	import ValidacionInstitucion from '$lib/components/validaciones/ValidacionInstitucion.svelte';
-	import ValidacionEmail from '$lib/components/validaciones/ValidacionEmail.svelte';
 	import DireccionForm from '$lib/components/forms/DireccionForm.svelte';
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
@@ -32,19 +32,19 @@
 	} from '$lib/services/auth/registration.mapper';
 
 	let cargada = false; // para saber si la página terminó de cargar
+
+	const TOTAL_PASOS = 5;
 	let etapa:
 		| 'select'
 		| 'form'
 		| 'verificando'
-		| 'email'
 		| 'verificado'
-		| 'direccion'
 		| 'contacto'
+		| 'direccion'
 		| 'exito'
 		| 'error' = 'select';
 
 	let rol: 'institucion' | 'colaborador' = 'institucion';
-	let emailPrincipal = '';
 	let registrando = false;
 	let autenticandoProveedor = false;
 	let errorRegistro: string | null = null;
@@ -76,19 +76,6 @@
 		return fallback;
 	}
 
-	function deducirEmail(contactos: Contacto[] = [], fallback: string = ''): string {
-		for (const contacto of contactos) {
-			if (!contacto) continue;
-			const tipo = (contacto.tipo_contacto ?? 'email').toLowerCase();
-			const etiqueta = (contacto.etiqueta ?? 'principal').toLowerCase();
-			const valor = contacto.valor?.trim();
-			if (valor && tipo.includes('mail') && etiqueta === 'principal') {
-				return valor.toLowerCase();
-			}
-		}
-		return fallback.trim().toLowerCase();
-	}
-
 	async function registrarColaborador(event: CustomEvent<ColaboradorFormSubmitDetail>) {
 		if (procesandoFormulario) {
 			return;
@@ -105,8 +92,7 @@
 		registrando = true;
 		try {
 			await authActions.registerColaborador(mapping.input);
-			emailPrincipal = mapping.emailPrincipal;
-			etapa = 'email';
+			etapa = 'verificado';
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -133,7 +119,6 @@
 		registrando = true;
 		try {
 			await authActions.registerInstitucion(mapping.input);
-			emailPrincipal = mapping.emailPrincipal;
 			etapa = 'verificando';
 		} catch (error) {
 			errorRegistro = manejarError(
@@ -152,8 +137,7 @@
 		resetFeedback();
 		autenticandoProveedor = true;
 		try {
-			const usuario = await authActions.signInWithGoogle(rol);
-			emailPrincipal = deducirEmail(usuario?.contactos ?? [], usuario?.username ?? '');
+			await authActions.signInWithGoogle(rol);
 			etapa = 'verificado';
 		} catch (error) {
 			errorRegistro = manejarError(
@@ -191,7 +175,7 @@
 		{#if etapa === 'select'}
 			<div in:fly={{ y: 20, opacity: 0, duration: 400 }} out:fade={{ duration: 200 }}>
 				<div class="mb-20">
-					<Stepper current={1} total={4} />
+					<Stepper current={1} total={TOTAL_PASOS} />
 				</div>
 				<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
 					<span class="block">Unite a</span>
@@ -232,7 +216,7 @@
 			</div>
 		{:else if etapa === 'form'}
 			<div class="mb-20">
-				<Stepper current={2} total={4} />
+				<Stepper current={2} total={TOTAL_PASOS} />
 			</div>
 			<button
 				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -290,57 +274,21 @@
 		{:else if etapa === 'verificando'}
 			<ValidacionInstitucion
 				pasoActual={3}
-				pasosTotales={4}
-				on:submit={() => (etapa = 'email')}
-				on:skip={() => (etapa = 'email')}
+				pasosTotales={TOTAL_PASOS}
+				on:submit={() => (etapa = 'contacto')}
+				on:skip={() => (etapa = 'contacto')}
 				on:cancel={() => {
 					resetFeedback();
 					etapa = 'form';
 				}}
 			/>
-			<!-- {:else if etapa === 'email'}
-			<ValidacionEmail
-				pasoActual={4}
-				pasosTotales={4}
-				emailDestino={emailPrincipal}
-				on:continue={() => (etapa = 'verificado')}
-				on:back={() => {
-					resetFeedback();
-					etapa = 'form';
-				}}
-			/> -->
 		{:else if etapa === 'verificado'}
 			<div class="mb-20">
-				<Stepper current={4} total={4} />
-			</div>
-			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
-				<div class="rounded-full bg-green-100 p-4 shadow-xl">
-					<svg
-						class="h-20 w-20 text-green-600"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M5 13l4 4L19 7"
-						/>
-					</svg>
-				</div>
-				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Identidad verificada!</h2>
-				<p class="mt-4 max-w-xs text-base text-gray-600">
-					Tu identidad ha sido validada correctamente. Ahora necesitamos que agregues algún medio de
-					contacto y la dirección de tu sede para completar el registro.
-				</p>
-				<div class="mt-8">
-					<Button label="Continuar" variant="primary" on:click={() => (etapa = 'contacto')} />
-				</div>
+				<Stepper current={3} total={TOTAL_PASOS} />
 			</div>
 		{:else if etapa === 'contacto'}
 			<div class="mb-20">
-				<Stepper current={4} total={4} />
+				<Stepper current={4} total={TOTAL_PASOS} />
 			</div>
 
 			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
@@ -358,7 +306,7 @@
 			</main>
 		{:else if etapa === 'direccion'}
 			<div class="mb-20">
-				<Stepper current={4} total={4} />
+				<Stepper current={5} total={TOTAL_PASOS} />
 			</div>
 
 			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
@@ -381,7 +329,7 @@
 			</div>
 		{:else if etapa === 'exito'}
 			<div class="mb-20">
-				<Stepper current={5} total={5} />
+				<Stepper current={TOTAL_PASOS + 1} total={TOTAL_PASOS} />
 			</div>
 
 			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
@@ -407,11 +355,7 @@
 				</p>
 				<div class="mt-8">
 					<!-- TODO: agregar dashboard u otro -->
-					<Button
-						label="Ir al Dashboard"
-						variant="primary"
-						on:click={() => goto('/mis-proyectos')}
-					/>
+					<Button label="Ir al panel" variant="primary" on:click={() => goto('/mi-panel')} />
 				</div>
 			</div>
 		{/if}

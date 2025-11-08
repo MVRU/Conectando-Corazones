@@ -4,6 +4,7 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
 	import { validarCiudadEnProvincia, MENSAJES_ERROR } from '$lib/utils/validaciones';
+	import { buildGoogleMapsPreviewUrls, type GoogleMapsPreviewUrls } from '$lib/utils/googleMaps';
 
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
@@ -24,6 +25,18 @@
 	let localidadesProvincia: Localidad[] = [];
 	let referencia = '';
 	let urlGoogleMaps = '';
+	let googleMapsPreview: GoogleMapsPreviewUrls | null = null;
+	let urlGoogleMapsLegible = '';
+
+	function decodeUrlForDisplay(url: string): string {
+		try {
+			return decodeURI(url);
+		} catch (_error) {
+			return url;
+		}
+	}
+
+	$: urlGoogleMapsLegible = urlGoogleMaps ? decodeUrlForDisplay(urlGoogleMaps) : '';
 	let intentoEnvio = false;
 
 	export let mostrarOmitir = false;
@@ -56,14 +69,18 @@
 	$: {
 		if (!requiereDireccionDetallada) {
 			urlGoogleMaps = '';
+			googleMapsPreview = null;
 			editandoUrlMapaGoogle = false;
-		} else if (
-			// validarCalle(calle) &&
-			// validarNumeroCalle(numero) &&
-			validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
-		) {
-			const direccionCompleta = `${localidad?.nombre}, ${provincia?.nombre}`;
-			urlGoogleMaps = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+		} else if (validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)) {
+			googleMapsPreview = buildGoogleMapsPreviewUrls({
+				locality: localidad?.nombre,
+				province: provincia?.nombre
+			});
+
+			urlGoogleMaps = googleMapsPreview?.placeUrl ?? '';
+		} else {
+			googleMapsPreview = null;
+			urlGoogleMaps = '';
 		}
 	}
 
@@ -216,7 +233,7 @@
 							rel="noopener noreferrer"
 							class="block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-2 text-base text-blue-600 underline placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
 						>
-							{urlGoogleMaps}
+							{urlGoogleMapsLegible}
 						</a>
 					{:else}
 						<!-- Sin URL: solo texto informativo -->
@@ -274,13 +291,13 @@
 			</div>
 
 			<!-- Vista previa del mapa -->
-			{#if urlGoogleMaps && !editandoUrlMapaGoogle}
+			{#if googleMapsPreview && !editandoUrlMapaGoogle}
 				<div
 					class="relative mx-auto mt-10 aspect-square max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:shadow-2xl"
 				>
 					<div class="relative w-full overflow-hidden rounded-3xl bg-gray-200 shadow-md">
 						<iframe
-							src="{urlGoogleMaps}&output=embed"
+							src={googleMapsPreview.embedUrl}
 							class="min-h-[350px] w-full border-0 sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] xl:min-h-[580px]"
 							title="Vista previa del mapa"
 							allowfullscreen
