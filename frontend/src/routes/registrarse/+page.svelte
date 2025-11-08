@@ -1,13 +1,13 @@
 <!-- TODOs:
- 	- [ ] Ver si es posible combinar ambos forms y corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true
-        - [ ] Agregar registro con proveedores federados: Google, Facebook, etc., cuando auth lo soporte
-         -->
+ 	- [ ] Corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true
+	- [ ] Agregar registro con proveedores federados: Google, Facebook, etc., cuando auth lo soporte
+-->
 
 <!-- * DECISIÓN DE DISEÑO: Este contenedor coordina formularios, autenticación y pasos del onboarding manteniendo la lógica de dominio fuera de los componentes de UI. -->
+
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import InstitucionForm from '$lib/components/registro/InstitucionForm.svelte';
-	import ColaboradorForm from '$lib/components/registro/ColaboradorForm.svelte';
+	import RegistroCuentaForm from '$lib/components/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/registro/RolCard.svelte';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
@@ -20,11 +20,7 @@
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
-	import type { Contacto } from '$lib/types/Contacto';
-	import type {
-		ColaboradorFormSubmitDetail,
-		InstitucionFormSubmitDetail
-	} from '$lib/types/forms/registro';
+	import type { RegistroCuentaSubmitDetail } from '$lib/types/forms/registro';
 	import { authActions } from '$lib/stores/auth';
 	import {
 		getNextStageAfterAccountStep,
@@ -73,23 +69,25 @@
 		return fallback;
 	}
 
-	async function registrarColaborador(event: CustomEvent<ColaboradorFormSubmitDetail>) {
+	async function manejarRegistroCuenta(event: CustomEvent<RegistroCuentaSubmitDetail>) {
 		if (procesandoFormulario) {
 			return;
 		}
 		resetFeedback();
-		let mapping;
-		try {
-			mapping = mapColaboradorFormToRegisterInput(event.detail);
-		} catch (error) {
-			errorRegistro = manejarError(error, 'Revisá los datos ingresados antes de continuar.');
-			return;
-		}
+
+		const detalle = event.detail;
+		rol = detalle.rol;
 
 		registrando = true;
 		try {
-			await authActions.registerColaborador(mapping.input);
-			etapa = getNextStageAfterAccountStep(rol);
+			if (detalle.rol === 'colaborador') {
+				const mapping = mapColaboradorFormToRegisterInput(detalle);
+				await authActions.registerColaborador(mapping.input);
+			} else {
+				const mapping = mapInstitucionFormToRegisterInput(detalle);
+				await authActions.registerInstitucion(mapping.input);
+			}
+			etapa = getNextStageAfterAccountStep(detalle.rol);
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -100,31 +98,8 @@
 		}
 	}
 
-	async function registrarInstitucion(event: CustomEvent<InstitucionFormSubmitDetail>) {
-		if (procesandoFormulario) {
-			return;
-		}
-		resetFeedback();
-		let mapping;
-		try {
-			mapping = mapInstitucionFormToRegisterInput(event.detail);
-		} catch (error) {
-			errorRegistro = manejarError(error, 'Revisá los datos ingresados antes de continuar.');
-			return;
-		}
-
-		registrando = true;
-		try {
-			await authActions.registerInstitucion(mapping.input);
-			etapa = getNextStageAfterAccountStep(rol);
-		} catch (error) {
-			errorRegistro = manejarError(
-				error,
-				'No pudimos completar el registro. Intentá nuevamente en unos instantes.'
-			);
-		} finally {
-			registrando = false;
-		}
+	function manejarFormularioInvalido() {
+		errorRegistro = 'Revisá los campos marcados en rojo antes de continuar.';
 	}
 
 	async function handleGoogleSignIn() {
@@ -255,19 +230,13 @@
 				/>
 			</div>
 
-			{#if rol === 'institucion'}
-				<InstitucionForm
-					on:submit={registrarInstitucion}
-					procesando={procesandoFormulario}
-					errorGeneral={errorRegistro}
-				/>
-			{:else}
-				<ColaboradorForm
-					on:submit={registrarColaborador}
-					procesando={procesandoFormulario}
-					errorGeneral={errorRegistro}
-				/>
-			{/if}
+			<RegistroCuentaForm
+				{rol}
+				procesando={procesandoFormulario}
+				errorGeneral={errorRegistro}
+				on:submit={manejarRegistroCuenta}
+				on:invalid={manejarFormularioInvalido}
+			/>
 		{:else if etapa === 'verificando'}
 			<ValidacionInstitucion
 				pasoActual={3}

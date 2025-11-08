@@ -4,12 +4,13 @@
 /**
  * TODOS:
  * - [ ] Agregar inputs a auth.
-        */
+*/
 
 import type { Contacto } from '$lib/types/Contacto';
 import type {
         ColaboradorFormSubmitDetail,
-        InstitucionFormSubmitDetail
+        InstitucionFormSubmitDetail,
+        RegistroCuentaSubmitDetail
 } from '$lib/types/forms/registro';
 import type {
         RegisterColaboradorInput,
@@ -60,10 +61,42 @@ function construirMetadata(base: Record<string, unknown>): Record<string, unknow
         return Object.fromEntries(entries);
 }
 
+function normalizarDetalleColaborador(
+        detail: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
+): ColaboradorFormSubmitDetail {
+        if ('rol' in detail) {
+                if (detail.rol !== 'colaborador') {
+                        throw new Error('El detalle recibido no corresponde a un colaborador.');
+                }
+                return {
+                        colaborador: detail.payload.colaborador,
+                        organizacion: detail.payload.organizacion,
+                        archivoFoto: detail.archivoFoto
+                };
+        }
+        return detail;
+}
+
+function normalizarDetalleInstitucion(
+        detail: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
+): InstitucionFormSubmitDetail {
+        if ('rol' in detail) {
+                if (detail.rol !== 'institucion') {
+                        throw new Error('El detalle recibido no corresponde a una institución.');
+                }
+                return {
+                        institucion: detail.payload.institucion,
+                        archivoFoto: detail.archivoFoto
+                };
+        }
+        return detail;
+}
+
 export function mapColaboradorFormToRegisterInput(
-        detail: ColaboradorFormSubmitDetail
+        detail: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
 ): RegistroMapeado<RegisterColaboradorInput> {
-        const contactos = clonarContactos(detail.colaborador.contactos);
+        const normalizado = normalizarDetalleColaborador(detail);
+        const contactos = clonarContactos(normalizado.colaborador.contactos);
         const email = obtenerEmailPrincipal(contactos);
         if (!email) {
                 throw new Error('No pudimos identificar un correo electrónico principal válido.');
@@ -71,26 +104,26 @@ export function mapColaboradorFormToRegisterInput(
 
         const metadata = construirMetadata({
                 organizacion:
-                        detail.colaborador.tipo_colaborador === 'organizacion'
+                        normalizado.colaborador.tipo_colaborador === 'organizacion'
                                 ? {
-                                          razon_social: sanitizeString(detail.organizacion.razon_social),
-                                          con_fines_de_lucro: detail.organizacion.con_fines_de_lucro
+                                          razon_social: sanitizeString(normalizado.organizacion.razon_social),
+                                          con_fines_de_lucro: normalizado.organizacion.con_fines_de_lucro
                                   }
                                 : undefined,
-                fotoPerfilPendiente: detail.archivoFoto ? true : undefined
+                fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
         });
 
         const input: RegisterColaboradorInput = {
                 email: normalizarEmail(email),
-                password: detail.colaborador.password,
+                password: normalizado.colaborador.password,
                 perfil: {
-                        username: sanitizeString(detail.colaborador.username),
-                        nombre: sanitizeString(detail.colaborador.nombre),
-                        apellido: sanitizeString(detail.colaborador.apellido),
-                        fecha_nacimiento: detail.colaborador.fecha_nacimiento,
-                        url_foto: sanitizeString(detail.colaborador.url_foto),
+                        username: sanitizeString(normalizado.colaborador.username),
+                        nombre: sanitizeString(normalizado.colaborador.nombre),
+                        apellido: sanitizeString(normalizado.colaborador.apellido),
+                        fecha_nacimiento: normalizado.colaborador.fecha_nacimiento,
+                        url_foto: sanitizeString(normalizado.colaborador.url_foto),
                         contactos,
-                        tipo_colaborador: detail.colaborador.tipo_colaborador
+                        tipo_colaborador: normalizado.colaborador.tipo_colaborador
                 },
                 metadata
         };
@@ -102,32 +135,34 @@ export function mapColaboradorFormToRegisterInput(
 }
 
 export function mapInstitucionFormToRegisterInput(
-        detail: InstitucionFormSubmitDetail
+        detail: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
 ): RegistroMapeado<RegisterInstitucionInput> {
-        const contactos = clonarContactos(detail.institucion.contactos);
+        const normalizado = normalizarDetalleInstitucion(detail);
+        const contactos = clonarContactos(normalizado.institucion.contactos);
         const email = obtenerEmailPrincipal(contactos);
         if (!email) {
                 throw new Error('No pudimos identificar un correo electrónico principal válido.');
         }
 
         const metadata = construirMetadata({
-                fotoPerfilPendiente: detail.archivoFoto ? true : undefined
+                fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
         });
 
-        const tipoInstitucion = sanitizeOptionalString(detail.institucion.tipo_institucion) ?? 'otro';
+        const tipoInstitucion =
+                sanitizeOptionalString(normalizado.institucion.tipo_institucion) ?? 'otro';
         const input: RegisterInstitucionInput = {
                 email: normalizarEmail(email),
-                password: detail.institucion.password,
+                password: normalizado.institucion.password,
                 perfil: {
-                        username: sanitizeString(detail.institucion.username),
-                        nombre: sanitizeString(detail.institucion.nombre),
-                        apellido: sanitizeString(detail.institucion.apellido),
-                        fecha_nacimiento: detail.institucion.fecha_nacimiento,
-                        url_foto: sanitizeString(detail.institucion.url_foto),
+                        username: sanitizeString(normalizado.institucion.username),
+                        nombre: sanitizeString(normalizado.institucion.nombre),
+                        apellido: sanitizeString(normalizado.institucion.apellido),
+                        fecha_nacimiento: normalizado.institucion.fecha_nacimiento,
+                        url_foto: sanitizeString(normalizado.institucion.url_foto),
                         contactos,
                         nombre_legal:
-                                sanitizeOptionalString(detail.institucion.nombre_legal) ??
-                                sanitizeString(detail.institucion.nombre),
+                                sanitizeOptionalString(normalizado.institucion.nombre_legal) ??
+                                sanitizeString(normalizado.institucion.nombre),
                         tipo_institucion: tipoInstitucion
                 },
                 metadata
@@ -137,4 +172,4 @@ export function mapInstitucionFormToRegisterInput(
                 input,
                 emailPrincipal: email
         };
-}
+}               
