@@ -24,6 +24,13 @@
 		mapColaboradorFormToRegisterInput,
 		mapInstitucionFormToRegisterInput
 	} from '$lib/services/auth/registration.mapper';
+	import {
+		REGISTRO_FORM_STORAGE_KEY,
+		REGISTRO_PAGE_STORAGE_KEY,
+		REGISTRO_STORAGE_TTL_MS,
+		REGISTRO_STORAGE_VERSION
+	} from '$lib/constants/registro';
+	import { toastStore } from '$lib/stores/toast';
 
 	let cargada = false; // para saber si la página terminó de cargar
 
@@ -34,10 +41,34 @@
 	let registrando = false;
 	let errorRegistro: string | null = null;
 
+	type RegistroPageSnapshot = {
+		version: number;
+		timestamp: number;
+		etapa: RegistroEtapa;
+		rol: RegistroRol;
+	};
+
+	let storageRegistroDisponible = false;
+	let persistenciaPaginaLista = false;
+	let notificacionEtapaMostrada = false;
+
 	$: procesandoFormulario = registrando;
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
+		if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+			storageRegistroDisponible = true;
+			const snapshot = leerProgresoRegistro();
+			if (snapshot) {
+				rol = snapshot.rol;
+				etapa = snapshot.etapa;
+				guardarProgresoRegistro({
+					...snapshot,
+					timestamp: Date.now()
+				});
+			}
+			persistenciaPaginaLista = true;
+		}
 		cargada = true;
 	});
 
@@ -48,7 +79,7 @@
 	function elegir(r: RegistroRol) {
 		rol = r;
 		resetFeedback();
-		etapa = 'form';
+		setEtapaConPersistencia('form', { limpiarFormulario: true });
 	}
 
 	function manejarError(error: unknown, fallback: string): string {
@@ -79,7 +110,8 @@
 				const mapping = mapInstitucionFormToRegisterInput(detalle);
 				await authActions.registerInstitucion(mapping.input);
 			}
-			etapa = getNextStageAfterAccountStep(detalle.rol);
+			const siguienteEtapa = getNextStageAfterAccountStep(detalle.rol);
+			setEtapaConPersistencia(siguienteEtapa, { limpiarFormulario: true });
 		} catch (error) {
 			errorRegistro = manejarError(
 				error,
@@ -96,7 +128,7 @@
 
 	function volverASeleccion() {
 		resetFeedback();
-		etapa = 'select';
+		setEtapaConPersistencia('select');
 	}
 
 	function obtenerEtapaAnterior(actual: RegistroEtapa): RegistroEtapa | null {
@@ -122,7 +154,119 @@
 			return;
 		}
 		resetFeedback();
-		etapa = anterior;
+		setEtapaConPersistencia(anterior);
+	}
+
+	function leerProgresoRegistro(): RegistroPageSnapshot | null {
+		if (!storageRegistroDisponible) {
+			return null;
+		}
+		try {
+			const raw = window.sessionStorage.getItem(REGISTRO_PAGE_STORAGE_KEY);
+			if (!raw) {
+				return null;
+			}
+			const snapshot = JSON.parse(raw) as RegistroPageSnapshot;
+			if (!snapshot || snapshot.version !== REGISTRO_STORAGE_VERSION) {
+				window.sessionStorage.removeItem(REGISTRO_PAGE_STORAGE_KEY);
+				return null;
+			}
+			if (Date.now() - snapshot.timestamp > REGISTRO_STORAGE_TTL_MS) {
+				window.sessionStorage.removeItem(REGISTRO_PAGE_STORAGE_KEY);
+				return null;
+			}
+			return snapshot;
+		} catch (error) {
+			console.warn('No se pudo recuperar el progreso del registro', error);
+			window.sessionStorage.removeItem(REGISTRO_PAGE_STORAGE_KEY);
+			return null;
+		}
+	}
+
+	function guardarProgresoRegistro(snapshot: RegistroPageSnapshot) {
+		if (!storageRegistroDisponible) {
+			return;
+		}
+		try {
+			window.sessionStorage.setItem(REGISTRO_PAGE_STORAGE_KEY, JSON.stringify(snapshot));
+		} catch (error) {
+			console.warn('No se pudo guardar el progreso del registro', error);
+		}
+	}
+
+	function limpiarProgresoRegistro() {
+		if (!storageRegistroDisponible) {
+			return;
+		}
+		window.sessionStorage.removeItem(REGISTRO_PAGE_STORAGE_KEY);
+	}
+
+	function limpiarFormularioPersistido() {
+		if (!storageRegistroDisponible) {
+			return;
+		}
+		window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+	}
+
+	function limpiarProgresoTotal() {
+		limpiarProgresoRegistro();
+		limpiarFormularioPersistido();
+	}
+
+	function setEtapaConPersistencia(
+		nueva: RegistroEtapa,
+		opciones: { limpiarFormulario?: boolean; limpiarTodo?: boolean } = {}
+	) {
+		etapa = nueva;
+
+		if (!storageRegistroDisponible || !persistenciaPaginaLista) {
+			if (opciones.limpiarTodo) {
+				limpiarProgresoTotal();
+			} else if (opciones.limpiarFormulario) {
+				limpiarFormularioPersistido();
+			}
+			return;
+		}
+
+		if (opciones.limpiarTodo || nueva === 'exito') {
+			limpiarProgresoTotal();
+			notificacionEtapaMostrada = false;
+			return;
+		}
+
+		if (nueva === 'select') {
+			limpiarProgresoRegistro();
+			if (opciones.limpiarFormulario ?? true) {
+				limpiarFormularioPersistido();
+			}
+			notificacionEtapaMostrada = false;
+			return;
+		}
+
+		if (opciones.limpiarFormulario) {
+			limpiarFormularioPersistido();
+		}
+
+		guardarProgresoRegistro({
+			version: REGISTRO_STORAGE_VERSION,
+			timestamp: Date.now(),
+			rol,
+			etapa: nueva
+		});
+		notificarProgresoGuardado();
+	}
+
+	function notificarProgresoGuardado() {
+		if (notificacionEtapaMostrada || !storageRegistroDisponible) {
+			return;
+		}
+		notificacionEtapaMostrada = true;
+		toastStore.show({
+			variant: 'info',
+			title: 'Progreso asegurado',
+			message:
+				'Recordamos el paso del registro en este dispositivo. Si necesitás salir, podrás retomar desde donde quedaste.'
+		});
 	}
 
 	function obtenerEtiquetaRetroceso(actual: RegistroEtapa): string {
@@ -236,11 +380,11 @@
 			<ValidacionInstitucion
 				pasoActual={3}
 				pasosTotales={TOTAL_PASOS}
-				on:submit={() => (etapa = 'contacto')}
-				on:skip={() => (etapa = 'contacto')}
+				on:submit={() => setEtapaConPersistencia('contacto')}
+				on:skip={() => setEtapaConPersistencia('contacto')}
 				on:cancel={() => {
 					resetFeedback();
-					etapa = 'form';
+					setEtapaConPersistencia('form');
 				}}
 			/>
 		{:else if etapa === 'contacto'}
@@ -278,8 +422,8 @@
 
 				<MetodosContactoForm
 					mostrarOmitir
-					on:skip={() => (etapa = 'direccion')}
-					on:submit={() => (etapa = 'direccion')}
+					on:skip={() => setEtapaConPersistencia('direccion')}
+					on:submit={() => setEtapaConPersistencia('direccion')}
 				/>
 			</main>
 		{:else if etapa === 'direccion'}
@@ -322,8 +466,8 @@
 
 				<DireccionForm
 					mostrarOmitir
-					on:skip={() => (etapa = 'exito')}
-					on:submit={() => (etapa = 'exito')}
+					on:skip={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
+					on:submit={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
 				/>
 			</div>
 		{:else if etapa === 'exito'}

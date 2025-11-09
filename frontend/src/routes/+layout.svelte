@@ -8,10 +8,11 @@
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 	import { page } from '$app/stores';
-	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
-	import { beforeNavigate } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { authActions } from '$lib/stores/auth';
+import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
+import { beforeNavigate } from '$app/navigation';
+import { onMount } from 'svelte';
+import { authActions } from '$lib/stores/auth';
+import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 
 	/**
 	 * ! DECISIÓN DE DISEÑO
@@ -32,6 +33,7 @@
 
 <Header />
 <MotionNotice />
+<ToastHost />
 
 {#if showBreadcrumbs}
 	<Breadcrumbs />

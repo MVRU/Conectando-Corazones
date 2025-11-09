@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -28,6 +28,12 @@
 		normalizarSeleccionBoolean,
 		type TipoColaborador
 	} from './form-helpers';
+	import {
+		REGISTRO_FORM_STORAGE_KEY,
+		REGISTRO_STORAGE_TTL_MS,
+		REGISTRO_STORAGE_VERSION
+	} from '$lib/constants/registro';
+	import { toastStore } from '$lib/stores/toast';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;
@@ -80,8 +86,7 @@
 			id: 'google',
 			label: 'Google',
 			descripcion: 'Conectate con tu cuenta de Gmail en segundos.',
-			cardClass:
-				'border-amber-100/70 bg-gradient-to-br from-white via-white to-amber-50/60 hover:shadow-amber-100/60',
+			cardClass: 'border-amber-100/70 bg-gradient-to-br from-white via-white to-amber-50/60',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-amber-100/80 text-amber-700'
 		},
@@ -89,8 +94,7 @@
 			id: 'facebook',
 			label: 'Facebook',
 			descripcion: 'Pronto vas a poder ingresar con tu perfil social.',
-			cardClass:
-				'border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70 hover:shadow-blue-100/60',
+			cardClass: 'border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-blue-100/80 text-blue-700'
 		},
@@ -98,8 +102,7 @@
 			id: 'microsoft',
 			label: 'Microsoft',
 			descripcion: 'Ideal si usás Outlook o Teams a diario.',
-			cardClass:
-				'border-slate-200 bg-gradient-to-br from-white via-white to-slate-50 hover:shadow-slate-200/60',
+			cardClass: 'border-slate-200 bg-gradient-to-br from-white via-white to-slate-50',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-slate-200 text-slate-700'
 		},
@@ -107,8 +110,7 @@
 			id: 'apple',
 			label: 'Apple',
 			descripcion: 'Usá tu Apple ID para un acceso seguro.',
-			cardClass:
-				'border-neutral-200 bg-gradient-to-br from-white via-white to-neutral-100 hover:shadow-neutral-200/60',
+			cardClass: 'border-neutral-200 bg-gradient-to-br from-white via-white to-neutral-100',
 			iconClass: 'text-white',
 			badgeClass: 'bg-neutral-900 text-white'
 		}
@@ -135,6 +137,28 @@
 		<path d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"></path>
 		</svg>`
 	};
+
+	type FormSnapshot = {
+		version: number;
+		timestamp: number;
+		rol: RegistroRol;
+		pasoFormulario: 'credenciales' | 'detalles';
+		metodoAcceso: 'manual' | 'federado' | null;
+		username: string;
+		email: string;
+		nombrePersona: string;
+		apellidoPersona: string;
+		fechaNacimiento: string | null;
+		urlFoto: string;
+		razonSocial: string;
+		conFinesDeLucroSeleccion: '' | 'true' | 'false';
+		nombreLegal: string;
+		tipoInstitucionSeleccion: string;
+		tipoInstitucionPersonalizado: string;
+		tipoColaborador: TipoColaborador;
+	};
+
+	const FORM_SNAPSHOT_VERSION = REGISTRO_STORAGE_VERSION;
 
 	interface ErroresFormulario {
 		username: string;
@@ -168,6 +192,15 @@
 
 	const TIPO_INSTITUCION_POR_DEFECTO = 'escuela';
 
+	let storageDisponible = false;
+	let persistenciaHabilitada = false;
+	let puedeReiniciarPorCambioRol = false;
+	let notificacionGuardadoMostrada = false;
+	let mostrarModalPassword = false;
+	let modalPassword = '';
+	let modalPasswordConfirm = '';
+	let modalPasswordError = '';
+	let modalPasswordConfirmError = '';
 	let username = '';
 	let email = '';
 	let password = '';
@@ -191,9 +224,53 @@
 
 	let rolInterno: RegistroRol = rol;
 
+	onMount(() => {
+		if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {
+			puedeReiniciarPorCambioRol = true;
+			return;
+		}
+		storageDisponible = true;
+		const snapshot = leerFormularioPersistido();
+		if (snapshot && snapshot.rol === rol) {
+			aplicarSnapshot(snapshot);
+		}
+		puedeReiniciarPorCambioRol = true;
+		persistenciaHabilitada = true;
+	});
+
 	$: if (rol !== rolInterno) {
 		rolInterno = rol;
-		resetFormulario();
+		if (puedeReiniciarPorCambioRol) {
+			resetFormulario();
+		}
+	}
+
+	$: if (persistenciaHabilitada) {
+		if (formularioTieneDatosPersistibles()) {
+			guardarFormularioPersistido({
+				version: FORM_SNAPSHOT_VERSION,
+				timestamp: Date.now(),
+				rol: rolInterno,
+				pasoFormulario,
+				metodoAcceso,
+				username,
+				email,
+				nombrePersona,
+				apellidoPersona,
+				fechaNacimiento: fechaNacimiento ? fechaNacimiento.toISOString() : null,
+				urlFoto,
+				razonSocial,
+				conFinesDeLucroSeleccion,
+				nombreLegal,
+				tipoInstitucionSeleccion,
+				tipoInstitucionPersonalizado,
+				tipoColaborador
+			});
+			notificarGuardarTemporal();
+		} else {
+			limpiarFormularioPersistido();
+			notificacionGuardadoMostrada = false;
+		}
 	}
 
 	let ultimoProcesando: boolean | null = null;
@@ -291,6 +368,169 @@
 		errores = crearErroresIniciales();
 		pasoFormulario = 'credenciales';
 		metodoAcceso = null;
+		notificacionGuardadoMostrada = false;
+		mostrarModalPassword = false;
+		modalPassword = '';
+		modalPasswordConfirm = '';
+		modalPasswordError = '';
+		modalPasswordConfirmError = '';
+		limpiarFormularioPersistido();
+	}
+
+	function aplicarSnapshot(snapshot: FormSnapshot) {
+		rolInterno = snapshot.rol;
+		pasoFormulario = snapshot.pasoFormulario;
+		metodoAcceso = snapshot.metodoAcceso;
+		username = snapshot.username ?? '';
+		email = snapshot.email ?? '';
+		nombrePersona = snapshot.nombrePersona ?? '';
+		apellidoPersona = snapshot.apellidoPersona ?? '';
+		fechaNacimiento = parseFechaPersistida(snapshot.fechaNacimiento);
+		urlFoto = snapshot.urlFoto ?? '';
+		razonSocial = snapshot.razonSocial ?? '';
+		conFinesDeLucroSeleccion = snapshot.conFinesDeLucroSeleccion ?? '';
+		nombreLegal = snapshot.nombreLegal ?? '';
+		tipoInstitucionSeleccion = snapshot.tipoInstitucionSeleccion ?? TIPO_INSTITUCION_POR_DEFECTO;
+		tipoInstitucionPersonalizado = snapshot.tipoInstitucionPersonalizado ?? '';
+		tipoColaborador = snapshot.tipoColaborador ?? 'unipersonal';
+		if (pasoFormulario === 'detalles' && requiereReingresoPassword()) {
+			abrirModalPassword();
+		}
+	}
+
+	function parseFechaPersistida(valor: string | null): Date | null {
+		if (!valor) {
+			return null;
+		}
+		const parsed = new Date(valor);
+		return Number.isNaN(parsed.getTime()) ? null : parsed;
+	}
+
+	function leerFormularioPersistido(): FormSnapshot | null {
+		if (!storageDisponible) {
+			return null;
+		}
+		try {
+			const raw = window.sessionStorage.getItem(REGISTRO_FORM_STORAGE_KEY);
+			if (!raw) {
+				return null;
+			}
+			const snapshot = JSON.parse(raw) as FormSnapshot;
+			if (!snapshot || snapshot.version !== FORM_SNAPSHOT_VERSION) {
+				window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+				return null;
+			}
+			if (Date.now() - snapshot.timestamp > REGISTRO_STORAGE_TTL_MS) {
+				window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+				return null;
+			}
+			return snapshot;
+		} catch (error) {
+			console.warn('No se pudo recuperar el progreso del formulario de registro', error);
+			window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+			return null;
+		}
+	}
+
+	function guardarFormularioPersistido(snapshot: FormSnapshot) {
+		if (!storageDisponible) {
+			return;
+		}
+		try {
+			window.sessionStorage.setItem(REGISTRO_FORM_STORAGE_KEY, JSON.stringify(snapshot));
+		} catch (error) {
+			console.warn('No se pudo guardar el progreso del formulario de registro', error);
+		}
+	}
+
+	function limpiarFormularioPersistido() {
+		if (!storageDisponible) {
+			return;
+		}
+		window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+	}
+
+	function formularioTieneDatosPersistibles(): boolean {
+		if (metodoAcceso || pasoFormulario === 'detalles') {
+			return true;
+		}
+		return Boolean(
+			username ||
+				email ||
+				nombrePersona ||
+				apellidoPersona ||
+				fechaNacimiento ||
+				urlFoto ||
+				razonSocial ||
+				conFinesDeLucroSeleccion ||
+				nombreLegal ||
+				tipoInstitucionPersonalizado ||
+				tipoInstitucionSeleccion !== TIPO_INSTITUCION_POR_DEFECTO ||
+				tipoColaborador !== 'unipersonal'
+		);
+	}
+
+	function notificarGuardarTemporal() {
+		if (!storageDisponible || notificacionGuardadoMostrada) {
+			return;
+		}
+		notificacionGuardadoMostrada = true;
+		toastStore.show({
+			variant: 'success',
+			title: 'Progreso guardado',
+			message:
+				'Guardamos temporalmente tus datos de registro en este dispositivo. Podés salir y volver más tarde para continuar sin perder tu avance.'
+		});
+	}
+
+	function requiereReingresoPassword() {
+		return !password || !passwordConfirm;
+	}
+
+	function abrirModalPassword() {
+		modalPassword = '';
+		modalPasswordConfirm = '';
+		modalPasswordError = '';
+		modalPasswordConfirmError = '';
+		mostrarModalPassword = true;
+	}
+
+	function cerrarModalPassword({ regresarACredenciales = false } = {}) {
+		mostrarModalPassword = false;
+		modalPassword = '';
+		modalPasswordConfirm = '';
+		modalPasswordError = '';
+		modalPasswordConfirmError = '';
+		if (regresarACredenciales) {
+			volverAPasoCredenciales();
+		}
+	}
+
+	function confirmarModalPassword() {
+		modalPasswordError = '';
+		modalPasswordConfirmError = '';
+		const nuevaPassword = modalPassword.trim();
+		const nuevaConfirmacion = modalPasswordConfirm.trim();
+
+		if (!nuevaPassword) {
+			modalPasswordError = MENSAJES_ERROR.obligatorio;
+		} else if (!validarContrasena(nuevaPassword)) {
+			modalPasswordError = MENSAJES_ERROR.requisitosContrasena;
+		}
+
+		if (!nuevaConfirmacion) {
+			modalPasswordConfirmError = MENSAJES_ERROR.obligatorio;
+		} else if (nuevaPassword && nuevaPassword !== nuevaConfirmacion) {
+			modalPasswordConfirmError = MENSAJES_ERROR.contrasenasNoCoinciden;
+		}
+
+		if (modalPasswordError || modalPasswordConfirmError) {
+			return;
+		}
+
+		password = nuevaPassword;
+		passwordConfirm = nuevaConfirmacion;
+		mostrarModalPassword = false;
 	}
 
 	function manejarRegistroProveedor(proveedor: FederatedProviderId) {
@@ -333,6 +573,7 @@
 
 	function volverAPasoCredenciales() {
 		pasoFormulario = 'credenciales';
+		mostrarModalPassword = false;
 		if (typeof window !== 'undefined') {
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
@@ -487,6 +728,12 @@
 				.filter(([, valor]) => valor)
 				.map(([campo]) => campo);
 			dispatch('invalid', { campos });
+			if (
+				campos.length &&
+				campos.every((campo) => campo === 'password' || campo === 'passwordConfirm')
+			) {
+				abrirModalPassword();
+			}
 			return;
 		}
 
@@ -565,7 +812,7 @@
 </script>
 
 <form
-	class="mx-auto max-w-4xl space-y-10 rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-lg backdrop-blur"
+	class="mx-auto max-w-4xl space-y-10 rounded-3xl bg-white/95 p-6 shadow-[0_25px_50px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80"
 	on:submit={manejarSubmit}
 	novalidate
 >
@@ -587,9 +834,7 @@
 	{/if}
 
 	{#if pasoFormulario === 'credenciales'}
-		<section
-			class="rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm ring-1 ring-black/5"
-		>
+		<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
 			<header class="mb-6 space-y-2 text-center sm:text-left">
 				<p
 					class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -606,10 +851,10 @@
 				<button
 					type="button"
 					on:click={() => seleccionarMetodoAcceso('manual')}
-					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--color-primary))] ${
+					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
 						metodoAcceso === 'manual'
 							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)] text-[rgb(var(--color-primary))]'
-							: 'border-slate-200/80 bg-white text-slate-700'
+							: 'border-slate-200/70 bg-white text-slate-700 hover:border-slate-300'
 					}`}
 				>
 					<span
@@ -640,10 +885,10 @@
 				<button
 					type="button"
 					on:click={() => seleccionarMetodoAcceso('federado')}
-					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--color-primary))] ${
+					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
 						metodoAcceso === 'federado'
 							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)] text-[rgb(var(--color-primary))]'
-							: 'border-slate-200/80 bg-white text-slate-700'
+							: 'border-slate-200/70 bg-white text-slate-700 hover:border-slate-300'
 					}`}
 				>
 					<span
@@ -676,15 +921,11 @@
 		</section>
 
 		{#if metodoAcceso === null}
-			<div
-				class="rounded-2xl border border-dashed border-slate-200 bg-white/70 p-8 text-center text-slate-500"
-			>
+			<div class="rounded-2xl bg-slate-50/80 p-8 text-center text-slate-500">
 				Seleccioná una de las opciones superiores para continuar con el formulario.
 			</div>
 		{:else if metodoAcceso === 'federado'}
-			<section
-				class="rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm ring-1 ring-black/5"
-			>
+			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
 				<header class="mb-4 space-y-2 text-center sm:text-left">
 					<p
 						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -702,7 +943,7 @@
 					{#each proveedoresFederados as proveedor}
 						<button
 							type="button"
-							class={`duración-300 group flex flex-col gap-4 rounded-2xl border p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--color-primary))]/30 ${proveedor.cardClass} cursor-not-allowed`}
+							class={`group flex flex-col gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]/30 focus-visible:ring-offset-2 ${proveedor.cardClass} cursor-not-allowed`}
 							aria-disabled="true"
 							title="Integración disponible pronto"
 							on:click={() => manejarRegistroProveedor(proveedor.id)}
@@ -753,9 +994,7 @@
 				</p>
 			</section>
 		{:else}
-			<section
-				class="rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm ring-1 ring-black/5"
-			>
+			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
 				<div class="flex flex-col gap-2">
 					<p
 						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -821,9 +1060,7 @@
 				</div>
 			</section>
 
-			<div
-				class="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm"
-			>
+			<div class="mt-10 flex flex-col gap-6 rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
 				<div>
 					<p class="text-lg font-semibold text-slate-900">¿Todo listo para continuar?</p>
 					<p class="text-sm text-slate-500">
@@ -854,7 +1091,7 @@
 		{/if}
 	{:else}
 		<div
-			class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-100/80 bg-white/80 p-4 text-sm text-slate-600"
+			class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-600 ring-1 ring-slate-100/80"
 		>
 			<div>
 				<p class="font-semibold text-slate-900">Paso 2 · Información de la cuenta</p>
@@ -945,7 +1182,7 @@
 							/>
 							<label
 								for={`tipo-colaborador-${opcion.value}`}
-								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:shadow-md peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-checked:shadow-md peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
+								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-[rgb(var(--color-primary))] peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
 							>
 								<span class="text-base font-semibold text-gray-900">{opcion.label}</span>
 								<span class="text-sm text-gray-600">{opcion.descripcion}</span>
@@ -956,7 +1193,7 @@
 
 				{#if tipoColaborador === 'organizacion'}
 					<div
-						class="flex flex-col gap-6 rounded-2xl border border-blue-100 bg-blue-50/70 px-6 py-7 shadow-sm"
+						class="flex flex-col gap-6 rounded-2xl bg-blue-50/70 px-6 py-7 ring-1 ring-blue-100/80"
 					>
 						<legend class="text-base font-semibold text-blue-800">Datos de la organización</legend>
 						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -1012,7 +1249,7 @@
 							/>
 							<label
 								for={`tipo-institucion-${opcion.value}`}
-								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 text-base font-semibold text-gray-900 shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:shadow-md peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-checked:shadow-md peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
+								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 text-base font-semibold text-gray-900 transition hover:border-[rgb(var(--color-primary))] peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
 							>
 								{opcion.label}
 							</label>
@@ -1057,8 +1294,114 @@
 					: tieneErrores
 						? 'Corregí los campos con error antes de continuar'
 						: 'Continuar con el registro'}
-				customClass="w-full rounded-xl bg-[rgb(var(--base-color))] px-8 py-3 font-semibold text-white shadow-md transition hover:shadow-xl disabled:opacity-60 md:w-auto"
+				customClass="w-full rounded-xl bg-[rgb(var(--base-color))] px-8 py-3 font-semibold text-white transition hover:brightness-110 disabled:opacity-60 md:w-auto"
 			/>
 		</div>
 	{/if}
 </form>
+
+{#if mostrarModalPassword}
+	<div
+		class="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm"
+		aria-live="assertive"
+	>
+		<div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-100/80">
+			<div class="mb-6 flex items-center gap-3">
+				<span
+					class="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/18 via-blue-400/6 to-blue-500/0 text-[rgb(var(--color-primary))] ring-1 ring-blue-200/60"
+					aria-hidden="true"
+				>
+					<span class="absolute inset-0 rounded-2xl border border-white/40 opacity-70"></span>
+					<span class="absolute inset-0 animate-[pulse_2.8s_ease-in-out_infinite] bg-gradient-to-br from-white/60 to-transparent opacity-80"></span>
+					<svg xmlns="http://www.w3.org/2000/svg" class="relative h-5 w-5" viewBox="0 0 24 24" fill="none">
+						<path
+							d="M7 7V6a5 5 0 0110 0v1"
+							stroke="currentColor"
+							stroke-width="1.6"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+						<rect
+							x="5"
+							y="10"
+							width="14"
+							height="10"
+							rx="2"
+							stroke="currentColor"
+							stroke-width="1.6"
+						/>
+						<path
+							d="M12 14v2"
+							stroke="currentColor"
+							stroke-width="1.6"
+							stroke-linecap="round"
+						/>
+					</svg>
+				</span>
+				<div>
+					<h2 class="text-lg font-semibold text-slate-900">Reingresá tu contraseña</h2>
+					<p class="mt-1 text-sm text-slate-600">
+						Por seguridad nunca guardamos tu contraseña. Para continuar necesitás volver a
+						ingresarla y confirmarla.
+					</p>
+				</div>
+			</div>
+
+			<div class="space-y-4">
+				<div>
+					<label for="modal_password" class="mb-1 block text-sm font-medium text-slate-700">
+						Contraseña
+					</label>
+					<input
+						id="modal_password"
+						name="modal_password"
+						type="password"
+						class={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							modalPasswordError ? 'border-red-300' : 'border-slate-200'
+						}`}
+						placeholder="Ingresá una contraseña segura"
+						bind:value={modalPassword}
+					/>
+					{#if modalPasswordError}
+						<p class="mt-1 text-xs text-red-600">{modalPasswordError}</p>
+					{/if}
+				</div>
+				<div>
+					<label for="modal_password_confirm" class="mb-1 block text-sm font-medium text-slate-700">
+						Confirmar contraseña
+					</label>
+					<input
+						id="modal_password_confirm"
+						name="modal_password_confirm"
+						type="password"
+						class={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
+						}`}
+						placeholder="Repetí la contraseña"
+						bind:value={modalPasswordConfirm}
+					/>
+					{#if modalPasswordConfirmError}
+						<p class="mt-1 text-xs text-red-600">{modalPasswordConfirmError}</p>
+					{/if}
+				</div>
+			</div>
+
+			<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+				<Button
+					type="button"
+					label="Volver a credenciales"
+					variant="secondary"
+					customClass="w-full sm:w-auto"
+					on:click={() => cerrarModalPassword({ regresarACredenciales: true })}
+				/>
+				<Button
+					type="button"
+					label="Guardar y continuar"
+					variant="primary"
+					customClass="w-full sm:w-auto"
+					on:click={confirmarModalPassword}
+				/>
+			</div>
+		</div>
+	</div>
+{/if}
