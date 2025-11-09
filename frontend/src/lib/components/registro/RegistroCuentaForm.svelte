@@ -28,6 +28,7 @@
 		normalizarSeleccionBoolean,
 		type TipoColaborador
 	} from './form-helpers';
+	import { Mail, KeyRound, Globe, ShieldCheck, Clock } from 'lucide-svelte';
 	import {
 		REGISTRO_FORM_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
@@ -40,6 +41,7 @@
 		invalid: { campos: string[] };
 		processing: { value: boolean };
 		back: void;
+		selectMethod: { metodo: MetodoAcceso };
 	}>();
 
 	export let rol: RegistroRol = 'institucion';
@@ -175,6 +177,8 @@
 		tipo_institucion: string;
 	}
 
+	type MetodoAcceso = 'manual' | 'federado';
+
 	const crearErroresIniciales = (): ErroresFormulario => ({
 		username: '',
 		email: '',
@@ -191,6 +195,29 @@
 	});
 
 	const TIPO_INSTITUCION_POR_DEFECTO = 'escuela';
+
+	const metodosRegistro: Array<{
+		id: MetodoAcceso;
+		label: string;
+		description: string;
+		chip: string;
+		disponible: boolean;
+	}> = [
+		{
+			id: 'manual',
+			label: 'Registrarme con email y contraseña segura',
+			description: 'Creá tu cuenta protegida para gestionar proyectos y colaboraciones.',
+			chip: 'Paso recomendado',
+			disponible: true
+		},
+		{
+			id: 'federado',
+			label: 'Iniciar con Google, Microsoft, Apple o Facebook',
+			description: 'Muy pronto vas a poder ingresar con tus cuentas favoritas de manera segura.',
+			chip: 'Próximamente',
+			disponible: false
+		}
+	];
 
 	let storageDisponible = false;
 	let persistenciaHabilitada = false;
@@ -220,7 +247,7 @@
 	let errores: ErroresFormulario = crearErroresIniciales();
 	let tieneErrores = false;
 	let pasoFormulario: 'credenciales' | 'detalles' = 'credenciales';
-	let metodoAcceso: 'manual' | 'federado' | null = null;
+	let metodoAcceso: MetodoAcceso | null = null;
 
 	let rolInterno: RegistroRol = rol;
 
@@ -537,13 +564,72 @@
 		console.info(`Registro con proveedor ${proveedor} aún no está disponible.`);
 	}
 
-	function seleccionarMetodoAcceso(metodo: 'manual' | 'federado') {
+	function seleccionarMetodoAcceso(metodo: MetodoAcceso) {
+		const metodoConfig = metodosRegistro.find((item) => item.id === metodo);
+		if (!metodoConfig?.disponible) {
+			return;
+		}
 		if (metodoAcceso === metodo) {
 			return;
 		}
 		metodoAcceso = metodo;
 		intentoEnvio = false;
 		pasoFormulario = 'credenciales';
+		dispatch('selectMethod', { metodo });
+	}
+
+	function manejarKeydownMetodo(
+		event: KeyboardEvent,
+		metodoId: MetodoAcceso,
+		disponible: boolean
+	) {
+		if (event.key === ' ' || event.key === 'Enter') {
+			event.preventDefault();
+			if (disponible) {
+				seleccionarMetodoAcceso(metodoId);
+			}
+			return;
+		}
+		if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+			event.preventDefault();
+			moverFocoMetodo(metodoId, 1);
+			return;
+		}
+		if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+			event.preventDefault();
+			moverFocoMetodo(metodoId, -1);
+		}
+	}
+
+	function moverFocoMetodo(actual: MetodoAcceso, direction: 1 | -1) {
+		const interactivos = metodosRegistro.filter((metodo) => metodo.disponible);
+		if (!interactivos.length) {
+			return;
+		}
+		const index = interactivos.findIndex((item) => item.id === actual);
+		const nextIndex = index === -1 ? 0 : (index + direction + interactivos.length) % interactivos.length;
+		const nextId = interactivos[nextIndex]?.id;
+		if (nextId) {
+			focusMetodoButton(nextId);
+		}
+	}
+
+	function obtenerTabIndexMetodo(id: MetodoAcceso, disponible: boolean) {
+		if (!disponible) {
+			return -1;
+		}
+		if (metodoAcceso === id) {
+			return 0;
+		}
+		return metodoAcceso === null && id === 'manual' ? 0 : -1;
+	}
+
+	function focusMetodoButton(id: MetodoAcceso) {
+		if (typeof document === 'undefined') {
+			return;
+		}
+		const elemento = document.querySelector<HTMLButtonElement>(`button[data-metodo="${id}"]`);
+		elemento?.focus();
 	}
 
 	function continuarConDetalles() {
@@ -847,76 +933,71 @@
 				</p>
 			</header>
 
-			<div class="grid gap-4 md:grid-cols-2">
-				<button
-					type="button"
-					on:click={() => seleccionarMetodoAcceso('manual')}
-					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-						metodoAcceso === 'manual'
-							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)] text-[rgb(var(--color-primary))]'
-							: 'border-slate-200/70 bg-white text-slate-700 hover:border-slate-300'
-					}`}
-				>
-					<span
-						class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[rgb(var(--color-primary))]/10 text-[rgb(var(--color-primary))]"
+			<div
+				role="radiogroup"
+				aria-label="Seleccioná el método de registro"
+				class="grid gap-4 md:grid-cols-2"
+			>
+				{#each metodosRegistro as metodo}
+					<button
+						type="button"
+						data-metodo={metodo.id}
+						role="radio"
+						aria-checked={metodoAcceso === metodo.id}
+						aria-disabled={!metodo.disponible}
+						tabindex={obtenerTabIndexMetodo(metodo.id, metodo.disponible)}
+						on:click={() => seleccionarMetodoAcceso(metodo.id)}
+						on:keydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
+						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+							metodo.disponible ? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]' : 'cursor-not-allowed opacity-70'
+						} ${metodoAcceso === metodo.id
+							? 'border-[#7CB9FF] bg-[#F5F9FF] ring-2 ring-[#7CB9FF]/40 shadow-sm'
+							: 'border-[#E5E7EB] bg-white hover:border-[#7CB9FF]/60 hover:ring-1 hover:ring-[#7CB9FF]/20'}`}
 					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="1.6"
-								d="M12 11c1.657 0 3-1.343 3-3S13.657 5 12 5 9 6.343 9 8s1.343 3 3 3zm0 2c-3.866 0-7 1.79-7 4v1h14v-1c0-2.21-3.134-4-7-4z"
-							/>
-						</svg>
-					</span>
-					<div>
-						<p class="text-base font-semibold text-slate-900">Registrarme manualmente</p>
-						<p class="text-sm text-slate-500">Creá un usuario con email y contraseña protegida.</p>
-					</div>
-					<span
-						class={`mt-2 inline-flex items-center text-xs font-semibold uppercase tracking-wide ${
-							metodoAcceso === 'manual' ? 'text-[rgb(var(--color-primary))]' : 'text-slate-400'
-						}`}
-					>
-						{metodoAcceso === 'manual' ? 'Seleccionado' : 'Paso recomendado'}
-					</span>
-				</button>
-
-				<button
-					type="button"
-					on:click={() => seleccionarMetodoAcceso('federado')}
-					class={`flex h-full flex-col gap-3 rounded-2xl border px-5 py-6 text-left transition-all duration-200 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-						metodoAcceso === 'federado'
-							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)] text-[rgb(var(--color-primary))]'
-							: 'border-slate-200/70 bg-white text-slate-700 hover:border-slate-300'
-					}`}
-				>
-					<span
-						class="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100/70 text-amber-600"
-					>
-						<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="1.6"
-								d="M12 3v3m0 12v3m9-9h-3M6 12H3m15.364-6.364l-2.121 2.121M8.757 15.243l-2.121 2.121m0-12.728l2.121 2.121m8.486 8.486l2.121 2.121"
-							/>
-						</svg>
-					</span>
-					<div>
-						<p class="text-base font-semibold text-slate-900">Proveedor federado</p>
-						<p class="text-sm text-slate-500">
-							Pronto vas a poder ingresar con Google, Facebook, Microsoft o Apple.
-						</p>
-					</div>
-					<span
-						class={`mt-2 inline-flex items-center text-xs font-semibold uppercase tracking-wide ${
-							metodoAcceso === 'federado' ? 'text-[rgb(var(--color-primary))]' : 'text-slate-400'
-						}`}
-					>
-						{metodoAcceso === 'federado' ? 'Seleccionado' : 'Próximamente'}
-					</span>
-				</button>
+						<div class="flex items-start gap-3">
+							{#if metodo.id === 'manual'}
+								<span class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F5F9FF] text-[#3B82F6]">
+									<Mail class="h-6 w-6" stroke-width={1.6} />
+									<span class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100">
+										<KeyRound class="h-4 w-4 text-[#2563EB]" stroke-width={1.7} />
+									</span>
+								</span>
+							{:else}
+								<span class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFE5E9] text-[#E24D5C]">
+									<Globe class="h-6 w-6" stroke-width={1.4} />
+									<span class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100">
+										{#if metodoAcceso === 'federado' && metodo.disponible}
+											<ShieldCheck class="h-4 w-4 text-emerald-500" stroke-width={1.7} />
+										{:else}
+											<Clock class="h-4 w-4 text-amber-500" stroke-width={1.7} />
+										{/if}
+									</span>
+								</span>
+							{/if}
+							<div class="space-y-1">
+								<p class="text-base font-semibold text-[#111827]">{metodo.label}</p>
+								<p class="text-sm text-[#6B7280]">{metodo.description}</p>
+							</div>
+						</div>
+						<div class="mt-auto flex items-center justify-between">
+							<span
+								class={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+									metodoAcceso === metodo.id
+										? 'bg-[#E0EDFF] text-[#2563EB]'
+										: 'bg-slate-100 text-slate-600'
+								}`}
+							>
+								{#if !metodo.disponible}
+									Próximamente
+								{:else if metodoAcceso === metodo.id}
+									Seleccionado
+								{:else}
+									{metodo.chip}
+								{/if}
+							</span>
+						</div>
+					</button>
+				{/each}
 			</div>
 		</section>
 

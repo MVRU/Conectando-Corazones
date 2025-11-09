@@ -1,48 +1,45 @@
 <script lang="ts">
 	import { fly, fade } from 'svelte/transition';
 	import { toastStore, type ToastMessage } from '$lib/stores/toast';
+	import { Info, CheckCircle2, AlertTriangle, ShieldAlert, X } from 'lucide-svelte';
 
 	let toasts: ToastMessage[] = [];
-	const VARIANT_STYLES: Record<
-		ToastMessage['variant'],
-		{
-			border: string;
-			iconWrapper: string;
-			iconPath: string;
-			label: string;
-		}
-	> = {
+	type VariantConfig = {
+		border: string;
+		iconWrapper: string;
+		label: string;
+		icon: typeof Info;
+		iconClass: string;
+	};
+
+	const VARIANT_STYLES: Record<ToastMessage['variant'], VariantConfig> = {
 		info: {
 			border: 'border-blue-200/70 bg-white text-slate-700',
-			iconWrapper:
-				'from-blue-500/15 via-blue-500/5 to-blue-500/0 text-blue-600 ring-1 ring-blue-200/40',
-			iconPath:
-				'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-			label: 'Información'
+			iconWrapper: 'from-blue-500/15 via-blue-500/5 to-blue-500/0 ring-1 ring-blue-200/40',
+			label: 'Información',
+			icon: Info,
+			iconClass: 'text-blue-600'
 		},
 		success: {
 			border: 'border-emerald-200/80 bg-white text-slate-700',
-			iconWrapper:
-				'from-emerald-500/20 via-emerald-500/10 to-emerald-500/0 text-emerald-600 ring-1 ring-emerald-200/50',
-			iconPath:
-				'M5 13l4 4L19 7',
-			label: 'Listo'
+			iconWrapper: 'from-emerald-500/20 via-emerald-500/10 to-emerald-500/0 ring-1 ring-emerald-200/50',
+			label: 'Listo',
+			icon: CheckCircle2,
+			iconClass: 'text-emerald-600'
 		},
 		warning: {
 			border: 'border-amber-200/80 bg-white text-slate-700',
-			iconWrapper:
-				'from-amber-400/25 via-amber-400/10 to-amber-400/0 text-amber-600 ring-1 ring-amber-200/60',
-			iconPath:
-				'M12 8v4m0 4h.01M12 3l9 16H3l9-16z',
-			label: 'Atención'
+			iconWrapper: 'from-amber-400/25 via-amber-400/10 to-amber-400/0 ring-1 ring-amber-200/60',
+			label: 'Atención',
+			icon: AlertTriangle,
+			iconClass: 'text-amber-600'
 		},
 		error: {
 			border: 'border-rose-200/80 bg-white text-slate-700',
-			iconWrapper:
-				'from-rose-500/20 via-rose-500/10 to-rose-500/0 text-rose-600 ring-1 ring-rose-200/50',
-			iconPath:
-				'M15 9l-6 6m0-6l6 6M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-			label: 'Error'
+			iconWrapper: 'from-rose-500/20 via-rose-500/10 to-rose-500/0 ring-1 ring-rose-200/50',
+			label: 'Error',
+			icon: ShieldAlert,
+			iconClass: 'text-rose-600'
 		}
 	};
 
@@ -74,20 +71,11 @@
 					aria-hidden="true"
 				>
 					<span class="absolute inset-0 animate-pulse bg-gradient-to-br from-white/50 to-transparent opacity-50"></span>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="relative h-5 w-5"
-						fill="none"
-						viewBox="0 0 24 24"
-					>
-						<path
-							d={VARIANT_STYLES[toast.variant].iconPath}
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.8"
-						/>
-					</svg>
+					<svelte:component
+						this={VARIANT_STYLES[toast.variant].icon}
+						class={`relative h-5 w-5 ${VARIANT_STYLES[toast.variant].iconClass}`}
+						stroke-width={1.8}
+					/>
 				</span>
 				<div class="flex-1 space-y-1">
 					{#if toast.title || VARIANT_STYLES[toast.variant].label}
@@ -103,15 +91,7 @@
 					on:click={() => closeToast(toast.id)}
 					aria-label="Cerrar notificación"
 				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24">
-						<path
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.8"
-							d="M6 6l12 12M6 18L18 6"
-						/>
-					</svg>
+					<X class="h-4 w-4" stroke-width={1.8} />
 				</button>
 			</div>
 		</div>
