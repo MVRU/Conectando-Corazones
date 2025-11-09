@@ -1,5 +1,3 @@
-<!-- * DECISIÓN DE DISEÑO: se unifica la UI de registro para ambos roles usando un estado discriminado y helpers compartidos, reduciendo duplicación y facilitando nuevas variantes en el futuro -->
-
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
@@ -76,7 +74,6 @@
 		descripcion: string;
 		cardClass: string;
 		iconClass: string;
-		iconLabel: string;
 		badgeClass: string;
 	}> = [
 		{
@@ -85,8 +82,7 @@
 			descripcion: 'Conectate con tu cuenta de Gmail en segundos.',
 			cardClass:
 				'border-amber-100/70 bg-gradient-to-br from-white via-white to-amber-50/60 hover:shadow-amber-100/60',
-			iconClass: 'bg-white text-[#EA4335]',
-			iconLabel: 'G',
+			iconClass: 'bg-white',
 			badgeClass: 'bg-amber-100/80 text-amber-700'
 		},
 		{
@@ -95,8 +91,7 @@
 			descripcion: 'Pronto vas a poder ingresar con tu perfil social.',
 			cardClass:
 				'border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70 hover:shadow-blue-100/60',
-			iconClass: 'bg-[#1877F2]/10 text-[#1877F2]',
-			iconLabel: 'f',
+			iconClass: 'bg-white',
 			badgeClass: 'bg-blue-100/80 text-blue-700'
 		},
 		{
@@ -105,8 +100,7 @@
 			descripcion: 'Ideal si usás Outlook o Teams a diario.',
 			cardClass:
 				'border-slate-200 bg-gradient-to-br from-white via-white to-slate-50 hover:shadow-slate-200/60',
-			iconClass: 'bg-slate-900/5 text-slate-900',
-			iconLabel: 'MS',
+			iconClass: 'bg-white',
 			badgeClass: 'bg-slate-200 text-slate-700'
 		},
 		{
@@ -115,11 +109,32 @@
 			descripcion: 'Usá tu Apple ID para un acceso seguro.',
 			cardClass:
 				'border-neutral-200 bg-gradient-to-br from-white via-white to-neutral-100 hover:shadow-neutral-200/60',
-			iconClass: 'bg-neutral-900 text-white',
-			iconLabel: '',
+			iconClass: 'text-white',
 			badgeClass: 'bg-neutral-900 text-white'
 		}
 	];
+
+	const iconosFederados: Record<FederatedProviderId, string> = {
+		google: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" id="google">
+		<path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
+		<path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
+		<path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
+		<path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
+		</svg>`,
+		facebook: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 1024 1024" id="facebook">
+		<path fill="#1877f2" d="M1024,512C1024,229.23016,794.76978,0,512,0S0,229.23016,0,512c0,255.554,187.231,467.37012,432,505.77777V660H302V512H432V399.2C432,270.87982,508.43854,200,625.38922,200,681.40765,200,740,210,740,210V336H675.43713C611.83508,336,592,375.46667,592,415.95728V512H734L711.3,660H592v357.77777C836.769,979.37012,1024,767.554,1024,512Z"></path>
+		<path fill="#fff" d="M711.3,660,734,512H592V415.95728C592,375.46667,611.83508,336,675.43713,336H740V210s-58.59235-10-114.61078-10C508.43854,200,432,270.87982,432,399.2V512H302V660H432v357.77777a517.39619,517.39619,0,0,0,160,0V660Z"></path>
+		</svg>`,
+		microsoft: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" xml:space="preserve" viewBox="0 0 16 16" id="microsoft">
+		<path fill="#4CAF50" d="M8.5 7.5H16v-7a.5.5 0 0 0-.5-.5h-7v7.5z"></path>
+		<path fill="#F44336" d="M7.5 7.5V0h-7a.5.5 0 0 0-.5.5v7h7.5z"></path>
+		<path fill="#2196F3" d="M7.5 8.5H0v7a.5.5 0 0 0 .5.5h7V8.5z"></path>
+		<path fill="#FFC107" d="M8.5 8.5V16h7a.5.5 0 0 0 .5-.5v-7H8.5z"></path>
+		</svg>`,
+		apple: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 128 128" id="apple">
+		<path d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"></path>
+		</svg>`
+	};
 
 	interface ErroresFormulario {
 		username: string;
@@ -694,9 +709,10 @@
 						>
 							<div class="flex items-center gap-4">
 								<span
-									class={`flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-semibold ${proveedor.iconClass}`}
+									class={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/50  ${proveedor.iconClass}`}
+									aria-hidden="true"
 								>
-									{proveedor.iconLabel}
+									{@html iconosFederados[proveedor.id]}
 								</span>
 								<div>
 									<p class="text-base font-semibold text-slate-900">
@@ -805,7 +821,9 @@
 				</div>
 			</section>
 
-			<div class="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm">
+			<div
+				class="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm"
+			>
 				<div>
 					<p class="text-lg font-semibold text-slate-900">¿Todo listo para continuar?</p>
 					<p class="text-sm text-slate-500">
@@ -1044,4 +1062,3 @@
 		</div>
 	{/if}
 </form>
-

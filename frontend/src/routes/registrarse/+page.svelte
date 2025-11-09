@@ -1,10 +1,3 @@
-<!-- TODOs:
- 	- [ ] Corregir las validaciones de entrada para que aparezcan solo cuando los campos tienen touched=true
-	- [ ] Agregar registro con proveedores federados: Google, Facebook, etc., cuando auth lo soporte
--->
-
-<!-- * DECISIÓN DE DISEÑO: Este contenedor coordina formularios, autenticación y pasos del onboarding manteniendo la lógica de dominio fuera de los componentes de UI. -->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/registro/RegistroCuentaForm.svelte';
@@ -250,31 +243,31 @@
 					etapa = 'form';
 				}}
 			/>
-	{:else if etapa === 'contacto'}
-		<div class="mb-8">
-			<Stepper current={4} total={TOTAL_PASOS} />
-			<button
-				type="button"
-				class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-				on:click={() => retrocederEtapa('contacto')}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
+		{:else if etapa === 'contacto'}
+			<div class="mb-8">
+				<Stepper current={4} total={TOTAL_PASOS} />
+				<button
+					type="button"
+					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+					on:click={() => retrocederEtapa('contacto')}
 				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
-				{obtenerEtiquetaRetroceso('contacto')}
-			</button>
-		</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 19l-7-7 7-7"
+						/>
+					</svg>
+					{obtenerEtiquetaRetroceso('contacto')}
+				</button>
+			</div>
 
 			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
 				<h2 class="text-center text-3xl font-extrabold text-gray-900">Agregá formas de contacto</h2>
@@ -289,31 +282,31 @@
 					on:submit={() => (etapa = 'direccion')}
 				/>
 			</main>
-	{:else if etapa === 'direccion'}
-		<div class="mb-8">
-			<Stepper current={5} total={TOTAL_PASOS} />
-			<button
-				type="button"
-				class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-				on:click={() => retrocederEtapa('direccion')}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
+		{:else if etapa === 'direccion'}
+			<div class="mb-8">
+				<Stepper current={5} total={TOTAL_PASOS} />
+				<button
+					type="button"
+					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+					on:click={() => retrocederEtapa('direccion')}
 				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
-				{obtenerEtiquetaRetroceso('direccion')}
-			</button>
-		</div>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 19l-7-7 7-7"
+						/>
+					</svg>
+					{obtenerEtiquetaRetroceso('direccion')}
+				</button>
+			</div>
 
 			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
 				<div class="text-center">
