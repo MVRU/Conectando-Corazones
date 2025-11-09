@@ -35,6 +35,7 @@
 		submit: RegistroCuentaSubmitDetail;
 		invalid: { campos: string[] };
 		processing: { value: boolean };
+		back: void;
 	}>();
 
 	export let rol: RegistroRol = 'institucion';
@@ -320,6 +321,10 @@
 		if (typeof window !== 'undefined') {
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
+	}
+
+	function solicitarRetroceso() {
+		dispatch('back');
 	}
 
 	function calcularErroresBase({
@@ -800,24 +805,33 @@
 				</div>
 			</section>
 
-			<div
-				class="mt-10 flex flex-col gap-4 rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-			>
+			<div class="mt-10 flex flex-col gap-6 rounded-2xl border border-slate-100/80 bg-white/90 p-6 shadow-sm">
 				<div>
 					<p class="text-lg font-semibold text-slate-900">¿Todo listo para continuar?</p>
 					<p class="text-sm text-slate-500">
-						Revisá tus credenciales para desbloquear el siguiente paso.
+						Revisá tus credenciales o volvé a elegir la forma de registro antes de avanzar.
 					</p>
 				</div>
-				<Button
-					type="button"
-					label="Completar mis datos"
-					variant="primary"
-					customClass="w-full sm:w-auto"
-					on:click={continuarConDetalles}
-					disabled={procesando}
-					customAriaLabel="Pasar al siguiente paso del registro"
-				/>
+				<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<Button
+						type="button"
+						label="Volver"
+						variant="secondary"
+						customClass="w-full sm:w-auto"
+						on:click={solicitarRetroceso}
+						disabled={procesando}
+						customAriaLabel="Regresar al paso anterior del registro"
+					/>
+					<Button
+						type="button"
+						label="Completar mis datos"
+						variant="primary"
+						customClass="w-full sm:w-auto"
+						on:click={continuarConDetalles}
+						disabled={procesando}
+						customAriaLabel="Pasar al siguiente paso del registro"
+					/>
+				</div>
 			</div>
 		{/if}
 	{:else}
@@ -1030,3 +1044,4 @@
 		</div>
 	{/if}
 </form>
+
