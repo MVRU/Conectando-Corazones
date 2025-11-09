@@ -39,10 +39,9 @@
 
 	let rol: RegistroRol = 'institucion';
 	let registrando = false;
-	let autenticandoProveedor = false;
 	let errorRegistro: string | null = null;
 
-	$: procesandoFormulario = registrando || autenticandoProveedor;
+	$: procesandoFormulario = registrando;
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
@@ -100,25 +99,6 @@
 
 	function manejarFormularioInvalido() {
 		errorRegistro = 'Revisá los campos marcados en rojo antes de continuar.';
-	}
-
-	async function handleGoogleSignIn() {
-		if (procesandoFormulario) {
-			return;
-		}
-		resetFeedback();
-		autenticandoProveedor = true;
-		try {
-			await authActions.signInWithGoogle(rol);
-			etapa = getNextStageAfterAccountStep(rol);
-		} catch (error) {
-			errorRegistro = manejarError(
-				error,
-				'No pudimos iniciar sesión con Google. Intentá nuevamente.'
-			);
-		} finally {
-			autenticandoProveedor = false;
-		}
 	}
 
 	function volverASeleccion() {
@@ -211,24 +191,6 @@
 				</svg>
 				Volver a elegir tipo de cuenta
 			</button>
-
-			<div
-				class="mb-10 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-white/80 p-4 text-center shadow-sm sm:flex-row sm:items-center sm:justify-between sm:text-left"
-			>
-				<p class="text-sm text-gray-600">
-					También podés crear tu cuenta usando tu perfil de Google para acelerar el proceso.
-				</p>
-				<Button
-					type="button"
-					variant="secondary"
-					label={autenticandoProveedor ? 'Conectando...' : 'Continuar con Google'}
-					loading={autenticandoProveedor}
-					disabled={registrando}
-					on:click={handleGoogleSignIn}
-					customAriaLabel="Registrarme utilizando Google"
-					customClass="w-full sm:w-auto"
-				/>
-			</div>
 
 			<RegistroCuentaForm
 				{rol}

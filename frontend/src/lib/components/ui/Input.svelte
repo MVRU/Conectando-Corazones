@@ -38,7 +38,7 @@
 	}
 </script>
 
-<div class="space-y-1">
+<div class="space-y-2">
 	<input
 		bind:this={inputRef}
 		{id}
@@ -48,9 +48,11 @@
 		{type}
 		{...$$restProps}
 		class={clsx(
-			'w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200',
-			'focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:outline-none',
-			error && 'border-red-400 ring-red-400 focus:ring-red-400',
+			'w-full rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 text-[15px] text-slate-900 shadow-sm ring-1 ring-transparent transition-all duration-200 placeholder:text-slate-400',
+			'focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgba(var(--color-primary),0.45)] focus:ring-offset-1 focus:ring-offset-white focus:outline-none',
+			error &&
+				'border-red-400 bg-red-50/80 text-red-900 placeholder:text-red-400 focus:border-red-500 focus:ring-red-300 focus:ring-offset-0',
+			'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:opacity-80',
 			customClass
 		)}
 		{required}

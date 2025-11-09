@@ -118,17 +118,17 @@
 		Salud: '➕',
 		'Desarrollo económico': '💼',
 		'Promoción de la paz': '☮️',
-		Seguridad: '�️',
+		Seguridad: '🛡️',
 		Entretenimiento: '🎭',
 		Liderazgo: '👑',
 		'Personas con discapacidades': '♿',
-		Tecnología: '�',
+		Tecnología: '💻',
 		Política: '🏛️',
 		Religión: '🙏',
 		'LGTBQ+': '🏳️‍🌈',
 		'Apoyo ante una crisis': '🆘',
 		Empleo: '💼',
-		'Inmigrantes y refugiados': '�',
+		'Inmigrantes y refugiados': '🛂',
 		Otro: '🔧'
 	};
 
@@ -227,7 +227,7 @@
 			</h2>
 			<div class="mb-6 flex flex-wrap gap-4">
 				{#each mockCategorias as categoria, i (i)}
-					<label class="flex cursor-pointer items-center gap-2 select-none">
+					<label class="flex cursor-pointer select-none items-center gap-2">
 						<input
 							type="checkbox"
 							checked={preferencias.includes(categoria.id_categoria!)}
@@ -264,7 +264,7 @@
 			Preferencias de notificaciones
 		</h2>
 		<div class="flex flex-col gap-4 md:flex-row md:gap-10">
-			<label class="flex cursor-pointer items-center gap-3 select-none">
+			<label class="flex cursor-pointer select-none items-center gap-3">
 				<span class="text-gray-700">Push</span>
 				<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
 				<div
@@ -273,7 +273,7 @@
 					class:bg-gray-200={!notificacionesPush}
 				>
 					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
+						class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
 						class:translate-x-0={!notificacionesPush}
 						class:translate-x-5={notificacionesPush}
 					></div>
@@ -282,7 +282,7 @@
 					>{notificacionesPush ? 'Activado' : 'Desactivado'}</span
 				>
 			</label>
-			<label class="flex cursor-pointer items-center gap-3 select-none">
+			<label class="flex cursor-pointer select-none items-center gap-3">
 				<span class="text-gray-700">Mail</span>
 				<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
 				<div
@@ -291,7 +291,7 @@
 					class:bg-gray-200={!notificacionesMail}
 				>
 					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
+						class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
 						class:translate-x-0={!notificacionesMail}
 						class:translate-x-5={notificacionesMail}
 					></div>

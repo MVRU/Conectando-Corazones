@@ -15,11 +15,14 @@
 	export let name: string | undefined = undefined;
 </script>
 
-<div>
-	<label for={id} class="font-semibold text-gray-800">
-		{label}
+<div class="group space-y-2">
+	<label
+		for={id}
+		class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition-colors group-focus-within:text-[rgb(var(--color-primary))]"
+	>
+		<span>{label}</span>
 		{#if required}
-			<span class="text-red-600">*</span>
+			<span class="text-base font-semibold leading-none text-red-500" aria-hidden="true">*</span>
 		{/if}
 	</label>
 	<Input {id} {name} bind:value {type} {placeholder} {autocomplete} {error} {required} {disabled} />
