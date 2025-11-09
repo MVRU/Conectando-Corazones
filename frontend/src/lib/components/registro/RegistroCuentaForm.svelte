@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
+	import type { ComponentType } from 'svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -28,7 +30,25 @@
 		normalizarSeleccionBoolean,
 		type TipoColaborador
 	} from './form-helpers';
-	import { Mail, KeyRound, Globe, ShieldCheck, Clock } from 'lucide-svelte';
+	import {
+		Mail,
+		KeyRound,
+		Globe,
+		ShieldCheck,
+		Clock,
+		UserRoundPlus,
+		UserRound,
+		Calendar,
+		Building2,
+		School,
+		Hospital,
+		Soup,
+		Church,
+		Ellipsis,
+		Eye,
+		EyeOff,
+		LockKeyhole
+	} from 'lucide-svelte';
 	import {
 		REGISTRO_FORM_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
@@ -52,26 +72,67 @@
 		value: TipoColaborador;
 		label: string;
 		descripcion: string;
+		icon: ComponentType;
 	}> = [
 		{
 			value: 'unipersonal',
 			label: 'Unipersonal',
-			descripcion: 'Sos una persona física que colabora con proyectos solidarios.'
+			descripcion: 'Sos una persona física que colabora con proyectos solidarios.',
+			icon: UserRound
 		},
 		{
 			value: 'organizacion',
 			label: 'Organización',
-			descripcion: 'Representás a una entidad que coordina recursos o acompañamiento.'
+			descripcion: 'Representás a una entidad que coordina recursos o acompañamiento.',
+			icon: Building2
 		}
 	];
 
-	const opcionesTipoInstitucion: Array<{ value: string; label: string }> = [
-		{ value: 'escuela', label: 'Escuela' },
-		{ value: 'hospital', label: 'Hospital' },
-		{ value: 'comedor', label: 'Comedor comunitario' },
-		{ value: 'fundacion', label: 'Fundación' },
-		{ value: 'iglesia', label: 'Iglesia' },
-		{ value: 'otro', label: 'Otro' }
+	type TipoInstitucionOpcion = {
+		value: string;
+		label: string;
+		descripcion: string;
+		icon: ComponentType;
+		disabled?: boolean;
+	};
+
+	const opcionesTipoInstitucion: TipoInstitucionOpcion[] = [
+		{
+			value: 'escuela',
+			label: 'Escuela',
+			descripcion: 'Instituciones educativas, apoyo escolar o clubes de tareas.',
+			icon: School
+		},
+		{
+			value: 'hospital',
+			label: 'Hospital',
+			descripcion: 'Hospitales, clínicas, postas de salud y acompañamiento.',
+			icon: Hospital
+		},
+		{
+			value: 'comedor',
+			label: 'Comedor comunitario',
+			descripcion: 'Merenderos, ollas populares o espacios barriales.',
+			icon: Soup
+		},
+		{
+			value: 'fundacion',
+			label: 'Fundación',
+			descripcion: 'Fundaciones, asociaciones civiles o ONGs.',
+			icon: Building2
+		},
+		{
+			value: 'iglesia',
+			label: 'Iglesia',
+			descripcion: 'Parroquias, templos o comunidades de fe.',
+			icon: Church
+		},
+		{
+			value: 'otro',
+			label: 'Otro',
+			descripcion: 'Otra figura legal o red solidaria.',
+			icon: Ellipsis
+		}
 	];
 
 	type FederatedProviderId = 'google' | 'facebook' | 'microsoft' | 'apple';
@@ -247,6 +308,11 @@
 	let errores: ErroresFormulario = crearErroresIniciales();
 	let tieneErrores = false;
 	let pasoFormulario: 'credenciales' | 'detalles' = 'credenciales';
+	let formularioRef: HTMLFormElement | null = null;
+let mostrarPassword = false;
+let mostrarPasswordConfirm = false;
+let mostrarModalPasswordTexto = false;
+let mostrarModalPasswordConfirmTexto = false;
 	let metodoAcceso: MetodoAcceso | null = null;
 
 	let rolInterno: RegistroRol = rol;
@@ -578,11 +644,7 @@
 		dispatch('selectMethod', { metodo });
 	}
 
-	function manejarKeydownMetodo(
-		event: KeyboardEvent,
-		metodoId: MetodoAcceso,
-		disponible: boolean
-	) {
+	function manejarKeydownMetodo(event: KeyboardEvent, metodoId: MetodoAcceso, disponible: boolean) {
 		if (event.key === ' ' || event.key === 'Enter') {
 			event.preventDefault();
 			if (disponible) {
@@ -607,7 +669,8 @@
 			return;
 		}
 		const index = interactivos.findIndex((item) => item.id === actual);
-		const nextIndex = index === -1 ? 0 : (index + direction + interactivos.length) % interactivos.length;
+		const nextIndex =
+			index === -1 ? 0 : (index + direction + interactivos.length) % interactivos.length;
 		const nextId = interactivos[nextIndex]?.id;
 		if (nextId) {
 			focusMetodoButton(nextId);
@@ -895,11 +958,28 @@
 			tipoInstitucionPersonalizado = '';
 		}
 	}
+
+	function manejarTeclaForm(event: KeyboardEvent) {
+		if (event.key !== 'Enter' || event.shiftKey || event.altKey || event.metaKey || event.ctrlKey) {
+			return;
+		}
+
+		event.preventDefault();
+
+		if (pasoFormulario === 'credenciales') {
+			continuarConDetalles();
+			return;
+		}
+
+		formularioRef?.requestSubmit();
+	}
 </script>
 
 <form
-	class="mx-auto max-w-4xl space-y-10 rounded-3xl bg-white/95 p-6 shadow-[0_25px_50px_rgba(15,23,42,0.08)] ring-1 ring-slate-100/80"
+	class="mx-auto max-w-4xl space-y-10"
 	on:submit={manejarSubmit}
+	on:keydown={manejarTeclaForm}
+	bind:this={formularioRef}
 	novalidate
 >
 	<header class="space-y-3 text-center">
@@ -920,7 +1000,7 @@
 	{/if}
 
 	{#if pasoFormulario === 'credenciales'}
-		<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
+		<section class="rounded-2xl bg-white p-6">
 			<header class="mb-6 space-y-2 text-center sm:text-left">
 				<p
 					class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -949,23 +1029,35 @@
 						on:click={() => seleccionarMetodoAcceso(metodo.id)}
 						on:keydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
 						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
-							metodo.disponible ? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]' : 'cursor-not-allowed opacity-70'
-						} ${metodoAcceso === metodo.id
-							? 'border-[#7CB9FF] bg-[#F5F9FF] ring-2 ring-[#7CB9FF]/40 shadow-sm'
-							: 'border-[#E5E7EB] bg-white hover:border-[#7CB9FF]/60 hover:ring-1 hover:ring-[#7CB9FF]/20'}`}
+							metodo.disponible
+								? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]'
+								: 'cursor-not-allowed opacity-70'
+						} ${
+							metodoAcceso === metodo.id
+								? 'border-[#7CB9FF] bg-[#F5F9FF] shadow-sm ring-2 ring-[#7CB9FF]/40'
+								: 'border-[#E5E7EB] bg-white hover:border-[#7CB9FF]/60 hover:ring-1 hover:ring-[#7CB9FF]/20'
+						}`}
 					>
 						<div class="flex items-start gap-3">
 							{#if metodo.id === 'manual'}
-								<span class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F5F9FF] text-[#3B82F6]">
+								<span
+									class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F5F9FF] text-[#3B82F6]"
+								>
 									<Mail class="h-6 w-6" stroke-width={1.6} />
-									<span class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100">
+									<span
+										class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
+									>
 										<KeyRound class="h-4 w-4 text-[#2563EB]" stroke-width={1.7} />
 									</span>
 								</span>
 							{:else}
-								<span class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFE5E9] text-[#E24D5C]">
+								<span
+									class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFE5E9] text-[#E24D5C]"
+								>
 									<Globe class="h-6 w-6" stroke-width={1.4} />
-									<span class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100">
+									<span
+										class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
+									>
 										{#if metodoAcceso === 'federado' && metodo.disponible}
 											<ShieldCheck class="h-4 w-4 text-emerald-500" stroke-width={1.7} />
 										{:else}
@@ -1075,7 +1167,7 @@
 				</p>
 			</section>
 		{:else}
-			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
+			<section class="rounded-2xl bg-white/95 p-6">
 				<div class="flex flex-col gap-2">
 					<p
 						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -1114,65 +1206,98 @@
 						error={intentoEnvio ? errores.email : ''}
 						disabled={procesando}
 					/>
-					<CampoFormulario
-						id="password"
-						name="password"
-						label="Contraseña"
-						required
-						placeholder="Ingresá una contraseña segura"
-						type="password"
-						autocomplete="new-password"
-						bind:value={password}
-						error={intentoEnvio ? errores.password : ''}
-						disabled={procesando}
-					/>
-					<CampoFormulario
-						id="passwordConfirm"
-						name="passwordConfirm"
-						label="Confirmá la contraseña"
-						required
-						placeholder="Repetí la contraseña"
-						type="password"
-						autocomplete="new-password"
-						bind:value={passwordConfirm}
-						error={intentoEnvio ? errores.passwordConfirm : ''}
-						disabled={procesando}
-					/>
+					<div class="space-y-2">
+						<label
+							for="password"
+							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
+						>
+							Contraseña <span class="text-red-500">*</span>
+						</label>
+						<div class="relative">
+							<Input
+								id="password"
+								name="password"
+								placeholder="Ingresá una contraseña segura"
+								autocomplete="new-password"
+								type={mostrarPassword ? 'text' : 'password'}
+								bind:value={password}
+								error={intentoEnvio ? errores.password : ''}
+								disabled={procesando}
+								customClass="pr-12"
+								required
+							/>
+							<button
+								type="button"
+								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+								on:click={() => (mostrarPassword = !mostrarPassword)}
+								aria-pressed={mostrarPassword}
+								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+								disabled={procesando}
+							>
+								{#if mostrarPassword}
+									<EyeOff class="h-4 w-4" stroke-width={1.7} />
+								{:else}
+									<Eye class="h-4 w-4" stroke-width={1.7} />
+								{/if}
+							</button>
+						</div>
+					</div>
+					<div class="space-y-2">
+						<label
+							for="passwordConfirm"
+							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
+						>
+							Confirmá la contraseña <span class="text-red-500">*</span>
+						</label>
+						<div class="relative">
+							<Input
+								id="passwordConfirm"
+								name="passwordConfirm"
+								placeholder="Repetí la contraseña"
+								autocomplete="new-password"
+								type={mostrarPasswordConfirm ? 'text' : 'password'}
+								bind:value={passwordConfirm}
+								error={intentoEnvio ? errores.passwordConfirm : ''}
+								disabled={procesando}
+								customClass="pr-12"
+								required
+							/>
+							<button
+								type="button"
+								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+								on:click={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
+								aria-pressed={mostrarPasswordConfirm}
+								aria-label={mostrarPasswordConfirm
+									? 'Ocultar confirmación de contraseña'
+									: 'Mostrar confirmación de contraseña'}
+								disabled={procesando}
+							>
+								{#if mostrarPasswordConfirm}
+									<EyeOff class="h-4 w-4" stroke-width={1.7} />
+								{:else}
+									<Eye class="h-4 w-4" stroke-width={1.7} />
+								{/if}
+							</button>
+						</div>
+					</div>
 				</div>
 			</section>
 
-			<div class="mt-10 flex flex-col gap-6 rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
-				<div>
-					<p class="text-lg font-semibold text-slate-900">¿Todo listo para continuar?</p>
-					<p class="text-sm text-slate-500">
-						Revisá tus credenciales o volvé a elegir la forma de registro antes de avanzar.
-					</p>
-				</div>
-				<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-					<Button
-						type="button"
-						label="Volver"
-						variant="secondary"
-						customClass="w-full sm:w-auto"
-						on:click={solicitarRetroceso}
-						disabled={procesando}
-						customAriaLabel="Regresar al paso anterior del registro"
-					/>
-					<Button
-						type="button"
-						label="Completar mis datos"
-						variant="primary"
-						customClass="w-full sm:w-auto"
-						on:click={continuarConDetalles}
-						disabled={procesando}
-						customAriaLabel="Pasar al siguiente paso del registro"
-					/>
-				</div>
+			<div class="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-end">
+				<Button
+					type="button"
+					label="Continuar"
+					variant="primary"
+					customClass="w-full sm:w-auto"
+					on:click={continuarConDetalles}
+					disabled={procesando}
+					customAriaLabel="Pasar al siguiente paso del registro"
+				/>
 			</div>
 		{/if}
 	{:else}
 		<div
-			class="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-600 ring-1 ring-slate-100/80"
+			class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/70 bg-white/90 p-4 text-sm text-slate-600"
 		>
 			<div>
 				<p class="font-semibold text-slate-900">Paso 2 · Información de la cuenta</p>
@@ -1195,88 +1320,285 @@
 			</button>
 		</div>
 
-		<section class="grid grid-cols-1 gap-8 md:grid-cols-2">
-			<div class="md:col-span-2">
+		{#if rolInterno === 'institucion'}
+			<section class="space-y-8 rounded-2xl px-6 py-8">
+				<header class="space-y-2">
+					<p
+						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+					>
+						Paso 2 · Perfil institucional
+					</p>
+					<h3 class="text-2xl font-semibold text-slate-900">Datos de la institución</h3>
+					<p class="text-sm text-slate-500">
+						Cargá los datos que harán que tu perfil sea reconocible y transparente.
+					</p>
+				</header>
+
 				<FotoPerfilUploader
 					id="foto"
 					name="foto"
-					label="Foto de perfil"
+					label="Foto o avatar"
 					optionalLabel="(opcional)"
+					description="Subí un logo o imagen cuadrada para que la comunidad identifique tu institución."
 					helperText="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
 					bind:url={urlFoto}
 					bind:file={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
-			</div>
 
-			<CampoFormulario
-				id="nombre"
-				name="nombre"
-				label={obtenerEtiquetaNombre()}
-				required
-				placeholder="Nombre"
-				bind:value={nombrePersona}
-				error={intentoEnvio ? errores.nombre : ''}
-				disabled={procesando}
-			/>
+				<div class="grid gap-5 md:grid-cols-2">
+					<CampoFormulario
+						id="nombre"
+						name="nombre"
+						label={obtenerEtiquetaNombre()}
+						required
+						placeholder="Nombre de la persona referente"
+						bind:value={nombrePersona}
+						error={intentoEnvio ? errores.nombre : ''}
+						disabled={procesando}
+						icon={UserRound}
+						iconClass="text-sky-500"
+					/>
 
-			<CampoFormulario
-				id="apellido"
-				name="apellido"
-				label={obtenerEtiquetaApellido()}
-				required
-				placeholder="Apellido"
-				bind:value={apellidoPersona}
-				error={intentoEnvio ? errores.apellido : ''}
-				disabled={procesando}
-			/>
+					<CampoFormulario
+						id="apellido"
+						name="apellido"
+						label={obtenerEtiquetaApellido()}
+						required
+						placeholder="Apellido de la persona referente"
+						bind:value={apellidoPersona}
+						error={intentoEnvio ? errores.apellido : ''}
+						disabled={procesando}
+						icon={UserRound}
+						iconClass="text-sky-500"
+					/>
+				</div>
 
-			<div>
-				<label for="fecha_nacimiento" class="font-semibold text-gray-800">
-					{obtenerEtiquetaFecha()} <span class="text-red-600">*</span>
-				</label>
-				<DatePicker
-					id="fecha_nacimiento"
-					name="fecha_nacimiento"
-					bind:value={fechaNacimiento}
-					error={intentoEnvio ? errores.fecha_nacimiento : ''}
+				<div class="grid gap-5 md:grid-cols-2">
+					<div>
+						<label for="fecha_nacimiento" class="mb-2 block text-sm font-semibold text-slate-700">
+							{obtenerEtiquetaFecha()} <span class="text-red-600">*</span>
+						</label>
+						<DatePicker
+							id="fecha_nacimiento"
+							name="fecha_nacimiento"
+							bind:value={fechaNacimiento}
+							error={intentoEnvio ? errores.fecha_nacimiento : ''}
+							prefixIcon={Calendar}
+							prefixIconClass="text-sky-500"
+						/>
+					</div>
+					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
+						Esta fecha nos ayuda a validar la idoneidad legal y operativa de la institución en la
+						red.
+					</p>
+				</div>
+
+				<div class="space-y-6 rounded-2xl bg-white p-6">
+					<div class="space-y-1">
+						<h4 class="text-lg font-semibold text-slate-900">Tipo de institución</h4>
+						<p class="text-sm text-slate-500">
+							Seleccioná la categoría que mejor describe tu misión.
+						</p>
+					</div>
+
+					<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						{#each opcionesTipoInstitucion as opcion}
+							<div class="relative">
+								<input
+									id={`tipo-institucion-${opcion.value}`}
+									type="radio"
+									class="peer sr-only"
+									name="tipo_institucion"
+									value={opcion.value}
+									checked={tipoInstitucionSeleccion === opcion.value}
+									on:change={() => actualizarTipoInstitucion(opcion.value)}
+									disabled={opcion.disabled}
+								/>
+								<label
+									for={`tipo-institucion-${opcion.value}`}
+									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-left text-sm transition ${
+										opcion.disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+									} ${
+										tipoInstitucionSeleccion === opcion.value
+											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
+											: 'border-slate-200 hover:border-sky-300'
+									} peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+								>
+									<span
+										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
+											tipoInstitucionSeleccion === opcion.value
+												? 'bg-sky-50 text-sky-600'
+												: 'bg-slate-50 text-slate-600'
+										}`}
+										aria-hidden="true"
+									>
+										<svelte:component this={opcion.icon} class="h-5 w-5" stroke-width={1.7} />
+									</span>
+									<div>
+										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
+										<p class="text-sm text-slate-500">{opcion.descripcion}</p>
+									</div>
+								</label>
+							</div>
+						{/each}
+					</div>
+
+					{#if tipoInstitucionSeleccion === 'otro'}
+						<CampoFormulario
+							id="tipo_institucion_personalizado"
+							name="tipo_institucion_personalizado"
+							label="Especificá el tipo de institución"
+							required
+							placeholder="Ej: Centro comunitario"
+							bind:value={tipoInstitucionPersonalizado}
+							error={intentoEnvio ? errores.tipo_institucion : ''}
+							disabled={procesando}
+							icon={Building2}
+							iconClass="text-sky-500"
+						/>
+					{/if}
+
+					<CampoFormulario
+						id="nombre_legal"
+						name="nombre_legal"
+						label="Nombre legal de la institución"
+						required
+						placeholder="Razón social registrada"
+						bind:value={nombreLegal}
+						error={intentoEnvio ? errores.nombre_legal : ''}
+						disabled={procesando}
+						icon={Building2}
+						iconClass="text-sky-500"
+					/>
+				</div>
+			</section>
+		{:else}
+			<section
+				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm"
+			>
+				<header class="space-y-2">
+					<p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+						Paso 2 · Perfil de colaborador/a
+					</p>
+					<h3 class="text-2xl font-semibold text-slate-900">Datos personales</h3>
+					<p class="text-sm text-slate-500">
+						Esta información es visible para las instituciones que contactes.
+					</p>
+				</header>
+
+				<FotoPerfilUploader
+					id="foto"
+					name="foto"
+					label="Foto o avatar"
+					optionalLabel="(opcional)"
+					description="Mostrá quién estará en contacto con las instituciones para generar mayor confianza."
+					helperText="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					bind:url={urlFoto}
+					bind:file={archivoFoto}
+					error={intentoEnvio ? errores.url_foto : ''}
 				/>
-			</div>
-		</section>
 
-		{#if rolInterno === 'colaborador'}
-			<section class="space-y-4">
-				<span class="font-semibold text-gray-800">
-					Tipo de colaborador/a <span class="text-red-600">*</span>
-				</span>
-				<div class="grid gap-4 md:grid-cols-2">
-					{#each opcionesTipoColaborador as opcion}
-						<div class="relative">
-							<input
-								id={`tipo-colaborador-${opcion.value}`}
-								type="radio"
-								class="peer sr-only"
-								name="tipo_colaborador"
-								value={opcion.value}
-								checked={tipoColaborador === opcion.value}
-								on:change={() => alternarTipoColaborador(opcion.value)}
-							/>
-							<label
-								for={`tipo-colaborador-${opcion.value}`}
-								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 transition hover:border-[rgb(var(--color-primary))] peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
-							>
-								<span class="text-base font-semibold text-gray-900">{opcion.label}</span>
-								<span class="text-sm text-gray-600">{opcion.descripcion}</span>
-							</label>
-						</div>
-					{/each}
+				<div class="grid gap-5 md:grid-cols-2">
+					<CampoFormulario
+						id="nombre"
+						name="nombre"
+						label={obtenerEtiquetaNombre()}
+						required
+						placeholder="Nombre"
+						bind:value={nombrePersona}
+						error={intentoEnvio ? errores.nombre : ''}
+						disabled={procesando}
+						icon={UserRound}
+						iconClass="text-sky-500"
+					/>
+
+					<CampoFormulario
+						id="apellido"
+						name="apellido"
+						label={obtenerEtiquetaApellido()}
+						required
+						placeholder="Apellido"
+						bind:value={apellidoPersona}
+						error={intentoEnvio ? errores.apellido : ''}
+						disabled={procesando}
+						icon={UserRound}
+						iconClass="text-sky-500"
+					/>
+				</div>
+
+				<div class="grid gap-5 md:grid-cols-2">
+					<div>
+						<label for="fecha_nacimiento" class="mb-2 block text-sm font-semibold text-slate-700">
+							{obtenerEtiquetaFecha()} <span class="text-red-600">*</span>
+						</label>
+						<DatePicker
+							id="fecha_nacimiento"
+							name="fecha_nacimiento"
+							bind:value={fechaNacimiento}
+							error={intentoEnvio ? errores.fecha_nacimiento : ''}
+							prefixIcon={Calendar}
+							prefixIconClass="text-slate-500"
+						/>
+					</div>
+					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
+						Usamos esta información únicamente para validar la edad mínima requerida por la
+						plataforma.
+					</p>
+				</div>
+
+				<div class="space-y-4">
+					<div>
+						<p class="text-sm font-semibold text-slate-800">
+							Tipo de colaborador/a <span class="text-red-600">*</span>
+						</p>
+						<p class="text-sm text-slate-500">
+							Elegí cómo vas a contribuir dentro de Conectando Corazones.
+						</p>
+					</div>
+					<div class="grid gap-4 md:grid-cols-2">
+						{#each opcionesTipoColaborador as opcion}
+							<div class="relative">
+								<input
+									id={`tipo-colaborador-${opcion.value}`}
+									type="radio"
+									class="peer sr-only"
+									name="tipo_colaborador"
+									value={opcion.value}
+									checked={tipoColaborador === opcion.value}
+									on:change={() => alternarTipoColaborador(opcion.value)}
+								/>
+								<label
+									for={`tipo-colaborador-${opcion.value}`}
+									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-sm transition ${
+										tipoColaborador === opcion.value
+											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
+											: 'border-slate-200 hover:border-sky-300'
+									} cursor-pointer peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+								>
+									<span
+										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
+											tipoColaborador === opcion.value
+												? 'bg-sky-50 text-sky-600'
+												: 'bg-slate-50 text-slate-600'
+										}`}
+										aria-hidden="true"
+									>
+										<svelte:component this={opcion.icon} class="h-5 w-5" stroke-width={1.7} />
+									</span>
+									<div>
+										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
+										<p class="text-sm text-slate-500">{opcion.descripcion}</p>
+									</div>
+								</label>
+							</div>
+						{/each}
+					</div>
 				</div>
 
 				{#if tipoColaborador === 'organizacion'}
-					<div
-						class="flex flex-col gap-6 rounded-2xl bg-blue-50/70 px-6 py-7 ring-1 ring-blue-100/80"
-					>
-						<legend class="text-base font-semibold text-blue-800">Datos de la organización</legend>
+					<div class="space-y-5 rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+						<p class="text-sm font-semibold text-slate-800">Datos de la organización</p>
 						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<div class="md:col-span-2">
 								<CampoFormulario
@@ -1288,6 +1610,8 @@
 									bind:value={razonSocial}
 									error={intentoEnvio ? errores.razon_social : ''}
 									disabled={procesando}
+									icon={Building2}
+									iconClass="text-sky-500"
 								/>
 							</div>
 
@@ -1310,57 +1634,6 @@
 						</div>
 					</div>
 				{/if}
-			</section>
-		{:else}
-			<section class="space-y-4">
-				<span class="font-semibold text-gray-800">
-					Tipo de institución <span class="text-red-600">*</span>
-				</span>
-				<div class="grid gap-4 md:grid-cols-3">
-					{#each opcionesTipoInstitucion as opcion}
-						<div class="relative">
-							<input
-								id={`tipo-institucion-${opcion.value}`}
-								type="radio"
-								class="peer sr-only"
-								name="tipo_institucion"
-								value={opcion.value}
-								checked={tipoInstitucionSeleccion === opcion.value}
-								on:change={() => actualizarTipoInstitucion(opcion.value)}
-							/>
-							<label
-								for={`tipo-institucion-${opcion.value}`}
-								class="flex h-full cursor-pointer flex-col gap-1 rounded-xl border border-gray-200 bg-white p-4 text-base font-semibold text-gray-900 transition hover:border-[rgb(var(--color-primary))] peer-checked:border-[rgb(var(--color-primary))] peer-checked:bg-[rgba(var(--color-primary),0.12)] peer-focus-visible:outline peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[rgb(var(--color-primary))]"
-							>
-								{opcion.label}
-							</label>
-						</div>
-					{/each}
-				</div>
-
-				{#if tipoInstitucionSeleccion === 'otro'}
-					<CampoFormulario
-						id="tipo_institucion_personalizado"
-						name="tipo_institucion_personalizado"
-						label="Especificá el tipo de institución"
-						required
-						placeholder="Ej: Centro comunitario"
-						bind:value={tipoInstitucionPersonalizado}
-						error={intentoEnvio ? errores.tipo_institucion : ''}
-						disabled={procesando}
-					/>
-				{/if}
-
-				<CampoFormulario
-					id="nombre_legal"
-					name="nombre_legal"
-					label="Nombre legal de la institución"
-					required
-					placeholder="Razón social registrada"
-					bind:value={nombreLegal}
-					error={intentoEnvio ? errores.nombre_legal : ''}
-					disabled={procesando}
-				/>
 			</section>
 		{/if}
 
@@ -1386,63 +1659,52 @@
 		class="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm"
 		aria-live="assertive"
 	>
-		<div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-100/80">
-			<div class="mb-6 flex items-center gap-3">
-				<span
-					class="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/18 via-blue-400/6 to-blue-500/0 text-[rgb(var(--color-primary))] ring-1 ring-blue-200/60"
-					aria-hidden="true"
-				>
-					<span class="absolute inset-0 rounded-2xl border border-white/40 opacity-70"></span>
-					<span class="absolute inset-0 animate-[pulse_2.8s_ease-in-out_infinite] bg-gradient-to-br from-white/60 to-transparent opacity-80"></span>
-					<svg xmlns="http://www.w3.org/2000/svg" class="relative h-5 w-5" viewBox="0 0 24 24" fill="none">
-						<path
-							d="M7 7V6a5 5 0 0110 0v1"
-							stroke="currentColor"
-							stroke-width="1.6"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-						<rect
-							x="5"
-							y="10"
-							width="14"
-							height="10"
-							rx="2"
-							stroke="currentColor"
-							stroke-width="1.6"
-						/>
-						<path
-							d="M12 14v2"
-							stroke="currentColor"
-							stroke-width="1.6"
-							stroke-linecap="round"
-						/>
-					</svg>
+		<div
+			class="w-full max-w-md rounded-3xl border border-slate-100 bg-white/95 p-6 shadow-[0_25px_60px_rgba(15,23,42,0.25)]"
+		>
+			<div class=" flex items-center gap-3">
+				<span class="inline-flex items-center text-[rgb(var(--color-primary))]" aria-hidden="true">
+					<LockKeyhole class="h-5 w-5" stroke-width={1.6} />
 				</span>
-				<div>
+				<div class="flex-1">
 					<h2 class="text-lg font-semibold text-slate-900">Reingresá tu contraseña</h2>
-					<p class="mt-1 text-sm text-slate-600">
-						Por seguridad nunca guardamos tu contraseña. Para continuar necesitás volver a
-						ingresarla y confirmarla.
-					</p>
 				</div>
 			</div>
+			<p class="mb-6 mt-1 text-sm text-slate-600">
+				Por seguridad no almacenamos tu contraseña, te pedimos que vuelvas a ingresarla antes de
+				continuar.
+			</p>
 
 			<div class="space-y-4">
 				<div>
 					<label for="modal_password" class="mb-1 block text-sm font-medium text-slate-700">
 						Contraseña
 					</label>
-					<input
-						id="modal_password"
-						name="modal_password"
-						type="password"
-						class={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
-							modalPasswordError ? 'border-red-300' : 'border-slate-200'
-						}`}
-						placeholder="Ingresá una contraseña segura"
-						bind:value={modalPassword}
-					/>
+					<div class="relative">
+						<input
+							id="modal_password"
+							name="modal_password"
+							type={mostrarModalPasswordTexto ? 'text' : 'password'}
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+								modalPasswordError ? 'border-red-300' : 'border-slate-200'
+							}`}
+							placeholder="Ingresá una contraseña segura"
+							bind:value={modalPassword}
+						/>
+						<button
+							type="button"
+							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+							on:click={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
+							aria-pressed={mostrarModalPasswordTexto}
+							aria-label={mostrarModalPasswordTexto ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+						>
+							{#if mostrarModalPasswordTexto}
+								<EyeOff class="h-4 w-4" stroke-width={1.7} />
+							{:else}
+								<Eye class="h-4 w-4" stroke-width={1.7} />
+							{/if}
+						</button>
+					</div>
 					{#if modalPasswordError}
 						<p class="mt-1 text-xs text-red-600">{modalPasswordError}</p>
 					{/if}
@@ -1451,16 +1713,34 @@
 					<label for="modal_password_confirm" class="mb-1 block text-sm font-medium text-slate-700">
 						Confirmar contraseña
 					</label>
-					<input
-						id="modal_password_confirm"
-						name="modal_password_confirm"
-						type="password"
-						class={`w-full rounded-2xl border px-4 py-3 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
-							modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
-						}`}
-						placeholder="Repetí la contraseña"
-						bind:value={modalPasswordConfirm}
-					/>
+					<div class="relative">
+						<input
+							id="modal_password_confirm"
+							name="modal_password_confirm"
+							type={mostrarModalPasswordConfirmTexto ? 'text' : 'password'}
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+								modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
+							}`}
+							placeholder="Repetí la contraseña"
+							bind:value={modalPasswordConfirm}
+						/>
+						<button
+							type="button"
+							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+							on:click={() =>
+								(mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
+							aria-pressed={mostrarModalPasswordConfirmTexto}
+							aria-label={mostrarModalPasswordConfirmTexto
+								? 'Ocultar confirmación de contraseña'
+								: 'Mostrar confirmación de contraseña'}
+						>
+							{#if mostrarModalPasswordConfirmTexto}
+								<EyeOff class="h-4 w-4" stroke-width={1.7} />
+							{:else}
+								<Eye class="h-4 w-4" stroke-width={1.7} />
+							{/if}
+						</button>
+					</div>
 					{#if modalPasswordConfirmError}
 						<p class="mt-1 text-xs text-red-600">{modalPasswordConfirmError}</p>
 					{/if}
@@ -1472,6 +1752,7 @@
 					type="button"
 					label="Volver a credenciales"
 					variant="secondary"
+					size="sm"
 					customClass="w-full sm:w-auto"
 					on:click={() => cerrarModalPassword({ regresarACredenciales: true })}
 				/>
@@ -1479,6 +1760,7 @@
 					type="button"
 					label="Guardar y continuar"
 					variant="primary"
+					size="sm"
 					customClass="w-full sm:w-auto"
 					on:click={confirmarModalPassword}
 				/>

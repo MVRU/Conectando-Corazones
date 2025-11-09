@@ -12,6 +12,15 @@
 	import type { Localidad } from '$lib/types/Localidad';
 	import { createEventDispatcher } from 'svelte';
 
+	type DireccionPayload = {
+		provinciaId: number | null;
+		provinciaNombre: string;
+		localidadId: number | null;
+		localidadNombre: string;
+		referencia?: string;
+		url_google_maps?: string;
+	};
+
 	let enviando = false;
 	let editandoUrlMapaGoogle = false;
 	// let calle = '';
@@ -43,7 +52,7 @@
 	export let etiquetaOmitir = 'Omitir';
 	export let solicitarSoloUbicacion = false;
 
-	const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; skip: void }>();
 
 	const convertirAString = (n?: number) => (n == null ? '' : String(n));
 
@@ -110,20 +119,18 @@
 
 		enviando = true;
 
-		// setTimeout(() => {
-		// 	enviando = false;
-		// 	const direccion: Direccion = {
-		// 		calle: requiereDireccionDetallada ? calle : '',
-		// 		numero: requiereDireccionDetallada ? numero : '',
-		// 		piso: requiereDireccionDetallada && piso ? piso : undefined,
-		// 		departamento: requiereDireccionDetallada && departamento ? departamento : undefined,
-		// 		referencia: requiereDireccionDetallada && referencia ? referencia : undefined,
-		// 		url_google_maps: requiereDireccionDetallada && urlGoogleMaps ? urlGoogleMaps : undefined,
-		// 		localidad_id: localidad?.id_localidad,
-		// 		localidad
-		// 	};
-		// 	dispatch('submit', direccion);
-		// }, 800);
+		setTimeout(() => {
+			enviando = false;
+			const payload: DireccionPayload = {
+				provinciaId: provincia?.id_provincia ?? null,
+				provinciaNombre: provincia?.nombre ?? '',
+				localidadId: localidad?.id_localidad ?? null,
+				localidadNombre: localidad?.nombre ?? '',
+				referencia: referencia?.trim() || undefined,
+				url_google_maps: requiereDireccionDetallada && urlGoogleMaps ? urlGoogleMaps : undefined
+			};
+			dispatch('submit', payload);
+		}, 800);
 	}
 </script>
 

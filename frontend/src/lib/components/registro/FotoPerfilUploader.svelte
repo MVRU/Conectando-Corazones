@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { createEventDispatcher, onDestroy, tick } from 'svelte';
+	import type { ComponentType } from 'svelte';
 	import { clsx } from 'clsx';
 
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { UserRoundPlus } from 'lucide-svelte';
 
 	export let id = '';
 	export let name = '';
@@ -12,10 +14,13 @@
 	export let placeholder = 'https://...';
 	export let helperText =
 		'Podés pegar un enlace o arrastrar una imagen en formato JPG, PNG o WebP.';
+	export let description = 'Subí una imagen cuadrada o tu isologotipo para personalizar tu perfil.';
 	export let accept = 'image/*';
 	export let error: string = '';
 	export let url = '';
 	export let file: File | null = null;
+	export let icon: ComponentType = UserRoundPlus;
+	export let iconClass = 'text-sky-600';
 
 	const dispatch = createEventDispatcher<{
 		url: string;
@@ -172,19 +177,34 @@
 	});
 </script>
 
-<fieldset
-	class="rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:border-[rgb(var(--color-primary))]"
->
-	<legend class="px-5 pt-5 text-sm font-semibold text-gray-800">
-		{label}
-		{#if optionalLabel}
-			<span class="ml-2 text-gray-500">{optionalLabel}</span>
+<fieldset class="rounded-2xl border border-slate-100 bg-white p-5">
+	<legend class="sr-only">{label}</legend>
+
+	<div class="space-y-5">
+		<div class="flex items-center gap-3">
+			<span
+				class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-sky-50"
+				aria-hidden="true"
+			>
+				<svelte:component this={icon} class={clsx('h-5 w-5', iconClass)} stroke-width={1.7} />
+			</span>
+			<div class="flex items-baseline gap-2">
+				<p class="text-base font-semibold text-slate-900">{label}</p>
+				{#if optionalLabel}
+					<span class="text-sm font-normal text-slate-400">{optionalLabel}</span>
+				{/if}
+			</div>
+		</div>
+
+		{#if description}
+			<p class="text-sm text-slate-500">{description}</p>
 		{/if}
-	</legend>
-	<div class="space-y-5 p-5">
-		<div class="flex flex-wrap items-center justify-between gap-3">
-			<p class="text-sm text-gray-600">{helperText}</p>
-			<div class="inline-flex rounded-full bg-gray-100 p-1 text-sm font-medium shadow-inner">
+
+		<div
+			class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-slate-50/70 px-4 py-3"
+		>
+			<p class="text-sm text-slate-600">{helperText}</p>
+			<div class="inline-flex rounded-full bg-white/90 p-1 text-sm font-medium shadow-inner">
 				{#each botonesModo as boton}
 					<button
 						type="button"

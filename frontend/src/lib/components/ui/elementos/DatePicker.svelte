@@ -1,11 +1,14 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
+	import type { ComponentType } from 'svelte';
 
 	export let id = '';
 	export let name = '';
 	export let required = false;
 	export let value: Date | null = null;
 	export let error = '';
+	export let prefixIcon: ComponentType | null = null;
+	export let prefixIconClass = '';
 
 	let internal = '';
 	let ultimaCadenaProcesada: string | null = null;
@@ -53,6 +56,8 @@
 	bind:value={internal}
 	{required}
 	{error}
+	{prefixIcon}
+	{prefixIconClass}
 	on:input={handleEntrada}
 	on:change={handleEntrada}
 />

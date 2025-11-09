@@ -2,6 +2,7 @@
 
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
+	import type { ComponentType } from 'svelte';
 
 	export let id: string;
 	export let label: string;
@@ -13,6 +14,8 @@
 	export let error: string = '';
 	export let disabled = false;
 	export let name: string | undefined = undefined;
+	export let icon: ComponentType | null = null;
+	export let iconClass = '';
 </script>
 
 <div class="group space-y-2">
@@ -25,5 +28,17 @@
 			<span class="text-base font-semibold leading-none text-red-500" aria-hidden="true">*</span>
 		{/if}
 	</label>
-	<Input {id} {name} bind:value {type} {placeholder} {autocomplete} {error} {required} {disabled} />
+	<Input
+		{id}
+		{name}
+		bind:value
+		{type}
+		{placeholder}
+		{autocomplete}
+		{error}
+		{required}
+		{disabled}
+		prefixIcon={icon}
+		prefixIconClass={iconClass}
+	/>
 </div>
