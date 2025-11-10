@@ -2,6 +2,7 @@
  * * Componente: ProyectoParticipaciones
  * -!- Para agregar los tipos de participaciones permitidas y sus objetivos.
  -->
+ 
 <script lang="ts">
 	import {
 		obtenerClasesColor,

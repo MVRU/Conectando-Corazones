@@ -5,6 +5,8 @@
 	import { getParticipacionVisual } from '$lib/utils/util-proyectos';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import type { ComponentType } from 'svelte';
+	import { HandHeart, HelpCircle } from 'lucide-svelte';
 
 	export let proyecto: Proyecto;
 	export let mostrarFormulario: () => void;
@@ -14,73 +16,90 @@
 	const multiplesObjetivos = participaciones.length > 1;
 	const unicoObjetivo = tieneUnSoloObjetivo ? participaciones[0] : null;
 
-	type UnidadInfo = {
-		bg: string;
-		border: string;
-		text: string;
-		icon: string;
-		label: string;
-		button: string;
-		objetivoLabel?: string;
-		actualLabel?: string;
+	 type UnidadInfo = {
+                bg: string;
+                border: string;
+                text: string;
+                icon: ComponentType;
+                iconBg: string;
+                iconColor: string;
+                label: string;
+                button: string;
+                objetivoLabel?: string;
+                actualLabel?: string;
 	};
 
 	function getUnidadInfo(obj: ParticipacionPermitida | null, multiples: boolean): UnidadInfo {
 		if (multiples) {
-			return {
-				bg: 'bg-yellow-50',
-				border: 'border-yellow-200',
-				text: 'text-yellow-800',
-				icon: '🤝',
-				label: 'ayuda múltiple (donaciones, materiales o voluntariado)',
-				button: 'Colaborar ahora'
-			};
-		}
+                        return {
+                                bg: 'bg-sky-50',
+                                border: 'border-sky-200',
+                                text: 'text-sky-900',
+                                icon: HandHeart,
+                                iconBg: 'bg-sky-100',
+                                iconColor: 'text-sky-600',
+                                label: 'ayuda múltiple (donaciones, materiales o voluntariado)',
+                                button: 'Colaborar ahora'
+                        };
+                }
 
-		if (!obj) {
-			return {
-				bg: 'bg-gray-50',
-				border: 'border-gray-200',
-				text: 'text-gray-800',
-				icon: '❓',
-				label: 'colaboración',
-				button: 'Colaborar'
-			};
-		}
+                if (!obj) {
+                        return {
+                                bg: 'bg-gray-50',
+                                border: 'border-gray-200',
+                                text: 'text-gray-800',
+                                icon: HelpCircle,
+                                iconBg: 'bg-gray-200',
+                                iconColor: 'text-gray-600',
+                                label: 'colaboración',
+                                button: 'Colaborar'
+                        };
+                }
 
-		const { color, icono, objetivoLabel, actualLabel } = getParticipacionVisual(obj);
+                const { color, icono, iconColor, objetivoLabel, actualLabel } = getParticipacionVisual(obj);
 
-		const colorMap = {
-			green: {
-				bg: 'bg-green-50',
-				border: 'border-green-200',
-				text: 'text-green-800',
-				label: `donaciones monetarias (${obj.unidad_medida || 'pesos'})`,
-				button: 'Donar ahora'
-			},
-			purple: {
-				bg: 'bg-purple-50',
-				border: 'border-purple-200',
-				text: 'text-purple-800',
-				label: 'voluntariado',
-				button: 'Postularme como voluntario'
-			},
-			blue: {
-				bg: 'bg-blue-50',
-				border: 'border-blue-200',
-				text: 'text-blue-800',
-				label: obj.unidad_medida ? `donaciones de ${obj.unidad_medida}` : 'donaciones específicas',
-				button: 'Donar materiales'
-			}
-		} as const;
+                const colorMap: Record<ReturnType<typeof getParticipacionVisual>['color'], {
+                        bg: string;
+                        border: string;
+                        text: string;
+                        iconBg: string;
+                        label: string;
+                        button: string;
+                }> = {
+                        green: {
+                                bg: 'bg-emerald-50',
+                                border: 'border-emerald-200',
+                                text: 'text-emerald-800',
+                                iconBg: 'bg-emerald-100',
+                                label: `donaciones monetarias (${obj.unidad_medida || 'pesos'})`,
+                                button: 'Donar ahora'
+                        },
+                        purple: {
+                                bg: 'bg-purple-50',
+                                border: 'border-purple-200',
+                                text: 'text-purple-800',
+                                iconBg: 'bg-purple-100',
+                                label: 'voluntariado',
+                                button: 'Postularme como voluntario'
+                        },
+                        blue: {
+                                bg: 'bg-blue-50',
+                                border: 'border-blue-200',
+                                text: 'text-blue-800',
+                                iconBg: 'bg-sky-100',
+                                label: obj.unidad_medida ? `donaciones de ${obj.unidad_medida}` : 'donaciones específicas',
+                                button: 'Donar materiales'
+                        }
+                } as const;
 
-		return {
-			...colorMap[color],
-			icon: icono,
-			objetivoLabel,
-			actualLabel
-		};
-	}
+                return {
+                        ...colorMap[color],
+                        icon: icono,
+                        iconColor,
+                        objetivoLabel,
+                        actualLabel
+                };
+        }
 
 	const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
 
@@ -96,20 +115,32 @@
 	<h3 class="mb-4 text-center text-lg font-semibold text-gray-800">¿Querés colaborar?</h3>
 
 	{#if multiplesObjetivos}
-		<div class={`mb-5 flex items-start gap-3 rounded-lg p-3 ${unidadInfo.bg} ${unidadInfo.border}`}>
-			<span class="text-xl">{unidadInfo.icon}</span>
-			<p class={`text-sm ${unidadInfo.text}`}>
-				Este proyecto necesita <strong>{unidadInfo.label}</strong>.
-			</p>
-		</div>
-	{:else if tieneUnSoloObjetivo}
-		<div class={`mb-5 flex items-start gap-3 rounded-lg p-3 ${unidadInfo.bg} ${unidadInfo.border}`}>
-			<span class="text-xl">{unidadInfo.icon}</span>
-			<p class={`text-sm ${unidadInfo.text}`}>
-				Este proyecto necesita <strong>{unidadInfo.label}</strong>.
-				{#if unicoObjetivo}
-					<span class="mt-1 block text-xs text-gray-500">
-						Objetivo: {unidadInfo.objetivoLabel}
+                <div class={`mb-5 flex items-start gap-3 rounded-lg p-3 ${unidadInfo.bg} ${unidadInfo.border}`}>
+                        <span class={`flex h-10 w-10 items-center justify-center rounded-full ${unidadInfo.iconBg}`}>
+                                <svelte:component
+                                        this={unidadInfo.icon}
+                                        class={`h-5 w-5 ${unidadInfo.iconColor}`}
+                                        aria-hidden="true"
+                                />
+                        </span>
+                        <p class={`text-sm ${unidadInfo.text}`}>
+                                Este proyecto necesita <strong>{unidadInfo.label}</strong>.
+                        </p>
+                </div>
+        {:else if tieneUnSoloObjetivo}
+                <div class={`mb-5 flex items-start gap-3 rounded-lg p-3 ${unidadInfo.bg} ${unidadInfo.border}`}>
+                        <span class={`flex h-10 w-10 items-center justify-center rounded-full ${unidadInfo.iconBg}`}>
+                                <svelte:component
+                                        this={unidadInfo.icon}
+                                        class={`h-5 w-5 ${unidadInfo.iconColor}`}
+                                        aria-hidden="true"
+                                />
+                        </span>
+                        <p class={`text-sm ${unidadInfo.text}`}>
+                                Este proyecto necesita <strong>{unidadInfo.label}</strong>.
+                                {#if unicoObjetivo}
+                                        <span class="mt-1 block text-xs text-gray-500">
+                                                Objetivo: {unidadInfo.objetivoLabel}
 						{#if unicoObjetivo.actual !== undefined}
 							&nbsp;|&nbsp; Actual: {unidadInfo.actualLabel}
 						{/if}

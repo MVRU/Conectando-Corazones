@@ -1,7 +1,8 @@
 <!--
-* Componente: ProyectoUbicaciones
-  -*- Para agregar las ubicaciones del proyecto
+	* Componente: ProyectoUbicaciones
+  	-*- Para agregar las ubicaciones del proyecto
  -->
+
 <script lang="ts">
 	import { provincias } from '$lib/data/provincias';
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';

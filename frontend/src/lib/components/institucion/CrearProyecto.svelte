@@ -1,4 +1,4 @@
-
+﻿
 <!--
 	Formulario completo para que las instituciones creen nuevos proyectos.
 	Incluye: información básica, categorías, tipos de participación y ubicaciones.
@@ -9,9 +9,9 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
 	import ProyectoParticipaciones from './ProyectoParticipaciones.svelte';
-	import ProyectoDirecciones from './ProyectoDirecciones.svelte';
-	import type { ParticipacionForm, UbicacionFormulario, DireccionFormulario } from '$lib/types/forms/CrearProyectoForm';
-	import type { TipoUbicacion } from '$lib/types/Ubicacion';
+	import ProyectoUbicaciones from './ProyectoUbicaciones.svelte';
+	import type { ParticipacionForm, UbicacionFormulario } from '$lib/types/forms/CrearProyectoForm';
+	import type { TipoUbicacion, ModalidadUbicacion } from '$lib/types/Ubicacion';
 	import { provincias } from '$lib/data/provincias';
 	import {
 		MENSAJES_ERROR,
@@ -31,6 +31,7 @@
 	} from '$lib/utils/util-proyecto-form';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';
+	import type { UbicacionCreate } from '$lib/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/types/dto/ParticipacionPermitidaCreate';
 
 	let titulo = '';
@@ -45,15 +46,16 @@
 	let ubicaciones: UbicacionFormulario[] = [
 		{
 			tipo_ubicacion: 'principal',
-			que_se_hace: '',
-			direccion: {
+			modalidad: '',
+			direccion_presencial: {
 				calle: '',
 				numero: '',
 				referencia: '',
 				localidad_id: undefined,
 				provincia: '',
 				localidad_nombre: ''
-			}
+			},
+			url_virtual: ''
 		}
 	];
 
@@ -149,53 +151,57 @@
 			? validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
 			: null;
 		if (errCatOtra) errores.categoria_otra = errCatOtra;
-		if (ubicaciones.length === 0) errores.ubicaciones = 'Debe agregar al menos una ubicación';
-		// Cómputos para requerimiento condicional de "que_se_hace"
-		const ubicacionesConTipo = ubicaciones
-			.map((u, i) => ({ i, tipo: (u.tipo_ubicacion || '').trim() }))
-			.filter((x) => x.tipo);
-		const esUnicaBasica =
-			ubicacionesConTipo.length === 1 &&
-			(ubicacionesConTipo[0]?.tipo === 'principal' || ubicacionesConTipo[0]?.tipo === 'virtual');
-		const indiceUnicaBasica = esUnicaBasica ? ubicacionesConTipo[0].i : -1;
+		if (ubicaciones.length === 0) errores.ubicaciones = 'Debe agregar al menos una ubicacion';
 
 		ubicaciones.forEach((ubicacion, index) => {
-			const prefix = `ubicacion_${index}`;
-			if (ubicacion.tipo_ubicacion === '') errores[`${prefix}_tipo`] = MENSAJES_ERROR.obligatorio;
-			if (ubicacion.tipo_ubicacion !== 'virtual') {
-				if (!ubicacion.direccion.provincia) {
-					errores[`${prefix}_provincia`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarProvincia(ubicacion.direccion.provincia)) {
-					errores[`${prefix}_provincia`] = MENSAJES_ERROR.provinciaInvalida;
-				}
-				if (!ubicacion.direccion.localidad_id) {
-					errores[`${prefix}_localidad`] = MENSAJES_ERROR.obligatorio;
-				} else {
-					const provincia = provincias.find((p) => p.nombre === ubicacion.direccion.provincia);
-					if (
-						provincia &&
-						!validarCiudadEnProvincia(ubicacion.direccion.localidad_id, provincia.id_provincia)
-					) {
-						errores[`${prefix}_localidad`] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
-					}
-				}
-				if (!ubicacion.direccion.calle) {
-					errores[`${prefix}_calle`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarCalle(ubicacion.direccion.calle)) {
-					errores[`${prefix}_calle`] = MENSAJES_ERROR.calleInvalida;
-				}
-				if (!ubicacion.direccion.numero) {
-					errores[`${prefix}_numero`] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarNumeroCalle(ubicacion.direccion.numero)) {
-					errores[`${prefix}_numero`] = MENSAJES_ERROR.numeroCalleInvalido;
-				}
+			const prefix = 'ubicacion_' + index;
+			if (!(ubicacion.tipo_ubicacion || '').trim()) {
+				errores[prefix + '_tipo'] = MENSAJES_ERROR.obligatorio;
 			}
 
-			// Validación de "qué se hace": requerida excepto si es la única básica
-			const q = (ubicacion.que_se_hace || '').normalize('NFC').trim().replace(/\s+/g, ' ');
-			if (index !== indiceUnicaBasica) {
-				if (!q || q.length < 10) {
-					errores[`${prefix}_que_se_hace`] = 'Describí brevemente qué se hace (mín. 10 caracteres)';
+			if (!ubicacion.modalidad) {
+				errores[prefix + '_modalidad'] = MENSAJES_ERROR.obligatorio;
+				return;
+			}
+
+			if (ubicacion.modalidad === 'virtual') {
+				const url = (ubicacion.url_virtual || '').trim();
+				if (!url) {
+					errores[prefix + '_url_virtual'] = 'La URL virtual es obligatoria'; // TODO: corregir para que no sea obligatoria
+				} else if (!validarUrl(url)) {
+					errores[prefix + '_url_virtual'] = MENSAJES_ERROR.urlInvalida;
+				}
+				return;
+			}
+
+			if (ubicacion.modalidad === 'presencial') {
+				const direccion = ubicacion.direccion_presencial;
+				if (!direccion) {
+					errores[prefix + '_provincia'] = MENSAJES_ERROR.obligatorio;
+					return;
+				}
+				if (!direccion.provincia) {
+					errores[prefix + '_provincia'] = MENSAJES_ERROR.obligatorio;
+				} else if (!validarProvincia(direccion.provincia)) {
+					errores[prefix + '_provincia'] = MENSAJES_ERROR.provinciaInvalida;
+				}
+				if (!direccion.localidad_id) {
+					errores[prefix + '_localidad'] = MENSAJES_ERROR.obligatorio;
+				} else {
+					const provincia = provincias.find((p) => p.nombre === direccion.provincia);
+					if (provincia && !validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)) {
+						errores[prefix + '_localidad'] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
+					}
+				}
+				if (!direccion.calle) {
+					errores[prefix + '_calle'] = MENSAJES_ERROR.obligatorio;
+				} else if (!validarCalle(direccion.calle)) {
+					errores[prefix + '_calle'] = MENSAJES_ERROR.calleInvalida;
+				}
+				if (!direccion.numero) {
+					errores[prefix + '_numero'] = MENSAJES_ERROR.obligatorio;
+				} else if (!validarNumeroCalle(direccion.numero)) {
+					errores[prefix + '_numero'] = MENSAJES_ERROR.numeroCalleInvalido;
 				}
 			}
 		});
@@ -204,17 +210,17 @@
 		const principalCount = ubicaciones.filter(
 			(u) => (u.tipo_ubicacion || '').trim() === 'principal'
 		).length;
-		if (principalCount > 1)
-			errores.ubicaciones_principal = 'Solo puede haber una ubicación de tipo "Principal".';
+		if (principalCount > 1) {
+			errores.ubicaciones_principal = 'Solo puede haber una ubicacion de tipo Principal.';
+		}
 		const firstTipo = (ubicaciones[0]?.tipo_ubicacion || '').trim();
 		if (firstTipo && firstTipo !== 'principal' && firstTipo !== 'virtual') {
-			errores.ubicaciones_principal = 'La primera ubicación debe ser Principal o Virtual.';
+			errores.ubicaciones_principal = 'La primera ubicacion debe ser Principal o Virtual.';
 		}
 
 		if (tiposParticipacionSeleccionados.length === 0) {
-			errores.participacion = 'Debe seleccionar al menos un tipo de participación';
+			errores.participacion = 'Debe seleccionar al menos un tipo de participacion';
 		}
-
 		const vistosEspecie = new Map<string, number>();
 		participacionesPermitidas.forEach((p, index) => {
 			if (!p.objetivo || p.objetivo <= 0) {
@@ -235,9 +241,9 @@
 				} else if (!/\p{L}/u.test(especieNorm)) {
 					errores[`participacion_${index}_especie`] = 'Debe incluir letras';
 				} else if (/^\d+$/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'No puede ser solo n�meros';
+					errores[`participacion_${index}_especie`] = 'No puede ser solo nï¿½meros';
 				} else if (!/^[\p{L}\p{N} .,'/%()-]+$/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'Us� solo letras, n�meros y signos comunes';
+					errores[`participacion_${index}_especie`] = 'Usï¿½ solo letras, nï¿½meros y signos comunes';
 				}
 			} else {
 				// Detección de duplicados para Especie: misma especie + unidad
@@ -283,25 +289,35 @@
 		}
 
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
-			tipo_participacion: (p.tipo_participacion?.descripcion ||
-				'Voluntariado') as TipoParticipacionDescripcion,
+			tipo_participacion: (p.tipo_participacion?.descripcion || 'Voluntariado') as TipoParticipacionDescripcion,
 			objetivo: Number(p.objetivo) || 0,
 			unidad_medida: p.unidad_medida === 'Otra' ? p.unidad_medida_otra || '' : p.unidad_medida,
 			especie: p.tipo_participacion?.descripcion === 'Especie' ? p.especie || '' : undefined
 		}));
 
-		const ubicacionesCargadas = ubicaciones
-			.filter((u) => u.tipo_ubicacion !== '')
-			.map((u) => ({
-				tipo_ubicacion: u.tipo_ubicacion as TipoUbicacion,
-				que_se_hace: u.que_se_hace,
-				direccion: {
-					calle: u.direccion.calle,
-					numero: u.direccion.numero,
-					referencia: u.direccion.referencia || undefined,
-					localidad_id: u.direccion.localidad_id as number
+		const ubicacionesCargadas: UbicacionCreate[] = ubicaciones
+			.filter((u) => (u.tipo_ubicacion || '').trim())
+			.map((u) => {
+				const tipo = u.tipo_ubicacion as TipoUbicacion;
+				const modalidad = (u.modalidad || 'presencial') as ModalidadUbicacion;
+				const carga: UbicacionCreate = { tipo_ubicacion: tipo, modalidad };
+				if (modalidad === 'presencial' && u.direccion_presencial) {
+					const direccion = u.direccion_presencial;
+					carga.direccion_presencial = {
+						calle: direccion.calle,
+						numero: direccion.numero,
+						referencia: direccion.referencia?.trim() || undefined,
+						piso: direccion.piso?.trim() || undefined,
+						departamento: direccion.departamento?.trim() || undefined,
+						url_google_maps: direccion.url_google_maps?.trim() || undefined,
+						localidad_id: direccion.localidad_id
+					};
+				} else if (modalidad === 'virtual') {
+					const url = u.url_virtual?.trim();
+					if (url) carga.url_virtual = url;
 				}
-			}));
+				return carga;
+			});
 
 		const payload: ProyectoCreate = {
 			titulo,
@@ -313,20 +329,22 @@
 			participaciones,
 			ubicaciones: ubicacionesCargadas
 		};
+
 		console.log('Payload listo', payload);
 	}
+
 </script>
 
 <svelte:head>
 	<title>Crear Proyecto - Conectando Corazones</title>
-	<meta name="description" content="Crea un nuevo proyecto para tu institución" />
+	<meta name="description" content="Creá un nuevo proyecto para tu institución" />
 </svelte:head>
 
 <main class="min-h-screen bg-gray-50">
 	<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">Crear nuevo proyecto</h1>
-			<p class="mt-2 text-gray-600">Complete la información para crear su proyecto</p>
+			<p class="mt-2 text-gray-600">Completá la información para crear su proyecto</p>
 		</div>
 
 		<form on:submit|preventDefault={enviarFormulario} class="space-y-8">
@@ -350,7 +368,7 @@
 				{limpiarError}
 			/>
 
-			<ProyectoDirecciones bind:ubicaciones {errores} {limpiarError} />
+			<ProyectoUbicaciones bind:ubicaciones {errores} />
 
 			<div class="flex justify-end">
 				<Button type="submit" label="Crear proyecto" />

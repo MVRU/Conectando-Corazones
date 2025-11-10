@@ -2,6 +2,7 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Colaboracion } from '$lib/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+	import type { EstadoDescripcion } from '$lib/types/Estado';
 
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
@@ -59,6 +60,18 @@
 		return colores[estado] || 'bg-gray-500';
 	}
 
+	function getBadgeColor(estado: EstadoDescripcion): string {
+		const palette: Record<EstadoDescripcion, string> = {
+			en_curso: 'text-emerald-600 border-emerald-200',
+			pendiente_solicitud_cierre: 'text-orange-600 border-orange-200',
+			en_revision: 'text-amber-600 border-amber-200',
+			en_auditoria: 'text-indigo-600 border-indigo-200',
+			completado: 'text-sky-600 border-sky-200',
+			cancelado: 'text-red-600 border-red-200'
+		};
+		return palette[estado] || 'text-gray-600 border-gray-300';
+	}
+
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: colorCirculoEstado = getColorCirculoEstado(estadoCodigo);
 </script>
@@ -73,7 +86,7 @@
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<!-- 1. Encabezado visual -->
 			<div class="mb-8">
-				<ProyectoHeader {proyecto} />
+				<ProyectoHeader {proyecto} getColorEstado={getBadgeColor} />
 			</div>
 
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -360,3 +373,8 @@
 		</div>
 	</main>
 {/if}
+
+
+
+
+
