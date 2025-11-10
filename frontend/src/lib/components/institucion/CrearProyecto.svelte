@@ -1,10 +1,4 @@
-﻿
-<!--
-	Formulario completo para que las instituciones creen nuevos proyectos.
-	Incluye: información básica, categorías, tipos de participación y ubicaciones.
--->
-
-<script lang="ts">
+﻿<script lang="ts">
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
@@ -68,10 +62,12 @@
 
 	import { toKey } from '$lib/utils/util-proyecto-form';
 	const categoriasKeys = mockCategorias.map((c) => toKey(c.descripcion || '')).filter(Boolean);
+
 	function esCategoriaRepetida(s: string): boolean {
 		const key = toKey(s);
 		return categoriasKeys.includes(key);
 	}
+
 	function validarCategoriaOtraDescripcion(s: string): string | null {
 		if (s == null) return 'Este campo es obligatorio';
 		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
@@ -88,7 +84,6 @@
 		return null;
 	}
 
-	// Id de la categoría "Otra" y validación inmediata del campo especificado
 	const idCategoriaOtra = mockCategorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 	)?.id_categoria;
@@ -130,6 +125,7 @@
 	function validarFormulario(): boolean {
 		errores = {};
 
+		// Campos básicos
 		const errTitulo = validarTituloProyecto(titulo);
 		if (errTitulo) errores.titulo = errTitulo;
 		const errDesc = validarDescripcionProyecto(descripcion);
@@ -147,11 +143,13 @@
 		if (errBen) errores.beneficiarios = errBen;
 		if (categoriasSeleccionadas.length === 0)
 			errores.categorias = 'Debe seleccionar al menos una categoría';
+
 		const errCatOtra = categoriaOtraDescripcion
 			? validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
 			: null;
 		if (errCatOtra) errores.categoria_otra = errCatOtra;
-		if (ubicaciones.length === 0) errores.ubicaciones = 'Debe agregar al menos una ubicacion';
+
+		if (ubicaciones.length === 0) errores.ubicaciones = 'Debe agregar al menos una ubicación';
 
 		ubicaciones.forEach((ubicacion, index) => {
 			const prefix = 'ubicacion_' + index;
@@ -164,11 +162,10 @@
 				return;
 			}
 
+			// URL virtual opcional
 			if (ubicacion.modalidad === 'virtual') {
 				const url = (ubicacion.url_virtual || '').trim();
-				if (!url) {
-					errores[prefix + '_url_virtual'] = 'La URL virtual es obligatoria'; // TODO: corregir para que no sea obligatoria
-				} else if (!validarUrl(url)) {
+				if (url && !validarUrl(url)) {
 					errores[prefix + '_url_virtual'] = MENSAJES_ERROR.urlInvalida;
 				}
 				return;
@@ -206,78 +203,20 @@
 			}
 		});
 
-		// Reglas adicionales de ubicaciones
 		const principalCount = ubicaciones.filter(
 			(u) => (u.tipo_ubicacion || '').trim() === 'principal'
 		).length;
 		if (principalCount > 1) {
-			errores.ubicaciones_principal = 'Solo puede haber una ubicacion de tipo Principal.';
+			errores.ubicaciones_principal = 'Solo puede haber una ubicación de tipo "Principal".';
 		}
 		const firstTipo = (ubicaciones[0]?.tipo_ubicacion || '').trim();
 		if (firstTipo && firstTipo !== 'principal' && firstTipo !== 'virtual') {
-			errores.ubicaciones_principal = 'La primera ubicacion debe ser Principal o Virtual.';
+			errores.ubicaciones_principal = 'La primera ubicación debe ser "Principal" o "Virtual".';
 		}
 
 		if (tiposParticipacionSeleccionados.length === 0) {
-			errores.participacion = 'Debe seleccionar al menos un tipo de participacion';
+			errores.participacion = 'Debe seleccionar al menos un tipo de participación';
 		}
-		const vistosEspecie = new Map<string, number>();
-		participacionesPermitidas.forEach((p, index) => {
-			if (!p.objetivo || p.objetivo <= 0) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo debe ser mayor a 0';
-			}
-			if (p.tipo_participacion?.descripcion === 'Especie') {
-				const especieNorm = (p.especie || '')
-					.normalize('NFC')
-					.trim()
-					.replace(/\s+/g, ' ')
-					.toLocaleLowerCase('es-AR');
-				if (!especieNorm) {
-					errores[`participacion_${index}_especie`] = 'La especie es obligatoria';
-				} else if (!/^\p{L}/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'Debe comenzar con una letra';
-				} else if (especieNorm.length < 3) {
-					errores[`participacion_${index}_especie`] = 'Debe tener al menos 3 caracteres';
-				} else if (!/\p{L}/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'Debe incluir letras';
-				} else if (/^\d+$/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'No puede ser solo nï¿½meros';
-				} else if (!/^[\p{L}\p{N} .,'/%()-]+$/u.test(especieNorm)) {
-					errores[`participacion_${index}_especie`] = 'Usï¿½ solo letras, nï¿½meros y signos comunes';
-				}
-			} else {
-				// Detección de duplicados para Especie: misma especie + unidad
-				const especieNorm = (p.especie || '')
-					.normalize('NFC')
-					.trim()
-					.replace(/\s+/g, ' ')
-					.toLocaleLowerCase('es-AR');
-				const uni = unidadEfectiva({
-					unidad_medida: p.unidad_medida,
-					unidad_medida_otra: p.unidad_medida_otra
-				});
-				const uniNorm = (uni || '')
-					.normalize('NFC')
-					.trim()
-					.replace(/\s+/g, ' ')
-					.toLocaleLowerCase('es-AR');
-				if (especieNorm) {
-					const key = `${especieNorm}|${uniNorm}`;
-					const ya = vistosEspecie.get(key);
-					if (ya != null) {
-						if (!errores[`participacion_${ya}_especie`])
-							errores[`participacion_${ya}_especie`] = 'Item duplicado (misma especie y unidad)';
-						errores[`participacion_${index}_especie`] = 'Item duplicado (misma especie y unidad)';
-					} else {
-						vistosEspecie.set(key, index);
-					}
-				}
-			}
-			if (p.unidad_medida === 'Otra') {
-				const errU = validarUnidadMedidaOtra(p.unidad_medida_otra || '');
-				if (errU) errores[`participacion_${index}_unidad_otra`] = errU;
-			}
-		});
 
 		return Object.keys(errores).length === 0;
 	}
@@ -301,16 +240,17 @@
 				const tipo = u.tipo_ubicacion as TipoUbicacion;
 				const modalidad = (u.modalidad || 'presencial') as ModalidadUbicacion;
 				const carga: UbicacionCreate = { tipo_ubicacion: tipo, modalidad };
+
 				if (modalidad === 'presencial' && u.direccion_presencial) {
-					const direccion = u.direccion_presencial;
+					const d = u.direccion_presencial;
 					carga.direccion_presencial = {
-						calle: direccion.calle,
-						numero: direccion.numero,
-						referencia: direccion.referencia?.trim() || undefined,
-						piso: direccion.piso?.trim() || undefined,
-						departamento: direccion.departamento?.trim() || undefined,
-						url_google_maps: direccion.url_google_maps?.trim() || undefined,
-						localidad_id: direccion.localidad_id
+						calle: d.calle,
+						numero: d.numero,
+						referencia: d.referencia?.trim() || undefined,
+						piso: d.piso?.trim() || undefined,
+						departamento: d.departamento?.trim() || undefined,
+						url_google_maps: d.url_google_maps?.trim() || undefined,
+						localidad_id: d.localidad_id
 					};
 				} else if (modalidad === 'virtual') {
 					const url = u.url_virtual?.trim();
@@ -332,7 +272,6 @@
 
 		console.log('Payload listo', payload);
 	}
-
 </script>
 
 <svelte:head>
@@ -344,7 +283,7 @@
 	<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 		<div class="mb-8">
 			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">Crear nuevo proyecto</h1>
-			<p class="mt-2 text-gray-600">Completá la información para crear su proyecto</p>
+			<p class="mt-2 text-gray-600">Completá la información para crear tu proyecto</p>
 		</div>
 
 		<form on:submit|preventDefault={enviarFormulario} class="space-y-8">

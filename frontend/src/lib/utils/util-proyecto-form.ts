@@ -80,19 +80,6 @@ export function formatearFechaLarga(iso?: string, estilo: 'de' | 'del' = 'de'): 
 	return estilo === 'del' ? base.replace(/\sde\s(\d{4})$/, ' del $1') : base;
 }
 
-export function obtenerPlaceholderQueSehace(tipo: string): string {
-	switch (tipo) {
-		case 'principal':
-			return 'Ejemplo: aquí se realiza el voluntariado';
-		case 'alternativa':
-			return 'Ejemplo: aquí se juntan los juguetes desde las 16h hasta las 18h';
-		case 'virtual':
-			return 'Ejemplo: se realizan las reuniones virtuales los días martes a las 19h';
-		default:
-			return 'Describí las actividades que se realizan en esta ubicación...';
-	}
-}
-
 export function obtenerDescripcionTipo(tipo: string): string {
 	return tipo.charAt(0).toUpperCase() + tipo.slice(1);
 }
@@ -176,8 +163,8 @@ export function validarTituloProyecto(t: string): string | null {
   if (/^\d+$/u.test(v)) return 'No puede ser solo números';
   // Debe contener al menos una letra y solo caracteres comunes
   if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
-  if (!/^[\p{L}\p{N} .,'!?:;\-()\/&]+$/u.test(v))
-    return 'Usá solo letras, números y signos comunes';
+  if (!/^[\p{L}\p{N} .,'!?:;\-()/&]+$/u.test(v))
+	return 'Usá solo letras, números y signos comunes';
   return null;
 }
 

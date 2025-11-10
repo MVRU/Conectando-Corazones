@@ -1,6 +1,6 @@
 import type { Localidad } from './Localidad';
 
-export const TIPO_UBICACION = ['principal','alternativa','voluntariado'] as const;
+export const TIPO_UBICACION = ['principal','alternativa','voluntariado', 'reuniones'] as const;
 export const MODALIDAD_UBICACION = ['presencial', 'virtual'] as const;
 
 export type TipoUbicacionBase = (typeof TIPO_UBICACION)[number];
