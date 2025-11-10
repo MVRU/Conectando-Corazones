@@ -75,7 +75,9 @@ export function filtrarProyectos(
 	if (provincia !== 'Todas') {
 		resultado = resultado.filter(
 			(p) =>
-				getProvinciaFromLocalidad(p.ubicaciones?.[0]?.ubicacion?.localidad)?.nombre === provincia
+				p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
+					? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
+					: false
 		);
 	}
 
@@ -129,8 +131,10 @@ export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'):
 	const ubicacion = getUbicacionPrincipal(proyecto);
 	if (!ubicacion) return virtualLabel;
 
-	const ciudad = ubicacion.ubicacion?.localidad?.nombre;
-	const provincia = getProvinciaFromLocalidad(ubicacion.ubicacion?.localidad)?.nombre;
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+	const provincia = getProvinciaFromLocalidad(localidadObj)?.nombre;
 
 	if (ciudad && provincia) return `${ciudad}, ${provincia}`;
 	return ciudad ?? provincia ?? virtualLabel;

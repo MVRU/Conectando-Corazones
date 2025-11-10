@@ -3,13 +3,15 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import { MapPin, CircleDot } from 'lucide-svelte';
 
 	export let proyecto: Proyecto;
 	export let getColorEstado: (estado: EstadoDescripcion) => string;
 
-	// -*- Ubicación principal
+	// Ubicación principal
 	const ubicacionTexto = getUbicacionTexto(proyecto);
 
+	// Estado
 	const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
 	const estadoEtiqueta = estadoLabel(estadoCodigo);
 </script>
@@ -37,14 +39,22 @@
 			<div
 				class="mt-3 flex flex-wrap items-center gap-3 text-sm font-medium drop-shadow sm:text-base"
 			>
-				<span class="flex items-center gap-1 text-pink-200">
-					📍 {ubicacionTexto}
-				</span>
+				<!-- Ubicación -->
+				{#if ubicacionTexto}
+					<span class="flex items-center gap-1 text-pink-200">
+						<MapPin class="h-4 w-4 text-pink-200" aria-hidden="true" />
+						{ubicacionTexto}
+					</span>
+				{/if}
 
+				<!-- Estado -->
 				<span
-					class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(estadoCodigo)} bg-white/80`}
+					class={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold shadow-sm backdrop-blur-sm transition ${getColorEstado(
+						estadoCodigo
+					)} bg-white/80`}
 				>
-					📌 {estadoEtiqueta}
+					<CircleDot class="h-3.5 w-3.5" aria-hidden="true" />
+					{estadoEtiqueta}
 				</span>
 			</div>
 		</div>

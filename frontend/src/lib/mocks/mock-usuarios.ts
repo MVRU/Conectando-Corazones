@@ -1,3 +1,5 @@
+// TODO: corregir direcciones por ubicaciones
+
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
 import { getLocalidad } from '$lib/utils/util-ubicaciones';
@@ -55,7 +57,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/escuela-esperanza.jpg',
 		nombre_legal: 'Escuela Primaria Esperanza',
-		tipo_institucion: 'educacion_publica',
+		tipo_institucion: 'Educación pública',
 		direccion: {
 			calle: 'San Martín',
 			numero: '456',
@@ -107,7 +109,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/hospital-garrahan.jpg',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
-		tipo_institucion: 'salud_publica',
+		tipo_institucion: 'Salud pública',
 		direccion: {
 			calle: 'Combate de los Pozos',
 			numero: '1881',
@@ -374,7 +376,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/clinica-san-jorge.jpg',
 		nombre_legal: 'Clínica San Jorge S.A.',
-		tipo_institucion: 'salud_privada',
+		tipo_institucion: 'Salud privada',
 		direccion: {
 			calle: 'Av. 9 de Julio',
 			numero: '3456',
@@ -424,7 +426,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/fundacion-siempre.jpg',
 		nombre_legal: 'Fundación Siempre',
-		tipo_institucion: 'fundacion',
+		tipo_institucion: 'Fundación',
 		direccion: {
 			calle: 'Av. Belgrano',
 			numero: '123',
@@ -454,7 +456,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/comedor-los-pinos.jpg',
 		nombre_legal: 'Comedor Los Pinos',
-		tipo_institucion: 'comedor',
+		tipo_institucion: 'Comedor',
 		direccion: {
 			calle: 'Calle 8',
 			numero: '456',
@@ -484,7 +486,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/hospital-sanjose.jpg',
 		nombre_legal: 'Hospital General San José',
-		tipo_institucion: 'hospital',
+		tipo_institucion: 'Hospital',
 		direccion: {
 			calle: 'Av. San Martín',
 			numero: '789',
@@ -514,7 +516,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/instituto-formacion.jpg',
 		nombre_legal: 'Instituto de Formación Laboral',
-		tipo_institucion: 'instituto',
+		tipo_institucion: 'Instituto',
 		direccion: {
 			calle: 'Av. Independencia',
 			numero: '321',
@@ -544,7 +546,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/fundacion-calor.jpg',
 		nombre_legal: 'Fundación Calor Humano',
-		tipo_institucion: 'fundacion',
+		tipo_institucion: 'Fundación',
 		direccion: {
 			calle: 'Av. Mitre',
 			numero: '654',
@@ -574,7 +576,7 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/hogar-santa-teresa.jpg',
 		nombre_legal: 'Hogar Santa Teresa',
-		tipo_institucion: 'hogar',
+		tipo_institucion: 'Hogar',
 		direccion: {
 			calle: 'Calle 25',
 			numero: '789',
