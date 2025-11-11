@@ -13,8 +13,8 @@
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
 	import type { Provincia } from '$lib/types/Provincia';
+	import { crearUrlGoogleMapsBasica } from '$lib/utils/util-ubicaciones';
 	import type { Localidad } from '$lib/types/Localidad';
-	import type { Direccion } from '$lib/types/Direccion';
 	import { createEventDispatcher } from 'svelte';
 
 	let enviando = false;
@@ -63,7 +63,7 @@
 			validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 		) {
 			const direccionCompleta = `${calle} ${numero}, ${localidad?.nombre}, ${provincia?.nombre}`;
-			urlGoogleMaps = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+			urlGoogleMaps = crearUrlGoogleMapsBasica(direccionCompleta);
 		}
 	}
 
@@ -87,7 +87,7 @@
 
 		setTimeout(() => {
 			enviando = false;
-			const direccion: Direccion = {
+			const direccion = {
 				calle,
 				numero,
 				piso: piso || undefined,

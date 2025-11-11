@@ -11,15 +11,12 @@
 	import {
 		obtenerDescripcionTipo
 	} from '$lib/utils/util-proyecto-form';
+	import { obtenerLocalidadesPorProvincia } from '$lib/utils/util-ubicaciones';
 
 	export let ubicaciones: UbicacionFormulario[] = [];
 	export let errores: Record<string, string> = {};
 
-    function obtenerLocalidadesPorProvincia(nombreProvincia: string) {
-        const provincia = provincias.find((p) => p.nombre === nombreProvincia);
-        if (!provincia) return [];
-        return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
-    }
+
 
 	function agregarUbicacion() {
 		ubicaciones = [

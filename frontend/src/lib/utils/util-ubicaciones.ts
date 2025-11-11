@@ -78,3 +78,63 @@ export function searchCities(query: string): string[] {
 export function getAllProvinceNames(): string[] {
 	return provincias.map((p) => p.nombre).sort((a, b) => a.localeCompare(b));
 }
+
+/**
+ * Para verificar si una ubicación es presencial
+ */
+export function esUbicacionPresencial(u?: import('$lib/types/Ubicacion').UbicacionDisyuncion): u is import('$lib/types/Ubicacion').UbicacionPresencial {
+	return !!u && (u as import('$lib/types/Ubicacion').UbicacionPresencial).modalidad === 'presencial';
+}
+
+/**
+ * Para verificar si una ubicación es virtual
+ */
+export function esUbicacionVirtual(u?: import('$lib/types/Ubicacion').UbicacionDisyuncion): u is import('$lib/types/Ubicacion').UbicacionVirtual {
+	return !!u && (u as import('$lib/types/Ubicacion').UbicacionVirtual).modalidad === 'virtual';
+}
+
+
+/**
+ * Construye una dirección completa desde una ubicación presencial
+ */
+export function construirDireccionCompleta(u: import('$lib/types/Ubicacion').UbicacionPresencial): string {
+	const calle = u.calle?.trim();
+	const numero = u.numero?.toString().trim();
+	const localidad = u.localidad?.nombre?.trim();
+	const provincia = u.localidad?.provincia?.nombre?.trim();
+
+	return [[calle, numero].filter(Boolean).join(' '), localidad, provincia]
+		.filter(Boolean)
+		.join(', ');
+}
+
+/**
+ * Genera URL de Google Maps desde una ubicación presencial
+ * Prioriza url_google_maps manual, sino genera automáticamente
+ */
+export function generarUrlGoogleMaps(u: import('$lib/types/Ubicacion').UbicacionPresencial): string | null {
+	// Si tiene URL manual, la usa
+	if (u.url_google_maps?.trim()) return u.url_google_maps;
+
+	// Sino genera automáticamente
+	const direccion = construirDireccionCompleta(u);
+	return direccion 
+		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}` 
+		: null;
+}
+
+/**
+ * Variante simplificada
+ */
+export function crearUrlGoogleMapsBasica(direccionCompleta: string): string {
+	return `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+}
+
+/**
+ * Obtiene todas las localidades de una provincia por nombre
+ */
+export function obtenerLocalidadesPorProvincia(nombreProvincia: string): Localidad[] {
+	const provincia = provincias.find((p) => p.nombre === nombreProvincia);
+	if (!provincia) return [];
+	return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
+}

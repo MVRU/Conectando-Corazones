@@ -3,16 +3,16 @@
   import type { EstadoDescripcion } from '$lib/types/Estado';
   import type { Colaboracion } from '$lib/types/Colaboracion';
   import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-  import type {
-    UbicacionDisyuncion,
-    UbicacionPresencial,
-    UbicacionVirtual
-  } from '$lib/types/Ubicacion';
   import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
-
   import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
   import { mockProyectos } from '$lib/mocks/mock-proyectos';
   import { page } from '$app/stores';
+  import { 
+    esUbicacionPresencial, 
+    esUbicacionVirtual,
+    construirDireccionCompleta,
+    generarUrlGoogleMaps
+  } from '$lib/utils/util-ubicaciones';
   import { error } from '@sveltejs/kit';
 
   import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
@@ -93,30 +93,13 @@
     return 'pendiente';
   }
 
-  function esPresencial(u?: UbicacionDisyuncion): u is UbicacionPresencial {
-    return !!u && (u as UbicacionPresencial).modalidad === 'presencial';
-  }
-  function esVirtual(u?: UbicacionDisyuncion): u is UbicacionVirtual {
-    return !!u && (u as UbicacionVirtual).modalidad === 'virtual';
-  }
+
 
   function capitalizar(s?: string) {
     return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
   }
 
-  function construirDireccion(u: UbicacionPresencial): string {
-    const calle = u.calle?.trim();
-    const numero = u.numero?.toString().trim();
-    const localidad = u.localidad?.nombre?.trim();
-    const provincia = u.localidad?.provincia?.nombre?.trim();
-    return [[calle, numero].filter(Boolean).join(' '), localidad, provincia].filter(Boolean).join(', ');
-  }
 
-  function urlGoogleMaps(u: UbicacionPresencial): string | null {
-    if (u.url_google_maps?.trim()) return u.url_google_maps;
-    const direccion = construirDireccion(u);
-    return direccion ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}` : null;
-  }
 
   function ordenarUbicaciones(ubs?: ProyectoUbicacion[]): ProyectoUbicacion[] {
     if (!ubs?.length) return [];
@@ -343,11 +326,11 @@
                 {#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
                   <li class="py-3 first:pt-0 last:pb-0 border-b border-gray-100 last:border-b-0">
                     <div class="flex items-start gap-3">
-                      {#if esPresencial(pu.ubicacion)}
+                      {#if esUbicacionPresencial(pu.ubicacion)}
                         <span class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100">
                           <MapPin class="h-4 w-4 text-sky-700" aria-hidden="true" />
                         </span>
-                      {:else if esVirtual(pu.ubicacion)}
+                      {:else if esUbicacionVirtual(pu.ubicacion)}
                         <span class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100">
                           <Globe class="h-4 w-4 text-violet-700" aria-hidden="true" />
                         </span>
@@ -359,25 +342,25 @@
                             {capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
                           </span>
 
-                          {#if esPresencial(pu.ubicacion)}
+                          {#if esUbicacionPresencial(pu.ubicacion)}
                             <span class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100">
                               Presencial
                             </span>
-                          {:else if esVirtual(pu.ubicacion)}
+                          {:else if esUbicacionVirtual(pu.ubicacion)}
                             <span class="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100">
                               Virtual
                             </span>
                           {/if}
                         </div>
 
-                        {#if esPresencial(pu.ubicacion)}
-                          {@const dir = construirDireccion(pu.ubicacion)}
+                        {#if esUbicacionPresencial(pu.ubicacion)}
+                          {@const dir = construirDireccionCompleta(pu.ubicacion)}
                           <p class="mt-1 text-sm text-gray-700">{dir || 'Dirección no disponible'}</p>
 
-                          {#if urlGoogleMaps(pu.ubicacion)}
+                          {#if generarUrlGoogleMaps(pu.ubicacion)}
                             <a
                               class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
-                              href={urlGoogleMaps(pu.ubicacion)!}
+                              href={generarUrlGoogleMaps(pu.ubicacion)!}
                               target="_blank"
                               rel="noopener noreferrer"
                               aria-label="Ver en Google Maps"
@@ -386,7 +369,7 @@
                               Ver en Google Maps
                             </a>
                           {/if}
-                        {:else if esVirtual(pu.ubicacion)}
+                        {:else if esUbicacionVirtual(pu.ubicacion)}
                           {#if pu.ubicacion.url_virtual}
                             <a
                               class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"

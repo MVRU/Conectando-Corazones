@@ -5,6 +5,7 @@
   import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
   import type { EstadoDescripcion } from '$lib/types/Estado';
   import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+  import { esUbicacionPresencial, esUbicacionVirtual, construirDireccionCompleta } from '$lib/utils/util-ubicaciones';
 
   import {
     CheckCircle2,
@@ -61,23 +62,20 @@
     ubicaciones.find((u) => u?.ubicacion?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
 
   // esVirtual = true solo si NO hay ubicaciones presenciales
-  function esUbicacionPresencial(
-    ubicacion: any
-  ): ubicacion is import('$lib/types/Ubicacion').UbicacionPresencial {
-    return ubicacion?.modalidad === 'presencial';
-  }
-
   $: hayPresenciales = ubicaciones.some((u) => esUbicacionPresencial(u?.ubicacion));
-  $: esVirtual = ubicaciones.length > 0 && !hayPresenciales;
+  $: hayVirtuales = ubicaciones.some((u) => esUbicacionVirtual(u?.ubicacion));
+  $: soloVirtuales = ubicaciones.length > 0 && !hayPresenciales && hayVirtuales;
 
   $: ubicacionTexto =
     ubicaciones.length === 0
       ? ''
-      : esVirtual
+      : soloVirtuales
       ? 'Virtual'
       : (() => {
           const u = ubicacionPrincipal?.ubicacion;
           if (esUbicacionPresencial(u)) {
+            const direccionCompleta = construirDireccionCompleta(u);
+           
             const localidad = u.localidad?.nombre || 'Ciudad';
             const provincia = u.localidad?.provincia?.nombre;
             return provincia ? `${localidad}, ${provincia}` : localidad;
