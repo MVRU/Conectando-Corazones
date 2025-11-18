@@ -120,6 +120,34 @@
 		return 'No disponible';
 	}
 
+	function formatearEtiquetaContacto(etiqueta?: string): string {
+		if (!etiqueta) return '';
+		const etiquetas: Record<string, string> = {
+			'principal': 'Principal',
+			'secundario': 'Secundario',
+			'celular': 'Celular',
+			'celular secundario': 'Celular Secundario',
+			'fijo': 'Fijo',
+			'oficina': 'Oficina'
+		};
+		return etiquetas[etiqueta.toLowerCase()] || etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1);
+	}
+
+	function obtenerIconoContacto(tipo: string): string {
+		switch (tipo) {
+			case 'email':
+				return 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z';
+			case 'telefono':
+				return 'M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z';
+			case 'web':
+				return 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9';
+			case 'red_social':
+				return 'M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1';
+			default:
+				return 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z';
+		}
+	}
+
 
 
 	// Funciones para reseñas
@@ -238,43 +266,97 @@
 						</div>
 
 						<!-- Información de contacto -->
-						<div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-							<div class="space-y-4">
-								<div>
-									<span class="text-sm font-medium text-gray-500">Ubicación</span>
-									<p class="text-gray-900">{obtenerUbicacion()}</p>
-								</div>
-							<div>
-								<span class="text-sm font-medium text-gray-500">Contacto</span>
-								<div class="flex flex-wrap gap-2 text-gray-900">
-									{#each ($usuarioStore?.contactos ?? []).slice(0,5) as c}
-										<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {obtenerColorContacto(c.tipo_contacto, c.etiqueta)}">
-											{formatearContacto(c.tipo_contacto, c.etiqueta, c.valor)}
-										</span>
-									{/each}
-								</div>
-							</div>
-								{#if $usuarioStore.rol === 'institucion'}
+						<div class="mt-8 border-t border-gray-200 pt-8">
+							<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+								<!-- Columna izquierda: Información de contacto y ubicación -->
+								<div class="space-y-6">
+									<!-- Ubicación -->
 									<div>
-										<span class="text-sm font-medium text-gray-500">Número de Institución</span>
-										<p class="text-gray-900">#{($usuarioStore as any).numero_institucion || $usuarioStore.id_usuario}</p>
+										<div class="mb-2 flex items-center gap-2">
+											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+											</svg>
+											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Ubicación</span>
+										</div>
+										<p class="ml-7 text-base text-gray-900">{obtenerUbicacion()}</p>
 									</div>
-								{/if}
-							</div>
-							<div class="space-y-4">
-								<div>
-									<span class="text-sm font-medium text-gray-500">Usuario</span>
-									<p class="text-gray-900">@{$usuarioStore.username}</p>
+
+									<!-- Contacto -->
+									<div>
+										<div class="mb-3 flex items-center gap-2">
+											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+											</svg>
+											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Información de Contacto</span>
+										</div>
+										<div class="ml-7 space-y-3">
+											{#each ($usuarioStore?.contactos ?? []).slice(0,5) as c}
+												<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-3">
+													<svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={obtenerIconoContacto(c.tipo_contacto)} />
+													</svg>
+													<div class="flex-1">
+														<div class="text-xs font-medium uppercase tracking-wide text-gray-500">
+															{c.tipo_contacto === 'email' ? 'Correo Electrónico' : 
+															 c.tipo_contacto === 'telefono' ? 'Teléfono' :
+															 c.tipo_contacto === 'web' ? 'Sitio Web' :
+															 c.tipo_contacto === 'red_social' ? 'Red Social' : c.tipo_contacto}
+															{#if c.etiqueta}
+																<span class="ml-1 text-gray-400">({formatearEtiquetaContacto(c.etiqueta)})</span>
+															{/if}
+														</div>
+														<p class="mt-0.5 text-sm font-medium text-gray-900">{c.valor}</p>
+													</div>
+												</div>
+											{/each}
+										</div>
+									</div>
+
+									{#if $usuarioStore.rol === 'institucion'}
+										<div>
+											<div class="mb-2 flex items-center gap-2">
+												<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+												</svg>
+												<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Número de Institución</span>
+											</div>
+											<p class="ml-7 text-base font-semibold text-gray-900">#{($usuarioStore as any).numero_institucion || $usuarioStore.id_usuario}</p>
+										</div>
+									{/if}
 								</div>
-								<div>
-									<span class="text-sm font-medium text-gray-500">Estado</span>
-									<p class="text-gray-900 capitalize">{$usuarioStore.estado}</p>
-								</div>
-								<div>
-									<span class="text-sm font-medium text-gray-500">Miembro desde</span>
-									<p class="text-gray-900">
-										{$usuarioStore.created_at ? new Date($usuarioStore.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' }) : 'No disponible'}
-									</p>
+
+								<!-- Columna derecha: Información de cuenta -->
+								<div class="space-y-6">
+									<div>
+										<div class="mb-2 flex items-center gap-2">
+											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+											</svg>
+											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Usuario</span>
+										</div>
+										<p class="ml-7 text-base text-gray-900">@{$usuarioStore.username}</p>
+									</div>
+									<div>
+										<div class="mb-2 flex items-center gap-2">
+											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+											</svg>
+											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Estado</span>
+										</div>
+										<p class="ml-7 text-base capitalize text-gray-900">{$usuarioStore.estado}</p>
+									</div>
+									<div>
+										<div class="mb-2 flex items-center gap-2">
+											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+											</svg>
+											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Miembro desde</span>
+										</div>
+										<p class="ml-7 text-base text-gray-900">
+											{$usuarioStore.created_at ? new Date($usuarioStore.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : 'No disponible'}
+										</p>
+									</div>
 								</div>
 							</div>
 						</div>

@@ -72,7 +72,7 @@ export const mockUsuarios = {
 				valor: 'direccion2@escuelaesperanza.edu.ar',
 				etiqueta: 'secundario'
 			},
-			{ tipo_contacto: 'telefono', valor: '341 XXXXXXX', etiqueta: 'celular' }
+			{ tipo_contacto: 'telefono', valor: '341 1234567', etiqueta: 'celular' }
 		],
 		consentimientos: [
 			{
