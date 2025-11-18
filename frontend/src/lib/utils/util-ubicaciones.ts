@@ -1,5 +1,6 @@
 import type { Localidad } from '$lib/types/Localidad';
 import type { Provincia } from '$lib/types/Provincia';
+import type { Direccion } from '$lib/types/Direccion';
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
@@ -77,4 +78,19 @@ export function searchCities(query: string): string[] {
 
 export function getAllProvinceNames(): string[] {
 	return provincias.map((p) => p.nombre).sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Formatea una dirección completa para mostrar de manera legible
+ * @param direccion - Objeto Direccion con calle, numero y localidad
+ * @returns String formateado con la ubicación completa
+ */
+export function obtenerUbicacion(direccion?: Direccion): string {
+	if (!direccion) return 'No disponible';
+	
+	const { calle, numero, localidad } = direccion;
+	const localidadNombre = localidad?.nombre || 'Localidad no disponible';
+	const provincia = localidad?.provincia?.nombre || 'Provincia no disponible';
+	
+	return `${calle} ${numero}, ${localidadNombre}, ${provincia}`;
 }
