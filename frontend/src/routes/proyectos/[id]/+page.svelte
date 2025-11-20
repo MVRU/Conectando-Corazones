@@ -31,7 +31,8 @@
     Globe,
     Link as LinkIcon,
     Heart,
-    Share2
+    Share2,
+    Send
   } from 'lucide-svelte';
 
   let proyecto: Proyecto;
@@ -133,7 +134,7 @@
   }
 
   function irAColaborar() {
-    document.getElementById('colaborar')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    showColaborarModal = true;
   }
 
   async function compartirProyecto() {
@@ -157,6 +158,10 @@
       .map((p) => p[0]?.toUpperCase())
       .join('');
   }
+
+  let showColaborarModal = false;
+  let mensajeColaboracion = '';
+  let showExitoModal = false;
 </script>
 
 <svelte:head>
@@ -428,6 +433,111 @@
       <p>Cargando proyecto...</p>
     </div>
   </main>
+{/if}
+
+{#if showColaborarModal}
+  <div
+    class="fixed inset-0 z-40 backdrop-blur-sm bg-black/30 transition-all duration-300"
+    on:click={() => (showColaborarModal = false)}
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal Colaborar -->
+  <div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div
+      class="pointer-events-auto relative mx-auto w-full max-w-lg scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-colaborar-titulo"
+      tabindex="-1"
+      on:click|stopPropagation
+      on:keydown={(e) => { if (e.key === 'Escape') showColaborarModal = false; }}
+    >
+      <!-- Encabezado -->
+      <div class="flex items-center justify-center border-b border-gray-100 px-5 pt-6 pb-5">
+        <h2 id="modal-colaborar-titulo" class="w-full text-center text-xl sm:text-2xl leading-tight font-extrabold bg-gradient-to-tr from-sky-600 to-sky-400 bg-clip-text text-transparent">
+          ¡Tu ayuda transforma vidas!
+        </h2>
+      </div>
+
+      <!-- Contenido -->
+      <div class="space-y-4 px-5 pt-4 pb-5 text-sm text-gray-700">
+        <p class="text-gray-800">
+          Escribe un mensaje a la institución contando por qué querés colaborar, qué te motiva o qué podés aportar.
+        </p>
+
+        <div>
+          <label for="mensaje-colaboracion" class="mb-1 block text-xs font-medium text-gray-600">Tu mensaje (opcional pero recomendado)</label>
+          <textarea
+            id="mensaje-colaboracion"
+            class="min-h-28 w-full resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
+            bind:value={mensajeColaboracion}
+            placeholder="Ej.: Me gustaría sumarme como voluntario los fines de semana..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="flex items-center justify-between gap-3 border-t border-gray-100 px-5 pt-3 pb-5">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          on:click={() => (showColaborarModal = false)}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] hover:brightness-110 active:translate-y-[1px] transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400"
+          on:click={() => { showColaborarModal = false; showExitoModal = true; }}
+        >
+          <Send class="h-4 w-4" aria-hidden="true" />
+          Enviar mi solicitud
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if showExitoModal}
+  <!-- Overlay -->
+  <div
+    class="fixed inset-0 z-40 backdrop-blur-sm bg-black/30 transition-all duration-300"
+    on:click={() => (showExitoModal = false)}
+    aria-hidden="true"
+  ></div>
+
+  <!-- Modal de solicitud enviada correctamente -->
+  <div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div
+      class="pointer-events-auto relative mx-auto w-full max-w-sm scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-exito-titulo"
+      tabindex="-1"
+      on:click|stopPropagation
+      on:keydown={(e) => { if (e.key === 'Escape') showExitoModal = false; }}
+    >
+      <div class="flex flex-col items-center gap-3 px-6 pt-6 pb-4 text-center">
+        <span class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-100">
+          <CheckCircle2 class="h-6 w-6 text-emerald-600" aria-hidden="true" />
+        </span>
+        <h3 id="modal-exito-titulo" class="text-base sm:text-lg font-semibold text-gray-900">
+          ¡Tu solicitud fue enviada correctamente!
+        </h3>
+      </div>
+
+      <div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+          on:click={() => (showExitoModal = false)}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
 {/if}
 
 <style>

@@ -24,12 +24,6 @@ export function getProvinciaFromLocalidad(localidad?: Localidad): Provincia | un
 	return provincias.find((p) => p.id_provincia === provinciaId);
 }
 
-/*
- -!- Helper para obtener localidades por ID y evitar depender del índice del arreglo mockLocalidades
- */
-export const obtenerLocalidadPorId = (localidadId: number): Localidad | undefined =>
-	mockLocalidades.find((l) => l.id_localidad === localidadId);
-
 /**
  * -!- Mapa de ciudades por provincia para consultas rápidas
  */
@@ -43,6 +37,7 @@ mockLocalidades.forEach((loc) => {
 });
 
 /**
+ * TODO: Actualmente no se usa. ¿Es para implementación futura? Sino borrar.
  * -!- Devuelve todas las ciudades de una provincia específica
  */
 export function getCitiesByProvince(provinceName: string): string[] {
@@ -51,6 +46,7 @@ export function getCitiesByProvince(provinceName: string): string[] {
 }
 
 /**
+ * TODO: Actualmente no se usa. ¿Es para implementación futura? Sino borrar.
  * -!- Obtiene la provincia correspondiente a una ciudad
  */
 export function getProvinceByCity(cityName: string) {
@@ -60,6 +56,7 @@ export function getProvinceByCity(cityName: string) {
 }
 
 /**
+ * TODO: Actualmente no se usa. ¿Es para implementación futura? Sino borrar.
  * -!- Devuelve todas las ciudades que coinciden parcial o totalmente con un término de búsqueda
  */
 export function searchCities(query: string): string[] {
@@ -114,7 +111,16 @@ export function construirDireccionCompleta(u: import('$lib/types/Ubicacion').Ubi
  */
 export function generarUrlGoogleMaps(u: import('$lib/types/Ubicacion').UbicacionPresencial): string | null {
 	// Si tiene URL manual, la usa
-	if (u.url_google_maps?.trim()) return u.url_google_maps;
+	if (u.url_google_maps?.trim()) {
+		let url = u.url_google_maps.trim();
+		
+		// Si no tiene protocolo, agregarlo
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			url = 'https://' + url;
+		}
+		
+		return url;
+	}
 
 	// Sino genera automáticamente
 	const direccion = construirDireccionCompleta(u);
