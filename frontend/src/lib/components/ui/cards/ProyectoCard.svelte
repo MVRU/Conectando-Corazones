@@ -18,6 +18,9 @@
 
   export let proyecto!: Proyecto;
   export let mostrarBotones: boolean = false;
+  export let esInstitucion: boolean = false;
+  export let esProyectoCompletado: boolean = false;
+  export let esMisProyectos: boolean = false;
 
   const formatearFechaCorta = (fecha?: string | Date | null): string => {
     if (!fecha) return '—';
@@ -166,22 +169,64 @@
 
       {#if mostrarBotones}
         <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
-          <Button
-            label="Ver detalles"
-            href={`/proyectos/${proyecto.id_proyecto}`}
-            variant="secondary"
-            size="sm"
-            customClass="flex-1"
-            aria-label="Ver detalles del proyecto"
-          />
-          <Button
-            label="Colaborar ahora"
-            href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
-            size="sm"
-            disabled={botonColaborarDeshabilitado}
-            customClass="flex-1"
-            aria-label="Colaborar en este proyecto"
-          />
+          {#if esMisProyectos && esInstitucion && !esProyectoCompletado}
+            <!-- Institución - Proyectos activos: Editar + Ver panel -->
+            <Button
+              label="Editar"
+              href={`/proyectos/${proyecto.id_proyecto}/editar`}
+              variant="secondary"
+              size="sm"
+              customClass="flex-1"
+              aria-label="Editar proyecto"
+            />
+            <Button
+              label="Ver panel"
+              href={`/proyectos/${proyecto.id_proyecto}/panel`}
+              size="sm"
+              customClass="flex-1"
+              aria-label="Ver panel del proyecto"
+            />
+          {:else if esMisProyectos && esInstitucion && esProyectoCompletado}
+            <!-- Institución - Historial: Solo Ver panel -->
+            <div class="flex w-full justify-center">
+              <Button
+                label="Ver panel"
+                href={`/proyectos/${proyecto.id_proyecto}/panel`}
+                size="sm"
+                customClass="w-52"
+                aria-label="Ver panel del proyecto"
+              />
+            </div>
+          {:else if esMisProyectos && !esInstitucion}
+            <!-- Colaborador - Cualquier estado: Solo Ver panel -->
+            <div class="flex w-full justify-center">
+              <Button
+                label="Ver panel"
+                href={`/proyectos/${proyecto.id_proyecto}/panel`}
+                size="sm"
+                customClass="w-52"
+                aria-label="Ver panel del proyecto"
+              />
+            </div>
+          {:else}
+            <!-- Default (página explorar): Ver detalles + Colaborar ahora -->
+            <Button
+              label="Ver detalles"
+              href={`/proyectos/${proyecto.id_proyecto}`}
+              variant="secondary"
+              size="sm"
+              customClass="flex-1"
+              aria-label="Ver detalles del proyecto"
+            />
+            <Button
+              label="Colaborar ahora"
+              href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
+              size="sm"
+              disabled={botonColaborarDeshabilitado}
+              customClass="flex-1"
+              aria-label="Colaborar en este proyecto"
+            />
+          {/if}
         </div>
       {/if}
     </div>

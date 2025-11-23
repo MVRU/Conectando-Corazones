@@ -11,5 +11,6 @@ export const mockProyectoCategorias: ProyectoCategoria[] = [
 	{ id_proyecto_categoria: 7, proyecto_id: 5, categoria_id: 4, categoria: mockCategorias[3] },
 	{ id_proyecto_categoria: 8, proyecto_id: 6, categoria_id: 1, categoria: mockCategorias[0] },
 	{ id_proyecto_categoria: 9, proyecto_id: 7, categoria_id: 6, categoria: mockCategorias[5] },
-	{ id_proyecto_categoria: 10, proyecto_id: 8, categoria_id: 7, categoria: mockCategorias[6] }
+	{ id_proyecto_categoria: 10, proyecto_id: 8, categoria_id: 7, categoria: mockCategorias[6] },
+	{ id_proyecto_categoria: 11, proyecto_id: 9, categoria_id: 5, categoria: mockCategorias[4] }
 ];

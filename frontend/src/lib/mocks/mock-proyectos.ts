@@ -287,6 +287,42 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			}
 		]
+	},
+	{
+		id_proyecto: 9,
+		titulo: 'Biblioteca Digital Comunitaria',
+		descripcion: 'Proyecto completado de creación de una biblioteca digital con acceso libre para la comunidad educativa.',
+		url_portada: '/img/proyectos-9.webp',
+		created_at: new Date('2024-08-15'),
+		fecha_cierre_postulaciones: new Date('2024-09-15'),
+		fecha_fin_tentativa: new Date('2024-12-15'),
+		id_chat_firebase: 1009,
+		participacion_permitida_ids: [1, 2],
+		colaboracion_ids: [10],
+		institucion_id: 2,
+		evidencia_ids: [9],
+		solicitud_finalizacion_ids: [9],
+		estado: 'completado',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 9,
+				id_proyecto: 9,
+				id_tipo_participacion: 1,
+				unidad_medida: 'libros',
+				objetivo: 500,
+				actual: 500,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+			},
+			{
+				id_participacion_permitida: 10,
+				id_proyecto: 9,
+				id_tipo_participacion: 2,
+				unidad_medida: 'pesos',
+				objetivo: 50000,
+				actual: 50000,
+				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
+			}
+		]
 	}
 ];
 
