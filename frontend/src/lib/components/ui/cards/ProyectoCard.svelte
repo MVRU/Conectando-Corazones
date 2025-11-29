@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { ArrowRight, BuildingOffice2, MapPin, GlobeAlt } from '@steeze-ui/heroicons';
+	import { ArrowRight, BuildingOffice2, MapPin, GlobeAlt, Photo } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
 	import { getParticipacionVisual, getUbicacionCorta } from '$lib/utils/util-proyectos';
@@ -38,7 +38,7 @@
 			/>
 		{:else}
 			<div class="flex h-full w-full items-center justify-center text-gray-300">
-				<span class="text-4xl">🖼️</span>
+				<Icon src={Photo} class="h-12 w-12" />
 			</div>
 		{/if}
 

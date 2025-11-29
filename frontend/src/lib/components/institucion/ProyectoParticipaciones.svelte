@@ -2,7 +2,7 @@
  * * Componente: ProyectoParticipaciones
  * -!- Para agregar los tipos de participaciones permitidas y sus objetivos.
  -->
- 
+
 <script lang="ts">
 	import {
 		obtenerClasesColor,
@@ -10,19 +10,21 @@
 		objetivoTexto,
 		toKey,
 		normalizarUnidadLibre,
-		validarUnidadLibre ,
-		normalizarEspecie ,
-		validarEspecie 
+		validarUnidadLibre,
+		normalizarEspecie,
+		validarEspecie
 	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/types/forms/CrearProyectoForm';
+	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import type { IconSource } from '@steeze-ui/svelte-icon';
 
 	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
 	export let participacionesPermitidas: ParticipacionForm[] = [];
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
-
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -33,7 +35,6 @@
 		return lista.map(toKey).includes(key);
 	}
 
-	
 	function validarUnidadMedidaOtra(s: string, tipo?: TipoParticipacionDescripcion): string | null {
 		if (s == null) return 'Este campo es obligatorio';
 		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
@@ -48,7 +49,6 @@
 		}
 		return null;
 	}
-
 
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
@@ -143,26 +143,29 @@
 		];
 	}
 
-	const tiposParticipacionInfo = {
+	const tiposParticipacionInfo: Record<
+		string,
+		{ titulo: string; descripcion: string; icon: IconSource; color: string }
+	> = {
 		Voluntariado: {
 			titulo: 'Voluntariado',
 			descripcion: 'Necesitás personas que dediquen su tiempo',
-			icon: '🤝',
+			icon: Users,
 			color: 'blue'
 		},
 		Monetaria: {
 			titulo: 'Aporte Monetario',
 			descripcion: 'Necesitás donaciones económicas',
-			icon: '💰',
+			icon: CurrencyDollar,
 			color: 'green'
 		},
 		Especie: {
 			titulo: 'En Especie',
 			descripcion: 'Necesitás materiales o productos específicos',
-			icon: '📦',
+			icon: Cube,
 			color: 'orange'
 		}
-	} as const;
+	};
 
 	const unidadesPorTipo = {
 		Voluntariado: ['personas', 'horas', 'días'],
@@ -185,7 +188,9 @@
 						on:click={() => toggleTipoParticipacion(tipo as TipoParticipacionDescripcion)}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 					>
-						<div class="mb-3 text-3xl">{info.icon}</div>
+						<div class="mb-3 text-3xl {clases.iconColor}">
+							<Icon src={info.icon} class="h-8 w-8" />
+						</div>
 						<h3 class="mb-1 font-semibold text-gray-900">{info.titulo}</h3>
 						<p class="text-sm text-gray-600">{info.descripcion}</p>
 					</button>
@@ -205,7 +210,9 @@
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
 			<div class="mb-4 flex items-center justify-between">
 				<h4 class="flex items-center gap-2 font-medium text-gray-900">
-					<span class="text-xl">{tipoInfo.icon}</span>
+					<span class="text-xl {clases.iconColor}">
+						<Icon src={tipoInfo.icon} class="h-6 w-6" />
+					</span>
 					{participacion.tipo_participacion?.descripcion}
 				</h4>
 				<button

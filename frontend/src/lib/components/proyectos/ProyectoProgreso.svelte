@@ -9,28 +9,46 @@
 	} from '$lib/utils/util-progreso';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import {
+		BookOpen,
+		Home,
+		Cake,
+		PuzzlePiece,
+		ComputerDesktop,
+		ShoppingBag,
+		Beaker,
+		Wrench,
+		Pencil,
+		ArchiveBox,
+		Users,
+		CurrencyDollar,
+		HandRaised
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import type { IconSource } from '@steeze-ui/svelte-icon';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
 	export let variant: 'compact' | 'extended' = 'compact';
 
-	const especieEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️'
+	const especieEmoji: Record<string, IconSource> = {
+		libros: BookOpen,
+		colchones: Home,
+		alimentos: Cake,
+		juguetes: PuzzlePiece,
+		computadoras: ComputerDesktop,
+		prendas: ShoppingBag,
+		medicamentos: Beaker,
+		herramientas: Wrench,
+		utiles: Pencil
 	};
 
-	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
+	const getEmojiEspecie = (especie?: string) =>
+		especieEmoji[especie?.toLowerCase() || ''] || ArchiveBox;
 
 	let step = 0;
 	const steps = 4;
-	let icono = '🤝';
+	let icono: IconSource = Users;
 
 	const hoy = new Date();
 	/**
@@ -52,14 +70,14 @@
 
 	const visualMap: Record<
 		string,
-		{ color: 'green' | 'blue' | 'purple'; emoji: (u?: string) => string }
+		{ color: 'green' | 'blue' | 'purple'; icon: (u?: string) => IconSource }
 	> = {
-		Monetaria: { color: 'green', emoji: () => '💰' },
-		Voluntariado: { color: 'purple', emoji: () => '🙋‍♀️' },
-		Materiales: { color: 'blue', emoji: (u?: string) => getEmojiEspecie(u) }
+		Monetaria: { color: 'green', icon: () => CurrencyDollar },
+		Voluntariado: { color: 'purple', icon: () => HandRaised },
+		Materiales: { color: 'blue', icon: (u?: string) => getEmojiEspecie(u) }
 	};
 
-	const defaultVisual = { color: 'blue' as const, emoji: () => '🤝' };
+	const defaultVisual = { color: 'blue' as const, icon: () => Users };
 
 	let participaciones: ParticipacionPermitida[] = [];
 
@@ -69,7 +87,7 @@
 		const { unidad_medida, tipo_participacion } = participaciones[0] || {};
 		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
 		color = visual.color;
-		icono = visual.emoji(unidad_medida);
+		icono = visual.icon(unidad_medida);
 	}
 
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
@@ -108,7 +126,10 @@
 		{/if}
 		{#if variant === 'compact'}
 			<div class="flex justify-between text-xs font-medium text-gray-700">
-				<span>{icono} Objetivo</span>
+				<div class="flex items-center gap-1.5">
+					<Icon src={icono} class="h-4 w-4" />
+					<span>Objetivo</span>
+				</div>
 				<span class={getMensajeProgreso().clase}>{getMensajeProgreso().texto}</span>
 			</div>
 		{/if}
@@ -133,7 +154,7 @@
 			<div class="mt-2 text-right">
 				<button
 					type="button"
-					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:ring-2 focus:ring-sky-200 focus:outline-none"
+					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:outline-none focus:ring-2 focus:ring-sky-200"
 					on:click={() => (showModal = true)}
 					aria-label="Ver cómo se calcula el progreso"
 				>
@@ -176,8 +197,8 @@
 			}}
 		>
 			<!-- Encabezado -->
-			<div class="flex items-center justify-between border-b border-gray-100 px-5 pt-5 pb-4">
-				<h2 id="modal-title" class="text-base leading-tight font-semibold text-gray-800">
+			<div class="flex items-center justify-between border-b border-gray-100 px-5 pb-4 pt-5">
+				<h2 id="modal-title" class="text-base font-semibold leading-tight text-gray-800">
 					{step === 0
 						? 'Cálculo del progreso'
 						: step === 1
@@ -188,7 +209,7 @@
 				</h2>
 				<button
 					type="button"
-					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
 					on:click={() => {
 						showModal = false;
 						step = 0;
@@ -207,7 +228,7 @@
 			</div>
 
 			<!-- Contenido -->
-			<div class="space-y-4 px-5 pt-4 pb-5 text-sm text-gray-700">
+			<div class="space-y-4 px-5 pb-5 pt-4 text-sm text-gray-700">
 				{#if step === 0}
 					<p class="text-gray-800">El progreso combina dos métricas:</p>
 					<ul class="space-y-2 text-sm">
@@ -278,11 +299,11 @@
 			</div>
 
 			<!-- Navegación -->
-			<div class="flex items-center justify-between border-t border-gray-100 px-5 pt-2 pb-5">
+			<div class="flex items-center justify-between border-t border-gray-100 px-5 pb-5 pt-2">
 				{#if step > 0}
 					<button
 						type="button"
-						class="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+						class="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-200"
 						on:click={() => step--}
 					>
 						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

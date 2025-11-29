@@ -16,7 +16,22 @@ import {
     ShoppingBag,
     Users,
     Cake,
-    Wrench
+    Wrench,
+    GlobeAmericas,
+    AcademicCap,
+    Briefcase,
+    ShieldCheck,
+    FaceSmile,
+    Trophy,
+    CpuChip,
+    BuildingLibrary,
+    Sparkles,
+    Lifebuoy,
+    UserGroup,
+    HandRaised,
+    MusicalNote,
+    ClipboardDocumentList,
+    Truck
 } from '@steeze-ui/heroicons';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 
@@ -46,27 +61,52 @@ export const PRIORIDAD_TIPO_UBICACION: TipoUbicacion[] = ['principal', 'alternat
 
 // --- CATEGORIAS ---
 
-export const ICONOS_CATEGORIA: Record<string, string> = {
-    Medioambiente: '🌱',
-    Educación: '📚',
-    Salud: '🏥',
-    'Desarrollo económico': '💼',
-    'Promoción de la paz': '🕊️',
-    Seguridad: '🛡️',
-    Entretenimiento: '🎭',
-    Liderazgo: '👑',
-    'Personas con discapacidad': '♿',
-    Tecnología: '💻',
-    Política: '🏛️',
-    Religión: '⛪',
-    'LGBTIQ+': '🏳️‍🌈',
-    'Apoyo ante una crisis': '🆘',
-    Empleo: '👷',
-    'Inmigrantes y refugiados': '🤝',
-    'Protección animal': '🐾',
-    'Alimentación y nutrición': '🍽️',
-    'Cultura y arte': '🎨',
-    Otra: '📋'
+export const ICONOS_CATEGORIA: Record<string, IconSource> = {
+    Medioambiente: GlobeAmericas,
+    Educación: AcademicCap,
+    Salud: Heart,
+    'Desarrollo económico': Briefcase,
+    'Promoción de la paz': HandRaised,
+    Seguridad: ShieldCheck,
+    Entretenimiento: FaceSmile,
+    Liderazgo: Trophy,
+    'Personas con discapacidad': UserGroup,
+    Tecnología: CpuChip,
+    Política: BuildingLibrary,
+    Religión: Sparkles,
+    'LGBTIQ+': Heart,
+    'Apoyo ante una crisis': Lifebuoy,
+    Empleo: Briefcase,
+    'Inmigrantes y refugiados': UserGroup,
+    'Protección animal': HandRaised,
+    'Alimentación y nutrición': Cake,
+    'Cultura y arte': MusicalNote,
+    Otra: ClipboardDocumentList
+};
+
+export const COLORES_CATEGORIA: Record<string, string> = {
+    Medioambiente: 'green',
+    Educación: 'blue',
+    Salud: 'red', // Using red/pink for health usually, but let's map to existing UI colors if possible. 'purple' or 'orange' might be better if 'red' isn't in COLORES_UI. Let's check COLORES_UI.
+    // COLORES_UI has: blue, green, orange, purple, gray, sky.
+    // Let's map Salud to 'green' or 'purple'. Let's use 'purple' for now as it's distinct.
+    'Desarrollo económico': 'blue',
+    'Promoción de la paz': 'sky',
+    Seguridad: 'gray',
+    Entretenimiento: 'orange',
+    Liderazgo: 'purple',
+    'Personas con discapacidad': 'blue',
+    Tecnología: 'sky',
+    Política: 'gray',
+    Religión: 'purple',
+    'LGBTIQ+': 'orange', // Rainbow -> maybe orange/purple
+    'Apoyo ante una crisis': 'orange', // Alert -> orange
+    Empleo: 'blue',
+    'Inmigrantes y refugiados': 'green',
+    'Protección animal': 'green',
+    'Alimentación y nutrición': 'orange',
+    'Cultura y arte': 'purple',
+    Otra: 'gray'
 };
 
 // --- PARTICIPACION ---
@@ -83,19 +123,19 @@ export const INFO_TIPOS_PARTICIPACION = {
     Voluntariado: {
         titulo: 'Voluntariado',
         descripcion: 'Necesitás personas que dediquen su tiempo',
-        icon: '🤝',
+        icon: Users,
         color: 'blue' as ParticipacionVisualColor
     },
     Monetaria: {
         titulo: 'Aporte Monetario',
         descripcion: 'Necesitás donaciones económicas',
-        icon: '💰',
+        icon: CurrencyDollar,
         color: 'green' as ParticipacionVisualColor
     },
     Especie: {
         titulo: 'En Especie',
         descripcion: 'Necesitás materiales o productos específicos',
-        icon: '📦',
+        icon: Cube,
         color: 'orange' as ParticipacionVisualColor
     }
 } as const;

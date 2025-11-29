@@ -8,10 +8,13 @@
 		MAX_BENEFICIARIOS,
 		formatearFechaLarga,
 		obtenerIconoCategoria,
+		obtenerColorCategoria,
+		obtenerClasesColor,
 		capitalizarPrimera,
 		normalizarTitulo,
 		validarTituloProyecto
 	} from '$lib/utils/util-proyecto-form';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let titulo = '';
 	export let descripcion = '';
@@ -30,7 +33,6 @@
 		if (beneficiarios < 1) beneficiarios = 1;
 		if (beneficiarios > MAX_BENEFICIARIOS) beneficiarios = MAX_BENEFICIARIOS;
 	}
-
 
 	function toggleCategoria(categoriaId?: number) {
 		if (categoriaId == null) return;
@@ -173,35 +175,30 @@
 
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 		{#each mockCategorias as categoria (categoria.id_categoria)}
+			{@const seleccionado = categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+			{@const color = obtenerColorCategoria(categoria.descripcion || '')}
+			{@const clases = obtenerClasesColor(color, seleccionado)}
 			<button
 				type="button"
 				on:click={() => toggleCategoria(categoria.id_categoria)}
-				class="group relative flex items-center rounded-lg border-2 border-dashed p-3 transition-all duration-200 hover:shadow-sm"
-				class:border-blue-500={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:bg-blue-50={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:border-gray-300={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:bg-white={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:hover:border-blue-400={!categoriasSeleccionadas.includes(
-					categoria.id_categoria ?? -1
-				)}
-				class:hover:bg-gray-50={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 hover:shadow-sm {clases.border} {clases.bg} {clases.hover}"
 			>
-				<span class="mr-2 flex-shrink-0 text-lg"
-					>{obtenerIconoCategoria(categoria.descripcion)}</span
-				>
+				<span class="mr-2 flex-shrink-0 text-lg {clases.iconColor}">
+					<Icon src={obtenerIconoCategoria(categoria.descripcion || '')} class="h-6 w-6" />
+				</span>
 				<div class="min-w-0 flex-1 text-left">
 					<span
-						class="block text-xs font-medium leading-tight"
-						class:text-blue-900={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-						class:text-gray-700={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+						class="block text-xs font-medium leading-tight {seleccionado
+							? 'text-gray-900'
+							: 'text-gray-700'}"
 					>
 						{categoria.descripcion}
 					</span>
 				</div>
 				<div class="ml-1 flex-shrink-0">
-					{#if categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-						<div class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
-							<svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+					{#if seleccionado}
+						<div class="flex h-4 w-4 items-center justify-center rounded-full {clases.iconBg}">
+							<svg class="h-2.5 w-2.5 {clases.iconColor}" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -211,7 +208,7 @@
 						</div>
 					{:else}
 						<div
-							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-300"
+							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-gray-400"
 						></div>
 					{/if}
 				</div>

@@ -1,4 +1,6 @@
-import { ICONOS_CATEGORIA, COLORES_UI } from './constants';
+import { ICONOS_CATEGORIA, COLORES_UI, COLORES_CATEGORIA } from './constants';
+import { ClipboardDocumentList } from '@steeze-ui/heroicons';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 
 export const MAX_BENEFICIARIOS = 100_000;
 
@@ -15,8 +17,12 @@ export function validarBeneficiariosValor(
 	return null;
 }
 
-export function obtenerIconoCategoria(descripcion: string): string {
-	return ICONOS_CATEGORIA[descripcion] || '📋';
+export function obtenerIconoCategoria(descripcion: string): IconSource {
+	return ICONOS_CATEGORIA[descripcion] || ClipboardDocumentList;
+}
+
+export function obtenerColorCategoria(descripcion: string): string {
+	return COLORES_CATEGORIA[descripcion] || 'gray';
 }
 
 export function obtenerClasesColor(color: string, seleccionado: boolean) {
@@ -24,7 +30,9 @@ export function obtenerClasesColor(color: string, seleccionado: boolean) {
 	return {
 		border: seleccionado ? c.border : 'border-gray-200',
 		bg: seleccionado ? c.bg : 'bg-white',
-		hover: !seleccionado ? c.hover : ''
+		hover: !seleccionado ? c.hover : '',
+		iconColor: seleccionado ? c.iconColor : 'text-gray-400',
+		iconBg: seleccionado ? c.iconBg : 'bg-gray-100'
 	};
 }
 
