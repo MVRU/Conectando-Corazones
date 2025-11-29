@@ -11,6 +11,7 @@
 	import type { Provincia } from '$lib/types/Provincia';
 	import type { Localidad } from '$lib/types/Localidad';
 	import { createEventDispatcher } from 'svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	type DireccionPayload = {
 		provinciaId: number | null;
@@ -130,7 +131,21 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 				url_google_maps: requiereDireccionDetallada && urlGoogleMaps ? urlGoogleMaps : undefined
 			};
 			dispatch('submit', payload);
+			toastStore.show({
+				variant: 'success',
+				title: 'Ubicación guardada',
+				message: 'Registramos tu ubicación principal. Podrás sumar más direcciones desde tu panel.'
+			});
 		}, 800);
+	}
+
+	function omitirDireccion() {
+		toastStore.show({
+			variant: 'info',
+			title: 'Paso omitido',
+			message: 'Podés completar tu ubicación más adelante desde el panel de la institución.'
+		});
+		dispatch('skip');
 	}
 </script>
 
@@ -332,7 +347,7 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
-				on:click={() => dispatch('skip')}
+				on:click={omitirDireccion}
 				customClass="w-full md:w-auto"
 			/>
 		{/if}

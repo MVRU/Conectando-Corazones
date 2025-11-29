@@ -194,7 +194,7 @@
 			{:else}
 				<!-- Solo en desktop -->
 				<div class="hidden md:block">
-					<Button label="Iniciar Sesión" href="/iniciar-sesion" />
+					<Button label="Iniciar sesión" href="/iniciar-sesion" />
 				</div>
 			{/if}
 

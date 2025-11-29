@@ -4,7 +4,6 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import FotoPerfilUploader from '$lib/components/registro/FotoPerfilUploader.svelte';
 	import CampoFormulario from './CampoFormulario.svelte';
 	import {
@@ -36,7 +35,6 @@
 		Globe,
 		ShieldCheck,
 		Clock,
-		UserRoundPlus,
 		UserRound,
 		Calendar,
 		Building2,
@@ -118,7 +116,7 @@
 		{
 			value: 'fundacion',
 			label: 'Fundación',
-			descripcion: 'Fundaciones, asociaciones civiles o ONGs.',
+			descripcion: 'Fundaciones, asociaciones civiles u ONGs.',
 			icon: Building2
 		},
 		{
@@ -309,10 +307,10 @@
 	let tieneErrores = false;
 	let pasoFormulario: 'credenciales' | 'detalles' = 'credenciales';
 	let formularioRef: HTMLFormElement | null = null;
-let mostrarPassword = false;
-let mostrarPasswordConfirm = false;
-let mostrarModalPasswordTexto = false;
-let mostrarModalPasswordConfirmTexto = false;
+	let mostrarPassword = false;
+	let mostrarPasswordConfirm = false;
+	let mostrarModalPasswordTexto = false;
+	let mostrarModalPasswordConfirmTexto = false;
 	let metodoAcceso: MetodoAcceso | null = null;
 
 	let rolInterno: RegistroRol = rol;
@@ -1321,7 +1319,9 @@ let mostrarModalPasswordConfirmTexto = false;
 		</div>
 
 		{#if rolInterno === 'institucion'}
-			<section class="space-y-8 rounded-2xl px-6 py-8">
+			<section
+				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm"
+			>
 				<header class="space-y-2">
 					<p
 						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
@@ -1478,7 +1478,9 @@ let mostrarModalPasswordConfirmTexto = false;
 				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm"
 			>
 				<header class="space-y-2">
-					<p class="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
+					<p
+						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+					>
 						Paso 2 · Perfil de colaborador/a
 					</p>
 					<h3 class="text-2xl font-semibold text-slate-900">Datos personales</h3>
@@ -1615,21 +1617,50 @@ let mostrarModalPasswordConfirmTexto = false;
 								/>
 							</div>
 
-							<div class="md:col-span-2">
-								<Select
-									id="con_fines_de_lucro"
-									name="con_fines_de_lucro"
-									bind:value={conFinesDeLucroSeleccion}
-									placeholder="Seleccioná una opción"
-									options={[
-										{ value: 'true', label: 'Sí, con fines de lucro' },
-										{ value: 'false', label: 'No, sin fines de lucro' }
-									]}
-									error={intentoEnvio ? errores.con_fines_de_lucro : ''}
-									label="¿La organización tiene fines de lucro?"
-									searchable={false}
-									disabled={procesando}
-								/>
+							<div class="space-y-3 md:col-span-2">
+								<p class="text-sm font-semibold text-slate-800">
+									¿La organización tiene fines de lucro?
+									<span class="text-red-600">*</span>
+								</p>
+								<div class="grid gap-3 sm:grid-cols-2">
+									{#each [{ value: 'true', label: 'Sí, con fines de lucro', descripcion: 'Opera como empresa o entidad mixta.', icon: Building2 }, { value: 'false', label: 'No, sin fines de lucro', descripcion: 'Asociación civil o fundación.', icon: ShieldCheck }] as opcion}
+										<label
+											class={`flex h-full cursor-pointer flex-col gap-2 rounded-2xl border p-4 transition ${
+												conFinesDeLucroSeleccion === opcion.value
+													? 'border-sky-500 bg-white shadow-sm'
+													: 'border-slate-200 bg-white hover:border-sky-300'
+											}`}
+										>
+											<input
+												type="radio"
+												name="con_fines_de_lucro"
+												value={opcion.value}
+												class="sr-only"
+												bind:group={conFinesDeLucroSeleccion}
+												disabled={procesando}
+											/>
+											<div class="flex items-center gap-3">
+												<span
+													class={`flex h-10 w-10 items-center justify-center rounded-xl ${
+														conFinesDeLucroSeleccion === opcion.value
+															? 'bg-sky-50 text-sky-600'
+															: 'bg-slate-50 text-slate-500'
+													}`}
+													aria-hidden="true"
+												>
+													<svelte:component this={opcion.icon} class="h-5 w-5" stroke-width={1.7} />
+												</span>
+												<div>
+													<p class="font-semibold text-slate-900">{opcion.label}</p>
+													<p class="text-xs text-slate-500">{opcion.descripcion}</p>
+												</div>
+											</div>
+										</label>
+									{/each}
+								</div>
+								{#if intentoEnvio && errores.con_fines_de_lucro}
+									<p class="text-sm text-red-600">{errores.con_fines_de_lucro}</p>
+								{/if}
 							</div>
 						</div>
 					</div>

@@ -497,7 +497,6 @@
 					tus proyectos solidarios.
 				</p>
 				<div class="mt-8">
-					<!-- TODO: agregar dashboard u otro -->
 					<Button label="Ir al panel" variant="primary" on:click={() => goto('/mi-panel')} />
 				</div>
 			</div>

@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	const dispatch = createEventDispatcher<{
 		submit: { files: File[] };
@@ -18,6 +19,7 @@
 	let archivosSeleccionados: File[] = [];
 	let aceptoDeclaracion = false;
 	let errorFormulario: string | null = null;
+	let avisoArchivosMostrado = false;
 
 	$: botonEnviarDeshabilitado = !aceptoDeclaracion;
 
@@ -26,6 +28,21 @@
 	function actualizarArchivos(event: Event) {
 		const input = event.target as HTMLInputElement;
 		archivosSeleccionados = Array.from(input.files ?? []);
+		if (archivosSeleccionados.length) {
+			toastStore.show({
+				variant: 'info',
+				title: 'Documentación recibida',
+				message:
+					'Tus archivos se guardan cifrados y nuestro equipo los revisará manualmente. Se eliminan automáticamente cuando finaliza la verificación.'
+			});
+			avisoArchivosMostrado = true;
+		} else if (avisoArchivosMostrado) {
+			toastStore.show({
+				variant: 'warning',
+				title: 'Sin archivos adjuntos',
+				message: 'Subí al menos un documento para continuar con la verificación.'
+			});
+		}
 	}
 
 	function enviarDocumentos() {
@@ -45,6 +62,11 @@
 
 		errorFormulario = null;
 		dispatch('submit', { files: archivosSeleccionados });
+		toastStore.show({
+			variant: 'success',
+			title: 'Documentos enviados',
+			message: 'Nuestro equipo está verificando tu documentación. Te avisaremos cuando finalice la revisión.'
+		});
 	}
 
 	function omitirRevision() {

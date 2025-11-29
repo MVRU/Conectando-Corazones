@@ -3,6 +3,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	import {
 		TIPOS_CONTACTO,
@@ -136,7 +137,21 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 		setTimeout(() => {
 			enviando = false;
 			dispatch('submit', contactos);
+			toastStore.show({
+				variant: 'success',
+				title: 'Contactos guardados',
+				message: 'Guardamos tus formas de contacto. Podés sumar o editarlas luego desde tu panel.'
+			});
 		}, 800);
+	}
+
+	function omitirContactos() {
+		toastStore.show({
+			variant: 'info',
+			title: 'Paso omitido',
+			message: 'Podés agregar formas de contacto más adelante desde tu panel de registro.'
+		});
+		dispatch('skip');
 	}
 </script>
 
@@ -256,7 +271,7 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
-				on:click={() => dispatch('skip')}
+				on:click={omitirContactos}
 				customClass="w-full md:w-auto"
 			/>
 		{/if}

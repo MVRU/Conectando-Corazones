@@ -34,7 +34,13 @@
 	let objectUrl: string | null = null;
 	let modoActivo: 'url' | 'archivo' = file ? 'archivo' : 'url';
 	let arrastrandoArchivo = false;
-	let errorInterno = '';
+let errorInterno = '';
+let vistaPreviaError = false;
+let ultimaUrlVistaPrevia = '';
+let vistaPreviaInterna = '';
+let vistaPreviaBlobAutogenerado: string | null = null;
+let vistaPreviaDescargando = false;
+let previewAbortController: AbortController | null = null;
 
 	const botonesModo: Array<{ id: 'url' | 'archivo'; etiqueta: string }> = [
 		{ id: 'url', etiqueta: 'Usar enlace' },
@@ -46,6 +52,14 @@
 	}
 
 	$: vistaPrevia = url.trim();
+	$: vistaPreviaNormalizada = normalizarUrlVistaPrevia(vistaPrevia);
+	$: if (vistaPrevia !== ultimaUrlVistaPrevia) {
+		vistaPreviaError = false;
+		ultimaUrlVistaPrevia = vistaPrevia;
+		if (modoActivo === 'url') {
+			prepararVistaPreviaDesdeUrl(vistaPrevia);
+		}
+	}
 	$: errorParaInput = modoActivo === 'url' ? error : '';
 	$: mensajeErrorGlobal = modoActivo === 'archivo' ? errorInterno || error : errorInterno;
 	$: mensajeEstado = file?.name
@@ -64,41 +78,58 @@
 		dispatch('file', file);
 	}
 
-	function limpiarObjectUrl() {
-		if (objectUrl) {
-			URL.revokeObjectURL(objectUrl);
-			objectUrl = null;
-		}
+function limpiarObjectUrl() {
+	if (objectUrl) {
+		URL.revokeObjectURL(objectUrl);
+		objectUrl = null;
 	}
+	if (vistaPreviaBlobAutogenerado) {
+		URL.revokeObjectURL(vistaPreviaBlobAutogenerado);
+		vistaPreviaBlobAutogenerado = null;
+	}
+	if (previewAbortController) {
+		previewAbortController.abort();
+		previewAbortController = null;
+	}
+}
 
-	function limpiarArchivoSeleccionado(preservarModo = false) {
-		limpiarObjectUrl();
-		if (fileInput) {
-			fileInput.value = '';
-		}
+function limpiarArchivoSeleccionado(preservarModo = false) {
+	if (vistaPreviaBlobAutogenerado) {
+		URL.revokeObjectURL(vistaPreviaBlobAutogenerado);
+		vistaPreviaBlobAutogenerado = null;
+	}
+	if (objectUrl) {
+		URL.revokeObjectURL(objectUrl);
+		objectUrl = null;
+	}
+	previewAbortController?.abort();
+	previewAbortController = null;
+	if (fileInput) {
+		fileInput.value = '';
+	}
+	emitirArchivo(null);
+	vistaPreviaInterna = '';
+	if (!preservarModo) {
+		modoActivo = 'url';
+	}
+}
+async function seleccionarModo(nuevoModo: 'url' | 'archivo') {
+	if (modoActivo === nuevoModo) return;
+	modoActivo = nuevoModo;
+	errorInterno = '';
+
+	if (nuevoModo === 'url') {
+		limpiarArchivoSeleccionado(true);
 		emitirArchivo(null);
-		if (!preservarModo) {
-			modoActivo = 'url';
-		}
-	}
-
-	async function seleccionarModo(nuevoModo: 'url' | 'archivo') {
-		if (modoActivo === nuevoModo) return;
-		modoActivo = nuevoModo;
-		errorInterno = '';
-
-		if (nuevoModo === 'url') {
-			limpiarArchivoSeleccionado(true);
-			emitirArchivo(null);
-			await tick();
-			urlInputRef?.focus();
-			return;
-		}
-
-		emitirUrl('');
 		await tick();
-		fileInput?.click();
+		urlInputRef?.focus();
+		return;
 	}
+
+	emitirUrl('');
+	await tick();
+	fileInput?.click();
+}
 
 	function validarArchivo(archivo: File) {
 		if (!archivo.type.startsWith('image/')) {
@@ -109,27 +140,71 @@
 		return true;
 	}
 
-	function procesarArchivo(archivo: File) {
-		if (!validarArchivo(archivo)) {
-			limpiarArchivoSeleccionado(true);
-			return;
-		}
-
-		limpiarObjectUrl();
-		objectUrl = URL.createObjectURL(archivo);
-		emitirArchivo(archivo);
-		emitirUrl(objectUrl);
+function procesarArchivo(archivo: File) {
+	if (!validarArchivo(archivo)) {
+		limpiarArchivoSeleccionado(true);
+		return;
 	}
 
-	function handleUrlInput(event: Event) {
-		const nuevaUrl = (event.target as HTMLInputElement).value;
-		modoActivo = 'url';
-		errorInterno = '';
-		emitirUrl(nuevaUrl);
-		if (file) {
-			limpiarArchivoSeleccionado(true);
-		}
+	limpiarObjectUrl();
+	objectUrl = URL.createObjectURL(archivo);
+	emitirArchivo(archivo);
+	emitirUrl(objectUrl);
+	vistaPreviaInterna = objectUrl;
+	vistaPreviaError = false;
+}
+
+function handleUrlInput(event: Event) {
+	const nuevaUrl = (event.target as HTMLInputElement).value;
+	modoActivo = 'url';
+	errorInterno = '';
+	emitirUrl(nuevaUrl);
+	if (file) {
+		limpiarArchivoSeleccionado(true);
 	}
+}
+
+async function prepararVistaPreviaDesdeUrl(valor: string) {
+	const normalizada = normalizarUrlVistaPrevia(valor);
+	if (!normalizada) {
+		if (vistaPreviaBlobAutogenerado) {
+			URL.revokeObjectURL(vistaPreviaBlobAutogenerado);
+			vistaPreviaBlobAutogenerado = null;
+		}
+		vistaPreviaInterna = '';
+		vistaPreviaError = false;
+		return;
+	}
+
+	vistaPreviaInterna = normalizada;
+	vistaPreviaError = false;
+	vistaPreviaDescargando = false;
+}
+
+function normalizarUrlVistaPrevia(raw: string): string {
+	const trimmed = raw.trim();
+	if (!trimmed) return '';
+	if (/^(?:data|blob):/i.test(trimmed)) {
+		return trimmed;
+	}
+	if (!/^[a-zA-Z]+:\/\//.test(trimmed)) {
+		return `https://${trimmed}`;
+	}
+	try {
+		return encodeURI(trimmed);
+	} catch {
+		return trimmed;
+	}
+}
+
+function manejarPreviewError() {
+	if (!vistaPrevia) return;
+	vistaPreviaError = true;
+}
+
+function manejarPreviewLoad() {
+	vistaPreviaError = false;
+}
 
 	function handleFileChange(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -238,7 +313,7 @@
 					aria-describedby={mensajeErrorGlobal ? `${id}-error` : undefined}
 				/>
 			</div>
-		{:else}
+		{:else if modoActivo === 'archivo' && !file}
 			<div class="space-y-2">
 				<label class="sr-only" for={`${id}-archivo`} id={`${id}-archivo-label`}>
 					Subí una imagen desde tu dispositivo
@@ -294,14 +369,26 @@
 				class="flex flex-col gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 md:flex-row md:items-center"
 			>
 				<figure class="flex items-center gap-4">
-					<div
-						class="h-20 w-20 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
-					>
-						<img
-							src={vistaPrevia}
-							alt="Vista previa de la foto seleccionada"
-							class="h-full w-full object-cover"
-						/>
+					<div class="h-20 w-20 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+						{#if vistaPreviaDescargando}
+							<div class="flex h-full w-full items-center justify-center text-xs text-slate-500">
+								Cargando…
+							</div>
+						{:else if (vistaPreviaInterna || vistaPreviaNormalizada) && !vistaPreviaError}
+							<img
+								src={vistaPreviaInterna || vistaPreviaNormalizada}
+								alt="Vista previa de la foto seleccionada"
+								class="h-full w-full object-cover"
+								loading="lazy"
+								referrerpolicy="no-referrer"
+								on:error={manejarPreviewError}
+								on:load={manejarPreviewLoad}
+							/>
+						{:else}
+							<div class="flex h-full w-full items-center justify-center bg-slate-50 text-xs text-slate-500">
+								Sin vista previa
+							</div>
+						{/if}
 					</div>
 					<figcaption class="space-y-1 text-sm">
 						<p class="font-semibold text-gray-800">
@@ -312,7 +399,12 @@
 						</p>
 					</figcaption>
 				</figure>
-				<div class="flex flex-1 items-center justify-end">
+				<div class="flex flex-1 flex-col items-end">
+					{#if vistaPreviaError && vistaPrevia}
+						<p class="mb-2 text-xs text-red-600">
+							No pudimos cargar la vista previa. Verificá que el enlace sea público y directo a una imagen.
+						</p>
+					{/if}
 					<button
 						type="button"
 						class="rounded-full border border-transparent bg-white px-4 py-2 text-sm font-semibold text-[rgb(var(--color-primary))] shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:bg-[rgba(var(--color-primary),0.08)]"
