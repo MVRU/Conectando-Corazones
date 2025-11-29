@@ -23,17 +23,18 @@
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 
 	import {
-		CheckCircle2,
-		Hourglass,
-		Package,
-		CircleDot,
+		CheckCircle,
+		Clock,
+		ArchiveBox,
+		EllipsisHorizontalCircle,
 		MapPin,
-		Globe,
-		Link as LinkIcon,
+		GlobeAlt,
+		Link,
 		Heart,
-		Share2,
-		Send
-	} from 'lucide-svelte';
+		Share,
+		PaperAirplane
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	let proyecto: Proyecto;
 	let colaboracionesActivas: Colaboracion[] = [];
@@ -222,19 +223,19 @@
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
 													>
-														<CheckCircle2 class="h-4 w-4 text-emerald-700" />
+														<Icon src={CheckCircle} class="h-4 w-4 text-emerald-700" />
 													</span>
 												{:else if estadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
 													>
-														<Hourglass class="h-4 w-4 text-amber-700" />
+														<Icon src={Clock} class="h-4 w-4 text-amber-700" />
 													</span>
 												{:else}
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200"
 													>
-														<Package class="h-4 w-4 text-gray-600" />
+														<Icon src={ArchiveBox} class="h-4 w-4 text-gray-600" />
 													</span>
 												{/if}
 											</div>
@@ -285,7 +286,7 @@
 								class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
 								aria-label="Colaborar ahora en este proyecto"
 							>
-								<Heart class="h-4 w-4" aria-hidden="true" />
+								<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
 								Colaborar ahora
 							</button>
 
@@ -295,7 +296,7 @@
 								class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
 								aria-label="Compartir este proyecto"
 							>
-								<Share2 class="h-4 w-4" aria-hidden="true" />
+								<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
 								Compartir
 							</button>
 						</div>
@@ -318,7 +319,7 @@
 									class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
 									aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
 								>
-									<CircleDot class="h-3.5 w-3.5" />
+									<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
 									{estadoLabel(estadoCodigo)}
 								</span>
 							</div>
@@ -379,13 +380,13 @@
 												<span
 													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
 												>
-													<MapPin class="h-4 w-4 text-sky-700" aria-hidden="true" />
+													<Icon src={MapPin} class="h-4 w-4 text-sky-700" aria-hidden="true" />
 												</span>
 											{:else if esUbicacionVirtual(pu.ubicacion)}
 												<span
 													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
 												>
-													<Globe class="h-4 w-4 text-violet-700" aria-hidden="true" />
+													<Icon src={GlobeAlt} class="h-4 w-4 text-violet-700" aria-hidden="true" />
 												</span>
 											{/if}
 
@@ -424,7 +425,7 @@
 															rel="noopener noreferrer"
 															aria-label="Ver en Google Maps"
 														>
-															<LinkIcon class="h-4 w-4" />
+															<Icon src={Link} class="h-4 w-4" />
 															Ver en Google Maps
 														</a>
 													{/if}
@@ -437,7 +438,7 @@
 															rel="noopener noreferrer"
 															aria-label="Abrir enlace virtual"
 														>
-															<LinkIcon class="h-4 w-4" />
+															<Icon src={Link} class="h-4 w-4" />
 															Abrir enlace
 														</a>
 													{:else}
@@ -531,7 +532,7 @@
 			<!-- Contenido -->
 			<div class="space-y-4 px-5 pb-5 pt-4 text-sm text-gray-700">
 				<p class="text-gray-800">
-					Escribe un mensaje a la institución contando por qué querés colaborar, qué te motiva o qué
+					Escribí un mensaje a la institución contando por qué querés colaborar, qué te motiva o qué
 					podés aportar.
 				</p>
 
@@ -565,7 +566,7 @@
 						showExitoModal = true;
 					}}
 				>
-					<Send class="h-4 w-4" aria-hidden="true" />
+					<Icon src={PaperAirplane} class="h-4 w-4" aria-hidden="true" />
 					Enviar mi solicitud
 				</button>
 			</div>
@@ -598,7 +599,7 @@
 				<span
 					class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-100"
 				>
-					<CheckCircle2 class="h-6 w-6 text-emerald-600" aria-hidden="true" />
+					<Icon src={CheckCircle} class="h-6 w-6 text-emerald-600" aria-hidden="true" />
 				</span>
 				<h3 id="modal-exito-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
 					¡Tu solicitud fue enviada correctamente!

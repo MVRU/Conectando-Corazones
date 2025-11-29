@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import type { ComponentType } from 'svelte';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
@@ -140,7 +140,7 @@ type ParticipacionVisual = {
 	actualLabel: string;
 	objetivoLabel: string;
 	color: ParticipacionVisualColor;
-	icono: ComponentType;
+	icono: IconSource;
 	iconColor: string;
 };
 

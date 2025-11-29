@@ -2,25 +2,23 @@ import type { EstadoDescripcion } from '$lib/types/Estado';
 import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 import type { TipoUbicacion } from '$lib/types/Ubicacion';
 import {
-    BadgeDollarSign,
-    BedDouble,
-    Box,
-    Boxes,
-    CircleDollarSign,
-    HandHeart,
-    HelpCircle,
-    Laptop,
-    Package,
-    PencilRuler,
-    Pill,
-    Puzzle,
+    CurrencyDollar,
+    Home,
+    Cube,
+    ArchiveBox,
+    Heart,
+    QuestionMarkCircle,
+    ComputerDesktop,
+    Pencil,
+    Beaker,
+    PuzzlePiece,
     Scale,
-    Shirt,
+    ShoppingBag,
     Users,
-    UtensilsCrossed,
+    Cake,
     Wrench
-} from 'lucide-svelte';
-import type { ComponentType } from 'svelte';
+} from '@steeze-ui/heroicons';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 
 // --- ESTADOS ---
 
@@ -108,24 +106,25 @@ export const UNIDADES_POR_TIPO = {
     Especie: ['unidades', 'kilogramos', 'mililitros', 'litros', 'centímetros', 'metros']
 } as const;
 
-export const ICONOS_UNIDAD: Record<string, ComponentType> = {
-    libros: Box,
-    colchones: BedDouble,
-    alimentos: UtensilsCrossed,
-    juguetes: Puzzle,
-    computadoras: Laptop,
-    prendas: Shirt,
-    medicamentos: Pill,
+export const ICONOS_UNIDAD: Record<string, IconSource> = {
+    libros: Cube,
+    colchones: Home,
+    alimentos: Cake,
+    juguetes: PuzzlePiece,
+    computadoras: ComputerDesktop,
+    prendas: ShoppingBag,
+    medicamentos: Beaker,
     herramientas: Wrench,
-    utiles: PencilRuler,
+    utiles: Pencil,
     personas: Users,
     kilogramos: Scale,
-    unidades: Boxes,
-    pesos: BadgeDollarSign,
-    dolares: CircleDollarSign
+    unidades: Cube,
+    pesos: CurrencyDollar,
+    dolares: CurrencyDollar
 };
 
-export const DEFAULT_PARTICIPACION_ICON = Package;
+export const DEFAULT_PARTICIPACION_ICON = ArchiveBox;
+
 
 // --- COLORES UI ---
 
