@@ -1,220 +1,141 @@
 <script lang="ts">
-  import type { Proyecto } from '$lib/types/Proyecto';
-  import Button from '$lib/components/ui/elementos/Button.svelte';
-  import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
-  import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
-  import type { EstadoDescripcion } from '$lib/types/Estado';
-  import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
-  import { esUbicacionPresencial, esUbicacionVirtual, construirDireccionCompleta } from '$lib/utils/util-ubicaciones';
+	import { goto } from '$app/navigation';
+	import type { Proyecto } from '$lib/types/Proyecto';
+	import { ArrowRight, Building2, MapPin, Globe } from 'lucide-svelte';
+	import { getParticipacionVisual, getUbicacionCorta } from '$lib/utils/util-proyectos';
+	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
 
-  import {
-    CheckCircle2,
-    Hourglass,
-    Search,
-    FileSearch,
-    XCircle,
-    MapPin
-  } from 'lucide-svelte';
+	export let proyecto: Proyecto;
+	export let mostrarBotones: boolean = false;
 
-  export let proyecto!: Proyecto;
-  export let mostrarBotones: boolean = false;
-
-  const formatearFechaCorta = (fecha?: string | Date | null): string => {
-    if (!fecha) return '—';
-    const f = fecha instanceof Date ? fecha : new Date(fecha);
-    if (isNaN(f.getTime())) return '—';
-    const dd = String(f.getDate()).padStart(2, '0');
-    const mm = String(f.getMonth() + 1).padStart(2, '0');
-    const aa = f.getFullYear().toString().slice(-2);
-    return `${dd}/${mm}/${aa}`;
-  };
-
-  // Estado
-  const estadoCodigo: EstadoDescripcion = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
-  const textoEstado = estadoLabel(estadoCodigo);
-  const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
-
-  // Icono y color por estado
-  function iconoYColorPorEstado(codigo: EstadoDescripcion) {
-    switch (codigo) {
-      case 'en_curso':
-        return { icono: CheckCircle2, color: 'text-sky-600' };
-      case 'pendiente_solicitud_cierre':
-        return { icono: Hourglass, color: 'text-amber-600' };
-      case 'en_revision':
-        return { icono: Search, color: 'text-gray-600' };
-      case 'en_auditoria':
-        return { icono: FileSearch, color: 'text-gray-600' };
-      case 'completado':
-        return { icono: CheckCircle2, color: 'text-emerald-600' };
-      case 'cancelado':
-        return { icono: XCircle, color: 'text-red-600' };
-      default:
-        return { icono: Hourglass, color: 'text-gray-600' };
-    }
-  }
-  const { icono: IconoEstado, color: colorIconoEstado } = iconoYColorPorEstado(estadoCodigo);
-
-  // Ubicaciones
-  const ubicaciones: ProyectoUbicacion[] = proyecto.ubicaciones ?? [];
-
-  $: ubicacionPrincipal =
-    ubicaciones.find((u) => u?.ubicacion?.tipo_ubicacion === 'principal') ?? ubicaciones[0];
-
-  // esVirtual = true solo si NO hay ubicaciones presenciales
-  $: hayPresenciales = ubicaciones.some((u) => esUbicacionPresencial(u?.ubicacion));
-  $: hayVirtuales = ubicaciones.some((u) => esUbicacionVirtual(u?.ubicacion));
-  $: soloVirtuales = ubicaciones.length > 0 && !hayPresenciales && hayVirtuales;
-
-  $: ubicacionTexto =
-    ubicaciones.length === 0
-      ? ''
-      : soloVirtuales
-      ? 'Virtual'
-      : (() => {
-          const u = ubicacionPrincipal?.ubicacion;
-          if (esUbicacionPresencial(u)) {
-            const direccionCompleta = construirDireccionCompleta(u);
-           
-            const localidad = u.localidad?.nombre || 'Ciudad';
-            const provincia = u.localidad?.provincia?.nombre;
-            return provincia ? `${localidad}, ${provincia}` : localidad;
-          }
-          return 'Ciudad';
-        })();
-
-  $: ubicacionTooltip = ubicacionTexto;
+	$: participaciones = (proyecto.participacion_permitida || []).map(getParticipacionVisual);
+	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso';
+	$: ubicacionCorta = getUbicacionCorta(proyecto);
+	$: isVirtual = ubicacionCorta === 'Virtual';
 </script>
 
-<a
-  href={`/proyectos/${proyecto.id_proyecto}`}
-  class="animate-fade-in-up group relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition-all hover:shadow-lg"
-  aria-label={`Abrir proyecto: ${proyecto.titulo}`}
+<div
+	class="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+	on:click={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
+	on:keydown={(e) =>
+		(e.key === 'Enter' || e.key === ' ') && goto(`/proyectos/${proyecto.id_proyecto}`)}
+	role="button"
+	tabindex="0"
 >
-  <!-- Imagen destacada -->
-  <div class="relative aspect-[4/3] w-full overflow-hidden" aria-label="Imagen de portada del proyecto">
-    <img
-      src={proyecto.url_portada || '/img/proyecto-default.jpg'}
-      alt={proyecto.titulo}
-      class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      loading="lazy"
-    />
+	<!-- Imagen Cover -->
+	<div class="relative h-48 overflow-hidden bg-gray-100">
+		{#if proyecto.url_portada}
+			<img
+				src={proyecto.url_portada}
+				alt={proyecto.titulo}
+				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+				loading="lazy"
+			/>
+		{:else}
+			<div class="flex h-full w-full items-center justify-center text-gray-300">
+				<span class="text-4xl">🖼️</span>
+			</div>
+		{/if}
 
-    <!-- Estado y Fechas -->
-    <div
-      class="absolute bottom-3 left-3 z-50 flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-lg backdrop-blur"
-      role="status"
-      aria-label={`Estado: ${textoEstado}`}
-    >
-      <span
-        class="flex h-5 w-5 items-center justify-center rounded-full bg-gray-50 ring-1 ring-gray-100"
-        aria-hidden="true"
-      >
-        <svelte:component this={IconoEstado} class={`h-3.5 w-3.5 ${colorIconoEstado}`} />
-      </span>
+		<!-- Badges flotantes -->
+		<div class="absolute left-3 top-3 flex flex-col items-start gap-2">
+			<StatusBadge estado={proyecto.estado} />
+		</div>
 
-      <span class="font-medium">{textoEstado}</span>
+		<!-- Badge de ubicación -->
+		<div class="absolute right-3 top-3">
+			<span
+				class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm"
+			>
+				{#if isVirtual}
+					<Globe class="h-3.5 w-3.5" />
+				{:else}
+					<MapPin class="h-3.5 w-3.5" />
+				{/if}
+				{ubicacionCorta}
+			</span>
+		</div>
+	</div>
 
-      <span class="mx-1 text-gray-300" aria-hidden="true">•</span>
+	<!-- Contenido -->
+	<div class="flex flex-grow flex-col p-4">
+		<!-- Header: Título e Institución -->
+		<div class="mb-3">
+			<h3
+				class="mb-1.5 line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
+			>
+				{proyecto.titulo}
+			</h3>
 
-      <span class="text-gray-600" aria-label="Rango de fechas">
-        {formatearFechaCorta(proyecto.created_at as any)} – {formatearFechaCorta(proyecto.fecha_fin_tentativa as any)}
-      </span>
-    </div>
+			{#if proyecto.institucion?.nombre_legal}
+				<div class="flex items-center gap-1.5 text-sm text-gray-500">
+					<Building2 class="h-3.5 w-3.5 flex-shrink-0" />
+					<span class="truncate">{proyecto.institucion.nombre_legal}</span>
+				</div>
+			{/if}
+		</div>
 
-    <!-- Gradiente oscuro -->
-    <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" aria-hidden="true"></div>
-  </div>
+		<p class="mb-3 line-clamp-3 text-sm leading-relaxed text-gray-600">
+			{proyecto.descripcion}
+		</p>
 
-  <!-- Contenido textual -->
-  <div class="flex flex-1 flex-col justify-between gap-6 p-6">
-    <div class="space-y-2">
-      <div class="flex items-center justify-between text-xs text-gray-500">
-        <span
-          class="font-semibold text-[rgb(var(--color-primary))] truncate max-w-[60%] whitespace-nowrap"
-          title={proyecto.institucion?.nombre_legal}
-        >
-          {proyecto.institucion?.nombre_legal || 'Institución'}
-        </span>
+		<!-- Progreso visual -->
+		<div class="mt-auto flex flex-col gap-2.5 border-t border-gray-100 pt-3">
+			<ProyectoProgreso {proyecto} variant="compact" />
 
-        {#if ubicacionTexto}
-          <div class="flex min-w-0 items-center gap-1 text-xs text-gray-500 max-w-[40%] whitespace-nowrap truncate">
-            <MapPin class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <span
-              class="truncate"
-              title={ubicacionTooltip}
-              aria-label={`Ubicación: ${ubicacionTooltip}`}
-            >
-              {ubicacionTexto}
-            </span>
-          </div>
-        {/if}
-      </div>
-
-      <h3 class="line-clamp-2 text-lg font-semibold text-gray-900">
-        {proyecto.titulo}
-      </h3>
-
-      <p class="line-clamp-3 text-sm leading-relaxed text-gray-600">
-        {proyecto.descripcion}
-      </p>
-    </div>
-
-    <!-- Progreso visual -->
-    <div class="mt-2 flex flex-col gap-2">
-      <ProyectoProgreso {proyecto} variant="compact" />
-
-      {#if mostrarBotones}
-        <div class="flex flex-col-reverse gap-3 pt-3 sm:flex-row">
-          <Button
-            label="Ver detalles"
-            href={`/proyectos/${proyecto.id_proyecto}`}
-            variant="secondary"
-            size="sm"
-            customClass="flex-1"
-            aria-label="Ver detalles del proyecto"
-          />
-          <Button
-            label="Colaborar ahora"
-            href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
-            size="sm"
-            disabled={botonColaborarDeshabilitado}
-            customClass="flex-1"
-            aria-label="Colaborar en este proyecto"
-          />
-        </div>
-      {/if}
-    </div>
-  </div>
-</a>
+			{#if mostrarBotones}
+				<div
+					class="flex flex-col-reverse gap-2 pt-2 sm:flex-row"
+					on:click|stopPropagation={() => {}}
+					on:keydown|stopPropagation={() => {}}
+					role="presentation"
+				>
+					<Button
+						label="Ver detalles"
+						href={`/proyectos/${proyecto.id_proyecto}`}
+						variant="secondary"
+						size="sm"
+						customClass="flex-1"
+						customAriaLabel="Ver detalles del proyecto"
+					/>
+					<Button
+						label="Colaborar ahora"
+						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
+						size="sm"
+						disabled={botonColaborarDeshabilitado}
+						customClass="flex-1"
+						customAriaLabel="Colaborar en este proyecto"
+					/>
+				</div>
+			{:else}
+				<button
+					class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-blue-600"
+					on:click|stopPropagation={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
+				>
+					Ver detalles
+					<ArrowRight class="h-4 w-4" />
+				</button>
+			{/if}
+		</div>
+	</div>
+</div>
 
 <style>
-  .line-clamp-3 {
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  @keyframes fade-in-up {
-    0% {
-      opacity: 0;
-      transform: translateY(16px);
-    }
-    100% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fade-in-up {
-    animation: fade-in-up 0.6s ease-out forwards;
-  }
+	.line-clamp-3 {
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
 </style>

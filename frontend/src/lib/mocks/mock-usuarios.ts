@@ -16,15 +16,7 @@ export const mockUsuarios = {
 		created_at: new Date('2020-01-01'),
 		rol: 'administrador',
 		url_foto: '/users/admin-default.png',
-		direccion: {
-			calle: 'Av. Corrientes',
-			numero: '1234',
-			piso: '5',
-			departamento: 'A',
-			referencia: 'Edificio Torre Central, entre Callao y Uruguay',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
 		],
@@ -58,14 +50,7 @@ export const mockUsuarios = {
 		url_foto: '/users/escuela-esperanza.jpg',
 		nombre_legal: 'Escuela Primaria Esperanza',
 		tipo_institucion: 'Educación pública',
-		direccion: {
-			calle: 'San Martín',
-			numero: '456',
-			referencia: 'Frente a la plaza principal',
-			localidad_id: 4,
 
-			localidad: getLocalidad(4)
-		},
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'direccion@escuelaesperanza.edu.ar', etiqueta: 'principal' },
 			{
@@ -110,13 +95,7 @@ export const mockUsuarios = {
 		url_foto: '/users/hospital-garrahan.jpg',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
 		tipo_institucion: 'Salud pública',
-		direccion: {
-			calle: 'Combate de los Pozos',
-			numero: '1881',
-			referencia: 'Hospital Garrahan - Sector Administrativo',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }
 		],
@@ -142,24 +121,19 @@ export const mockUsuarios = {
 		password: '123456',
 		nombre: 'María',
 		apellido: 'González',
-		fecha_nacimiento: new Date('1988-07-22'),
+		fecha_nacimiento: new Date('1985-05-20'),
 		estado: 'activo',
 		created_at: new Date('2024-02-01'),
 		rol: 'colaborador',
 		url_foto: '/users/maria-gonzalez.jpg',
 		tipo_colaborador: 'unipersonal',
-		direccion: {
-			calle: 'Mitre',
-			numero: '789',
-			piso: '2',
-			departamento: 'B',
-			localidad_id: 5,
-			localidad: getLocalidad(5)
-		},
 		contactos: [
-			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }
+			{
+				tipo_contacto: 'email',
+				valor: 'maria.gonzalez@gmail.com',
+				etiqueta: 'principal'
+			}
 		],
-
 		consentimientos: [
 			{
 				id_consentimiento: 9,
@@ -190,13 +164,7 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Biblioteca Popular Los Libros',
 		con_fines_de_lucro: false,
-		direccion: {
-			calle: 'Belgrano',
-			numero: '987',
-			referencia: 'Esquina con Sarmiento',
-			localidad_id: 6,
-			localidad: getLocalidad(6)
-		},
+
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
 
 		consentimientos: [
@@ -229,14 +197,7 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Fundación Manos Unidas Argentina',
 		con_fines_de_lucro: false,
-		direccion: {
-			calle: 'Av. Santa Fe',
-			numero: '1456',
-			piso: '3',
-			departamento: 'C',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }
 		],
@@ -283,15 +244,7 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Empresa Solidaria S.A.',
 		con_fines_de_lucro: true,
-		direccion: {
-			calle: 'Av. del Libertador',
-			numero: '5678',
-			piso: '12',
-			departamento: 'A',
-			referencia: 'Torre Empresarial Norte',
-			localidad_id: 21,
-			localidad: getLocalidad(21)
-		},
+
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -328,12 +281,6 @@ export const mockUsuarios = {
 		rol: 'colaborador',
 		url_foto: '/users/ana-martinez.jpg',
 		tipo_colaborador: 'unipersonal',
-		direccion: {
-			calle: 'San Juan',
-			numero: '1122',
-			localidad_id: 22,
-			localidad: getLocalidad(22)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -341,7 +288,6 @@ export const mockUsuarios = {
 				etiqueta: 'principal'
 			}
 		],
-
 		consentimientos: [
 			{
 				id_consentimiento: 18,
@@ -377,13 +323,6 @@ export const mockUsuarios = {
 		url_foto: '/users/clinica-san-jorge.jpg',
 		nombre_legal: 'Clínica San Jorge S.A.',
 		tipo_institucion: 'Salud privada',
-		direccion: {
-			calle: 'Av. 9 de Julio',
-			numero: '3456',
-			referencia: 'Edificio principal, planta baja',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -391,7 +330,6 @@ export const mockUsuarios = {
 				etiqueta: 'principal'
 			}
 		],
-
 		consentimientos: [
 			{
 				id_consentimiento: 21,
@@ -427,13 +365,6 @@ export const mockUsuarios = {
 		url_foto: '/users/fundacion-siempre.jpg',
 		nombre_legal: 'Fundación Siempre',
 		tipo_institucion: 'Fundación',
-		direccion: {
-			calle: 'Av. Belgrano',
-			numero: '123',
-			referencia: 'Frente a la plaza central',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -457,13 +388,6 @@ export const mockUsuarios = {
 		url_foto: '/users/comedor-los-pinos.jpg',
 		nombre_legal: 'Comedor Los Pinos',
 		tipo_institucion: 'Comedor',
-		direccion: {
-			calle: 'Calle 8',
-			numero: '456',
-			referencia: 'Barrio Norte',
-			localidad_id: 2,
-			localidad: getLocalidad(2)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -487,13 +411,6 @@ export const mockUsuarios = {
 		url_foto: '/users/hospital-sanjose.jpg',
 		nombre_legal: 'Hospital General San José',
 		tipo_institucion: 'Hospital',
-		direccion: {
-			calle: 'Av. San Martín',
-			numero: '789',
-			referencia: 'Esquina con Av. Rivadavia',
-			localidad_id: 5,
-			localidad: getLocalidad(5)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -517,13 +434,6 @@ export const mockUsuarios = {
 		url_foto: '/users/instituto-formacion.jpg',
 		nombre_legal: 'Instituto de Formación Laboral',
 		tipo_institucion: 'Instituto',
-		direccion: {
-			calle: 'Av. Independencia',
-			numero: '321',
-			referencia: 'Cerca de la estación',
-			localidad_id: 22,
-			localidad: getLocalidad(22)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -547,13 +457,6 @@ export const mockUsuarios = {
 		url_foto: '/users/fundacion-calor.jpg',
 		nombre_legal: 'Fundación Calor Humano',
 		tipo_institucion: 'Fundación',
-		direccion: {
-			calle: 'Av. Mitre',
-			numero: '654',
-			referencia: 'A metros del hospital',
-			localidad_id: 23,
-			localidad: getLocalidad(23)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -577,13 +480,6 @@ export const mockUsuarios = {
 		url_foto: '/users/hogar-santa-teresa.jpg',
 		nombre_legal: 'Hogar Santa Teresa',
 		tipo_institucion: 'Hogar',
-		direccion: {
-			calle: 'Calle 25',
-			numero: '789',
-			referencia: 'Barrio Sur',
-			localidad_id: 9,
-			localidad: getLocalidad(9)
-		},
 		contactos: [
 			{
 				tipo_contacto: 'email',

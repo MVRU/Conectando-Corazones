@@ -51,11 +51,14 @@ export function ordenarPorProgreso(
 /**
  * Calcula el porcentaje de tiempo transcurrido desde la fecha de inicio hasta la fecha de cierre
  */
-export function calcularProgresoTiempo(fechaInicio?: Date, fechaCierre?: Date): number {
+export function calcularProgresoTiempo(
+	fechaInicio?: Date | string | null,
+	fechaCierre?: Date | string | null
+): number {
 	if (!fechaInicio || !fechaCierre) return 0;
 
-	const inicio = fechaInicio.getTime();
-	const fin = fechaCierre.getTime();
+	const inicio = new Date(fechaInicio).getTime();
+	const fin = new Date(fechaCierre).getTime();
 	const ahora = Date.now();
 
 	if ([inicio, fin].some(isNaN) || fin <= inicio) return 0;

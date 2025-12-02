@@ -1,36 +1,17 @@
 import { error } from '@sveltejs/kit';
 import type { ComponentType } from 'svelte';
-import {
-        BadgeDollarSign,
-        BedDouble,
-        Box,
-        Boxes,
-        CircleDollarSign,
-        Laptop,
-        Package,
-        PencilRuler,
-        Pill,
-        Puzzle,
-        Scale,
-        Shirt,
-        UtensilsCrossed,
-        Users,
-        Wrench
-} from 'lucide-svelte';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-
-const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
-	en_curso: 0,
-	pendiente_solicitud_cierre: 1,
-	en_revision: 2,
-	en_auditoria: 3,
-	completado: 4,
-	cancelado: 5
-};
+import {
+	ESTADO_PRIORIDAD,
+	ICONOS_UNIDAD,
+	DEFAULT_PARTICIPACION_ICON,
+	COLORES_UI,
+	type ParticipacionVisualColor
+} from './constants';
 
 export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 	const idNumerico = Number(idParam);
@@ -140,75 +121,65 @@ export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'):
 	return ciudad ?? provincia ?? virtualLabel;
 }
 
+export function getUbicacionCorta(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
+	const ubicacion = getUbicacionPrincipal(proyecto);
+	if (!ubicacion) return virtualLabel;
+
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+
+	return ciudad ?? virtualLabel;
+}
+
 //**
 // * Utilidades para Participación Permitida
 //  */
 
-type ParticipacionVisualColor = 'green' | 'purple' | 'blue';
-
 type ParticipacionVisual = {
-        actualLabel: string;
-        objetivoLabel: string;
-        color: ParticipacionVisualColor;
-        icono: ComponentType;
-        iconColor: string;
-};
-
-const DEFAULT_ICON = Package;
-
-const unidadIcono: Record<string, ComponentType> = {
-        libros: Box,
-        colchones: BedDouble,
-        alimentos: UtensilsCrossed,
-        juguetes: Puzzle,
-        computadoras: Laptop,
-        prendas: Shirt,
-        medicamentos: Pill,
-        herramientas: Wrench,
-        utiles: PencilRuler,
-        personas: Users,
-        kilogramos: Scale,
-        unidades: Boxes,
-        pesos: BadgeDollarSign,
-        dolares: CircleDollarSign
+	actualLabel: string;
+	objetivoLabel: string;
+	color: ParticipacionVisualColor;
+	icono: ComponentType;
+	iconColor: string;
 };
 
 export function getParticipacionVisual(p: ParticipacionPermitida): ParticipacionVisual {
-        const unidad = p.unidad_medida?.toLowerCase();
-        const tipo = p.tipo_participacion?.descripcion;
-        const actual = p.actual ?? 0;
-        const objetivo = p.objetivo ?? 0;
+	const unidad = p.unidad_medida?.toLowerCase();
+	const tipo = p.tipo_participacion?.descripcion;
+	const actual = p.actual ?? 0;
+	const objetivo = p.objetivo ?? 0;
 
-        if (tipo === 'Monetaria') {
-                const formatter = new Intl.NumberFormat('es-AR');
-                return {
-                        actualLabel: `$${formatter.format(actual)}`,
-                        objetivoLabel: `$${formatter.format(objetivo)}`,
-                        color: 'green',
-                        icono: unidadIcono[unidad || 'pesos'] ?? DEFAULT_ICON,
-                        iconColor: 'text-emerald-600'
-                };
-        }
+	if (tipo === 'Monetaria') {
+		const formatter = new Intl.NumberFormat('es-AR');
+		return {
+			actualLabel: `$${formatter.format(actual)}`,
+			objetivoLabel: `$${formatter.format(objetivo)}`,
+			color: 'green',
+			icono: ICONOS_UNIDAD[unidad || 'pesos'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.green.iconColor
+		};
+	}
 
-        if (tipo === 'Voluntariado') {
-                const labelUnidad = unidad === 'personas' ? 'voluntarios' : unidad || 'voluntarios';
-                return {
-                        actualLabel: `${actual} ${labelUnidad}`,
-                        objetivoLabel: `${objetivo} ${labelUnidad}`,
-                        color: 'purple',
-                        icono: unidadIcono[unidad || 'personas'] ?? DEFAULT_ICON,
-                        iconColor: 'text-purple-600'
-                };
-        }
+	if (tipo === 'Voluntariado') {
+		const labelUnidad = unidad === 'personas' ? 'voluntarios' : unidad || 'voluntarios';
+		return {
+			actualLabel: `${actual} ${labelUnidad}`,
+			objetivoLabel: `${objetivo} ${labelUnidad}`,
+			color: 'purple',
+			icono: ICONOS_UNIDAD[unidad || 'personas'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.purple.iconColor
+		};
+	}
 
-        const labelUnidad = unidad || 'unidades';
-        return {
-                actualLabel: `${actual} ${labelUnidad}`,
-                objetivoLabel: `${objetivo} ${labelUnidad}`,
-                color: 'blue',
-                icono: unidadIcono[unidad || 'unidades'] ?? DEFAULT_ICON,
-                iconColor: 'text-sky-600'
-        };
+	const labelUnidad = unidad || 'unidades';
+	return {
+		actualLabel: `${actual} ${labelUnidad}`,
+		objetivoLabel: `${objetivo} ${labelUnidad}`,
+		color: 'blue',
+		icono: ICONOS_UNIDAD[unidad || 'unidades'] ?? DEFAULT_PARTICIPACION_ICON,
+		iconColor: COLORES_UI.sky.iconColor
+	};
 }
 
 //**
