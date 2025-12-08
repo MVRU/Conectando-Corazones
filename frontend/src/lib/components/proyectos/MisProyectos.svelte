@@ -3,12 +3,22 @@
 	import type { Usuario } from '$lib/types/Usuario';
 	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
 	import { fade, fly } from 'svelte/transition';
-	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
+	import MisProyectoCard from '$lib/components/ui/cards/MisProyectoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import { writable } from 'svelte/store';
-	import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-	import { filtrarProyectos } from '$lib/utils/util-proyectos';
+	import {
+		getProvinciaFromLocalidad,
+		obtenerProvinciasDisponibles,
+		obtenerLocalidadesDisponibles,
+		filtrarPorLocalidad
+	} from '$lib/utils/util-ubicaciones';
+	import {
+		filtrarProyectos,
+		filtrarProyectosPorUsuario,
+		filtrarPorTipoUbicacion,
+		filtrarPorRangoFechas
+	} from '$lib/utils/util-proyectos';
 	import {
 		TIPO_PARTICIPACION_LABELS,
 		type TipoParticipacionDescripcion
@@ -57,25 +67,6 @@
 	// Filtrar proyectos según el rol del usuario
 	$: proyectosDelUsuario = filtrarProyectosPorUsuario(proyectos, usuario);
 
-	function filtrarProyectosPorUsuario(
-		proyectosList: Proyecto[],
-		user: Usuario | null
-	): Proyecto[] {
-		if (!user) return [];
-
-		if (user.rol === 'institucion') {
-			return proyectosList.filter((p) => p.institucion_id === user.id_usuario);
-		}
-
-		if (user.rol === 'colaborador') {
-			return proyectosList.filter((p) =>
-				p.colaboraciones?.some((c) => c.colaborador_id === user.id_usuario && c.estado === 'aprobada')
-			);
-		}
-
-		return [];
-	}
-
 	// Filtrar proyectos por estado
 	$: proyectosActivos = proyectosDelUsuario.filter(
 		(p) => p.estado && estadosActivos.includes(p.estado)
@@ -83,110 +74,20 @@
 	$: proyectosHistorial = proyectosDelUsuario.filter((p) => p.estado === estadoCompletado);
 
 	// Provincias disponibles para cada sección
-	$: provinciasActivosDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				proyectosActivos
-					.filter((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						return primeraUbicacion?.modalidad === 'presencial';
-					})
-					.map((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							return (
-								getProvinciaFromLocalidad(primeraUbicacion.localidad)?.nombre ??
-								''
-							);
-						}
-						return '';
-					})
-					.filter((s) => s !== '')
-			)
-		).sort()
-	];
+	$: provinciasActivosDisponibles = obtenerProvinciasDisponibles(proyectosActivos);
 
-	$: provinciasHistorialDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				proyectosHistorial
-					.filter((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						return primeraUbicacion?.modalidad === 'presencial';
-					})
-					.map((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							return (
-								getProvinciaFromLocalidad(primeraUbicacion.localidad)?.nombre ??
-								''
-							);
-						}
-						return '';
-					})
-					.filter((s) => s !== '')
-			)
-		).sort()
-	];
+	$: provinciasHistorialDisponibles = obtenerProvinciasDisponibles(proyectosHistorial);
 
 	// Localidades filtradas por provincia seleccionada
-	$: localidadesActivosDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				proyectosActivos
-					.filter((p) => {
-						if (provinciaSeleccionadaActivos === 'Todas') return true;
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							const provincia = getProvinciaFromLocalidad(
-								primeraUbicacion.localidad
-							);
-							return provincia?.nombre === provinciaSeleccionadaActivos;
-						}
-						return false;
-					})
-					.map((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							return primeraUbicacion.localidad?.nombre ?? '';
-						}
-						return '';
-					})
-					.filter((s) => s !== '')
-			)
-		).sort()
-	];
+	$: localidadesActivosDisponibles = obtenerLocalidadesDisponibles(
+		proyectosActivos,
+		provinciaSeleccionadaActivos
+	);
 
-	$: localidadesHistorialDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				proyectosHistorial
-					.filter((p) => {
-						if (provinciaSeleccionadaHistorial === 'Todas') return true;
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							const provincia = getProvinciaFromLocalidad(
-								primeraUbicacion.localidad
-							);
-							return provincia?.nombre === provinciaSeleccionadaHistorial;
-						}
-						return false;
-					})
-					.map((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							return primeraUbicacion.localidad?.nombre ?? '';
-						}
-						return '';
-					})
-					.filter((s) => s !== '')
-			)
-		).sort()
-	];
+	$: localidadesHistorialDisponibles = obtenerLocalidadesDisponibles(
+		proyectosHistorial,
+		provinciaSeleccionadaHistorial
+	);
 
 	// Proyectos visibles con filtros aplicados
 	$: proyectosActivosVisibles = aplicarFiltrosAdicionales(
@@ -227,52 +128,13 @@
 		let resultado = proyectosList;
 
 		// Filtrar por tipo de ubicación
-		if (tipoUbicacion !== 'Todas') {
-			resultado = resultado.filter((p) => {
-				const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-				if (tipoUbicacion === 'Presencial') {
-					return primeraUbicacion?.modalidad === 'presencial';
-				} else if (tipoUbicacion === 'Virtual') {
-					return primeraUbicacion?.modalidad === 'virtual';
-				}
-				return false;
-			});
-		}
+		resultado = filtrarPorTipoUbicacion(resultado, tipoUbicacion);
 
-		// Filtrar por localidad 
-		if (localidad !== 'Todas' && tipoUbicacion === 'Presencial') {
-			resultado = resultado.filter((p) => {
-				const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-				if (primeraUbicacion?.modalidad === 'presencial') {
-					return primeraUbicacion.localidad?.nombre === localidad;
-				}
-				return false;
-			});
-		}
+		// Filtrar por localidad
+		resultado = filtrarPorLocalidad(resultado, localidad, tipoUbicacion);
 
 		// Filtrar por rango de fechas
-		if (fechaDesde || fechaHasta) {
-			resultado = resultado.filter((p) => {
-				const fechaInicio = p.created_at ? new Date(p.created_at) : null;
-				const fechaFin = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
-				
-				if (!fechaInicio || !fechaFin) return false;
-				
-				// Si fechaDesde es antes del inicio del proyecto → NO aparece
-				if (fechaDesde) {
-					const desde = new Date(fechaDesde);
-					if (desde < fechaInicio) return false;
-				}
-				
-				// Si fechaHasta es después del fin del proyecto → NO aparece
-				if (fechaHasta) {
-					const hasta = new Date(fechaHasta);
-					if (hasta > fechaFin) return false;
-				}
-				
-				return true;
-			});
-		}
+		resultado = filtrarPorRangoFechas(resultado, fechaDesde, fechaHasta);
 
 		return resultado;
 	}
@@ -455,13 +317,14 @@
 									placeholder="Desde"
 									class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 								/>
-								<input
-									id="fecha-hasta-activos"
-									type="date"
-									bind:value={fechaHastaActivos}
-									placeholder="Hasta"
-									class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-								/>
+							<input
+								id="fecha-hasta-activos"
+								type="date"
+								bind:value={fechaHastaActivos}
+								min={fechaDesdeActivos}
+								placeholder="Hasta"
+								class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							/>
 							</div>
 						</div>
 					</div>
@@ -505,12 +368,10 @@
 					out:fade={{ duration: 150 }}
 					class="transition-transform hover:scale-[1.02]"
 				>
-					<ProyectoCard 
+					<MisProyectoCard 
 						{proyecto} 
-						mostrarBotones={true}
 						esInstitucion={usuario?.rol === 'institucion'}
 						esProyectoCompletado={false}
-						esMisProyectos={true}
 					/>
 				</div>
 			{/each}
@@ -681,13 +542,14 @@
 									placeholder="Desde"
 									class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 								/>
-								<input
-									id="fecha-hasta-historial"
-									type="date"
-									bind:value={fechaHastaHistorial}
-									placeholder="Hasta"
-									class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-								/>
+							<input
+								id="fecha-hasta-historial"
+								type="date"
+								bind:value={fechaHastaHistorial}
+								min={fechaDesdeHistorial}
+								placeholder="Hasta"
+								class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							/>
 							</div>
 						</div>
 					</div>
@@ -731,12 +593,10 @@
 					out:fade={{ duration: 150 }}
 					class="transition-transform hover:scale-[1.02]"
 				>
-					<ProyectoCard 
+					<MisProyectoCard 
 						{proyecto} 
-						mostrarBotones={true}
 						esInstitucion={usuario?.rol === 'institucion'}
 						esProyectoCompletado={true}
-						esMisProyectos={true}
 					/>
 				</div>
 			{/each}

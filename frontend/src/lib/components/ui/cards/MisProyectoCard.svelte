@@ -1,18 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { ArrowRight, Building2, MapPin, Globe } from 'lucide-svelte';
-	import { getParticipacionVisual, getUbicacionCorta } from '$lib/utils/util-proyectos';
+	import { Building2, MapPin, Globe } from 'lucide-svelte';
+	import { getUbicacionCorta } from '$lib/utils/util-proyectos';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
-	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
 
 	export let proyecto: Proyecto;
-	export let mostrarBotones: boolean = false;
+	export let esInstitucion: boolean = false;
+	export let esProyectoCompletado: boolean = false;
 
-	$: participaciones = (proyecto.participacion_permitida || []).map(getParticipacionVisual);
-	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso';
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
 	$: isVirtual = ubicacionCorta === 'Virtual';
 </script>
@@ -86,39 +84,41 @@
 		<div class="mt-auto flex flex-col gap-2.5 border-t border-gray-100 pt-3">
 			<ProyectoProgreso {proyecto} variant="compact" />
 
-			{#if mostrarBotones}
-				<div
-					class="flex flex-col-reverse gap-2 pt-2 sm:flex-row"
-					on:click|stopPropagation={() => {}}
-					on:keydown|stopPropagation={() => {}}
-					role="presentation"
-				>
+			<!-- Botones específicos para Mis Proyectos -->
+			<div
+				class="flex flex-col-reverse gap-2 pt-2 sm:flex-row"
+				on:click|stopPropagation={() => {}}
+				on:keydown|stopPropagation={() => {}}
+				role="presentation"
+			>
+				{#if esInstitucion && !esProyectoCompletado}
+					<!-- Institución - Proyectos activos: Editar + Ver panel -->
 					<Button
-						label="Ver detalles"
-						href={`/proyectos/${proyecto.id_proyecto}`}
+						label="Editar"
+						href={`/proyectos/${proyecto.id_proyecto}/editar`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
-						customAriaLabel="Ver detalles del proyecto"
+						customAriaLabel="Editar proyecto"
 					/>
 					<Button
-						label="Colaborar ahora"
-						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
+						label="Ver panel"
+						href={`/proyectos/${proyecto.id_proyecto}/panel`}
 						size="sm"
-						disabled={botonColaborarDeshabilitado}
 						customClass="flex-1"
-						customAriaLabel="Colaborar en este proyecto"
+						customAriaLabel="Ver panel del proyecto"
 					/>
-				</div>
-			{:else}
-				<button
-					class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-blue-600"
-					on:click|stopPropagation={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
-				>
-					Ver detalles
-					<ArrowRight class="h-4 w-4" />
-				</button>
-			{/if}
+				{:else}
+					<!-- Institución (completado) o Colaborador: Solo Ver panel -->
+					<Button
+						label="Ver panel"
+						href={`/proyectos/${proyecto.id_proyecto}/panel`}
+						size="sm"
+						customClass="w-full"
+						customAriaLabel="Ver panel del proyecto"
+					/>
+				{/if}
+			</div>
 		</div>
 	</div>
 </div>

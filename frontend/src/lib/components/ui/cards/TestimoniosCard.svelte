@@ -2,27 +2,25 @@
 	export let puntaje: number = 5;
 	export let contenido: string = '';
 	export let username: string = '';
-	export let rol: string | undefined;
+	export let rol: string | undefined = undefined;
 	export let active: boolean = false;
 	export let locked: boolean = false;
 
 	const MAX_LENGTH = 180;
 
-	// * Se trunca el contenido para mantener la tarjeta compacta
 	$: contenidoTruncado =
 		contenido.length > MAX_LENGTH ? contenido.slice(0, MAX_LENGTH).trimEnd() + '…' : contenido;
 </script>
 
 <div
-	class="group relative flex h-[320px] min-h-[260px] w-full max-w-[380px] min-w-[280px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/80 bg-gradient-to-b from-white via-white to-gray-50 px-7 py-8 shadow-[0_4px_32px_0_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-500 will-change-transform select-none
+	class="group relative flex h-[320px] min-h-[260px] w-full min-w-[280px] max-w-[380px] select-none flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/80 bg-gradient-to-b from-white via-white to-gray-50 px-7 py-8 shadow-[0_4px_32px_0_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-500 will-change-transform
     hover:shadow-[0_12px_48px_0_rgba(30,100,200,0.12)]
     {active && !locked ? 'z-10 scale-105 ring-1 ring-blue-100/60' : ''}
     {locked
 		? 'pointer-events-none opacity-75 blur-[0.5px]'
-		: ' hover:-translate-y-1.5 focus-visible:ring-4 focus-visible:ring-blue-50/70 focus-visible:outline-none'}
+		: ' hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-50/70'}
   "
 >
-	<!-- Estrellas con diseño más refinado -->
 	<div class="mb-5 flex justify-center gap-1.5">
 		{#each Array(5).keys() as i (i)}
 			<svg
@@ -42,14 +40,12 @@
 		{/each}
 	</div>
 
-	<!-- Cita con comillas estilizadas -->
 	<blockquote
-		class="relative mb-6 flex-grow text-center text-base leading-relaxed text-gray-700/90 italic selection:bg-blue-50 selection:text-blue-800"
+		class="relative mb-6 flex-grow text-center text-base italic leading-relaxed text-gray-700/90 selection:bg-blue-50 selection:text-blue-800"
 	>
 		<span class="relative z-10">{contenidoTruncado}</span>
 	</blockquote>
 
-	<!-- Autor y rol -->
 	<div class="mt-auto flex flex-col items-center gap-0.5">
 		<p class="font-semibold text-gray-800 transition-colors duration-200 group-hover:text-blue-500">
 			{username}

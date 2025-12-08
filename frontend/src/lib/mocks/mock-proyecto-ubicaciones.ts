@@ -56,6 +56,24 @@ const ubicacionesBase: ProyectoUbicacion[] = [
 		ubicacion_id: 8,
 		ubicacion: getUbicacion(8)
 	},
+	{
+		id_proyecto_ubicacion: 10,
+		proyecto_id: 6,
+		ubicacion_id: 4,
+		ubicacion: getUbicacion(4)
+	},
+	{
+		id_proyecto_ubicacion: 11,
+		proyecto_id: 7,
+		ubicacion_id: 2,
+		ubicacion: getUbicacion(2)
+	},
+	{
+		id_proyecto_ubicacion: 12,
+		proyecto_id: 8,
+		ubicacion_id: 6,
+		ubicacion: getUbicacion(6)
+	}
 ];
 
 export const mockProyectoUbicaciones: ProyectoUbicacion[] = ubicacionesBase;

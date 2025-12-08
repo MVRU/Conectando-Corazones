@@ -267,6 +267,8 @@ const proyectosBase: Proyecto[] = [
 		descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
 		resumen: 'Capacitamos cuidadores de adultos mayores y articulamos redes.',
 		aprendizajes: 'Profundizamos en el cuidado domiciliario y la comunicacion con las familias.',
+		url_portada: '/img/proyectos-8.webp',
+		created_at: new Date('2025-04-10'),
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
 		fecha_fin_tentativa: new Date('2025-07-10'),
 		id_chat_firebase: 1008,
