@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
-	import DireccionForm from '$lib/components/forms/DireccionForm.svelte';
+	// import DireccionForm eliminado: ubicación ahora está asociada a proyectos
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { EditarPerfilForm } from '$lib/types/forms/EditarPerfilForm';
 	import { crearFormularioVacio } from '$lib/types/forms/EditarPerfilForm';
@@ -19,7 +19,7 @@
 	import { yaReseno, filtrarResenasPorTipo, obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { obtenerColorContacto, obtenerColorRol, formatearContacto, formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
-	import { obtenerUbicacion as obtenerUbicacionUtil } from '$lib/utils/util-ubicaciones';
+	// import obtenerUbicacionUtil eliminado: ubicación ahora está asociada a proyectos
 
 	onMount(() => {
 		if (!$isAuthenticated) {
@@ -55,16 +55,8 @@
             nombre: $usuarioStore.nombre || '',
             apellido: $usuarioStore.apellido || '',
             url_foto: $usuarioStore.url_foto || '',
-            contactos: $usuarioStore.contactos ?? [],
-            direccion: {
-				calle: $usuarioStore.direccion?.calle || '',
-				numero: $usuarioStore.direccion?.numero || '',
-				piso: $usuarioStore.direccion?.piso || '',
-				departamento: $usuarioStore.direccion?.departamento || '',
-				referencia: $usuarioStore.direccion?.referencia || '',
-				idProvincia: $usuarioStore.direccion?.localidad?.provincia?.id_provincia?.toString() || '',
-				idLocalidad: $usuarioStore.direccion?.localidad?.id_localidad?.toString() || ''
-			}
+            contactos: $usuarioStore.contactos ?? []
+			// direccion eliminada: ahora está asociada a proyectos
 		};
 		mostrarModalEdicion = true;
 	}
@@ -111,9 +103,7 @@
 		return contacto?.valor || 'No disponible';
 	}
 
-	function obtenerUbicacion(): string {
-		return obtenerUbicacionUtil($usuarioStore?.direccion);
-	}
+	// TODO: Ubicación eliminada - ahora está asociada a proyectos, no usuarios
 
 
 
@@ -237,17 +227,7 @@
 							<div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 								<!-- Columna izquierda: Información de contacto y ubicación -->
 								<div class="space-y-6">
-									<!-- Ubicación -->
-									<div>
-										<div class="mb-2 flex items-center gap-2">
-											<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-											</svg>
-											<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Ubicación</span>
-										</div>
-										<p class="ml-7 text-base text-gray-900">{obtenerUbicacion()}</p>
-									</div>
+									<!-- Ubicación eliminada: ahora está asociada a proyectos -->
 
 									<!-- Contacto -->
 									<div>
@@ -537,31 +517,7 @@
                 </div>
 
 				<!-- Dirección -->
-				<div class="pb-6">
-					<h4 class="text-lg font-medium text-gray-900 mb-4">Dirección</h4>
-					<DireccionForm 
-						calle={datosEdicion.direccion.calle}
-						numero={datosEdicion.direccion.numero}
-						piso={datosEdicion.direccion.piso}
-						departamento={datosEdicion.direccion.departamento}
-						referencia={datosEdicion.direccion.referencia}
-						idProvincia={datosEdicion.direccion.idProvincia}
-						idLocalidad={datosEdicion.direccion.idLocalidad}
-						on:submit={(event) => {
-							// Actualizar los datos de dirección cuando se envía el formulario
-							const direccionData = event.detail;
-							datosEdicion.direccion = {
-								calle: direccionData.calle,
-								numero: direccionData.numero,
-								piso: direccionData.piso || '',
-								departamento: direccionData.departamento || '',
-								referencia: direccionData.referencia || '',
-								idProvincia: direccionData.localidad?.provincia?.id_provincia?.toString() || '',
-								idLocalidad: direccionData.localidad?.id_localidad?.toString() || ''
-							};
-						}}
-					/>
-				</div>
+				<!-- Sección de dirección eliminada: ubicación ahora está asociada a proyectos -->
 
 				<!-- Botones de acción -->
 				<div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
