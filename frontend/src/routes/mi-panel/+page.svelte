@@ -9,6 +9,7 @@
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { goto } from '$app/navigation';
+	import { isAdmin } from '$lib/stores/auth';
 
 	import { fly, fade } from 'svelte/transition';
 	import DashboardGeneral from './DashboardGeneral.svelte';
@@ -108,6 +109,15 @@
 				type="button"
 				on:click={() => goto('/institucion/solicitudes-colaboracion')}
 			/>
+			{#if $isAdmin}
+				<Button
+					label="Panel admin"
+					variant="secondary"
+					size="md"
+					type="button"
+					on:click={() => goto('/admin')}
+				/>
+			{/if}
 		</div>
 	</div>
 </main>
