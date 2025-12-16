@@ -19,7 +19,8 @@
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
 
-	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
+export let valoresIniciales: Contacto[] = [];
+	let contactos: Contacto[] = valoresIniciales.length > 0 ? valoresIniciales.map((c) => ({ ...c })) : [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	let enviando = false;
 
 	const etiquetasTipoContacto: Record<TipoContacto, string> = {
@@ -53,6 +54,14 @@
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+
+// Si vienen valores iniciales y el formulario está "vacío", precargamos
+$: if (valoresIniciales && valoresIniciales.length > 0) {
+    const formularioVacio = contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+    if (formularioVacio) {
+        contactos = valoresIniciales.map((c) => ({ ...c }));
+    }
+}
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {

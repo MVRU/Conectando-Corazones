@@ -1,6 +1,7 @@
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
 import { getLocalidad } from '$lib/utils/util-ubicaciones';
+import { mockCategorias } from '$lib/mocks/mock-categorias';
 
 export const mockUsuarios = {
 	admin1: {
@@ -71,7 +72,7 @@ export const mockUsuarios = {
 				valor: 'direccion2@escuelaesperanza.edu.ar',
 				etiqueta: 'secundario'
 			},
-			{ tipo_contacto: 'telefono', valor: '341 XXXXXXX', etiqueta: 'celular' }
+			{ tipo_contacto: 'telefono', valor: '341 1234567', etiqueta: 'celular' }
 		],
 		consentimientos: [
 			{
@@ -155,7 +156,16 @@ export const mockUsuarios = {
 			localidad: getLocalidad(5)
 		},
 		contactos: [
-			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }
+			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },
+			{ tipo_contacto: 'telefono', valor: '341 44443665', etiqueta: 'celular secundario' },
+			{ tipo_contacto: 'web', valor: 'https://www.maria-gonzalez.com.ar', etiqueta: 'principal' }
+		],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación
+			mockCategorias[2], // Apoyo ante una crisis
+			mockCategorias[16], // Salud
+			mockCategorias[0] // Alimentación y nutrición
 		],
 
 		consentimientos: [
@@ -196,6 +206,11 @@ export const mockUsuarios = {
 			localidad: getLocalidad(6)
 		},
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación (índice 4)
+			mockCategorias[2], // Cultura y arte (índice 2)
+			mockCategorias[9] // Liderazgo (índice 9)
+		],
 
 		consentimientos: [
 			{
