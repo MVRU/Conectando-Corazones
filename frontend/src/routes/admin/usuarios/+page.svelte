@@ -18,7 +18,7 @@
 
 	let filtroRol: '' | 'administrador' | 'institucion' | 'colaborador' = '';
 
-	let filtroEstado: '' | 'activo' | 'inactivo' | 'pendiente' = '';
+	let filtroEstado: '' | 'activo' | 'inactivo' | 'pendiente' | 'suspendido' = '';
 
 	let busqueda = '';
 
@@ -102,6 +102,16 @@
 
 		</div>
 
+		<div>
+			<Button
+				label="Crear usuario"
+				variant="primary"
+				size="sm"
+				type="button"
+				href="/admin/usuarios/crear"
+			/>
+		</div>
+
 	</div>
 
 
@@ -161,6 +171,8 @@
 					<option value="inactivo">Inactivo</option>
 
 					<option value="pendiente">Pendiente</option>
+
+					<option value="suspendido">Suspendido</option>
 
 				</select>
 
