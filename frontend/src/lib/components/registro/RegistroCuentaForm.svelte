@@ -14,6 +14,8 @@
 		validarContrasena,
 		esAdulto,
 		validarUrl,
+		esFechaFutura,
+		esFechaMuyAntigua,
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
 	import { enfocarPrimerCampoConError } from '$lib/utils/forms';
@@ -53,6 +55,7 @@
 		REGISTRO_STORAGE_VERSION
 	} from '$lib/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
+	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;
@@ -762,12 +765,18 @@
 				? MENSAJES_ERROR.obligatorio
 				: !validarUsername(usernameNormalizado)
 					? MENSAJES_ERROR.usuarioInvalido
-					: '',
+					: Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
+						? `El nombre de usuario "${usernameNormalizado}" ya está en uso`
+						: '',
 			email: !emailNormalizado
 				? MENSAJES_ERROR.obligatorio
 				: !validarCorreo(emailNormalizado)
 					? MENSAJES_ERROR.correoInvalido
-					: '',
+					: Object.values(mockUsuarios).some((u) =>
+								u.contactos.some((c) => c.tipo_contacto === 'email' && c.valor === emailNormalizado)
+						  )
+						? `El correo electrónico "${emailNormalizado}" ya está en uso`
+						: '',
 			password: !password
 				? MENSAJES_ERROR.obligatorio
 				: !validarContrasena(password)
@@ -788,8 +797,15 @@
 				: !validarApellido(apellidoNormalizado)
 					? MENSAJES_ERROR.apellidoInvalido
 					: '',
-			fecha_nacimiento:
-				fechaNacimiento && esAdulto(fechaNacimiento) ? '' : MENSAJES_ERROR.requisitoEdad,
+			fecha_nacimiento: !fechaNacimiento
+				? MENSAJES_ERROR.obligatorio
+				: esFechaFutura(fechaNacimiento)
+					? MENSAJES_ERROR.fechaFutura
+					: esFechaMuyAntigua(fechaNacimiento)
+						? MENSAJES_ERROR.fechaMuyAntigua
+						: !esAdulto(fechaNacimiento)
+							? MENSAJES_ERROR.requisitoEdad
+							: '',
 			url_foto: archivoFoto
 				? ''
 				: urlNormalizada
@@ -830,7 +846,18 @@
 		return {
 			...crearErroresIniciales(),
 			...base,
-			nombre_legal: !nombreLegalNormalizado ? MENSAJES_ERROR.obligatorio : '',
+			nombre_legal: !nombreLegalNormalizado
+				? MENSAJES_ERROR.obligatorio
+				: nombreLegalNormalizado.length < 3
+					? MENSAJES_ERROR.nombreCorto
+					: Object.values(mockUsuarios).some(
+								(u) =>
+									u.rol === 'institucion' &&
+									'nombre_legal' in u &&
+									u.nombre_legal?.toLowerCase() === nombreLegalNormalizado.toLowerCase()
+						  )
+						? MENSAJES_ERROR.nombreLegalDuplicado
+						: '',
 			tipo_institucion:
 				seleccion === 'otro' ? (personalizado ? '' : MENSAJES_ERROR.tipoInstitucionObligatorio) : ''
 		};

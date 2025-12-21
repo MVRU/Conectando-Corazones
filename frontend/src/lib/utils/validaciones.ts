@@ -30,7 +30,11 @@ export const MENSAJES_ERROR = {
 	otroContactoObligatorio: 'Debe especificar el tipo de contacto',
 	telefonoInvalido: 'Número de teléfono inválido',
 	urlInvalida: 'URL inválida',
-	contactoDuplicado: 'Método de contacto duplicado'
+	contactoDuplicado: 'Método de contacto duplicado',
+	fechaFutura: 'La fecha no puede ser futura',
+	fechaMuyAntigua: 'La fecha es demasiado antigua',
+	nombreLegalDuplicado: 'El nombre legal ya se encuentra registrado',
+	nombreCorto: 'El nombre debe tener al menos 3 caracteres'
 };
 
 /**
@@ -168,6 +172,22 @@ export function esFechaFutura(fecha?: Date | string): boolean {
 		if (isNaN(fechaObj.getTime())) return false;
 
 		return fechaObj > new Date();
+	} catch {
+		return false;
+	}
+}
+
+export function esFechaMuyAntigua(fecha?: Date | string): boolean {
+	if (!fecha) return false;
+
+	try {
+		const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+		if (isNaN(fechaObj.getTime())) return false;
+
+		const fechaActual = new Date();
+		const diferenciaAnios = fechaActual.getFullYear() - fechaObj.getFullYear();
+
+		return diferenciaAnios > 120;
 	} catch {
 		return false;
 	}

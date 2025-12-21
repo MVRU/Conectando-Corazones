@@ -9,6 +9,7 @@ import type {
 } from '$lib/types/Usuario';
 import type { Contacto } from '$lib/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
+import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -351,12 +352,30 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
                 throw new Error('Ingresá un correo electrónico válido.');
         }
 
+        const emailExistente = Object.values(mockUsuarios).some((u) =>
+                u.contactos.some(
+                        (c) => c.tipo_contacto === 'email' && c.valor === input.email
+                )
+        );
+
+        if (emailExistente) {
+                throw new Error(`El correo electrónico "${input.email}" ya está en uso`);
+        }
+
         if (!esTextoNoVacio(input.password) || input.password.length < 8) {
                 throw new Error('La contraseña debe tener al menos 8 caracteres.');
         }
 
         if (!validarUsername(input.perfil.username)) {
                 throw new Error('Ingresá un nombre de usuario válido.');
+        }
+
+        const usuarioExistente = Object.values(mockUsuarios).some(
+                (u) => u.username === input.perfil.username
+        );
+
+        if (usuarioExistente) {
+                throw new Error(`El nombre de usuario "${input.perfil.username}" ya está en uso`);
         }
 
         if (!esTextoNoVacio(input.perfil.nombre) || !esTextoNoVacio(input.perfil.apellido)) {
