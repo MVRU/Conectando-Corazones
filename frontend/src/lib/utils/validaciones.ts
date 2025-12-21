@@ -34,7 +34,8 @@ export const MENSAJES_ERROR = {
 	fechaFutura: 'La fecha no puede ser futura',
 	fechaMuyAntigua: 'La fecha es demasiado antigua',
 	nombreLegalDuplicado: 'El nombre legal ya se encuentra registrado',
-	nombreCorto: 'El nombre debe tener al menos 3 caracteres'
+	nombreCorto: 'El nombre debe tener al menos 3 caracteres',
+	razonSocialDuplicada: 'La razón social ya se encuentra registrada'
 };
 
 /**
@@ -114,7 +115,6 @@ export function validarProvinciaPorISO(codigoIso: string): boolean {
 /**
  * -!- Valida si una ciudad pertenece a una provincia específica usando IDs.
  */
-
 export function validarCiudadEnProvincia(
 	idLocalidad?: number | string,
 	idProvincia?: number | string
@@ -134,7 +134,7 @@ export function validarTelefonoInternacional(telefono: string): boolean {
 	if (!telefono || !telefono.trim()) return false;
 
 	const regexTelefono = /^\+?\d{1,3}[\s-]?\d{1,4}[\s-]?\d{3}[\s-]?\d{4}$/;
-	return regexTelefono.test(telefono.replace(/\s|-|\(|\)/g, '')); // Limpia espacios y formateadores
+	return regexTelefono.test(telefono.replace(/\s|-|\(|\)/g, ''));
 }
 
 export function validarUrl(url: string): boolean {

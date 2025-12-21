@@ -825,8 +825,19 @@
 			...crearErroresIniciales(),
 			...base,
 			razon_social:
-				datos.tipoColaborador === 'organizacion' && !razonSocialNormalizada
-					? MENSAJES_ERROR.obligatorio
+				datos.tipoColaborador === 'organizacion'
+					? !razonSocialNormalizada
+						? MENSAJES_ERROR.obligatorio
+						: razonSocialNormalizada.length < 3
+							? MENSAJES_ERROR.nombreCorto
+							: Object.values(mockUsuarios).some(
+										(u) =>
+											u.rol === 'colaborador' &&
+											'razon_social' in u &&
+											u.razon_social?.toLowerCase() === razonSocialNormalizada.toLowerCase()
+								  )
+								? MENSAJES_ERROR.razonSocialDuplicada
+								: ''
 					: '',
 			con_fines_de_lucro:
 				datos.tipoColaborador === 'organizacion' && conFines === ''
