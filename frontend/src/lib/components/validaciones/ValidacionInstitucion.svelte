@@ -3,6 +3,7 @@
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { toastStore } from '$lib/stores/toast';
+	import { X } from 'lucide-svelte';
 
 	const dispatch = createEventDispatcher<{
 		submit: { files: File[] };
@@ -25,24 +26,74 @@
 
 	const renaperDisponible = false;
 
+	const MAX_FILES = 5;
+
 	function actualizarArchivos(event: Event) {
 		const input = event.target as HTMLInputElement;
-		archivosSeleccionados = Array.from(input.files ?? []);
-		if (archivosSeleccionados.length) {
-			toastStore.show({
-				variant: 'info',
-				title: 'Documentación recibida',
-				message:
-					'Tus archivos se guardan cifrados y nuestro equipo los revisará manualmente. Se eliminan automáticamente cuando finaliza la verificación.'
+		const nuevosArchivos = Array.from(input.files ?? []);
+		let archivosAgregados = 0;
+		let duplicadosIgnorados = 0;
+
+		if (nuevosArchivos.length) {
+			const archivosValidos: File[] = [];
+
+			nuevosArchivos.forEach((nuevo) => {
+				const esDuplicado = archivosSeleccionados.some(
+					(existente) => existente.name === nuevo.name && existente.size === nuevo.size
+				);
+
+				if (esDuplicado) {
+					duplicadosIgnorados++;
+				} else {
+					archivosValidos.push(nuevo);
+				}
 			});
-			avisoArchivosMostrado = true;
-		} else if (avisoArchivosMostrado) {
-			toastStore.show({
-				variant: 'warning',
-				title: 'Sin archivos adjuntos',
-				message: 'Subí al menos un documento para continuar con la verificación.'
-			});
+
+			if (archivosSeleccionados.length + archivosValidos.length > MAX_FILES) {
+				const espacioDisponible = MAX_FILES - archivosSeleccionados.length;
+				if (espacioDisponible > 0) {
+					archivosSeleccionados = [
+						...archivosSeleccionados,
+						...archivosValidos.slice(0, espacioDisponible)
+					];
+					archivosAgregados = espacioDisponible;
+				}
+
+				toastStore.show({
+					variant: 'warning',
+					title: 'Límite de archivos',
+					message: `Solo se permiten hasta ${MAX_FILES} archivos. Se han agregado los que cabían.`
+				});
+			} else {
+				archivosSeleccionados = [...archivosSeleccionados, ...archivosValidos];
+				archivosAgregados = archivosValidos.length;
+			}
+
+			if (duplicadosIgnorados > 0) {
+				toastStore.show({
+					variant: 'warning',
+					title: 'Archivos duplicados',
+					message: `Se ignoraron ${duplicadosIgnorados} archivo(s) que ya estaban en la lista.`
+				});
+			}
+
+			// Si no se había mostrado el aviso y se agregaron archivos, mostrarlo ahora
+			if (!avisoArchivosMostrado && archivosAgregados > 0) {
+				toastStore.show({
+					variant: 'info',
+					title: 'Documentación recibida',
+					message: 'Tus archivos se guardan cifrados y nuestro equipo los revisará manualmente.'
+				});
+				avisoArchivosMostrado = true;
+			}
 		}
+
+		// Resetear el valor del input para permitir seleccionar los mismos archivos nuevamente si fuera necesario
+		input.value = '';
+	}
+
+	function removerArchivo(index: number) {
+		archivosSeleccionados = archivosSeleccionados.filter((_, i) => i !== index);
 	}
 
 	function enviarDocumentos() {
@@ -65,7 +116,8 @@
 		toastStore.show({
 			variant: 'success',
 			title: 'Documentos enviados',
-			message: 'Nuestro equipo está verificando tu documentación. Te avisaremos cuando finalice la revisión.'
+			message:
+				'Nuestro equipo está verificando tu documentación. Te avisaremos cuando finalice la revisión.'
 		});
 	}
 
@@ -215,10 +267,22 @@
 							<ul
 								class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
 							>
-								{#each archivosSeleccionados as archivo}
+								{#each archivosSeleccionados as archivo, i}
 									<li class="flex items-center justify-between px-4 py-2">
 										<span class="truncate pr-4" title={archivo.name}>{archivo.name}</span>
-										<span class="text-xs text-gray-500">{Math.ceil(archivo.size / 1024)} KB</span>
+										<div class="flex items-center gap-4">
+											<span class="whitespace-nowrap text-xs text-gray-500"
+												>{Math.ceil(archivo.size / 1024)} KB</span
+											>
+											<button
+												type="button"
+												class="text-gray-400 transition hover:text-red-500 focus:text-red-500 focus:outline-none"
+												on:click={() => removerArchivo(i)}
+												aria-label={`Quitar archivo ${archivo.name}`}
+											>
+												<X class="h-4 w-4" />
+											</button>
+										</div>
 									</li>
 								{/each}
 							</ul>
