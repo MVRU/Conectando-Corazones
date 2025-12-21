@@ -61,11 +61,11 @@ export function esAdulto(fecha: Date): boolean {
 }
 
 export function validarNombre(nombre: string): boolean {
-	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombre.trim());
+	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(nombre.trim());
 }
 
 export function validarApellido(apellido: string): boolean {
-	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellido.trim());
+	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(apellido.trim());
 }
 
 export function validarCalle(calle: string): boolean {

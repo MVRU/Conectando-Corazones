@@ -14,7 +14,7 @@
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import type { RegistroCuentaSubmitDetail } from '$lib/types/forms/registro';
-	import { authActions } from '$lib/stores/auth';
+	import { authActions, isAuthenticated } from '$lib/stores/auth';
 	import {
 		obtenerSiguienteEtapaCuenta,
 		type RegistroEtapa,
@@ -53,6 +53,16 @@
 	let notificacionEtapaMostrada = false;
 
 	$: procesandoFormulario = registrando;
+
+	$: if ($isAuthenticated) {
+		if (typeof window !== 'undefined') {
+			toastStore.show({
+				variant: 'info',
+				message: 'Ya iniciaste sesión. Te redirigimos a tu panel.'
+			});
+			goto('/mi-panel');
+		}
+	}
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);

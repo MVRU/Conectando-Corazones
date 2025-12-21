@@ -765,7 +765,8 @@
 				? MENSAJES_ERROR.obligatorio
 				: !validarUsername(usernameNormalizado)
 					? MENSAJES_ERROR.usuarioInvalido
-					: Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
+					: // TODO: Reemplazar validación contra mockUsuarios por llamada a API real
+						Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
 						? `El nombre de usuario "${usernameNormalizado}" ya está en uso`
 						: '',
 			email: !emailNormalizado
@@ -906,6 +907,12 @@
 		if (procesando) {
 			return;
 		}
+
+		if (pasoFormulario === 'credenciales') {
+			continuarConDetalles();
+			return;
+		}
+
 		intentoEnvio = true;
 		if (tieneErrores) {
 			enfocarPrimerCampoConError();
@@ -994,27 +1001,11 @@
 			tipoInstitucionPersonalizado = '';
 		}
 	}
-
-	function manejarTeclaForm(event: KeyboardEvent) {
-		if (event.key !== 'Enter' || event.shiftKey || event.altKey || event.metaKey || event.ctrlKey) {
-			return;
-		}
-
-		event.preventDefault();
-
-		if (pasoFormulario === 'credenciales') {
-			continuarConDetalles();
-			return;
-		}
-
-		formularioRef?.requestSubmit();
-	}
 </script>
 
 <form
 	class="mx-auto max-w-4xl space-y-10"
 	on:submit={manejarSubmit}
-	on:keydown={manejarTeclaForm}
 	bind:this={formularioRef}
 	novalidate
 >
@@ -1264,7 +1255,7 @@
 							/>
 							<button
 								type="button"
-								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 								on:click={() => (mostrarPassword = !mostrarPassword)}
 								aria-pressed={mostrarPassword}
 								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -1300,7 +1291,7 @@
 							/>
 							<button
 								type="button"
-								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 								on:click={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
 								aria-pressed={mostrarPasswordConfirm}
 								aria-label={mostrarPasswordConfirm
@@ -1321,11 +1312,10 @@
 
 			<div class="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-end">
 				<Button
-					type="button"
+					type="submit"
 					label="Continuar"
 					variant="primary"
 					customClass="w-full sm:w-auto"
-					on:click={continuarConDetalles}
 					disabled={procesando}
 					customAriaLabel="Pasar al siguiente paso del registro"
 				/>
@@ -1461,7 +1451,7 @@
 										tipoInstitucionSeleccion === opcion.value
 											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
 											: 'border-slate-200 hover:border-sky-300'
-									} peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+									} peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
 								>
 									<span
 										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
@@ -1614,7 +1604,7 @@
 										tipoColaborador === opcion.value
 											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
 											: 'border-slate-200 hover:border-sky-300'
-									} cursor-pointer peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+									} cursor-pointer peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
 								>
 									<span
 										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
@@ -1762,7 +1752,7 @@
 						/>
 						<button
 							type="button"
-							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 							on:click={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
 							aria-pressed={mostrarModalPasswordTexto}
 							aria-label={mostrarModalPasswordTexto ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -1795,7 +1785,7 @@
 						/>
 						<button
 							type="button"
-							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-200"
+							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 							on:click={() =>
 								(mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
 							aria-pressed={mostrarModalPasswordConfirmTexto}
