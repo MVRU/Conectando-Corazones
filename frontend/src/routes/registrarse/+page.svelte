@@ -16,13 +16,13 @@
 	import type { RegistroCuentaSubmitDetail } from '$lib/types/forms/registro';
 	import { authActions } from '$lib/stores/auth';
 	import {
-		getNextStageAfterAccountStep,
+		obtenerSiguienteEtapaCuenta,
 		type RegistroEtapa,
 		type RegistroRol
 	} from '$lib/services/auth/registration-flow';
 	import {
-		mapColaboradorFormToRegisterInput,
-		mapInstitucionFormToRegisterInput
+		mapearFormularioColaboradorAInputRegistro,
+		mapearFormularioInstitucionAInputRegistro
 	} from '$lib/services/auth/registration.mapper';
 	import {
 		REGISTRO_FORM_STORAGE_KEY,
@@ -35,7 +35,7 @@
 	let cargada = false; // para saber si la página terminó de cargar
 
 	const TOTAL_PASOS = 5;
-	let etapa: RegistroEtapa = 'select';
+	let etapa: RegistroEtapa = 'seleccion';
 
 	let rol: RegistroRol = 'institucion';
 	let registrando = false;
@@ -79,7 +79,7 @@
 	function elegir(r: RegistroRol) {
 		rol = r;
 		resetFeedback();
-		setEtapaConPersistencia('form', { limpiarFormulario: true });
+		setEtapaConPersistencia('formulario', { limpiarFormulario: true });
 	}
 
 	function manejarError(error: unknown, fallback: string): string {
@@ -104,13 +104,13 @@
 		registrando = true;
 		try {
 			if (detalle.rol === 'colaborador') {
-				const mapping = mapColaboradorFormToRegisterInput(detalle);
+				const mapping = mapearFormularioColaboradorAInputRegistro(detalle);
 				await authActions.registerColaborador(mapping.input);
 			} else {
-				const mapping = mapInstitucionFormToRegisterInput(detalle);
+				const mapping = mapearFormularioInstitucionAInputRegistro(detalle);
 				await authActions.registerInstitucion(mapping.input);
 			}
-			const siguienteEtapa = getNextStageAfterAccountStep(detalle.rol);
+			const siguienteEtapa = obtenerSiguienteEtapaCuenta(detalle.rol);
 			setEtapaConPersistencia(siguienteEtapa, { limpiarFormulario: true });
 		} catch (error) {
 			errorRegistro = manejarError(
@@ -128,17 +128,17 @@
 
 	function volverASeleccion() {
 		resetFeedback();
-		setEtapaConPersistencia('select');
+		setEtapaConPersistencia('seleccion');
 	}
 
 	function obtenerEtapaAnterior(actual: RegistroEtapa): RegistroEtapa | null {
 		switch (actual) {
-			case 'form':
-				return 'select';
-			case 'verificando':
-				return 'form';
+			case 'formulario':
+				return 'seleccion';
+			case 'verificacion':
+				return 'formulario';
 			case 'contacto':
-				return rol === 'institucion' ? 'verificando' : 'form';
+				return rol === 'institucion' ? 'verificacion' : 'formulario';
 			case 'direccion':
 				return 'contacto';
 			case 'exito':
@@ -234,7 +234,7 @@
 			return;
 		}
 
-		if (nueva === 'select') {
+		if (nueva === 'seleccion') {
 			limpiarProgresoRegistro();
 			if (opciones.limpiarFormulario ?? true) {
 				limpiarFormularioPersistido();
@@ -300,10 +300,10 @@
 
 <main class="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
 	<section class="transition-all duration-300 sm:p-12">
-		{#if etapa === 'select'}
+		{#if etapa === 'seleccion'}
 			<div in:fly={{ y: 20, opacity: 0, duration: 400 }} out:fade={{ duration: 200 }}>
 				<div class="mb-20">
-					<Stepper current={1} total={TOTAL_PASOS} />
+					<Stepper pasoActual={1} pasosTotales={TOTAL_PASOS} />
 				</div>
 				<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
 					<span class="block">Unite a</span>
@@ -342,9 +342,9 @@
 					a las instituciones.
 				</p>
 			</div>
-		{:else if etapa === 'form'}
+		{:else if etapa === 'formulario'}
 			<div class="mb-20">
-				<Stepper current={2} total={TOTAL_PASOS} />
+				<Stepper pasoActual={2} pasosTotales={TOTAL_PASOS} />
 			</div>
 			<button
 				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -374,9 +374,9 @@
 				errorGeneral={errorRegistro}
 				on:submit={manejarRegistroCuenta}
 				on:invalid={manejarFormularioInvalido}
-				on:back={() => retrocederEtapa('form')}
+				on:back={() => retrocederEtapa('formulario')}
 			/>
-		{:else if etapa === 'verificando'}
+		{:else if etapa === 'verificacion'}
 			<ValidacionInstitucion
 				pasoActual={3}
 				pasosTotales={TOTAL_PASOS}
@@ -384,12 +384,12 @@
 				on:skip={() => setEtapaConPersistencia('contacto')}
 				on:cancel={() => {
 					resetFeedback();
-					setEtapaConPersistencia('form');
+					setEtapaConPersistencia('formulario');
 				}}
 			/>
 		{:else if etapa === 'contacto'}
 			<div class="mb-8">
-				<Stepper current={4} total={TOTAL_PASOS} />
+				<Stepper pasoActual={4} pasosTotales={TOTAL_PASOS} />
 				<button
 					type="button"
 					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -428,7 +428,7 @@
 			</main>
 		{:else if etapa === 'direccion'}
 			<div class="mb-8">
-				<Stepper current={5} total={TOTAL_PASOS} />
+				<Stepper pasoActual={5} pasosTotales={TOTAL_PASOS} />
 				<button
 					type="button"
 					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
@@ -472,7 +472,7 @@
 			</div>
 		{:else if etapa === 'exito'}
 			<div class="mb-20">
-				<Stepper current={TOTAL_PASOS + 1} total={TOTAL_PASOS} />
+				<Stepper pasoActual={TOTAL_PASOS + 1} pasosTotales={TOTAL_PASOS} />
 			</div>
 
 			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">

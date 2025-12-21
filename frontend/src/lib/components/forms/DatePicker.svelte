@@ -1,7 +1,7 @@
 <!--
 * Componente: DatePicker para formularios
-        -*- Descripción: selector de fecha avanzado con validación.
-        -*- Soporta límites de fecha min/max.
+	-*- Descripción: selector de fecha avanzado con validación.
+	-*- Soporta límites de fecha min/max.
 -->
 <script lang="ts">
 	export let id = '';
@@ -31,7 +31,7 @@
 		{max}
 		{required}
 		{placeholder}
-		class="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:outline-none {error
+		class="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))] {error
 			? 'border-red-500 ring-red-500 focus:ring-red-500'
 			: ''} {customClass}"
 		aria-invalid={error ? 'true' : 'false'}

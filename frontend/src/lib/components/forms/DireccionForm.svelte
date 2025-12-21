@@ -4,7 +4,10 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
 	import { validarCiudadEnProvincia, MENSAJES_ERROR } from '$lib/utils/validaciones';
-	import { buildGoogleMapsPreviewUrls, type GoogleMapsPreviewUrls } from '$lib/utils/googleMaps';
+	import {
+		construirUrlsVistaPreviaGoogleMaps,
+		type UrlsVistaPreviaGoogleMaps
+	} from '$lib/utils/googleMaps';
 
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
@@ -24,10 +27,6 @@
 
 	let enviando = false;
 	let editandoUrlMapaGoogle = false;
-	// let calle = '';
-	// let numero = '';
-	// let piso = '';
-	// let departamento = '';
 	let idProvincia = '';
 	let idLocalidad = '';
 	let provincia: Provincia | undefined;
@@ -35,7 +34,7 @@
 	let localidadesProvincia: Localidad[] = [];
 	let referencia = '';
 	let urlGoogleMaps = '';
-	let googleMapsPreview: GoogleMapsPreviewUrls | null = null;
+	let googleMapsPreview: UrlsVistaPreviaGoogleMaps | null = null;
 	let urlGoogleMapsLegible = '';
 
 	function decodeUrlForDisplay(url: string): string {
@@ -53,11 +52,11 @@
 	export let etiquetaOmitir = 'Omitir';
 	export let solicitarSoloUbicacion = false;
 
-const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; skip: void }>();
+	const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; skip: void }>();
 
 	const convertirAString = (n?: number) => (n == null ? '' : String(n));
 
-	$: requiereDireccionDetallada = !solicitarSoloUbicacion;
+	$: requiereGeolocalizacion = !solicitarSoloUbicacion;
 
 	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
 
@@ -77,17 +76,17 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 
 	// Genera la URL automáticamente
 	$: {
-		if (!requiereDireccionDetallada) {
+		if (!requiereGeolocalizacion) {
 			urlGoogleMaps = '';
 			googleMapsPreview = null;
 			editandoUrlMapaGoogle = false;
 		} else if (validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)) {
-			googleMapsPreview = buildGoogleMapsPreviewUrls({
-				locality: localidad?.nombre,
-				province: provincia?.nombre
+			googleMapsPreview = construirUrlsVistaPreviaGoogleMaps({
+				localidad: localidad?.nombre,
+				provincia: provincia?.nombre
 			});
 
-			urlGoogleMaps = googleMapsPreview?.placeUrl ?? '';
+			urlGoogleMaps = googleMapsPreview?.urlLugar ?? '';
 		} else {
 			googleMapsPreview = null;
 			urlGoogleMaps = '';
@@ -95,16 +94,6 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 	}
 
 	$: errores = {
-		// calle: requiereDireccionDetallada
-		// 	? validarCalle(calle)
-		// 		? ''
-		// 		: MENSAJES_ERROR.calleInvalida
-		// 	: '',
-		// numero: requiereDireccionDetallada
-		// 	? validarNumeroCalle(numero)
-		// 		? ''
-		// 		: MENSAJES_ERROR.numeroCalleInvalido
-		// 	: '',
 		provincia: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
 		localidad: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 			? ''
@@ -128,7 +117,7 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 				localidadId: localidad?.id_localidad ?? null,
 				localidadNombre: localidad?.nombre ?? '',
 				referencia: referencia?.trim() || undefined,
-				url_google_maps: requiereDireccionDetallada && urlGoogleMaps ? urlGoogleMaps : undefined
+				url_google_maps: requiereGeolocalizacion && urlGoogleMaps ? urlGoogleMaps : undefined
 			};
 			dispatch('submit', payload);
 			toastStore.show({
@@ -158,34 +147,6 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 	</header>
 
 	<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
-		<!-- Calle -->
-		<!-- <div>
-			<label for="calle" class="mb-2 block text-sm font-semibold text-gray-700"> Calle </label>
-			<Input id="calle" bind:value={calle} error={intentoEnvio ? errores.calle : ''} />
-		</div> -->
-
-		<!-- Número -->
-		<!-- <div>
-			<label for="numero" class="mb-2 block text-sm font-semibold text-gray-700"> Número </label>
-			<Input id="numero" bind:value={numero} error={intentoEnvio ? errores.numero : ''} />
-		</div> -->
-
-		<!-- Piso -->
-		<!-- <div>
-			<label for="piso" class="mb-2 block text-sm font-semibold text-gray-700">
-				Piso (opcional)
-			</label>
-			<Input id="piso" bind:value={piso} placeholder="Ej: PB, 1, 2" />
-		</div> -->
-
-		<!-- Departamento -->
-		<!-- <div>
-			<label for="departamento" class="mb-2 block text-sm font-semibold text-gray-700">
-				Departamento (opcional)
-			</label>
-			<Input id="departamento" bind:value={departamento} placeholder="Ej: A, B, 101" />
-		</div> -->
-
 		<!-- Provincia -->
 		<div class="space-y-2">
 			<label for="provincia" class="block text-sm font-semibold text-gray-800">
@@ -223,20 +184,7 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 			/>
 		</div>
 
-		<!-- Referencia -->
-		{#if requiereDireccionDetallada}
-			<!-- Referencia -->
-			<!-- <div class="md:col-span-2">
-				<label for="referencia" class="mb-2 block text-sm font-semibold text-gray-700">
-					Referencia (opcional)
-				</label>
-				<Input
-					id="referencia"
-					bind:value={referencia}
-					placeholder="Ej: Edificio al lado de la plaza"
-					customClass="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-				/>
-			</div> -->
+		{#if requiereGeolocalizacion}
 			<!-- Campo URL Google Maps -->
 			<div class="md:col-span-2">
 				<label for="urlGoogleMaps" class="mb-2 block text-sm font-semibold text-gray-800">
@@ -321,7 +269,7 @@ const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; s
 							<div class="rounded-[26px] bg-white p-3 sm:p-4">
 								<div class="relative overflow-hidden rounded-3xl">
 									<iframe
-										src={googleMapsPreview.embedUrl}
+										src={googleMapsPreview.urlInsertar}
 										class="h-[320px] w-full border-0 sm:h-[360px] md:h-[420px] lg:h-[460px] xl:h-[500px]"
 										title="Vista previa del mapa"
 										aria-label="Vista previa de la ubicación seleccionada en Google Maps"

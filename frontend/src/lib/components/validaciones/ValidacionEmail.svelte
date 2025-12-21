@@ -42,7 +42,7 @@
 <!-- Etapa: Enviando -->
 {#if etapa === 'sending'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
 		<Loader loading={true} size={80} message="Enviando correo de verificación..." />
@@ -54,7 +54,7 @@
 	<!-- Etapa: Esperando código -->
 {:else if etapa === 'waiting'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-blue-100 p-5 shadow-md">
@@ -95,7 +95,7 @@
 	<!-- Etapa: Error -->
 {:else if etapa === 'error'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-red-100 p-6 shadow-xl">

@@ -136,10 +136,10 @@
 		}
 	];
 
-	type FederatedProviderId = 'google' | 'facebook' | 'microsoft' | 'apple';
+	type IdProveedorFederado = 'google' | 'facebook' | 'microsoft' | 'apple';
 
 	const proveedoresFederados: Array<{
-		id: FederatedProviderId;
+		id: IdProveedorFederado;
 		label: string;
 		descripcion: string;
 		cardClass: string;
@@ -180,7 +180,7 @@
 		}
 	];
 
-	const iconosFederados: Record<FederatedProviderId, string> = {
+	const iconosFederados: Record<IdProveedorFederado, string> = {
 		google: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" id="google">
 		<path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
 		<path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
@@ -202,7 +202,7 @@
 		</svg>`
 	};
 
-	type FormSnapshot = {
+	type InstantaneaFormulario = {
 		version: number;
 		timestamp: number;
 		rol: RegistroRol;
@@ -222,7 +222,7 @@
 		tipoColaborador: TipoColaborador;
 	};
 
-	const FORM_SNAPSHOT_VERSION = REGISTRO_STORAGE_VERSION;
+	const VERSION_INSTANTANEA_FORMULARIO = REGISTRO_STORAGE_VERSION;
 
 	interface ErroresFormulario {
 		username: string;
@@ -342,7 +342,7 @@
 	$: if (persistenciaHabilitada) {
 		if (formularioTieneDatosPersistibles()) {
 			guardarFormularioPersistido({
-				version: FORM_SNAPSHOT_VERSION,
+				version: VERSION_INSTANTANEA_FORMULARIO,
 				timestamp: Date.now(),
 				rol: rolInterno,
 				pasoFormulario,
@@ -386,7 +386,7 @@
 		}
 	} satisfies Record<RegistroRol, { titulo: string; descripcion: string }>;
 
-	interface DatosBaseValidacion {
+	interface DatosValidacionBase {
 		username: string;
 		email: string;
 		password: string;
@@ -398,13 +398,13 @@
 		archivoFoto: File | null;
 	}
 
-	interface DatosColaboradorValidacion extends DatosBaseValidacion {
+	interface DatosValidacionColaborador extends DatosValidacionBase {
 		tipoColaborador: TipoColaborador;
 		razonSocial: string;
 		conFinesDeLucro: '' | 'true' | 'false';
 	}
 
-	interface DatosInstitucionValidacion extends DatosBaseValidacion {
+	interface DatosValidacionInstitucion extends DatosValidacionBase {
 		nombreLegal: string;
 		tipoInstitucionSeleccion: string;
 		tipoInstitucionPersonalizado: string;
@@ -471,22 +471,22 @@
 		limpiarFormularioPersistido();
 	}
 
-	function aplicarSnapshot(snapshot: FormSnapshot) {
-		rolInterno = snapshot.rol;
-		pasoFormulario = snapshot.pasoFormulario;
-		metodoAcceso = snapshot.metodoAcceso;
-		username = snapshot.username ?? '';
-		email = snapshot.email ?? '';
-		nombrePersona = snapshot.nombrePersona ?? '';
-		apellidoPersona = snapshot.apellidoPersona ?? '';
-		fechaNacimiento = parseFechaPersistida(snapshot.fechaNacimiento);
-		urlFoto = snapshot.urlFoto ?? '';
-		razonSocial = snapshot.razonSocial ?? '';
-		conFinesDeLucroSeleccion = snapshot.conFinesDeLucroSeleccion ?? '';
-		nombreLegal = snapshot.nombreLegal ?? '';
-		tipoInstitucionSeleccion = snapshot.tipoInstitucionSeleccion ?? TIPO_INSTITUCION_POR_DEFECTO;
-		tipoInstitucionPersonalizado = snapshot.tipoInstitucionPersonalizado ?? '';
-		tipoColaborador = snapshot.tipoColaborador ?? 'unipersonal';
+	function aplicarSnapshot(instantanea: InstantaneaFormulario) {
+		rolInterno = instantanea.rol;
+		pasoFormulario = instantanea.pasoFormulario;
+		metodoAcceso = instantanea.metodoAcceso;
+		username = instantanea.username ?? '';
+		email = instantanea.email ?? '';
+		nombrePersona = instantanea.nombrePersona ?? '';
+		apellidoPersona = instantanea.apellidoPersona ?? '';
+		fechaNacimiento = parseFechaPersistida(instantanea.fechaNacimiento);
+		urlFoto = instantanea.urlFoto ?? '';
+		razonSocial = instantanea.razonSocial ?? '';
+		conFinesDeLucroSeleccion = instantanea.conFinesDeLucroSeleccion ?? '';
+		nombreLegal = instantanea.nombreLegal ?? '';
+		tipoInstitucionSeleccion = instantanea.tipoInstitucionSeleccion ?? TIPO_INSTITUCION_POR_DEFECTO;
+		tipoInstitucionPersonalizado = instantanea.tipoInstitucionPersonalizado ?? '';
+		tipoColaborador = instantanea.tipoColaborador ?? 'unipersonal';
 		if (pasoFormulario === 'detalles' && requiereReingresoPassword()) {
 			abrirModalPassword();
 		}
@@ -500,7 +500,7 @@
 		return Number.isNaN(parsed.getTime()) ? null : parsed;
 	}
 
-	function leerFormularioPersistido(): FormSnapshot | null {
+	function leerFormularioPersistido(): InstantaneaFormulario | null {
 		if (!storageDisponible) {
 			return null;
 		}
@@ -509,16 +509,16 @@
 			if (!raw) {
 				return null;
 			}
-			const snapshot = JSON.parse(raw) as FormSnapshot;
-			if (!snapshot || snapshot.version !== FORM_SNAPSHOT_VERSION) {
+			const instantanea = JSON.parse(raw) as InstantaneaFormulario;
+			if (!instantanea || instantanea.version !== VERSION_INSTANTANEA_FORMULARIO) {
 				window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
 				return null;
 			}
-			if (Date.now() - snapshot.timestamp > REGISTRO_STORAGE_TTL_MS) {
+			if (Date.now() - instantanea.timestamp > REGISTRO_STORAGE_TTL_MS) {
 				window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
 				return null;
 			}
-			return snapshot;
+			return instantanea;
 		} catch (error) {
 			console.warn('No se pudo recuperar el progreso del formulario de registro', error);
 			window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
@@ -526,12 +526,12 @@
 		}
 	}
 
-	function guardarFormularioPersistido(snapshot: FormSnapshot) {
+	function guardarFormularioPersistido(instantanea: InstantaneaFormulario) {
 		if (!storageDisponible) {
 			return;
 		}
 		try {
-			window.sessionStorage.setItem(REGISTRO_FORM_STORAGE_KEY, JSON.stringify(snapshot));
+			window.sessionStorage.setItem(REGISTRO_FORM_STORAGE_KEY, JSON.stringify(instantanea));
 		} catch (error) {
 			console.warn('No se pudo guardar el progreso del formulario de registro', error);
 		}
@@ -627,7 +627,7 @@
 		mostrarModalPassword = false;
 	}
 
-	function manejarRegistroProveedor(proveedor: FederatedProviderId) {
+	function manejarRegistroProveedor(proveedor: IdProveedorFederado) {
 		console.info(`Registro con proveedor ${proveedor} aún no está disponible.`);
 	}
 
@@ -674,7 +674,7 @@
 			index === -1 ? 0 : (index + direction + interactivos.length) % interactivos.length;
 		const nextId = interactivos[nextIndex]?.id;
 		if (nextId) {
-			focusMetodoButton(nextId);
+			enfocarBotonMetodo(nextId);
 		}
 	}
 
@@ -688,7 +688,7 @@
 		return metodoAcceso === null && id === 'manual' ? 0 : -1;
 	}
 
-	function focusMetodoButton(id: MetodoAcceso) {
+	function enfocarBotonMetodo(id: MetodoAcceso) {
 		if (typeof document === 'undefined') {
 			return;
 		}
@@ -743,7 +743,7 @@
 		fechaNacimiento,
 		urlFoto,
 		archivoFoto
-	}: DatosBaseValidacion): Pick<
+	}: DatosValidacionBase): Pick<
 		ErroresFormulario,
 		| 'username'
 		| 'email'
@@ -816,7 +816,7 @@
 		};
 	}
 
-	function calcularErroresColaborador(datos: DatosColaboradorValidacion): ErroresFormulario {
+	function calcularErroresColaborador(datos: DatosValidacionColaborador): ErroresFormulario {
 		const base = calcularErroresBase(datos);
 		const razonSocialNormalizada = datos.razonSocial.trim();
 		const conFines = datos.conFinesDeLucro;
@@ -848,7 +848,7 @@
 		};
 	}
 
-	function calcularErroresInstitucion(datos: DatosInstitucionValidacion): ErroresFormulario {
+	function calcularErroresInstitucion(datos: DatosValidacionInstitucion): ErroresFormulario {
 		const base = calcularErroresBase(datos);
 		const nombreLegalNormalizado = datos.nombreLegal.trim();
 		const seleccion = datos.tipoInstitucionSeleccion;
@@ -1374,13 +1374,13 @@
 
 				<FotoPerfilUploader
 					id="foto"
-					name="foto"
-					label="Foto o avatar"
-					optionalLabel="(opcional)"
-					description="Subí un logo o imagen cuadrada para que la comunidad identifique tu institución."
-					helperText="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
-					bind:url={urlFoto}
-					bind:file={archivoFoto}
+					nombre="foto"
+					etiqueta="Foto o avatar"
+					etiquetaOpcional="(opcional)"
+					descripcion="Subí un logo o imagen cuadrada para que la comunidad identifique tu institución."
+					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					bind:enlace={urlFoto}
+					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 
@@ -1529,13 +1529,13 @@
 
 				<FotoPerfilUploader
 					id="foto"
-					name="foto"
-					label="Foto o avatar"
-					optionalLabel="(opcional)"
-					description="Mostrá quién estará en contacto con las instituciones para generar mayor confianza."
-					helperText="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
-					bind:url={urlFoto}
-					bind:file={archivoFoto}
+					nombre="foto"
+					etiqueta="Foto o avatar"
+					etiquetaOpcional="(opcional)"
+					descripcion="Mostrá quién estará en contacto con las instituciones para generar mayor confianza."
+					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					bind:enlace={urlFoto}
+					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 

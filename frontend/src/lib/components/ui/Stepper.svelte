@@ -1,7 +1,7 @@
 <script lang="ts">
-	export let current = 1;
-	export let total = 4;
-	export let labels: string[] = [
+	export let pasoActual = 1;
+	export let pasosTotales = 4;
+	export let etiquetas: string[] = [
 		'Tipo de cuenta',
 		'Datos de cuenta',
 		'Identidad',
@@ -9,15 +9,18 @@
 		'Ubicación'
 	];
 
-	$: normalizedTotal = Math.max(total, 0);
-	const COMPLETED_LABEL = 'Completado';
-	$: effectiveLabels = Array.from(
-		{ length: normalizedTotal },
-		(_, index) => labels[index] ?? `Paso ${index + 1}`
+	$: totalNormalizado = Math.max(pasosTotales, 0);
+	const ETIQUETA_COMPLETADO = 'Completado';
+	$: etiquetasEfectivas = Array.from(
+		{ length: totalNormalizado },
+		(_, index) => etiquetas[index] ?? `Paso ${index + 1}`
 	);
-	$: currentLabel =
-		current > 0 && current <= normalizedTotal ? effectiveLabels[current - 1] : COMPLETED_LABEL;
-	$: lastStepLabel = normalizedTotal > 0 ? effectiveLabels[normalizedTotal - 1] : COMPLETED_LABEL;
+	$: etiquetaActual =
+		pasoActual > 0 && pasoActual <= totalNormalizado
+			? etiquetasEfectivas[pasoActual - 1]
+			: ETIQUETA_COMPLETADO;
+	$: etiquetaUltimoPaso =
+		totalNormalizado > 0 ? etiquetasEfectivas[totalNormalizado - 1] : ETIQUETA_COMPLETADO;
 </script>
 
 <div class="mb-8 w-full px-4 sm:px-6 md:px-8">
@@ -25,14 +28,14 @@
 	<ol
 		class="hidden flex-wrap items-center justify-center gap-x-4 gap-y-4 text-sm text-gray-500 sm:flex"
 	>
-		{#each effectiveLabels as stepLabel, i (i)}
+		{#each etiquetasEfectivas as etiqueta, i (i)}
 			<li class="flex flex-col items-center">
 				<div class="flex items-center">
 					<div
 						class={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-							current > i + 1
+							pasoActual > i + 1
 								? 'border-green-500 bg-green-500 text-white'
-								: current === i + 1
+								: pasoActual === i + 1
 									? 'border-blue-500 bg-blue-500 text-white'
 									: 'border-gray-300 bg-white text-gray-400'
 						}`}
@@ -40,14 +43,14 @@
 						{i + 1}
 					</div>
 
-					{#if i < normalizedTotal}
+					{#if i < totalNormalizado}
 						<div class="mx-2 hidden h-1 w-10 bg-gray-300 sm:block md:w-16 lg:w-24"></div>
 					{/if}
 				</div>
 
 				<!-- Label -->
 				<div class="mt-2 w-28 text-center text-xs font-medium text-gray-600 sm:w-32 md:w-36">
-					{stepLabel}
+					{etiqueta}
 				</div>
 			</li>
 		{/each}
@@ -57,12 +60,12 @@
 			<div class="flex items-center">
 				<div
 					class={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-						current > normalizedTotal
+						pasoActual > totalNormalizado
 							? 'border-green-500 bg-green-500 text-white'
 							: 'border-gray-300 bg-white text-gray-400'
 					}`}
 				>
-					{#if current > normalizedTotal}
+					{#if pasoActual > totalNormalizado}
 						<svg
 							class="h-4 w-4"
 							fill="none"
@@ -87,13 +90,13 @@
 		<div class="flex flex-col items-center">
 			<div
 				class={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-					current === normalizedTotal + 1
+					pasoActual === totalNormalizado + 1
 						? 'border-green-500 bg-green-500 text-white'
 						: 'border-blue-500 bg-blue-500 text-white'
 				}`}
 			>
-				{#if current <= normalizedTotal}
-					{current}
+				{#if pasoActual <= totalNormalizado}
+					{pasoActual}
 				{:else}
 					<svg
 						class="h-4 w-4"
@@ -107,7 +110,7 @@
 				{/if}
 			</div>
 			<div class="mt-1 w-24 text-center text-xs font-medium text-gray-600">
-				{currentLabel}
+				{etiquetaActual}
 			</div>
 		</div>
 
@@ -119,10 +122,10 @@
 			<div
 				class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-gray-400"
 			>
-				{normalizedTotal}
+				{totalNormalizado}
 			</div>
 			<div class="mt-1 w-24 text-center text-xs font-medium text-gray-400">
-				{lastStepLabel}
+				{etiquetaUltimoPaso}
 			</div>
 		</div>
 	</div>

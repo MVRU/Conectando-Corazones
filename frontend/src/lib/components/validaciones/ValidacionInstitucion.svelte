@@ -135,7 +135,7 @@
 
 <section class="flex min-h-screen flex-col bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
 	<div class="mb-12 sm:mb-16">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 
 	<div class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8">

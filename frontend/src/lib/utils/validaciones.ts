@@ -1,7 +1,3 @@
-// FIX: revisar y corregir errores tras cambios en interfaces
-
-// TODO: corregir cuando cambiemos el signin (registro de usuario)
-
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
@@ -23,8 +19,6 @@ export const MENSAJES_ERROR = {
 	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
 	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
 	numeroCalleInvalido: 'Número inválido. Debe ser un número positivo.',
-	pisoInvalido: 'Piso inválido. Puede ser un número o "PB".', // ! Este no lo estamos implementando -> revisar
-	ciudadInvalida: 'Ciudad inválida. Ingresá un nombre válido.', // ! Este no lo estamos implementando -> revisar
 	provinciaInvalida: 'Provincia inválida. Seleccioná una opción.',
 	ciudadNoPerteneceProvincia: 'La ciudad seleccionada no pertenece a la provincia elegida.',
 	otroContactoObligatorio: 'Debe especificar el tipo de contacto',
@@ -74,11 +68,6 @@ export function validarApellido(apellido: string): boolean {
 	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellido.trim());
 }
 
-export function validarRazonSocial(nombre: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return nombre.trim().length >= 3 && nombre.trim().length <= 100;
-}
-
 export function validarCalle(calle: string): boolean {
 	return calle.trim().length >= 3;
 }
@@ -87,29 +76,8 @@ export function validarNumeroCalle(numero: string): boolean {
 	return /^\d{1,5}$/.test(numero);
 }
 
-export function validarPiso(piso: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return piso === '' || /^(\d+|PB)$/i.test(piso);
-}
-
-export function validarCiudad(ciudad: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return ciudad.trim().length >= 2;
-}
-
 export function validarProvincia(provincia: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
 	return provincias.some((p) => p.nombre === provincia);
-}
-
-export function validarProvinciaPorId(id: number): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return provincias.some((p) => p.id_provincia === id);
-}
-
-export function validarProvinciaPorISO(codigoIso: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return provincias.some((p) => p.codigo_iso === codigoIso);
 }
 
 /**

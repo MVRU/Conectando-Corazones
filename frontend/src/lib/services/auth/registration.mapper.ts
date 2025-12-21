@@ -22,17 +22,17 @@ interface RegistroMapeado<TInput> {
         emailPrincipal: string;
 }
 
-function sanitizeString(value: unknown): string {
-        return typeof value === 'string' ? value.trim() : '';
+function sanitizarCadena(valor: unknown): string {
+        return typeof valor === 'string' ? valor.trim() : '';
 }
 
-function sanitizeOptionalString(value: unknown): string | undefined {
-        const trimmed = sanitizeString(value);
-        return trimmed.length > 0 ? trimmed : undefined;
+function sanitizarCadenaOpcional(valor: unknown): string | undefined {
+        const limpio = sanitizarCadena(valor);
+        return limpio.length > 0 ? limpio : undefined;
 }
 
 function normalizarEmail(email: string): string {
-        return sanitizeString(email).toLowerCase();
+        return sanitizarCadena(email).toLowerCase();
 }
 
 function clonarContactos(contactos: Contacto[] = []): Contacto[] {
@@ -42,10 +42,10 @@ function clonarContactos(contactos: Contacto[] = []): Contacto[] {
 function obtenerEmailPrincipal(contactos: Contacto[]): string | null {
         for (const contacto of contactos) {
                 if (!contacto) continue;
-                const valor = sanitizeString(contacto.valor);
+                const valor = sanitizarCadena(contacto.valor);
                 if (!valor) continue;
-                const tipo = sanitizeString(contacto.tipo_contacto || 'email').toLowerCase();
-                const etiqueta = sanitizeString(contacto.etiqueta || 'principal').toLowerCase();
+                const tipo = sanitizarCadena(contacto.tipo_contacto || 'email').toLowerCase();
+                const etiqueta = sanitizarCadena(contacto.etiqueta || 'principal').toLowerCase();
                 if (tipo.includes('mail') && etiqueta === 'principal') {
                         return valor.toLowerCase();
                 }
@@ -53,123 +53,123 @@ function obtenerEmailPrincipal(contactos: Contacto[]): string | null {
         return null;
 }
 
-function construirMetadata(base: Record<string, unknown>): Record<string, unknown> | undefined {
-        const entries = Object.entries(base).filter(([, value]) => value !== undefined);
-        if (entries.length === 0) {
+function construirMetadatos(base: Record<string, unknown>): Record<string, unknown> | undefined {
+        const entradas = Object.entries(base).filter(([, valor]) => valor !== undefined);
+        if (entradas.length === 0) {
                 return undefined;
         }
-        return Object.fromEntries(entries);
+        return Object.fromEntries(entradas);
 }
 
 function normalizarDetalleColaborador(
-        detail: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
+        detalle: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
 ): ColaboradorFormSubmitDetail {
-        if ('rol' in detail) {
-                if (detail.rol !== 'colaborador') {
+        if ('rol' in detalle) {
+                if (detalle.rol !== 'colaborador') {
                         throw new Error('El detalle recibido no corresponde a un colaborador.');
                 }
                 return {
-                        colaborador: detail.payload.colaborador,
-                        organizacion: detail.payload.organizacion,
-                        archivoFoto: detail.archivoFoto
+                        colaborador: detalle.payload.colaborador,
+                        organizacion: detalle.payload.organizacion,
+                        archivoFoto: detalle.archivoFoto
                 };
         }
-        return detail;
+        return detalle;
 }
 
 function normalizarDetalleInstitucion(
-        detail: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
+        detalle: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
 ): InstitucionFormSubmitDetail {
-        if ('rol' in detail) {
-                if (detail.rol !== 'institucion') {
+        if ('rol' in detalle) {
+                if (detalle.rol !== 'institucion') {
                         throw new Error('El detalle recibido no corresponde a una institución.');
                 }
                 return {
-                        institucion: detail.payload.institucion,
-                        archivoFoto: detail.archivoFoto
+                        institucion: detalle.payload.institucion,
+                        archivoFoto: detalle.archivoFoto
                 };
         }
-        return detail;
+        return detalle;
 }
 
-export function mapColaboradorFormToRegisterInput(
-        detail: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
+export function mapearFormularioColaboradorAInputRegistro(
+        detalle: ColaboradorFormSubmitDetail | RegistroCuentaSubmitDetail
 ): RegistroMapeado<RegisterColaboradorInput> {
-        const normalizado = normalizarDetalleColaborador(detail);
+        const normalizado = normalizarDetalleColaborador(detalle);
         const contactos = clonarContactos(normalizado.colaborador.contactos);
         const email = obtenerEmailPrincipal(contactos);
         if (!email) {
                 throw new Error('No pudimos identificar un correo electrónico principal válido.');
         }
 
-        const metadata = construirMetadata({
+        const metadatos = construirMetadatos({
                 organizacion:
                         normalizado.colaborador.tipo_colaborador === 'organizacion'
                                 ? {
-                                          razon_social: sanitizeString(normalizado.organizacion.razon_social),
+                                          razon_social: sanitizarCadena(normalizado.organizacion.razon_social),
                                           con_fines_de_lucro: normalizado.organizacion.con_fines_de_lucro
                                   }
                                 : undefined,
                 fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
         });
 
-        const input: RegisterColaboradorInput = {
+        const datosRegistro: RegisterColaboradorInput = {
                 email: normalizarEmail(email),
                 password: normalizado.colaborador.password,
                 perfil: {
-                        username: sanitizeString(normalizado.colaborador.username),
-                        nombre: sanitizeString(normalizado.colaborador.nombre),
-                        apellido: sanitizeString(normalizado.colaborador.apellido),
+                        username: sanitizarCadena(normalizado.colaborador.username),
+                        nombre: sanitizarCadena(normalizado.colaborador.nombre),
+                        apellido: sanitizarCadena(normalizado.colaborador.apellido),
                         fecha_nacimiento: normalizado.colaborador.fecha_nacimiento,
-                        url_foto: sanitizeString(normalizado.colaborador.url_foto),
+                        url_foto: sanitizarCadena(normalizado.colaborador.url_foto),
                         contactos,
                         tipo_colaborador: normalizado.colaborador.tipo_colaborador
                 },
-                metadata
+                metadata: metadatos
         };
 
         return {
-                input,
+                input: datosRegistro,
                 emailPrincipal: email
         };
 }
 
-export function mapInstitucionFormToRegisterInput(
-        detail: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
+export function mapearFormularioInstitucionAInputRegistro(
+        detalle: InstitucionFormSubmitDetail | RegistroCuentaSubmitDetail
 ): RegistroMapeado<RegisterInstitucionInput> {
-        const normalizado = normalizarDetalleInstitucion(detail);
+        const normalizado = normalizarDetalleInstitucion(detalle);
         const contactos = clonarContactos(normalizado.institucion.contactos);
         const email = obtenerEmailPrincipal(contactos);
         if (!email) {
                 throw new Error('No pudimos identificar un correo electrónico principal válido.');
         }
 
-        const metadata = construirMetadata({
+        const metadatos = construirMetadatos({
                 fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
         });
 
         const tipoInstitucion =
-                sanitizeOptionalString(normalizado.institucion.tipo_institucion) ?? 'otro';
-        const input: RegisterInstitucionInput = {
+                sanitizarCadenaOpcional(normalizado.institucion.tipo_institucion) ?? 'otro';
+        const datosRegistro: RegisterInstitucionInput = {
                 email: normalizarEmail(email),
                 password: normalizado.institucion.password,
                 perfil: {
-                        username: sanitizeString(normalizado.institucion.username),
-                        nombre: sanitizeString(normalizado.institucion.nombre),
-                        apellido: sanitizeString(normalizado.institucion.apellido),
+                        username: sanitizarCadena(normalizado.institucion.username),
+                        nombre: sanitizarCadena(normalizado.institucion.nombre),
+                        apellido: sanitizarCadena(normalizado.institucion.apellido),
                         fecha_nacimiento: normalizado.institucion.fecha_nacimiento,
-                        url_foto: sanitizeString(normalizado.institucion.url_foto),
+                        url_foto: sanitizarCadena(normalizado.institucion.url_foto),
                         contactos,
                         nombre_legal:
-                                sanitizeOptionalString(normalizado.institucion.nombre_legal) ??
-                                sanitizeString(normalizado.institucion.nombre),
+                                sanitizarCadenaOpcional(normalizado.institucion.nombre_legal) ??
+                                sanitizarCadena(normalizado.institucion.nombre),
                         tipo_institucion: tipoInstitucion
                 },
-                metadata
+                metadata: metadatos
         };
 
         return {
-                input,
+                input: datosRegistro,
                 emailPrincipal: email
         };
 }               

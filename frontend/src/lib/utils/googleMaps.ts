@@ -1,105 +1,98 @@
-export interface GoogleMapsLocationConfig {
-        locality?: string;
-        province?: string;
-        country?: string;
-        zoom?: number;
-        language?: string;
+export interface ConfiguracionUbicacionGoogleMaps {
+	localidad?: string;
+	provincia?: string;
+	pais?: string;
+	zoom?: number;
+	idioma?: string;
 }
 
-export interface GoogleMapsPreviewUrls {
-        embedUrl: string;
-        placeUrl: string;
+export interface UrlsVistaPreviaGoogleMaps {
+	urlInsertar: string;
+	urlLugar: string;
 }
 
-const GOOGLE_MAPS_EMBED_BASE_URL = 'https://maps.google.com/maps';
-const GOOGLE_MAPS_PLACE_BASE_URL = 'https://www.google.com/maps';
-const GOOGLE_MAPS_PLACE_PATH = '/place/';
-const DEFAULT_COUNTRY = 'Argentina';
-const DEFAULT_LANGUAGE = 'es';
-const DEFAULT_ZOOM = 13;
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 21;
+const URL_BASE_INSERTAR_GOOGLE_MAPS = 'https://maps.google.com/maps';
+const URL_BASE_LUGAR_GOOGLE_MAPS = 'https://www.google.com/maps';
+const RUTA_LUGAR_GOOGLE_MAPS = '/place/';
+const PAIS_POR_DEFECTO = 'Argentina';
+const IDIOMA_POR_DEFECTO = 'es';
+const ZOOM_POR_DEFECTO = 13;
+const ZOOM_MINIMO = 1;
+const ZOOM_MAXIMO = 21;
 
-const LANGUAGE_PATTERN = /^[a-z]{2}(?:-[A-Z]{2})?$/u;
+const PATRON_IDIOMA = /^[a-z]{2}(?:-[A-Z]{2})?$/u;
 
-function normalizeZoom(zoom: number | undefined): number {
-        if (!Number.isFinite(zoom)) {
-                return DEFAULT_ZOOM;
-        }
+function normalizarZoom(zoom: number | undefined): number {
+	if (!Number.isFinite(zoom)) {
+		return ZOOM_POR_DEFECTO;
+	}
 
-        const roundedZoom = Math.round(zoom as number);
-        return Math.min(Math.max(roundedZoom, MIN_ZOOM), MAX_ZOOM);
+	const zoomRedondeado = Math.round(zoom as number);
+	return Math.min(Math.max(zoomRedondeado, ZOOM_MINIMO), ZOOM_MAXIMO);
 }
 
-function normalizeLanguage(language: string | undefined): string {
-        const trimmed = language?.trim();
+function normalizarIdioma(idioma: string | undefined): string {
+	const recortado = idioma?.trim();
 
-        if (!trimmed || !LANGUAGE_PATTERN.test(trimmed)) {
-                return DEFAULT_LANGUAGE;
-        }
+	if (!recortado || !PATRON_IDIOMA.test(recortado)) {
+		return IDIOMA_POR_DEFECTO;
+	}
 
-        return trimmed;
+	return recortado;
 }
 
-function sanitizePart(value?: string): string | null {
-        const trimmed = value?.trim();
+function sanitizarParte(valor?: string): string | null {
+	const recortado = valor?.trim();
 
-        if (!trimmed) {
-                return null;
-        }
+	if (!recortado) {
+		return null;
+	}
 
-        return trimmed.replace(/\s+/gu, ' ');
+	return recortado.replace(/\s+/gu, ' ');
 }
 
-function buildSearchableParts(config: GoogleMapsLocationConfig): string[] | null {
-        const sanitizedLocality = sanitizePart(config.locality);
-        const sanitizedProvince = sanitizePart(config.province);
+function construirPartesBuscables(config: ConfiguracionUbicacionGoogleMaps): string[] | null {
+	const localidadSanitizada = sanitizarParte(config.localidad);
+	const provinciaSanitizada = sanitizarParte(config.provincia);
 
-        if (!sanitizedLocality || !sanitizedProvince) {
-                return null;
-        }
+	if (!localidadSanitizada || !provinciaSanitizada) {
+		return null;
+	}
 
-        const sanitizedCountry = sanitizePart(config.country) ?? DEFAULT_COUNTRY;
+	const paisSanitizado = sanitizarParte(config.pais) ?? PAIS_POR_DEFECTO;
 
-        return [sanitizedLocality, sanitizedProvince, sanitizedCountry];
+	return [localidadSanitizada, provinciaSanitizada, paisSanitizado];
 }
 
-export function buildGoogleMapsPreviewUrls(
-        config: GoogleMapsLocationConfig = {}
-): GoogleMapsPreviewUrls | null {
-        const searchableParts = buildSearchableParts(config);
+export function construirUrlsVistaPreviaGoogleMaps(
+	config: ConfiguracionUbicacionGoogleMaps = {}
+): UrlsVistaPreviaGoogleMaps | null {
+	const partesBuscables = construirPartesBuscables(config);
 
-        if (!searchableParts) {
-                return null;
-        }
+	if (!partesBuscables) {
+		return null;
+	}
 
-        const language = normalizeLanguage(config.language);
-        const zoom = normalizeZoom(config.zoom);
-        const placeLabel = searchableParts.join(', ');
+	const idioma = normalizarIdioma(config.idioma);
+	const zoom = normalizarZoom(config.zoom);
+	const etiquetaLugar = partesBuscables.join(', ');
 
-        const embedParams = new URLSearchParams({
-                q: placeLabel,
-                hl: language,
-                z: String(zoom),
-                t: '',
-                ie: 'UTF8',
-                iwloc: 'B',
-                output: 'embed'
-        });
+	const parametrosInsertar = new URLSearchParams({
+		q: etiquetaLugar,
+		hl: idioma,
+		z: String(zoom),
+		t: '',
+		ie: 'UTF8',
+		iwloc: 'B',
+		output: 'embed'
+	});
 
-        const embedUrl = `${GOOGLE_MAPS_EMBED_BASE_URL}?${embedParams.toString()}`;
+	const urlInsertar = `${URL_BASE_INSERTAR_GOOGLE_MAPS}?${parametrosInsertar.toString()}`;
 
-        const placeUrl = `${GOOGLE_MAPS_PLACE_BASE_URL}${GOOGLE_MAPS_PLACE_PATH}${encodeURIComponent(
-                placeLabel
-        )}?hl=${language}`;
+	const urlLugar = `${URL_BASE_LUGAR_GOOGLE_MAPS}${RUTA_LUGAR_GOOGLE_MAPS}${encodeURIComponent(
+		etiquetaLugar
+	)}?hl=${idioma}`;
 
-        return { embedUrl, placeUrl };
+	return { urlInsertar, urlLugar };
 }
 
-export function buildGoogleMapsEmbedUrl(config: GoogleMapsLocationConfig = {}): string {
-        return buildGoogleMapsPreviewUrls(config)?.embedUrl ?? '';
-}
-
-export function buildGoogleMapsPlaceUrl(config: GoogleMapsLocationConfig = {}): string {
-        return buildGoogleMapsPreviewUrls(config)?.placeUrl ?? '';
-}
