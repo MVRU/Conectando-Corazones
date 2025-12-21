@@ -8,11 +8,12 @@
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 	import { page } from '$app/stores';
-import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
-import { beforeNavigate } from '$app/navigation';
-import { onMount } from 'svelte';
-import { authActions } from '$lib/stores/auth';
-import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
+	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { authActions } from '$lib/stores/auth';
+	import { toastStore } from '$lib/stores/toast';
+	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 
 	/**
 	 * ! DECISIÓN DE DISEÑO
@@ -29,6 +30,23 @@ import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 		beforeNavigate(clearBreadcrumbs);
 		authActions.checkAuth();
 	});
+
+	$: {
+		const error = $page.url.searchParams.get('error');
+		if (error === 'already_logged_in') {
+			setTimeout(() => {
+				toastStore.show({
+					title: 'Sesión activa',
+					message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
+					variant: 'info'
+				});
+
+				const newUrl = new URL($page.url);
+				newUrl.searchParams.delete('error');
+				window.history.replaceState({}, '', newUrl.toString());
+			}, 0);
+		}
+	}
 </script>
 
 <Header />
