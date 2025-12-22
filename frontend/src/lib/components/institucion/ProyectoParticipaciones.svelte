@@ -62,7 +62,7 @@
 				...participacionesPermitidas,
 				{
 					tipo_participacion: { descripcion: tipo },
-					objetivo: 0,
+					objetivo: undefined,
 					actual: 0,
 					unidad_medida:
 						tipo === 'Monetaria' ? 'ARS' : tipo === 'Voluntariado' ? 'personas' : 'unidades',
@@ -86,8 +86,14 @@
 			const err = validarEspecie(norm);
 			if (err) errores[`participacion_${index}_especie`] = err;
 			else limpiarError(`participacion_${index}_especie`);
+		} else if (field === 'objetivo') {
+			participacionesPermitidas[index] = { ...participacionesPermitidas[index], objetivo: value as number | undefined };
+			// Limpiar error si el objetivo es válido
+			if (value != null && Number(value) > 0) {
+				limpiarError(`participacion_${index}_objetivo`);
+			}
 		} else {
-			participacionesPermitidas[index] = { ...participacionesPermitidas[index], [field]: value };
+			participacionesPermitidas[index] = { ...participacionesPermitidas[index], [field]: value as any };
 		}
 		participacionesPermitidas = participacionesPermitidas;
 
@@ -135,7 +141,7 @@
 			...participacionesPermitidas,
 			{
 				tipo_participacion: { descripcion: 'Especie' },
-				objetivo: 0,
+				objetivo: undefined,
 				actual: 0,
 				unidad_medida: 'unidades',
 				especie: ''
@@ -169,6 +175,11 @@
 		Monetaria: ['ARS', 'USD', 'EUR'],
 		Especie: ['unidades', 'kilogramos', 'mililitros', 'litros', 'centímetros', 'metros']
 	} as const;
+
+	$: cantidadDonacionesEspecie = participacionesPermitidas.filter(
+		(p) => p.tipo_participacion?.descripcion === 'Especie'
+	).length;
+	$: limiteEspecieAlcanzado = cantidadDonacionesEspecie >= 10;
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -253,10 +264,13 @@
 						<input
 							id="objetivo_{index}"
 							type="number"
-							value={participacion.objetivo ?? 0}
-							on:input={(e) =>
-								updateParticipacion(index, 'objetivo', Number(e.currentTarget.value) || 0)}
+						value={participacion.objetivo ?? ''}
+						on:input={(e) => {
+							const val = e.currentTarget.value;
+							updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
+						}}
 							min="1"
+							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 							placeholder="100"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
@@ -293,7 +307,9 @@
 									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
-									placeholder="Ejemplo: toneladas, docentes, ARS"
+								placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'
+									? 'Ejemplo: GPB, Bitcoin'
+									: 'Ejemplo: toneladas, docentes, metros'}
 									maxlength="40"
 								/>
 								{#if errores[`participacion_${index}_unidad_otra`]}
@@ -315,22 +331,28 @@
 	{/each}
 
 	{#if tiposParticipacionSeleccionados.includes('Especie')}
-		<div class="mt-4 flex justify-center">
-			<button
-				type="button"
-				on:click={agregarItemEspecie}
-				class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
-			>
-				<svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-					/></svg
+		{#if limiteEspecieAlcanzado}
+			<div class="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-800">
+				⚠️ Has alcanzado el límite máximo de 10 tipos de donaciones en especie por proyecto.
+			</div>
+		{:else}
+			<div class="mt-4 flex justify-center">
+				<button
+					type="button"
+					on:click={agregarItemEspecie}
+					class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
 				>
-				Agregar otro item en especie
-			</button>
-		</div>
+					<svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+						><path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+						/></svg
+					>
+					Agregar otro item en especie
+				</button>
+			</div>
+		{/if}
 	{/if}
 </div>
