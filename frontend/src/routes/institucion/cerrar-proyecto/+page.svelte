@@ -80,10 +80,10 @@
 </script>
 
 <svelte:head>
-	<title>Cerrar Proyecto - Conectando Corazones</title>
+	<title>Solicitar Cierre de Proyecto - Conectando Corazones</title>
 	<meta
 		name="description"
-		content="Completá la lista de verificación para enviar tu proyecto a revisión de colaboradores."
+		content="Solicitá el cierre de tu proyecto completando la lista de verificación para enviar a revisión de colaboradores."
 	/>
 </svelte:head>
 
@@ -107,7 +107,7 @@
 				</svg>
 			</div>
 			<h1 class="text-center text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-				Cerrar proyecto
+				Solicitar cierre de proyecto
 			</h1>
 			<div class="rounded-full bg-blue-100 p-3">
 				<svg
@@ -127,7 +127,7 @@
 		</div>
 		<div class="mx-auto max-w-3xl">
 			<p class="text-center text-lg leading-relaxed text-gray-600">
-				Antes de enviar tu proyecto a revisión, completá la siguiente lista de verificación.
+				Antes de enviar tu solicitud de cierre de proyecto, completá la siguiente lista de verificación.
 			</p>
 			<p class="mt-3 text-center text-base text-gray-500">
 				Solo podrás avanzar si <strong>todos los puntos están completos</strong>.
@@ -155,10 +155,10 @@
 						<polyline points="20 6 9 17 4 12" />
 					</svg>
 					<div>
-						<p class="font-semibold">Solicitud de cierre enviada exitosamente</p>
+						<p class="font-semibold">¡Solicitud de cierre enviada exitosamente!</p>
 						<p class="mt-1 text-sm text-green-700">
-							Tu proyecto ha sido enviado a revisión. Los colaboradores serán notificados para
-							validar las evidencias.
+							Tu solicitud de cierre de proyecto ha sido enviada. Los colaboradores serán notificados para
+							revisar y validar las evidencias cargadas.
 						</p>
 					</div>
 				</div>
@@ -175,7 +175,7 @@
 								name="proyecto"
 								options={proyectosDisponibles}
 								bind:value={proyectoSeleccionado}
-								placeholder="Elegí un proyecto para cerrar"
+								placeholder="Elegí un proyecto para solicitar cierre"
 								on:change={handleProyectoChange}
 								required
 							/>
@@ -324,7 +324,7 @@
 						{:else if !todosLosChecksCompletos}
 							Completá todos los puntos ({Object.values(checks).filter((c) => c).length}/5)
 						{:else}
-							Enviar proyecto a revisión
+							Enviar solicitud de cierre
 						{/if}
 					</button>
 				</form>
