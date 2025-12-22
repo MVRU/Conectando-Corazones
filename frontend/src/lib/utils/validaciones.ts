@@ -68,6 +68,12 @@ export function validarApellido(apellido: string): boolean {
 	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(apellido.trim());
 }
 
+export function validarNombreLegal(nombre: string): boolean {
+	const nombreNormalizado = nombre.trim();
+	return nombreNormalizado.length >= 3;
+}
+
+
 export function validarCalle(calle: string): boolean {
 	return calle.trim().length >= 3;
 }
