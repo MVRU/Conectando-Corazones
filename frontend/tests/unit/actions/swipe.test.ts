@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { swipe } from './swipe';
+import { swipe } from '$lib/actions/swipe';
 
 /**
  * * DECISIÓN DE DISEÑO:

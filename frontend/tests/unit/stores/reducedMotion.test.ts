@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, afterEach, expect, vi } from 'vitest';
-import * as device from '../utils/device';
+import * as device from '$lib/utils/device';
 
 // * Importación dinámica para aislar el estado del módulo en cada test
 let reducedMotion: any;
@@ -40,7 +40,7 @@ describe('reducedMotion store', () => {
 	});
 
 	async function loadStores() {
-		const mod = await import('./reducedMotion');
+		const mod = await import('$lib/stores/reducedMotion');
 		reducedMotion = mod.reducedMotion;
 		motionNoticeVisible = mod.motionNoticeVisible;
 	}

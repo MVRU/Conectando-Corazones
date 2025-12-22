@@ -15,7 +15,6 @@ export default defineConfig({
 		clearMocks: true,
 		globals: true,
 		include: [
-			'src/**/*.{test,spec}.{js,ts}',
 			'tests/**/*.test.{js,ts}'
 		],
 		exclude: ['src/lib/server/**', 'node_modules', '**/node_modules/**'],
@@ -24,8 +23,6 @@ export default defineConfig({
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
 			exclude: [
-				'**/*.spec.ts',
-				'**/*.test.ts',
 				'**/node_modules/**',
 				'**/tests/**',
 				'**/.svelte-kit/**'
