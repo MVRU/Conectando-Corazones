@@ -9,6 +9,7 @@
 	import type { MockUsuarios } from '$lib/mocks/mock-usuarios';
 
 	import type { Usuario } from '$lib/types/Usuario';
+	import { exportarUsuarios } from '$lib/utils/export-csv';
 
 
 
@@ -102,7 +103,14 @@
 
 		</div>
 
-		<div>
+		<div class="flex gap-2">
+			<Button
+				label="Exportar CSV"
+				variant="secondary"
+				size="sm"
+				type="button"
+				on:click={() => exportarUsuarios(usuariosFiltrados as unknown as Array<Record<string, unknown>>)}
+			/>
 			<Button
 				label="Crear usuario"
 				variant="primary"

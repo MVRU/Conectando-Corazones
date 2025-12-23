@@ -7,6 +7,7 @@
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import { exportarProyectos } from '$lib/utils/export-csv';
 
 
 
@@ -116,6 +117,16 @@
 
 			<p class="mt-1 text-sm text-gray-600">Listado simulado a partir de los mocks</p>
 
+		</div>
+
+		<div>
+			<Button
+				label="Exportar CSV"
+				variant="secondary"
+				size="sm"
+				type="button"
+				on:click={() => exportarProyectos(proyectosFiltrados as unknown as Array<Record<string, unknown>>)}
+			/>
 		</div>
 
 	</div>
