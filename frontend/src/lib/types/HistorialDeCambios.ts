@@ -1,12 +1,12 @@
 export interface HistorialDeCambios {
 	id_cambio?: number;
-	tipo_objeto: string;
+	tipo_objeto: 'Usuario' | 'Proyecto' | 'Resena' | 'Reporte' | 'Categoria' | string;
 	id_objeto: number;
-	accion: string;
-	atributo_afectado: string;
-	valor_anterior: string;
-	valor_nuevo: string;
-	justificacion?: string;
+	accion: 'creado' | 'actualizado' | 'eliminado' | 'aprobado' | 'rechazado' | 'suspendido' | 'activado' | string;
+	atributo_afectado?: string; // Ej: 'estado', 'titulo', 'descripcion', 'aprobado'
+	valor_anterior?: string | null;
+	valor_nuevo?: string | null;
+	justificacion?: string | null;
 	created_at?: Date;
-	usuario_id?: number | null; // * FK a usuario que inicia el cambio (si aplica)
+	usuario_id?: number; // Usuario que realizó el cambio (admin)
 }
