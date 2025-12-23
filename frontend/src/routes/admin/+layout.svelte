@@ -30,7 +30,7 @@
 					<a
 						href="/admin/usuarios"
 						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/usuarios')}
+						class:selected={$page.url.pathname.startsWith('/admin/usuarios') && !$page.url.pathname.startsWith('/admin/usuarios-bajas-calificaciones')}
 					>
 						<span>Usuarios</span>
 					</a>
@@ -40,6 +40,20 @@
 						class:selected={$page.url.pathname.startsWith('/admin/proyectos')}
 					>
 						<span>Proyectos</span>
+					</a>
+					<a
+						href="/admin/reportes"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/reportes')}
+					>
+						<span>Reportes</span>
+					</a>
+					<a
+						href="/admin/usuarios-bajas-calificaciones"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/usuarios-bajas-calificaciones')}
+					>
+						<span>Usuarios con bajas calificaciones</span>
 					</a>
 				</nav>
 			</aside>
