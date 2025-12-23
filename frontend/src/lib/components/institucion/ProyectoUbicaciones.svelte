@@ -37,9 +37,10 @@
 		];
 	}
 
-	function esTipoPredefinido(tipo: string): boolean {
-		return ['principal', 'voluntariado'].includes(tipo);
-	}
+function esTipoPredefinido(tipo: string): boolean {
+	const normalizado = (tipo || '').trim().toLowerCase();
+	return TIPO_UBICACION.some((t) => t.toLowerCase() === normalizado);
+}
 
 	function manejarCambioTipo(index: number, valor: string) {
 		if (valor === 'personalizado') {
