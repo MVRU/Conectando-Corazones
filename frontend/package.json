@@ -52,6 +52,7 @@
 		"@tailwindcss/typography": "^0.5.16",
 		"aos": "^2.3.4",
 		"clsx": "^2.1.1",
+		"lucide-svelte": "^0.562.0",
 		"solid-js": "^1.9.7",
 		"solid-motionone": "^1.0.4",
 		"tailwindcss": "^4.1.7"

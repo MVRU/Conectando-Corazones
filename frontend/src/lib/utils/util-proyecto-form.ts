@@ -133,7 +133,7 @@ export function validarTituloProyecto(t: string): string | null {
 	if (/^\d+$/u.test(v)) return 'No puede ser solo números';
 	if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
 	if (/<|>/.test(v)) return 'Caracteres inválidos detectados.';
-	if (!/^[\p{L}\p{N} .,'!?:;\-()/&@#$%*+=[\]{}|~]+$/u.test(v))
+	if (!/^[\p{L}\p{N} .,'!?:;\-()/&@#$%*+=[\]{}|~¡¿]+$/u.test(v))
 		return 'Usá solo letras, números y signos comunes';
 	return null;
 }
@@ -221,20 +221,20 @@ export function toKey(s: string): string {
 		.replace(/\s+/g, ' ');
 }
 
-export function normalizarUnidadLibre(texto: string): string {
-	return (texto ?? '')
+export function normalizarUnidadLibre(texto: string, preserveCase = false): string {
+	const t = (texto ?? '')
 		.normalize('NFC')
 		.trim()
-		.replace(/\s+/g, ' ')
-		.toLocaleLowerCase('es-AR');
+		.replace(/\s+/g, ' ');
+	return preserveCase ? t : t.toLocaleLowerCase('es-AR');
 }
 
 export function validarUnidadLibre(
 	texto: string,
-	opciones?: { esRepetida?: (t: string) => boolean }
+	opciones?: { esRepetida?: (t: string) => boolean; allowUpperCase?: boolean }
 ): string | null {
 	if (texto == null) return 'Este campo es obligatorio';
-	const v = normalizarUnidadLibre(texto);
+	const v = normalizarUnidadLibre(texto, opciones?.allowUpperCase);
 	if (!v) return 'Este campo es obligatorio';
 	if (v.length < 2) return 'Debe tener al menos 2 caracteres';
 	if (v.length > 40) return 'Máximo 40 caracteres';

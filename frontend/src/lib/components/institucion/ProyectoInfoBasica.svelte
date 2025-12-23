@@ -76,6 +76,7 @@
 				id="titulo"
 				type="text"
 				bind:value={titulo}
+				maxlength="120"
 				on:blur={() => normalizarTitulo(titulo)}
 				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 				placeholder="Ejemplo: Infancias felices 2025"

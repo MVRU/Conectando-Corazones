@@ -161,16 +161,18 @@
 		ubicaciones.forEach((ubicacion, index) => {
 			const prefix = 'ubicacion_' + index;
 			const tipoTrim = (ubicacion.tipo_ubicacion || '').trim();
-			
+
 			if (!tipoTrim) {
 				errores[prefix + '_tipo'] = MENSAJES_ERROR.obligatorio;
 			} else if (tipoTrim === 'personalizado_input') {
 				// Si seleccionó "Otro..." pero no ingresó texto
 				errores[prefix + '_tipo'] = 'Por favor, especifique el tipo de ubicación.';
-			} else if (!['principal', 'alternativa', 'voluntariado', 'reuniones'].includes(tipoTrim.toLowerCase())) {
+			} else if (
+				!['principal', 'alternativa', 'voluntariado', 'reuniones'].includes(tipoTrim.toLowerCase())
+			) {
 				// Si es un tipo personalizado, verificar que no coincida con la lista oficial
 				const existeEnLista = ['principal', 'alternativa', 'voluntariado', 'reuniones'].some(
-					tipo => tipo.toLowerCase() === tipoTrim.toLowerCase()
+					(tipo) => tipo.toLowerCase() === tipoTrim.toLowerCase()
 				);
 				if (existeEnLista) {
 					errores[prefix + '_tipo'] = 'Ese tipo de ubicación ya existe en la lista oficial.';
@@ -206,7 +208,10 @@
 					errores[prefix + '_localidad'] = MENSAJES_ERROR.obligatorio;
 				} else {
 					const provincia = provincias.find((p) => p.nombre === direccion.provincia);
-					if (provincia && !validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)) {
+					if (
+						provincia &&
+						!validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)
+					) {
 						errores[prefix + '_localidad'] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
 					}
 				}
@@ -242,36 +247,44 @@
 		ubicaciones.forEach((ubicacion, index) => {
 			const ubicacionesDuplicadas = ubicaciones.filter((u, i) => {
 				if (i === index) return false; // Excluir la misma ubicación
-				
+
 				// Comparar tipo y modalidad
-				const mismoTipo = (u.tipo_ubicacion || '').trim().toLowerCase() === (ubicacion.tipo_ubicacion || '').trim().toLowerCase();
-				const mismaModalidad = (u.modalidad || '').trim().toLowerCase() === (ubicacion.modalidad || '').trim().toLowerCase();
-				
+				const mismoTipo =
+					(u.tipo_ubicacion || '').trim().toLowerCase() ===
+					(ubicacion.tipo_ubicacion || '').trim().toLowerCase();
+				const mismaModalidad =
+					(u.modalidad || '').trim().toLowerCase() ===
+					(ubicacion.modalidad || '').trim().toLowerCase();
+
 				if (!mismoTipo || !mismaModalidad) return false;
-				
+
 				// Si es presencial, comparar dirección
 				if (ubicacion.modalidad === 'presencial') {
 					const dir1 = ubicacion.direccion_presencial;
 					const dir2 = u.direccion_presencial;
-					
+
 					if (!dir1 || !dir2) return false;
-					
+
 					return (
-						(dir1.provincia || '').trim().toLowerCase() === (dir2.provincia || '').trim().toLowerCase() &&
+						(dir1.provincia || '').trim().toLowerCase() ===
+							(dir2.provincia || '').trim().toLowerCase() &&
 						dir1.localidad_id === dir2.localidad_id &&
 						(dir1.calle || '').trim().toLowerCase() === (dir2.calle || '').trim().toLowerCase() &&
 						(dir1.numero || '').trim().toLowerCase() === (dir2.numero || '').trim().toLowerCase()
 					);
 				}
-				
+
 				// Si es virtual, comparar URL
 				if (ubicacion.modalidad === 'virtual') {
-					return (u.url_virtual || '').trim().toLowerCase() === (ubicacion.url_virtual || '').trim().toLowerCase();
+					return (
+						(u.url_virtual || '').trim().toLowerCase() ===
+						(ubicacion.url_virtual || '').trim().toLowerCase()
+					);
 				}
-				
+
 				return false;
 			});
-			
+
 			if (ubicacionesDuplicadas.length > 0) {
 				errores[`ubicacion_${index}_tipo`] = 'Esta ubicación ya ha sido registrada.';
 			}
@@ -285,39 +298,45 @@
 		participacionesPermitidas.forEach((participacion, index) => {
 			const tipo = participacion.tipo_participacion?.descripcion;
 			const objetivo = participacion.objetivo;
-			
+
 			if (tipo === 'Monetaria' && (objetivo == null || objetivo <= 0)) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio para participación monetaria.';
+				errores[`participacion_${index}_objetivo`] =
+					'El objetivo es obligatorio para participación monetaria.';
 			}
-			
+
 			if (tipo === 'Especie') {
 				if (objetivo == null || objetivo <= 0) {
-					errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio para participación en especie.';
+					errores[`participacion_${index}_objetivo`] =
+						'El objetivo es obligatorio para participación en especie.';
 				}
 				if (!participacion.especie || !participacion.especie.trim()) {
 					errores[`participacion_${index}_especie`] = 'Debe especificar qué necesita en especie.';
 				} else {
 					// Verificar que no haya especies duplicadas
 					const especieNormalizada = participacion.especie.trim().toLowerCase();
-					const especiesDuplicadas = participacionesPermitidas.filter((p, i) => 
-						i !== index && 
-						p.tipo_participacion?.descripcion === 'Especie' &&
-						p.especie?.trim().toLowerCase() === especieNormalizada
+					const especiesDuplicadas = participacionesPermitidas.filter(
+						(p, i) =>
+							i !== index &&
+							p.tipo_participacion?.descripcion === 'Especie' &&
+							p.especie?.trim().toLowerCase() === especieNormalizada
 					);
 					if (especiesDuplicadas.length > 0) {
-						errores[`participacion_${index}_especie`] = 'Ya existe una donación en especie con el mismo ítem.';
+						errores[`participacion_${index}_especie`] =
+							'Ya existe una donación en especie con el mismo ítem.';
 					}
 				}
 			}
-			
+
 			if (tipo === 'Voluntariado' && (objetivo == null || objetivo <= 0)) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio para participación de voluntariado.';
+				errores[`participacion_${index}_objetivo`] =
+					'El objetivo es obligatorio para participación de voluntariado.';
 			}
 
 			// Validar unidad_medida_otra cuando se selecciona "Otra"
 			if (participacion.unidad_medida === 'Otra') {
 				const unidadOtra = participacion.unidad_medida_otra || '';
-				const errorUnidad = validarUnidadLibre(unidadOtra);
+				const esMonetaria = participacion.tipo_participacion?.descripcion === 'Monetaria';
+				const errorUnidad = validarUnidadLibre(unidadOtra, { allowUpperCase: esMonetaria });
 				if (errorUnidad) {
 					errores[`participacion_${index}_unidad_otra`] = errorUnidad;
 				}
@@ -327,14 +346,22 @@
 		return Object.keys(errores).length === 0;
 	}
 
-	function enviarFormulario() {
+	let enviando = false;
+
+	async function enviarFormulario() {
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
 			return;
 		}
 
+		enviando = true;
+
+		// Simulación de envío al backend
+		await new Promise((resolve) => setTimeout(resolve, 2000));
+
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
-			tipo_participacion: (p.tipo_participacion?.descripcion || 'Voluntariado') as TipoParticipacionDescripcion,
+			tipo_participacion: (p.tipo_participacion?.descripcion ||
+				'Voluntariado') as TipoParticipacionDescripcion,
 			objetivo: Number(p.objetivo) || 0,
 			unidad_medida: p.unidad_medida === 'Otra' ? p.unidad_medida_otra || '' : p.unidad_medida,
 			especie: p.tipo_participacion?.descripcion === 'Especie' ? p.especie || '' : undefined
@@ -377,6 +404,8 @@
 		};
 
 		console.log('Payload listo', payload);
+		enviando = false;
+		alert('¡Proyecto creado con éxito! (simulación)');
 	}
 </script>
 
@@ -409,14 +438,14 @@
 			<ProyectoParticipaciones
 				bind:tiposParticipacionSeleccionados
 				bind:participacionesPermitidas
-				{errores}
+				bind:errores
 				{limpiarError}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} />
 
 			<div class="flex justify-end">
-				<Button type="submit" label="Crear proyecto" />
+				<Button type="submit" label="Crear proyecto" loading={enviando} loadingLabel="Creando..." />
 			</div>
 		</form>
 	</div>
