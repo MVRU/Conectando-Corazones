@@ -55,6 +55,34 @@
 					>
 						<span>Usuarios con bajas calificaciones</span>
 					</a>
+					<a
+						href="/admin/moderacion-resenas"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/moderacion-resenas')}
+					>
+						<span>Moderación de reseñas</span>
+					</a>
+					<a
+						href="/admin/logs-actividad"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/logs-actividad')}
+					>
+						<span>Logs de actividad</span>
+					</a>
+					<a
+						href="/admin/analytics"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/analytics')}
+					>
+						<span>Analytics</span>
+					</a>
+					<a
+						href="/admin/configuracion"
+						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+						class:selected={$page.url.pathname.startsWith('/admin/configuracion')}
+					>
+						<span>Configuración</span>
+					</a>
 				</nav>
 			</aside>
 
