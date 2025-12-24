@@ -1,170 +1,293 @@
 import type { Evidencia } from '$lib/types/Evidencia';
 import type { Archivo } from '$lib/types/Archivo';
 
-// Mock de archivos asociados a evidencias
+// ============================================================================
+// ARCHIVOS (EVIDENCIAS) - Organizados por proyecto y tipo
+// ============================================================================
+
+// --- PROYECTO 1: "Un libro, un sueño" (Escuela Esperanza - id: 2) ---
+// Objetivos: 20 libros (especie), 10 docentes (voluntariado)
+
 export const mockArchivos: Archivo[] = [
-	// Archivos para evidencia 1 (Proyecto "Un libro, un sueño" - Objetivo: libros)
+	// === EVIDENCIAS DE ENTRADA - Colaboradores donando ===
+	
+	//  Donación de 5 libros infantiles
 	{
 		id_archivo: 1,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Flibros-recibidos-foto1.jpg?alt=media&token=a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-		descripcion: 'Foto de libros donados',
-		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-09-15'),
-		usuario_id: 2,
+		descripcion: 'Comprobante de donación de 5 libros infantiles',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fcomprobante_donacion_libros_maria.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-03-15'),
+		usuario_id: 4, 
 		evidencia_id: 1,
 		proyecto_id: 1
 	},
 	{
 		id_archivo: 2,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Flibros-recibidos-foto2.jpg?alt=media&token=b2c3d4e5-f6a7-8901-bcde-f2345678901a',
-		descripcion: 'Foto de clasificación de libros',
+		descripcion: 'Fotografía de los libros donados por María',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_libros_donados_maria.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-09-15'),
-		usuario_id: 2,
-		evidencia_id: 1,
-		proyecto_id: 1
-	},
-	{
-		id_archivo: 3,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fcomprobante-donacion.pdf?alt=media&token=c3d4e5f6-a7b8-9012-cdef-34567890123b',
-		descripcion: 'Comprobante de donación firmado',
-		tipo_mime: 'application/pdf',
-		created_at: new Date('2025-09-15'),
-		usuario_id: 2,
+		created_at: new Date('2025-03-15'),
+		usuario_id: 4, 
 		evidencia_id: 1,
 		proyecto_id: 1
 	},
 
-	// Archivos para evidencia 2 (Proyecto "Un libro, un sueño" - Objetivo: docentes)
+	// Donación de 7 libros infantiles
+	{
+		id_archivo: 3,
+		descripcion: 'Recibo de donación de 7 libros infantiles de aventuras y cuentos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Frecibo_donacion_libros_juan.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-03-20'),
+		usuario_id: 5, 
+		evidencia_id: 2,
+		proyecto_id: 1
+	},
+
+	// === EVIDENCIAS DE SALIDA - Institución mostrando recepción y uso ===
+	
+	//  Recepción de libros y armado de biblioteca
 	{
 		id_archivo: 4,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fplanilla-docentes.xlsx?alt=media&token=d4e5f6a7-b8c9-0123-def0-45678901234c',
-		descripcion: 'Planilla de asistencia de docentes voluntarios',
-		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		created_at: new Date('2025-10-05'),
-		usuario_id: 2,
-		evidencia_id: 2,
+		descripcion: 'Fotografía de la biblioteca escolar armada con los libros recibidos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_biblioteca_armada.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-04-10'),
+		usuario_id: 2, 
+		evidencia_id: 3,
 		proyecto_id: 1
 	},
 	{
 		id_archivo: 5,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto-taller.jpg?alt=media&token=e5f6a7b8-c9d0-1234-ef01-56789012345d',
-		descripcion: 'Foto del taller de lectura',
-		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-10-05'),
-		usuario_id: 2,
-		evidencia_id: 2,
+		descripcion: 'Registro y catálogo de libros recibidos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fregistro_libros_recibidos.xlsx?alt=media',
+		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		created_at: new Date('2025-04-10'),
+		usuario_id: 2, 
+		evidencia_id: 3,
 		proyecto_id: 1
 	},
 
-	// Archivos para evidencia 3 (Proyecto "Comedores con alma" - Objetivo: personas)
+	// EVIDENCIAS DE ENTRADA - Voluntariado docente 
+	
 	{
 		id_archivo: 6,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Fregistro-voluntarios.pdf?alt=media&token=f6a7b8c9-d0e1-2345-f012-67890123456e',
-		descripcion: 'Registro de voluntarios con firmas',
-		tipo_mime: 'application/pdf',
-		created_at: new Date('2025-08-20'),
-		usuario_id: 11,
-		evidencia_id: 3,
-		proyecto_id: 2
+		descripcion: 'Selfie de Ana Martínez confirmando su participación como docente voluntaria',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fselfie_ana_martinez.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-03-18'),
+		usuario_id: 8, 
+		evidencia_id: 4,
+		proyecto_id: 1
 	},
 	{
 		id_archivo: 7,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Ffoto-grupo-voluntarios.jpg?alt=media&token=a7b8c9d0-e1f2-3456-0123-78901234567f',
-		descripcion: 'Foto grupal de voluntarios',
+		descripcion: 'Selfie de María González confirmando su participación como docente voluntaria',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fselfie_maria_gonzalez.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-08-20'),
-		usuario_id: 11,
-		evidencia_id: 3,
-		proyecto_id: 2
+		created_at: new Date('2025-03-20'),
+		usuario_id: 4, // María González - colaborador
+		evidencia_id: 4,
+		proyecto_id: 1
 	},
-
-	// Archivos para evidencia 4 (Proyecto "Comedores con alma" - Objetivo: harina)
 	{
 		id_archivo: 8,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Ffactura-harina-001.pdf?alt=media&token=b8c9d0e1-f2a3-4567-1234-89012345678a',
-		descripcion: 'Factura de compra de harina - Proveedor A',
-		tipo_mime: 'application/pdf',
-		created_at: new Date('2025-09-10'),
-		usuario_id: 11,
+		descripcion: 'Selfie de Patricia Morales confirmando su participación como docente voluntaria',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fselfie_patricia_morales.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-03-22'),
+		usuario_id: 6, // Patricia Morales (Fundación Manos Unidas) - colaborador
 		evidencia_id: 4,
-		proyecto_id: 2
+		proyecto_id: 1
 	},
+
+	//  EVIDENCIAS DE SALIDA - Docentes trabajando en el taller 
+	
 	{
 		id_archivo: 9,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Ffactura-harina-002.pdf?alt=media&token=c9d0e1f2-a3b4-5678-2345-90123456789b',
-		descripcion: 'Factura de compra de harina - Proveedor B',
-		tipo_mime: 'application/pdf',
-		created_at: new Date('2025-09-25'),
-		usuario_id: 11,
-		evidencia_id: 4,
-		proyecto_id: 2
+		descripcion: 'Fotografía de las docentes voluntarias trabajando en el taller de lectura',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_docentes_taller_lectura.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-04-15'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 5,
+		proyecto_id: 1
 	},
+
+	// --- PROYECTO 4: "Equipamiento Médico Hospitalario" (Hospital Central - id: 9) ---
+	// Objetivo: $500,000 ARS (donación monetaria)
+
+	// EVIDENCIAS DE ENTRADA - Colaboradores donando dinero 
+
 	{
 		id_archivo: 10,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Ffoto-almacenamiento.jpg?alt=media&token=d0e1f2a3-b4c5-6789-3456-01234567890c',
-		descripcion: 'Foto del depósito con mercadería',
-		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-09-25'),
-		usuario_id: 11,
-		evidencia_id: 4,
-		proyecto_id: 2
+		descripcion: 'Comprobante de transferencia bancaria por $50,000',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ftransferencia_bancaria_carlos_50mil.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-04-15'),
+		usuario_id: 7,
+		evidencia_id: 5,
+		proyecto_id: 4
 	},
 
-	// Archivos para evidencia 5 (Proyecto "Comedores con alma" - Objetivo: huevos)
 	{
 		id_archivo: 11,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto2%2Fticket-huevos.jpg?alt=media&token=e1f2a3b4-c5d6-7890-4567-12345678901d',
-		descripcion: 'Ticket de compra de huevos',
-		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-10-01'),
-		usuario_id: 11,
-		evidencia_id: 5,
-		proyecto_id: 2
+		descripcion: 'Comprobante de donación por MercadoPago - $50,000',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Fcomprobante_donacion_mercadopago.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-04-20'),
+		usuario_id: 8, 
+		evidencia_id: 6,
+		proyecto_id: 4
 	},
 
-	// Archivos para evidencia 6 (Proyecto "Hogar de sonrisas")
+	// === EVIDENCIAS DE SALIDA - Hospital mostrando compra de equipamiento ===
+	
+	//  Compra e instalación de equipamiento
 	{
 		id_archivo: 12,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto3%2Fregistro-asistencia.xlsx?alt=media&token=f2a3b4c5-d6e7-8901-5678-23456789012e',
-		descripcion: 'Registro de asistencia de voluntarios',
-		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		created_at: new Date('2025-03-15'),
-		usuario_id: 3,
-		evidencia_id: 6,
-		proyecto_id: 3
+		descripcion: 'Factura de compra de equipamiento médico para sala de urgencias',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffactura_compra_equipamiento_medico.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-05-10'),
+		usuario_id: 9, 
+		evidencia_id: 7,
+		proyecto_id: 4
 	},
 	{
 		id_archivo: 13,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto3%2Ffotos-actividades.jpg?alt=media&token=a3b4c5d6-e7f8-9012-6789-34567890123f',
-		descripcion: 'Fotos de actividades con los niños',
+		descripcion: 'Fotografía del equipamiento médico instalado en sala de urgencias',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffoto_equipamiento_instalado.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		created_at: new Date('2025-03-15'),
-		usuario_id: 3,
-		evidencia_id: 6,
-		proyecto_id: 3
+		created_at: new Date('2025-05-15'),
+		usuario_id: 9, 
+		evidencia_id: 7,
+		proyecto_id: 4
 	},
 	{
 		id_archivo: 14,
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto3%2Finforme-mensual.pdf?alt=media&token=b4c5d6e7-f8a9-0123-7890-45678901234a',
-		descripcion: 'Informe mensual de actividades',
+		descripcion: 'Acta de recepción y conformidad del equipamiento',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Facta_recepcion_equipamiento.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		created_at: new Date('2025-03-15'),
-		usuario_id: 3,
-		evidencia_id: 6,
-		proyecto_id: 3
+		created_at: new Date('2025-05-15'),
+		usuario_id: 9, 
+		evidencia_id: 7,
+		proyecto_id: 4
+	},
+
+	// --- PROYECTO 9: "Luz para aprender" (Escuela Esperanza - id: 2) ---
+	// Objetivos: 100 metros de cableado, 20 luminarias LED, 30 personas capacitadas
+	
+
+	// === EVIDENCIAS DE ENTRADA - 
+	
+	// - Donación de materiales eléctricos (cables)
+	{
+		id_archivo: 15,
+		descripcion: 'Fotografías del cableado eléctrico antiguo deteriorado',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_cableado_viejo.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-03-01'),
+		usuario_id: 10, 
+		evidencia_id: 8,
+		proyecto_id: 9
+	},
+	{
+		id_archivo: 16,
+		descripcion: 'Factura de compra de 100 metros de cable eléctrico',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffactura_compra_cables.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-03-05'),
+		usuario_id: 10, 
+		evidencia_id: 8,
+		proyecto_id: 9
+	},
+
+	//  Donación de luminarias LED
+	{
+		id_archivo: 17,
+		descripcion: 'Fotografías de las luminarias LED donadas (embaladas)',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_lamparas_nuevas_embaladas.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-03-10'),
+		usuario_id: 4, 
+		evidencia_id: 9,
+		proyecto_id: 9
+	},
+	{
+		id_archivo: 18,
+		descripcion: 'Comprobante de donación de 20 luminarias LED',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcomprobante_donacion_lamparas.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-03-10'),
+		usuario_id: 4, 
+		evidencia_id: 9,
+		proyecto_id: 9
+	},
+
+	// === EVIDENCIAS DE SALIDA - Institución mostrando instalación ===
+	
+	// Escuela Esperanza (id: 2) - Instalación del nuevo cableado
+	{
+		id_archivo: 19,
+		descripcion: 'Fotografías del nuevo cableado eléctrico instalado en las aulas',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_cableado_nuevo_instalado.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-04-20'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 10,
+		proyecto_id: 9
+	},
+	{
+		id_archivo: 20,
+		descripcion: 'Certificado de electricista matriculado - instalación conforme',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcertificado_electricista_instalacion.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-04-25'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 10,
+		proyecto_id: 9
+	},
+
+	// Escuela Esperanza (id: 2) - Instalación de luminarias LED
+	{
+		id_archivo: 21,
+		descripcion: 'Fotografías de las luminarias LED instaladas en aulas y pasillos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_lamparas_instaladas.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-05-10'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 11,
+		proyecto_id: 9
+	},
+	{
+		id_archivo: 22,
+		descripcion: 'Video recorriendo las instalaciones con la nueva iluminación',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fvideo_recorrido_iluminacion.mp4?alt=media',
+		tipo_mime: 'video/mp4',
+		created_at: new Date('2025-05-10'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 11,
+		proyecto_id: 9
 	}
 ];
 
-// Mock de evidencias
+// ============================================================================
+// EVIDENCIAS 
+// ============================================================================
+
 export const mockEvidencias: Evidencia[] = [
-	// Evidencias para Proyecto 1: "Un libro, un sueño"
+	// --- PROYECTO 1: "Un libro, un sueño" ---
+	
+	// Evidencia 1: Donación de libros (ENTRADA - colaborador)
 	{
 		id_evidencia: 1,
-		created_at: new Date('2025-09-15'),
-		archivos_ids: [1, 2, 3],
-		archivos: mockArchivos.filter((a) => [1, 2, 3].includes(a.id_archivo!)),
-		id_participacion_permitida: 1,
+		created_at: new Date('2025-03-15'),
+		archivos_ids: [1, 2],
+		id_participacion_permitida: 1, // 20 libros (especie)
+		id_proyecto: 1,
+		archivos: [mockArchivos[0], mockArchivos[1]],
 		participacion_permitida: {
 			id_participacion_permitida: 1,
 			id_proyecto: 1,
@@ -173,15 +296,57 @@ export const mockEvidencias: Evidencia[] = [
 			objetivo: 20,
 			actual: 12,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
-		},
-		id_proyecto: 1
+		}
 	},
+
+	// Evidencia 2: Donación de libros (ENTRADA - colaborador)
 	{
 		id_evidencia: 2,
-		created_at: new Date('2025-10-05'),
+		created_at: new Date('2025-03-20'),
+		archivos_ids: [3],
+		id_participacion_permitida: 1, // 20 libros (especie)
+		id_proyecto: 1,
+		archivos: [mockArchivos[2]],
+		participacion_permitida: {
+			id_participacion_permitida: 1,
+			id_proyecto: 1,
+			id_tipo_participacion: 1,
+			unidad_medida: 'libros',
+			objetivo: 20,
+			actual: 12,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 3: Recepción y catalogación de libros (SALIDA - institución)
+	// Esta evidencia de salida referencia a las evidencias de entrada (1 y 2)
+	{
+		id_evidencia: 3,
+		created_at: new Date('2025-04-10'),
 		archivos_ids: [4, 5],
-		archivos: mockArchivos.filter((a) => [4, 5].includes(a.id_archivo!)),
-		id_participacion_permitida: 2,
+		evidencias_entradas_ids: [1, 2], // Referencias a las donaciones de María y Juan
+		id_participacion_permitida: 1, // 20 libros (especie)
+		id_proyecto: 1,
+		archivos: [mockArchivos[3], mockArchivos[4]],
+		participacion_permitida: {
+			id_participacion_permitida: 1,
+			id_proyecto: 1,
+			id_tipo_participacion: 1,
+			unidad_medida: 'libros',
+			objetivo: 20,
+			actual: 12,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 4: Inscripción de docentes voluntarias (ENTRADA - colaboradores)
+	{
+		id_evidencia: 4,
+		created_at: new Date('2025-03-18'),
+		archivos_ids: [6, 7, 8],
+		id_participacion_permitida: 2, // 10 docentes voluntarios
+		id_proyecto: 1,
+		archivos: [mockArchivos[5], mockArchivos[6], mockArchivos[7]],
 		participacion_permitida: {
 			id_participacion_permitida: 2,
 			id_proyecto: 1,
@@ -190,79 +355,169 @@ export const mockEvidencias: Evidencia[] = [
 			objetivo: 10,
 			actual: 2,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-		},
-		id_proyecto: 1
+		}
 	},
 
-	// Evidencias para Proyecto 2: "Comedores con alma"
-	{
-		id_evidencia: 3,
-		created_at: new Date('2025-08-20'),
-		archivos_ids: [6, 7],
-		archivos: mockArchivos.filter((a) => [6, 7].includes(a.id_archivo!)),
-		id_participacion_permitida: 1,
-		participacion_permitida: {
-			id_participacion_permitida: 1,
-			id_proyecto: 2,
-			id_tipo_participacion: 1,
-			unidad_medida: 'personas',
-			objetivo: 30,
-			actual: 18,
-			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-		},
-		id_proyecto: 2
-	},
-	{
-		id_evidencia: 4,
-		created_at: new Date('2025-09-25'),
-		archivos_ids: [8, 9, 10],
-		archivos: mockArchivos.filter((a) => [8, 9, 10].includes(a.id_archivo!)),
-		id_participacion_permitida: 2,
-		participacion_permitida: {
-			id_participacion_permitida: 2,
-			id_proyecto: 2,
-			id_tipo_participacion: 2,
-			unidad_medida: 'kg de harina',
-			objetivo: 10,
-			actual: 15,
-			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
-		},
-		id_proyecto: 2
-	},
+	// Evidencia 5: Docentes trabajando en taller (SALIDA - institución)
 	{
 		id_evidencia: 5,
-		created_at: new Date('2025-10-01'),
-		archivos_ids: [11],
-		archivos: mockArchivos.filter((a) => [11].includes(a.id_archivo!)),
-		id_participacion_permitida: 3,
+		created_at: new Date('2025-04-15'),
+		archivos_ids: [9],
+		evidencias_entradas_ids: [4], // Referencia a las inscripciones de las docentes
+		id_participacion_permitida: 2, // 10 docentes voluntarios
+		id_proyecto: 1,
+		archivos: [mockArchivos[8]],
 		participacion_permitida: {
-			id_participacion_permitida: 3,
-			id_proyecto: 2,
-			id_tipo_participacion: 3,
-			unidad_medida: 'docenas de huevos',
-			objetivo: 6,
-			actual: 3,
-			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
-		},
-		id_proyecto: 2
+			id_participacion_permitida: 2,
+			id_proyecto: 1,
+			id_tipo_participacion: 1,
+			unidad_medida: 'docentes',
+			objetivo: 10,
+			actual: 2,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+		}
 	},
 
-	// Evidencias para Proyecto 3: "Hogar de sonrisas"
+	// --- PROYECTO 4: "Equipamiento Médico Hospitalario" ---
+	
+	// Evidencia 6: Donación monetaria 
 	{
 		id_evidencia: 6,
-		created_at: new Date('2025-03-15'),
-		archivos_ids: [12, 13, 14],
-		archivos: mockArchivos.filter((a) => [12, 13, 14].includes(a.id_archivo!)),
-		id_participacion_permitida: 3,
+		created_at: new Date('2025-04-15'),
+		archivos_ids: [8],
+		id_participacion_permitida: 4, // $500,000 ARS (monetaria)
+		id_proyecto: 4,
+		archivos: [mockArchivos[7]],
 		participacion_permitida: {
-			id_participacion_permitida: 3,
-			id_proyecto: 3,
+			id_participacion_permitida: 4,
+			id_proyecto: 4,
 			id_tipo_participacion: 1,
-			unidad_medida: 'personas',
-			objetivo: 10,
-			actual: 7,
-			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
-		},
-		id_proyecto: 3
+			unidad_medida: 'ARS',
+			objetivo: 500000,
+			actual: 100000,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Monetaria' }
+		}
+	},
+
+	// Evidencia 7: Donación monetaria 
+	{
+		id_evidencia: 7,
+		created_at: new Date('2025-04-20'),
+		archivos_ids: [11],
+		id_participacion_permitida: 4, // $500,000 ARS (monetaria)
+		id_proyecto: 4,
+		archivos: [mockArchivos[10]],
+		participacion_permitida: {
+			id_participacion_permitida: 4,
+			id_proyecto: 4,
+			id_tipo_participacion: 1,
+			unidad_medida: 'ARS',
+			objetivo: 500000,
+			actual: 100000,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Monetaria' }
+		}
+	},
+
+	// Evidencia 8: Compra de equipamiento médico (SALIDA - institución)
+	// Esta evidencia de salida referencia a las donaciones monetarias (6 y 7)
+	{
+		id_evidencia: 8,
+		created_at: new Date('2025-05-10'),
+		archivos_ids: [12, 13, 14],
+		evidencias_entradas_ids: [6, 7], 
+		id_participacion_permitida: 4, 
+		id_proyecto: 4,
+		archivos: [mockArchivos[11], mockArchivos[12], mockArchivos[13]],
+		participacion_permitida: {
+			id_participacion_permitida: 4,
+			id_proyecto: 4,
+			id_tipo_participacion: 1,
+			unidad_medida: 'ARS',
+			objetivo: 500000,
+			actual: 100000,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Monetaria' }
+		}
+	},
+
+	// --- PROYECTO 9: "Luz para aprender" ---
+	
+	// Evidencia 9: Donación de cableado eléctrico 
+	{
+		id_evidencia: 9,
+		created_at: new Date('2025-03-01'),
+		archivos_ids: [15, 16],
+		id_participacion_permitida: 8, 
+		id_proyecto: 9,
+		archivos: [mockArchivos[14], mockArchivos[15]],
+		participacion_permitida: {
+			id_participacion_permitida: 8,
+			id_proyecto: 9,
+			id_tipo_participacion: 1,
+			unidad_medida: 'metros',
+			objetivo: 100,
+			actual: 100,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 10: Donación de luminarias LED 
+	{
+		id_evidencia: 10,
+		created_at: new Date('2025-03-10'),
+		archivos_ids: [17, 18],
+		id_participacion_permitida: 9, 
+		id_proyecto: 9,
+		archivos: [mockArchivos[16], mockArchivos[17]],
+		participacion_permitida: {
+			id_participacion_permitida: 9,
+			id_proyecto: 9,
+			id_tipo_participacion: 1,
+			unidad_medida: 'unidades',
+			objetivo: 20,
+			actual: 20,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 11: Instalación del nuevo cableado (SALIDA - institución)
+	// Esta evidencia de salida referencia a la donación de cables (evidencia 9)
+	{
+		id_evidencia: 11,
+		created_at: new Date('2025-04-20'),
+		archivos_ids: [19, 20],
+		evidencias_entradas_ids: [9], 
+		id_participacion_permitida: 8, 
+		id_proyecto: 9,
+		archivos: [mockArchivos[18], mockArchivos[19]],
+		participacion_permitida: {
+			id_participacion_permitida: 8,
+			id_proyecto: 9,
+			id_tipo_participacion: 1,
+			unidad_medida: 'metros',
+			objetivo: 100,
+			actual: 100,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 12: Instalación de luminarias LED (SALIDA - institución)
+	// Esta evidencia de salida referencia a la donación de luminarias (evidencia 10)
+	{
+		id_evidencia: 12,
+		created_at: new Date('2025-05-10'),
+		archivos_ids: [21, 22],
+		evidencias_entradas_ids: [10], 
+		id_participacion_permitida: 9, 
+		id_proyecto: 9,
+		archivos: [mockArchivos[20], mockArchivos[21]],
+		participacion_permitida: {
+			id_participacion_permitida: 9,
+			id_proyecto: 9,
+			id_tipo_participacion: 1,
+			unidad_medida: 'unidades',
+			objetivo: 20,
+			actual: 20,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
 	}
 ];

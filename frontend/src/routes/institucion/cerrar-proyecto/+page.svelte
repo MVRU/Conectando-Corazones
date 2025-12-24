@@ -1,15 +1,19 @@
 
 <script lang="ts">
 	import Select from '$lib/components/ui/elementos/Select.svelte';
+	import ObjetivoEvidencias from '$lib/components/institucion/ObjetivoEvidencias.svelte';
+	import ChecklistVerificacion from '$lib/components/institucion/ChecklistVerificacion.svelte';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
+	import { mockEvidencias } from '$lib/mocks/mock-evidencias';
 	import { usuario } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-
+	
 	let proyectoSeleccionado = '';
 	let enviandoSolicitud = false;
 	let solicitudEnviada = false;
 	let mounted = false;
+	let objetivosExpandidos: Record<number, boolean> = {};
 
 	onMount(() => {
 		mounted = true;
@@ -34,6 +38,39 @@
 				}))
 		: [];
 
+	// Obtener proyecto completo seleccionado
+	$: proyectoActual = proyectoSeleccionado
+		? mockProyectos.find((p) => p.id_proyecto === Number(proyectoSeleccionado))
+		: null;
+
+	// Evidencias del proyecto seleccionado agrupadas por objetivo
+	$: evidenciasPorObjetivo = proyectoActual
+		? proyectoActual.participacion_permitida?.map((objetivo) => {
+				const evidenciasObjetivo = mockEvidencias.filter(
+					(e) => e.id_participacion_permitida === objetivo.id_participacion_permitida
+				);
+				// Separar evidencias de entrada y salida
+				const evidenciasEntrada = evidenciasObjetivo.filter((e) => !e.evidencias_entradas_ids || e.evidencias_entradas_ids.length === 0);
+				const evidenciasSalida = evidenciasObjetivo.filter((e) => e.evidencias_entradas_ids && e.evidencias_entradas_ids.length > 0);
+				
+				return {
+					objetivo,
+					evidencias: evidenciasObjetivo,
+					evidenciasEntrada,
+					evidenciasSalida,
+					totalArchivos: evidenciasObjetivo.reduce(
+						(sum, ev) => sum + (ev.archivos?.length || 0),
+						0
+					)
+				};
+		  }) || []
+		: [];
+
+	// Validar que todos los objetivos tengan al menos una evidencia
+	$: todosLosObjetivosTienenEvidencias = evidenciasPorObjetivo.every(
+		(item) => item.evidencias.length > 0
+	);
+
 	// Validar que todos los checks estén marcados
 	$: todosLosChecksCompletos = Object.values(checks).every((check) => check === true);
 
@@ -43,16 +80,6 @@
 
 	async function enviarSolicitud(event: Event) {
 		event.preventDefault();
-
-		if (!proyectoSeleccionado) {
-			alert('Por favor, seleccioná un proyecto');
-			return;
-		}
-
-		if (!todosLosChecksCompletos) {
-			alert('Debés completar todos los puntos de la lista de verificación');
-			return;
-		}
 
 		enviandoSolicitud = true;
 
@@ -185,103 +212,64 @@
 						{/if}
 					</div>
 
-					<!-- Lista de verificación -->
-					<div class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-6">
-						<div class="mb-4 flex items-center gap-2">
-							<svg
-								class="h-5 w-5 text-blue-600"
-								fill="none"
-								stroke="currentColor"
-								stroke-width="2"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"
-								/>
-							</svg>
-							<h2 class="text-lg font-semibold text-gray-900">Lista de verificación</h2>
-						</div>
-
-						<!-- Checkbox 1 -->
-						<label class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50">
-							<input
-								type="checkbox"
-								bind:checked={checks.evidenciasSuficientes}
-								class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-							/>
-							<span class="text-sm leading-relaxed text-gray-700">
-								Para cada objetivo del proyecto, se cargaron evidencias suficientes (ej.: fotos,
-								comprobantes, facturas, documentos).
-							</span>
-						</label>
-
-						<!-- Checkbox 2 -->
-						<label class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50">
-							<input
-								type="checkbox"
-								bind:checked={checks.archivosLegibles}
-								class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-							/>
-							<span class="text-sm leading-relaxed text-gray-700">
-								Todos los archivos son legibles, correctos y pertinentes.
-							</span>
-						</label>
-
-						<!-- Checkbox 3 -->
-						<label class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50">
-							<input
-								type="checkbox"
-								bind:checked={checks.evidenciasRespaldadas}
-								class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-							/>
-							<span class="text-sm leading-relaxed text-gray-700">
-								Se revisó que las evidencias respaldan adecuadamente los aportes recibidos de los
-								colaboradores.
-							</span>
-						</label>
-
-						<!-- Checkbox 4 -->
-						<label class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50">
-							<input
-								type="checkbox"
-								bind:checked={checks.noRequiereMasEvidencias}
-								class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-							/>
-							<span class="text-sm leading-relaxed text-gray-700">
-								Se confirma que el proyecto ya no requiere más carga de evidencias.
-							</span>
-						</label>
-
-						<!-- Checkbox 5 -->
-						<label class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50">
-							<input
-								type="checkbox"
-								bind:checked={checks.conformidadRevision}
-								class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-							/>
-							<span class="text-sm leading-relaxed text-gray-700">
-								Se da conformidad para que el sistema lo envíe a revisión de los colaboradores.
-							</span>
-						</label>
-
-						<!-- Indicador de progreso -->
-						<div class="mt-4 pt-4 border-t border-gray-200">
-							<div class="flex items-center justify-between text-sm">
-								<span class="text-gray-600">
-									Completado: {Object.values(checks).filter((c) => c).length} / 5
-								</span>
-								<span
-									class="font-medium"
-									class:text-green-600={todosLosChecksCompletos}
-									class:text-gray-500={!todosLosChecksCompletos}
+					<!-- Resumen de Evidencias por Objetivo -->
+					{#if proyectoSeleccionado && proyectoActual}
+						<div class="space-y-4 rounded-lg border border-gray-200 bg-white p-6">
+							<div class="mb-4 flex items-center gap-2">
+								<svg
+									class="h-5 w-5 text-blue-600"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+									viewBox="0 0 24 24"
 								>
-									{todosLosChecksCompletos ? '✓ Listo para enviar' : 'Pendiente'}
-								</span>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"
+									/>
+								</svg>
+								<h2 class="text-lg font-semibold text-gray-900">Resumen de Evidencias</h2>
 							</div>
+
+							{#if evidenciasPorObjetivo.length === 0}
+								<p class="text-sm text-gray-500">No se encontraron objetivos para este proyecto.</p>
+							{:else}
+								<div class="space-y-3">
+					{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos }, idx}
+						<ObjetivoEvidencias
+							{objetivo}
+							{evidencias}
+							{evidenciasEntrada}
+							{evidenciasSalida}
+							{totalArchivos}
+							bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida!]}
+						/>
+					{/each}
+				</div>
+								
+								<!-- Alerta si falta cargar evidencias -->
+								{#if !todosLosObjetivosTienenEvidencias}
+									<div class="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+										<div class="flex gap-3">
+											<svg class="h-5 w-5 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+											</svg>
+											<div class="text-sm text-yellow-800">
+												<p class="font-medium">Atención: Faltan evidencias</p>
+												<p class="mt-1 text-yellow-700">
+													Algunos objetivos no tienen evidencias cargadas. Debes cargar al menos una evidencia para cada objetivo antes de solicitar el cierre.
+												</p>
+											</div>
+										</div>
+									</div>
+								{/if}
+							{/if}
 						</div>
-					</div>
+					{/if}
+
+					<!-- Lista de verificación -->
+					<ChecklistVerificacion bind:checks />
 
 					<!-- Nota informativa -->
 					<div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
@@ -312,8 +300,8 @@
 					<!-- Botón de envío -->
 					<button
 						type="submit"
-						disabled={!todosLosChecksCompletos || !proyectoSeleccionado || enviandoSolicitud}
-						class="w-full rounded-xl py-3 text-base font-medium text-white shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {todosLosChecksCompletos && proyectoSeleccionado
+						disabled={!todosLosChecksCompletos || !todosLosObjetivosTienenEvidencias || !proyectoSeleccionado || enviandoSolicitud}
+						class="w-full rounded-xl py-3 text-base font-medium text-white shadow-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {todosLosChecksCompletos && todosLosObjetivosTienenEvidencias && proyectoSeleccionado
 							? 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
 							: 'bg-gray-400'}"
 					>
@@ -321,6 +309,8 @@
 							Enviando solicitud...
 						{:else if !proyectoSeleccionado}
 							Seleccioná un proyecto
+						{:else if !todosLosObjetivosTienenEvidencias}
+							Cargá evidencias para todos los objetivos
 						{:else if !todosLosChecksCompletos}
 							Completá todos los puntos ({Object.values(checks).filter((c) => c).length}/5)
 						{:else}

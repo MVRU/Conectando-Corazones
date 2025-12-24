@@ -52,7 +52,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 1,
 				id_proyecto: 1,
 				id_tipo_participacion: 1,
-				unidad_medida: 'libros',
+				unidad_medida: 'unidades',
+				especie: 'libros',
 				objetivo: 20,
 				actual: 12,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -97,7 +98,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 2,
 				id_proyecto: 2,
 				id_tipo_participacion: 2,
-				unidad_medida: 'kg de harina',
+				unidad_medida: 'kg',
+				especie: 'de harina',
 				objetivo: 10,
 				actual: 15,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -106,7 +108,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 3,
 				id_proyecto: 2,
 				id_tipo_participacion: 3,
-				unidad_medida: 'docenas de huevos',
+				unidad_medida: 'docenas',
+				especie: 'de huevos',
 				objetivo: 6,
 				actual: 3,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -243,7 +246,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 7,
 				id_proyecto: 7,
 				id_tipo_participacion: 1,
-				unidad_medida: 'abrigos',
+				unidad_medida: 'unidades',
+				especie: 'abrigo',
 				objetivo: 50,
 				actual: 8,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -273,6 +277,54 @@ const proyectosBase: Proyecto[] = [
 				unidad_medida: 'personas',
 				objetivo: 10,
 				actual: 5,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+			}
+		]
+	},
+	{
+		id_proyecto: 9,
+		titulo: 'Luz para aprender',
+		descripcion:
+			'Renovación completa de la infraestructura eléctrica de la escuela, incluyendo cableado, luminarias LED y capacitación en seguridad eléctrica.',
+		url_portada: '/img/proyectos-9.webp',
+		created_at: new Date('2025-02-01'),
+		fecha_cierre_postulaciones: new Date('2025-03-15'),
+		fecha_fin_tentativa: new Date('2025-06-30'),
+		id_chat_firebase: 1009,
+		participacion_permitida_ids: [8, 9, 10],
+		colaboracion_ids: [],
+		institucion_id: 2,
+		evidencia_ids: [8, 9],
+		solicitud_finalizacion_ids: [],
+		estado: 'en_curso',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 8,
+				id_proyecto: 9,
+				id_tipo_participacion: 1,
+				unidad_medida: 'metros',
+				especie: 'cable',
+				objetivo: 100,
+				actual: 100,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+			},
+			{
+				id_participacion_permitida: 9,
+				id_proyecto: 9,
+				id_tipo_participacion: 1,
+				unidad_medida: 'unidades',
+				especie: 'lamparas LED',
+				objetivo: 20,
+				actual: 20,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+			},
+			{
+				id_participacion_permitida: 10,
+				id_proyecto: 9,
+				id_tipo_participacion: 1,
+				unidad_medida: 'personas',
+				objetivo: 30,
+				actual: 30,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			}
 		]
