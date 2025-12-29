@@ -81,6 +81,11 @@
 	async function enviarSolicitud(event: Event) {
 		event.preventDefault();
 
+		// Validación previa: no continuar si falta algún requisito
+		if (!proyectoSeleccionado || !todosLosChecksCompletos || !todosLosObjetivosTienenEvidencias) {
+			return;
+		}
+
 		enviandoSolicitud = true;
 
 		// Simulación de envío al backend
