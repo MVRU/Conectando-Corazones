@@ -1,18 +1,17 @@
 import { error } from '@sveltejs/kit';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-
-const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
-	en_curso: 0,
-	pendiente_solicitud_cierre: 1,
-	en_revision: 2,
-	en_auditoria: 3,
-	completado: 4,
-	cancelado: 5
-};
+import {
+	ESTADO_PRIORIDAD,
+	ICONOS_UNIDAD,
+	DEFAULT_PARTICIPACION_ICON,
+	COLORES_UI,
+	type ParticipacionVisualColor
+} from './constants';
 
 export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 	const idNumerico = Number(idParam);
@@ -57,7 +56,9 @@ export function filtrarProyectos(
 	if (provincia !== 'Todas') {
 		resultado = resultado.filter(
 			(p) =>
-				getProvinciaFromLocalidad(p.ubicaciones?.[0]?.ubicacion?.direccion?.localidad)?.nombre === provincia
+				p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
+					? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
+					: false
 		);
 	}
 
@@ -111,35 +112,39 @@ export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'):
 	const ubicacion = getUbicacionPrincipal(proyecto);
 	if (!ubicacion) return virtualLabel;
 
-	const ciudad = ubicacion.ubicacion?.direccion?.localidad?.nombre;
-	const provincia = getProvinciaFromLocalidad(ubicacion.ubicacion?.direccion?.localidad)?.nombre;
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+	const provincia = getProvinciaFromLocalidad(localidadObj)?.nombre;
 
 	if (ciudad && provincia) return `${ciudad}, ${provincia}`;
 	return ciudad ?? provincia ?? virtualLabel;
+}
+
+export function getUbicacionCorta(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
+	const ubicacion = getUbicacionPrincipal(proyecto);
+	if (!ubicacion) return virtualLabel;
+
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+
+	return ciudad ?? virtualLabel;
 }
 
 //**
 // * Utilidades para Participación Permitida
 //  */
 
-const unidadEmoji: Record<string, string> = {
-	libros: '📚',
-	colchones: '🛏️',
-	alimentos: '🍽️',
-	juguetes: '🧸',
-	computadoras: '💻',
-	prendas: '👕',
-	medicamentos: '💊',
-	herramientas: '🔧',
-	utiles: '✏️',
-	personas: '🙋‍♀️',
-	kilogramos: '⚖️',
-	unidades: '📦',
-	pesos: '💰',
-	dolares: '💵'
+type ParticipacionVisual = {
+	actualLabel: string;
+	objetivoLabel: string;
+	color: ParticipacionVisualColor;
+	icono: IconSource;
+	iconColor: string;
 };
 
-export function getParticipacionVisual(p: ParticipacionPermitida) {
+export function getParticipacionVisual(p: ParticipacionPermitida): ParticipacionVisual {
 	const unidad = p.unidad_medida?.toLowerCase();
 	const tipo = p.tipo_participacion?.descripcion;
 	const actual = p.actual ?? 0;
@@ -150,8 +155,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 		return {
 			actualLabel: `$${formatter.format(actual)}`,
 			objetivoLabel: `$${formatter.format(objetivo)}`,
-			color: 'green' as const,
-			icono: unidadEmoji[unidad || 'pesos'] || '💰'
+			color: 'green',
+			icono: ICONOS_UNIDAD[unidad || 'pesos'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.green.iconColor
 		};
 	}
 
@@ -160,8 +166,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 		return {
 			actualLabel: `${actual} ${labelUnidad}`,
 			objetivoLabel: `${objetivo} ${labelUnidad}`,
-			color: 'purple' as const,
-			icono: unidadEmoji[unidad || 'personas'] || '🙋‍♀️'
+			color: 'purple',
+			icono: ICONOS_UNIDAD[unidad || 'personas'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.purple.iconColor
 		};
 	}
 
@@ -169,8 +176,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 	return {
 		actualLabel: `${actual} ${labelUnidad}`,
 		objetivoLabel: `${objetivo} ${labelUnidad}`,
-		color: 'blue' as const,
-		icono: unidadEmoji[unidad || 'unidades'] || '📦'
+		color: 'blue',
+		icono: ICONOS_UNIDAD[unidad || 'unidades'] ?? DEFAULT_PARTICIPACION_ICON,
+		iconColor: COLORES_UI.sky.iconColor
 	};
 }
 

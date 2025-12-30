@@ -1,8 +1,18 @@
-import type { TipoUbicacion } from '$lib/types/Ubicacion';
-import type { Direccion } from '$lib/types/Direccion';
+import type { TipoUbicacion, ModalidadUbicacion } from '$lib/types/Ubicacion';
+
+export interface UbicacionPresencialCreate {
+  calle: string;
+  numero: string;
+  piso?: string;
+  departamento?: string;
+  referencia?: string;
+  url_google_maps?: string;
+  localidad_id?: number;
+}
 
 export interface UbicacionCreate {
   tipo_ubicacion: TipoUbicacion;
-  que_se_hace: string;
-  direccion: Direccion;
+  modalidad: ModalidadUbicacion;
+  direccion_presencial?: UbicacionPresencialCreate;
+  url_virtual?: string;
 }

@@ -11,6 +11,8 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { validarCorreo } from '$lib/utils/validaciones';
+	import { Key } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	let email = '';
 	let cargando = false;
@@ -91,8 +93,10 @@ TODO:
 			<div class="rounded-2xl bg-white p-8 shadow-lg">
 				{#if !emailEnviado}
 					<!-- Formulario para ingresar email -->
-					<h2 class="mb-6 text-2xl font-semibold text-[rgb(var(--base-color))]">
-						🔑 Restablecer contraseña
+					<h2
+						class="mb-6 flex items-center gap-2 text-2xl font-semibold text-[rgb(var(--base-color))]"
+					>
+						<Icon src={Key} class="h-6 w-6" /> Restablecer contraseña
 					</h2>
 
 					{#if validacionErrores.length > 0}

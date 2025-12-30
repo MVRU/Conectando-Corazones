@@ -1,9 +1,11 @@
 {
   "dependencies": {
     "@fontsource/raleway": "^5.2.6",
-    "aos": "^2.3.4"
+    "aos": "^2.3.4",
+    "lucide-svelte": "^0.553.0"
   },
   "devDependencies": {
+    "@sveltejs/adapter-auto": "^7.0.0",
     "@types/aos": "^3.0.7"
   }
 }

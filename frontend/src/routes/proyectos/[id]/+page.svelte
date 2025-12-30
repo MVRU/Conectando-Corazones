@@ -3,23 +3,45 @@
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import type { Colaboracion } from '$lib/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-
+	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { page } from '$app/stores';
+	import {
+		esUbicacionPresencial,
+		esUbicacionVirtual,
+		construirDireccionCompleta,
+		generarUrlGoogleMaps
+	} from '$lib/utils/util-ubicaciones';
 	import { error } from '@sveltejs/kit';
 
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+	import ModalColaboracion from '$lib/components/proyectos/ModalColaboracion.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
-	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
+	import { layoutStore } from '$lib/stores/layout';
+	import { onDestroy, onMount } from 'svelte';
+
+	import {
+		CheckCircle,
+		Clock,
+		ArchiveBox,
+		EllipsisHorizontalCircle,
+		MapPin,
+		GlobeAlt,
+		Link,
+		Heart,
+		Share
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	let proyecto: Proyecto;
 	let colaboracionesActivas: Colaboracion[] = [];
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -27,7 +49,6 @@
 	$: {
 		const id = $page.params.id;
 		const encontrado = mockProyectos.find((p) => p.id_proyecto?.toString() === id);
-
 		if (encontrado) {
 			proyecto = encontrado;
 			setBreadcrumbs([
@@ -40,42 +61,27 @@
 		}
 	}
 
-	function calcularEstadoObjetivo(
-		actual: number,
-		objetivo: number
-	): 'completo' | 'parcial' | 'pendiente' {
-		if (actual >= objetivo) return 'completo';
-		if (actual > 0) return 'parcial';
-		return 'pendiente';
-	}
-
-	// -*- Helper para normalizar fechas // TODO: pasar a archivo utils
-	function toDateOrNull(fecha: string | Date | undefined | null): Date | null {
+	function aFecha(fecha: string | Date | undefined | null): Date | null {
 		if (!fecha) return null;
-		if (fecha instanceof Date) return isNaN(fecha.getTime()) ? null : fecha;
-		const d = new Date(fecha);
+		const d = fecha instanceof Date ? fecha : new Date(fecha);
 		return isNaN(d.getTime()) ? null : d;
 	}
 
-	function diasRestantes(fechaFin: string | Date | undefined): number {
-		const fin = toDateOrNull(fechaFin);
+	function diasRestantes(fechaFin: string | Date | undefined | null): number {
+		const fin = aFecha(fechaFin);
 		if (!fin) return 0;
 		const hoy = new Date();
-		const diferencia = fin.getTime() - hoy.getTime();
-		return Math.max(Math.ceil(diferencia / (1000 * 60 * 60 * 24)), 0);
+		return Math.max(Math.ceil((fin.getTime() - hoy.getTime()) / 86_400_000), 0);
 	}
 
-	function formatearFecha(fecha: string | Date | undefined): string {
-		const d = toDateOrNull(fecha);
-		if (!d) return 'Fecha no disponible';
-		return d.toLocaleDateString('es-ES', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		});
+	function formatearFechaLocal(fecha: string | Date | undefined | null): string {
+		const d = aFecha(fecha);
+		return d
+			? d.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })
+			: 'Fecha no disponible';
 	}
 
-	function getColorEstado(estado: EstadoDescripcion) {
+	function clasesEstado(estado: EstadoDescripcion) {
 		return (
 			{
 				en_curso: 'text-green-600 bg-green-100',
@@ -89,7 +95,85 @@
 	}
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
-	$: colorEstado = getColorEstado(estadoCodigo);
+	$: clasesChipEstado = clasesEstado(estadoCodigo);
+
+	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
+		if (actual >= objetivo) return 'completo';
+		if (actual > 0) return 'parcial';
+		return 'pendiente';
+	}
+
+	function capitalizar(s?: string) {
+		return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+	}
+
+	function ordenarUbicaciones(ubs?: ProyectoUbicacion[]): ProyectoUbicacion[] {
+		if (!ubs?.length) return [];
+		const prioridad = new Map(PRIORIDAD_TIPO.map((t, i) => [t, i]));
+		return [...ubs].sort((a, b) => {
+			const ta = a.ubicacion?.tipo_ubicacion ?? '';
+			const tb = b.ubicacion?.tipo_ubicacion ?? '';
+			const pa = prioridad.get(ta as any) ?? Number.MAX_SAFE_INTEGER;
+			const pb = prioridad.get(tb as any) ?? Number.MAX_SAFE_INTEGER;
+			if (pa !== pb) return pa - pb;
+			const ma = a.ubicacion?.modalidad === 'presencial' ? 0 : 1;
+			const mb = b.ubicacion?.modalidad === 'presencial' ? 0 : 1;
+			return ma - mb;
+		});
+	}
+
+	$: ubicacionesOrdenadas = ordenarUbicaciones(proyecto?.ubicaciones);
+
+	$: colaboradoresAprobados = (colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada');
+
+	function clasesChipColaborador(tipo?: string) {
+		const t = (tipo || '').toLowerCase();
+		return t.includes('org') ? 'bg-indigo-50 text-indigo-700' : 'bg-sky-50 text-sky-700';
+	}
+
+	function etiquetaTipoColaborador(tipo?: string) {
+		const t = (tipo || '').toLowerCase();
+		if (t.includes('org')) return 'Organización';
+		if (t.includes('uni') || t.includes('persona')) return 'Voluntario/a';
+		return 'Voluntario/a';
+	}
+
+	function irAColaborar() {
+		showColaborarModal = true;
+	}
+
+	async function compartirProyecto() {
+		const url = window.location.href;
+		const titulo = proyecto?.titulo || 'Conectando Corazones';
+		const texto = 'Sumate a este proyecto solidario';
+		try {
+			if (navigator.share) await navigator.share({ title: titulo, text: texto, url });
+			else if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url);
+		} catch {
+			/* cancelado por la persona usuaria */
+		}
+	}
+
+	function iniciales(nombre?: string): string {
+		if (!nombre) return 'CC';
+		return nombre
+			.split(' ')
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((p) => p[0]?.toUpperCase())
+			.join('');
+	}
+
+	let showColaborarModal = false;
+	let showExitoModal = false;
+
+	onMount(() => {
+		layoutStore.showStickyBottomBar();
+	});
+
+	onDestroy(() => {
+		layoutStore.hideStickyBottomBar();
+	});
 </script>
 
 <svelte:head>
@@ -98,115 +182,90 @@
 </svelte:head>
 
 {#if proyecto}
-	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
-		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
-			<!-- Header del proyecto -->
-			<ProyectoHeader {proyecto} {getColorEstado} />
+	<main
+		class="min-h-screen bg-gray-50 pb-24 pt-6 text-gray-800 sm:pt-10"
+		aria-label="Detalle del proyecto"
+	>
+		<div
+			class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
+		>
+			<ProyectoHeader {proyecto} />
 
-			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
+			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 				<!-- Columna principal -->
-				<div class="animate-fade-up order-2 space-y-10 lg:order-1 lg:col-span-2">
-					<!-- Progreso del proyecto -->
+				<div class="animate-fade-up order-2 space-y-6 sm:space-y-10 lg:order-1 lg:col-span-2">
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+						aria-labelledby="titulo-progreso"
 					>
-						<h2 class="mb-4 text-2xl font-semibold">Progreso del Proyecto</h2>
+						<h2 id="titulo-progreso" class="mb-4 text-xl font-semibold sm:text-2xl">
+							Progreso del proyecto
+						</h2>
+
 						<ProyectoProgreso {proyecto} variant="extended" />
 
-						<div class="mt-8">
+						<div class="mt-6 sm:mt-8">
 							<h3
 								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
+								id="titulo-objetivos"
 							>
-								<span>
-									{(proyecto.participacion_permitida?.length || 0) === 1 ? 'Objetivo' : 'Objetivos'}
-								</span>
-								<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
-									{#if proyecto.created_at}
-										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-											<svg
-												class="h-4 w-4 text-gray-600"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-												/>
-											</svg>
-											<span class="text-xs font-medium text-gray-700">
-												Inicio: {formatearFecha(proyecto.created_at)}
-											</span>
-										</div>
-									{/if}
-									{#if proyecto.fecha_fin_tentativa}
-										<div class="flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5">
-											<svg
-												class="h-4 w-4 text-gray-600"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													stroke-linecap="round"
-													stroke-linejoin="round"
-													stroke-width="2"
-													d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-												/>
-											</svg>
-											<span class="text-xs font-medium text-gray-700">
-												Finaliza: {formatearFecha(proyecto.fecha_fin_tentativa)}
-											</span>
-										</div>
-										<div class="rounded-full bg-blue-50 px-3 py-1.5">
+								<span
+									>{(proyecto.participacion_permitida?.length || 0) === 1
+										? 'Objetivo'
+										: 'Objetivos'}</span
+								>
+								{#if proyecto.fecha_fin_tentativa}
+									<div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
+										<div class="rounded-full bg-blue-50 px-3 py-1.5" aria-label="Días restantes">
 											<span class="text-xs font-semibold text-blue-700">
 												{diasRestantes(proyecto.fecha_fin_tentativa)} días restantes
 											</span>
 										</div>
-									{/if}
-								</div>
+									</div>
+								{/if}
 							</h3>
 
 							{#if proyecto.participacion_permitida?.length}
-								<ul class="space-y-4">
+								<ul class="space-y-4" aria-labelledby="titulo-objetivos">
 									{#each participacionesOrdenadas as p (p.id_participacion_permitida)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
 										<li
-											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
+											class="flex items-start gap-4 rounded-xl border border-gray-100 p-4 shadow-sm transition hover:border-gray-200 sm:p-5"
+											role="group"
+											aria-label={`Progreso de ${p.unidad_medida}`}
 										>
-											<!-- Ícono -->
-											<div class="flex-shrink-0">
-												{#if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 text-green-700"
+											<div class="flex-shrink-0" aria-hidden="true">
+												{#if estadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
+													<span
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
 													>
-														✅
-													</div>
-												{:else if calcularEstadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
+														<Icon src={CheckCircle} class="h-4 w-4 text-emerald-700" />
+													</span>
+												{:else if estadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
+													<span
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
 													>
-														⏳
-													</div>
+														<Icon src={Clock} class="h-4 w-4 text-amber-700" />
+													</span>
 												{:else}
-													<div
-														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-500"
+													<span
+														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200"
 													>
-														📦
-													</div>
+														<Icon src={ArchiveBox} class="h-4 w-4 text-gray-600" />
+													</span>
 												{/if}
 											</div>
 
-											<!-- Contenido -->
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
 													{p.unidad_medida === 'dinero'
 														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
 														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
 												</p>
-												<div class="mt-1 flex justify-between text-xs text-gray-500">
+												<div
+													class="mt-1 flex justify-between text-xs text-gray-500"
+													aria-label="Porcentaje alcanzado"
+												>
 													<span>{porcentaje}% alcanzado</span>
 												</div>
 											</div>
@@ -221,81 +280,320 @@
 						</div>
 					</section>
 
-					<!-- Detalles del proyecto -->
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+						aria-label="Detalles del proyecto"
 					>
-						<DetallesProyecto {proyecto} {formatearFecha} />
+						<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
 					</section>
 				</div>
 
-				<!-- Columna Lateral -->
+				<!-- Columna lateral -->
 				<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
-					<div class="rounded-xl border border-gray-200 bg-white p-6 shadow">
-						<h3 class="mb-5 text-lg font-semibold text-gray-900">Información</h3>
+					<div
+						class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
+						role="group"
+						aria-label="Acciones principales del proyecto"
+					>
+						<div class="flex gap-2 sm:gap-3">
+							<button
+								type="button"
+								on:click={irAColaborar}
+								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+								aria-label="Colaborar ahora en este proyecto"
+							>
+								<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
+								Colaborar ahora
+							</button>
+
+							<button
+								type="button"
+								on:click={compartirProyecto}
+								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+								aria-label="Compartir este proyecto"
+							>
+								<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
+								Compartir
+							</button>
+						</div>
+
+						<p class="px-1 pt-2 text-center text-xs text-gray-500">
+							Tu ayuda se refleja en tiempo real en el progreso del proyecto.
+						</p>
+					</div>
+
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+						aria-label="Información del proyecto"
+					>
+						<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
+
 						<div class="space-y-4">
-							<div class="flex justify-between border-b border-gray-100 pb-3">
-								<span class="text-sm text-gray-600">Estado</span>
+							<div class="flex items-center justify-between border-b border-gray-100 pb-3">
+								<span class="text-sm text-gray-600">Estado actual del proyecto</span>
 								<span
-									class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${colorEstado}`}
+									class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
+									aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
 								>
-									<svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-										<circle cx="10" cy="10" r="8" />
-									</svg>
+									<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
 									{estadoLabel(estadoCodigo)}
 								</span>
 							</div>
-							<div class="flex justify-between border-b border-gray-100 pb-3">
-								<span class="text-sm text-gray-600">Institución</span>
-								<span class="text-sm font-medium text-gray-800">
-									{proyecto.institucion?.nombre_legal || 'N/A'}
-								</span>
-							</div>
-							<div class="flex justify-between">
-								<span class="text-sm text-gray-600">Ubicación</span>
-								<span class="text-sm font-medium text-gray-800">
-									{getUbicacionTexto(proyecto)}
-								</span>
+
+							<div class="flex items-center justify-between">
+								<div class="flex min-w-0 items-center gap-3">
+									<div
+										class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+										aria-label="Identidad visual de la institución"
+									>
+										{#if proyecto.institucion?.url_foto}
+											<img
+												src={proyecto.institucion.url_foto}
+												alt="Logo o foto de la institución"
+												class="h-full w-full object-cover"
+												loading="lazy"
+											/>
+										{:else}
+											<span class="text-[11px] font-semibold text-gray-600"
+												>{iniciales(proyecto.institucion?.nombre_legal)}</span
+											>
+										{/if}
+									</div>
+
+									<div class="min-w-0 flex-1">
+										<span
+											class="block truncate text-sm font-medium text-gray-900"
+											title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+											aria-label="Institución organizadora"
+										>
+											{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+										</span>
+										<div class="mt-1">
+											<span
+												class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+											>
+												{proyecto.institucion?.tipo_institucion || 'Institución'}
+											</span>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					</section>
 
-					<!-- Colaboradores -->
-					<div class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100">
-						<h3 class="mb-5 text-lg font-semibold text-gray-900">Solicitudes de colaboración</h3>
-						{#if colaboracionesActivas.length}
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+						aria-label="Ubicaciones del proyecto"
+					>
+						<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
+
+						{#if ubicacionesOrdenadas.length}
+							<ul class="rounded-lg">
+								{#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
+									<li class="border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0">
+										<div class="flex items-start gap-3">
+											{#if esUbicacionPresencial(pu.ubicacion)}
+												<span
+													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
+												>
+													<Icon src={MapPin} class="h-4 w-4 text-sky-700" aria-hidden="true" />
+												</span>
+											{:else if esUbicacionVirtual(pu.ubicacion)}
+												<span
+													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
+												>
+													<Icon src={GlobeAlt} class="h-4 w-4 text-violet-700" aria-hidden="true" />
+												</span>
+											{/if}
+
+											<div class="min-w-0 flex-1">
+												<div class="flex flex-wrap items-center gap-2">
+													<span
+														class="truncate text-sm font-semibold text-gray-900"
+														title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+													>
+														{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+													</span>
+
+													{#if esUbicacionPresencial(pu.ubicacion)}
+														<span
+															class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
+														>
+															Presencial
+														</span>
+													{:else if esUbicacionVirtual(pu.ubicacion)}
+														<span
+															class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
+														>
+															Virtual
+														</span>
+													{/if}
+												</div>
+
+												{#if esUbicacionPresencial(pu.ubicacion)}
+													{@const dir = construirDireccionCompleta(pu.ubicacion)}
+													<p class="mt-1 text-sm text-gray-700">
+														{dir || 'Dirección no disponible'}
+													</p>
+
+													{#if generarUrlGoogleMaps(pu.ubicacion)}
+														<a
+															class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
+															href={generarUrlGoogleMaps(pu.ubicacion)!}
+															target="_blank"
+															rel="noopener noreferrer"
+															aria-label="Ver en Google Maps"
+														>
+															<Icon src={Link} class="h-4 w-4" />
+															Ver en Google Maps
+														</a>
+													{/if}
+												{:else if esUbicacionVirtual(pu.ubicacion)}
+													{#if pu.ubicacion.url_virtual}
+														<a
+															class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
+															href={pu.ubicacion.url_virtual}
+															target="_blank"
+															rel="noopener noreferrer"
+															aria-label="Abrir enlace virtual"
+														>
+															<Icon src={Link} class="h-4 w-4" />
+															Abrir enlace
+														</a>
+													{:else}
+														<p class="mt-1 text-sm text-gray-500">Enlace virtual no especificado</p>
+													{/if}
+												{:else}
+													<p class="mt-1 text-sm text-gray-500">
+														Información de la ubicación no disponible
+													</p>
+												{/if}
+											</div>
+										</div>
+									</li>
+								{/each}
+							</ul>
+						{:else}
+							<p class="text-sm text-gray-500">Este proyecto aún no tiene ubicaciones cargadas.</p>
+						{/if}
+					</section>
+
+					<section
+						class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
+						aria-label="Colaboradores aprobados"
+					>
+						<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
+
+						{#if colaboradoresAprobados.length}
 							<ul class="space-y-3">
-								{#each colaboracionesActivas as colab (colab.id_colaboracion)}
-									<li class="flex justify-between border-b border-gray-100 pb-2 last:border-b-0">
-										<span class="text-sm text-gray-700">
-											{obtenerNombreColaborador(colab.colaborador)}
-										</span>
+								{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
+									<li
+										class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
+									>
 										<span
-											class={`text-xs font-semibold ${
-												colab.estado === 'aprobada'
-													? 'bg-emerald-50 text-emerald-600'
-													: 'bg-amber-50 text-amber-600'
-											} rounded-full px-2.5 py-1`}
+											class="block flex-1 truncate text-sm text-gray-700"
+											title={obtenerNombreColaborador(colab.colaborador)}
+											>{obtenerNombreColaborador(colab.colaborador)}</span
 										>
-											{colab.estado === 'aprobada' ? 'Aprobada' : 'Pendiente'}
+										<span
+											class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
+											aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
+										>
+											{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
 										</span>
 									</li>
 								{/each}
 							</ul>
 						{:else}
-							<p class="text-sm text-gray-500">No hay colaboradores activos.</p>
+							<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
 						{/if}
-					</div>
+					</section>
 				</div>
+			</div>
+		</div>
+
+		<div
+			class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
+		>
+			<div class="flex gap-3">
+				<button
+					type="button"
+					on:click={irAColaborar}
+					class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+				>
+					<Icon src={Heart} class="h-5 w-5" />
+					Colaborar ahora
+				</button>
+				<button
+					type="button"
+					on:click={compartirProyecto}
+					class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+					aria-label="Compartir"
+				>
+					<Icon src={Share} class="h-5 w-5" />
+				</button>
 			</div>
 		</div>
 	</main>
 {:else}
-	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
+	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
 		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<p>Cargando proyecto...</p>
 		</div>
 	</main>
+{/if}
+
+<ModalColaboracion
+	bind:open={showColaborarModal}
+	on:submit={() => {
+		showColaborarModal = false;
+		showExitoModal = true;
+	}}
+/>
+
+{#if showExitoModal}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		on:click={() => (showExitoModal = false)}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de solicitud enviada correctamente -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-exito-titulo"
+			tabindex="-1"
+			on:click|stopPropagation
+			on:keydown={(e) => {
+				if (e.key === 'Escape') showExitoModal = false;
+			}}
+		>
+			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+				<span
+					class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-100"
+				>
+					<Icon src={CheckCircle} class="h-6 w-6 text-emerald-600" aria-hidden="true" />
+				</span>
+				<h3 id="modal-exito-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
+					¡Tu solicitud fue enviada correctamente!
+				</h3>
+			</div>
+
+			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					on:click={() => (showExitoModal = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</div>
+	</div>
 {/if}
 
 <style>
@@ -309,7 +607,6 @@
 			transform: translateY(0);
 		}
 	}
-
 	.animate-fade-up {
 		animation: fade-up 0.5s ease-out both;
 	}
