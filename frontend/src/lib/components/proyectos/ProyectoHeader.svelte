@@ -25,14 +25,14 @@
 
 	<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-	<div class="absolute bottom-0 left-0 w-full p-6 text-white">
+	<div class="absolute bottom-0 left-0 w-full p-4 text-white sm:p-6">
 		<div class="flex flex-col gap-2">
-			<div class="mb-2 flex items-center gap-3">
+			<div class="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
 				<StatusBadge estado={proyecto.estado} />
-				<LocationDisplay {proyecto} className="text-white/90" />
+				<LocationDisplay {proyecto} variant="badge" />
 			</div>
 
-			<h1 class="text-shadow-sm text-3xl font-bold leading-tight md:text-4xl">
+			<h1 class="text-shadow-sm text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
 				{proyecto.titulo}
 			</h1>
 

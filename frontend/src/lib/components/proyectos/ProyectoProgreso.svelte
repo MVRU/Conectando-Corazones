@@ -360,12 +360,11 @@
 			href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 			size="sm"
 			disabled={botonColaborarDeshabilitado}
-			customClass="flex-1 py-2.5 text-sm font-medium transition-all"
+			customClass="flex-1 cursor-pointer py-2.5 text-sm font-medium transition-all"
 		/>
 	</div>
 {/if}
 
-<!-- Animación -->
 <style>
 	@keyframes fade-up {
 		from {

@@ -9,6 +9,7 @@
 -->
 
 <script lang="ts">
+	import { layoutStore } from '$lib/stores/layout';
 	import { onMount } from 'svelte';
 	let isVisible = false;
 
@@ -30,14 +31,17 @@
 <button
 	on:click={scrollToTop}
 	aria-label="Volver arriba"
-	class="fixed right-5 bottom-7 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700"
+	class="fixed right-5 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700 {$layoutStore.hasStickyBottomBar
+		? 'bottom-32 lg:bottom-7'
+		: 'bottom-7'}"
 	style="
 		opacity: {isVisible ? 1 : 0};
 		pointer-events: {isVisible ? 'auto' : 'none'};
 		transform: translateY({isVisible ? '0' : '40px'}) scale({isVisible ? 1 : 0.95});
 		transition:
 			opacity 0.5s cubic-bezier(.42,0,.19,1),
-			transform 0.7s cubic-bezier(.39,0,.21,1);
+			transform 0.7s cubic-bezier(.39,0,.21,1),
+			bottom 0.5s ease-out;
 	"
 >
 	<span

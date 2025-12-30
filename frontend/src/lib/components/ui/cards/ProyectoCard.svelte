@@ -108,7 +108,7 @@
 						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 						size="sm"
 						disabled={botonColaborarDeshabilitado}
-						customClass="flex-1"
+						customClass="flex-1 cursor-pointer"
 						customAriaLabel="Colaborar en este proyecto"
 					/>
 				</div>
