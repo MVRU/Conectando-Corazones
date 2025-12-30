@@ -263,13 +263,13 @@ export function filtrarPorRangoFechas(
 		// Si fechaDesde es antes del inicio del proyecto → NO aparece
 		if (fechaDesde) {
 			const desde = new Date(fechaDesde);
-			if (desde < fechaInicio) return false;
+			if (fechaInicio < desde) return false;
 		}
 
 		// Si fechaHasta es después del fin del proyecto → NO aparece
 		if (fechaHasta) {
 			const hasta = new Date(fechaHasta);
-			if (hasta > fechaFin) return false;
+			if (fechaFin > hasta) return false;
 		}
 
 		return true;

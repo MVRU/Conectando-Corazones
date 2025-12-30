@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { writable } from 'svelte/store';
-	import type { Writable } from 'svelte/store';
 
-	export let value: Writable<string> = writable('');
+	export let value: string = '';
 	export let placeholder = 'Buscar...';
 	export let ariaLabel = 'Campo de búsqueda';
 	export let showReset = true;
@@ -19,7 +17,7 @@
 	});
 
 	function clearSearch() {
-		value.set('');
+		value = '';
 		inputRef?.focus();
 	}
 </script>
@@ -27,11 +25,11 @@
 <div class={`group relative w-full ${customClass}`}>
 	<input
 		type="text"
-		class="focus:ring-opacity-50 w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+		class="w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50"
 		{placeholder}
 		aria-label={ariaLabel}
 		bind:this={inputRef}
-		bind:value={$value}
+		bind:value
 		on:keydown={(e) => {
 			if (e.key === 'Escape') clearSearch();
 		}}
@@ -39,7 +37,7 @@
 
 	<!-- Ícono lupa -->
 	<svg
-		class="pointer-events-none absolute top-1/2 left-5 h-5 w-5 -translate-y-1/2 text-gray-400 transition duration-300 group-hover:text-blue-500"
+		class="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 transition duration-300 group-hover:text-blue-500"
 		xmlns="http://www.w3.org/2000/svg"
 		fill="none"
 		viewBox="0 0 24 24"
@@ -53,12 +51,12 @@
 		/>
 	</svg>
 
-	{#if showReset && $value.trim() !== ''}
+	{#if showReset && value.trim() !== ''}
 		<!-- Botón para limpiar -->
 		<button
 			type="button"
 			aria-label="Limpiar búsqueda"
-			class="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+			class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
 			on:click={clearSearch}
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

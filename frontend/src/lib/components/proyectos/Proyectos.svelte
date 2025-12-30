@@ -87,7 +87,7 @@
 	<!-- Buscador -->
 	<div class="animate-fade-in-up mx-auto mb-4 w-full max-w-xl">
 		<SearchBar
-			bind:value={searchQuery}
+			bind:value={$searchQuery}
 			placeholder="Buscar por título o institución..."
 			ariaLabel="Campo de búsqueda de proyectos solidarios"
 			autofocus={false}
