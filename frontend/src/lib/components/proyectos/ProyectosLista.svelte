@@ -42,6 +42,9 @@
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-6 text-center">
 		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">{titulo}</h2>
+		<div class="mt-4 flex justify-center">
+			<slot name="header-actions" />
+		</div>
 	</div>
 
 	<!-- Buscador -->

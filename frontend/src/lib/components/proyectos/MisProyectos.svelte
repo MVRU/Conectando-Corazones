@@ -4,11 +4,13 @@
 	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { writable } from 'svelte/store';
+	import { Plus, Search } from 'lucide-svelte';
 	import {
 		obtenerProvinciasDisponibles,
 		obtenerLocalidadesDisponibles,
 		filtrarPorLocalidad
 	} from '$lib/utils/util-ubicaciones';
+	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import {
 		filtrarProyectos,
 		filtrarProyectosPorUsuario,
@@ -23,129 +25,150 @@
 	import ProyectosFiltro from './ProyectosFiltro.svelte';
 	import ProyectosLista from './ProyectosLista.svelte';
 
-	export let proyectos: Proyecto[] = proyectosPorDefecto;
 	export let usuario: Usuario | null = null;
+	export let proyectos: Proyecto[] = proyectosPorDefecto;
 
-	// Estados generales
-	let pestanaActiva: 'todos' | 'activos' | 'completados' = 'todos';
+	let pestanaActiva: 'todos' | 'activos' | 'completados' = 'activos';
+	let mostrarFiltros = false;
 	let consultaBusqueda = writable('');
 
-	const tiposParticipacion: ('Todos' | TipoParticipacionDescripcion)[] = [
-		'Todos',
-		...(Object.keys(TIPO_PARTICIPACION_LABELS) as TipoParticipacionDescripcion[])
-	];
-
-	// Estados unificados para filtros
-	let mostrarFiltros = false;
+	// Filtros
 	let filtroParticipacion: 'Todos' | TipoParticipacionDescripcion = 'Todos';
 	let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
 	let provinciaSeleccionada = 'Todas';
 	let localidadSeleccionada = 'Todas';
-	let estadoSeleccionado = 'Todos';
 	let fechaDesde = '';
 	let fechaHasta = '';
+	let estadoSeleccionado: 'Todos' | EstadoDescripcion = 'Todos';
+	let criterioOrden: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso' = 'recientes';
 
-	// Estados para filtrar proyectos por estado
-	const estadosActivos: EstadoDescripcion[] = [
-		'en_curso',
-		'pendiente_solicitud_cierre',
-		'en_revision',
-		'en_auditoria'
-	];
-	const estadoCompletado: EstadoDescripcion = 'completado';
+	// Datos derivados para filtros
+	let proyectosUsuario: Proyecto[] = [];
+	let estadosDisponibles: string[] = [];
+	let provinciasDisponibles: string[] = [];
+	let localidadesDisponibles: string[] = [];
+	let tiposParticipacion: string[] = [];
 
-	$: proyectosDelUsuario = filtrarProyectosPorUsuario(proyectos, usuario);
+	$: {
+		// Filtrar por usuario (Institución o Colaborador)
+		proyectosUsuario = filtrarProyectosPorUsuario(proyectos, usuario);
 
-	// Estados disponibles para el dropdown
-	const estadosDisponibles = ['Todos', ...Object.values(ESTADO_LABELS)];
+		// Obtener listas para los selects de filtros basadas en los proyectos del usuario
+		const estadosSet = new Set<string>();
+		const tiposSet = new Set<string>();
 
-	// Filtrar proyectos según el tab activo
-	$: proyectosPorTab = proyectosDelUsuario.filter((p) => {
-		if (pestanaActiva === 'todos') return true;
-		if (pestanaActiva === 'activos') return p.estado && estadosActivos.includes(p.estado);
-		if (pestanaActiva === 'completados') return p.estado === estadoCompletado;
-		return true;
-	});
+		proyectosUsuario.forEach((p) => {
+			if (p.estado) estadosSet.add(ESTADO_LABELS[p.estado]);
+			p.participacion_permitida?.forEach((pp) => {
+				if (pp.tipo_participacion?.descripcion) {
+					tiposSet.add(pp.tipo_participacion.descripcion);
+				}
+			});
+		});
 
-	$: provinciasDisponibles = obtenerProvinciasDisponibles(proyectosPorTab);
+		estadosDisponibles = ['Todos', ...Array.from(estadosSet)];
+		tiposParticipacion = ['Todos', ...Array.from(tiposSet)];
+		provinciasDisponibles = obtenerProvinciasDisponibles(proyectosUsuario);
+	}
 
-	$: localidadesDisponibles = obtenerLocalidadesDisponibles(proyectosPorTab, provinciaSeleccionada);
+	// Actualizar localidades cuando cambia la provincia
+	$: localidadesDisponibles = obtenerLocalidadesDisponibles(
+		proyectosUsuario,
+		provinciaSeleccionada
+	);
 
-	// Proyectos visibles con todos los filtros aplicados
-	$: proyectosVisibles = aplicarFiltrosAdicionales(
-		filtrarProyectos(
-			proyectosPorTab,
-			[filtroParticipacion],
-			$consultaBusqueda,
-			pestanaActiva === 'todos' ? estadoSeleccionado : 'Todos',
-			provinciaSeleccionada
-		),
-		tipoUbicacion,
-		localidadSeleccionada,
+	// Lógica de filtrado principal
+	$: proyectosFiltrados = filtrarProyectos(
+		proyectosUsuario,
+		[filtroParticipacion],
+		$consultaBusqueda,
+		estadoSeleccionado,
+		provinciaSeleccionada
+	);
+
+	// Filtros adicionales encadenados
+	$: proyectosFiltradosUbicacion = filtrarPorTipoUbicacion(proyectosFiltrados, tipoUbicacion);
+	$: proyectosFiltradosFechas = filtrarPorRangoFechas(
+		proyectosFiltradosUbicacion,
 		fechaDesde,
 		fechaHasta
 	);
+	$: proyectosFinales = filtrarPorLocalidad(
+		proyectosFiltradosFechas,
+		localidadSeleccionada,
+		tipoUbicacion
+	);
 
-	function aplicarFiltrosAdicionales(
-		ProyectosLista: Proyecto[],
-		tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual',
-		localidad: string,
-		fechaDesde: string,
-		fechaHasta: string
-	): Proyecto[] {
-		let resultado = ProyectosLista;
+	// Clasificación por pestañas (Activos vs Completados)
+	$: proyectosActivos = proyectosFinales.filter(
+		(p) => p.estado !== 'completado' && p.estado !== 'cancelado'
+	);
+	$: proyectosCompletados = proyectosFinales.filter(
+		(p) => p.estado === 'completado' || p.estado === 'cancelado'
+	);
 
-		// Filtrar por tipo de ubicación
-		resultado = filtrarPorTipoUbicacion(resultado, tipoUbicacion);
+	// Selección de proyectos a mostrar según pestaña
+	$: proyectosVisibles =
+		pestanaActiva === 'todos'
+			? proyectosFinales
+			: pestanaActiva === 'activos'
+				? proyectosActivos
+				: proyectosCompletados;
 
-		// Filtrar por localidad
-		resultado = filtrarPorLocalidad(resultado, localidad, tipoUbicacion);
-
-		// Filtrar por rango de fechas
-		resultado = filtrarPorRangoFechas(resultado, fechaDesde, fechaHasta);
-
-		return resultado;
+	// Ordenamiento
+	$: {
+		proyectosVisibles = [...proyectosVisibles].sort((a, b) => {
+			if (criterioOrden === 'recientes' || criterioOrden === 'antiguos') {
+				const fechaA = new Date(a.created_at || '').getTime();
+				const fechaB = new Date(b.created_at || '').getTime();
+				return criterioOrden === 'recientes' ? fechaB - fechaA : fechaA - fechaB;
+			} else {
+				const progA = calcularProgresoTotal(a);
+				const progB = calcularProgresoTotal(b);
+				return criterioOrden === 'mayor_progreso' ? progB - progA : progA - progB;
+			}
+		});
 	}
+
+	// Textos dinámicos
+	$: tituloSeccion =
+		pestanaActiva === 'todos'
+			? 'Todos mis proyectos'
+			: pestanaActiva === 'activos'
+				? 'Proyectos activos'
+				: 'Historial de proyectos';
+
+	$: etiquetaEstado =
+		pestanaActiva === 'activos' ? 'activos' : pestanaActiva === 'completados' ? 'completados' : '';
+
+	$: tituloVacio =
+		$consultaBusqueda.trim() !== ''
+			? 'No se encontraron resultados'
+			: pestanaActiva === 'activos'
+				? 'No tenés proyectos activos'
+				: pestanaActiva === 'completados'
+					? 'No tenés proyectos en el historial'
+					: 'No hay proyectos';
+
+	$: descripcionVacia =
+		$consultaBusqueda.trim() !== ''
+			? `No hay proyectos que coincidan con "${$consultaBusqueda}" y los filtros seleccionados.`
+			: pestanaActiva === 'activos'
+				? 'Los proyectos en curso o pendientes aparecerán acá.'
+				: pestanaActiva === 'completados'
+					? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
+					: 'No tenés ningún proyecto asociado a tu cuenta.';
 
 	function restablecerFiltros() {
 		filtroParticipacion = 'Todos';
 		tipoUbicacion = 'Todas';
 		provinciaSeleccionada = 'Todas';
 		localidadSeleccionada = 'Todas';
-		estadoSeleccionado = 'Todos';
 		fechaDesde = '';
 		fechaHasta = '';
+		estadoSeleccionado = 'Todos';
 		consultaBusqueda.set('');
 	}
-
-	// Reset localidad cuando cambia provincia
-	$: if (provinciaSeleccionada) {
-		localidadSeleccionada = 'Todas';
-	}
-
-	$: tituloSeccion =
-		pestanaActiva === 'todos'
-			? 'Todos mis proyectos'
-			: pestanaActiva === 'activos'
-				? 'Mis proyectos activos'
-				: 'Mis proyectos completados';
-
-	$: etiquetaEstado =
-		pestanaActiva === 'todos' ? undefined : pestanaActiva === 'activos' ? 'activo' : 'completado';
-
-	$: tituloVacio =
-		pestanaActiva === 'todos'
-			? 'No tenés proyectos'
-			: pestanaActiva === 'activos'
-				? 'No tenés proyectos activos'
-				: 'No tenés proyectos completados';
-
-	$: descripcionVacia =
-		pestanaActiva === 'todos'
-			? 'No tenés proyectos en este momento.'
-			: pestanaActiva === 'activos'
-				? 'No tenés proyectos activos en este momento.'
-				: 'Aún no tenés proyectos completados.';
 </script>
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-8 sm:px-10 lg:px-20">
@@ -207,6 +230,7 @@
 			mostrarEstado={pestanaActiva === 'todos'}
 			bind:estado={estadoSeleccionado}
 			{estadosDisponibles}
+			bind:criterioOrden
 			on:reset={restablecerFiltros}
 			on:ubicacionChange={() => {
 				provinciaSeleccionada = 'Todas';
@@ -217,4 +241,24 @@
 
 		<Button slot="empty-action" label="Limpiar filtros" on:click={restablecerFiltros} />
 	</ProyectosLista>
+
+	{#if usuario?.rol === 'institucion'}
+		<a
+			href="/proyectos/crear"
+			class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
+			aria-label="Crear nuevo proyecto"
+		>
+			<Plus size={24} />
+			<span class="font-medium">Crear proyecto</span>
+		</a>
+	{:else if usuario?.rol === 'colaborador'}
+		<a
+			href="/proyectos"
+			class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
+			aria-label="Descubrir proyectos"
+		>
+			<Search size={24} />
+			<span class="font-medium">Descubrir proyectos</span>
+		</a>
+	{/if}
 </section>

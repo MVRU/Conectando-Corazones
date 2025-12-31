@@ -275,3 +275,42 @@ export function filtrarPorRangoFechas(
 		return true;
 	});
 }
+
+
+/**
+ * Formatea una fecha o string de fecha a un formato "5 Feb 2025"
+ * Capitaliza la primera letra del mes.
+ */
+export function formatearFechaBadge(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	const partes = new Intl.DateTimeFormat('es-AR', {
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric'
+	}).formatToParts(d);
+
+	const dia = partes.find((p) => p.type === 'day')?.value;
+	const mes = partes.find((p) => p.type === 'month')?.value;
+	const anio = partes.find((p) => p.type === 'year')?.value;
+
+	if (dia && mes && anio) {
+		const mesCapitalizado = mes.charAt(0).toUpperCase() + mes.slice(1);
+		return `${dia} ${mesCapitalizado} ${anio}`;
+	}
+
+	return formatearFecha(date);
+}
+
+/**
+ * Formatea una fecha o string de fecha a un formato "DD MMM YYYY" (03 Feb 2025)
+ */
+export function formatearFecha(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	return new Intl.DateTimeFormat('es-AR', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric'
+	}).format(d);
+}

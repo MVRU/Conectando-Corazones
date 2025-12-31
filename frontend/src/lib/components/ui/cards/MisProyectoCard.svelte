@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { Building2, MapPin, Globe } from 'lucide-svelte';
-	import { getUbicacionCorta } from '$lib/utils/util-proyectos';
+	import { MapPin, Globe } from 'lucide-svelte';
+	import { getUbicacionCorta, formatearFechaBadge } from '$lib/utils/util-proyectos';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
@@ -14,6 +14,7 @@
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
 	$: esVirtual = ubicacionCorta === 'Virtual';
 	$: estaCompletado = proyecto.estado === 'completado' || esProyectoCompletado;
+	$: esInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
 </script>
 
 <div
@@ -31,6 +32,8 @@
 				src={proyecto.url_portada}
 				alt={proyecto.titulo}
 				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+				class:opacity-90={esInactivo}
+				class:grayscale-[0.8]={esInactivo}
 				loading="lazy"
 			/>
 		{:else}
@@ -61,20 +64,23 @@
 
 	<!-- Contenido -->
 	<div class="flex flex-grow flex-col p-4">
-		<!-- Header: Título e Institución -->
-		<div class="mb-3">
+		<!-- Header: Título y Fechas -->
+		<div class="mb-1 flex items-center justify-end">
+			<div class="text-xs font-medium text-gray-400">
+				<span class="whitespace-nowrap">
+					{formatearFechaBadge(proyecto.created_at)} — {formatearFechaBadge(
+						proyecto.fecha_fin_tentativa
+					)}
+				</span>
+			</div>
+		</div>
+		<!-- Header: Título -->
+		<div>
 			<h3
 				class="mb-1.5 line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
 			>
 				{proyecto.titulo}
 			</h3>
-
-			{#if proyecto.institucion?.nombre_legal}
-				<div class="flex items-center gap-1.5 text-sm text-gray-500">
-					<Building2 class="h-3.5 w-3.5 flex-shrink-0" />
-					<span class="truncate">{proyecto.institucion.nombre_legal}</span>
-				</div>
-			{/if}
 		</div>
 
 		<p class="mb-3 line-clamp-3 text-sm leading-relaxed text-gray-600">
@@ -83,7 +89,7 @@
 
 		<!-- Progreso visual -->
 		<div class="mt-auto flex flex-col gap-2.5 border-t border-gray-100 pt-3">
-			<ProyectoProgreso {proyecto} variant="compact" />
+			<ProyectoProgreso {proyecto} variant="compact" ocultarEtiquetaObjetivo={true} />
 
 			<!-- Botones específicos para Mis Proyectos -->
 			<div

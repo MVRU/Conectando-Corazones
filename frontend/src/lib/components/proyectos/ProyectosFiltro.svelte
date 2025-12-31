@@ -22,6 +22,9 @@
 	export let localidadesDisponibles: string[] = [];
 	export let tiposParticipacion: string[] = [];
 
+	export let criterioOrden: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso' =
+		'recientes';
+
 	const dispatch = createEventDispatcher();
 
 	function alternarFiltros() {
@@ -35,15 +38,45 @@
 	function manejarCambioUbicacion() {
 		dispatch('ubicacionChange');
 	}
+
+	$: filtrosActivos = [
+		participacion !== 'Todos',
+		tipoUbicacion !== 'Todas',
+		provincia !== 'Todas',
+		localidad !== 'Todas',
+		fechaDesde !== '',
+		fechaHasta !== '',
+		mostrarEstado && estado !== 'Todos'
+	].filter(Boolean).length;
 </script>
 
-<div class="animate-fade-in-up mb-4 text-center">
+<div class="animate-fade-in-up mb-4 flex flex-wrap justify-center gap-3">
+	<!-- Dropdown de Ordenamiento -->
+	<div class="relative">
+		<select
+			bind:value={criterioOrden}
+			class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+			aria-label="Ordenar proyectos"
+		>
+			<option value="recientes">Más recientes</option>
+			<option value="antiguos">Más antiguos</option>
+			<option value="mayor_progreso">Mayor progreso</option>
+			<option value="menor_progreso">Menor progreso</option>
+		</select>
+	</div>
+
 	<button
 		on:click={alternarFiltros}
 		class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50"
 	>
-		<Filter size={16} />
 		{mostrar ? 'Ocultar filtros' : 'Mostrar filtros'}
+		{#if filtrosActivos > 0}
+			<span
+				class="bg-primary hover:bg-primary-dark ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white shadow-sm"
+			>
+				{filtrosActivos}
+			</span>
+		{/if}
 		{#if mostrar}
 			<ChevronUp size={16} />
 		{:else}
@@ -249,5 +282,14 @@
 	}
 	.animate-fade-in-up {
 		animation: fade-in-up 0.6s ease-out both;
+	}
+	select {
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+		background-position: right 0.5rem center;
+		background-repeat: no-repeat;
+		background-size: 1.5em 1.5em;
+		padding-right: 2.5rem;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
 	}
 </style>
