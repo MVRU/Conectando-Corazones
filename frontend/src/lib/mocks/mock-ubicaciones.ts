@@ -72,12 +72,6 @@ const ubicacionesBase: UbicacionDisyuncion[] = [
 		tipo_ubicacion: 'reuniones',
 		modalidad: 'virtual',
 		url_virtual: 'https://teams.microsoft.com/l/meetup-join/19%3a...'
-	} satisfies UbicacionVirtual,
-	{
-		id_ubicacion: 8,
-		tipo_ubicacion: 'principal',
-		modalidad: 'virtual',
-		url_virtual: 'https://biblioteca-digital.conectandocorazones.org'
 	} satisfies UbicacionVirtual
 ];
 

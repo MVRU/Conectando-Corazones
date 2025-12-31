@@ -14,14 +14,18 @@
 		validarNumeroCalle,
 		validarCiudadEnProvincia,
 		validarProvincia,
-		esFechaFutura
+		esFechaFutura,
+		validarPiso
 	} from '$lib/utils/validaciones';
 	import {
 		validarBeneficiariosValor,
 		validarTituloProyecto,
 		validarDescripcionProyecto,
 		validarUrlImagen,
-		unidadEfectiva
+		unidadEfectiva,
+		esFechaDemasiadoLejana,
+		validarUnidadLibre,
+		validarReferencia
 	} from '$lib/utils/util-proyecto-form';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';
@@ -71,11 +75,11 @@
 	function validarCategoriaOtraDescripcion(s: string): string | null {
 		if (s == null) return 'Este campo es obligatorio';
 		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
-		if (v.length < 3) return 'Debe tener al menos 3 caracteres';
-		if (v.length > 60) return 'Máximo 60 caracteres';
+		if (v.length < 3) return 'Debe tener al menos 3 caracteres.';
+		if (v.length > 60) return 'Máximo 60 caracteres.';
 		const ban = ['n/a', 'na', '-', 'otro', 'otra', 'ninguna', 'ninguno', 'no sé', 'nose'];
-		if (ban.includes(v.toLowerCase())) return 'Por favor, especificá una categoría válida';
-		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra';
+		if (ban.includes(v.toLowerCase())) return 'Por favor, especificá una categoría válida.';
+		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra.';
 		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
 		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/&()-]+$/u.test(v))
 			return 'Usá solo letras, números y signos comunes';
@@ -120,8 +124,6 @@
 	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
 	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
 
-	import { validarUnidadMedidaOtra } from '$lib/utils/util-proyecto-form';
-
 	function validarFormulario(): boolean {
 		errores = {};
 
@@ -137,12 +139,17 @@
 				if (errImg) errores.urlPortada = errImg;
 			}
 		}
-		if (!fechaFinTentativa || !esFechaFutura(fechaFinTentativa))
-			errores.fechaFinTentativa = 'Fecha inválida';
+		if (!fechaFinTentativa) {
+			errores.fechaFinTentativa = 'La fecha de fin tentativa es obligatoria.';
+		} else if (!esFechaFutura(fechaFinTentativa)) {
+			errores.fechaFinTentativa = 'La fecha de fin debe ser al menos a partir de mañana.';
+		} else if (esFechaDemasiadoLejana(fechaFinTentativa)) {
+			errores.fechaFinTentativa = 'La fecha es demasiado lejana (máximo 2 años).';
+		}
 		const errBen = beneficiarios != null ? validarBeneficiariosValor(beneficiarios) : null;
 		if (errBen) errores.beneficiarios = errBen;
 		if (categoriasSeleccionadas.length === 0)
-			errores.categorias = 'Debe seleccionar al menos una categoría';
+			errores.categorias = 'Debe seleccionar al menos una categoría.';
 
 		const errCatOtra = categoriaOtraDescripcion
 			? validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
@@ -153,8 +160,23 @@
 
 		ubicaciones.forEach((ubicacion, index) => {
 			const prefix = 'ubicacion_' + index;
-			if (!(ubicacion.tipo_ubicacion || '').trim()) {
+			const tipoTrim = (ubicacion.tipo_ubicacion || '').trim();
+
+			if (!tipoTrim) {
 				errores[prefix + '_tipo'] = MENSAJES_ERROR.obligatorio;
+			} else if (tipoTrim === 'personalizado_input') {
+				// Si seleccionó "Otro..." pero no ingresó texto
+				errores[prefix + '_tipo'] = 'Por favor, especifique el tipo de ubicación.';
+			} else if (
+				!['principal', 'alternativa', 'voluntariado', 'reuniones'].includes(tipoTrim.toLowerCase())
+			) {
+				// Si es un tipo personalizado, verificar que no coincida con la lista oficial
+				const existeEnLista = ['principal', 'alternativa', 'voluntariado', 'reuniones'].some(
+					(tipo) => tipo.toLowerCase() === tipoTrim.toLowerCase()
+				);
+				if (existeEnLista) {
+					errores[prefix + '_tipo'] = 'Ese tipo de ubicación ya existe en la lista oficial.';
+				}
 			}
 
 			if (!ubicacion.modalidad) {
@@ -166,7 +188,7 @@
 			if (ubicacion.modalidad === 'virtual') {
 				const url = (ubicacion.url_virtual || '').trim();
 				if (url && !validarUrl(url)) {
-					errores[prefix + '_url_virtual'] = MENSAJES_ERROR.urlInvalida;
+					errores[prefix + '_url_virtual'] = 'Ingrese una URL válida (ej: https://...).';
 				}
 				return;
 			}
@@ -186,7 +208,10 @@
 					errores[prefix + '_localidad'] = MENSAJES_ERROR.obligatorio;
 				} else {
 					const provincia = provincias.find((p) => p.nombre === direccion.provincia);
-					if (provincia && !validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)) {
+					if (
+						provincia &&
+						!validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)
+					) {
 						errores[prefix + '_localidad'] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
 					}
 				}
@@ -200,6 +225,14 @@
 				} else if (!validarNumeroCalle(direccion.numero)) {
 					errores[prefix + '_numero'] = MENSAJES_ERROR.numeroCalleInvalido;
 				}
+				const errRef = validarReferencia(direccion.referencia || '');
+				if (errRef) {
+					errores[prefix + '_referencia'] = errRef;
+				}
+				const errPiso = validarPiso(direccion.piso || '');
+				if (errPiso) {
+					errores[prefix + '_piso'] = errPiso;
+				}
 			}
 		});
 
@@ -209,23 +242,122 @@
 		if (principalCount > 1) {
 			errores.ubicaciones_principal = 'Solo puede haber una ubicación de tipo "Principal".';
 		}
-		const firstTipo = (ubicaciones[0]?.tipo_ubicacion || '').trim();
-		if (firstTipo && firstTipo !== 'principal' && firstTipo !== 'virtual') {
-			errores.ubicaciones_principal = 'La primera ubicación debe ser "Principal" o "Virtual".';
-		}
+
+		// Validar ubicaciones duplicadas
+		ubicaciones.forEach((ubicacion, index) => {
+			const ubicacionesDuplicadas = ubicaciones.filter((u, i) => {
+				if (i === index) return false; // Excluir la misma ubicación
+
+				// Comparar tipo y modalidad
+				const mismoTipo =
+					(u.tipo_ubicacion || '').trim().toLowerCase() ===
+					(ubicacion.tipo_ubicacion || '').trim().toLowerCase();
+				const mismaModalidad =
+					(u.modalidad || '').trim().toLowerCase() ===
+					(ubicacion.modalidad || '').trim().toLowerCase();
+
+				if (!mismoTipo || !mismaModalidad) return false;
+
+				// Si es presencial, comparar dirección
+				if (ubicacion.modalidad === 'presencial') {
+					const dir1 = ubicacion.direccion_presencial;
+					const dir2 = u.direccion_presencial;
+
+					if (!dir1 || !dir2) return false;
+
+					return (
+						(dir1.provincia || '').trim().toLowerCase() ===
+							(dir2.provincia || '').trim().toLowerCase() &&
+						dir1.localidad_id === dir2.localidad_id &&
+						(dir1.calle || '').trim().toLowerCase() === (dir2.calle || '').trim().toLowerCase() &&
+						(dir1.numero || '').trim().toLowerCase() === (dir2.numero || '').trim().toLowerCase()
+					);
+				}
+
+				// Si es virtual, comparar URL
+				if (ubicacion.modalidad === 'virtual') {
+					return (
+						(u.url_virtual || '').trim().toLowerCase() ===
+						(ubicacion.url_virtual || '').trim().toLowerCase()
+					);
+				}
+
+				return false;
+			});
+
+			if (ubicacionesDuplicadas.length > 0) {
+				errores[`ubicacion_${index}_tipo`] = 'Esta ubicación ya ha sido registrada.';
+			}
+		});
 
 		if (tiposParticipacionSeleccionados.length === 0) {
-			errores.participacion = 'Debe seleccionar al menos un tipo de participación';
+			errores.participacion = 'Debe seleccionar al menos un tipo de participación.';
 		}
+
+		// Validar objetivos de participación
+		participacionesPermitidas.forEach((participacion, index) => {
+			const tipo = participacion.tipo_participacion?.descripcion;
+			const objetivo = participacion.objetivo;
+
+			if (tipo === 'Monetaria' && (objetivo == null || objetivo <= 0)) {
+				errores[`participacion_${index}_objetivo`] =
+					'El objetivo es obligatorio para participación monetaria.';
+			}
+
+			if (tipo === 'Especie') {
+				if (objetivo == null || objetivo <= 0) {
+					errores[`participacion_${index}_objetivo`] =
+						'El objetivo es obligatorio para participación en especie.';
+				}
+				if (!participacion.especie || !participacion.especie.trim()) {
+					errores[`participacion_${index}_especie`] = 'Debe especificar qué necesita en especie.';
+				} else {
+					// Verificar que no haya especies duplicadas
+					const especieNormalizada = participacion.especie.trim().toLowerCase();
+					const especiesDuplicadas = participacionesPermitidas.filter(
+						(p, i) =>
+							i !== index &&
+							p.tipo_participacion?.descripcion === 'Especie' &&
+							p.especie?.trim().toLowerCase() === especieNormalizada
+					);
+					if (especiesDuplicadas.length > 0) {
+						errores[`participacion_${index}_especie`] =
+							'Ya existe una donación en especie con el mismo ítem.';
+					}
+				}
+			}
+
+			if (tipo === 'Voluntariado' && (objetivo == null || objetivo <= 0)) {
+				errores[`participacion_${index}_objetivo`] =
+					'El objetivo es obligatorio para participación de voluntariado.';
+			}
+
+			// Validar unidad_medida_otra cuando se selecciona "Otra"
+			if (participacion.unidad_medida === 'Otra') {
+				const unidadOtra = participacion.unidad_medida_otra || '';
+				const esMonetaria = participacion.tipo_participacion?.descripcion === 'Monetaria';
+				const errorUnidad = validarUnidadLibre(unidadOtra, { allowUpperCase: esMonetaria });
+				if (errorUnidad) {
+					errores[`participacion_${index}_unidad_otra`] = errorUnidad;
+				}
+			}
+		});
 
 		return Object.keys(errores).length === 0;
 	}
 
-	function enviarFormulario() {
+	let enviando = false;
+
+	async function enviarFormulario() {
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
 			return;
 		}
+
+		enviando = true;
+
+		// Simulación de envío al backend
+		await new Promise((resolve) => setTimeout(resolve, 2000));
 
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
 			tipo_participacion: (p.tipo_participacion?.descripcion || 'Voluntariado') as TipoParticipacionDescripcion,
@@ -271,6 +403,8 @@
 		};
 
 		console.log('Payload listo', payload);
+		enviando = false;
+		alert('¡Proyecto creado con éxito! (simulación)');
 	}
 </script>
 
@@ -303,14 +437,14 @@
 			<ProyectoParticipaciones
 				bind:tiposParticipacionSeleccionados
 				bind:participacionesPermitidas
-				{errores}
+				bind:errores
 				{limpiarError}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} />
 
 			<div class="flex justify-end">
-				<Button type="submit" label="Crear proyecto" />
+				<Button type="submit" label="Crear proyecto" loading={enviando} loadingLabel="Creando..." />
 			</div>
 		</form>
 	</div>

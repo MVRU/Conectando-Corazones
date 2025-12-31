@@ -9,29 +9,47 @@
 	} from '$lib/utils/util-progreso';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
 	import type { EstadoDescripcion } from '$lib/types/Estado';
+	import {
+		BookOpen,
+		Home,
+		Cake,
+		PuzzlePiece,
+		ComputerDesktop,
+		ShoppingBag,
+		Beaker,
+		Wrench,
+		Pencil,
+		ArchiveBox,
+		Users,
+		CurrencyDollar,
+		HandRaised
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import type { IconSource } from '@steeze-ui/svelte-icon';
 
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
 	export let variant: 'compact' | 'extended' = 'compact';
 	export let ocultarEtiquetaObjetivo = false;
 
-	const especieEmoji: Record<string, string> = {
-		libros: '📚',
-		colchones: '🛏️',
-		alimentos: '🍽️',
-		juguetes: '🧸',
-		computadoras: '💻',
-		prendas: '👕',
-		medicamentos: '💊',
-		herramientas: '🔧',
-		utiles: '✏️'
+	const especieEmoji: Record<string, IconSource> = {
+		libros: BookOpen,
+		colchones: Home,
+		alimentos: Cake,
+		juguetes: PuzzlePiece,
+		computadoras: ComputerDesktop,
+		prendas: ShoppingBag,
+		medicamentos: Beaker,
+		herramientas: Wrench,
+		utiles: Pencil
 	};
 
-	const getEmojiEspecie = (especie?: string) => especieEmoji[especie?.toLowerCase() || ''] || '📦';
+	const getEmojiEspecie = (especie?: string) =>
+		especieEmoji[especie?.toLowerCase() || ''] || ArchiveBox;
 
 	let step = 0;
 	const steps = 4;
-	let icono = '🤝';
+	let icono: IconSource = Users;
 
 	const hoy = new Date();
 	/**
@@ -53,14 +71,14 @@
 
 	const visualMap: Record<
 		string,
-		{ color: 'green' | 'blue' | 'purple'; emoji: (u?: string) => string }
+		{ color: 'green' | 'blue' | 'purple'; icon: (u?: string) => IconSource }
 	> = {
-		Monetaria: { color: 'green', emoji: () => '💰' },
-		Voluntariado: { color: 'purple', emoji: () => '🙋‍♀️' },
-		Materiales: { color: 'blue', emoji: (u?: string) => getEmojiEspecie(u) }
+		Monetaria: { color: 'green', icon: () => CurrencyDollar },
+		Voluntariado: { color: 'purple', icon: () => HandRaised },
+		Materiales: { color: 'blue', icon: (u?: string) => getEmojiEspecie(u) }
 	};
 
-	const defaultVisual = { color: 'blue' as const, emoji: () => '🤝' };
+	const defaultVisual = { color: 'blue' as const, icon: () => Users };
 
 	let participaciones: ParticipacionPermitida[] = [];
 
@@ -70,7 +88,7 @@
 		const { unidad_medida, tipo_participacion } = participaciones[0] || {};
 		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
 		color = visual.color;
-		icono = visual.emoji(unidad_medida);
+		icono = visual.icon(unidad_medida);
 	}
 
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
@@ -109,12 +127,10 @@
 		{/if}
 		{#if variant === 'compact'}
 			<div class="flex justify-between text-xs font-medium text-gray-700">
-				<span>
-					{#if !ocultarEtiquetaObjetivo}
-						{icono}
-						Objetivo
-					{/if}
-				</span>
+				<div class="flex items-center gap-1.5">
+					<Icon src={icono} class="h-4 w-4" />
+					<span>Objetivo</span>
+				</div>
 				<span class={getMensajeProgreso().clase}>{getMensajeProgreso().texto}</span>
 			</div>
 		{/if}
@@ -345,12 +361,11 @@
 			href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 			size="sm"
 			disabled={botonColaborarDeshabilitado}
-			customClass="flex-1 py-2.5 text-sm font-medium transition-all"
+			customClass="flex-1 cursor-pointer py-2.5 text-sm font-medium transition-all"
 		/>
 	</div>
 {/if}
 
-<!-- Animación -->
 <style>
 	@keyframes fade-up {
 		from {

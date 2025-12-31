@@ -18,22 +18,25 @@
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+	import ModalColaboracion from '$lib/components/proyectos/ModalColaboracion.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+	import { layoutStore } from '$lib/stores/layout';
+	import { onDestroy, onMount } from 'svelte';
 
 	import {
-		CheckCircle2,
-		Hourglass,
-		Package,
-		CircleDot,
+		CheckCircle,
+		Clock,
+		ArchiveBox,
+		EllipsisHorizontalCircle,
 		MapPin,
-		Globe,
-		Link as LinkIcon,
+		GlobeAlt,
+		Link,
 		Heart,
-		Share2,
-		Send
-	} from 'lucide-svelte';
+		Share
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	let proyecto: Proyecto;
 	let colaboracionesActivas: Colaboracion[] = [];
@@ -162,8 +165,15 @@
 	}
 
 	let showColaborarModal = false;
-	let mensajeColaboracion = '';
 	let showExitoModal = false;
+
+	onMount(() => {
+		layoutStore.showStickyBottomBar();
+	});
+
+	onDestroy(() => {
+		layoutStore.hideStickyBottomBar();
+	});
 </script>
 
 <svelte:head>
@@ -172,22 +182,29 @@
 </svelte:head>
 
 {#if proyecto}
-	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800" aria-label="Detalle del proyecto">
-		<div class="animate-fade-up mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
+	<main
+		class="min-h-screen bg-gray-50 pb-24 pt-6 text-gray-800 sm:pt-10"
+		aria-label="Detalle del proyecto"
+	>
+		<div
+			class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
+		>
 			<ProyectoHeader {proyecto} />
 
-			<div class="grid grid-cols-1 gap-10 lg:grid-cols-3">
+			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 				<!-- Columna principal -->
-				<div class="animate-fade-up order-2 space-y-10 lg:order-1 lg:col-span-2">
+				<div class="animate-fade-up order-2 space-y-6 sm:space-y-10 lg:order-1 lg:col-span-2">
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 						aria-labelledby="titulo-progreso"
 					>
-						<h2 id="titulo-progreso" class="mb-4 text-2xl font-semibold">Progreso del proyecto</h2>
+						<h2 id="titulo-progreso" class="mb-4 text-xl font-semibold sm:text-2xl">
+							Progreso del proyecto
+						</h2>
 
 						<ProyectoProgreso {proyecto} variant="extended" />
 
-						<div class="mt-8">
+						<div class="mt-6 sm:mt-8">
 							<h3
 								class="mb-4 flex flex-wrap items-center justify-between text-lg font-medium text-gray-900"
 								id="titulo-objetivos"
@@ -198,7 +215,7 @@
 										: 'Objetivos'}</span
 								>
 								{#if proyecto.fecha_fin_tentativa}
-									<div class="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
+									<div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-gray-600 md:mt-0">
 										<div class="rounded-full bg-blue-50 px-3 py-1.5" aria-label="Días restantes">
 											<span class="text-xs font-semibold text-blue-700">
 												{diasRestantes(proyecto.fecha_fin_tentativa)} días restantes
@@ -213,7 +230,7 @@
 									{#each participacionesOrdenadas as p (p.id_participacion_permitida)}
 										{@const porcentaje = Math.round(((p.actual || 0) / p.objetivo) * 100)}
 										<li
-											class="flex items-start gap-4 rounded-xl border border-gray-100 p-5 shadow-sm transition hover:border-gray-200"
+											class="flex items-start gap-4 rounded-xl border border-gray-100 p-4 shadow-sm transition hover:border-gray-200 sm:p-5"
 											role="group"
 											aria-label={`Progreso de ${p.unidad_medida}`}
 										>
@@ -222,19 +239,19 @@
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
 													>
-														<CheckCircle2 class="h-4 w-4 text-emerald-700" />
+														<Icon src={CheckCircle} class="h-4 w-4 text-emerald-700" />
 													</span>
 												{:else if estadoObjetivo(p.actual || 0, p.objetivo) === 'parcial'}
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100"
 													>
-														<Hourglass class="h-4 w-4 text-amber-700" />
+														<Icon src={Clock} class="h-4 w-4 text-amber-700" />
 													</span>
 												{:else}
 													<span
 														class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200"
 													>
-														<Package class="h-4 w-4 text-gray-600" />
+														<Icon src={ArchiveBox} class="h-4 w-4 text-gray-600" />
 													</span>
 												{/if}
 											</div>
@@ -264,7 +281,7 @@
 					</section>
 
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow transition-shadow hover:shadow-lg"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 						aria-label="Detalles del proyecto"
 					>
 						<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
@@ -274,7 +291,7 @@
 				<!-- Columna lateral -->
 				<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
 					<div
-						class="sticky top-6 z-[1] rounded-2xl bg-white/60 p-1 backdrop-blur supports-[backdrop-filter]:bg-white/40"
+						class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
 						role="group"
 						aria-label="Acciones principales del proyecto"
 					>
@@ -282,20 +299,20 @@
 							<button
 								type="button"
 								on:click={irAColaborar}
-								class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
 								aria-label="Colaborar ahora en este proyecto"
 							>
-								<Heart class="h-4 w-4" aria-hidden="true" />
+								<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
 								Colaborar ahora
 							</button>
 
 							<button
 								type="button"
 								on:click={compartirProyecto}
-								class="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
 								aria-label="Compartir este proyecto"
 							>
-								<Share2 class="h-4 w-4" aria-hidden="true" />
+								<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
 								Compartir
 							</button>
 						</div>
@@ -306,7 +323,7 @@
 					</div>
 
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
 						aria-label="Información del proyecto"
 					>
 						<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
@@ -318,7 +335,7 @@
 									class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
 									aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
 								>
-									<CircleDot class="h-3.5 w-3.5" />
+									<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
 									{estadoLabel(estadoCodigo)}
 								</span>
 							</div>
@@ -343,9 +360,9 @@
 										{/if}
 									</div>
 
-									<div class="min-w-0">
+									<div class="min-w-0 flex-1">
 										<span
-											class="max-w-[210px] truncate text-sm font-medium text-gray-900"
+											class="block truncate text-sm font-medium text-gray-900"
 											title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
 											aria-label="Institución organizadora"
 										>
@@ -365,7 +382,7 @@
 					</section>
 
 					<section
-						class="rounded-xl border border-gray-200 bg-white p-6 shadow"
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
 						aria-label="Ubicaciones del proyecto"
 					>
 						<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
@@ -379,31 +396,34 @@
 												<span
 													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
 												>
-													<MapPin class="h-4 w-4 text-sky-700" aria-hidden="true" />
+													<Icon src={MapPin} class="h-4 w-4 text-sky-700" aria-hidden="true" />
 												</span>
 											{:else if esUbicacionVirtual(pu.ubicacion)}
 												<span
 													class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
 												>
-													<Globe class="h-4 w-4 text-violet-700" aria-hidden="true" />
+													<Icon src={GlobeAlt} class="h-4 w-4 text-violet-700" aria-hidden="true" />
 												</span>
 											{/if}
 
 											<div class="min-w-0 flex-1">
 												<div class="flex flex-wrap items-center gap-2">
-													<span class="truncate text-sm font-semibold text-gray-900">
+													<span
+														class="truncate text-sm font-semibold text-gray-900"
+														title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+													>
 														{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
 													</span>
 
 													{#if esUbicacionPresencial(pu.ubicacion)}
 														<span
-															class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
+															class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
 														>
 															Presencial
 														</span>
 													{:else if esUbicacionVirtual(pu.ubicacion)}
 														<span
-															class="inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
+															class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
 														>
 															Virtual
 														</span>
@@ -424,7 +444,7 @@
 															rel="noopener noreferrer"
 															aria-label="Ver en Google Maps"
 														>
-															<LinkIcon class="h-4 w-4" />
+															<Icon src={Link} class="h-4 w-4" />
 															Ver en Google Maps
 														</a>
 													{/if}
@@ -437,7 +457,7 @@
 															rel="noopener noreferrer"
 															aria-label="Abrir enlace virtual"
 														>
-															<LinkIcon class="h-4 w-4" />
+															<Icon src={Link} class="h-4 w-4" />
 															Abrir enlace
 														</a>
 													{:else}
@@ -459,7 +479,7 @@
 					</section>
 
 					<section
-						class="rounded-2xl bg-white p-6 shadow-lg ring-1 ring-gray-100"
+						class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
 						aria-label="Colaboradores aprobados"
 					>
 						<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
@@ -468,13 +488,15 @@
 							<ul class="space-y-3">
 								{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
 									<li
-										class="flex items-center justify-between border-b border-gray-100 pb-2 last:border-b-0"
+										class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
 									>
-										<span class="text-sm text-gray-700"
+										<span
+											class="block flex-1 truncate text-sm text-gray-700"
+											title={obtenerNombreColaborador(colab.colaborador)}
 											>{obtenerNombreColaborador(colab.colaborador)}</span
 										>
 										<span
-											class={`rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
+											class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
 											aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
 										>
 											{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
@@ -489,6 +511,29 @@
 				</div>
 			</div>
 		</div>
+
+		<div
+			class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
+		>
+			<div class="flex gap-3">
+				<button
+					type="button"
+					on:click={irAColaborar}
+					class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+				>
+					<Icon src={Heart} class="h-5 w-5" />
+					Colaborar ahora
+				</button>
+				<button
+					type="button"
+					on:click={compartirProyecto}
+					class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+					aria-label="Compartir"
+				>
+					<Icon src={Share} class="h-5 w-5" />
+				</button>
+			</div>
+		</div>
 	</main>
 {:else}
 	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
@@ -498,80 +543,13 @@
 	</main>
 {/if}
 
-{#if showColaborarModal}
-	<div
-		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={() => (showColaborarModal = false)}
-		aria-hidden="true"
-	></div>
-
-	<!-- Modal Colaborar -->
-	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-		<div
-			class="pointer-events-auto relative mx-auto w-full max-w-lg scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
-			role="dialog"
-			aria-modal="true"
-			aria-labelledby="modal-colaborar-titulo"
-			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
-				if (e.key === 'Escape') showColaborarModal = false;
-			}}
-		>
-			<!-- Encabezado -->
-			<div class="flex items-center justify-center border-b border-gray-100 px-5 pb-5 pt-6">
-				<h2
-					id="modal-colaborar-titulo"
-					class="w-full bg-gradient-to-tr from-sky-600 to-sky-400 bg-clip-text text-center text-xl font-extrabold leading-tight text-transparent sm:text-2xl"
-				>
-					¡Tu ayuda transforma vidas!
-				</h2>
-			</div>
-
-			<!-- Contenido -->
-			<div class="space-y-4 px-5 pb-5 pt-4 text-sm text-gray-700">
-				<p class="text-gray-800">
-					Escribe un mensaje a la institución contando por qué querés colaborar, qué te motiva o qué
-					podés aportar.
-				</p>
-
-				<div>
-					<label for="mensaje-colaboracion" class="mb-1 block text-xs font-medium text-gray-600"
-						>Tu mensaje (opcional pero recomendado)</label
-					>
-					<textarea
-						id="mensaje-colaboracion"
-						class="min-h-28 w-full resize-y rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-200"
-						bind:value={mensajeColaboracion}
-						placeholder="Ej.: Me gustaría sumarme como voluntario los fines de semana..."
-					></textarea>
-				</div>
-			</div>
-
-			<!-- Acciones -->
-			<div class="flex items-center justify-between gap-3 border-t border-gray-100 px-5 pb-5 pt-3">
-				<button
-					type="button"
-					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-					on:click={() => (showColaborarModal = false)}
-				>
-					Cancelar
-				</button>
-				<button
-					type="button"
-					class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-5 py-2 text-sm font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 active:translate-y-[1px]"
-					on:click={() => {
-						showColaborarModal = false;
-						showExitoModal = true;
-					}}
-				>
-					<Send class="h-4 w-4" aria-hidden="true" />
-					Enviar mi solicitud
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ModalColaboracion
+	bind:open={showColaborarModal}
+	on:submit={() => {
+		showColaborarModal = false;
+		showExitoModal = true;
+	}}
+/>
 
 {#if showExitoModal}
 	<!-- Overlay -->
@@ -598,7 +576,7 @@
 				<span
 					class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-100"
 				>
-					<CheckCircle2 class="h-6 w-6 text-emerald-600" aria-hidden="true" />
+					<Icon src={CheckCircle} class="h-6 w-6 text-emerald-600" aria-hidden="true" />
 				</span>
 				<h3 id="modal-exito-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
 					¡Tu solicitud fue enviada correctamente!

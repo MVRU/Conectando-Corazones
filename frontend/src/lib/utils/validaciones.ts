@@ -27,7 +27,7 @@ export const MENSAJES_ERROR = {
 	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
 	dniInvalid: 'DNI inválido. Debe ser un número entre 7 y 8 dígitos.', // ! Quitar cuando corrijamos signin
 	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
-	numeroCalleInvalido: 'Número inválido. Debe ser un número positivo.',
+	numeroCalleInvalido: 'Número inválido.',
 	pisoInvalido: 'Piso inválido. Puede ser un número o "PB".', // ! Este no lo estamos implementando -> revisar
 	ciudadInvalida: 'Ciudad inválida. Ingresá un nombre válido.', // ! Este no lo estamos implementando -> revisar
 	provinciaInvalida: 'Provincia inválida. Seleccioná una opción.',
@@ -126,12 +126,19 @@ export function validarCalle(calle: string): boolean {
 }
 
 export function validarNumeroCalle(numero: string): boolean {
-	return /^\d{1,5}$/.test(numero);
+	const trim = numero.trim();
+	// Permitir números (1-5 dígitos) o texto corto alfanumérico como "S/N"
+	return trim.length > 0 && trim.length <= 10 && /^[a-zA-Z0-9\s/.-]+$/.test(trim);
 }
 
-export function validarPiso(piso: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return piso === '' || /^(\d+|PB)$/i.test(piso);
+export function validarPiso(piso: string): string | null {
+	if (!piso || !piso.trim()) return null; // Campo opcional
+	const v = piso.trim();
+	const num = parseInt(v, 10);
+	if (isNaN(num) || num < 0 || !Number.isInteger(parseFloat(v))) {
+		return 'Ingrese un número de piso válido.';
+	}
+	return null;
 }
 
 export function validarCiudad(ciudad: string): boolean {

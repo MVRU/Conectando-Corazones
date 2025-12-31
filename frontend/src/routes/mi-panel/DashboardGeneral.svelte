@@ -9,6 +9,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProgressBar from '$lib/components/ui/elementos/ProgressBar.svelte';
+	import {
+		ChartBar,
+		CheckCircle,
+		ArrowPath,
+		CurrencyDollar,
+		BuildingOffice,
+		Heart,
+		PresentationChartLine,
+		Sparkles,
+		Trophy,
+		Calendar
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	// Datos simulados basados en los KPIs de la imagen
 	const metricas = {
@@ -69,16 +82,20 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 100ms"
 		>
-			<div class="absolute -top-4 -right-4 text-6xl opacity-10">📊</div>
+			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+				<Icon src={ChartBar} class="h-24 w-24" />
+			</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-blue-600">Total Proyectos</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.totalProyectos}</p>
 				<div class="mt-3 flex gap-4 text-xs">
 					<span class="flex items-center gap-1 text-green-600">
-						✅ {metricas.proyectosCompletados} completados
+						<Icon src={CheckCircle} class="h-3 w-3" />
+						{metricas.proyectosCompletados} completados
 					</span>
 					<span class="flex items-center gap-1 text-blue-600">
-						🔄 {metricas.proyectosEnEjecucion} activos
+						<Icon src={ArrowPath} class="h-3 w-3" />
+						{metricas.proyectosEnEjecucion} activos
 					</span>
 				</div>
 			</div>
@@ -91,7 +108,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 200ms"
 		>
-			<div class="absolute -top-4 -right-4 text-6xl opacity-10">💰</div>
+			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+				<Icon src={CurrencyDollar} class="h-24 w-24" />
+			</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-green-600">Total Donado</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">
@@ -108,7 +127,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 300ms"
 		>
-			<div class="absolute -top-4 -right-4 text-6xl opacity-10">🏢</div>
+			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+				<Icon src={BuildingOffice} class="h-24 w-24" />
+			</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-purple-600">Instituciones</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.instituciones}</p>
@@ -123,7 +144,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 400ms"
 		>
-			<div class="absolute -top-4 -right-4 text-6xl opacity-10">❤️</div>
+			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+				<Icon src={Heart} class="h-24 w-24" />
+			</div>
 			<div class="relative">
 				<h3 class="text-sm font-medium text-orange-600">Beneficiarios</h3>
 				<p class="mt-2 text-3xl font-bold text-gray-900">{metricas.beneficiarios}</p>
@@ -140,7 +163,9 @@
 		style="transition-delay: 500ms"
 	>
 		<div class="mb-6 flex items-center gap-3">
-			<h2 class="text-xl font-bold text-gray-900">📈 Proyectos Activos</h2>
+			<h2 class="flex items-center gap-2 text-xl font-bold text-gray-900">
+				<Icon src={PresentationChartLine} class="h-6 w-6 text-blue-600" /> Proyectos Activos
+			</h2>
 			<div class="h-px flex-1 bg-gradient-to-r from-blue-200 to-transparent"></div>
 		</div>
 
@@ -177,7 +202,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 700ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-gray-900">🎯 Intereses vs Participación</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+				<Icon src={Sparkles} class="h-5 w-5 text-yellow-500" /> Intereses vs Participación
+			</h2>
 			<div class="space-y-4">
 				{#each categorias as categoria}
 					<div class="space-y-2">
@@ -222,7 +249,9 @@
 			<div
 				class="rounded-2xl border border-yellow-100 bg-gradient-to-br from-yellow-50 to-white p-6 shadow-lg"
 			>
-				<h2 class="mb-4 text-lg font-bold text-gray-900">🏆 Insignias Conseguidas</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={Trophy} class="h-5 w-5 text-yellow-600" /> Insignias Conseguidas
+				</h2>
 				<div class="flex items-center gap-4">
 					<div class="text-4xl font-bold text-yellow-600">{metricas.insignias}</div>
 					<div class="flex-1">
@@ -241,7 +270,9 @@
 
 			<!-- Evolución Anual -->
 			<div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
-				<h2 class="mb-4 text-lg font-bold text-gray-900">📅 Evolución Anual</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={Calendar} class="h-5 w-5 text-blue-600" /> Evolución Anual
+				</h2>
 				<div class="space-y-3">
 					{#each evolucionAnual as año}
 						<div class="flex items-center justify-between">

@@ -37,9 +37,10 @@
 		];
 	}
 
-	function esTipoPredefinido(tipo: string): boolean {
-		return ['principal', 'voluntariado'].includes(tipo);
-	}
+function esTipoPredefinido(tipo: string): boolean {
+	const normalizado = (tipo || '').trim().toLowerCase();
+	return TIPO_UBICACION.some((t) => t.toLowerCase() === normalizado);
+}
 
 	function manejarCambioTipo(index: number, valor: string) {
 		if (valor === 'personalizado') {
@@ -62,7 +63,41 @@
 		campo: 'tipo_ubicacion' | 'modalidad',
 		valor: string
 	) {
-		// Simplemente actualizamos el valor sin restricciones
+		// Si está escribiendo un tipo personalizado, verificar si coincide con la lista oficial
+		if (campo === 'tipo_ubicacion' && valor && ubicaciones[index].tipo_ubicacion !== '' && !esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')) {
+			const valorNormalizado = valor.trim().toLowerCase();
+			const existeEnLista = TIPO_UBICACION.some(tipo => tipo.toLowerCase() === valorNormalizado);
+			
+			if (existeEnLista) {
+				errores[`ubicacion_${index}_tipo`] = 'Ese tipo de ubicación ya existe en la lista oficial.';
+				ubicaciones[index] = { ...ubicaciones[index], [campo]: valor };
+				ubicaciones = ubicaciones;
+				return;
+			} else {
+				// Limpiar el error si ya no coincide con la lista
+				if (errores[`ubicacion_${index}_tipo`] === 'Ese tipo de ubicación ya existe en la lista oficial.') {
+					delete errores[`ubicacion_${index}_tipo`];
+				}
+			}
+		}
+		
+		// Verificar si intenta marcar como "Principal" cuando ya existe una
+		if (campo === 'tipo_ubicacion' && valor.toLowerCase() === 'principal') {
+			const yaTienePrincipal = ubicaciones.some((u, i) => 
+				i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
+			);
+			if (yaTienePrincipal) {
+				errores[`ubicacion_${index}_tipo`] = "Solo puede existir una ubicación de tipo 'Principal'.";
+				return;
+			} else {
+				// Limpiar el error si ya no hay conflicto
+				if (errores[`ubicacion_${index}_tipo`] === "Solo puede existir una ubicación de tipo 'Principal'.") {
+					delete errores[`ubicacion_${index}_tipo`];
+				}
+			}
+		}
+
+		// Simplemente actualizamos el valor
 		ubicaciones[index] = { ...ubicaciones[index], [campo]: valor };
 		ubicaciones = ubicaciones;
 		
@@ -118,6 +153,22 @@
 		(ubicacionesConTipo[0]?.tipo === 'principal' || ubicacionesConTipo[0]?.tipo === 'virtual');
 
 	$: indiceUnicaBasica = esUnicaBasica ? ubicacionesConTipo[0].i : -1;
+
+	$: yaTienePrincipal = ubicaciones.some(u => u.tipo_ubicacion?.toLowerCase() === 'principal');
+
+	// Función para obtener tipos disponibles según el índice
+	function obtenerTiposDisponibles(index: number): readonly string[] {
+		const ubicacionActual = ubicaciones[index];
+		// Si la ubicación actual ya es Principal, permitir que se mantenga
+		if (ubicacionActual.tipo_ubicacion?.toLowerCase() === 'principal') {
+			return TIPO_UBICACION;
+		}
+		// Si ya hay una Principal en otra ubicación, filtrarla
+		if (yaTienePrincipal) {
+			return TIPO_UBICACION.filter(tipo => tipo.toLowerCase() !== 'principal');
+		}
+		return TIPO_UBICACION;
+	}
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -160,7 +211,7 @@
 							class:border-red-300={errores[`ubicacion_${index}_tipo`]}
 						>
 							<option value="">Seleccionar tipo</option>
-							{#each TIPO_UBICACION as tipo (tipo)}
+							{#each obtenerTiposDisponibles(index) as tipo (tipo)}
 								<option value={tipo}>{obtenerDescripcionTipo(tipo)}</option>
 							{/each}
 							<option value="personalizado">Otro...</option>
@@ -216,11 +267,11 @@
 				{#if ubicacion.modalidad === 'virtual'}
 					<div>
 						<label for="url_virtual_{index}" class="mb-2 block text-sm font-medium text-gray-700"
-							>URL Virtual *</label
+							>URL Virtual</label
 						>
 						<input
 							id="url_virtual_{index}"
-							type="url"
+							type="text"
 							value={ubicacion.url_virtual || ''}
 							on:input={(e) => {
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
@@ -334,6 +385,39 @@
 						</div>
 					</div>
 
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<div>
+							<label for="piso_{index}" class="mb-2 block text-sm font-medium text-gray-700"
+								>Piso</label
+							>
+							<input
+								id="piso_{index}"
+								type="text"
+								value={ubicacion.direccion_presencial?.piso || ''}
+								on:input={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
+								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class:border-red-300={errores[`ubicacion_${index}_piso`]}
+								placeholder="Ej: 5"
+							/>
+							{#if errores[`ubicacion_${index}_piso`]}
+								<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_piso`]}</p>
+							{/if}
+						</div>
+						<div>
+							<label for="departamento_{index}" class="mb-2 block text-sm font-medium text-gray-700"
+								>Departamento</label
+							>
+							<input
+								id="departamento_{index}"
+								type="text"
+								value={ubicacion.direccion_presencial?.departamento || ''}
+								on:input={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
+								class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								placeholder="Ej: A"
+							/>
+						</div>
+					</div>
+
 					<div>
 						<label for="referencia_{index}" class="mb-2 block text-sm font-medium text-gray-700"
 							>Referencia</label
@@ -344,7 +428,11 @@
 							on:input={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
 							class="w-full resize-none rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class:border-red-300={errores[`ubicacion_${index}_referencia`]}
 						></textarea>
+						{#if errores[`ubicacion_${index}_referencia`]}
+							<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_referencia`]}</p>
+						{/if}
 					</div>
 				{/if}
 			</div>

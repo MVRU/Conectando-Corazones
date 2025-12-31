@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
-	import { ArrowRight, Building2, MapPin, Globe } from 'lucide-svelte';
+	import { ArrowRight, BuildingOffice2, MapPin, GlobeAlt, Photo } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+
 	import { getParticipacionVisual, getUbicacionCorta } from '$lib/utils/util-proyectos';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -36,7 +38,7 @@
 			/>
 		{:else}
 			<div class="flex h-full w-full items-center justify-center text-gray-300">
-				<span class="text-4xl">🖼️</span>
+				<Icon src={Photo} class="h-12 w-12" />
 			</div>
 		{/if}
 
@@ -51,9 +53,9 @@
 				class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm"
 			>
 				{#if isVirtual}
-					<Globe class="h-3.5 w-3.5" />
+					<Icon src={GlobeAlt} class="h-3.5 w-3.5" />
 				{:else}
-					<MapPin class="h-3.5 w-3.5" />
+					<Icon src={MapPin} class="h-3.5 w-3.5" />
 				{/if}
 				{ubicacionCorta}
 			</span>
@@ -72,7 +74,7 @@
 
 			{#if proyecto.institucion?.nombre_legal}
 				<div class="flex items-center gap-1.5 text-sm text-gray-500">
-					<Building2 class="h-3.5 w-3.5 flex-shrink-0" />
+					<Icon src={BuildingOffice2} class="h-3.5 w-3.5 flex-shrink-0" />
 					<span class="truncate">{proyecto.institucion.nombre_legal}</span>
 				</div>
 			{/if}
@@ -106,7 +108,7 @@
 						href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 						size="sm"
 						disabled={botonColaborarDeshabilitado}
-						customClass="flex-1"
+						customClass="flex-1 cursor-pointer"
 						customAriaLabel="Colaborar en este proyecto"
 					/>
 				</div>
@@ -116,7 +118,7 @@
 					on:click|stopPropagation={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
 				>
 					Ver detalles
-					<ArrowRight class="h-4 w-4" />
+					<Icon src={ArrowRight} class="h-4 w-4" />
 				</button>
 			{/if}
 		</div>

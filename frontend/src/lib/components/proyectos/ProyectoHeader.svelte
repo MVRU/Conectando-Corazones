@@ -2,6 +2,8 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
+	import { Photo } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let proyecto: Proyecto;
 </script>
@@ -17,20 +19,20 @@
 		<div
 			class="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-100"
 		>
-			<span class="text-4xl">🖼️</span>
+			<Icon src={Photo} class="h-16 w-16 text-blue-300" />
 		</div>
 	{/if}
 
 	<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-	<div class="absolute bottom-0 left-0 w-full p-6 text-white">
+	<div class="absolute bottom-0 left-0 w-full p-4 text-white sm:p-6">
 		<div class="flex flex-col gap-2">
-			<div class="mb-2 flex items-center gap-3">
+			<div class="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
 				<StatusBadge estado={proyecto.estado} />
-				<LocationDisplay {proyecto} className="text-white/90" />
+				<LocationDisplay {proyecto} variant="badge" />
 			</div>
 
-			<h1 class="text-shadow-sm text-3xl font-bold leading-tight md:text-4xl">
+			<h1 class="text-shadow-sm text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
 				{proyecto.titulo}
 			</h1>
 

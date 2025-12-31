@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
 	import {
-		CheckCircle2,
+		CheckCircle,
 		Clock,
-		AlertCircle,
-		FileCheck,
+		ExclamationCircle,
+		DocumentCheck,
 		XCircle,
-		HelpCircle
-	} from 'lucide-svelte';
+		QuestionMarkCircle
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let estado: EstadoDescripcion | undefined = 'en_curso';
 
@@ -18,19 +19,19 @@
 		},
 		pendiente_solicitud_cierre: {
 			color: 'bg-amber-100 text-amber-700 border-amber-200',
-			icon: AlertCircle
+			icon: ExclamationCircle
 		},
 		en_revision: {
 			color: 'bg-blue-100 text-blue-700 border-blue-200',
-			icon: FileCheck
+			icon: DocumentCheck
 		},
 		en_auditoria: {
 			color: 'bg-purple-100 text-purple-700 border-purple-200',
-			icon: FileCheck
+			icon: DocumentCheck
 		},
 		completado: {
 			color: 'bg-gray-100 text-gray-700 border-gray-200',
-			icon: CheckCircle2
+			icon: CheckCircle
 		},
 		cancelado: {
 			color: 'bg-red-100 text-red-700 border-red-200',
@@ -43,8 +44,8 @@
 </script>
 
 <span
-	class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border {config.color}"
+	class="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium {config.color}"
 >
-	<svelte:component this={config.icon} class="w-3.5 h-3.5" />
+	<Icon src={config.icon} class="h-3.5 w-3.5" />
 	{label}
 </span>

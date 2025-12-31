@@ -245,7 +245,7 @@
 	</div>
 
 	<!-- Lista de proyectos -->
-	<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+	<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
 		{#each proyectosVisibles as proyecto (proyecto.id_proyecto)}
 			<div
 				in:fly={{ y: 20, duration: 300 }}

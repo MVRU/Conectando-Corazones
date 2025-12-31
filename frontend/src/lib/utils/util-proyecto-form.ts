@@ -1,4 +1,6 @@
-import { ICONOS_CATEGORIA, COLORES_UI } from './constants';
+import { ICONOS_CATEGORIA, COLORES_UI, COLORES_CATEGORIA } from './constants';
+import { ClipboardDocumentList } from '@steeze-ui/heroicons';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 
 export const MAX_BENEFICIARIOS = 100_000;
 
@@ -15,8 +17,12 @@ export function validarBeneficiariosValor(
 	return null;
 }
 
-export function obtenerIconoCategoria(descripcion: string): string {
-	return ICONOS_CATEGORIA[descripcion] || '📋';
+export function obtenerIconoCategoria(descripcion: string): IconSource {
+	return ICONOS_CATEGORIA[descripcion] || ClipboardDocumentList;
+}
+
+export function obtenerColorCategoria(descripcion: string): string {
+	return COLORES_CATEGORIA[descripcion] || 'gray';
 }
 
 export function obtenerClasesColor(color: string, seleccionado: boolean) {
@@ -24,7 +30,9 @@ export function obtenerClasesColor(color: string, seleccionado: boolean) {
 	return {
 		border: seleccionado ? c.border : 'border-gray-200',
 		bg: seleccionado ? c.bg : 'bg-white',
-		hover: !seleccionado ? c.hover : ''
+		hover: !seleccionado ? c.hover : '',
+		iconColor: seleccionado ? c.iconColor : 'text-gray-400',
+		iconBg: seleccionado ? c.iconBg : 'bg-gray-100'
 	};
 }
 
@@ -123,9 +131,9 @@ export function validarTituloProyecto(t: string): string | null {
 	if (v.length > 120) return 'Máximo 120 caracteres';
 	if (/^\d/.test(v)) return 'No puede comenzar con un número';
 	if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-	// Debe contener al menos una letra y solo caracteres comunes
 	if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
-	if (!/^[\p{L}\p{N} .,'!?:;\-()/&]+$/u.test(v))
+	if (/<|>/.test(v)) return 'Caracteres inválidos detectados.';
+	if (!/^[\p{L}\p{N} .,'!?:;\-()/&@#$%*+=[\]{}|~¡¿]+$/u.test(v))
 		return 'Usá solo letras, números y signos comunes';
 	return null;
 }
@@ -134,33 +142,71 @@ export function validarDescripcionProyecto(
 	s: string,
 	opts: { min?: number; max?: number } = {}
 ): string | null {
-	const { min = 20, max = 1500 } = opts;
+	const { min = 50, max = 2000 } = opts;
 	if (s == null) return 'Este campo es obligatorio';
 	const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
 	if (!v) return 'Este campo es obligatorio';
-	if (v.length < min) return `Debe tener al menos ${min} caracteres`;
-	if (v.length > max) return `Maximo ${max} caracteres`;
+	if (v.length < min) return `Por favor, brinde mas detalles sobre el proyecto (mínimo ${min} caracteres).`;
+	if (v.length > max) return `Maximo ${max} caracteres. Por favor, sea más breve`;
 	if (/^\d/.test(v)) return 'No puede comenzar con un numero';
 	if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
 	if (/^\d+$/u.test(v)) return 'No puede ser solo numeros';
 	return null;
 }
 
+export function esFechaDemasiadoLejana(fecha?: Date | string, maxAnios: number = 2): boolean {
+	if (!fecha) return false;
+
+	try {
+		const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+		if (isNaN(fechaObj.getTime())) return false;
+
+		const hoy = new Date();
+		const fechaMaxima = new Date(hoy);
+		fechaMaxima.setFullYear(hoy.getFullYear() + maxAnios);
+
+		return fechaObj > fechaMaxima;
+	} catch {
+		return false;
+	}
+}
+
 export function validarUrlImagen(url: string): string | null {
 	if (!url) return null; // Campo opcional
 	const v = url.trim();
+	
+	// Validar longitud máxima
+	if (v.length > 255) return 'La URL es demasiado extensa. Por favor proporcione una mas breve';
+	
 	const isDataImage = /^data:image\//i.test(v);
 	if (isDataImage) return null;
-	const extOk = (() => {
-		try {
-			const u = new URL(v, 'http://example.com');
-			const path = (u.pathname || '').toLowerCase();
-			return /(\.jpg|\.jpeg|\.png|\.webp|\.gif)$/.test(path);
-		} catch {
-			return /(\.jpg|\.jpeg|\.png|\.webp|\.gif)(\?.*)?(#.*)?$/i.test(v);
+	
+	// Detectar si parece una URL pero no tiene protocolo
+	if (!v.startsWith('http://') && !v.startsWith('https://')) {
+		// Si parece una URL (tiene www. o tiene punto y barra)
+		if (v.startsWith('www.') || /^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+(\/|$)/.test(v)) {
+			return 'La URL debe comenzar con http:// o https://.';
 		}
-	})();
-	if (!extOk) return 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)';
+	}
+	
+	// Validar que sea una URL válida
+	let urlObj: URL;
+	try {
+		urlObj = new URL(v);
+	} catch {
+		return 'El formato de la URL no es válido.';
+	}
+	
+	// Validar que tenga protocolo http o https
+	if (!['http:', 'https:'].includes(urlObj.protocol)) {
+		return 'La URL debe comenzar con http:// o https://.';
+	}
+	
+	// Luego validar la extensión de imagen
+	const path = urlObj.pathname.toLowerCase();
+	const hasValidExt = /(\.jpg|\.jpeg|\.png|\.webp|\.gif)$/.test(path);
+	if (!hasValidExt) return 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)';
+	
 	return null;
 }
 
@@ -175,20 +221,20 @@ export function toKey(s: string): string {
 		.replace(/\s+/g, ' ');
 }
 
-export function normalizarUnidadLibre(texto: string): string {
-	return (texto ?? '')
+export function normalizarUnidadLibre(texto: string, preserveCase = false): string {
+	const t = (texto ?? '')
 		.normalize('NFC')
 		.trim()
-		.replace(/\s+/g, ' ')
-		.toLocaleLowerCase('es-AR');
+		.replace(/\s+/g, ' ');
+	return preserveCase ? t : t.toLocaleLowerCase('es-AR');
 }
 
 export function validarUnidadLibre(
 	texto: string,
-	opciones?: { esRepetida?: (t: string) => boolean }
+	opciones?: { esRepetida?: (t: string) => boolean; allowUpperCase?: boolean }
 ): string | null {
 	if (texto == null) return 'Este campo es obligatorio';
-	const v = normalizarUnidadLibre(texto);
+	const v = normalizarUnidadLibre(texto, opciones?.allowUpperCase);
 	if (!v) return 'Este campo es obligatorio';
 	if (v.length < 2) return 'Debe tener al menos 2 caracteres';
 	if (v.length > 40) return 'Máximo 40 caracteres';
@@ -224,14 +270,11 @@ export function validarEspecie(texto: string): string | null {
 	return null;
 }
 
-export function validarUnidadMedidaOtra(texto: string): string | null {
-	if (texto == null) return 'Este campo es obligatorio';
-	const v = texto.normalize('NFC').trim().replace(/\s+/g, ' ');
-	if (v.length < 2) return 'Debe tener al menos 2 caracteres';
-	if (v.length > 40) return 'Máximo 40 caracteres';
-	if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra';
-	if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-	if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/%()-]+$/u.test(v))
-		return 'Usá letras, números y signos comunes';
+export function validarReferencia(referencia: string): string | null {
+	if (!referencia || !referencia.trim()) return null; // Campo opcional
+	const v = referencia.trim();
+	if (v.length > 200) {
+		return 'La referencia no puede superar los 200 caracteres.';
+	}
 	return null;
 }
