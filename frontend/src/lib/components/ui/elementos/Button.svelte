@@ -60,6 +60,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={isDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -84,7 +85,7 @@
 		{:else}
 			<span
 				class={clsx(
-					'text-animation font-inter z-10 leading-[1.11] whitespace-nowrap',
+					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
 					textSize[size]
 				)}
 			>
@@ -129,6 +130,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={isDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -153,7 +155,7 @@
 		{:else}
 			<span
 				class={clsx(
-					'text-animation font-inter z-10 leading-[1.11] whitespace-nowrap',
+					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
 					textSize[size]
 				)}
 			>
@@ -200,6 +202,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={isDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		{#if loading}
 			<svg
