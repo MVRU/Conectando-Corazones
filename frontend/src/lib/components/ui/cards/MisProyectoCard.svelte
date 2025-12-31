@@ -12,7 +12,8 @@
 	export let esProyectoCompletado: boolean = false;
 
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
-	$: isVirtual = ubicacionCorta === 'Virtual';
+	$: esVirtual = ubicacionCorta === 'Virtual';
+	$: estaCompletado = proyecto.estado === 'completado' || esProyectoCompletado;
 </script>
 
 <div
@@ -48,7 +49,7 @@
 			<span
 				class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm"
 			>
-				{#if isVirtual}
+				{#if esVirtual}
 					<Globe class="h-3.5 w-3.5" />
 				{:else}
 					<MapPin class="h-3.5 w-3.5" />
@@ -91,7 +92,7 @@
 				on:keydown|stopPropagation={() => {}}
 				role="presentation"
 			>
-				{#if esInstitucion && !esProyectoCompletado}
+				{#if esInstitucion && proyecto.estado === 'en_curso'}
 					<!-- Institución - Proyectos activos: Editar + Ver panel -->
 					<Button
 						label="Editar"
