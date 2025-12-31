@@ -1,8 +1,21 @@
+export enum MotivoReporte {
+	SPAM = 'Spam',
+	FRAUDE = 'Fraude',
+	USO_INDEBIDO_FONDOS = 'Uso indebido de fondos',
+	CONTENIDO_FALSO = 'Contenido falso o engañoso',
+	EVIDENCIA_MANIPULADA = 'Evidencia manipulada',
+	CONDUCTA_INAPROPIADA = 'Conducta inapropiada',
+	SUPLANTACION_IDENTIDAD = 'Suplantación de identidad',
+	INCUMPLIMIENTO_NORMAS = 'Incumplimiento de normas',
+	CONFLICTO_INTERESES = 'Conflicto de intereses',
+	OTRO = 'Otro'
+}
+
 export interface Reporte {
 	id_reporte?: number;
 	tipo_objeto: 'Usuario' | 'Proyecto' | string;
 	id_objeto: number;
-	motivo: string; // -*- podríamos definir un enum más adelante: ['spam' | 'fraude' | ...]
+	motivo: MotivoReporte;
 	descripcion: string;
 	created_at?: Date;
 	estado?: 'pendiente' | 'resuelto' | 'rechazado';
