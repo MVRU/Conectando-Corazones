@@ -13,6 +13,7 @@
 		TIPO_PARTICIPACION_LABELS,
 		type TipoParticipacionDescripcion
 	} from '$lib/types/TipoParticipacion';
+	import { usuario } from '$lib/stores/auth';
 
 	let searchQuery = writable('');
 
@@ -80,8 +81,18 @@
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-2 sm:px-10 lg:px-20">
 	<!-- Encabezado -->
-	<div class="animate-fade-in-up mb-2 text-center">
+	<div class="animate-fade-in-up relative mb-2 text-center">
 		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
+		
+		{#if $usuario}
+			<a
+				href="/mis-proyectos"
+				class="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 rounded-4xl bg-[#007fff] px-8 py-3 text-base font-semibold text-white transition-all duration-200 hover:bg-[#0066cc] lg:inline-flex"
+			>
+				Mis Proyectos
+				<span class="text-xl">›</span>
+			</a>
+		{/if}
 	</div>
 
 	<!-- Buscador -->
