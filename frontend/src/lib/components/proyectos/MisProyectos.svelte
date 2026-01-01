@@ -2,6 +2,7 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Usuario } from '$lib/types/Usuario';
 	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
+	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { writable } from 'svelte/store';
 	import { Plus, Search } from 'lucide-svelte';
@@ -34,6 +35,7 @@
 
 	// Filtros
 	let filtroParticipacion: 'Todos' | TipoParticipacionDescripcion = 'Todos';
+	let categoriaSeleccionada = 'Todas';
 	let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
 	let provinciaSeleccionada = 'Todas';
 	let localidadSeleccionada = 'Todas';
@@ -48,6 +50,7 @@
 	let provinciasDisponibles: string[] = [];
 	let localidadesDisponibles: string[] = [];
 	let tiposParticipacion: string[] = [];
+	let categoriasDisponibles: string[] = ['Todas', ...mockCategorias.map(c => c.descripcion)].sort();
 
 	$: {
 		// Filtrar por usuario (Institución o Colaborador)
@@ -83,7 +86,8 @@
 		[filtroParticipacion],
 		$consultaBusqueda,
 		estadoSeleccionado,
-		provinciaSeleccionada
+		provinciaSeleccionada,
+		categoriaSeleccionada
 	);
 
 	// Filtros adicionales encadenados
@@ -161,6 +165,7 @@
 
 	function restablecerFiltros() {
 		filtroParticipacion = 'Todos';
+		categoriaSeleccionada = 'Todas';
 		tipoUbicacion = 'Todas';
 		provinciaSeleccionada = 'Todas';
 		localidadSeleccionada = 'Todas';
@@ -219,6 +224,8 @@
 			prefijoId="mis-proyectos"
 			bind:mostrar={mostrarFiltros}
 			bind:participacion={filtroParticipacion}
+			bind:categoria={categoriaSeleccionada}
+			{categoriasDisponibles}
 			bind:tipoUbicacion
 			bind:provincia={provinciaSeleccionada}
 			bind:localidad={localidadSeleccionada}

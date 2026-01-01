@@ -4,7 +4,7 @@ import type { Proyecto } from '$lib/types/Proyecto';
 import type { Usuario } from '$lib/types/Usuario';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+import { ESTADO_LABELS } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 import {
 	ESTADO_PRIORIDAD,
@@ -59,7 +59,8 @@ export function filtrarProyectos(
 	filtros: string[],
 	searchQuery: string,
 	estado: string,
-	provincia: string
+	provincia: string,
+	categoria: string = 'Todas'
 ): Proyecto[] {
 	let resultado = [...proyectos];
 
@@ -71,6 +72,12 @@ export function filtrarProyectos(
 					pp.tipo_participacion?.descripcion &&
 					tiposEsperados.includes(pp.tipo_participacion.descripcion)
 			)
+		);
+	}
+
+	if (categoria !== 'Todas') {
+		resultado = resultado.filter((p) =>
+			p.categorias?.some((c) => c.descripcion === categoria)
 		);
 	}
 

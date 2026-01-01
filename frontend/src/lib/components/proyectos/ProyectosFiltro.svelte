@@ -6,6 +6,8 @@
 
 	export let mostrar: boolean = false;
 	export let participacion: 'Todos' | TipoParticipacionDescripcion = 'Todos';
+	export let categoria: string = 'Todas';
+	export let categoriasDisponibles: string[] = ['Todas'];
 	export let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
 	export let provincia: string = 'Todas';
 	export let localidad: string = 'Todas';
@@ -41,6 +43,7 @@
 
 	$: filtrosActivos = [
 		participacion !== 'Todos',
+		categoria !== 'Todas',
 		tipoUbicacion !== 'Todas',
 		provincia !== 'Todas',
 		localidad !== 'Todas',
@@ -119,6 +122,31 @@
 						>
 							{#each tiposParticipacion as tipo (tipo)}
 								<option value={tipo}>{tipo}</option>
+							{/each}
+						</select>
+						<ChevronDown
+							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+							size={16}
+						/>
+					</div>
+				</div>
+
+				<!-- Filtro por Categoría -->
+				<div class="flex flex-col gap-1.5">
+					<label
+						for="{prefijoId}-filtro-categoria"
+						class="text-xs font-medium uppercase tracking-wide text-gray-500"
+					>
+						Categoría
+					</label>
+					<div class="relative">
+						<select
+							id="{prefijoId}-filtro-categoria"
+							bind:value={categoria}
+							class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+						>
+							{#each categoriasDisponibles as cat (cat)}
+								<option value={cat}>{cat}</option>
 							{/each}
 						</select>
 						<ChevronDown
