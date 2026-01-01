@@ -79,19 +79,17 @@
 	}
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-2 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-4 pb-6 pt-2 sm:px-10 lg:px-20">
 	<!-- Encabezado -->
-	<div class="animate-fade-in-up relative mb-2 text-center">
-		<h2 class="text-4xl font-extrabold text-gray-900 sm:text-5xl">Proyectos Solidarios</h2>
-		
+	<div class="animate-fade-in-up relative mb-8 flex flex-col items-center gap-4 md:block">
+		<h2 class="text-center text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-5xl">
+			Proyectos solidarios
+		</h2>
+
 		{#if $usuario}
-			<a
-				href="/mis-proyectos"
-				class="absolute right-8 top-1/2 hidden -translate-y-1/2 items-center gap-3 rounded-4xl bg-[#007fff] px-8 py-3 text-base font-semibold text-white transition-all duration-200 hover:bg-[#0066cc] lg:inline-flex"
-			>
-				Mis Proyectos
-				<span class="text-xl">›</span>
-			</a>
+			<div class="flex items-center gap-3 md:absolute md:right-0 md:top-1/2 md:-translate-y-1/2">
+				<Button href="/mis-proyectos" variant="primary" label="Mis proyectos" />
+			</div>
 		{/if}
 	</div>
 
@@ -256,7 +254,7 @@
 	</div>
 
 	<!-- Lista de proyectos -->
-	<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+	<div class="grid gap-4 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 2xl:grid-cols-4">
 		{#each proyectosVisibles as proyecto (proyecto.id_proyecto)}
 			<div
 				in:fly={{ y: 20, duration: 300 }}

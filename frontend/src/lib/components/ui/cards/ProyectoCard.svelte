@@ -63,7 +63,7 @@
 	</div>
 
 	<!-- Contenido -->
-	<div class="flex flex-grow flex-col p-4">
+	<div class="flex flex-grow flex-col p-3 sm:p-4">
 		<!-- Header: Título e Institución -->
 		<div class="mb-3">
 			<h3
