@@ -10,7 +10,7 @@ export type EtiquetaContacto = (typeof ETIQUETAS_CONTACTO)[number];
 // ! Interfaz
 export interface Contacto {
 	id_contacto?: number;
-	tipo_contacto: TipoContacto | string;
+	tipo_contacto: TipoContacto | string;	
 	valor: string;
 	etiqueta?: EtiquetaContacto | string;
 	usuario_id?: number; // * FK
