@@ -2,16 +2,9 @@
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Usuario } from '$lib/types/Usuario';
-	import {
-		ArrowRight,
-		BuildingOffice2,
-		MapPin,
-		GlobeAlt,
-		Photo,
-		User,
-		UserGroup
-	} from '@steeze-ui/heroicons';
+	import { ArrowRight, MapPin, GlobeAlt, Photo } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import userDefault from '$lib/assets/user-default.png';
 
 	import {
 		getParticipacionVisual,
@@ -47,6 +40,9 @@
 
 <div
 	class="group flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:shadow-md"
+	class:border-l-4={esCreador || esParticipante}
+	class:border-l-blue-100={esCreador || esParticipante}
+	class:hover:border-l-blue-200={esCreador || esParticipante}
 	on:click={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
 	on:keydown={(e) =>
 		(e.key === 'Enter' || e.key === ' ') && goto(`/proyectos/${proyecto.id_proyecto}`)}
@@ -71,33 +67,28 @@
 		{/if}
 
 		<!-- Badges flotantes -->
-		<div class="absolute left-3 top-3 flex flex-col items-start gap-2">
-			<StatusBadge estado={proyecto.estado} />
-
-			{#if esCreador}
-				<span
-					class="inline-flex items-center gap-1.5 rounded-full bg-blue-100/90 px-2.5 py-1 text-xs font-semibold text-blue-700 shadow-sm backdrop-blur-sm"
+		<div class="absolute left-3 top-3 flex items-center gap-2">
+			{#if esCreador || esParticipante}
+				<div
+					class="relative h-8 w-8 overflow-hidden rounded-full border-2 bg-white shadow-sm"
+					class:border-blue-100={esCreador || esParticipante}
+					class:hover:border-blue-200={esCreador || esParticipante}
+					title={esCreador
+						? 'Es mi proyecto'
+						: isInactivo
+							? 'Participaste en este proyecto'
+							: 'Estás participando en este proyecto'}
 				>
-					<Icon src={User} class="h-3.5 w-3.5" />
-					Mi proyecto
-				</span>
-			{:else if esParticipante}
-				{#if isInactivo}
-					<span
-						class="inline-flex items-center gap-1.5 rounded-full bg-gray-100/90 px-2.5 py-1 text-xs font-semibold text-gray-700 shadow-sm backdrop-blur-sm"
-					>
-						<Icon src={UserGroup} class="h-3.5 w-3.5" />
-						Participaste
-					</span>
-				{:else}
-					<span
-						class="inline-flex items-center gap-1.5 rounded-full bg-green-100/90 px-2.5 py-1 text-xs font-semibold text-green-700 shadow-sm backdrop-blur-sm"
-					>
-						<Icon src={UserGroup} class="h-3.5 w-3.5" />
-						Participando
-					</span>
-				{/if}
+					<img
+						src={usuario?.url_foto}
+						alt="Tu perfil"
+						class="h-full w-full object-cover"
+						loading="lazy"
+					/>
+				</div>
 			{/if}
+
+			<StatusBadge estado={proyecto.estado} />
 		</div>
 
 		<!-- Badge de ubicación -->
@@ -113,22 +104,22 @@
 				{ubicacionCorta}
 			</span>
 		</div>
+		<!-- Rango de fechas -->
+		<div
+			class="absolute bottom-0 left-0 right-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+		>
+			<span
+				class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
+			>
+				{formatearFechaBadge(proyecto.created_at)} — {formatearFechaBadge(
+					proyecto.fecha_fin_tentativa
+				)}
+			</span>
+		</div>
 	</div>
 
 	<!-- Contenido -->
 	<div class="flex flex-grow flex-col p-3 sm:p-4">
-		{#if variant === 'mis-proyectos'}
-			<div class="mb-1 flex items-center justify-end">
-				<div class="text-xs font-medium text-gray-400">
-					<span class="whitespace-nowrap">
-						{formatearFechaBadge(proyecto.created_at)} — {formatearFechaBadge(
-							proyecto.fecha_fin_tentativa
-						)}
-					</span>
-				</div>
-			</div>
-		{/if}
-
 		<div class="mb-3">
 			<h3
 				class="mb-1.5 line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
@@ -136,10 +127,16 @@
 				{proyecto.titulo}
 			</h3>
 
-			{#if proyecto.institucion?.nombre_legal}
-				<div class="flex items-center gap-1.5 text-sm text-gray-500">
-					<Icon src={BuildingOffice2} class="h-3.5 w-3.5 flex-shrink-0" />
-					<span class="truncate">{proyecto.institucion.nombre_legal}</span>
+			{#if proyecto.institucion?.nombre_legal && !(variant === 'mis-proyectos' && esCreador)}
+				<div class="flex items-center gap-2 text-sm text-gray-500">
+					<img
+						src={proyecto.institucion?.url_foto || userDefault}
+						alt={proyecto.institucion.nombre_legal}
+						class="h-5 w-5 rounded-full object-cover shadow-sm"
+						loading="lazy"
+					/>
+					<span class="truncate font-medium text-gray-700">{proyecto.institucion.nombre_legal}</span
+					>
 				</div>
 			{/if}
 		</div>
@@ -251,13 +248,14 @@
 					{/if}
 				</div>
 			{:else}
-				<button
-					class="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-blue-600"
-					on:click|stopPropagation={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
-				>
-					Ver detalles
-					<Icon src={ArrowRight} class="h-4 w-4" />
-				</button>
+				<Button
+					label="Ver detalles"
+					href={`/proyectos/${proyecto.id_proyecto}`}
+					variant="secondary"
+					size="sm"
+					customClass="flex-1"
+					customAriaLabel="Ver detalles del proyecto"
+				/>
 			{/if}
 		</div>
 	</div>

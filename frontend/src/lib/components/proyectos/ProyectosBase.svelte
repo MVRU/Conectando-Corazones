@@ -3,156 +3,61 @@
 	import { fade, fly } from 'svelte/transition';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import Pagination from '$lib/components/ui/elementos/Pagination.svelte';
-	import { writable } from 'svelte/store';
-	import { getProvinciaFromLocalidad, filtrarPorLocalidad } from '$lib/utils/util-ubicaciones';
-	import {
-		filtrarProyectos,
-		filtrarPorTipoUbicacion,
-		filtrarPorRangoFechas
-	} from '$lib/utils/util-proyectos';
-	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
-	import { ESTADO_LABELS } from '$lib/types/Estado';
-	import {
-		TIPO_PARTICIPACION_LABELS,
-		type TipoParticipacionDescripcion
-	} from '$lib/types/TipoParticipacion';
+	import type { Writable } from 'svelte/store';
+	import ProyectosFiltro from './ProyectosFiltro.svelte';
+	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 
 	// Props
-	export let proyectos: Proyecto[] = [];
+	export let proyectos: Proyecto[] = []; // Proyectos YA filtrados y ordenados
 	export let titulo: string = '';
 	export let placeholderBusqueda: string = 'Buscar por título o institución...';
 	export let textoVacio: string = 'No hay proyectos disponibles';
 	export let descripcionVacia: string =
 		'Probá con otro tipo de participación o reiniciá los filtros.';
 
-	// Props para filtros avanzados
-	export let categoriaSeleccionada: string = 'Todas';
-	export let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
-	export let localidadSeleccionada: string = 'Todas';
-	export let fechaDesde: string = '';
-	export let fechaHasta: string = '';
-	export let criterioOrden: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso' =
-		'recientes';
+	// Configuración
+	export let mostrarEstado: boolean = false;
+	export let prefijoIdFiltros: string = 'filtros-base';
 
-	export let customFilter: ((proyectos: Proyecto[]) => Proyecto[]) | undefined = undefined;
+	// Stores de filtros (Writables)
+	export let mostrarFiltros: Writable<boolean>;
+	export let filtroParticipacion: Writable<'Todos' | TipoParticipacionDescripcion>;
+	export let categoriaSeleccionada: Writable<string>;
+	export let tipoUbicacion: Writable<'Todas' | 'Presencial' | 'Virtual'>;
+	export let provinciaSeleccionada: Writable<string>;
+	export let localidadSeleccionada: Writable<string>;
+	export let fechaDesde: Writable<string>;
+	export let fechaHasta: Writable<string>;
+	export let estadoSeleccionado: Writable<string>;
+	export let criterioOrden: Writable<
+		'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'
+	>;
+	export let consultaBusqueda: Writable<string>;
 
-	let searchQuery = writable('');
+	// Datos derivados (Stores o Arrays simples pasados desde parent)
+	export let categoriasDisponibles: string[] = [];
+	export let provinciasDisponibles: string[] = [];
+	export let estadosDisponibles: string[] = [];
+	export let tiposParticipacionDisponibles: string[] = [];
+
+	// Funciones
+	export let calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
+	export let restablecerFiltros: () => void;
+
+	// Computed Local
+	$: localidades = calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada);
 
 	// Paginación
 	const ITEMS_POR_PAGINA = 16;
 	let paginaActual = 1;
 
-	const tiposParticipacion: ('Todos' | TipoParticipacionDescripcion)[] = [
-		'Todos',
-		...(Object.keys(TIPO_PARTICIPACION_LABELS) as TipoParticipacionDescripcion[])
-	];
-	const estadosDisponiblesBase = ['Todos', ...Object.values(ESTADO_LABELS)];
-
-	let provinciasDisponibles: string[] = [];
-	export let filtroParticipacionSeleccionado: 'Todos' | TipoParticipacionDescripcion = 'Todos';
-	export let estadoSeleccionado: string = 'Todos';
-	export let provinciaSeleccionada: string = 'Todas';
-
-	// Calcular provincias disponibles
-	$: provinciasDisponibles = [
-		'Todas',
-		...Array.from(
-			new Set(
-				proyectos
-					.map((p) => {
-						const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-						if (primeraUbicacion?.modalidad === 'presencial') {
-							return getProvinciaFromLocalidad(primeraUbicacion.localidad)?.nombre ?? '';
-						}
-						return '';
-					})
-					.filter((s) => s !== '')
-			)
-		).sort()
-	];
-
-	let estadosDisponibles: string[] = [];
-	let tiposParticipacionDisponibles: string[] = [];
-
-	$: {
-		const estadosSet = new Set<string>();
-		const tiposSet = new Set<string>();
-
-		proyectos.forEach((p) => {
-			if (p.estado) estadosSet.add(ESTADO_LABELS[p.estado]);
-			p.participacion_permitida?.forEach((pp) => {
-				if (pp.tipo_participacion?.descripcion) {
-					tiposSet.add(pp.tipo_participacion.descripcion);
-				}
-			});
-		});
-
-		estadosDisponibles = ['Todos', ...Array.from(estadosSet)];
-		tiposParticipacionDisponibles = ['Todos', ...Array.from(tiposSet)];
-	}
-
-	// Sincronizar filtros
-	let filtrosSeleccionados: (TipoParticipacionDescripcion | 'Todos')[] = ['Todos'];
-	$: {
-		if (filtroParticipacionSeleccionado === 'Todos') {
-			filtrosSeleccionados = ['Todos'];
-		} else {
-			filtrosSeleccionados = [filtroParticipacionSeleccionado];
-		}
-	}
-
-	// Aplicar filtros
-	$: proyectosFiltrados = filtrarProyectos(
-		proyectos,
-		filtrosSeleccionados,
-		$searchQuery,
-		estadoSeleccionado,
-		provinciaSeleccionada,
-		categoriaSeleccionada
-	);
-
-	// Filtros adicionales encadenados
-	$: proyectosFiltradosUbicacion = filtrarPorTipoUbicacion(proyectosFiltrados, tipoUbicacion);
-	$: proyectosFiltradosFechas = filtrarPorRangoFechas(
-		proyectosFiltradosUbicacion,
-		fechaDesde,
-		fechaHasta
-	);
-	$: proyectosFiltradosLocalidad = filtrarPorLocalidad(
-		proyectosFiltradosFechas,
-		localidadSeleccionada,
-		tipoUbicacion
-	);
-
-	// Aplicar filtro custom (Tabs)
-	$: proyectosFinales = customFilter
-		? customFilter(proyectosFiltradosLocalidad)
-		: proyectosFiltradosLocalidad;
-
-	// Ordenamiento
-	$: proyectosOrdenados = [...proyectosFinales].sort((a, b) => {
-		if (criterioOrden === 'recientes' || criterioOrden === 'antiguos') {
-			const fechaA = new Date(a.created_at || '').getTime();
-			const fechaB = new Date(b.created_at || '').getTime();
-			return criterioOrden === 'recientes' ? fechaB - fechaA : fechaA - fechaB;
-		} else {
-			const progA = calcularProgresoTotal(a);
-			const progB = calcularProgresoTotal(b);
-			return criterioOrden === 'mayor_progreso' ? progB - progA : progA - progB;
-		}
-	});
-
-	// Paginación
-	$: totalPaginas = Math.ceil(proyectosOrdenados.length / ITEMS_POR_PAGINA);
+	$: totalPaginas = Math.ceil(proyectos.length / ITEMS_POR_PAGINA);
 	$: indiceInicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
 	$: indiceFin = indiceInicio + ITEMS_POR_PAGINA;
-	$: proyectosVisibles = proyectosOrdenados.slice(indiceInicio, indiceFin);
+	$: proyectosVisibles = proyectos.slice(indiceInicio, indiceFin);
 
-	$: if (
-		proyectosOrdenados.length !== proyectos.length ||
-		$searchQuery ||
-		filtroParticipacionSeleccionado
-	) {
+	// Reset página al filtrar
+	$: if (proyectos.length || $consultaBusqueda || $filtroParticipacion) {
 		paginaActual = 1;
 	}
 
@@ -162,18 +67,6 @@
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth' });
 		}
-	}
-
-	function resetFiltros() {
-		filtroParticipacionSeleccionado = 'Todos';
-		estadoSeleccionado = 'Todos';
-		provinciaSeleccionada = 'Todas';
-		categoriaSeleccionada = 'Todas';
-		tipoUbicacion = 'Todas';
-		localidadSeleccionada = 'Todas';
-		fechaDesde = '';
-		fechaHasta = '';
-		searchQuery.set('');
 	}
 </script>
 
@@ -191,20 +84,40 @@
 	<!-- Buscador -->
 	<div class="animate-fade-in-up mx-auto mb-4 w-full max-w-xl">
 		<SearchBar
-			bind:value={$searchQuery}
+			bind:value={$consultaBusqueda}
 			placeholder={placeholderBusqueda}
 			ariaLabel="Campo de búsqueda de proyectos"
 			autofocus={false}
 		/>
 	</div>
 
-	<!-- Slot para filtros personalizados -->
-	<slot
-		name="filtros-personalizados"
-		{resetFiltros}
+	<ProyectosFiltro
+		prefijoId={prefijoIdFiltros}
+		bind:mostrar={$mostrarFiltros}
+		bind:participacion={$filtroParticipacion}
+		bind:categoria={$categoriaSeleccionada}
+		{categoriasDisponibles}
+		bind:tipoUbicacion={$tipoUbicacion}
+		bind:provincia={$provinciaSeleccionada}
+		bind:localidad={$localidadSeleccionada}
+		bind:fechaDesde={$fechaDesde}
+		bind:fechaHasta={$fechaHasta}
 		{provinciasDisponibles}
-		{estadosDisponibles}
+		localidadesDisponibles={localidades}
 		tiposParticipacion={tiposParticipacionDisponibles}
+		{mostrarEstado}
+		bind:estado={$estadoSeleccionado}
+		{estadosDisponibles}
+		bind:criterioOrden={$criterioOrden}
+		on:reset={() => {
+			restablecerFiltros();
+			// $consultaBusqueda = ''; // reset manejado por restablecerFiltros de composable usualmente, verificar
+		}}
+		on:ubicacionChange={() => {
+			$provinciaSeleccionada = 'Todas';
+			$localidadSeleccionada = 'Todas';
+		}}
+		on:toggle={() => ($mostrarFiltros = !$mostrarFiltros)}
 	/>
 
 	<!-- Contador -->
@@ -213,9 +126,7 @@
 			Mostrando <strong>{proyectosVisibles.length}</strong> proyecto{proyectosVisibles.length !== 1
 				? 's'
 				: ''}
-			de <strong>{proyectosOrdenados.length}</strong> encontrado{proyectosOrdenados.length !== 1
-				? 's'
-				: ''}
+			de <strong>{proyectos.length}</strong> encontrado{proyectos.length !== 1 ? 's' : ''}
 		</p>
 	</div>
 
@@ -227,13 +138,13 @@
 				out:fade={{ duration: 150 }}
 				class="transition-transform hover:scale-[1.02]"
 			>
-				<slot name="card" {proyecto} {resetFiltros} />
+				<slot name="card" {proyecto} />
 			</div>
 		{/each}
 	</div>
 
 	<!-- Paginación -->
-	{#if proyectosOrdenados.length > ITEMS_POR_PAGINA}
+	{#if proyectos.length > ITEMS_POR_PAGINA}
 		<div class="mt-8">
 			<Pagination
 				currentPage={paginaActual}
@@ -244,18 +155,18 @@
 	{/if}
 
 	<!-- Sin resultados -->
-	{#if proyectosOrdenados.length === 0}
+	{#if proyectos.length === 0}
 		<div class="animate-fade-in-up py-24 text-center">
 			<h3 class="mb-4 text-xl font-semibold text-gray-800">{textoVacio}</h3>
 			<p class="mx-auto mb-6 max-w-xl text-gray-600">
-				{#if $searchQuery.trim() !== ''}
-					No se encontraron resultados para <strong>"{$searchQuery.trim()}"</strong>.
+				{#if $consultaBusqueda.trim() !== ''}
+					No se encontraron resultados para <strong>"{$consultaBusqueda.trim()}"</strong>.
 				{:else}
 					{descripcionVacia}
 				{/if}
 			</p>
 			<div class="flex justify-center">
-				<slot name="empty-action" {resetFiltros} />
+				<slot name="empty-action" {restablecerFiltros} />
 			</div>
 		</div>
 	{/if}

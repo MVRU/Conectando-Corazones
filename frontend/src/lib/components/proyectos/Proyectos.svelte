@@ -52,10 +52,6 @@
 				</button>
 			</div>
 		</div>
-	{:else}
-		<div class="mb-8 flex justify-center px-4">
-			<h1 class="text-3xl font-bold text-gray-900">Proyectos Solidarios</h1>
-		</div>
 	{/if}
 
 	{#if activeTab === 'todos'}

@@ -15,7 +15,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2020-01-01'),
 		rol: 'administrador',
-		url_foto: '/users/admin-default.png',
+		url_foto: '/users/user-default.png',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
@@ -92,7 +92,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-10'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-garrahan.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
 		tipo_institucion: 'Salud pública',
 
@@ -125,7 +125,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-01'),
 		rol: 'colaborador',
-		url_foto: '/users/maria-gonzalez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		contactos: [
 			{
@@ -160,7 +160,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-15'),
 		rol: 'colaborador',
-		url_foto: '/users/biblioteca-popular.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Biblioteca Popular Los Libros',
 		con_fines_de_lucro: false,
@@ -193,7 +193,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-01-20'),
 		rol: 'colaborador',
-		url_foto: '/users/fundacion-manos-unidas.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Fundación Manos Unidas Argentina',
 		con_fines_de_lucro: false,
@@ -240,7 +240,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-05'),
 		rol: 'colaborador',
-		url_foto: '/users/empresa-solidaria.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Empresa Solidaria S.A.',
 		con_fines_de_lucro: true,
@@ -279,7 +279,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-01'),
 		rol: 'colaborador',
-		url_foto: '/users/ana-martinez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		contactos: [
 			{
@@ -320,7 +320,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/clinica-san-jorge.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Clínica San Jorge S.A.',
 		tipo_institucion: 'Salud privada',
 		contactos: [
@@ -362,7 +362,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-10'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-siempre.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Siempre',
 		tipo_institucion: 'Fundación',
 		contactos: [
@@ -385,7 +385,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/comedor-los-pinos.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Comedor Los Pinos',
 		tipo_institucion: 'Comedor',
 		contactos: [
@@ -408,7 +408,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-04-01'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-sanjose.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital General San José',
 		tipo_institucion: 'Hospital',
 		contactos: [
@@ -431,7 +431,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-05-01'),
 		rol: 'institucion',
-		url_foto: '/users/instituto-formacion.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Instituto de Formación Laboral',
 		tipo_institucion: 'Instituto',
 		contactos: [
@@ -454,7 +454,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-06-01'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-calor.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Calor Humano',
 		tipo_institucion: 'Fundación',
 		contactos: [
@@ -477,7 +477,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-07-01'),
 		rol: 'institucion',
-		url_foto: '/users/hogar-santa-teresa.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hogar Santa Teresa',
 		tipo_institucion: 'Hogar',
 		contactos: [

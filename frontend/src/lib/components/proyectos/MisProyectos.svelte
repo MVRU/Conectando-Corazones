@@ -3,12 +3,9 @@
 	import type { Usuario } from '$lib/types/Usuario';
 	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { writable } from 'svelte/store';
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
-	import { type TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
-	import { createProyectosFiltros, FILTROS_INICIALES } from '$lib/composables/useProyectosFiltros';
-	import ProyectosFiltro from './ProyectosFiltro.svelte';
+	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
@@ -17,23 +14,31 @@
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = proyectosPorDefecto;
 
-	const filtrosUtils = createProyectosFiltros();
+	// Inicializar composable de filtros
+	const {
+		proyectos: proyectosStore,
+		proyectosOrdenados,
+		mostrarFiltros,
+		filtroParticipacion,
+		categoriaSeleccionada,
+		tipoUbicacion,
+		provinciaSeleccionada,
+		localidadSeleccionada,
+		fechaDesde,
+		fechaHasta,
+		estadoSeleccionado,
+		criterioOrden,
+		consultaBusqueda,
+		categoriasDisponibles,
+		provinciasDisponibles,
+		estadosDisponibles,
+		tiposParticipacionDisponibles,
+		calcularLocalidadesDisponibles,
+		restablecerFiltros
+	} = createProyectosFiltros();
 
 	let pestanaActiva: 'todos' | 'activos' | 'completados' =
 		($page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos';
-
-	let consultaBusqueda = writable('');
-
-	let mostrarFiltros = false;
-	let filtroParticipacion = FILTROS_INICIALES.filtroParticipacion;
-	let categoriaSeleccionada = FILTROS_INICIALES.categoriaSeleccionada;
-	let tipoUbicacion = FILTROS_INICIALES.tipoUbicacion;
-	let provinciaSeleccionada = FILTROS_INICIALES.provinciaSeleccionada;
-	let localidadSeleccionada = FILTROS_INICIALES.localidadSeleccionada;
-	let fechaDesde = FILTROS_INICIALES.fechaDesde;
-	let fechaHasta = FILTROS_INICIALES.fechaHasta;
-	let estadoSeleccionado = FILTROS_INICIALES.estadoSeleccionado;
-	let criterioOrden = FILTROS_INICIALES.criterioOrden;
 
 	$: {
 		const estadoUrl = $page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados';
@@ -54,12 +59,8 @@
 	}
 
 	$: proyectosUsuario = filtrarProyectosPorUsuario(proyectos, usuario);
-
-	// Calcular localidades disponibles usando utilidad compartida
-	$: localidadesDisponibles = filtrosUtils.calcularLocalidadesDisponibles(
-		proyectosUsuario,
-		provinciaSeleccionada
-	);
+	$: proyectosFiltradosPestana = filtroCustom(proyectosUsuario);
+	$: proyectosStore.set(proyectosFiltradosPestana);
 
 	// Textos dinámicos
 	$: tituloSeccion =
@@ -83,18 +84,6 @@
 				? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
 				: 'No tenés ningún proyecto asociado a tu cuenta.';
 
-	// Función para restablecer filtros
-	function restablecerFiltros() {
-		filtroParticipacion = FILTROS_INICIALES.filtroParticipacion;
-		categoriaSeleccionada = FILTROS_INICIALES.categoriaSeleccionada;
-		tipoUbicacion = FILTROS_INICIALES.tipoUbicacion;
-		provinciaSeleccionada = FILTROS_INICIALES.provinciaSeleccionada;
-		localidadSeleccionada = FILTROS_INICIALES.localidadSeleccionada;
-		fechaDesde = FILTROS_INICIALES.fechaDesde;
-		fechaHasta = FILTROS_INICIALES.fechaHasta;
-		estadoSeleccionado = FILTROS_INICIALES.estadoSeleccionado;
-	}
-
 	$: filtroCustom = (proyectosInput: Proyecto[]) => {
 		if (pestanaActiva === 'todos') return proyectosInput;
 		if (pestanaActiva === 'activos') {
@@ -109,20 +98,29 @@
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-8 sm:px-10 lg:px-20">
 	<ProyectosBase
-		proyectos={proyectosUsuario}
+		proyectos={$proyectosOrdenados}
 		titulo={tituloSeccion}
 		textoVacio={tituloVacio}
 		{descripcionVacia}
-		bind:categoriaSeleccionada
-		bind:tipoUbicacion
-		bind:localidadSeleccionada
-		bind:fechaDesde
-		bind:fechaHasta
-		bind:criterioOrden
-		filtroParticipacionSeleccionado={filtroParticipacion}
-		bind:estadoSeleccionado
-		bind:provinciaSeleccionada
-		customFilter={filtroCustom}
+		mostrarEstado={pestanaActiva === 'todos'}
+		prefijoIdFiltros="mis-proyectos"
+		{mostrarFiltros}
+		{filtroParticipacion}
+		{categoriaSeleccionada}
+		{tipoUbicacion}
+		{provinciaSeleccionada}
+		{localidadSeleccionada}
+		{fechaDesde}
+		{fechaHasta}
+		{estadoSeleccionado}
+		{criterioOrden}
+		{consultaBusqueda}
+		{categoriasDisponibles}
+		provinciasDisponibles={$provinciasDisponibles}
+		estadosDisponibles={$estadosDisponibles}
+		tiposParticipacionDisponibles={$tiposParticipacionDisponibles}
+		{calcularLocalidadesDisponibles}
+		{restablecerFiltros}
 	>
 		<svelte:fragment slot="header-actions">
 			<div class="mb-4 flex flex-wrap justify-center gap-3">
@@ -156,59 +154,12 @@
 			</div>
 		</svelte:fragment>
 
-		<svelte:fragment
-			slot="filtros-personalizados"
-			let:resetFiltros
-			let:provinciasDisponibles
-			let:estadosDisponibles
-			let:tiposParticipacion
-		>
-			<ProyectosFiltro
-				prefijoId="mis-proyectos"
-				bind:mostrar={mostrarFiltros}
-				bind:participacion={filtroParticipacion}
-				bind:categoria={categoriaSeleccionada}
-				categoriasDisponibles={filtrosUtils.categoriasDisponibles}
-				bind:tipoUbicacion
-				bind:provincia={provinciaSeleccionada}
-				bind:localidad={localidadSeleccionada}
-				bind:fechaDesde
-				bind:fechaHasta
-				{provinciasDisponibles}
-				{localidadesDisponibles}
-				{tiposParticipacion}
-				mostrarEstado={pestanaActiva === 'todos'}
-				bind:estado={estadoSeleccionado}
-				{estadosDisponibles}
-				bind:criterioOrden
-				on:reset={() => {
-					restablecerFiltros();
-					resetFiltros();
-				}}
-				on:ubicacionChange={() => {
-					provinciaSeleccionada = 'Todas';
-					localidadSeleccionada = 'Todas';
-				}}
-				on:toggle={() => (mostrarFiltros = !mostrarFiltros)}
-			/>
-		</svelte:fragment>
-
 		<svelte:fragment slot="card" let:proyecto>
 			<ProyectoCard
 				{proyecto}
 				{usuario}
 				variant="mis-proyectos"
 				esInstitucion={usuario?.rol === 'institucion'}
-			/>
-		</svelte:fragment>
-
-		<svelte:fragment slot="empty-action" let:resetFiltros>
-			<Button
-				label="Limpiar filtros"
-				on:click={() => {
-					restablecerFiltros();
-					resetFiltros();
-				}}
 			/>
 		</svelte:fragment>
 	</ProyectosBase>
