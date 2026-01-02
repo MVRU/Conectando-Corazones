@@ -79,7 +79,9 @@ export function validarCalle(calle: string): boolean {
 }
 
 export function validarNumeroCalle(numero: string): boolean {
-	return /^\d{1,5}$/.test(numero);
+	const trim = numero.trim();
+	// Permitir números (1-5 dígitos) o texto corto alfanumérico como "S/N"
+	return trim.length > 0 && trim.length <= 10 && /^[a-zA-Z0-9\s/.-]+$/.test(trim);
 }
 
 export function validarProvincia(provincia: string): boolean {

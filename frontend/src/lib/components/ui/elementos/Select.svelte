@@ -151,7 +151,6 @@ export let ariaDescribedBy: string | undefined = undefined;
 		</label>
 	{/if}
 
-	<!-- Contenedor del Select -->
 	<div class="relative" bind:this={selectRef}>
 		<input
 			type="text"
@@ -184,7 +183,6 @@ export let ariaDescribedBy: string | undefined = undefined;
 		aria-describedby={ariaDescribedBy}
 	/>
 
-		<!-- Ícono de flecha -->
 		<button
 			type="button"
 			class={clsx(
@@ -201,12 +199,10 @@ export let ariaDescribedBy: string | undefined = undefined;
 			</svg>
 		</button>
 
-		<!-- Opciones desplegables -->
 		{#if isOpen}
 			<div
 				class="absolute z-50 mt-2 max-h-60 w-full overflow-hidden rounded-2xl border border-slate-100/80 bg-white/95 shadow-2xl ring-1 ring-black/5"
 			>
-				<!-- Lista de opciones -->
 				<div class="max-h-52 overflow-auto overscroll-contain">
 					{#each filteredOptions as option (option.value)}
 						<button

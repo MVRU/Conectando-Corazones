@@ -8,6 +8,24 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import {
+		Trophy,
+		Star,
+		AcademicCap,
+		Sparkles,
+		CurrencyDollar,
+		HandRaised,
+		ArchiveBox,
+		Clipboard,
+		User,
+		PresentationChartLine,
+		RocketLaunch,
+		Clock,
+		Heart,
+		ChartBar,
+		CursorArrowRays
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	// Datos personalizados para colaborador
 	const perfilColaborador = {
@@ -79,10 +97,10 @@
 	];
 
 	const insigniasRecientes = [
-		{ nombre: 'Primera Donación', icono: '🏆', fecha: 'Ene 2024' },
-		{ nombre: 'Voluntario Constante', icono: '⭐', fecha: 'Mar 2024' },
-		{ nombre: 'Mentor del Mes', icono: '👨‍🏫', fecha: 'May 2024' },
-		{ nombre: 'Donante Generoso', icono: '💎', fecha: 'Jun 2024' }
+		{ nombre: 'Primera Donación', icono: Trophy, fecha: 'Ene 2024' },
+		{ nombre: 'Voluntario Constante', icono: Star, fecha: 'Mar 2024' },
+		{ nombre: 'Mentor del Mes', icono: AcademicCap, fecha: 'May 2024' },
+		{ nombre: 'Donante Generoso', icono: Sparkles, fecha: 'Jun 2024' }
 	];
 
 	const categoriasFavoritas = [
@@ -114,13 +132,13 @@
 	function getTipoIcon(tipo: string) {
 		switch (tipo) {
 			case 'donacion':
-				return '💰';
+				return CurrencyDollar;
 			case 'voluntariado':
-				return '🤝';
+				return HandRaised;
 			case 'material':
-				return '📦';
+				return ArchiveBox;
 			default:
-				return '📋';
+				return Clipboard;
 		}
 	}
 </script>
@@ -136,10 +154,12 @@
 		<div class="flex items-center justify-between">
 			<div class="flex items-center gap-4">
 				<div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl">
-					👤
+					<Icon src={User} class="h-8 w-8 text-white" />
 				</div>
 				<div>
-					<h1 class="text-2xl font-bold">¡Hola, {perfilColaborador.nombre}! 👋</h1>
+					<h1 class="text-2xl font-bold">
+						¡Hola, {perfilColaborador.nombre}! <Icon src={HandRaised} class="inline h-6 w-6" />
+					</h1>
 					<p class="text-blue-100">
 						{perfilColaborador.nivel} • Activo {perfilColaborador.tiempoActivo}
 					</p>
@@ -203,7 +223,9 @@
 				class:translate-y-4={!animate}
 				style="transition-delay: 300ms"
 			>
-				<h2 class="mb-4 text-lg font-bold text-gray-900">📈 Tu Actividad Reciente</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={PresentationChartLine} class="h-5 w-5 text-blue-600" /> Tu Actividad Reciente
+				</h2>
 				<div class="space-y-3">
 					{#each actividadReciente as actividad, i}
 						<div
@@ -211,7 +233,9 @@
 							class:opacity-0={!animate}
 							style="transition-delay: {400 + i * 100}ms"
 						>
-							<div class="text-2xl">{getTipoIcon(actividad.tipo)}</div>
+							<div class="text-2xl">
+								<Icon src={getTipoIcon(actividad.tipo)} class="h-6 w-6 text-gray-600" />
+							</div>
 							<div class="flex-1">
 								<p class="font-medium text-gray-900">{actividad.descripcion}</p>
 								<p class="text-sm text-gray-600">{actividad.proyecto}</p>
@@ -232,7 +256,9 @@
 				class:translate-y-4={!animate}
 				style="transition-delay: 400ms"
 			>
-				<h2 class="mb-4 text-lg font-bold text-gray-900">🚀 Próximas Oportunidades</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={RocketLaunch} class="h-5 w-5 text-purple-600" /> Próximas Oportunidades
+				</h2>
 				<div class="space-y-3">
 					{#each proximasOportunidades as oportunidad, i}
 						<div
@@ -252,10 +278,16 @@
 							<div class="flex items-center gap-4 text-xs">
 								<span class="font-medium">{oportunidad.tipo}</span>
 								{#if oportunidad.tiempo}
-									<span>⏱️ {oportunidad.tiempo}</span>
+									<span class="flex items-center gap-1">
+										<Icon src={Clock} class="h-3 w-3" />
+										{oportunidad.tiempo}
+									</span>
 								{/if}
 								{#if oportunidad.objetivo}
-									<span>🎯 {oportunidad.objetivo}</span>
+									<span class="flex items-center gap-1">
+										<Icon src={CursorArrowRays} class="h-3 w-3" />
+										{oportunidad.objetivo}
+									</span>
 								{/if}
 							</div>
 						</div>
@@ -273,7 +305,9 @@
 				class:translate-y-4={!animate}
 				style="transition-delay: 500ms"
 			>
-				<h2 class="mb-4 text-lg font-bold text-gray-900">🏆 Insignias</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={Trophy} class="h-5 w-5 text-yellow-600" /> Insignias
+				</h2>
 				<div class="grid grid-cols-2 gap-3">
 					{#each insigniasRecientes as insignia, i}
 						<div
@@ -281,7 +315,9 @@
 							class:opacity-0={!animate}
 							style="transition-delay: {600 + i * 100}ms"
 						>
-							<div class="mb-1 text-2xl">{insignia.icono}</div>
+							<div class="mb-1 flex justify-center text-2xl">
+								<Icon src={insignia.icono} class="h-8 w-8 text-yellow-500" />
+							</div>
 							<p class="text-xs font-medium text-gray-900">{insignia.nombre}</p>
 							<p class="text-xs text-gray-500">{insignia.fecha}</p>
 						</div>
@@ -296,7 +332,9 @@
 				class:translate-y-4={!animate}
 				style="transition-delay: 600ms"
 			>
-				<h2 class="mb-4 text-lg font-bold text-gray-900">❤️ Tus Categorías</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-gray-900">
+					<Icon src={Heart} class="h-5 w-5 text-red-500" /> Tus Categorías
+				</h2>
 				<div class="space-y-3">
 					{#each categoriasFavoritas as categoria, i}
 						<div
@@ -326,7 +364,9 @@
 				class:translate-y-4={!animate}
 				style="transition-delay: 700ms"
 			>
-				<h2 class="mb-4 text-lg font-bold text-blue-900">📊 Resumen</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-blue-900">
+					<Icon src={ChartBar} class="h-5 w-5 text-blue-700" /> Resumen
+				</h2>
 				<div class="space-y-3 text-sm">
 					<div class="flex justify-between">
 						<span class="text-blue-700">Impacto este mes:</span>

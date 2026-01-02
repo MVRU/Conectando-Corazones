@@ -11,6 +11,9 @@
 	} from '$lib/types/Usuario';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
+	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
+	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	// Usamos un usuario real de los mocks
 	let usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador =
@@ -110,27 +113,6 @@
 
 		alert('Contraseña cambiada exitosamente');
 	}
-
-	// --- Iconos para categorías ---
-	const categoriaIconos: Record<string, string> = {
-		Medioambiente: '🌱',
-		Educación: '📚',
-		Salud: '➕',
-		'Desarrollo económico': '💼',
-		'Promoción de la paz': '☮️',
-		Seguridad: '🛡️',
-		Entretenimiento: '🎭',
-		Liderazgo: '👑',
-		'Personas con discapacidades': '♿',
-		Tecnología: '💻',
-		Política: '🏛️',
-		Religión: '🙏',
-		'LGTBQ+': '🏳️‍🌈',
-		'Apoyo ante una crisis': '🆘',
-		Empleo: '💼',
-		'Inmigrantes y refugiados': '🛂',
-		Otro: '🔧'
-	};
 
 	let showDeleteModal = false;
 	function eliminarCuenta() {
@@ -234,7 +216,12 @@
 							on:change={() => toggleCategoria(categoria.id_categoria!)}
 							class="h-5 w-5 rounded-2xl border-gray-300 accent-blue-500 focus:ring-2 focus:ring-blue-200"
 						/>
-						<span class="text-2xl">{categoriaIconos[categoria.descripcion] || '🔧'}</span>
+						<span class="text-2xl">
+							<Icon
+								src={ICONOS_CATEGORIA[categoria.descripcion] || Wrench}
+								class="h-6 w-6 text-gray-600"
+							/>
+						</span>
 						<span
 							class={preferencias.includes(categoria.id_categoria!)
 								? 'font-semibold text-blue-700'
@@ -346,14 +333,7 @@
 			class="mt-12 flex flex-col gap-6 border-t pt-8 md:flex-row md:items-center md:justify-between"
 		>
 			<div class="flex items-center gap-3">
-				<svg class="h-7 w-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16zm-4-4a4 4 0 118 0 4 4 0 01-8 0z"
-					/></svg
-				>
+				<Icon src={ExclamationCircle} class="h-7 w-7 text-red-400" />
 				<span class="font-semibold text-red-500">Eliminar cuenta</span>
 			</div>
 			<Button
@@ -368,18 +348,7 @@
 	{#if showDeleteModal}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
 			<div class="flex w-full max-w-sm flex-col items-center rounded-2xl bg-white p-8 shadow-xl">
-				<svg
-					class="mb-4 h-12 w-12 text-red-400"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16zm-4-4a4 4 0 118 0 4 4 0 01-8 0z"
-					/></svg
-				>
+				<Icon src={ExclamationCircle} class="mb-4 h-12 w-12 text-red-400" />
 				<p class="mb-4 text-center text-lg font-semibold text-red-600">
 					¿Está seguro de eliminar su cuenta?
 				</p>

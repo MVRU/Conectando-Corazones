@@ -1,0 +1,115 @@
+<script lang="ts">
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { PaperAirplane, XMark } from '@steeze-ui/heroicons';
+	import { createEventDispatcher, onMount } from 'svelte';
+	import { fade, scale } from 'svelte/transition';
+
+	export let open = false;
+
+	const dispatch = createEventDispatcher();
+	let mensajeColaboracion = '';
+	let textarea: HTMLTextAreaElement;
+
+	function cerrar() {
+		open = false;
+		dispatch('close');
+	}
+
+	function enviar() {
+		dispatch('submit', { mensaje: mensajeColaboracion });
+		mensajeColaboracion = '';
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (open && e.key === 'Escape') cerrar();
+	}
+
+	$: if (open && textarea) {
+		setTimeout(() => textarea.focus(), 100);
+	}
+</script>
+
+<svelte:window on:keydown={handleKeydown} />
+
+{#if open}
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		on:click={cerrar}
+		transition:fade={{ duration: 200 }}
+		aria-hidden="true"
+	></div>
+
+	<div
+		class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="modal-colaborar-titulo"
+	>
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all"
+			transition:scale={{ duration: 200, start: 0.95 }}
+		>
+			<div
+				class="relative border-b border-gray-100 bg-gradient-to-tr from-sky-50 to-white px-5 pb-5 pt-6 text-center"
+			>
+				<button
+					type="button"
+					class="absolute right-4 top-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-200"
+					on:click={cerrar}
+					aria-label="Cerrar modal"
+				>
+					<Icon src={XMark} class="h-5 w-5" />
+				</button>
+
+				<h2
+					id="modal-colaborar-titulo"
+					class="bg-gradient-to-tr from-sky-600 to-sky-400 bg-clip-text text-xl font-extrabold leading-tight text-transparent sm:text-2xl"
+				>
+					¡Tu ayuda transforma vidas!
+				</h2>
+			</div>
+
+			<!-- Contenido -->
+			<div class="space-y-4 px-6 py-6 text-sm text-gray-700">
+				<p class="text-gray-800">
+					Escribí un mensaje a la institución contando por qué querés colaborar, qué te motiva o qué
+					podés aportar.
+				</p>
+
+				<div>
+					<label for="mensaje-colaboracion" class="mb-1.5 block text-xs font-semibold text-gray-700"
+						>Tu mensaje (opcional pero recomendado)</label
+					>
+					<textarea
+						id="mensaje-colaboracion"
+						bind:this={textarea}
+						class="min-h-[120px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-sky-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-sky-100"
+						bind:value={mensajeColaboracion}
+						placeholder="Ej.: Me gustaría sumarme como voluntario los fines de semana..."
+					></textarea>
+				</div>
+			</div>
+
+			<!-- Acciones -->
+			<div
+				class="flex flex-col-reverse gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between"
+			>
+				<button
+					type="button"
+					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 sm:w-auto"
+					on:click={cerrar}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 active:translate-y-[1px] sm:w-auto"
+					on:click={enviar}
+				>
+					<Icon src={PaperAirplane} class="h-4 w-4" aria-hidden="true" />
+					Enviar mi solicitud
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

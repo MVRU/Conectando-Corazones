@@ -2,6 +2,7 @@ import type { Localidad } from '$lib/types/Localidad';
 import type { Provincia } from '$lib/types/Provincia';
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import type { UbicacionDisyuncion, UbicacionPresencial, UbicacionVirtual } from '$lib/types/Ubicacion';
 
 /**
  * * Getters sencillos
@@ -23,12 +24,6 @@ export function getProvinciaFromLocalidad(localidad?: Localidad): Provincia | un
 	if (provinciaId === undefined || provinciaId === null) return undefined;
 	return provincias.find((p) => p.id_provincia === provinciaId);
 }
-
-/*
- -!- Helper para obtener localidades por ID y evitar depender del índice del arreglo mockLocalidades
- */
-export const obtenerLocalidadPorId = (localidadId: number): Localidad | undefined =>
-	mockLocalidades.find((l) => l.id_localidad === localidadId);
 
 /**
  * -!- Mapa de ciudades por provincia para consultas rápidas
@@ -77,4 +72,73 @@ export function searchCities(query: string): string[] {
 
 export function getAllProvinceNames(): string[] {
 	return provincias.map((p) => p.nombre).sort((a, b) => a.localeCompare(b));
+}
+
+/**
+ * Para verificar si una ubicación es presencial
+ */
+export function esUbicacionPresencial(u?: UbicacionDisyuncion): u is UbicacionPresencial {
+	return !!u && (u as UbicacionPresencial).modalidad === 'presencial';
+}
+
+/**
+ * Para verificar si una ubicación es virtual
+ */
+export function esUbicacionVirtual(u?: UbicacionDisyuncion): u is UbicacionVirtual {
+	return !!u && (u as UbicacionVirtual).modalidad === 'virtual';
+}
+
+
+/**
+ * Construye una dirección completa desde una ubicación presencial
+ */
+export function construirDireccionCompleta(u: UbicacionPresencial): string {
+	const calle = u.calle?.trim();
+	const numero = u.numero?.toString().trim();
+	const localidad = u.localidad?.nombre?.trim();
+	const provincia = u.localidad?.provincia?.nombre?.trim();
+
+	return [[calle, numero].filter(Boolean).join(' '), localidad, provincia]
+		.filter(Boolean)
+		.join(', ');
+}
+
+/**
+ * Genera URL de Google Maps desde una ubicación presencial
+ * Prioriza url_google_maps manual, sino genera automáticamente
+ */
+export function generarUrlGoogleMaps(u: UbicacionPresencial): string | null {
+	// Si tiene URL manual, la usa
+	if (u.url_google_maps?.trim()) {
+		let url = u.url_google_maps.trim();
+
+		// Si no tiene protocolo, agregarlo
+		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+			url = 'https://' + url;
+		}
+
+		return url;
+	}
+
+	// Sino genera automáticamente
+	const direccion = construirDireccionCompleta(u);
+	return direccion
+		? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(direccion)}`
+		: null;
+}
+
+/**
+ * Variante simplificada
+ */
+export function crearUrlGoogleMapsBasica(direccionCompleta: string): string {
+	return `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+}
+
+/**
+ * Obtiene todas las localidades de una provincia por nombre
+ */
+export function obtenerLocalidadesPorProvincia(nombreProvincia: string): Localidad[] {
+	const provincia = provincias.find((p) => p.nombre === nombreProvincia);
+	if (!provincia) return [];
+	return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
 }

@@ -1,5 +1,7 @@
 import type { Colaboracion } from '$lib/types/Colaboracion';
 import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
+import { BuildingOffice, User } from '@steeze-ui/heroicons';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 
 /**
  * * Retorna el nombre visible de un colaborador
@@ -24,15 +26,15 @@ export function colaboracionesVisibles(colaboraciones: Colaboracion[] = []): Col
 /**
  * * Devuelve un icono según el tipo de colaborador
  */
-export function getTipoIcon(colaboracion: Colaboracion): string {
+export function getTipoIcon(colaboracion: Colaboracion): IconSource {
 	if (
 		colaboracion.colaborador &&
 		'tipo_colaborador' in colaboracion.colaborador &&
 		colaboracion.colaborador.tipo_colaborador === 'organizacion'
 	) {
-		return '🏢';
+		return BuildingOffice;
 	}
-	return '👤';
+	return User;
 }
 
 /**
