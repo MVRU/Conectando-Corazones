@@ -13,14 +13,14 @@ import { calcularProgresoTotal } from '$lib/utils/util-progreso';
  */
 export const FILTROS_INICIALES = {
 	mostrarFiltros: false,
-	filtroParticipacion: 'Todos' as 'Todos' | TipoParticipacionDescripcion,
-	categoriaSeleccionada: 'Todas',
+	filtroParticipacion: [] as string[],
+	categoriaSeleccionada: [] as string[],
 	tipoUbicacion: 'Todas' as 'Todas' | 'Presencial' | 'Virtual',
 	provinciaSeleccionada: 'Todas',
 	localidadSeleccionada: 'Todas',
 	fechaDesde: '',
 	fechaHasta: '',
-	estadoSeleccionado: 'Todos',
+	estadoSeleccionado: [] as string[],
 	criterioOrden: 'recientes' as 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'
 };
 
@@ -70,7 +70,7 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		]) => {
 			let resultado = filtrarProyectos(
 				$proyectos,
-				$participacion === 'Todos' ? ['Todos'] : [$participacion],
+				$participacion,
 				$search,
 				$estado,
 				$provincia,

@@ -122,7 +122,8 @@
 	<div class="flex flex-grow flex-col p-3 sm:p-4">
 		<div class="mb-3">
 			<h3
-				class="mb-1.5 line-clamp-2 text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
+				class="mb-1.5 line-clamp-2 break-words text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
+				title={proyecto.titulo}
 			>
 				{proyecto.titulo}
 			</h3>
@@ -141,7 +142,7 @@
 			{/if}
 		</div>
 
-		<p class="mb-3 line-clamp-3 text-sm leading-relaxed text-gray-600">
+		<p class="mb-3 line-clamp-2 text-sm leading-relaxed text-gray-600" title={proyecto.descripcion}>
 			{proyecto.descripcion}
 		</p>
 
@@ -232,7 +233,7 @@
 						<Button
 							label="Ver detalles"
 							href={`/proyectos/${proyecto.id_proyecto}`}
-							variant="secondary"
+							variant={botonColaborarDeshabilitado ? 'primary' : 'secondary'}
 							size="sm"
 							customClass="flex-1"
 							customAriaLabel="Ver detalles del proyecto"
@@ -241,6 +242,7 @@
 							label="Colaborar ahora"
 							href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
 							size="sm"
+							variant={botonColaborarDeshabilitado ? 'secondary' : 'primary'}
 							disabled={botonColaborarDeshabilitado}
 							customClass="flex-1 cursor-pointer"
 							customAriaLabel="Colaborar en este proyecto"
@@ -262,13 +264,6 @@
 </div>
 
 <style>
-	.line-clamp-3 {
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
 	.line-clamp-2 {
 		display: -webkit-box;
 		-webkit-line-clamp: 2;

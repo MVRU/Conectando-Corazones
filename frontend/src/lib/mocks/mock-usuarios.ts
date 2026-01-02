@@ -488,6 +488,75 @@ export const mockUsuarios = {
 			}
 		],
 		consentimientos: []
+	} satisfies Institucion,
+
+	refugio_patitas: {
+		id_usuario: 16,
+		username: 'refugio_patitas',
+		password: '123456',
+		nombre: 'Clara',
+		apellido: 'Benitez',
+		fecha_nacimiento: new Date('1990-01-20'),
+		estado: 'activo',
+		created_at: new Date('2024-08-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Asociación Civil Refugio Patitas',
+		tipo_institucion: 'Protección Animal',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'adopciones@patitasfelices.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ecologistas_cordoba: {
+		id_usuario: 17,
+		username: 'ecologistas_cba',
+		password: '123456',
+		nombre: 'Lucas',
+		apellido: 'Serrano',
+		fecha_nacimiento: new Date('1985-05-05'),
+		estado: 'activo',
+		created_at: new Date('2024-08-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Ecologistas Unidos de Córdoba',
+		tipo_institucion: 'Medio Ambiente',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@ecologistas.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	biblioteca_barrial: {
+		id_usuario: 18,
+		username: 'biblioread',
+		password: '123456',
+		nombre: 'Marta',
+		apellido: 'Quiroga',
+		fecha_nacimiento: new Date('1960-12-01'),
+		estado: 'activo',
+		created_at: new Date('2024-08-15'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Biblioteca Popular El Saber',
+		tipo_institucion: 'Biblioteca',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@bibliotecasaber.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
 	} satisfies Institucion
 } as const;
 

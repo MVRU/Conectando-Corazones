@@ -5,10 +5,9 @@
 	import Pagination from '$lib/components/ui/elementos/Pagination.svelte';
 	import type { Writable } from 'svelte/store';
 	import ProyectosFiltro from './ProyectosFiltro.svelte';
-	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 
 	// Props
-	export let proyectos: Proyecto[] = []; // Proyectos YA filtrados y ordenados
+	export let proyectos: Proyecto[] = [];
 	export let titulo: string = '';
 	export let placeholderBusqueda: string = 'Buscar por título o institución...';
 	export let textoVacio: string = 'No hay proyectos disponibles';
@@ -21,20 +20,20 @@
 
 	// Stores de filtros (Writables)
 	export let mostrarFiltros: Writable<boolean>;
-	export let filtroParticipacion: Writable<'Todos' | TipoParticipacionDescripcion>;
-	export let categoriaSeleccionada: Writable<string>;
+	export let filtroParticipacion: Writable<string[]>;
+	export let categoriaSeleccionada: Writable<string[]>;
 	export let tipoUbicacion: Writable<'Todas' | 'Presencial' | 'Virtual'>;
 	export let provinciaSeleccionada: Writable<string>;
 	export let localidadSeleccionada: Writable<string>;
 	export let fechaDesde: Writable<string>;
 	export let fechaHasta: Writable<string>;
-	export let estadoSeleccionado: Writable<string>;
+	export let estadoSeleccionado: Writable<string[]>;
 	export let criterioOrden: Writable<
 		'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'
 	>;
 	export let consultaBusqueda: Writable<string>;
 
-	// Datos derivados (Stores o Arrays simples pasados desde parent)
+	// Datos derivados
 	export let categoriasDisponibles: string[] = [];
 	export let provinciasDisponibles: string[] = [];
 	export let estadosDisponibles: string[] = [];
@@ -44,7 +43,6 @@
 	export let calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
 	export let restablecerFiltros: () => void;
 
-	// Computed Local
 	$: localidades = calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada);
 
 	// Paginación
@@ -91,34 +89,35 @@
 		/>
 	</div>
 
-	<ProyectosFiltro
-		prefijoId={prefijoIdFiltros}
-		bind:mostrar={$mostrarFiltros}
-		bind:participacion={$filtroParticipacion}
-		bind:categoria={$categoriaSeleccionada}
-		{categoriasDisponibles}
-		bind:tipoUbicacion={$tipoUbicacion}
-		bind:provincia={$provinciaSeleccionada}
-		bind:localidad={$localidadSeleccionada}
-		bind:fechaDesde={$fechaDesde}
-		bind:fechaHasta={$fechaHasta}
-		{provinciasDisponibles}
-		localidadesDisponibles={localidades}
-		tiposParticipacion={tiposParticipacionDisponibles}
-		{mostrarEstado}
-		bind:estado={$estadoSeleccionado}
-		{estadosDisponibles}
-		bind:criterioOrden={$criterioOrden}
-		on:reset={() => {
-			restablecerFiltros();
-			// $consultaBusqueda = ''; // reset manejado por restablecerFiltros de composable usualmente, verificar
-		}}
-		on:ubicacionChange={() => {
-			$provinciaSeleccionada = 'Todas';
-			$localidadSeleccionada = 'Todas';
-		}}
-		on:toggle={() => ($mostrarFiltros = !$mostrarFiltros)}
-	/>
+	<div class="relative z-30">
+		<ProyectosFiltro
+			prefijoId={prefijoIdFiltros}
+			bind:mostrar={$mostrarFiltros}
+			bind:participacion={$filtroParticipacion}
+			bind:categoria={$categoriaSeleccionada}
+			{categoriasDisponibles}
+			bind:tipoUbicacion={$tipoUbicacion}
+			bind:provincia={$provinciaSeleccionada}
+			bind:localidad={$localidadSeleccionada}
+			bind:fechaDesde={$fechaDesde}
+			bind:fechaHasta={$fechaHasta}
+			{provinciasDisponibles}
+			localidadesDisponibles={localidades}
+			tiposParticipacion={tiposParticipacionDisponibles}
+			{mostrarEstado}
+			bind:estado={$estadoSeleccionado}
+			{estadosDisponibles}
+			bind:criterioOrden={$criterioOrden}
+			on:reset={() => {
+				restablecerFiltros();
+			}}
+			on:ubicacionChange={() => {
+				$provinciaSeleccionada = 'Todas';
+				$localidadSeleccionada = 'Todas';
+			}}
+			on:toggle={() => ($mostrarFiltros = !$mostrarFiltros)}
+		/>
+	</div>
 
 	<!-- Contador -->
 	<div class="animate-fade-in-up mb-4 text-center text-sm text-gray-600">

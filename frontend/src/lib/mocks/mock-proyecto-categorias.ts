@@ -2,7 +2,7 @@ import type { ProyectoCategoria } from '$lib/types/ProyectoCategoria';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
 
 export const mockProyectoCategorias: ProyectoCategoria[] = [
-	{ id_proyecto_categoria: 1, proyecto_id: 1, categoria_id: 2, categoria: mockCategorias[1] },
+	{ id_proyecto_categoria: 1, proyecto_id: 1, categoria_id: 5, categoria: mockCategorias[4] },
 	{ id_proyecto_categoria: 2, proyecto_id: 1, categoria_id: 7, categoria: mockCategorias[6] },
 	{ id_proyecto_categoria: 3, proyecto_id: 2, categoria_id: 1, categoria: mockCategorias[0] },
 	{ id_proyecto_categoria: 4, proyecto_id: 3, categoria_id: 3, categoria: mockCategorias[2] },

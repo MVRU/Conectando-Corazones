@@ -2,11 +2,10 @@
 	import { fade, fly } from 'svelte/transition';
 	import { Filter, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 
 	export let mostrar: boolean = false;
-	export let participacion: 'Todos' | TipoParticipacionDescripcion = 'Todos';
-	export let categoria: string = 'Todas';
+	export let participacion: string[] = [];
+	export let categoria: string[] = [];
 	export let categoriasDisponibles: string[] = ['Todas'];
 	export let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
 	export let provincia: string = 'Todas';
@@ -17,7 +16,7 @@
 
 	// Filtro de Estado
 	export let mostrarEstado: boolean = false;
-	export let estado: string = 'Todos';
+	export let estado: string[] = [];
 	export let estadosDisponibles: string[] = [];
 
 	export let provinciasDisponibles: string[] = [];
@@ -42,15 +41,23 @@
 	}
 
 	$: filtrosActivos = [
-		participacion !== 'Todos',
-		categoria !== 'Todas',
+		participacion.length > 0 && !participacion.includes('Todos'),
+		categoria.length > 0 && !categoria.includes('Todas'),
 		tipoUbicacion !== 'Todas',
 		provincia !== 'Todas',
 		localidad !== 'Todas',
 		fechaDesde !== '',
 		fechaHasta !== '',
-		mostrarEstado && estado !== 'Todos'
+		mostrarEstado && estado.length > 0 && !estado.includes('Todos')
 	].filter(Boolean).length;
+
+	let estadoDropdownOpen: boolean = false;
+	let categoriaDropdownOpen: boolean = false;
+	let participacionDropdownOpen: boolean = false;
+	let ubicacionDropdownOpen: boolean = false;
+	let provinciaDropdownOpen: boolean = false;
+	let localidadDropdownOpen: boolean = false;
+	let fechaDropdownOpen: boolean = false;
 </script>
 
 <div class="animate-fade-in-up mb-4 flex flex-wrap justify-center gap-3">
@@ -108,77 +115,235 @@
 			<div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
 				<!-- Filtro por Tipo de Participación -->
 				<div class="flex flex-col gap-1.5">
-					<label
-						for="{prefijoId}-filtro-participacion"
+					<span
+						id="{prefijoId}-label-participacion"
 						class="text-xs font-medium uppercase tracking-wide text-gray-500"
 					>
 						Tipo de participación
-					</label>
+					</span>
 					<div class="relative">
-						<select
-							id="{prefijoId}-filtro-participacion"
-							bind:value={participacion}
-							class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+						<button
+							type="button"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							on:click={() => (participacionDropdownOpen = !participacionDropdownOpen)}
+							aria-haspopup="listbox"
+							aria-expanded={participacionDropdownOpen}
+							aria-labelledby="{prefijoId}-label-participacion"
 						>
-							{#each tiposParticipacion as tipo (tipo)}
-								<option value={tipo}>{tipo}</option>
-							{/each}
-						</select>
-						<ChevronDown
-							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-							size={16}
-						/>
+							<span class="block max-w-[140px] truncate">
+								{#if participacion.length === 0 || participacion.includes('Todos')}
+									Todos
+								{:else if participacion.length <= 2}
+									{participacion.join(', ')}
+								{:else}
+									{participacion.length} seleccionados
+								{/if}
+							</span>
+							<ChevronDown
+								class="text-gray-400 transition-transform duration-200 {participacionDropdownOpen
+									? 'rotate-180'
+									: ''}"
+								size={16}
+							/>
+						</button>
+
+						{#if participacionDropdownOpen}
+							<div
+								class="fixed inset-0 z-10 cursor-default"
+								on:click={() => (participacionDropdownOpen = false)}
+								role="presentation"
+							></div>
+							<div
+								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								in:fly={{ y: -5, duration: 150 }}
+							>
+								<!-- Opción Seleccionar Todos -->
+								<label
+									class="mb-1 flex cursor-pointer items-center gap-3 rounded-md border-b border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+								>
+									<input
+										type="checkbox"
+										class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										checked={participacion.length === 0 || participacion.includes('Todos')}
+										on:change={() => {
+											participacion = [];
+										}}
+									/>
+									<span class="font-medium text-blue-600">Seleccionar todos</span>
+								</label>
+
+								<div class="space-y-0.5">
+									{#each tiposParticipacion.filter((t) => t !== 'Todos') as tipo (tipo)}
+										<label
+											class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+										>
+											<input
+												type="checkbox"
+												class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+												checked={participacion.includes(tipo)}
+												on:change={() => {
+													if (participacion.includes(tipo)) {
+														participacion = participacion.filter((t) => t !== tipo);
+													} else {
+														const clean = participacion.filter((t) => t !== 'Todos');
+														participacion = [...clean, tipo];
+													}
+												}}
+											/>
+											<span>{tipo}</span>
+										</label>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 
-				<!-- Filtro por Categoría -->
+				<!-- Filtro por Categoría (Checkbox Dropdown) -->
 				<div class="flex flex-col gap-1.5">
-					<label
-						for="{prefijoId}-filtro-categoria"
+					<span
+						id="{prefijoId}-label-categoria"
 						class="text-xs font-medium uppercase tracking-wide text-gray-500"
 					>
 						Categoría
-					</label>
+					</span>
 					<div class="relative">
-						<select
-							id="{prefijoId}-filtro-categoria"
-							bind:value={categoria}
-							class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+						<!-- Botón Trigger -->
+						<button
+							type="button"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							on:click={() => (categoriaDropdownOpen = !categoriaDropdownOpen)}
+							aria-haspopup="listbox"
+							aria-expanded={categoriaDropdownOpen}
+							aria-labelledby="{prefijoId}-label-categoria"
 						>
-							{#each categoriasDisponibles as cat (cat)}
-								<option value={cat}>{cat}</option>
-							{/each}
-						</select>
-						<ChevronDown
-							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-							size={16}
-						/>
+							<span class="block max-w-[140px] truncate">
+								{#if categoria.length === 0 || (categoria.length === 1 && categoria[0] === 'Todas')}
+									Todas
+								{:else if categoria.length <= 2}
+									{categoria.join(', ')}
+								{:else}
+									{categoria.length} seleccionadas
+								{/if}
+							</span>
+							<ChevronDown
+								class="text-gray-400 transition-transform duration-200 {categoriaDropdownOpen
+									? 'rotate-180'
+									: ''}"
+								size={16}
+							/>
+						</button>
+
+						<!-- Dropdown Body -->
+						{#if categoriaDropdownOpen}
+							<!-- Backdrop transparente -->
+							<div
+								class="fixed inset-0 z-10 cursor-default"
+								on:click={() => (categoriaDropdownOpen = false)}
+								role="presentation"
+							></div>
+
+							<div
+								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								in:fly={{ y: -5, duration: 150 }}
+							>
+								<!-- Opción Seleccionar Todos -->
+								<label
+									class="mb-1 flex cursor-pointer items-center gap-3 rounded-md border-b border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+								>
+									<input
+										type="checkbox"
+										class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+										checked={categoria.length === 0 ||
+											(categoria.length === 1 && categoria[0] === 'Todas')}
+										on:change={() => {
+											categoria = [];
+										}}
+									/>
+									<span class="font-medium text-blue-600">Seleccionar todas</span>
+								</label>
+
+								<!-- Lista de Categorías -->
+								<div class="space-y-0.5">
+									{#each categoriasDisponibles.filter((c) => c !== 'Todas') as cat (cat)}
+										<label
+											class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+										>
+											<input
+												type="checkbox"
+												class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+												checked={categoria.includes(cat)}
+												on:change={() => {
+													if (categoria.includes(cat)) {
+														categoria = categoria.filter((c) => c !== cat);
+													} else {
+														const clean = categoria.filter((c) => c !== 'Todas');
+														categoria = [...clean, cat];
+													}
+												}}
+											/>
+											<span>{cat}</span>
+										</label>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 
 				<!-- Filtro por Tipo de Ubicación -->
 				<div class="flex flex-col gap-1.5">
-					<label
-						for="{prefijoId}-filtro-tipo-ubicacion"
+					<span
+						id="{prefijoId}-label-ubicacion"
 						class="text-xs font-medium uppercase tracking-wide text-gray-500"
 					>
 						Ubicación
-					</label>
+					</span>
 					<div class="relative">
-						<select
-							id="{prefijoId}-filtro-tipo-ubicacion"
-							bind:value={tipoUbicacion}
-							on:change={manejarCambioUbicacion}
-							class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+						<button
+							type="button"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							on:click={() => (ubicacionDropdownOpen = !ubicacionDropdownOpen)}
 						>
-							<option value="Todas">Todas</option>
-							<option value="Presencial">Presencial</option>
-							<option value="Virtual">Virtual</option>
-						</select>
-						<ChevronDown
-							class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-							size={16}
-						/>
+							<span class="block truncate">{tipoUbicacion}</span>
+							<ChevronDown
+								class="text-gray-400 transition-transform duration-200 {ubicacionDropdownOpen
+									? 'rotate-180'
+									: ''}"
+								size={16}
+							/>
+						</button>
+
+						{#if ubicacionDropdownOpen}
+							<div
+								class="fixed inset-0 z-10 cursor-default"
+								on:click={() => (ubicacionDropdownOpen = false)}
+								role="presentation"
+							></div>
+							<div
+								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								in:fly={{ y: -5, duration: 150 }}
+							>
+								<div class="space-y-0.5">
+									{#each ['Todas', 'Presencial', 'Virtual'] as tipo}
+										<button
+											type="button"
+											class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {tipoUbicacion ===
+											tipo
+												? 'bg-blue-50 font-medium text-blue-700'
+												: 'text-gray-700'}"
+											on:click={() => {
+												tipoUbicacion = tipo as any;
+												manejarCambioUbicacion();
+												ubicacionDropdownOpen = false;
+											}}
+										>
+											{tipo}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 
@@ -186,110 +351,321 @@
 				{#if tipoUbicacion === 'Presencial'}
 					<!-- Provincia -->
 					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
-						<label
-							for="{prefijoId}-filtro-provincia"
+						<span
+							id="{prefijoId}-label-provincia"
 							class="text-xs font-medium uppercase tracking-wide text-gray-500"
 						>
 							Provincia
-						</label>
+						</span>
 						<div class="relative">
-							<select
-								id="{prefijoId}-filtro-provincia"
-								bind:value={provincia}
-								class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							<button
+								type="button"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+								on:click={() => (provinciaDropdownOpen = !provinciaDropdownOpen)}
 							>
-								{#each provinciasDisponibles as prov (prov)}
-									<option value={prov}>{prov}</option>
-								{/each}
-							</select>
-							<ChevronDown
-								class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-								size={16}
-							/>
+								<span class="block truncate">{provincia}</span>
+								<ChevronDown
+									class="text-gray-400 transition-transform duration-200 {provinciaDropdownOpen
+										? 'rotate-180'
+										: ''}"
+									size={16}
+								/>
+							</button>
+
+							{#if provinciaDropdownOpen}
+								<div
+									class="fixed inset-0 z-10 cursor-default"
+									on:click={() => (provinciaDropdownOpen = false)}
+									role="presentation"
+								></div>
+								<div
+									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									in:fly={{ y: -5, duration: 150 }}
+								>
+									<div class="space-y-0.5">
+										{#each provinciasDisponibles as prov (prov)}
+											<button
+												type="button"
+												class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {provincia ===
+												prov
+													? 'bg-blue-50 font-medium text-blue-700'
+													: 'text-gray-700'}"
+												on:click={() => {
+													provincia = prov;
+													provinciaDropdownOpen = false;
+												}}
+											>
+												{prov}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
 					</div>
 
 					<!-- Localidad -->
 					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
-						<label
-							for="{prefijoId}-filtro-localidad"
+						<span
+							id="{prefijoId}-label-localidad"
 							class="text-xs font-medium uppercase tracking-wide text-gray-500"
 						>
 							Localidad
-						</label>
+						</span>
 						<div class="relative">
-							<select
-								id="{prefijoId}-filtro-localidad"
-								bind:value={localidad}
+							<button
+								type="button"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+								on:click={() => (localidadDropdownOpen = !localidadDropdownOpen)}
 								disabled={provincia === 'Todas'}
-								class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 							>
-								{#each localidadesDisponibles as loc (loc)}
-									<option value={loc}>{loc}</option>
-								{/each}
-							</select>
-							<ChevronDown
-								class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-								size={16}
-							/>
+								<span class="block truncate">{localidad}</span>
+								<ChevronDown
+									class="text-gray-400 transition-transform duration-200 {localidadDropdownOpen
+										? 'rotate-180'
+										: ''}"
+									size={16}
+								/>
+							</button>
+
+							{#if localidadDropdownOpen}
+								<div
+									class="fixed inset-0 z-10 cursor-default"
+									on:click={() => (localidadDropdownOpen = false)}
+									role="presentation"
+								></div>
+								<div
+									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									in:fly={{ y: -5, duration: 150 }}
+								>
+									<div class="space-y-0.5">
+										{#each localidadesDisponibles as loc (loc)}
+											<button
+												type="button"
+												class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {localidad ===
+												loc
+													? 'bg-blue-50 font-medium text-blue-700'
+													: 'text-gray-700'}"
+												on:click={() => {
+													localidad = loc;
+													localidadDropdownOpen = false;
+												}}
+											>
+												{loc}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
 					</div>
 				{/if}
 
-				<!-- Filtro por Estado (Opcional) -->
+				<!-- Filtro por Estado -->
 				{#if mostrarEstado}
-					<div class="flex flex-col gap-1.5">
-						<label
-							for="{prefijoId}-filtro-estado"
+					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
+						<span
+							id="{prefijoId}-label-estado"
 							class="text-xs font-medium uppercase tracking-wide text-gray-500"
 						>
 							Estado
-						</label>
+						</span>
+
 						<div class="relative">
-							<select
-								id="{prefijoId}-filtro-estado"
-								bind:value={estado}
-								class="w-full cursor-pointer appearance-none rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							<!-- Botón Trigger -->
+							<button
+								type="button"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+								on:click={() => (estadoDropdownOpen = !estadoDropdownOpen)}
+								aria-haspopup="listbox"
+								aria-expanded={estadoDropdownOpen}
+								aria-labelledby="{prefijoId}-label-estado"
 							>
-								{#each estadosDisponibles as est (est)}
-									<option value={est}>{est}</option>
-								{/each}
-							</select>
-							<ChevronDown
-								class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-								size={16}
-							/>
+								<span class="block max-w-[140px] truncate">
+									{#if estado.length === 0 || estado.includes('Todos')}
+										Todos
+									{:else if estado.length <= 2}
+										{estado.join(', ')}
+									{:else}
+										{estado.length} seleccionados
+									{/if}
+								</span>
+								<ChevronDown
+									class="text-gray-400 transition-transform duration-200 {estadoDropdownOpen
+										? 'rotate-180'
+										: ''}"
+									size={16}
+								/>
+							</button>
+
+							<!-- Dropdown Body -->
+							{#if estadoDropdownOpen}
+								<!-- Backdrop transparente para cerrar al hacer click afuera -->
+								<div
+									class="fixed inset-0 z-10 cursor-default"
+									on:click={() => (estadoDropdownOpen = false)}
+									role="presentation"
+								></div>
+
+								<div
+									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									in:fly={{ y: -5, duration: 150 }}
+								>
+									<!-- Opción Seleccionar Todos -->
+									<label
+										class="mb-1 flex cursor-pointer items-center gap-3 rounded-md border-b border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+									>
+										<input
+											type="checkbox"
+											class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+											checked={estado.length === 0 || estado.includes('Todos')}
+											on:change={() => {
+												estado = [];
+											}}
+										/>
+										<span class="font-medium text-blue-600">Seleccionar todos</span>
+									</label>
+
+									<!-- Lista de Estados -->
+									<div class="space-y-0.5">
+										{#each estadosDisponibles.filter((e) => e !== 'Todos') as est (est)}
+											<label
+												class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+											>
+												<input
+													type="checkbox"
+													class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+													checked={estado.includes(est)}
+													on:change={() => {
+														if (estado.includes(est)) {
+															estado = estado.filter((e) => e !== est);
+														} else {
+															const clean = estado.filter((e) => e !== 'Todos');
+															estado = [...clean, est];
+														}
+													}}
+												/>
+												<span>{est}</span>
+											</label>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
 					</div>
 				{/if}
 
 				<!-- Filtro por Fecha -->
 				<div class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}">
-					<label
-						for="{prefijoId}-fecha-desde"
+					<span
+						id="{prefijoId}-label-fecha"
 						class="text-xs font-medium uppercase tracking-wide text-gray-500"
 					>
 						Rango de Fechas
-					</label>
-					<div class="flex items-center gap-2">
-						<div class="relative flex-1">
-							<input
-								id="{prefijoId}-fecha-desde"
-								type="date"
-								bind:value={fechaDesde}
-								class="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+					</span>
+
+					<div class="relative">
+						<!-- Botón Trigger -->
+						<button
+							type="button"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							on:click={() => (fechaDropdownOpen = !fechaDropdownOpen)}
+							aria-haspopup="dialog"
+							aria-expanded={fechaDropdownOpen}
+							aria-labelledby="{prefijoId}-label-fecha"
+						>
+							<span class="block truncate">
+								{#if !fechaDesde && !fechaHasta}
+									Cualquier fecha
+								{:else if fechaDesde && !fechaHasta}
+									Desde {new Date(fechaDesde + 'T00:00:00').toLocaleDateString('es-AR', {
+										day: '2-digit',
+										month: '2-digit',
+										year: 'numeric'
+									})}
+								{:else if !fechaDesde && fechaHasta}
+									Hasta {new Date(fechaHasta + 'T00:00:00').toLocaleDateString('es-AR', {
+										day: '2-digit',
+										month: '2-digit',
+										year: 'numeric'
+									})}
+								{:else}
+									{new Date(fechaDesde + 'T00:00:00').toLocaleDateString('es-AR', {
+										day: '2-digit',
+										month: '2-digit',
+										year: '2-digit'
+									})} - {new Date(fechaHasta + 'T00:00:00').toLocaleDateString('es-AR', {
+										day: '2-digit',
+										month: '2-digit',
+										year: '2-digit'
+									})}
+								{/if}
+							</span>
+							<ChevronDown
+								class="text-gray-400 transition-transform duration-200 {fechaDropdownOpen
+									? 'rotate-180'
+									: ''}"
+								size={16}
 							/>
-						</div>
-						<span class="text-gray-400">-</span>
-						<div class="relative flex-1">
-							<input
-								id="{prefijoId}-fecha-hasta"
-								type="date"
-								bind:value={fechaHasta}
-								min={fechaDesde}
-								class="w-full appearance-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
-							/>
-						</div>
+						</button>
+
+						<!-- Dropdown Body -->
+						{#if fechaDropdownOpen}
+							<!-- Backdrop transparente -->
+							<div
+								class="fixed inset-0 z-10 cursor-default"
+								on:click={() => (fechaDropdownOpen = false)}
+								role="presentation"
+							></div>
+
+							<div
+								class="absolute left-0 right-0 top-full z-20 mt-1 min-w-[280px] rounded-lg border border-gray-100 bg-white p-4 shadow-lg lg:right-auto lg:w-auto"
+								in:fly={{ y: -5, duration: 150 }}
+							>
+								<div class="flex flex-col gap-4">
+									<div class="grid grid-cols-2 gap-3">
+										<div class="flex flex-col gap-1.5">
+											<label for="{prefijoId}-fecha-desde" class="text-xs text-gray-600"
+												>Desde</label
+											>
+											<input
+												id="{prefijoId}-fecha-desde"
+												type="date"
+												bind:value={fechaDesde}
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+											/>
+										</div>
+										<div class="flex flex-col gap-1.5">
+											<label for="{prefijoId}-fecha-hasta" class="text-xs text-gray-600"
+												>Hasta</label
+											>
+											<input
+												id="{prefijoId}-fecha-hasta"
+												type="date"
+												bind:value={fechaHasta}
+												min={fechaDesde}
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+											/>
+										</div>
+									</div>
+
+									{#if fechaDesde || fechaHasta}
+										<div class="flex justify-end border-t border-gray-100 pt-3">
+											<button
+												type="button"
+												class="text-xs font-medium text-red-500 hover:text-red-700"
+												on:click={() => {
+													fechaDesde = '';
+													fechaHasta = '';
+												}}
+											>
+												Borrar fechas
+											</button>
+										</div>
+									{/if}
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 			</div>

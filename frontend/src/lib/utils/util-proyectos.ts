@@ -32,8 +32,8 @@ export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 
 /**
  * Filtra proyectos según el rol del usuario
- * - Instituciones: Solo sus proyectos creados
- * - Colaboradores: Solo proyectos donde tienen colaboración aprobada
+ * - Instituciones: solo sus proyectos creados
+ * - Colaboradores: solo proyectos donde tienen colaboración aprobada
  */
 export function filtrarProyectosPorUsuario(
 	proyectos: Proyecto[],
@@ -58,13 +58,13 @@ export function filtrarProyectos(
 	proyectos: Proyecto[],
 	filtros: string[],
 	searchQuery: string,
-	estado: string,
+	estado: string[],
 	provincia: string,
-	categoria: string = 'Todas'
+	categoria: string[] = []
 ): Proyecto[] {
 	let resultado = [...proyectos];
 
-	if (!filtros.includes('Todos')) {
+	if (filtros.length > 0 && !filtros.includes('Todos')) {
 		const tiposEsperados = filtros.filter((f) => f !== 'Todos');
 		resultado = resultado.filter((p) =>
 			p.participacion_permitida?.some(
@@ -75,14 +75,17 @@ export function filtrarProyectos(
 		);
 	}
 
-	if (categoria !== 'Todas') {
+	// Filtro por Categoría (multi-select)
+	// Si el array está vacío, o incluye "Todas", no filtramos
+	const categoriasActivas = categoria.filter(c => c !== 'Todas');
+	if (categoriasActivas.length > 0) {
 		resultado = resultado.filter((p) =>
-			p.categorias?.some((c) => c.descripcion === categoria)
+			p.categorias?.some((c) => categoriasActivas.includes(c.descripcion))
 		);
 	}
 
-	if (estado !== 'Todos') {
-		resultado = resultado.filter((p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado);
+	if (estado.length > 0 && !estado.includes('Todos')) {
+		resultado = resultado.filter((p) => estado.includes(ESTADO_LABELS[p.estado ?? 'en_curso']));
 	}
 
 	if (provincia !== 'Todas') {
