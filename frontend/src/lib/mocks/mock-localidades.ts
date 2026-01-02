@@ -145,6 +145,18 @@ const localidadesBase: Omit<Localidad, 'provincia'>[] = [
 		nombre: 'Río Gallegos',
 		codigo_postal: '9400',
 		id_provincia: 22
+	},
+	{
+		id_localidad: 24,
+		nombre: 'Quilmes',
+		codigo_postal: '1878',
+		id_provincia: 1
+	},
+	{
+		id_localidad: 25,
+		nombre: 'Villa Carlos Paz',
+		codigo_postal: '5152',
+		id_provincia: 3
 	}
 ];
 

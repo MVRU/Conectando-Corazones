@@ -360,8 +360,7 @@
 		await new Promise((resolve) => setTimeout(resolve, 2000));
 
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
-			tipo_participacion: (p.tipo_participacion?.descripcion ||
-				'Voluntariado') as TipoParticipacionDescripcion,
+			tipo_participacion: (p.tipo_participacion?.descripcion || 'Voluntariado') as TipoParticipacionDescripcion,
 			objetivo: Number(p.objetivo) || 0,
 			unidad_medida: p.unidad_medida === 'Otra' ? p.unidad_medida_otra || '' : p.unidad_medida,
 			especie: p.tipo_participacion?.descripcion === 'Especie' ? p.especie || '' : undefined

@@ -1,9 +1,10 @@
 import { error } from '@sveltejs/kit';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/types/Proyecto';
+import type { Usuario } from '$lib/types/Usuario';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+import { ESTADO_LABELS } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 import {
 	ESTADO_PRIORIDAD,
@@ -29,16 +30,41 @@ export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 	return proyecto;
 }
 
+/**
+ * Filtra proyectos según el rol del usuario
+ * - Instituciones: solo sus proyectos creados
+ * - Colaboradores: solo proyectos donde tienen colaboración aprobada
+ */
+export function filtrarProyectosPorUsuario(
+	proyectos: Proyecto[],
+	usuario: Usuario | null
+): Proyecto[] {
+	if (!usuario) return [];
+
+	if (usuario.rol === 'institucion') {
+		return proyectos.filter((p) => p.institucion_id === usuario.id_usuario);
+	}
+
+	if (usuario.rol === 'colaborador') {
+		return proyectos.filter((p) =>
+			p.colaboraciones?.some((c) => c.colaborador_id === usuario.id_usuario && c.estado === 'aprobada')
+		);
+	}
+
+	return [];
+}
+
 export function filtrarProyectos(
 	proyectos: Proyecto[],
 	filtros: string[],
 	searchQuery: string,
-	estado: string,
-	provincia: string
+	estado: string[],
+	provincia: string,
+	categoria: string[] = []
 ): Proyecto[] {
 	let resultado = [...proyectos];
 
-	if (!filtros.includes('Todos')) {
+	if (filtros.length > 0 && !filtros.includes('Todos')) {
 		const tiposEsperados = filtros.filter((f) => f !== 'Todos');
 		resultado = resultado.filter((p) =>
 			p.participacion_permitida?.some(
@@ -49,8 +75,17 @@ export function filtrarProyectos(
 		);
 	}
 
-	if (estado !== 'Todos') {
-		resultado = resultado.filter((p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado);
+	// Filtro por Categoría (multi-select)
+	// Si el array está vacío, o incluye "Todas", no filtramos
+	const categoriasActivas = categoria.filter(c => c !== 'Todas');
+	if (categoriasActivas.length > 0) {
+		resultado = resultado.filter((p) =>
+			p.categorias?.some((c) => categoriasActivas.includes(c.descripcion))
+		);
+	}
+
+	if (estado.length > 0 && !estado.includes('Todos')) {
+		resultado = resultado.filter((p) => estado.includes(ESTADO_LABELS[p.estado ?? 'en_curso']));
 	}
 
 	if (provincia !== 'Todas') {
@@ -195,4 +230,97 @@ const URGENCIA_COLOR_MAP: Record<string, string> = {
 export function getColorUrgencia(urgencia?: string): string | undefined {
 	if (!urgencia) return undefined; // -*- Evita clases cuando no hay urgencia definida
 	return URGENCIA_COLOR_MAP[urgencia];
+}
+
+/**
+ * Filtra proyectos por tipo de ubicación (Presencial/Virtual)
+ */
+export function filtrarPorTipoUbicacion(
+	proyectos: Proyecto[],
+	tipo: 'Todas' | 'Presencial' | 'Virtual'
+): Proyecto[] {
+	if (tipo === 'Todas') return proyectos;
+
+	return proyectos.filter((p) => {
+		const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
+		if (tipo === 'Presencial') {
+			return primeraUbicacion?.modalidad === 'presencial';
+		} else if (tipo === 'Virtual') {
+			return primeraUbicacion?.modalidad === 'virtual';
+		}
+		return false;
+	});
+}
+
+/**
+ * Filtra proyectos por rango de fechas
+ * - fechaDesde: filtra proyectos que iniciaron después de esta fecha
+ * - fechaHasta: filtra proyectos que terminan antes de esta fecha
+ */
+export function filtrarPorRangoFechas(
+	proyectos: Proyecto[],
+	fechaDesde?: string,
+	fechaHasta?: string
+): Proyecto[] {
+	if (!fechaDesde && !fechaHasta) return proyectos;
+
+	return proyectos.filter((p) => {
+		const fechaInicio = p.created_at ? new Date(p.created_at) : null;
+		const fechaFin = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
+
+		if (!fechaInicio || !fechaFin) return false;
+
+		// Si fechaDesde es antes del inicio del proyecto → NO aparece
+		if (fechaDesde) {
+			const desde = new Date(fechaDesde);
+			if (fechaInicio < desde) return false;
+		}
+
+		// Si fechaHasta es después del fin del proyecto → NO aparece
+		if (fechaHasta) {
+			const hasta = new Date(fechaHasta);
+			if (fechaFin > hasta) return false;
+		}
+
+		return true;
+	});
+}
+
+
+/**
+ * Formatea una fecha o string de fecha a un formato "5 Feb 2025"
+ * Capitaliza la primera letra del mes.
+ */
+export function formatearFechaBadge(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	const partes = new Intl.DateTimeFormat('es-AR', {
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric'
+	}).formatToParts(d);
+
+	const dia = partes.find((p) => p.type === 'day')?.value;
+	const mes = partes.find((p) => p.type === 'month')?.value;
+	const anio = partes.find((p) => p.type === 'year')?.value;
+
+	if (dia && mes && anio) {
+		const mesCapitalizado = mes.charAt(0).toUpperCase() + mes.slice(1);
+		return `${dia} ${mesCapitalizado} ${anio}`;
+	}
+
+	return formatearFecha(date);
+}
+
+/**
+ * Formatea una fecha o string de fecha a un formato "DD MMM YYYY" (03 Feb 2025)
+ */
+export function formatearFecha(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	return new Intl.DateTimeFormat('es-AR', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric'
+	}).format(d);
 }

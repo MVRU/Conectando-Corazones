@@ -75,13 +75,23 @@ export const mockColaboraciones: Colaboracion[] = [
 	{
 		id_colaboracion: 9,
 		estado: 'aprobada',
-		created_at: new Date('2025-04-15'),
+		mensaje: 'Tengo experiencia en talleres de arte y puedo contribuir con materiales y tiempo para enseñar técnicas de pintura.',
+		created_at: new Date('2025-04-20'),
 		proyecto_id: 8,
-		colaborador_id: 7,
-		colaborador: getColaborador(7)
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g - Proyecto completado
 	},
 	{
 		id_colaboracion: 10,
+		estado: 'aprobada',
+		mensaje: 'Me encantaría colaborar en la biblioteca digital aportando mi experiencia en catalogos y gestión de recursos digitales.',
+		created_at: new Date('2024-09-01'),
+		proyecto_id: 9,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g - Proyecto completado
+	},
+	{
+		id_colaboracion: 11,
 		estado: 'pendiente',
 		mensaje:
 			'Como biblioteca popular, tenemos muchos libros infantiles que podríamos donar y experiencia organizando actividades de lectura para niños.',
@@ -91,7 +101,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(5) // biblioteca_popular
 	},
 	{
-		id_colaboracion: 11,
+		id_colaboracion: 12,
 		estado: 'pendiente',
 		mensaje:
 			'Nuestra fundación tiene amplia experiencia en proyectos educativos y podemos aportar recursos humanos, materiales didácticos y voluntarios especializados.',
@@ -101,7 +111,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(6) // fundacion_manos_unidas
 	},
 	{
-		id_colaboracion: 12,
+		id_colaboracion: 13,
 		estado: 'pendiente',
 		mensaje:
 			'Como parte de nuestra responsabilidad social empresaria, queremos apoyar la educación infantil con donaciones económicas y voluntarios de nuestro equipo.',
@@ -111,7 +121,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 13,
+		id_colaboracion: 14,
 		estado: 'pendiente',
 		mensaje:
 			'Soy docente jubilada y me encantaría colaborar con mi experiencia pedagógica. Puedo ayudar con clases de apoyo y actividades recreativas.',
@@ -121,7 +131,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(8) // ana_martinez
 	},
 	{
-		id_colaboracion: 14,
+		id_colaboracion: 15,
 		estado: 'pendiente',
 		mensaje:
 			'Tengo experiencia en trabajo comunitario y me gustaría aportar tiempo de voluntariado los fines de semana para ayudar con las actividades del proyecto.',
