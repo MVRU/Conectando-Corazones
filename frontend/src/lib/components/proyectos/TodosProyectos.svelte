@@ -6,6 +6,8 @@
 	import ProyectosBase from './ProyectosBase.svelte';
 	import { usuario } from '$lib/stores/auth';
 	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
+	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	export let proyectos: Proyecto[] = defaultProyectos;
 
@@ -33,6 +35,14 @@
 	} = createProyectosFiltros();
 
 	$: proyectosStore.set(proyectos);
+
+	onMount(() => {
+		const categoriaParam = $page.url.searchParams.get('categoria');
+		if (categoriaParam) {
+			categoriaSeleccionada.set([categoriaParam]);
+			mostrarFiltros.set(true);
+		}
+	});
 </script>
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-4 pb-6 pt-2 sm:px-10 lg:px-20">

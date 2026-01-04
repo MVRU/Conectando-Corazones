@@ -141,7 +141,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(4) // maria_gonzalez
 	},
 	{
-		id_colaboracion: 15,
+		id_colaboracion: 16,
 		estado: 'aprobada',
 		mensaje:
 			'Nuestra fundación tiene amplia experiencia en proyectos educativos y podemos aportar recursos humanos y materiales.',
@@ -151,7 +151,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(6) // fundacion_manos_unidas
 	},
 	{
-		id_colaboracion: 16,
+		id_colaboracion: 17,
 		estado: 'pendiente',
 		mensaje:
 			'Como empresa comprometida con la RSE, queremos apoyar la educación con donaciones y voluntarios corporativos.',
@@ -162,7 +162,7 @@ export const mockColaboraciones: Colaboracion[] = [
 	},
 	// Colaboraciones para proyecto 2
 	{
-		id_colaboracion: 17,
+		id_colaboracion: 18,
 		estado: 'pendiente',
 		mensaje:
 			'Podemos donar alimentos no perecederos y coordinar jornadas de voluntariado para ayudar con la alimentación.',
@@ -172,17 +172,17 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 18,
+		id_colaboracion: 19,
 		estado: 'aprobada',
 		mensaje: 'Como nutricionista, puedo asesorar sobre alimentación saludable y planificar menús.',
 		created_at: new Date('2025-02-20'),
-		proyecto_id: 7,
+		proyecto_id: 7,	
 		colaborador_id: 8,
 		colaborador: getColaborador(8) // ana_martinez
 	},
 
 	{
-		id_colaboracion: 19,
+		id_colaboracion: 20,
 		estado: 'rechazada',
 		mensaje: 'Quiero ayudar en lo que sea necesario.',
 		justificacion:
@@ -193,7 +193,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(4) // maria_gonzalez
 	},
 	{
-		id_colaboracion: 20,
+		id_colaboracion: 21,
 		estado: 'rechazada',
 		mensaje: 'Mi empresa puede ayudar con donaciones económicas grandes.',
 		justificacion:
@@ -204,7 +204,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 21,
+		id_colaboracion: 22,
 		estado: 'rechazada',
 		mensaje: 'Tengo tiempo libre los martes por la tarde.',
 		justificacion:
@@ -213,5 +213,25 @@ export const mockColaboraciones: Colaboracion[] = [
 		proyecto_id: 2,
 		colaborador_id: 8,
 		colaborador: getColaborador(8) // ana_martinez
-	}
+	},
+	{
+		id_colaboracion: 23,
+		estado: 'pendiente',
+		mensaje: 'Me encantaría colaborar para reducir la brecha digital.',
+		created_at: new Date('2026-01-04'),
+		proyecto_id: 12,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	},
+	{
+		id_colaboracion: 24,
+		estado: 'rechazada',
+		mensaje: 'Quiero ayudar en lo que sea necesario.',
+		justificacion:
+			'El mensaje es muy genérico y no especifica cómo puede contribuir al proyecto específico.',
+		created_at: new Date('2026-01-04'),
+		proyecto_id: 19,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	},
 ];

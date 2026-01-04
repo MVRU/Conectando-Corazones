@@ -158,7 +158,7 @@
 			<ProyectoCard
 				{proyecto}
 				{usuario}
-				variant="mis-proyectos"
+				variante="mis-proyectos"
 				esInstitucion={usuario?.rol === 'institucion'}
 			/>
 		</svelte:fragment>

@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Usuario } from '$lib/types/Usuario';
-	import { ArrowRight, MapPin, GlobeAlt, Photo } from '@steeze-ui/heroicons';
+	import { ArrowRight, MapPin, GlobeAlt, Photo, XMark, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import userDefault from '$lib/assets/user-default.png';
+	import usuarioPorDefecto from '$lib/assets/user-default.png';
 
 	import {
 		getParticipacionVisual,
@@ -14,28 +14,56 @@
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
+	import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
+	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
 	export let proyecto: Proyecto;
 	export let usuario: Usuario | null = null;
 	export let mostrarBotones: boolean = false;
-	export let variant: 'default' | 'mis-proyectos' = 'default';
+	export let variante: 'default' | 'mis-proyectos' = 'default';
 	export let esInstitucion: boolean = false;
+
+	// Obtener colaboración del usuario desde el mock global
+	$: colaboracionUsuario =
+		usuario &&
+		mockColaboraciones.find(
+			(c) => c.proyecto_id === proyecto.id_proyecto && c.colaborador_id === usuario.id_usuario
+		);
 
 	// Detectar roles
 	$: esCreador = usuario?.id_usuario === proyecto.institucion_id;
+
 	$: esParticipante =
 		!esCreador &&
-		usuario &&
+		!!usuario &&
 		usuario.rol === 'colaborador' &&
-		proyecto.colaboraciones?.some(
-			(c) => c.colaborador_id === usuario?.id_usuario && c.estado === 'aprobada'
-		);
+		colaboracionUsuario?.estado === 'aprobada';
+
+	// Detectar si el usuario ya envió una solicitud (pendiente, rechazada, etc) pero NO está aprobada (ya cubierto por esParticipante)
+	$: yaColaboro =
+		!esCreador &&
+		!esParticipante &&
+		!!usuario &&
+		usuario.rol === 'colaborador' &&
+		!!colaboracionUsuario;
+
+	$: esRechazada = colaboracionUsuario?.estado === 'rechazada';
+
+	let mostrarJustificacion = false;
+
+	function manejarClickColaborar(e: Event) {
+		if (esRechazada) {
+			e.preventDefault();
+			e.stopPropagation();
+			mostrarJustificacion = true;
+		}
+	}
 
 	$: participaciones = (proyecto.participacion_permitida || []).map(getParticipacionVisual);
-	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso';
+	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro;
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
-	$: isVirtual = ubicacionCorta === 'Virtual';
-	$: isInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
+	$: esVirtual = ubicacionCorta === 'Virtual';
+	$: estaInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
 </script>
 
 <div
@@ -56,8 +84,8 @@
 				src={proyecto.url_portada}
 				alt={proyecto.titulo}
 				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-				class:opacity-90={isInactivo}
-				class:grayscale-[0.8]={isInactivo}
+				class:opacity-90={estaInactivo}
+				class:grayscale-[0.8]={estaInactivo}
 				loading="lazy"
 			/>
 		{:else}
@@ -75,7 +103,7 @@
 					class:hover:border-blue-200={esCreador || esParticipante}
 					title={esCreador
 						? 'Es mi proyecto'
-						: isInactivo
+						: estaInactivo
 							? 'Participaste en este proyecto'
 							: 'Estás participando en este proyecto'}
 				>
@@ -96,7 +124,7 @@
 			<span
 				class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm"
 			>
-				{#if isVirtual}
+				{#if esVirtual}
 					<Icon src={GlobeAlt} class="h-3.5 w-3.5" />
 				{:else}
 					<Icon src={MapPin} class="h-3.5 w-3.5" />
@@ -116,6 +144,36 @@
 				)}
 			</span>
 		</div>
+
+		<!-- Justificación de rechazo (Modal) -->
+		<Modal
+			bind:abierto={mostrarJustificacion}
+			titulo="Solicitud Rechazada"
+			ocultarEncabezado={true}
+			anchoMaximo="max-w-sm"
+		>
+			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+				<span
+					class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 ring-1 ring-red-100"
+				>
+					<Icon src={XCircle} class="h-6 w-6 text-red-600" aria-hidden="true" />
+				</span>
+				<h3 class="text-base font-semibold text-gray-900 sm:text-lg">Solicitud rechazada</h3>
+				<p class="text-sm text-gray-500">
+					{colaboracionUsuario?.justificacion || 'No se proporcionó una justificación.'}
+				</p>
+			</div>
+
+			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					on:click={() => (mostrarJustificacion = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</Modal>
 	</div>
 
 	<!-- Contenido -->
@@ -128,10 +186,10 @@
 				{proyecto.titulo}
 			</h3>
 
-			{#if proyecto.institucion?.nombre_legal && !(variant === 'mis-proyectos' && esCreador)}
+			{#if proyecto.institucion?.nombre_legal && !(variante === 'mis-proyectos' && esCreador)}
 				<div class="flex items-center gap-2 text-sm text-gray-500">
 					<img
-						src={proyecto.institucion?.url_foto || userDefault}
+						src={proyecto.institucion?.url_foto || usuarioPorDefecto}
 						alt={proyecto.institucion.nombre_legal}
 						class="h-5 w-5 rounded-full object-cover shadow-sm"
 						loading="lazy"
@@ -151,10 +209,10 @@
 			<ProyectoProgreso
 				{proyecto}
 				variant="compact"
-				ocultarEtiquetaObjetivo={variant === 'mis-proyectos'}
+				ocultarEtiquetaObjetivo={variante === 'mis-proyectos'}
 			/>
 
-			{#if variant === 'mis-proyectos'}
+			{#if variante === 'mis-proyectos'}
 				<!-- Botones específicos para Mis Proyectos -->
 				<div
 					class="flex flex-col-reverse gap-2 pt-2 sm:flex-row"
@@ -233,19 +291,32 @@
 						<Button
 							label="Ver detalles"
 							href={`/proyectos/${proyecto.id_proyecto}`}
-							variant={botonColaborarDeshabilitado ? 'primary' : 'secondary'}
+							variant={botonColaborarDeshabilitado && !esRechazada ? 'primary' : 'secondary'}
 							size="sm"
 							customClass="flex-1"
 							customAriaLabel="Ver detalles del proyecto"
 						/>
 						<Button
-							label="Colaborar ahora"
-							href={`/proyectos/${proyecto.id_proyecto}#colaborar`}
+							label={esRechazada
+								? 'Solicitud rechazada'
+								: yaColaboro
+									? 'Solicitud enviada'
+									: 'Colaborar ahora'}
+							href={esRechazada ? undefined : `/proyectos/${proyecto.id_proyecto}#colaborar`}
 							size="sm"
-							variant={botonColaborarDeshabilitado ? 'secondary' : 'primary'}
-							disabled={botonColaborarDeshabilitado}
-							customClass="flex-1 cursor-pointer"
-							customAriaLabel="Colaborar en este proyecto"
+							variant={esRechazada
+								? 'danger'
+								: botonColaborarDeshabilitado
+									? 'secondary'
+									: 'primary'}
+							disabled={esRechazada ? false : botonColaborarDeshabilitado}
+							customClass={'flex-1 cursor-pointer'}
+							customAriaLabel={esRechazada
+								? 'Ver justificación del rechazo'
+								: yaColaboro
+									? 'Solicitud de colaboración enviada'
+									: 'Colaborar en este proyecto'}
+							on:click={manejarClickColaborar}
 						/>
 					{/if}
 				</div>

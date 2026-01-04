@@ -53,7 +53,7 @@ TODO:
 </script>
 
 <svelte:head>
-	<title>Iniciar Sesión - Conectando Corazones</title>
+	<title>Iniciar sesión - Conectando Corazones</title>
 	<meta
 		name="description"
 		content="Inicia sesión en Conectando Corazones para acceder a tu cuenta y gestionar tus proyectos."
@@ -181,7 +181,7 @@ TODO:
 
 					<Button
 						type="submit"
-						label="Iniciar Sesión"
+						label="Iniciar sesión"
 						loading={$isLoading}
 						loadingLabel="Iniciando sesión..."
 						customClass="w-full"

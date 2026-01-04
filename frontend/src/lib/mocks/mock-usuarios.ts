@@ -7,7 +7,7 @@ import { getLocalidad } from '$lib/utils/util-ubicaciones';
 export const mockUsuarios = {
 	admin1: {
 		id_usuario: 1,
-		username: 'alexis_sklate',
+		username: 'admin_conectando',
 		password: '123456',
 		nombre: 'Alexis',
 		apellido: 'Sklate',

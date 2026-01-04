@@ -3,7 +3,14 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { page } from '$app/stores';
-	import { isAuthenticated, usuario as usuarioStore, authActions } from '$lib/stores/auth';
+	import {
+		isAuthenticated,
+		usuario as usuarioStore,
+		authActions,
+		isAdmin,
+		isInstitucion,
+		isColaborador
+	} from '$lib/stores/auth';
 
 	let menuAbierto = false;
 	let visible = false;
@@ -27,6 +34,16 @@
 		menuAbierto = false;
 		mostrarDropdown = false;
 	}
+
+	$: dropdownItems = [
+		{ label: 'Perfil', href: '/perfil' },
+		{ label: $isAdmin ? 'Panel de administración' : 'Mi panel', href: '/mi-panel' },
+		...($isInstitucion ? [{ label: 'Crear proyecto', href: '/proyectos/crear' }] : []),
+		...($isColaborador
+			? [{ label: 'Solicitudes de colaboración', href: '/colaborador/solicitudes-colaboracion' }]
+			: []),
+		{ label: 'Configuración', href: '/configuracion' }
+	];
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -168,7 +185,9 @@
 								Mi cuenta
 							</li>
 
-							{#each [{ label: 'Perfil', href: '/perfil' }, { label: 'Mi panel', href: '/mi-panel' }, { label: 'Crear proyecto', href: '/proyectos/crear' }, { label: 'Configuración', href: '/configuracion' }] as item, i (i)}
+							<!-- Items del menú dinámicos según rol -->
+
+							{#each dropdownItems as item, i (i)}
 								<li>
 									<a
 										href={item.href}
@@ -194,7 +213,7 @@
 			{:else}
 				<!-- Solo en desktop -->
 				<div class="hidden md:block">
-					<Button label="Iniciar Sesión" href="/iniciar-sesion" />
+					<Button label="Iniciar sesión" href="/iniciar-sesion" />
 				</div>
 			{/if}
 
