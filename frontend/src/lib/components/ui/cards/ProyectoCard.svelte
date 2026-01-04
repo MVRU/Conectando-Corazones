@@ -49,6 +49,8 @@
 
 	$: esRechazada = colaboracionUsuario?.estado === 'rechazada';
 
+	$: esAdmin = usuario?.rol === 'administrador';
+
 	let mostrarJustificacion = false;
 
 	function manejarClickColaborar(e: Event) {
@@ -286,6 +288,22 @@
 							size="sm"
 							customClass="flex-1"
 							customAriaLabel="Ver panel de participación"
+						/>
+					{:else if esAdmin}
+						<Button
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
+							variant="secondary"
+							size="sm"
+							customClass="flex-1"
+							customAriaLabel="Ver detalles del proyecto"
+						/>
+						<Button
+							label="Ver panel"
+							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							size="sm"
+							customClass="flex-1"
+							customAriaLabel="Ver panel del proyecto"
 						/>
 					{:else}
 						<Button

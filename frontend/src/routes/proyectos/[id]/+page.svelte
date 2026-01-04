@@ -38,7 +38,11 @@
 		Link,
 		Heart,
 		Share,
-		XCircle
+		XCircle,
+		Pencil,
+		ShieldCheck,
+		Trash,
+		ChevronDown
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -60,6 +64,7 @@
 	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
 	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
+	$: esAdministrador = $usuario?.rol === 'administrador';
 
 	$: {
 		const id = $page.params.id;
@@ -187,6 +192,7 @@
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
+	let mostrarDropdownAdmin = false;
 	let solicitudRecienEnviada = false;
 
 	function manejarClickSolicitud() {
@@ -213,13 +219,31 @@
 
 {#if proyecto}
 	<main
-		class="min-h-screen bg-gray-50 pb-24 pt-6 text-gray-800 sm:pt-10"
+		class="min-h-screen pb-24 pt-6 text-gray-800 sm:pt-10 {esAdministrador
+			? 'bg-slate-50'
+			: 'bg-gray-50'}"
 		aria-label="Detalle del proyecto"
 	>
+		{#if esAdministrador}
+			<div
+				class="sticky z-40 -mt-6 mb-6 flex w-full items-center justify-center bg-blue-800 px-4 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-500 sm:-mt-10 sm:mb-10 {$layoutStore.headerVisible
+					? 'top-[4.5rem]'
+					: 'top-0'}"
+				role="alert"
+			>
+				<p>
+					Estás visualizando este proyecto como Administrador.
+					<a href="/mi-panel" class="ml-1 underline hover:text-blue-200">
+						Ir al panel de administración
+					</a>
+				</p>
+			</div>
+		{/if}
+
 		<div
 			class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 		>
-			<ProyectoHeader {proyecto} />
+			<ProyectoHeader {proyecto} {esAdministrador} />
 
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 				<!-- Columna principal -->
@@ -326,7 +350,63 @@
 						aria-label="Acciones principales del proyecto"
 					>
 						<div class="flex gap-3">
-							{#if esCreador || esColaboradorAprobado}
+							{#if esAdministrador}
+								<div class="relative flex-1">
+									<button
+										type="button"
+										on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 font-semibold text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										aria-expanded={mostrarDropdownAdmin}
+										aria-haspopup="true"
+									>
+										Gestionar proyecto
+										<Icon
+											src={ChevronDown}
+											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
+
+									{#if mostrarDropdownAdmin}
+										<!-- Dropdown menu -->
+										<div
+											class="animate-in fade-in zoom-in-95 absolute left-0 right-0 top-full mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+											role="menu"
+											tabindex="-1"
+										>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+											>
+												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
+												Editar proyecto
+											</button>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+											>
+												<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
+												Auditar proyecto
+											</button>
+											<div class="my-1 border-t border-gray-100"></div>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+												role="menuitem"
+											>
+												<Icon src={Trash} class="h-4 w-4 text-red-500" />
+												Eliminar proyecto
+											</button>
+										</div>
+
+										<div
+											class="fixed inset-0 z-[-1]"
+											on:click={() => (mostrarDropdownAdmin = false)}
+											aria-hidden="true"
+										></div>
+									{/if}
+								</div>
+							{:else if esCreador || esColaboradorAprobado}
 								<a
 									href="/proyectos/{proyecto.id_proyecto}/panel"
 									class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
@@ -583,7 +663,58 @@
 			class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
 		>
 			<div class="flex gap-3">
-				{#if esCreador || esColaboradorAprobado}
+				{#if esAdministrador}
+					<!-- Dropdown móvil -->
+					<div class="relative flex-1">
+						<button
+							type="button"
+							on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+							class="flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+						>
+							Gestionar proyecto
+							<Icon
+								src={ChevronDown}
+								class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+									? 'rotate-180'
+									: ''}"
+							/>
+						</button>
+
+						{#if mostrarDropdownAdmin}
+							<!-- Dropdown menu popup -->
+							<div
+								class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 right-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
+							>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+								>
+									<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
+									Editar proyecto
+								</button>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+								>
+									<Icon src={ShieldCheck} class="h-5 w-5 text-gray-500" />
+									Auditar proyecto
+								</button>
+								<div class="my-1 border-t border-gray-100"></div>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
+								>
+									<Icon src={Trash} class="h-5 w-5 text-red-500" />
+									Eliminar proyecto
+								</button>
+							</div>
+
+							<!-- Backdrop -->
+							<div
+								class="fixed inset-0 z-[-1] bg-black/50"
+								on:click={() => (mostrarDropdownAdmin = false)}
+								aria-hidden="true"
+							></div>
+						{/if}
+					</div>
+				{:else if esCreador || esColaboradorAprobado}
 					<a
 						href={esCreador ? '/institucion' : '/colaborador'}
 						class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-transparent bg-sky-100 px-4 py-3 font-bold text-sky-700 transition active:scale-[0.98]"

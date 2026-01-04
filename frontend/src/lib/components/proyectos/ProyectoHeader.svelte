@@ -6,6 +6,7 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let proyecto: Proyecto;
+	export let esAdministrador: boolean = false;
 </script>
 
 <div class="group relative h-48 w-full overflow-hidden rounded-xl shadow-lg md:h-64 lg:h-80">
@@ -32,14 +33,39 @@
 				<LocationDisplay {proyecto} variant="badge" />
 			</div>
 
-			<h1 class="text-shadow-sm text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl">
+			<h1
+				class="text-shadow-sm flex flex-wrap items-center gap-2 text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl"
+			>
 				{proyecto.titulo}
+				{#if esAdministrador}
+					<span
+						class="inline-flex items-center rounded-md bg-slate-900/80 px-2 py-1 text-sm font-normal text-white ring-1 ring-white/20 backdrop-blur-sm"
+					>
+						ID: {proyecto.id_proyecto}
+					</span>
+				{/if}
 			</h1>
 
 			{#if proyecto.institucion?.nombre_legal}
 				<p class="text-lg font-medium text-white/90">
 					{proyecto.institucion.nombre_legal}
 				</p>
+			{/if}
+
+			{#if esAdministrador}
+				<div class="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-white/80">
+					<span>
+						Creado: {proyecto.created_at
+							? new Date(proyecto.created_at).toLocaleDateString('es-AR')
+							: '-'}
+					</span>
+					<span>•</span>
+					<span>
+						Actualizado: {proyecto.updated_at
+							? new Date(proyecto.updated_at).toLocaleDateString('es-AR')
+							: '-'}
+					</span>
+				</div>
 			{/if}
 		</div>
 	</div>

@@ -9,22 +9,28 @@
 
 	export let proyectos: Proyecto[] = defaultProyectos;
 
-	let activeTab: 'todos' | 'mis-proyectos' = 'todos';
+	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';
 
-	$: if ($page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario) {
+	$: esAdministrador = $usuario?.rol === 'administrador';
+
+	$: if ($page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario && !esAdministrador) {
 		activeTab = 'mis-proyectos';
+	} else if ($page.url.searchParams.get('tab') === 'auditoria' && esAdministrador) {
+		activeTab = 'auditoria';
 	}
 
-	function handleTabChange(tab: 'todos' | 'mis-proyectos') {
+	function handleTabChange(tab: 'todos' | 'mis-proyectos' | 'auditoria') {
 		activeTab = tab;
 		const url = new URL(window.location.href);
-		if (tab === 'mis-proyectos') {
-			url.searchParams.set('tab', 'mis-proyectos');
+		if (tab !== 'todos') {
+			url.searchParams.set('tab', tab);
 		} else {
 			url.searchParams.delete('tab');
 		}
 		window.history.replaceState({}, '', url);
 	}
+
+	$: proyectosEnAuditoria = proyectos.filter((p) => p.estado === 'en_auditoria');
 </script>
 
 <section class="min-h-screen w-full bg-gray-50 pt-8">
@@ -41,15 +47,27 @@
 				>
 					Todos los proyectos
 				</button>
-				<button
-					class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
-					'mis-proyectos'
-						? 'bg-white text-gray-900 shadow-sm'
-						: 'text-gray-500 hover:text-gray-900'}"
-					on:click={() => handleTabChange('mis-proyectos')}
-				>
-					Mis proyectos
-				</button>
+				{#if esAdministrador}
+					<button
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
+						'auditoria'
+							? 'bg-white text-gray-900 shadow-sm'
+							: 'text-gray-500 hover:text-gray-900'}"
+						on:click={() => handleTabChange('auditoria')}
+					>
+						Proyectos en auditoría
+					</button>
+				{:else}
+					<button
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
+						'mis-proyectos'
+							? 'bg-white text-gray-900 shadow-sm'
+							: 'text-gray-500 hover:text-gray-900'}"
+						on:click={() => handleTabChange('mis-proyectos')}
+					>
+						Mis proyectos
+					</button>
+				{/if}
 			</div>
 		</div>
 	{/if}
@@ -58,7 +76,14 @@
 		<div in:fade={{ duration: 200 }}>
 			<TodosProyectos {proyectos} on:cambiarTab={(e) => handleTabChange(e.detail)} />
 		</div>
-	{:else if activeTab === 'mis-proyectos' && $usuario}
+	{:else if activeTab === 'auditoria' && esAdministrador}
+		<div in:fade={{ duration: 200 }}>
+			<TodosProyectos
+				proyectos={proyectosEnAuditoria}
+				on:cambiarTab={(e) => handleTabChange(e.detail)}
+			/>
+		</div>
+	{:else if activeTab === 'mis-proyectos' && $usuario && !esAdministrador}
 		<div in:fade={{ duration: 200 }}>
 			<MisProyectos usuario={$usuario} {proyectos} />
 		</div>

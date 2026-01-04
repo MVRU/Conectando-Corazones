@@ -11,6 +11,7 @@
 		isInstitucion,
 		isColaborador
 	} from '$lib/stores/auth';
+	import { layoutStore } from '$lib/stores/layout';
 
 	let menuAbierto = false;
 	let visible = false;
@@ -89,8 +90,10 @@
 			const current = window.scrollY;
 			if (current > 100 && current > lastScrollY) {
 				mostrarHeader = false;
+				layoutStore.setHeaderVisible(false);
 			} else {
 				mostrarHeader = true;
+				layoutStore.setHeaderVisible(true);
 			}
 			lastScrollY = current;
 		};

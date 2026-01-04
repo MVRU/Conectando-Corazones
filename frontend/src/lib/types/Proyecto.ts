@@ -15,6 +15,7 @@ export interface Proyecto {
   aprendizajes?: string;
   url_portada?: string;
   created_at?: Date | string | null;
+  updated_at?: Date | string | null;
   fecha_cierre_postulaciones?: Date | string | null;
   fecha_fin_tentativa?: Date | string | null;
   beneficiarios?: number | string | null;

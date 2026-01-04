@@ -41,6 +41,7 @@ const proyectosBase: Proyecto[] = [
 		aprendizajes: 'Aprendimos a coordinar puntos de acopio y a conectar voluntarios con escuelas.',
 		url_portada: '/img/proyectos-1.webp',
 		created_at: new Date('2025-03-01'),
+		updated_at: new Date('2025-03-05'),
 		fecha_cierre_postulaciones: new Date('2025-08-01'),
 		fecha_fin_tentativa: new Date('2025-10-01'),
 		id_chat_firebase: 1001,
