@@ -42,7 +42,7 @@ const proyectosBase: Proyecto[] = [
 		url_portada: '/img/proyectos-1.webp',
 		created_at: new Date('2025-03-01'),
 		fecha_cierre_postulaciones: new Date('2025-08-01'),
-		fecha_fin_tentativa: new Date('2025-10-01'),
+		fecha_fin_tentativa: new Date('2026-01-10'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [1, 2],
@@ -55,7 +55,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 1,
 				id_proyecto: 1,
 				id_tipo_participacion: 1,
-				unidad_medida: 'libros',
+				unidad_medida: 'unidades',
+				especie: 'Libros infantiles',
 				objetivo: 20,
 				actual: 12,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -63,11 +64,11 @@ const proyectosBase: Proyecto[] = [
 			{
 				id_participacion_permitida: 2,
 				id_proyecto: 1,
-				id_tipo_participacion: 1,
-				unidad_medida: 'docentes',
+				id_tipo_participacion: 2,
+				unidad_medida: 'personas',
 				objetivo: 10,
 				actual: 2,
-				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Voluntariado' }
 			}
 		]
 	},
