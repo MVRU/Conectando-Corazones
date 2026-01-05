@@ -163,7 +163,7 @@ export const mockUsuarios = {
 		],
 		categorias_preferidas: [
 			mockCategorias[4], // Educación
-			mockCategorias[2], // Apoyo ante una crisis
+			mockCategorias[2], 
 			mockCategorias[16], // Salud
 			mockCategorias[0] // Alimentación y nutrición
 		],

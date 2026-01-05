@@ -28,7 +28,16 @@
 	});
 
 	// Proyectos del usuario (mock)
-	$: proyectosUsuario = mockProyectos.filter(p => p.institucion_id === $usuarioStore?.id_usuario);
+	// Para instituciones: proyectos creados por ellos
+	// Para colaboradores: proyectos en los que participan (tienen colaboraciones aprobadas)
+	$: proyectosUsuario = $usuarioStore?.rol === 'institucion'
+		? mockProyectos.filter(p => p.institucion_id === $usuarioStore?.id_usuario)
+		: mockProyectos.filter(p => 
+			p.colaboraciones?.some(c => 
+				c.colaborador_id === $usuarioStore?.id_usuario && 
+				(c.estado === 'aprobada')
+			)
+		);
 	$: proyectosActivos = proyectosUsuario.filter(p => p.estado === 'en_curso');
 	$: proyectosCompletados = proyectosUsuario.filter(p => p.estado === 'completado');
 
@@ -182,12 +191,15 @@
 								<h2 class="text-3xl font-bold text-gray-900">
 									{$usuarioStore.rol === 'institucion' ? ($usuarioStore as any).nombre_legal || $usuarioStore.nombre : $usuarioStore.nombre + ' ' + $usuarioStore.apellido}
 								</h2>
+								<!-- 
+								Posible campo de Bio/Descripción de usuario:
 								<p class="mt-2 text-lg text-gray-600">
 									{$usuarioStore.rol === 'institucion' 
 										? 'Organización sin fines de lucro comprometida con el desarrollo social'
-										: 'Colaborador comprometido con causas sociales'
+										: 'Colaborador unipersonal apasionado por apoyar la infancia. Con experiencia en voluntariado en comedores infantiles y talleres de creatividad para niños, busca sumarse a proyectos que mejoren la vida y el desarrollo de niñas y niños.'
 									}
 								</p>
+								-->
 								
 								<!-- Tags -->
 								<div class="mt-4 flex flex-wrap gap-2">
@@ -269,6 +281,15 @@
 												<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Número de Institución</span>
 											</div>
 											<p class="ml-7 text-base font-semibold text-gray-900">#{($usuarioStore as any).numero_institucion || $usuarioStore.id_usuario}</p>
+										</div>
+										<div>
+											<div class="mb-2 flex items-center gap-2">
+												<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+												</svg>
+												<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Representante Legal</span>
+											</div>
+											<p class="ml-7 text-base text-gray-900">{$usuarioStore.nombre} {$usuarioStore.apellido}</p>
 										</div>
 									{/if}
 								</div>
@@ -445,15 +466,24 @@
 		<div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-xl" on:click|stopPropagation>
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="text-xl font-semibold text-gray-900">Editar Perfil</h3>
-				<button
-					on:click={cerrarModalEdicion}
-					aria-label="Cerrar modal"
-					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
-				</button>
+				<div class="flex items-center gap-4 flex-1 justify-end">
+					{#if $usuarioStore}
+						<p class="text-lg font-semibold text-gray-900">
+							{$usuarioStore.rol === 'institucion' 
+								? ($usuarioStore as any).nombre_legal || $usuarioStore.nombre 
+								: $usuarioStore.nombre + ' ' + $usuarioStore.apellido}
+						</p>
+					{/if}
+					<button
+						on:click={cerrarModalEdicion}
+						aria-label="Cerrar modal"
+						class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+					>
+						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+						</svg>
+					</button>
+				</div>
 			</div>
 
 			<form on:submit|preventDefault={handleGuardarPerfil} class="space-y-6">
@@ -481,29 +511,59 @@
 				</div>
 
 				<!-- Información personal -->
-				<div class="border-b border-gray-200 pb-6">
-					<h4 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h4>
-					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-						<div>
-							<label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-							<input
-								type="text"
-								id="nombre"
-								bind:value={datosEdicion.nombre}
-								class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-							/>
-						</div>
-						<div>
-							<label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
-							<input
-								type="text"
-								id="apellido"
-								bind:value={datosEdicion.apellido}
-								class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-							/>
+				{#if $usuarioStore}
+					<div class="border-b border-gray-200 pb-6">
+						<h4 class="text-lg font-medium text-gray-900 mb-4">
+							{$usuarioStore.rol === 'institucion' ? 'Representante Legal' : 'Información Personal'}
+						</h4>
+						<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+							<div>
+								<label for="nombre" class="block text-sm font-medium text-gray-700">
+									{$usuarioStore.rol === 'institucion' ? 'Nombre' : 'Nombre'}
+								</label>
+								{#if $usuarioStore.rol === 'colaborador' && ($usuarioStore as any).tipo_colaborador === 'unipersonal'}
+									<input
+										type="text"
+										id="nombre"
+										bind:value={datosEdicion.nombre}
+										disabled
+										class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed text-gray-500"
+										title="Los usuarios unipersonales no pueden modificar su nombre"
+									/>
+								{:else}
+									<input
+										type="text"
+										id="nombre"
+										bind:value={datosEdicion.nombre}
+										class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+									/>
+								{/if}
+							</div>
+							<div>
+								<label for="apellido" class="block text-sm font-medium text-gray-700">
+									{$usuarioStore.rol === 'institucion' ? 'Apellido' : 'Apellido'}
+								</label>
+								{#if $usuarioStore.rol === 'colaborador' && ($usuarioStore as any).tipo_colaborador === 'unipersonal'}
+								<input
+									type="text"
+									id="apellido"
+									bind:value={datosEdicion.apellido}
+									disabled
+									class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed text-gray-500"
+									title="Los usuarios unipersonales no pueden modificar su apellido"
+								/>
+							{:else}
+								<input
+									type="text"
+									id="apellido"
+									bind:value={datosEdicion.apellido}
+									class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+								/>
+							{/if}
 						</div>
 					</div>
-				</div>
+					</div>
+				{/if}
 
                 <!-- Información de contacto (múltiples) -->
                 <div class="border-b border-gray-200 pb-6">
