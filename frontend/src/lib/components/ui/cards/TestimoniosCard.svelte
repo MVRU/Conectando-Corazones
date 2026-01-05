@@ -2,7 +2,7 @@
 	export let puntaje: number = 5;
 	export let contenido: string = '';
 	export let username: string = '';
-	export let rol: string | undefined = undefined;
+export let rol: string | undefined = undefined;
 	export let active: boolean = false;
 	export let locked: boolean = false;
 

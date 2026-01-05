@@ -5,7 +5,7 @@ import { svelteTesting } from '@testing-library/svelte/vite';
 
 /**
  * ! DECISIÓN DE DISEÑO
- *  -!- Se extrae la configuración de pruebas en un archivo dedicado para cumplir con SRP y mantener limpio vite.config.ts
+ *  -!- Tests centralizados en carpeta tests/ para mejor organización y mantenibilidad
  */
 
 export default defineConfig({
@@ -13,9 +13,20 @@ export default defineConfig({
 	test: {
 		environment: 'jsdom',
 		clearMocks: true,
-		include: ['src/**/*.{test,spec}.{js,ts}'],
-		exclude: ['src/lib/server/**'],
+		globals: true,
+		include: [
+			'tests/**/*.test.{js,ts}'
+		],
+		exclude: ['src/lib/server/**', 'node_modules', '**/node_modules/**'],
 		setupFiles: ['./vitest-setup-client.ts'],
-		environmentMatchGlobs: [['src/lib/server/**', 'node']]
+		coverage: {
+			provider: 'v8',
+			reporter: ['text', 'json', 'html'],
+			exclude: [
+				'**/node_modules/**',
+				'**/tests/**',
+				'**/.svelte-kit/**'
+			]
+		}
 	}
 });

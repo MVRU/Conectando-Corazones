@@ -39,7 +39,7 @@
 <div class="flex min-h-screen flex-col bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
 	<!-- Stepper -->
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 
 	{#if etapa === 'verificando'}

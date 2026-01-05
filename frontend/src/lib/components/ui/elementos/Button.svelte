@@ -15,9 +15,11 @@
 	export let customClass = '';
 	export let customAriaLabel: string | null = null;
 	export let type: 'button' | 'submit' | 'reset' = 'submit';
+	export let ariaDisabled: boolean | undefined = undefined;
 	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
 	$: isDisabled = disabled || loading;
 	$: busyLabel = loadingLabel ?? label;
+	$: computedAriaDisabled = ariaDisabled ?? isDisabled;
 	const dispatch = createEventDispatcher();
 
 	function handleClick(event: MouseEvent) {
@@ -58,7 +60,7 @@
 		tabindex="0"
 		aria-label={ariaLabel}
 		aria-busy={loading || undefined}
-		aria-disabled={isDisabled}
+		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
@@ -127,7 +129,7 @@
 		tabindex="0"
 		aria-label={ariaLabel}
 		aria-busy={loading || undefined}
-		aria-disabled={isDisabled}
+		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
@@ -267,7 +269,7 @@
 		tabindex="0"
 		aria-label={ariaLabel}
 		aria-busy={loading || undefined}
-		aria-disabled={isDisabled}
+		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
 	>
 		{#if loading}

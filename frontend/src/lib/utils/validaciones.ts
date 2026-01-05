@@ -1,7 +1,3 @@
-// FIX: revisar y corregir errores tras cambios en interfaces
-
-// TODO: corregir cuando cambiemos el signin (registro de usuario)
-
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
@@ -16,26 +12,24 @@ export const MENSAJES_ERROR = {
 		'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial',
 	usuarioInvalido:
 		'El nombre de usuario debe tener entre 3 y 30 caracteres y solo puede contener letras, números, puntos, guiones bajos o guiones',
-	cuitInvalid: 'El CUIT es inválido', // ! Quitar cuando corrijamos signin
-	cuilInvalid: 'El CUIL es inválido', // ! Quitar cuando corrijamos signin
 	contrasenasNoCoinciden: 'Las contraseñas no coinciden',
 	requisitoEdad: 'Debés tener al menos 18 años',
-	documentTypeRequired: 'Por favor, especificá el tipo de documento', // ! Quitar cuando corrijamos signin
 	tipoInstitucionObligatorio: 'Debe especificar el tipo de institución',
-	specifyDocument: 'Debe especificar el documento', // ! Quitar cuando corrijamos signin
 	nombreInvalido: 'Nombre inválido. Solo se permiten letras y espacios.',
 	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
-	dniInvalid: 'DNI inválido. Debe ser un número entre 7 y 8 dígitos.', // ! Quitar cuando corrijamos signin
 	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
-	numeroCalleInvalido: 'Número inválido.',
-	pisoInvalido: 'Piso inválido. Puede ser un número o "PB".', // ! Este no lo estamos implementando -> revisar
-	ciudadInvalida: 'Ciudad inválida. Ingresá un nombre válido.', // ! Este no lo estamos implementando -> revisar
+	numeroCalleInvalido: 'Número inválido. Debe ser un número positivo.',
 	provinciaInvalida: 'Provincia inválida. Seleccioná una opción.',
 	ciudadNoPerteneceProvincia: 'La ciudad seleccionada no pertenece a la provincia elegida.',
 	otroContactoObligatorio: 'Debe especificar el tipo de contacto',
 	telefonoInvalido: 'Número de teléfono inválido',
 	urlInvalida: 'URL inválida',
-	contactoDuplicado: 'Método de contacto duplicado'
+	contactoDuplicado: 'Método de contacto duplicado',
+	fechaFutura: 'La fecha no puede ser futura',
+	fechaMuyAntigua: 'La fecha es demasiado antigua',
+	nombreLegalDuplicado: 'El nombre legal ya se encuentra registrado',
+	nombreCorto: 'El nombre debe tener al menos 3 caracteres',
+	razonSocialDuplicada: 'La razón social ya se encuentra registrada'
 };
 
 /**
@@ -54,42 +48,6 @@ export function validarUsername(username: string): boolean {
 	return /^[a-zA-Z0-9._-]{3,30}$/.test(username);
 }
 
-export function isValidCuit(cuit: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	if (!cuit) return false;
-	if (!/^\d{11}$/.test(cuit)) return false;
-	const prefix = cuit.slice(0, 2);
-	const number = cuit.slice(2, 10);
-	const check = cuit.slice(10);
-	const digits = prefix + number;
-	const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-	let sum = 0;
-	for (let i = 0; i < digits.length; i++) {
-		sum += parseInt(digits[i]) * weights[i];
-	}
-	const mod = sum % 11;
-	const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
-	return check === calculatedCheckDigit.toString();
-}
-
-export function isValidCuil(cuil: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	if (!cuil) return false;
-	if (!/^\d{11}$/.test(cuil)) return false;
-	const prefix = cuil.slice(0, 2);
-	const number = cuil.slice(2, 10);
-	const check = cuil.slice(10);
-	const digits = prefix + number;
-	const weights = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
-	let sum = 0;
-	for (let i = 0; i < digits.length; i++) {
-		sum += parseInt(digits[i]) * weights[i];
-	}
-	const mod = sum % 11;
-	const calculatedCheckDigit = mod === 0 ? 0 : mod === 1 ? 9 : 11 - mod;
-	return check === calculatedCheckDigit.toString();
-}
-
 export function esAdulto(fecha: Date): boolean {
 	if (!(fecha instanceof Date) || isNaN(fecha.getTime())) return false;
 	const hoy = new Date();
@@ -103,23 +61,18 @@ export function esAdulto(fecha: Date): boolean {
 }
 
 export function validarNombre(nombre: string): boolean {
-	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(nombre.trim());
+	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(nombre.trim());
 }
 
 export function validarApellido(apellido: string): boolean {
-	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(apellido.trim());
+	return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s'-]+$/.test(apellido.trim());
 }
 
-export function isValidDni(dni: string): boolean {
-	// ! Quitar cuando corrijamos signin
-	const dniNum = parseInt(dni, 10);
-	return /^\d{7,8}$/.test(dni) && dniNum >= 1000000 && dniNum <= 99999999;
+export function validarNombreLegal(nombre: string): boolean {
+	const nombreNormalizado = nombre.trim();
+	return nombreNormalizado.length >= 3;
 }
 
-export function validarRazonSocial(nombre: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return nombre.trim().length >= 3 && nombre.trim().length <= 100;
-}
 
 export function validarCalle(calle: string): boolean {
 	return calle.trim().length >= 3;
@@ -131,40 +84,13 @@ export function validarNumeroCalle(numero: string): boolean {
 	return trim.length > 0 && trim.length <= 10 && /^[a-zA-Z0-9\s/.-]+$/.test(trim);
 }
 
-export function validarPiso(piso: string): string | null {
-	if (!piso || !piso.trim()) return null; // Campo opcional
-	const v = piso.trim();
-	const num = parseInt(v, 10);
-	if (isNaN(num) || num < 0 || !Number.isInteger(parseFloat(v))) {
-		return 'Ingrese un número de piso válido.';
-	}
-	return null;
-}
-
-export function validarCiudad(ciudad: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return ciudad.trim().length >= 2;
-}
-
 export function validarProvincia(provincia: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
 	return provincias.some((p) => p.nombre === provincia);
-}
-
-export function validarProvinciaPorId(id: number): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return provincias.some((p) => p.id_provincia === id);
-}
-
-export function validarProvinciaPorISO(codigoIso: string): boolean {
-	// ! Este no lo estamos implementando -> revisar
-	return provincias.some((p) => p.codigo_iso === codigoIso);
 }
 
 /**
  * -!- Valida si una ciudad pertenece a una provincia específica usando IDs.
  */
-
 export function validarCiudadEnProvincia(
 	idLocalidad?: number | string,
 	idProvincia?: number | string
@@ -184,7 +110,7 @@ export function validarTelefonoInternacional(telefono: string): boolean {
 	if (!telefono || !telefono.trim()) return false;
 
 	const regexTelefono = /^\+?\d{1,3}[\s-]?\d{1,4}[\s-]?\d{3}[\s-]?\d{4}$/;
-	return regexTelefono.test(telefono.replace(/\s|-|\(|\)/g, '')); // Limpia espacios y formateadores
+	return regexTelefono.test(telefono.replace(/\s|-|\(|\)/g, ''));
 }
 
 export function validarUrl(url: string): boolean {
@@ -222,6 +148,22 @@ export function esFechaFutura(fecha?: Date | string): boolean {
 		if (isNaN(fechaObj.getTime())) return false;
 
 		return fechaObj > new Date();
+	} catch {
+		return false;
+	}
+}
+
+export function esFechaMuyAntigua(fecha?: Date | string): boolean {
+	if (!fecha) return false;
+
+	try {
+		const fechaObj = fecha instanceof Date ? fecha : new Date(fecha);
+		if (isNaN(fechaObj.getTime())) return false;
+
+		const fechaActual = new Date();
+		const diferenciaAnios = fechaActual.getFullYear() - fechaObj.getFullYear();
+
+		return diferenciaAnios > 120;
 	} catch {
 		return false;
 	}

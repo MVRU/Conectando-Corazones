@@ -14,8 +14,7 @@
 		validarNumeroCalle,
 		validarCiudadEnProvincia,
 		validarProvincia,
-		esFechaFutura,
-		validarPiso
+		esFechaFutura
 	} from '$lib/utils/validaciones';
 	import {
 		validarBeneficiariosValor,
@@ -25,7 +24,8 @@
 		unidadEfectiva,
 		esFechaDemasiadoLejana,
 		validarUnidadLibre,
-		validarReferencia
+		validarReferencia,
+		validarPiso
 	} from '$lib/utils/util-proyecto-form';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';

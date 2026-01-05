@@ -278,3 +278,12 @@ export function validarReferencia(referencia: string): string | null {
 	}
 	return null;
 }
+
+export function validarPiso(piso: string): string | null {
+	if (!piso || !piso.trim()) return null; // Campo opcional
+	const v = piso.trim();
+	if (v.length > 10) return 'Máximo 10 caracteres';
+	// Permitir números y letras (ej: "PB", "1", "2A")
+	if (!/^[a-zA-Z0-9\s]+$/.test(v)) return 'Caracteres inválidos';
+	return null;
+}
