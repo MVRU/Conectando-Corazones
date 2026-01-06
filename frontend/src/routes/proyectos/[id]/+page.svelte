@@ -14,6 +14,7 @@
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-ubicaciones';
 	import { error } from '@sveltejs/kit';
+	import { goto } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
@@ -23,6 +24,8 @@
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
+	import { usuario } from '$lib/stores/auth';
+	import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
 	import { onDestroy, onMount } from 'svelte';
 
 	import {
@@ -34,7 +37,12 @@
 		GlobeAlt,
 		Link,
 		Heart,
-		Share
+		Share,
+		XCircle,
+		Pencil,
+		ShieldCheck,
+		Trash,
+		ChevronDown
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -45,6 +53,18 @@
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
+
+	$: esCreador = $usuario?.id_usuario === proyecto?.institucion?.id_usuario;
+	$: colaboracionUsuario =
+		$usuario &&
+		mockColaboraciones.find(
+			(c) => c.proyecto_id === proyecto?.id_proyecto && c.colaborador_id === $usuario?.id_usuario
+		);
+
+	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
+	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
+	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
+	$: esAdministrador = $usuario?.rol === 'administrador';
 
 	$: {
 		const id = $page.params.id;
@@ -138,8 +158,24 @@
 		return 'Voluntario/a';
 	}
 
+	function esParticipacionMonetaria(p: ParticipacionPermitida): boolean {
+		return p.tipo_participacion?.descripcion === 'Monetaria';
+	}
+
+	function formatoNumero(valor: number): string {
+		return new Intl.NumberFormat('es-AR', {
+			style: 'decimal',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(valor);
+	}
+
 	function irAColaborar() {
-		showColaborarModal = true;
+		if (!$usuario) {
+			goto('/iniciar-sesion');
+			return;
+		}
+		mostrarModalColaborar = true;
 	}
 
 	async function compartirProyecto() {
@@ -164,8 +200,20 @@
 			.join('');
 	}
 
-	let showColaborarModal = false;
-	let showExitoModal = false;
+	let mostrarModalColaborar = false;
+	let mostrarModalExito = false;
+	let mostrarModalJustificacion = false;
+	let mostrarModalPendiente = false;
+	let mostrarDropdownAdmin = false;
+	let solicitudRecienEnviada = false;
+
+	function manejarClickSolicitud() {
+		if (tieneSolicitudPendiente) {
+			mostrarModalPendiente = true;
+		} else {
+			irAColaborar();
+		}
+	}
 
 	onMount(() => {
 		layoutStore.showStickyBottomBar();
@@ -183,13 +231,31 @@
 
 {#if proyecto}
 	<main
-		class="min-h-screen bg-gray-50 pb-24 pt-6 text-gray-800 sm:pt-10"
+		class="min-h-screen pb-24 pt-6 text-gray-800 sm:pt-10 {esAdministrador
+			? 'bg-slate-50'
+			: 'bg-gray-50'}"
 		aria-label="Detalle del proyecto"
 	>
+		{#if esAdministrador}
+			<div
+				class="sticky z-40 -mt-6 mb-6 flex w-full items-center justify-center bg-blue-800 px-4 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-500 sm:-mt-10 sm:mb-10 {$layoutStore.headerVisible
+					? 'top-[4.5rem]'
+					: 'top-0'}"
+				role="alert"
+			>
+				<p>
+					Estás visualizando este proyecto como Administrador.
+					<a href="/mi-panel" class="ml-1 underline hover:text-blue-200">
+						Ir al panel de administración
+					</a>
+				</p>
+			</div>
+		{/if}
+
 		<div
 			class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 		>
-			<ProyectoHeader {proyecto} />
+			<ProyectoHeader {proyecto} {esAdministrador} />
 
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 				<!-- Columna principal -->
@@ -258,8 +324,8 @@
 
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
-													{p.unidad_medida === 'dinero'
-														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
+													{esParticipacionMonetaria(p)
+														? `$ ${formatoNumero(p.actual || 0)} / $ ${formatoNumero(p.objetivo)} ${p.unidad_medida?.toUpperCase() || ''}`
 														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
 												</p>
 												<div
@@ -295,16 +361,105 @@
 						role="group"
 						aria-label="Acciones principales del proyecto"
 					>
-						<div class="flex gap-2 sm:gap-3">
-							<button
-								type="button"
-								on:click={irAColaborar}
-								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
-								aria-label="Colaborar ahora en este proyecto"
-							>
-								<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
-								Colaborar ahora
-							</button>
+						<div class="flex gap-3">
+							{#if esAdministrador}
+								<div class="relative flex-1">
+									<button
+										type="button"
+										on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 font-semibold text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										aria-expanded={mostrarDropdownAdmin}
+										aria-haspopup="true"
+									>
+										Gestionar proyecto
+										<Icon
+											src={ChevronDown}
+											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
+
+									{#if mostrarDropdownAdmin}
+										<!-- Dropdown menu -->
+										<div
+											class="animate-in fade-in zoom-in-95 absolute left-0 right-0 top-full mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+											role="menu"
+											tabindex="-1"
+										>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+											>
+												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
+												Editar proyecto
+											</button>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+											>
+												<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
+												Auditar proyecto
+											</button>
+											<div class="my-1 border-t border-gray-100"></div>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+												role="menuitem"
+											>
+												<Icon src={Trash} class="h-4 w-4 text-red-500" />
+												Eliminar proyecto
+											</button>
+										</div>
+
+										<div
+											class="fixed inset-0 z-[-1]"
+											on:click={() => (mostrarDropdownAdmin = false)}
+											aria-hidden="true"
+										></div>
+									{/if}
+								</div>
+							{:else if esCreador || esColaboradorAprobado}
+								<a
+									href="/proyectos/{proyecto.id_proyecto}/panel"
+									class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+									aria-label="Ver panel del proyecto"
+								>
+									<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
+									Ver panel
+								</a>
+							{:else}
+								<!-- Botón de acción principal -->
+								{#if esSolicitudRechazada}
+									<button
+										type="button"
+										on:click={() => (mostrarModalJustificacion = true)}
+										class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										aria-label="Ver motivo del rechazo"
+									>
+										Solicitud rechazada
+									</button>
+								{:else}
+									<button
+										type="button"
+										on:click={manejarClickSolicitud}
+										disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
+										class={tieneSolicitudPendiente
+											? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 active:translate-y-[1px]'
+											: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+										aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
+											? 'Ver estado de solicitud'
+											: 'Colaborar ahora en este proyecto'}
+									>
+										{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+											<Icon src={Clock} class="h-4 w-4" aria-hidden="true" />
+											Solicitud enviada
+										{:else}
+											<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
+											Colaborar ahora
+										{/if}
+									</button>
+								{/if}
+							{/if}
 
 							<button
 								type="button"
@@ -366,7 +521,8 @@
 											title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
 											aria-label="Institución organizadora"
 										>
-											{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+											{(proyecto.institucion?.nombre_legal || 'Institución organizadora') +
+												(esCreador ? ' (vos)' : '')}
 										</span>
 										<div class="mt-1">
 											<span
@@ -493,7 +649,10 @@
 										<span
 											class="block flex-1 truncate text-sm text-gray-700"
 											title={obtenerNombreColaborador(colab.colaborador)}
-											>{obtenerNombreColaborador(colab.colaborador)}</span
+											>{obtenerNombreColaborador(colab.colaborador) +
+												($usuario?.id_usuario === colab.colaborador?.id_usuario
+													? ' (vos)'
+													: '')}</span
 										>
 										<span
 											class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
@@ -516,14 +675,91 @@
 			class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
 		>
 			<div class="flex gap-3">
-				<button
-					type="button"
-					on:click={irAColaborar}
-					class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
-				>
-					<Icon src={Heart} class="h-5 w-5" />
-					Colaborar ahora
-				</button>
+				{#if esAdministrador}
+					<!-- Dropdown móvil -->
+					<div class="relative flex-1">
+						<button
+							type="button"
+							on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+							class="flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+						>
+							Gestionar proyecto
+							<Icon
+								src={ChevronDown}
+								class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+									? 'rotate-180'
+									: ''}"
+							/>
+						</button>
+
+						{#if mostrarDropdownAdmin}
+							<!-- Dropdown menu popup -->
+							<div
+								class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 right-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
+							>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+								>
+									<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
+									Editar proyecto
+								</button>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+								>
+									<Icon src={ShieldCheck} class="h-5 w-5 text-gray-500" />
+									Auditar proyecto
+								</button>
+								<div class="my-1 border-t border-gray-100"></div>
+								<button
+									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
+								>
+									<Icon src={Trash} class="h-5 w-5 text-red-500" />
+									Eliminar proyecto
+								</button>
+							</div>
+
+							<!-- Backdrop -->
+							<div
+								class="fixed inset-0 z-[-1] bg-black/50"
+								on:click={() => (mostrarDropdownAdmin = false)}
+								aria-hidden="true"
+							></div>
+						{/if}
+					</div>
+				{:else if esCreador || esColaboradorAprobado}
+					<a
+						href={esCreador ? '/institucion' : '/colaborador'}
+						class="flex flex-1 items-center justify-center gap-2 rounded-xl border border-transparent bg-sky-100 px-4 py-3 font-bold text-sky-700 transition active:scale-[0.98]"
+					>
+						Ver panel
+					</a>
+				{:else if esSolicitudRechazada}
+					<button
+						type="button"
+						on:click={() => (mostrarModalJustificacion = true)}
+						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-sm transition active:scale-[0.98]"
+					>
+						<Icon src={XCircle} class="h-5 w-5" />
+						Solicitud rechazada
+					</button>
+				{:else}
+					<button
+						type="button"
+						on:click={manejarClickSolicitud}
+						disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
+						class={tieneSolicitudPendiente
+							? 'flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-100 px-4 py-3 font-bold text-amber-700 shadow-sm transition active:scale-[0.98]'
+							: 'flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+					>
+						{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+							<Icon src={Clock} class="h-5 w-5" />
+							Solicitud enviada
+						{:else}
+							<Icon src={Heart} class="h-5 w-5" />
+							Colaborar ahora
+						{/if}
+					</button>
+				{/if}
 				<button
 					type="button"
 					on:click={compartirProyecto}
@@ -544,18 +780,19 @@
 {/if}
 
 <ModalColaboracion
-	bind:open={showColaborarModal}
+	bind:open={mostrarModalColaborar}
 	on:submit={() => {
-		showColaborarModal = false;
-		showExitoModal = true;
+		mostrarModalColaborar = false;
+		mostrarModalExito = true;
+		solicitudRecienEnviada = true;
 	}}
 />
 
-{#if showExitoModal}
+{#if mostrarModalExito}
 	<!-- Overlay -->
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={() => (showExitoModal = false)}
+		on:click={() => (mostrarModalExito = false)}
 		aria-hidden="true"
 	></div>
 
@@ -569,7 +806,7 @@
 			tabindex="-1"
 			on:click|stopPropagation
 			on:keydown={(e) => {
-				if (e.key === 'Escape') showExitoModal = false;
+				if (e.key === 'Escape') mostrarModalExito = false;
 			}}
 		>
 			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
@@ -587,7 +824,110 @@
 				<button
 					type="button"
 					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
-					on:click={() => (showExitoModal = false)}
+					on:click={() => (mostrarModalExito = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if mostrarModalJustificacion}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		on:click={() => (mostrarModalJustificacion = false)}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de justificación de rechazo -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-justificacion-titulo"
+			tabindex="-1"
+			on:click|stopPropagation
+			on:keydown={(e) => {
+				if (e.key === 'Escape') mostrarModalJustificacion = false;
+			}}
+		>
+			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+				<span
+					class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 ring-1 ring-red-100"
+				>
+					<Icon src={XCircle} class="h-6 w-6 text-red-600" aria-hidden="true" />
+				</span>
+				<h3
+					id="modal-justificacion-titulo"
+					class="text-base font-semibold text-gray-900 sm:text-lg"
+				>
+					Solicitud rechazada
+				</h3>
+				<p class="text-sm text-gray-500">
+					{colaboracionUsuario?.justificacion || 'No se proporcionó una justificación.'}
+				</p>
+			</div>
+
+			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					on:click={() => (mostrarModalJustificacion = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if mostrarModalPendiente}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		on:click={() => (mostrarModalPendiente = false)}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de Solicitud Pendiente -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl transition-all duration-300"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-pendiente-titulo"
+			tabindex="-1"
+			on:click|stopPropagation
+			on:keydown={(e) => {
+				if (e.key === 'Escape') mostrarModalPendiente = false;
+			}}
+		>
+			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+				<span
+					class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 ring-1 ring-amber-100"
+				>
+					<Icon src={Clock} class="h-6 w-6 text-amber-600" aria-hidden="true" />
+				</span>
+				<h3 id="modal-pendiente-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
+					Solicitud pendiente
+				</h3>
+				<div class="mt-2 w-full space-y-3 rounded-lg bg-gray-50 p-3 text-sm text-gray-600">
+					<p class="font-medium text-gray-800">Mensaje enviado:</p>
+					<p class="italic">
+						"{colaboracionUsuario?.mensaje || 'Sin mensaje'}"
+					</p>
+				</div>
+				<p class="text-xs text-gray-400">Tu solicitud está siendo revisada por la institución.</p>
+			</div>
+
+			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					on:click={() => (mostrarModalPendiente = false)}
 				>
 					Cerrar
 				</button>

@@ -301,20 +301,32 @@ export function hasPermission(permission: string): boolean {
  * Verificar acceso a rutas por rol
  */
 export function canAccessRoute(route: string): boolean {
-        const routePermissions: Record<string, string[]> = {
-                '/admin': ['administrador'],
-                '/institucion': ['institucion', 'administrador'],
-                '/colaborador': ['colaborador', 'administrador'],
-                '/proyectos/crear': ['institucion', 'administrador'],
-                '/perfil': ['institucion', 'colaborador', 'administrador']
-        };
+	const routePermissions: Record<string, string[]> = {
+		'/admin': ['administrador'],
+		'/institucion': ['institucion', 'administrador'],
+		'/colaborador': ['colaborador', 'administrador'],
+		'/proyectos/crear': ['institucion', 'administrador'],
+		'/perfil': ['institucion', 'colaborador', 'administrador'],
+		'/mi-panel': ['institucion', 'colaborador', 'administrador'],
+		'/configuracion': ['institucion', 'colaborador', 'administrador']
+	};
 
-        const requiredRoles = routePermissions[route] ?? [];
-        const state = get(authStore);
+	const state = get(authStore);
+	const userRole = state.usuario?.rol;
 
-        return (
-                requiredRoles.length === 0 || (!!state.usuario && requiredRoles.includes(state.usuario.rol))
-        );
+	if (routePermissions[route]) {
+		return !!userRole && routePermissions[route].includes(userRole);
+	}
+
+	const permissions = Object.entries(routePermissions).sort((a, b) => b[0].length - a[0].length);
+
+	for (const [path, roles] of permissions) {
+		if (route.startsWith(path)) {
+			return !!userRole && roles.includes(userRole);
+		}
+	}
+
+	return true;
 }
 
 function obtenerMensajeError(error: unknown, fallback: string): string {
