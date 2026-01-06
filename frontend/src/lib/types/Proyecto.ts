@@ -11,12 +11,15 @@ export interface Proyecto {
   id_proyecto?: number;
   titulo: string;
   descripcion: string;
+  resumen?: string;
+  aprendizajes?: string;
   url_portada?: string;
-  created_at?: Date;
-  fecha_cierre_postulaciones?: Date;
-  fecha_fin_tentativa: Date;
-  beneficiarios?: number;
-  id_chat_firebase?: number;
+  created_at?: Date | string | null;
+  updated_at?: Date | string | null;
+  fecha_cierre_postulaciones?: Date | string | null;
+  fecha_fin_tentativa?: Date | string | null;
+  beneficiarios?: number | string | null;
+  id_chat_firebase?: number | string | null;
 
   // * RELACIONES
 

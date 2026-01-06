@@ -1,10 +1,11 @@
 <script lang="ts">
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+
 	export let icon: 'user' | 'support' | 'alert' = 'user';
 	export let title = '';
 	export let description = '';
 	export let link = '';
 	export let linkText = '';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 </script>
 
 <div
