@@ -50,7 +50,7 @@ const proyectosBase: Proyecto[] = [
 		institucion_id: 2,
 		evidencia_ids: [1],
 		solicitud_finalizacion_ids: [1],
-		estado: 'en_curso',
+		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 1,

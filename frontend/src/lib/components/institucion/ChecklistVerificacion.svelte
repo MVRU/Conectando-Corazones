@@ -38,7 +38,7 @@
 	}
 </script>
 
-<div class="space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-6">
+<div class="space-y-4">
 	<div class="mb-4 flex items-center gap-2">
 		<svg
 			class="h-5 w-5 text-blue-600"
@@ -57,30 +57,36 @@
 	</div>
 
 	<!-- Items del checklist -->
-	{#each checklistItems as item}
-		<label
-			class="flex cursor-pointer items-start gap-3 rounded-lg bg-white p-4 transition hover:bg-gray-50"
-		>
-			<input
-				type="checkbox"
-				checked={checks[item.key]}
-				on:change={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
-				class="mt-1 h-5 w-5 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-			/>
-			<span class="text-sm leading-relaxed text-gray-700">
-				{item.label}
-			</span>
-		</label>
-	{/each}
+	<div class="space-y-2">
+		{#each checklistItems as item}
+			<label
+				class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-100 p-3 transition hover:bg-gray-50"
+			>
+				<input
+					type="checkbox"
+					checked={checks[item.key]}
+					on:change={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
+					class="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+				/>
+				<span class="text-sm leading-relaxed text-gray-700">
+					{item.label}
+				</span>
+			</label>
+		{/each}
+	</div>
 
 	<!-- Indicador de progreso -->
-	<div class="mt-4 border-t border-gray-200 pt-4">
+	<div class="mt-4 border-t border-gray-100 pt-4">
 		<div class="flex items-center justify-between text-sm">
-			<span class="text-gray-600">
+			<span class="text-gray-500">
 				Completado: {completados} / {totalItems}
 			</span>
-			<span class="font-medium" class:text-green-600={todosCompletos} class:text-gray-500={!todosCompletos}>
-				{todosCompletos ? '✓ Listo para enviar' : 'Pendiente'}
+			<span
+				class="font-medium"
+				class:text-green-600={todosCompletos}
+				class:text-gray-400={!todosCompletos}
+			>
+				{todosCompletos ? '✓ Listo' : 'Pendiente'}
 			</span>
 		</div>
 	</div>
