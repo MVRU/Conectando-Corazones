@@ -557,6 +557,52 @@ export const mockUsuarios = {
 			}
 		],
 		consentimientos: []
+	} satisfies Institucion,
+
+	fundacion_esperanza_fallida: { // creé esta institución que tiene verificación documental "rechazada" para pruebas
+		id_usuario: 19,
+		username: 'fundacion_fail',
+		password: '123456',
+		nombre: 'Carlos',
+		apellido: 'Díaz',
+		fecha_nacimiento: new Date('1980-05-15'),
+		estado: 'activo',
+		created_at: new Date('2024-09-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Fundación Esperanza Fallida',
+		tipo_institucion: 'Fundación',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@esperanzafallida.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ong_nuevo_horizonte: { // creé esta institución que tiene verificación documental "pendiente" para pruebas
+		id_usuario: 20,
+		username: 'ong_horizonte',
+		password: '123456',
+		nombre: 'Laura',
+		apellido: 'Gómez',
+		fecha_nacimiento: new Date('1985-11-20'),
+		estado: 'activo',
+		created_at: new Date('2024-09-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'ONG Nuevo Horizonte',
+		tipo_institucion: 'ONG',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@nuevohorizonte.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
 	} satisfies Institucion
 } as const;
 

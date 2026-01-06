@@ -320,7 +320,7 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 10,
 				id_proyecto: 9,
 				id_tipo_participacion: 2,
-				unidad_medida: 'pesos',
+				unidad_medida: 'ARS',
 				objetivo: 50000,
 				actual: 50000,
 				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
@@ -519,7 +519,7 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 17,
 				id_proyecto: 14,
 				id_tipo_participacion: 1,
-				unidad_medida: 'pesos',
+				unidad_medida: 'ARS',
 				objetivo: 200000,
 				actual: 45000,
 				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
@@ -604,7 +604,7 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 30,
 				id_proyecto: 16,
 				id_tipo_participacion: 1,
-				unidad_medida: 'pesos',
+				unidad_medida: 'ARS',
 				objetivo: 50000,
 				actual: 55000,
 				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
@@ -689,7 +689,7 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 32,
 				id_proyecto: 18,
 				id_tipo_participacion: 1,
-				unidad_medida: 'pesos (combustible)',
+				unidad_medida: 'BRL',
 				objetivo: 60000,
 				actual: 10000,
 				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
@@ -731,6 +731,64 @@ const proyectosBase: Proyecto[] = [
 				objetivo: 20,
 				actual: 5,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+			}
+		]
+	},
+	{
+		id_proyecto: 20,
+		titulo: 'Comedor Nocturno',
+		descripcion: 'Cenas calientes para personas en situación de calle durante el invierno.',
+		resumen: 'Alimento caliente en noches frías.',
+		aprendizajes: 'La regularidad genera confianza con las personas asistidas.',
+		url_portada: '/img/proyectos-20.jpg',
+		created_at: new Date('2026-02-01'),
+		fecha_cierre_postulaciones: new Date('2026-03-01'),
+		fecha_fin_tentativa: new Date('2026-08-01'),
+		id_chat_firebase: 1020,
+		participacion_permitida_ids: [1],
+		colaboracion_ids: [],
+		institucion_id: 11,
+		evidencia_ids: [],
+		solicitud_finalizacion_ids: [],
+		estado: 'en_curso',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 34,
+				id_proyecto: 20,
+				id_tipo_participacion: 1,
+				unidad_medida: 'viandas',
+				objetivo: 100,
+				actual: 20,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+			}
+		]
+	},
+	{
+		id_proyecto: 21,
+		titulo: 'Taller de Oficios',
+		descripcion: 'Capacitación en carpintería básica para jóvenes del barrio.',
+		resumen: 'Herramientas para el primer empleo.',
+		aprendizajes: 'El oficio dignifica y abre puertas.',
+		url_portada: '/img/proyectos-21.jpg',
+		created_at: new Date('2026-02-15'),
+		fecha_cierre_postulaciones: new Date('2026-03-15'),
+		fecha_fin_tentativa: new Date('2026-09-15'),
+		id_chat_firebase: 1021,
+		participacion_permitida_ids: [1],
+		colaboracion_ids: [],
+		institucion_id: 11,
+		evidencia_ids: [],
+		solicitud_finalizacion_ids: [],
+		estado: 'en_curso',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 35,
+				id_proyecto: 21,
+				id_tipo_participacion: 1,
+				unidad_medida: 'voluntarios capacitadores',
+				objetivo: 2,
+				actual: 1,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			}
 		]
 	}

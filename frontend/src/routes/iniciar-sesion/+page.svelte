@@ -12,6 +12,7 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
+	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 	import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 	import { LockClosed, Eye, EyeSlash } from '@steeze-ui/heroicons';
@@ -42,12 +43,24 @@ TODO:
 		try {
 			await authActions.login(identificador, password, recordarme);
 
+			toastStore.show({
+				variant: 'success',
+				title: '¡Hola de nuevo!',
+				message: 'Iniciaste sesión correctamente.'
+			});
+
 			// Redirigir según el rol del usuario
 			// TODO: Implementar redirección basada en el rol
 			goto('/');
 		} catch (error) {
-			// El error ya se maneja en el store
+			// El error ya se maneja en el store, pero mostramos toast también
 			console.error('Error en login:', error);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de acceso',
+				message:
+					error instanceof Error ? error.message : 'Verificá tus credenciales e intentá nuevamente.'
+			});
 		}
 	}
 </script>

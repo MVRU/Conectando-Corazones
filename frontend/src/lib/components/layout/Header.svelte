@@ -3,6 +3,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 	import {
 		isAuthenticated,
 		usuario as usuarioStore,
@@ -12,6 +13,9 @@
 		isColaborador
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
+
+	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
+	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 
 	let menuAbierto = false;
 	let visible = false;
@@ -34,17 +38,49 @@
 		await authActions.logout();
 		menuAbierto = false;
 		mostrarDropdown = false;
+		goto('/');
+	}
+
+	$: verificacionAprobada =
+		$usuarioStore &&
+		mockVerificaciones.find((v) => v.usuario_id === $usuarioStore?.id_usuario)?.estado ===
+			'aprobada';
+
+	$: proyectosEnCursoCount = $usuarioStore
+		? mockProyectos.filter(
+				(p) => p.institucion_id === $usuarioStore?.id_usuario && p.estado === 'en_curso'
+			).length
+		: 0;
+
+	$: limiteProyectosAlcanzado = proyectosEnCursoCount >= 5;
+
+	interface DropdownItem {
+		label: string;
+		href: string;
+		disabled?: boolean;
+		disabledReason?: string;
 	}
 
 	$: dropdownItems = [
 		{ label: 'Perfil', href: '/perfil' },
 		{ label: $isAdmin ? 'Panel de administración' : 'Mi panel', href: '/mi-panel' },
-		...($isInstitucion ? [{ label: 'Crear proyecto', href: '/proyectos/crear' }] : []),
+		...($isInstitucion
+			? [
+					{
+						label: 'Crear proyecto',
+						href: '/proyectos/crear',
+						disabled: !verificacionAprobada || limiteProyectosAlcanzado,
+						disabledReason: !verificacionAprobada
+							? 'Debés tener la verificación de institución aprobada para crear proyectos'
+							: 'Ya tenés 5 proyectos en curso (límite máximo alcanzado)'
+					}
+				]
+			: []),
 		...($isColaborador
 			? [{ label: 'Solicitudes de colaboración', href: '/colaborador/solicitudes-colaboracion' }]
 			: []),
 		{ label: 'Configuración', href: '/configuracion' }
-	];
+	] as DropdownItem[];
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -192,13 +228,22 @@
 
 							{#each dropdownItems as item, i (i)}
 								<li>
-									<a
-										href={item.href}
-										class="block px-4 py-3 text-sm font-medium transition-colors duration-200 hover:bg-blue-500/10 hover:text-blue-200"
-										on:click={() => ((menuAbierto = false), (mostrarDropdown = false))}
-									>
-										{item.label}
-									</a>
+									{#if item.disabled}
+										<span
+											class="block cursor-not-allowed px-4 py-3 text-sm font-medium text-gray-500"
+											title={item.disabledReason}
+										>
+											{item.label}
+										</span>
+									{:else}
+										<a
+											href={item.href}
+											class="block px-4 py-3 text-sm font-medium transition-colors duration-200 hover:bg-blue-500/10 hover:text-blue-200"
+											on:click={() => ((menuAbierto = false), (mostrarDropdown = false))}
+										>
+											{item.label}
+										</a>
+									{/if}
 								</li>
 							{/each}
 

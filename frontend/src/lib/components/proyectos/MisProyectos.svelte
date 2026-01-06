@@ -6,15 +6,19 @@
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
 	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
+	import { useProyectosFiltrosUrl } from '$lib/composables/useProyectosFiltrosUrl';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = proyectosPorDefecto;
 
 	// Inicializar composable de filtros
+	const filtros = createProyectosFiltros();
+
 	const {
 		proyectos: proyectosStore,
 		proyectosOrdenados,
@@ -35,7 +39,10 @@
 		tiposParticipacionDisponibles,
 		calcularLocalidadesDisponibles,
 		restablecerFiltros
-	} = createProyectosFiltros();
+	} = filtros;
+
+	// Sincronizar filtros con URL
+	useProyectosFiltrosUrl(filtros);
 
 	let pestanaActiva: 'todos' | 'activos' | 'completados' =
 		($page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos';
@@ -70,6 +77,11 @@
 				? 'Mis proyectos activos'
 				: 'Mis proyectos completados';
 
+	// Verificar estado de la institución
+	$: verificacion = usuario && mockVerificaciones.find((v) => v.usuario_id === usuario.id_usuario);
+	$: verificationAprobada = verificacion?.estado === 'aprobada';
+	$: esInstitucion = usuario?.rol === 'institucion';
+
 	$: tituloVacio =
 		pestanaActiva === 'activos'
 			? 'No tenés proyectos activos'
@@ -78,11 +90,13 @@
 				: 'No hay proyectos';
 
 	$: descripcionVacia =
-		pestanaActiva === 'activos'
-			? 'Los proyectos en curso o pendientes aparecerán acá.'
-			: pestanaActiva === 'completados'
-				? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
-				: 'No tenés ningún proyecto asociado a tu cuenta.';
+		esInstitucion && !verificationAprobada
+			? 'No podés crear proyectos hasta que verifiques exitosamente la identidad de tu institución.'
+			: pestanaActiva === 'activos'
+				? 'Los proyectos en curso o pendientes aparecerán acá.'
+				: pestanaActiva === 'completados'
+					? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
+					: 'No tenés ningún proyecto asociado a tu cuenta.';
 
 	$: filtroCustom = (proyectosInput: Proyecto[]) => {
 		if (pestanaActiva === 'todos') return proyectosInput;
@@ -165,14 +179,26 @@
 	</ProyectosBase>
 
 	{#if usuario?.rol === 'institucion'}
-		<a
-			href="/proyectos/crear"
-			class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
-			aria-label="Crear nuevo proyecto"
-		>
-			<Plus size={24} />
-			<span class="font-medium">Crear proyecto</span>
-		</a>
+		{#if verificationAprobada}
+			<a
+				href="/proyectos/crear"
+				class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
+				aria-label="Crear nuevo proyecto"
+			>
+				<Plus size={24} />
+				<span class="font-medium">Crear proyecto</span>
+			</a>
+		{:else}
+			<button
+				disabled
+				class="fixed bottom-6 right-6 z-50 flex cursor-not-allowed items-center gap-2 rounded-full bg-gray-400 px-6 py-3 text-white shadow-lg sm:bottom-8 sm:right-8"
+				title="Debes validar tu identidad para crear proyectos"
+				aria-label="Crear nuevo proyecto (Deshabilitado)"
+			>
+				<Plus size={24} />
+				<span class="font-medium">Crear proyecto</span>
+			</button>
+		{/if}
 	{:else if usuario?.rol === 'colaborador'}
 		<a
 			href="/proyectos"

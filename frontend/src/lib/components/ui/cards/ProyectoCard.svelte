@@ -309,33 +309,38 @@
 						<Button
 							label="Ver detalles"
 							href={`/proyectos/${proyecto.id_proyecto}`}
-							variant={botonColaborarDeshabilitado && !esRechazada ? 'primary' : 'secondary'}
+							variant={usuario?.rol === 'institucion' ||
+							(botonColaborarDeshabilitado && !esRechazada)
+								? 'primary'
+								: 'secondary'}
 							size="sm"
 							customClass="flex-1"
 							customAriaLabel="Ver detalles del proyecto"
 						/>
-						<Button
-							label={esRechazada
-								? 'Solicitud rechazada'
-								: yaColaboro
-									? 'Solicitud enviada'
-									: 'Colaborar ahora'}
-							href={esRechazada ? undefined : `/proyectos/${proyecto.id_proyecto}#colaborar`}
-							size="sm"
-							variant={esRechazada
-								? 'danger'
-								: botonColaborarDeshabilitado
-									? 'secondary'
-									: 'primary'}
-							disabled={esRechazada ? false : botonColaborarDeshabilitado}
-							customClass={'flex-1 cursor-pointer'}
-							customAriaLabel={esRechazada
-								? 'Ver justificación del rechazo'
-								: yaColaboro
-									? 'Solicitud de colaboración enviada'
-									: 'Colaborar en este proyecto'}
-							on:click={manejarClickColaborar}
-						/>
+						{#if usuario?.rol === 'colaborador'}
+							<Button
+								label={esRechazada
+									? 'Solicitud rechazada'
+									: yaColaboro
+										? 'Solicitud enviada'
+										: 'Colaborar ahora'}
+								href={esRechazada ? undefined : `/proyectos/${proyecto.id_proyecto}#colaborar`}
+								size="sm"
+								variant={esRechazada
+									? 'danger'
+									: botonColaborarDeshabilitado
+										? 'secondary'
+										: 'primary'}
+								disabled={esRechazada ? false : botonColaborarDeshabilitado}
+								customClass={'flex-1 cursor-pointer'}
+								customAriaLabel={esRechazada
+									? 'Ver justificación del rechazo'
+									: yaColaboro
+										? 'Solicitud de colaboración enviada'
+										: 'Colaborar en este proyecto'}
+								on:click={manejarClickColaborar}
+							/>
+						{/if}
 					{/if}
 				</div>
 			{:else}

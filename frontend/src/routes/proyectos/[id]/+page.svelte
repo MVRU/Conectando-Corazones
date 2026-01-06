@@ -158,6 +158,18 @@
 		return 'Voluntario/a';
 	}
 
+	function esParticipacionMonetaria(p: ParticipacionPermitida): boolean {
+		return p.tipo_participacion?.descripcion === 'Monetaria';
+	}
+
+	function formatoNumero(valor: number): string {
+		return new Intl.NumberFormat('es-AR', {
+			style: 'decimal',
+			minimumFractionDigits: 0,
+			maximumFractionDigits: 0
+		}).format(valor);
+	}
+
 	function irAColaborar() {
 		if (!$usuario) {
 			goto('/iniciar-sesion');
@@ -312,8 +324,8 @@
 
 											<div class="flex w-full flex-col">
 												<p class="font-medium text-gray-800">
-													{p.unidad_medida === 'dinero'
-														? `$${(p.actual || 0).toLocaleString('es-AR')} / $${p.objetivo.toLocaleString('es-AR')}`
+													{esParticipacionMonetaria(p)
+														? `$ ${formatoNumero(p.actual || 0)} / $ ${formatoNumero(p.objetivo)} ${p.unidad_medida?.toUpperCase() || ''}`
 														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
 												</p>
 												<div
