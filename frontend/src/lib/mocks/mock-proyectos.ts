@@ -347,7 +347,7 @@ const proyectosBase: Proyecto[] = [
 		institucion_id: 2,
 		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
-		estado: 'en_curso',
+		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 11,
@@ -793,6 +793,47 @@ const proyectosBase: Proyecto[] = [
 				objetivo: 2,
 				actual: 1,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+			}
+		]
+	},
+	{
+		id_proyecto: 22,
+		titulo: 'Apoyo escolar en contraturno',
+		beneficiarios: 35,
+		descripcion: 'Acompañamiento educativo para estudiantes con dificultades de aprendizaje. Clases de apoyo en matemática y lengua durante las tardes.',
+		resumen: 'Reforzamos contenidos clave para evitar el abandono escolar.',
+		aprendizajes: 'El apoyo individualizado marca la diferencia en el rendimiento académico.',
+		url_portada: '/img/proyectos-22.jpg',
+		created_at: new Date('2025-09-10'),
+		updated_at: new Date('2025-12-20'),
+		fecha_cierre_postulaciones: new Date('2025-10-15'),
+		fecha_fin_tentativa: new Date('2025-12-30'),
+		id_chat_firebase: 1022,
+		participacion_permitida_ids: [36, 37],
+		colaboracion_ids: [],
+		institucion_id: 2,
+		evidencia_ids: [13, 14, 15, 16],
+		solicitud_finalizacion_ids: [],
+		estado: 'pendiente_solicitud_cierre',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 36,
+				id_proyecto: 22,
+				id_tipo_participacion: 1,
+				unidad_medida: 'docentes voluntarios',
+				objetivo: 5,
+				actual: 5,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+			},
+			{
+				id_participacion_permitida: 37,
+				id_proyecto: 22,
+				id_tipo_participacion: 1,
+				unidad_medida: 'unidades',
+				especie: 'útiles escolares',
+				objetivo: 40,
+				actual: 38,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			}
 		]
 	}

@@ -6,6 +6,7 @@
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import { mockEvidencias } from '$lib/mocks/mock-evidencias';
 	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
+	import { mockSolicitudesFinalizacion } from '$lib/mocks/mock-solicitudes-finalizacion';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -83,6 +84,16 @@
 		? mockProyectos.find((p) => p.id_proyecto === Number(proyectoSeleccionado))
 		: null;
 
+	// Verificar si ya existe una solicitud de finalización pendiente para el proyecto seleccionado
+	$: solicitudPendienteExistente = proyectoSeleccionado
+		? mockSolicitudesFinalizacion.find(
+				(s) => s.proyecto_id === Number(proyectoSeleccionado) && s.estado === 'pendiente'
+			)
+		: null;
+
+	// Variable booleana derivada para validaciones
+	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
+
 	// Evidencias del proyecto seleccionado agrupadas por objetivo
 	$: evidenciasPorObjetivo = proyectoActual
 		? proyectoActual.participacion_permitida?.map((objetivo) => {
@@ -129,8 +140,13 @@
 	async function enviarSolicitud(event: Event) {
 		event.preventDefault();
 
-		// Validación previa: no continuar si falta algún requisito
-		if (!proyectoSeleccionado || !todosLosChecksCompletos || !todosLosObjetivosTienenEvidencias) {
+		// Validación previa: no continuar si falta algún requisito o ya existe solicitud pendiente
+		if (
+			!proyectoSeleccionado ||
+			!todosLosChecksCompletos ||
+			!todosLosObjetivosTienenEvidencias ||
+			tieneSolicitudPendiente
+		) {
 			return;
 		}
 
@@ -292,7 +308,45 @@
 					{/if}
 				</div>
 
-				{#if proyectoSeleccionado && proyectoActual}
+				{#if proyectoSeleccionado && proyectoActual}				<!-- Alerta: Solicitud pendiente existente -->
+				{#if solicitudPendienteExistente}
+					<div
+						class="mb-6 rounded-xl border border-orange-200 bg-orange-50 p-6 shadow-sm"
+					>
+						<div class="flex gap-4">
+							<div class="flex-shrink-0">
+								<svg
+									class="h-6 w-6 text-orange-600"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+									/>
+								</svg>
+							</div>
+							<div>
+								<h3 class="text-base font-semibold text-orange-900">Solicitud ya enviada</h3>
+								<p class="mt-2 text-sm text-orange-800">
+									Este proyecto ya tiene una solicitud de cierre <strong>pendiente</strong> de revisión.
+									No podés enviar otra solicitud hasta que los colaboradores revisen la actual.
+								</p>
+								<p class="mt-2 text-xs text-orange-700">
+									Fecha de solicitud:
+									{solicitudPendienteExistente.created_at?.toLocaleDateString('es-AR', {
+										day: 'numeric',
+										month: 'long',
+										year: 'numeric'
+									})}
+								</p>
+							</div>
+						</div>
+					</div>
+				{/if}
 					<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
 						<!-- Columna Izquierda: Evidencias (Principal) -->
 						<div class="space-y-6 lg:col-span-8">
@@ -376,7 +430,7 @@
 						<div class="space-y-6 lg:sticky lg:top-6 lg:col-span-4">
 							<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
 								<div class="p-6">
-									<ChecklistVerificacion bind:checks />
+									<ChecklistVerificacion bind:checks disabled={tieneSolicitudPendiente} />
 
 									<div class="mt-6 space-y-4">
 										<!-- Nota informativa -->
@@ -410,9 +464,11 @@
 											type="submit"
 											disabled={!todosLosChecksCompletos ||
 												!todosLosObjetivosTienenEvidencias ||
-												enviandoSolicitud}
+												enviandoSolicitud ||
+												tieneSolicitudPendiente}
 											class="w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none {todosLosChecksCompletos &&
-											todosLosObjetivosTienenEvidencias
+										todosLosObjetivosTienenEvidencias &&
+								!tieneSolicitudPendiente
 												? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md focus:ring-blue-500'
 												: 'bg-gray-300 text-gray-500'}"
 										>
@@ -435,7 +491,9 @@
 														></path>
 													</svg>
 													Enviando...
-												</span>
+											</span>
+											{:else if tieneSolicitudPendiente}
+												Solicitud ya enviada
 											{:else if !todosLosObjetivosTienenEvidencias}
 												Faltan evidencias
 											{:else if !todosLosChecksCompletos}

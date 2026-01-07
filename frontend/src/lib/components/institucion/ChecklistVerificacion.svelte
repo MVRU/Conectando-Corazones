@@ -1,5 +1,6 @@
 <script lang="ts">
 	export let checks: Record<string, boolean>;
+	export let disabled: boolean = false;
 	export let onUpdate: (checks: Record<string, boolean>) => void = () => {};
 
 	// Definición de items del checklist
@@ -60,15 +61,20 @@
 	<div class="space-y-2">
 		{#each checklistItems as item}
 			<label
-				class="flex cursor-pointer items-start gap-3 rounded-lg border border-gray-100 p-3 transition hover:bg-gray-50"
+				class="flex items-start gap-3 rounded-lg border border-gray-100 p-3 transition {disabled
+					? 'cursor-not-allowed bg-gray-50 opacity-60'
+					: 'cursor-pointer hover:bg-gray-50'}"
 			>
 				<input
 					type="checkbox"
 					checked={checks[item.key]}
 					on:change={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
-					class="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+					disabled={disabled}
+					class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 {disabled
+						? 'cursor-not-allowed'
+						: 'cursor-pointer'}"
 				/>
-				<span class="text-sm leading-relaxed text-gray-700">
+				<span class="text-sm leading-relaxed {disabled ? 'text-gray-500' : 'text-gray-700'}">
 					{item.label}
 				</span>
 			</label>

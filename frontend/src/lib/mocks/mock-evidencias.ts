@@ -519,5 +519,89 @@ export const mockEvidencias: Evidencia[] = [
 			actual: 20,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 		}
+	},
+
+	// --- PROYECTO 22: "Apoyo escolar en contraturno" (Escuela Esperanza - id: 2) ---
+
+	// Evidencia 13: Docentes voluntarios confirmándose (ENTRADA - colaboradores)
+	{
+		id_evidencia: 13,
+		created_at: new Date('2025-09-22'),
+		archivos_ids: [23, 24],
+		evidencias_entradas_ids: [],
+		id_participacion_permitida: 36,
+		id_proyecto: 22,
+		archivos: [mockArchivos[22], mockArchivos[23]],
+		participacion_permitida: {
+			id_participacion_permitida: 36,
+			id_proyecto: 22,
+			id_tipo_participacion: 1,
+			unidad_medida: 'docentes voluntarios',
+			objetivo: 5,
+			actual: 5,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+		}
+	},
+
+	// Evidencia 14: Clases de apoyo en marcha (SALIDA - institución)
+	{
+		id_evidencia: 14,
+		created_at: new Date('2025-10-15'),
+		archivos_ids: [25, 26],
+		evidencias_entradas_ids: [13],
+		id_participacion_permitida: 36,
+		id_proyecto: 22,
+		archivos: [mockArchivos[24], mockArchivos[25]],
+		participacion_permitida: {
+			id_participacion_permitida: 36,
+			id_proyecto: 22,
+			id_tipo_participacion: 1,
+			unidad_medida: 'docentes voluntarios',
+			objetivo: 5,
+			actual: 5,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+		}
+	},
+
+	// Evidencia 15: Donación de útiles escolares (ENTRADA - colaboradores)
+	{
+		id_evidencia: 15,
+		created_at: new Date('2025-10-05'),
+		archivos_ids: [27, 28],
+		evidencias_entradas_ids: [],
+		id_participacion_permitida: 37,
+		id_proyecto: 22,
+		archivos: [mockArchivos[26], mockArchivos[27]],
+		participacion_permitida: {
+			id_participacion_permitida: 37,
+			id_proyecto: 22,
+			id_tipo_participacion: 1,
+			unidad_medida: 'unidades',
+			especie: 'útiles escolares',
+			objetivo: 40,
+			actual: 38,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 16: Útiles escolares en uso (SALIDA - institución)
+	{
+		id_evidencia: 16,
+		created_at: new Date('2025-11-10'),
+		archivos_ids: [29, 30],
+		evidencias_entradas_ids: [15],
+		id_participacion_permitida: 37,
+		id_proyecto: 22,
+		archivos: [mockArchivos[28], mockArchivos[29]],
+		participacion_permitida: {
+			id_participacion_permitida: 37,
+			id_proyecto: 22,
+			id_tipo_participacion: 1,
+			unidad_medida: 'unidades',
+			especie: 'útiles escolares',
+			objetivo: 40,
+			actual: 38,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
 	}
 ];
