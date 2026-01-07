@@ -28,7 +28,7 @@
 		mounted = true;
 	});
 
-	// Protección de ruta y validación de usuario
+	// Protección de ruta y validación de usuario 
 	$: if (browser && mounted && !$isLoading) {
 		// Resetear estados de error en cada evaluación para evitar falsos positivos persistentes
 		accesoDenegado = false;
@@ -48,6 +48,10 @@
 			} else if (verificacion.estado !== 'aprobada') {
 				accesoDenegado = true;
 				mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
+			} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
+				// Validación de institucion creadora usando variable derivada
+				accesoDenegado = true;
+				mensajeErrorAcceso = 'Este proyecto no pertenece a tu institución. Solo puedes solicitar el cierre de tus propios proyectos.';
 			}
 		}
 	}
@@ -94,6 +98,11 @@
 	// Variable booleana derivada para validaciones
 	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
 
+	//  Validar si es el dueño del proyecto
+	$: proyectoPerteneceAInstitucion = proyectoActual 
+		? proyectoActual.institucion_id === $usuario?.id_usuario 
+		: false;
+
 	// Evidencias del proyecto seleccionado agrupadas por objetivo
 	$: evidenciasPorObjetivo = proyectoActual
 		? proyectoActual.participacion_permitida?.map((objetivo) => {
@@ -139,6 +148,12 @@
 
 	async function enviarSolicitud(event: Event) {
 		event.preventDefault();
+
+		// Validación antes de enviar usando variable derivada
+		if (!proyectoPerteneceAInstitucion) {
+			console.error('[SEGURIDAD] Intento de solicitar cierre de proyecto ajeno');
+			return;
+		}
 
 		// Validación previa: no continuar si falta algún requisito o ya existe solicitud pendiente
 		if (
