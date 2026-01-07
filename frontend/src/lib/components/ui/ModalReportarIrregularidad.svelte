@@ -3,6 +3,7 @@
 	import { usuario as usuarioStore } from '$lib/stores/auth';
 	import type { Reporte } from '$lib/types/Reporte';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
+	import { crearReporte } from '$lib/utils/util-reportes';
 	import { portal } from '$lib/actions/portal';
 	import { Button } from '$lib';
 
@@ -42,27 +43,20 @@
 
 		enviando = true;
 
-		const nuevoReporte: Reporte = {
-			tipo_objeto,
-			id_objeto,
-			motivo,
-			descripcion:
-				motivo === 'Otro'
-					? `Motivo: ${motivoOtro.trim()}\n\n${descripcion.trim()}`
-					: descripcion.trim(),
-			id_reporte: undefined,
-			created_at: new Date(),
-			estado: 'pendiente',
-			fecha_resolucion: null,
-			comentario_resolucion: null,
-			reportante_id: usuario.id_usuario,
-			admin_id: null,
-			usuario_id: tipo_objeto === 'Usuario' ? id_objeto : undefined
-		};
-
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-			console.log('Reporte enviado (simulado):', nuevoReporte);
+			const nuevoReporte = await crearReporte({
+				tipo_objeto,
+				id_objeto,
+				motivo,
+				descripcion:
+					motivo === 'Otro'
+						? `Motivo: ${motivoOtro.trim()}\n\n${descripcion.trim()}`
+						: descripcion.trim(),
+				reportante_id: usuario.id_usuario,
+				admin_id: null
+			});
+
+			console.log('Reporte enviado real:', nuevoReporte);
 			dispatch('success', { reporte: nuevoReporte });
 
 			enviando = false;
@@ -90,7 +84,7 @@
 		use:portal
 		class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
 		on:click={cerrarModal}
-		on:keydown={(e) => e.key === 'Enter' && cerrarModal()}
+		on:keydown={(e: KeyboardEvent) => e.key === 'Enter' && cerrarModal()}
 		role="button"
 		tabindex="0"
 		aria-label="Cerrar modal"

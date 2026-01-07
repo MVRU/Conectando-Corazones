@@ -4,6 +4,9 @@
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { Button } from '$lib';
 
+	// Estado de autenticación
+	import { isAuthenticated, usuario } from '$lib/stores/auth';
+
 	let formularioEnviado = false;
 	let enviandoFormulario = false;
 	let errorEnvio = '';
@@ -18,6 +21,12 @@
 		errorEnvio = '';
 		enviandoFormulario = true;
 
+		if (!$usuario?.id_usuario) {
+			errorEnvio = 'Debés iniciar sesión para enviar un reporte.';
+			enviandoFormulario = false;
+			return;
+		}
+
 		const nuevoReporte: Reporte = {
 			tipo_objeto: tipoObjeto,
 			id_objeto: idObjeto,
@@ -31,9 +40,8 @@
 			estado: 'pendiente',
 			fecha_resolucion: null,
 			comentario_resolucion: null,
-			reportante_id: 1, // TODO: Obtener usuario real si está logueado
-			admin_id: null,
-			usuario_id: tipoObjeto === 'Usuario' ? idObjeto : undefined
+			reportante_id: $usuario.id_usuario,
+			admin_id: null
 		};
 
 		try {
@@ -81,39 +89,69 @@
 		<div
 			class="rounded-3xl border border-gray-100 bg-white p-8 shadow-lg ring-1 ring-gray-100 transition hover:shadow-xl sm:p-10"
 		>
-			<!-- Mensaje de éxito -->
-			{#if formularioEnviado}
-				<div class="flex flex-col items-center justify-center p-6 text-center">
-					<div class="mb-4 rounded-full bg-green-100 p-4">
+			{#if $isAuthenticated}
+				<!-- Mensaje de éxito -->
+				{#if formularioEnviado}
+					<div class="flex flex-col items-center justify-center p-6 text-center">
+						<div class="mb-4 rounded-full bg-green-100 p-4">
+							<svg
+								class="h-10 w-10 text-green-600"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								viewBox="0 0 24 24"
+							>
+								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+							</svg>
+						</div>
+						<h3 class="text-xl font-bold text-gray-900">¡Reporte enviado!</h3>
+						<p class="mt-2 text-gray-600">
+							Gracias por colaborar. El equipo de administración revisará tu reporte a la brevedad.
+						</p>
+						<Button href="/" label="Volver al inicio" customClass="mt-8" />
+					</div>
+				{:else}
+					{#if errorEnvio}
+						<div class="mb-6 rounded-lg bg-red-50 p-4 text-center text-red-700">
+							{errorEnvio}
+						</div>
+					{/if}
+
+					<ReporteForm
+						isLoading={enviandoFormulario}
+						{nombreObjeto}
+						{tipoObjeto}
+						on:submit={handleFormSubmit}
+					/>
+				{/if}
+			{:else}
+				<!-- Mensaje para usuarios no autenticados -->
+				<div class="flex flex-col items-center justify-center py-10 text-center">
+					<div class="mb-6 rounded-full bg-orange-100 p-6">
 						<svg
-							class="h-10 w-10 text-green-600"
+							class="h-12 w-12 text-orange-600"
 							fill="none"
 							stroke="currentColor"
 							stroke-width="2"
 							viewBox="0 0 24 24"
 						>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+							/>
 						</svg>
 					</div>
-					<h3 class="text-xl font-bold text-gray-900">¡Reporte enviado!</h3>
-					<p class="mt-2 text-gray-600">
-						Gracias por colaborar. El equipo de administración revisará tu reporte a la brevedad.
+					<h3 class="text-2xl font-bold text-gray-900">Debés iniciar sesión</h3>
+					<p class="mt-4 max-w-md text-gray-600">
+						Para garantizar la seguridad y el correcto seguimiento de los reportes, es necesario que
+						inicies sesión en tu cuenta.
 					</p>
-					<Button href="/" label="Volver al inicio" customClass="mt-8" />
-				</div>
-			{:else}
-				{#if errorEnvio}
-					<div class="mb-6 rounded-lg bg-red-50 p-4 text-center text-red-700">
-						{errorEnvio}
+					<div class="mt-8 flex flex-col gap-4 sm:flex-row">
+						<Button href="/iniciar-sesion" label="Iniciar sesión" variant="primary" />
+						<Button href="/registrarse" label="Crear cuenta" variant="secondary" />
 					</div>
-				{/if}
-
-				<ReporteForm
-					isLoading={enviandoFormulario}
-					{nombreObjeto}
-					{tipoObjeto}
-					on:submit={handleFormSubmit}
-				/>
+				</div>
 			{/if}
 		</div>
 	</section>
