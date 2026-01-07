@@ -308,7 +308,8 @@ export function canAccessRoute(route: string): boolean {
 		'/proyectos/crear': ['institucion', 'administrador'],
 		'/perfil': ['institucion', 'colaborador', 'administrador'],
 		'/mi-panel': ['institucion', 'colaborador', 'administrador'],
-		'/configuracion': ['institucion', 'colaborador', 'administrador']
+		'/configuracion': ['institucion', 'colaborador', 'administrador'],
+		'/reportes': ['institucion', 'colaborador', 'administrador']
 	};
 
 	const state = get(authStore);
