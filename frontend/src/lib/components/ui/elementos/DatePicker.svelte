@@ -1,15 +1,18 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
+	import type { ComponentType } from 'svelte';
 
 	export let id = '';
 	export let name = '';
 	export let required = false;
 	export let value: Date | null = null;
 	export let error = '';
+	export let prefixIcon: ComponentType | null = null;
+	export let prefixIconClass = '';
 
 	let internal = '';
+	let ultimaCadenaProcesada: string | null = null;
 
-	// Formatea Date -> "YYYY-MM-DD"
 	function formatForInput(d: Date | null): string {
 		if (!d) return '';
 		const year = d.getFullYear();
@@ -18,14 +21,43 @@
 		return `${year}-${month}-${day}`;
 	}
 
-	// sincroniza cambios del padre -> input
+	function actualizarValorDesdeCadena(cadena: string): Date | null {
+		if (!cadena) {
+			value = null;
+			return null;
+		}
+
+		const fecha = new Date(`${cadena}T00:00:00`);
+		if (Number.isNaN(fecha.getTime())) {
+			value = null;
+			return null;
+		}
+
+		value = fecha;
+		return fecha;
+	}
+
 	$: internal = formatForInput(value);
 
-	// convierte cambios del input -> Date
-	function onChange(e: Event) {
-		const v = (e.target as HTMLInputElement).value;
-		value = v ? new Date(v + 'T00:00:00') : null;
+	$: if (internal !== ultimaCadenaProcesada) {
+		ultimaCadenaProcesada = internal;
+		actualizarValorDesdeCadena(internal);
+	}
+
+	function handleEntrada(e: Event) {
+		actualizarValorDesdeCadena((e.target as HTMLInputElement).value);
 	}
 </script>
 
-<Input {id} {name} type="date" bind:value={internal} {required} {error} on:change={onChange} />
+<Input
+	{id}
+	{name}
+	type="date"
+	bind:value={internal}
+	{required}
+	{error}
+	{prefixIcon}
+	{prefixIconClass}
+	on:input={handleEntrada}
+	on:change={handleEntrada}
+/>

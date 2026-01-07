@@ -11,6 +11,10 @@
 	} from '$lib/types/Usuario';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
+	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
+	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { toastStore } from '$lib/stores/toast';
 
 	// Usamos un usuario real de los mocks
 	let usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador =
@@ -72,28 +76,44 @@
 		);
 
 		// Simular persistencia
-		alert('Cambios guardados exitosamente');
+		toastStore.show({
+			variant: 'success',
+			title: 'Datos actualizados',
+			message: 'Tus preferencias se guardaron correctamente.'
+		});
 	}
 
 	function cambiarPassword() {
 		// Validar que las contraseñas coincidan
 		if (passNueva !== passConfirm) {
 			console.error('Error: Las contraseñas no coinciden');
-			alert('Error: Las contraseñas no coinciden');
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: 'Las contraseñas nuevas no coinciden.'
+			});
 			return;
 		}
 
 		// Validar que se ingresó una contraseña
 		if (!passNueva.trim()) {
 			console.error('Error: La nueva contraseña no puede estar vacía');
-			alert('Error: La nueva contraseña no puede estar vacía');
+			toastStore.show({
+				variant: 'error',
+				title: 'Campo requerido',
+				message: 'Por favor, ingresá una contraseña nueva.'
+			});
 			return;
 		}
 
 		// Validar contraseña actual (simulado)
 		if (!passActual.trim()) {
 			console.error('Error: Debe ingresar la contraseña actual');
-			alert('Error: Debe ingresar la contraseña actual');
+			toastStore.show({
+				variant: 'error',
+				title: 'Falta contraseña actual',
+				message: 'Para seguridad, ingresá tu contraseña actual.'
+			});
 			return;
 		}
 
@@ -108,29 +128,12 @@
 		passNueva = '';
 		passConfirm = '';
 
-		alert('Contraseña cambiada exitosamente');
+		toastStore.show({
+			variant: 'success',
+			title: 'Contraseña actualizada',
+			message: 'Tu contraseña se cambió con éxito.'
+		});
 	}
-
-	// --- Iconos para categorías ---
-	const categoriaIconos: Record<string, string> = {
-		Medioambiente: '🌱',
-		Educación: '📚',
-		Salud: '➕',
-		'Desarrollo económico': '💼',
-		'Promoción de la paz': '☮️',
-		Seguridad: '�️',
-		Entretenimiento: '🎭',
-		Liderazgo: '👑',
-		'Personas con discapacidades': '♿',
-		Tecnología: '�',
-		Política: '🏛️',
-		Religión: '🙏',
-		'LGTBQ+': '🏳️‍🌈',
-		'Apoyo ante una crisis': '🆘',
-		Empleo: '💼',
-		'Inmigrantes y refugiados': '�',
-		Otro: '🔧'
-	};
 
 	let showDeleteModal = false;
 	function eliminarCuenta() {
@@ -140,7 +143,12 @@
 		console.log('=== ELIMINAR CUENTA ===');
 		console.log('Usuario eliminado:', usuario.id_usuario);
 		showDeleteModal = false;
-		alert('Cuenta eliminada (simulación)');
+		toastStore.show({
+			variant: 'info',
+			message: 'Tu cuenta ha sido eliminada. Lamentamos que te vayas.'
+		});
+		// Simular logout y redirect
+		window.location.href = '/';
 	}
 	function cancelarEliminarCuenta() {
 		showDeleteModal = false;
@@ -227,14 +235,19 @@
 			</h2>
 			<div class="mb-6 flex flex-wrap gap-4">
 				{#each mockCategorias as categoria, i (i)}
-					<label class="flex cursor-pointer items-center gap-2 select-none">
+					<label class="flex cursor-pointer select-none items-center gap-2">
 						<input
 							type="checkbox"
 							checked={preferencias.includes(categoria.id_categoria!)}
 							on:change={() => toggleCategoria(categoria.id_categoria!)}
 							class="h-5 w-5 rounded-2xl border-gray-300 accent-blue-500 focus:ring-2 focus:ring-blue-200"
 						/>
-						<span class="text-2xl">{categoriaIconos[categoria.descripcion] || '🔧'}</span>
+						<span class="text-2xl">
+							<Icon
+								src={ICONOS_CATEGORIA[categoria.descripcion] || Wrench}
+								class="h-6 w-6 text-gray-600"
+							/>
+						</span>
 						<span
 							class={preferencias.includes(categoria.id_categoria!)
 								? 'font-semibold text-blue-700'
@@ -264,7 +277,7 @@
 			Preferencias de notificaciones
 		</h2>
 		<div class="flex flex-col gap-4 md:flex-row md:gap-10">
-			<label class="flex cursor-pointer items-center gap-3 select-none">
+			<label class="flex cursor-pointer select-none items-center gap-3">
 				<span class="text-gray-700">Push</span>
 				<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
 				<div
@@ -273,7 +286,7 @@
 					class:bg-gray-200={!notificacionesPush}
 				>
 					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
+						class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
 						class:translate-x-0={!notificacionesPush}
 						class:translate-x-5={notificacionesPush}
 					></div>
@@ -282,7 +295,7 @@
 					>{notificacionesPush ? 'Activado' : 'Desactivado'}</span
 				>
 			</label>
-			<label class="flex cursor-pointer items-center gap-3 select-none">
+			<label class="flex cursor-pointer select-none items-center gap-3">
 				<span class="text-gray-700">Mail</span>
 				<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
 				<div
@@ -291,7 +304,7 @@
 					class:bg-gray-200={!notificacionesMail}
 				>
 					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
+						class="absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
 						class:translate-x-0={!notificacionesMail}
 						class:translate-x-5={notificacionesMail}
 					></div>
@@ -346,14 +359,7 @@
 			class="mt-12 flex flex-col gap-6 border-t pt-8 md:flex-row md:items-center md:justify-between"
 		>
 			<div class="flex items-center gap-3">
-				<svg class="h-7 w-7 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16zm-4-4a4 4 0 118 0 4 4 0 01-8 0z"
-					/></svg
-				>
+				<Icon src={ExclamationCircle} class="h-7 w-7 text-red-400" />
 				<span class="font-semibold text-red-500">Eliminar cuenta</span>
 			</div>
 			<Button
@@ -368,18 +374,7 @@
 	{#if showDeleteModal}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
 			<div class="flex w-full max-w-sm flex-col items-center rounded-2xl bg-white p-8 shadow-xl">
-				<svg
-					class="mb-4 h-12 w-12 text-red-400"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16zm-4-4a4 4 0 118 0 4 4 0 01-8 0z"
-					/></svg
-				>
+				<Icon src={ExclamationCircle} class="mb-4 h-12 w-12 text-red-400" />
 				<p class="mb-4 text-center text-lg font-semibold text-red-600">
 					¿Está seguro de eliminar su cuenta?
 				</p>

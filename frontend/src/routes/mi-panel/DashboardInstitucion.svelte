@@ -10,6 +10,24 @@
 	import { onMount } from 'svelte';
 	import ProgressBar from '$lib/components/ui/elementos/ProgressBar.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
+	import {
+		Fire,
+		Bolt,
+		Heart,
+		Clipboard,
+		ArrowTrendingUp,
+		ArrowRight,
+		ChartBar,
+		BuildingOffice,
+		Sparkles,
+		Calendar,
+		Users,
+		Eye,
+		Clock,
+		Megaphone,
+		CurrencyDollar
+	} from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	// Datos para gestión institucional
 	const institucionInfo = {
@@ -161,26 +179,26 @@
 	function getUrgenciaIcon(urgencia: string) {
 		switch (urgencia) {
 			case 'alta':
-				return '🔥';
+				return Fire;
 			case 'media':
-				return '⚡';
+				return Bolt;
 			case 'baja':
-				return '💚';
+				return Heart;
 			default:
-				return '📋';
+				return Clipboard;
 		}
 	}
 
 	function getTendenciaIcon(tendencia: string) {
 		switch (tendencia) {
 			case 'creciente':
-				return '📈';
+				return ArrowTrendingUp;
 			case 'estable':
-				return '➡️';
+				return ArrowRight;
 			case 'variable':
-				return '📊';
+				return ChartBar;
 			default:
-				return '📋';
+				return Clipboard;
 		}
 	}
 </script>
@@ -196,7 +214,7 @@
 		<div class="mb-4 flex items-center justify-between">
 			<div class="flex items-center gap-4">
 				<div class="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-2xl">
-					🏢
+					<Icon src={BuildingOffice} class="h-8 w-8 text-white" />
 				</div>
 				<div>
 					<h1 class="text-2xl font-bold">{institucionInfo.nombre}</h1>
@@ -234,7 +252,9 @@
 		class:translate-y-4={!animate}
 		style="transition-delay: 200ms"
 	>
-		<h2 class="mb-6 text-xl font-bold text-gray-900">🎯 Gestión de Proyectos Activos</h2>
+		<h2 class="mb-6 flex items-center gap-2 text-xl font-bold text-gray-900">
+			<Icon src={Sparkles} class="h-6 w-6 text-yellow-500" /> Gestión de Proyectos Activos
+		</h2>
 
 		<div class="space-y-4">
 			{#each proyectosActivos as proyecto, i}
@@ -249,12 +269,24 @@
 						<div class="flex-1">
 							<div class="mb-1 flex items-center gap-2">
 								<h3 class="text-lg font-semibold">{proyecto.titulo}</h3>
-								<span class="text-lg">{getUrgenciaIcon(proyecto.urgencia)}</span>
+								<span class="text-lg">
+									<Icon src={getUrgenciaIcon(proyecto.urgencia)} class="h-5 w-5 text-gray-600" />
+								</span>
 							</div>
 							<div class="mb-2 flex gap-4 text-sm opacity-75">
-								<span>📅 Deadline: {new Date(proyecto.deadline).toLocaleDateString('es-AR')}</span>
-								<span>👥 {proyecto.colaboradores} colaboradores</span>
-								<span>👁️ {proyecto.visualizaciones} visualizaciones</span>
+								<span class="flex items-center gap-1">
+									<Icon src={Calendar} class="h-4 w-4" /> Deadline: {new Date(
+										proyecto.deadline
+									).toLocaleDateString('es-AR')}
+								</span>
+								<span class="flex items-center gap-1">
+									<Icon src={Users} class="h-4 w-4" />
+									{proyecto.colaboradores} colaboradores
+								</span>
+								<span class="flex items-center gap-1">
+									<Icon src={Eye} class="h-4 w-4" />
+									{proyecto.visualizaciones} visualizaciones
+								</span>
 							</div>
 						</div>
 						<div class="text-right">
@@ -305,7 +337,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 400ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-gray-900">👥 Análisis de Colaboradores</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+				<Icon src={Users} class="h-5 w-5 text-blue-600" /> Análisis de Colaboradores
+			</h2>
 
 			<div class="space-y-4">
 				{#each colaboradoresAnalisis as categoria, i}
@@ -318,7 +352,12 @@
 							<div class="flex-1">
 								<div class="flex items-center gap-2">
 									<h4 class="font-semibold text-gray-900">{categoria.categoria}</h4>
-									<span class="text-lg">{getTendenciaIcon(categoria.tendencia)}</span>
+									<span class="text-lg">
+										<Icon
+											src={getTendenciaIcon(categoria.tendencia)}
+											class="h-5 w-5 text-gray-600"
+										/>
+									</span>
 								</div>
 								<p class="text-sm text-gray-600">{categoria.aporte}</p>
 							</div>
@@ -354,7 +393,9 @@
 		>
 			<!-- Rendimiento General -->
 			<div class="rounded-2xl border border-green-100 bg-green-50 p-6 shadow-lg">
-				<h2 class="mb-4 text-lg font-bold text-green-900">📊 Rendimiento General</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-green-900">
+					<Icon src={ChartBar} class="h-5 w-5 text-green-700" /> Rendimiento General
+				</h2>
 				<div class="space-y-3">
 					<div class="flex justify-between">
 						<span class="text-green-700">Promedio recaudación:</span>
@@ -377,7 +418,9 @@
 
 			<!-- Alcance y Visibilidad -->
 			<div class="rounded-2xl border border-blue-100 bg-blue-50 p-6 shadow-lg">
-				<h2 class="mb-4 text-lg font-bold text-blue-900">👁️ Alcance y Visibilidad</h2>
+				<h2 class="mb-4 flex items-center gap-2 text-lg font-bold text-blue-900">
+					<Icon src={Eye} class="h-5 w-5 text-blue-700" /> Alcance y Visibilidad
+				</h2>
 				<div class="grid grid-cols-2 gap-4 text-center">
 					<div>
 						<p class="text-2xl font-bold text-blue-600">
@@ -413,7 +456,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 600ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-orange-900">⚡ Próximas Acciones Requeridas</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-orange-900">
+				<Icon src={Bolt} class="h-5 w-5 text-orange-700" /> Próximas Acciones Requeridas
+			</h2>
 
 			<div class="space-y-3">
 				{#each proximasAcciones as accion, i}
@@ -423,7 +468,14 @@
 						style="transition-delay: {700 + i * 100}ms"
 					>
 						<div class="text-2xl">
-							{accion.tipo === 'deadline' ? '⏰' : accion.tipo === 'comunicacion' ? '📢' : '💰'}
+							<Icon
+								src={accion.tipo === 'deadline'
+									? Clock
+									: accion.tipo === 'comunicacion'
+										? Megaphone
+										: CurrencyDollar}
+								class="h-6 w-6 text-orange-600"
+							/>
 						</div>
 						<div class="flex-1">
 							<p class="font-medium text-orange-900">{accion.descripcion}</p>
@@ -450,7 +502,9 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 700ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-gray-900">📈 Tendencias de Crecimiento</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+				<Icon src={ArrowTrendingUp} class="h-5 w-5 text-green-600" /> Tendencias de Crecimiento
+			</h2>
 
 			<div class="space-y-4">
 				<div>

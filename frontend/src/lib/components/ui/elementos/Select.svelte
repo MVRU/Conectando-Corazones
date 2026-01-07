@@ -10,10 +10,11 @@
 	export let required = false;
 	export let disabled = false;
 	export let error: string = '';
-	export let size: 'sm' | 'md' | 'lg' = 'md';
-	export let name: string = '';
-	export let id: string = '';
-	export let searchable = true;
+export let size: 'sm' | 'md' | 'lg' = 'md';
+export let name: string = '';
+export let id: string = '';
+export let searchable = true;
+export let ariaDescribedBy: string | undefined = undefined;
 
 	let isOpen = false;
 	let selectRef: HTMLElement;
@@ -135,21 +136,21 @@
 	});
 </script>
 
-<div class="w-full space-y-1">
+<div class="group w-full space-y-2">
 	{#if label}
 		<label
 			for={id}
 			class={clsx(
-				'mb-2 block font-medium text-gray-700',
+				'inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition-colors group-focus-within:text-[rgb(var(--color-primary))]',
 				labelSizeClasses[size],
-				required && 'after:ml-1 after:text-red-500 after:content-["*"]'
+				required &&
+					'after:ml-1 after:text-base after:font-semibold after:text-red-500 after:content-["*"]'
 			)}
 		>
 			{label}
 		</label>
 	{/if}
 
-	<!-- Contenedor del Select -->
 	<div class="relative" bind:this={selectRef}>
 		<input
 			type="text"
@@ -164,27 +165,29 @@
 			{name}
 			{placeholder}
 			class={clsx(
-				'w-full rounded-xl border bg-white text-left shadow-sm transition-all duration-200',
+				'w-full rounded-2xl border border-slate-200/80 bg-white/95 pr-12 text-left text-[15px] text-slate-900 shadow-sm ring-1 ring-transparent transition-all duration-200 placeholder:text-slate-400',
 				sizeClasses[size],
-				'border-gray-300 text-gray-900 placeholder:text-gray-400',
-				'focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none',
-				error ? 'border-red-300 focus:ring-red-400' : 'hover:border-gray-400',
-				disabled && 'cursor-not-allowed bg-gray-100 text-gray-500 placeholder:text-gray-400'
+				'focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgba(var(--color-primary),0.45)] focus:ring-offset-1 focus:ring-offset-white focus:outline-none',
+				error
+					? 'border-red-400 bg-red-50/80 text-red-900 placeholder:text-red-400 focus:ring-red-300 focus:ring-offset-0'
+					: 'hover:border-slate-300',
+				disabled &&
+					'cursor-not-allowed bg-slate-100 text-slate-500 opacity-80 placeholder:text-slate-400'
 			)}
 			readonly={!searchable || !isTyping}
 			role="combobox"
 			aria-controls="select-options"
-			aria-haspopup="listbox"
-			aria-expanded={isOpen}
-			aria-labelledby={label ? id : undefined}
-		/>
+		aria-haspopup="listbox"
+		aria-expanded={isOpen}
+		aria-labelledby={label ? id : undefined}
+		aria-describedby={ariaDescribedBy}
+	/>
 
-		<!-- Ícono de flecha -->
 		<button
 			type="button"
 			class={clsx(
-				'absolute top-1/2 right-3 -translate-y-1/2 transform',
-				'cursor-pointer text-gray-400 transition-transform duration-200'
+			 'absolute right-4 top-1/2 -translate-y-1/2 transform rounded-full p-1',
+			 'text-slate-400 transition-colors duration-200 hover:text-slate-600 group-focus-within:text-[rgb(var(--color-primary))]'
 			)}
 			aria-label="Toggle dropdown"
 			on:click={toggleDropdown}
@@ -196,12 +199,10 @@
 			</svg>
 		</button>
 
-		<!-- Opciones desplegables -->
 		{#if isOpen}
 			<div
-				class="absolute z-50 mt-2 max-h-60 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg ring-1 ring-black/5"
+				class="absolute z-50 mt-2 max-h-60 w-full overflow-hidden rounded-2xl border border-slate-100/80 bg-white/95 shadow-2xl ring-1 ring-black/5"
 			>
-				<!-- Lista de opciones -->
 				<div class="max-h-52 overflow-auto overscroll-contain">
 					{#each filteredOptions as option (option.value)}
 						<button
@@ -209,8 +210,8 @@
 							class={clsx(
 								'group w-full px-4 py-2 text-left text-sm transition-colors duration-150',
 								option.value === value
-									? 'bg-blue-500 text-white'
-									: 'text-gray-700 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none'
+									? 'bg-[rgb(var(--color-primary))] text-white'
+									: 'text-slate-600 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none'
 							)}
 							on:click={() => handleSelect(option)}
 							role="option"

@@ -104,13 +104,11 @@
 					class="duration-400 drop-shadow-lg transition-transform hover:scale-105 active:scale-95"
 				>
 					<Button
-						label="Dejá tu opinión"
-						href="https://docs.google.com/forms/d/e/1FAIpQLSd2ATCFzwuTLpmbNgFssKjGfk0GEpZD6NeygSyhdF10fuk23A/viewform?usp=sharing&ouid=105997224151194228520"
+						label="Registrarse"
+						href="/registrarse"
 						variant="primary"
 						size="md"
-						external={true}
-						target="_blank"
-						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3"
+						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
 					/>
 				</div>
 			</div>

@@ -27,7 +27,7 @@ export * from './utils/sanitize';
 export * from './mocks/mock-proyectos';
 export * from './mocks/mock-proyecto-categorias';
 export * from './mocks/mock-proyecto-ubicaciones';
-export * from './mocks/mock-direcciones';
+export * from './mocks/mock-ubicaciones';
 
 // Modelos
 export * from './types/Usuario';

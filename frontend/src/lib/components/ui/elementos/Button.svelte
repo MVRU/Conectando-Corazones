@@ -10,14 +10,16 @@
 	export let href: string | null = null;
 	export let target: '_blank' | '_self' | string = '_blank';
 	export let external = false;
-	export let variant: 'primary' | 'secondary' | 'ghost' = 'primary';
+	export let variant: 'primary' | 'secondary' | 'ghost' | 'danger' = 'primary';
 	export let size: 'md' | 'sm' = 'md';
 	export let customClass = '';
 	export let customAriaLabel: string | null = null;
 	export let type: 'button' | 'submit' | 'reset' = 'submit';
+	export let ariaDisabled: boolean | undefined = undefined;
 	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
 	$: isDisabled = disabled || loading;
 	$: busyLabel = loadingLabel ?? label;
+	$: computedAriaDisabled = ariaDisabled ?? isDisabled;
 	const dispatch = createEventDispatcher();
 
 	function handleClick(event: MouseEvent) {
@@ -58,7 +60,7 @@
 		tabindex="0"
 		aria-label={ariaLabel}
 		aria-busy={loading || undefined}
-		aria-disabled={isDisabled}
+		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
 		{...$$restProps}
 	>
@@ -121,6 +123,75 @@
 			rootSize[size],
 			'bg-[#eff6ff] text-[rgb(var(--color-primary))] hover:bg-[#dbeafe]',
 			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50',
+			customClass
+		)}
+		{type}
+		role="link"
+		tabindex="0"
+		aria-label={ariaLabel}
+		aria-busy={loading || undefined}
+		aria-disabled={computedAriaDisabled}
+		disabled={isDisabled}
+	>
+		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
+		{#if loading}
+			<svg
+				class={clsx(iconSize[size], 'z-10 animate-spin')}
+				xmlns="http://www.w3.org/2000/svg"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="4"
+				role="status"
+				aria-hidden="true"
+			>
+				<circle class="opacity-25" cx="12" cy="12" r="10" />
+				<path
+					class="opacity-75"
+					fill="currentColor"
+					d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+				/>
+			</svg>
+			<span class="sr-only">{busyLabel}</span>
+		{:else}
+			<span
+				class={clsx(
+					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					textSize[size]
+				)}
+			>
+				{label}
+			</span>
+			<span
+				class={clsx(
+					'icon-animation absolute z-10 flex items-center justify-center',
+					iconSize[size]
+				)}
+			>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				>
+					<path d="M5 12h14M12 5l7 7-7 7" />
+				</svg>
+			</span>
+		{/if}
+	</button>
+
+	<!-- ! Variante Danger -->
+{:else if variant === 'danger'}
+	<button
+		on:click={handleClick}
+		class={clsx(
+			rootBase,
+			rootSize[size],
+			'bg-red-600 text-white hover:bg-red-700',
+			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50 ',
 			customClass
 		)}
 		{type}
@@ -200,7 +271,7 @@
 		tabindex="0"
 		aria-label={ariaLabel}
 		aria-busy={loading || undefined}
-		aria-disabled={isDisabled}
+		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
 		{...$$restProps}
 	>

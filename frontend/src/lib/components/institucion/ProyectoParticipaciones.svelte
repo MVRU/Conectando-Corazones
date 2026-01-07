@@ -2,6 +2,7 @@
  * * Componente: ProyectoParticipaciones
  * -!- Para agregar los tipos de participaciones permitidas y sus objetivos.
  -->
+
 <script lang="ts">
 	import {
 		obtenerClasesColor,
@@ -9,19 +10,22 @@
 		objetivoTexto,
 		toKey,
 		normalizarUnidadLibre,
-		validarUnidadLibre ,
-		normalizarEspecie ,
-		validarEspecie 
+		validarUnidadLibre,
+		normalizarEspecie,
+		validarEspecie
 	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/types/forms/CrearProyectoForm';
+	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import type { IconSource } from '@steeze-ui/svelte-icon';
+	import { TriangleAlert, Trash2, Plus } from 'lucide-svelte';
 
 	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
 	export let participacionesPermitidas: ParticipacionForm[] = [];
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
-
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -32,7 +36,6 @@
 		return lista.map(toKey).includes(key);
 	}
 
-	
 	function validarUnidadMedidaOtra(s: string, tipo?: TipoParticipacionDescripcion): string | null {
 		if (s == null) return 'Este campo es obligatorio';
 		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
@@ -48,7 +51,6 @@
 		return null;
 	}
 
-
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
 			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
@@ -61,7 +63,7 @@
 				...participacionesPermitidas,
 				{
 					tipo_participacion: { descripcion: tipo },
-					objetivo: 0,
+					objetivo: undefined,
 					actual: 0,
 					unidad_medida:
 						tipo === 'Monetaria' ? 'ARS' : tipo === 'Voluntariado' ? 'personas' : 'unidades',
@@ -85,18 +87,36 @@
 			const err = validarEspecie(norm);
 			if (err) errores[`participacion_${index}_especie`] = err;
 			else limpiarError(`participacion_${index}_especie`);
+		} else if (field === 'objetivo') {
+			const valNum = value as number | undefined;
+			participacionesPermitidas[index] = {
+				...participacionesPermitidas[index],
+				objetivo: valNum
+			};
+
+			if (valNum !== undefined && valNum <= 0) {
+				errores[`participacion_${index}_objetivo`] = 'El objetivo debe ser mayor a 0';
+			} else {
+				limpiarError(`participacion_${index}_objetivo`);
+			}
 		} else {
-			participacionesPermitidas[index] = { ...participacionesPermitidas[index], [field]: value };
+			participacionesPermitidas[index] = {
+				...participacionesPermitidas[index],
+				[field]: value as any
+			};
 		}
 		participacionesPermitidas = participacionesPermitidas;
 
 		if (field === 'unidad_medida_otra') {
-			const norm = normalizarUnidadLibre(String(value ?? ''));
+			const descripcionTipo = participacionesPermitidas[index].tipo_participacion?.descripcion;
+			const esMonetaria = descripcionTipo === 'Monetaria';
+			const norm = normalizarUnidadLibre(String(value ?? ''), esMonetaria);
 			participacionesPermitidas[index] = {
 				...participacionesPermitidas[index],
 				unidad_medida_otra: norm
 			};
 			const err = validarUnidadLibre(norm, {
+				allowUpperCase: esMonetaria,
 				esRepetida: (t) =>
 					esUnidadRepetida(
 						participacionesPermitidas[index].tipo_participacion?.descripcion as
@@ -134,7 +154,7 @@
 			...participacionesPermitidas,
 			{
 				tipo_participacion: { descripcion: 'Especie' },
-				objetivo: 0,
+				objetivo: undefined,
 				actual: 0,
 				unidad_medida: 'unidades',
 				especie: ''
@@ -142,32 +162,40 @@
 		];
 	}
 
-	const tiposParticipacionInfo = {
+	const tiposParticipacionInfo: Record<
+		string,
+		{ titulo: string; descripcion: string; icon: IconSource; color: string }
+	> = {
 		Voluntariado: {
 			titulo: 'Voluntariado',
 			descripcion: 'Necesitás personas que dediquen su tiempo',
-			icon: '🤝',
+			icon: Users,
 			color: 'blue'
 		},
 		Monetaria: {
 			titulo: 'Aporte Monetario',
 			descripcion: 'Necesitás donaciones económicas',
-			icon: '💰',
+			icon: CurrencyDollar,
 			color: 'green'
 		},
 		Especie: {
 			titulo: 'En Especie',
 			descripcion: 'Necesitás materiales o productos específicos',
-			icon: '📦',
+			icon: Cube,
 			color: 'orange'
 		}
-	} as const;
+	};
 
 	const unidadesPorTipo = {
 		Voluntariado: ['personas', 'horas', 'días'],
 		Monetaria: ['ARS', 'USD', 'EUR'],
 		Especie: ['unidades', 'kilogramos', 'mililitros', 'litros', 'centímetros', 'metros']
 	} as const;
+
+	$: cantidadDonacionesEspecie = participacionesPermitidas.filter(
+		(p) => p.tipo_participacion?.descripcion === 'Especie'
+	).length;
+	$: limiteEspecieAlcanzado = cantidadDonacionesEspecie >= 10;
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -184,7 +212,9 @@
 						on:click={() => toggleTipoParticipacion(tipo as TipoParticipacionDescripcion)}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 					>
-						<div class="mb-3 text-3xl">{info.icon}</div>
+						<div class="mb-3 text-3xl {clases.iconColor}">
+							<Icon src={info.icon} class="h-8 w-8" />
+						</div>
 						<h3 class="mb-1 font-semibold text-gray-900">{info.titulo}</h3>
 						<p class="text-sm text-gray-600">{info.descripcion}</p>
 					</button>
@@ -204,7 +234,9 @@
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
 			<div class="mb-4 flex items-center justify-between">
 				<h4 class="flex items-center gap-2 font-medium text-gray-900">
-					<span class="text-xl">{tipoInfo.icon}</span>
+					<span class="text-xl {clases.iconColor}">
+						<Icon src={tipoInfo.icon} class="h-6 w-6" />
+					</span>
 					{participacion.tipo_participacion?.descripcion}
 				</h4>
 				<button
@@ -214,13 +246,7 @@
 					title="Eliminar"
 					aria-label="Eliminar participación"
 				>
-					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20"
-						><path
-							fill-rule="evenodd"
-							d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-							clip-rule="evenodd"
-						/></svg
-					>
+					<Trash2 class="h-5 w-5" />
 				</button>
 			</div>
 			<div class="grid gap-4">
@@ -252,10 +278,13 @@
 						<input
 							id="objetivo_{index}"
 							type="number"
-							value={participacion.objetivo ?? 0}
-							on:input={(e) =>
-								updateParticipacion(index, 'objetivo', Number(e.currentTarget.value) || 0)}
+							value={participacion.objetivo ?? ''}
+							on:input={(e) => {
+								const val = e.currentTarget.value;
+								updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
+							}}
 							min="1"
+							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 							placeholder="100"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
@@ -292,7 +321,9 @@
 									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
-									placeholder="Ejemplo: toneladas, docentes, ARS"
+									placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'
+										? 'Ejemplo: GPB, Bitcoin'
+										: 'Ejemplo: toneladas, docentes, metros'}
 									maxlength="40"
 								/>
 								{#if errores[`participacion_${index}_unidad_otra`]}
@@ -314,22 +345,24 @@
 	{/each}
 
 	{#if tiposParticipacionSeleccionados.includes('Especie')}
-		<div class="mt-4 flex justify-center">
-			<button
-				type="button"
-				on:click={agregarItemEspecie}
-				class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
+		{#if limiteEspecieAlcanzado}
+			<div
+				class="mt-4 flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-800"
 			>
-				<svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-					><path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-					/></svg
+				<TriangleAlert class="h-5 w-5" />
+				Has alcanzado el límite máximo de 10 tipos de donaciones en especie por proyecto.
+			</div>
+		{:else}
+			<div class="mt-4 flex justify-center">
+				<button
+					type="button"
+					on:click={agregarItemEspecie}
+					class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
 				>
-				Agregar otro item en especie
-			</button>
-		</div>
+					<Plus class="mr-2 h-4 w-4" />
+					Agregar otro item en especie
+				</button>
+			</div>
+		{/if}
 	{/if}
 </div>

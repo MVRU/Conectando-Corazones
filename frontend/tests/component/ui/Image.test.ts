@@ -1,6 +1,6 @@
 import { render } from '@testing-library/svelte';
 import { describe, it, expect } from 'vitest';
-import Image from './Image.svelte';
+import Image from '$lib/components/ui/elementos/Image.svelte';
 
 /**
  * ! Test para el componente <Image />

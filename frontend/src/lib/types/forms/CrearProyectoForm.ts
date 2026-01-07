@@ -1,25 +1,31 @@
-import type { TipoUbicacion } from '$lib/types/Ubicacion';
+import type { TipoUbicacion, ModalidadUbicacion } from '$lib/types/Ubicacion';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-import type { Direccion } from '$lib/types/Direccion';
 
 // Tipos específicos del formulario de creación de proyecto
 
 export interface UbicacionFormulario {
   tipo_ubicacion: TipoUbicacion | '';
-  que_se_hace: string;
-  direccion: DireccionFormulario;
+  modalidad: ModalidadUbicacion | '';
+  direccion_presencial?: DireccionPresencialFormulario;
+  url_virtual?: string;
 }
 
-export interface DireccionFormulario {
+export interface DireccionPresencialFormulario {
   calle: string;
   numero: string;
-  referencia: string;
-  localidad_id: number | undefined;
-  provincia: string;
-  localidad_nombre: string;
+  piso?: string;
+  departamento?: string;
+  referencia?: string;
+  url_google_maps?: string;
+  localidad_id?: number;
+  localidad_nombre?: string;
+  provincia?: string;
 }
 
 export type ParticipacionForm = Partial<ParticipacionPermitida> & {
   unidad_medida_otra?: string;
 };
+
+// deprecado por las dudas
+export type DireccionFormulario = DireccionPresencialFormulario;
 
