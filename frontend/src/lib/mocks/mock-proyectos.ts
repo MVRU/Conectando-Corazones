@@ -813,7 +813,7 @@ const proyectosBase: Proyecto[] = [
 		colaboracion_ids: [],
 		institucion_id: 2,
 		evidencia_ids: [13, 14, 15, 16],
-		solicitud_finalizacion_ids: [],
+		solicitud_finalizacion_ids: [10, 11, 12],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{

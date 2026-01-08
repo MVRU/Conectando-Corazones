@@ -270,6 +270,96 @@ export const mockArchivos: Archivo[] = [
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 11,
 		proyecto_id: 9
+	},
+
+	// --- PROYECTO 22: "Apoyo escolar en contraturno" (Escuela Esperanza) ---
+	
+	// Evidencia 13: Docentes voluntarios confirmándose (ENTRADA)
+	{
+		id_archivo: 23,
+		descripcion: 'Formulario de inscripción de docentes voluntarios',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Fformulario_docentes.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-09-22'),
+		usuario_id: 4, // Colaborador
+		evidencia_id: 13,
+		proyecto_id: 22
+	},
+	{
+		id_archivo: 24,
+		descripcion: 'Fotografía de reunión inicial con docentes voluntarios',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Freunion_docentes.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-09-22'),
+		usuario_id: 4, // Colaborador
+		evidencia_id: 13,
+		proyecto_id: 22
+	},
+
+	// Evidencia 14: Clases de apoyo en marcha (SALIDA)
+	{
+		id_archivo: 25,
+		descripcion: 'Fotografía de clases de apoyo escolar en marcha',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Fclases_apoyo.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-10-15'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 14,
+		proyecto_id: 22
+	},
+	{
+		id_archivo: 26,
+		descripcion: 'Registro de asistencia de estudiantes a clases de apoyo',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Fregistro_asistencia.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-10-15'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 14,
+		proyecto_id: 22
+	},
+
+	// Evidencia 15: Donación de útiles escolares (ENTRADA)
+	{
+		id_archivo: 27,
+		descripcion: 'Comprobante de donación de útiles escolares',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Fcomprobante_utiles.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-10-05'),
+		usuario_id: 5, // Colaborador
+		evidencia_id: 15,
+		proyecto_id: 22
+	},
+	{
+		id_archivo: 28,
+		descripcion: 'Fotografía de los útiles escolares donados',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Ffoto_utiles_donados.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-10-05'),
+		usuario_id: 5, // Colaborador
+		evidencia_id: 15,
+		proyecto_id: 22
+	},
+
+	// Evidencia 16: Útiles escolares en uso (SALIDA)
+	{
+		id_archivo: 29,
+		descripcion: 'Fotografía de estudiantes utilizando los útiles escolares',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Festudiantes_con_utiles.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		created_at: new Date('2025-11-10'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 16,
+		proyecto_id: 22
+	},
+	{
+		id_archivo: 30,
+		descripcion: 'Acta de entrega de útiles escolares a estudiantes',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Facta_entrega_utiles.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		created_at: new Date('2025-11-10'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 16,
+		proyecto_id: 22
 	}
 ];
 

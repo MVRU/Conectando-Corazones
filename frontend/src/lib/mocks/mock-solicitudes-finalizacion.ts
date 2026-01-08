@@ -67,5 +67,27 @@ export const mockSolicitudesFinalizacion: SolicitudFinalizacion[] = [
 		created_at: new Date('2026-01-05'),
 		proyecto_id: 9,
 		evidencia_ids: [9, 10]
+	},
+	// Proyecto 22: "Apoyo escolar en contraturno" (Escuela Esperanza) - 3 solicitudes rechazadas
+	{
+		id_solicitud: 10,
+		estado: 'rechazada',
+		created_at: new Date('2025-11-05'),
+		proyecto_id: 22,
+		evidencia_ids: []
+	},
+	{
+		id_solicitud: 11,
+		estado: 'rechazada',
+		created_at: new Date('2025-12-10'),
+		proyecto_id: 22,
+		evidencia_ids: []
+	},
+	{
+		id_solicitud: 12,
+		estado: 'rechazada',
+		created_at: new Date('2026-01-03'),
+		proyecto_id: 22,
+		evidencia_ids: []
 	}
 ];

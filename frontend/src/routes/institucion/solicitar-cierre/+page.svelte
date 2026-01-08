@@ -103,6 +103,16 @@
 		? proyectoActual.institucion_id === $usuario?.id_usuario 
 		: false;
 
+	// Contar solicitudes rechazadas del proyecto seleccionado
+	$: solicitudesRechazadas = proyectoSeleccionado
+		? mockSolicitudesFinalizacion.filter(
+				(s) => s.proyecto_id === Number(proyectoSeleccionado) && s.estado === 'rechazada'
+			)
+		: [];
+
+	// Validar si tiene 3 o más solicitudes rechazadas
+	$: tieneTresSolicitudesRechazadas = solicitudesRechazadas.length >= 3;
+
 	// Evidencias del proyecto seleccionado agrupadas por objetivo
 	$: evidenciasPorObjetivo = proyectoActual
 		? proyectoActual.participacion_permitida?.map((objetivo) => {
@@ -152,6 +162,12 @@
 		// Validación antes de enviar usando variable derivada
 		if (!proyectoPerteneceAInstitucion) {
 			console.error('[SEGURIDAD] Intento de solicitar cierre de proyecto ajeno');
+			return;
+		}
+
+		// Validación: verificar límite de 3 solicitudes rechazadas
+		if (tieneTresSolicitudesRechazadas) {
+			console.error('[VALIDACIÓN] Proyecto con 3 solicitudes rechazadas');
 			return;
 		}
 
@@ -323,8 +339,56 @@
 					{/if}
 				</div>
 
-				{#if proyectoSeleccionado && proyectoActual}				<!-- Alerta: Solicitud pendiente existente -->
-				{#if solicitudPendienteExistente}
+				{#if proyectoSeleccionado && proyectoActual}
+				<!-- Alerta: 3 solicitudes rechazadas -->
+				{#if tieneTresSolicitudesRechazadas}
+					<div
+						class="mb-6 rounded-xl border border-red-200 bg-red-50 p-6 shadow-sm"
+					>
+						<div class="flex gap-4">
+							<div class="flex-shrink-0">
+								<svg
+									class="h-6 w-6 text-red-600"
+									fill="none"
+									viewBox="0 0 24 24"
+									stroke-width="1.5"
+									stroke="currentColor"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+									/>
+								</svg>
+							</div>
+							<div>
+								<h3 class="text-base font-semibold text-red-900">Límite de solicitudes rechazadas</h3>
+								<p class="mt-2 text-sm text-red-800">
+									Este proyecto alcanzó el <strong>límite de 3 solicitudes de cierre rechazadas</strong>.
+									No podés enviar más solicitudes para este proyecto, que se encuentra en auditoría y está siendo revisado por los administradores.
+								</p>
+								<p class="mt-2 text-xs text-red-700">
+									Solicitudes rechazadas: {solicitudesRechazadas.length}
+								</p>
+								<div class="mt-3 text-xs text-red-700">
+									<p class="font-medium">Fechas de rechazo:</p>
+									<ul class="mt-1 list-inside list-disc space-y-1">
+										{#each solicitudesRechazadas as solicitud}
+											<li>
+												{solicitud.created_at?.toLocaleDateString('es-AR', {
+													day: 'numeric',
+													month: 'long',
+													year: 'numeric'
+												})}
+											</li>
+										{/each}
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+				<!-- Alerta: Solicitud pendiente existente -->
+				{:else if solicitudPendienteExistente}
 					<div
 						class="mb-6 rounded-xl border border-orange-200 bg-orange-50 p-6 shadow-sm"
 					>
@@ -445,7 +509,7 @@
 						<div class="space-y-6 lg:sticky lg:top-6 lg:col-span-4">
 							<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
 								<div class="p-6">
-									<ChecklistVerificacion bind:checks disabled={tieneSolicitudPendiente} />
+								<ChecklistVerificacion bind:checks disabled={tieneSolicitudPendiente || tieneTresSolicitudesRechazadas} />
 
 									<div class="mt-6 space-y-4">
 										<!-- Nota informativa -->
@@ -480,10 +544,12 @@
 											disabled={!todosLosChecksCompletos ||
 												!todosLosObjetivosTienenEvidencias ||
 												enviandoSolicitud ||
-												tieneSolicitudPendiente}
+												tieneSolicitudPendiente ||
+												tieneTresSolicitudesRechazadas}
 											class="w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none {todosLosChecksCompletos &&
 										todosLosObjetivosTienenEvidencias &&
-								!tieneSolicitudPendiente
+								!tieneSolicitudPendiente &&
+								!tieneTresSolicitudesRechazadas
 												? 'bg-blue-600 hover:bg-blue-700 hover:shadow-md focus:ring-blue-500'
 												: 'bg-gray-300 text-gray-500'}"
 										>
@@ -507,6 +573,8 @@
 													</svg>
 													Enviando...
 											</span>
+											{:else if tieneTresSolicitudesRechazadas}
+												Límite de solicitudes rechazadas alcanzado
 											{:else if tieneSolicitudPendiente}
 												Solicitud ya enviada
 											{:else if !todosLosObjetivosTienenEvidencias}
