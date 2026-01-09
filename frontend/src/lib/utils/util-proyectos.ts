@@ -1,18 +1,18 @@
 import { error } from '@sveltejs/kit';
+import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/types/Proyecto';
+import type { Usuario } from '$lib/types/Usuario';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+import { ESTADO_LABELS } from '$lib/types/Estado';
 import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
-
-const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
-	en_curso: 0,
-	pendiente_solicitud_cierre: 1,
-	en_revision: 2,
-	en_auditoria: 3,
-	completado: 4,
-	cancelado: 5
-};
+import {
+	ESTADO_PRIORIDAD,
+	ICONOS_UNIDAD,
+	DEFAULT_PARTICIPACION_ICON,
+	COLORES_UI,
+	type ParticipacionVisualColor
+} from './constants';
 
 export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 	const idNumerico = Number(idParam);
@@ -30,16 +30,41 @@ export function getProyectoById(idParam: string, lista: Proyecto[]): Proyecto {
 	return proyecto;
 }
 
+/**
+ * Filtra proyectos según el rol del usuario
+ * - Instituciones: solo sus proyectos creados
+ * - Colaboradores: solo proyectos donde tienen colaboración aprobada
+ */
+export function filtrarProyectosPorUsuario(
+	proyectos: Proyecto[],
+	usuario: Usuario | null
+): Proyecto[] {
+	if (!usuario) return [];
+
+	if (usuario.rol === 'institucion') {
+		return proyectos.filter((p) => p.institucion_id === usuario.id_usuario);
+	}
+
+	if (usuario.rol === 'colaborador') {
+		return proyectos.filter((p) =>
+			p.colaboraciones?.some((c) => c.colaborador_id === usuario.id_usuario && c.estado === 'aprobada')
+		);
+	}
+
+	return [];
+}
+
 export function filtrarProyectos(
 	proyectos: Proyecto[],
 	filtros: string[],
 	searchQuery: string,
-	estado: string,
-	provincia: string
+	estado: string[],
+	provincia: string,
+	categoria: string[] = []
 ): Proyecto[] {
 	let resultado = [...proyectos];
 
-	if (!filtros.includes('Todos')) {
+	if (filtros.length > 0 && !filtros.includes('Todos')) {
 		const tiposEsperados = filtros.filter((f) => f !== 'Todos');
 		resultado = resultado.filter((p) =>
 			p.participacion_permitida?.some(
@@ -50,14 +75,25 @@ export function filtrarProyectos(
 		);
 	}
 
-	if (estado !== 'Todos') {
-		resultado = resultado.filter((p) => ESTADO_LABELS[p.estado ?? 'en_curso'] === estado);
+	// Filtro por Categoría (multi-select)
+	// Si el array está vacío, o incluye "Todas", no filtramos
+	const categoriasActivas = categoria.filter(c => c !== 'Todas');
+	if (categoriasActivas.length > 0) {
+		resultado = resultado.filter((p) =>
+			p.categorias?.some((c) => categoriasActivas.includes(c.descripcion))
+		);
+	}
+
+	if (estado.length > 0 && !estado.includes('Todos')) {
+		resultado = resultado.filter((p) => estado.includes(ESTADO_LABELS[p.estado ?? 'en_curso']));
 	}
 
 	if (provincia !== 'Todas') {
 		resultado = resultado.filter(
 			(p) =>
-				getProvinciaFromLocalidad(p.ubicaciones?.[0]?.ubicacion?.direccion?.localidad)?.nombre === provincia
+				p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
+					? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
+					: false
 		);
 	}
 
@@ -111,35 +147,39 @@ export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'):
 	const ubicacion = getUbicacionPrincipal(proyecto);
 	if (!ubicacion) return virtualLabel;
 
-	const ciudad = ubicacion.ubicacion?.direccion?.localidad?.nombre;
-	const provincia = getProvinciaFromLocalidad(ubicacion.ubicacion?.direccion?.localidad)?.nombre;
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+	const provincia = getProvinciaFromLocalidad(localidadObj)?.nombre;
 
 	if (ciudad && provincia) return `${ciudad}, ${provincia}`;
 	return ciudad ?? provincia ?? virtualLabel;
+}
+
+export function getUbicacionCorta(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
+	const ubicacion = getUbicacionPrincipal(proyecto);
+	if (!ubicacion) return virtualLabel;
+
+	const localidadObj =
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+	const ciudad = localidadObj?.nombre;
+
+	return ciudad ?? virtualLabel;
 }
 
 //**
 // * Utilidades para Participación Permitida
 //  */
 
-const unidadEmoji: Record<string, string> = {
-	libros: '📚',
-	colchones: '🛏️',
-	alimentos: '🍽️',
-	juguetes: '🧸',
-	computadoras: '💻',
-	prendas: '👕',
-	medicamentos: '💊',
-	herramientas: '🔧',
-	utiles: '✏️',
-	personas: '🙋‍♀️',
-	kilogramos: '⚖️',
-	unidades: '📦',
-	pesos: '💰',
-	dolares: '💵'
+type ParticipacionVisual = {
+	actualLabel: string;
+	objetivoLabel: string;
+	color: ParticipacionVisualColor;
+	icono: IconSource;
+	iconColor: string;
 };
 
-export function getParticipacionVisual(p: ParticipacionPermitida) {
+export function getParticipacionVisual(p: ParticipacionPermitida): ParticipacionVisual {
 	const unidad = p.unidad_medida?.toLowerCase();
 	const tipo = p.tipo_participacion?.descripcion;
 	const actual = p.actual ?? 0;
@@ -150,8 +190,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 		return {
 			actualLabel: `$${formatter.format(actual)}`,
 			objetivoLabel: `$${formatter.format(objetivo)}`,
-			color: 'green' as const,
-			icono: unidadEmoji[unidad || 'pesos'] || '💰'
+			color: 'green',
+			icono: ICONOS_UNIDAD[unidad || 'pesos'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.green.iconColor
 		};
 	}
 
@@ -160,8 +201,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 		return {
 			actualLabel: `${actual} ${labelUnidad}`,
 			objetivoLabel: `${objetivo} ${labelUnidad}`,
-			color: 'purple' as const,
-			icono: unidadEmoji[unidad || 'personas'] || '🙋‍♀️'
+			color: 'purple',
+			icono: ICONOS_UNIDAD[unidad || 'personas'] ?? DEFAULT_PARTICIPACION_ICON,
+			iconColor: COLORES_UI.purple.iconColor
 		};
 	}
 
@@ -169,8 +211,9 @@ export function getParticipacionVisual(p: ParticipacionPermitida) {
 	return {
 		actualLabel: `${actual} ${labelUnidad}`,
 		objetivoLabel: `${objetivo} ${labelUnidad}`,
-		color: 'blue' as const,
-		icono: unidadEmoji[unidad || 'unidades'] || '📦'
+		color: 'blue',
+		icono: ICONOS_UNIDAD[unidad || 'unidades'] ?? DEFAULT_PARTICIPACION_ICON,
+		iconColor: COLORES_UI.sky.iconColor
 	};
 }
 
@@ -187,4 +230,97 @@ const URGENCIA_COLOR_MAP: Record<string, string> = {
 export function getColorUrgencia(urgencia?: string): string | undefined {
 	if (!urgencia) return undefined; // -*- Evita clases cuando no hay urgencia definida
 	return URGENCIA_COLOR_MAP[urgencia];
+}
+
+/**
+ * Filtra proyectos por tipo de ubicación (Presencial/Virtual)
+ */
+export function filtrarPorTipoUbicacion(
+	proyectos: Proyecto[],
+	tipo: 'Todas' | 'Presencial' | 'Virtual'
+): Proyecto[] {
+	if (tipo === 'Todas') return proyectos;
+
+	return proyectos.filter((p) => {
+		const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
+		if (tipo === 'Presencial') {
+			return primeraUbicacion?.modalidad === 'presencial';
+		} else if (tipo === 'Virtual') {
+			return primeraUbicacion?.modalidad === 'virtual';
+		}
+		return false;
+	});
+}
+
+/**
+ * Filtra proyectos por rango de fechas
+ * - fechaDesde: filtra proyectos que iniciaron después de esta fecha
+ * - fechaHasta: filtra proyectos que terminan antes de esta fecha
+ */
+export function filtrarPorRangoFechas(
+	proyectos: Proyecto[],
+	fechaDesde?: string,
+	fechaHasta?: string
+): Proyecto[] {
+	if (!fechaDesde && !fechaHasta) return proyectos;
+
+	return proyectos.filter((p) => {
+		const fechaInicio = p.created_at ? new Date(p.created_at) : null;
+		const fechaFin = p.fecha_fin_tentativa ? new Date(p.fecha_fin_tentativa) : null;
+
+		if (!fechaInicio || !fechaFin) return false;
+
+		// Si fechaDesde es antes del inicio del proyecto → NO aparece
+		if (fechaDesde) {
+			const desde = new Date(fechaDesde);
+			if (fechaInicio < desde) return false;
+		}
+
+		// Si fechaHasta es después del fin del proyecto → NO aparece
+		if (fechaHasta) {
+			const hasta = new Date(fechaHasta);
+			if (fechaFin > hasta) return false;
+		}
+
+		return true;
+	});
+}
+
+
+/**
+ * Formatea una fecha o string de fecha a un formato "5 Feb 2025"
+ * Capitaliza la primera letra del mes.
+ */
+export function formatearFechaBadge(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	const partes = new Intl.DateTimeFormat('es-AR', {
+		day: 'numeric',
+		month: 'short',
+		year: 'numeric'
+	}).formatToParts(d);
+
+	const dia = partes.find((p) => p.type === 'day')?.value;
+	const mes = partes.find((p) => p.type === 'month')?.value;
+	const anio = partes.find((p) => p.type === 'year')?.value;
+
+	if (dia && mes && anio) {
+		const mesCapitalizado = mes.charAt(0).toUpperCase() + mes.slice(1);
+		return `${dia} ${mesCapitalizado} ${anio}`;
+	}
+
+	return formatearFecha(date);
+}
+
+/**
+ * Formatea una fecha o string de fecha a un formato "DD MMM YYYY" (03 Feb 2025)
+ */
+export function formatearFecha(date: Date | string | null | undefined): string {
+	if (!date) return '-';
+	const d = new Date(date);
+	return new Intl.DateTimeFormat('es-AR', {
+		day: '2-digit',
+		month: 'short',
+		year: 'numeric'
+	}).format(d);
 }

@@ -1,6 +1,6 @@
 import type { Categoria } from './Categoria';
 import type { TipoParticipacion } from './TipoParticipacion';
-import type { Direccion } from './Direccion';
+import type { Localidad } from './Localidad'; // Para guardar localidad/ciudad preferida al mostrar proyectos
 import type { Contacto } from './Contacto';
 import type { Consentimiento } from './Consentimiento';
 
@@ -20,11 +20,11 @@ export interface Usuario {
 
 	// * Relaciones
 	// -*- FKs para create/update
-	direccion_id?: number;
+	localidad_id?: number;
 
 	// -*- Objetos expandidos para read
 	contactos?: Contacto[]; // ! sirve para login
-	direccion?: Direccion;
+	localidad?: Localidad;
 	categorias_preferidas?: Categoria[];
 	tipos_participacion_preferidas?: TipoParticipacion[];
 	consentimientos?: Consentimiento[];

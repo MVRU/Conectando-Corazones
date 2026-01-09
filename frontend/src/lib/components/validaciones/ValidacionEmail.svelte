@@ -8,6 +8,7 @@
 
 	export let pasoActual = 4;
 	export let pasosTotales = 5;
+	export let emailDestino = '';
 
 	let etapa: 'sending' | 'waiting' | 'verified' | 'error' = 'sending';
 	let codigo = '';
@@ -41,19 +42,19 @@
 <!-- Etapa: Enviando -->
 {#if etapa === 'sending'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
 		<Loader loading={true} size={80} message="Enviando correo de verificación..." />
 		<p class="mt-6 max-w-md text-lg text-gray-700">
-			Estamos enviando un código de verificación a tu correo electrónico.
+			Estamos enviando un código de verificación a {emailDestino || 'tu correo electrónico'}.
 		</p>
 	</div>
 
 	<!-- Etapa: Esperando código -->
 {:else if etapa === 'waiting'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-blue-100 p-5 shadow-md">
@@ -68,7 +69,8 @@
 		</div>
 		<h2 class="mt-6 text-3xl font-bold text-gray-800">Revisá tu correo</h2>
 		<p class="mt-4 max-w-md text-base text-gray-600">
-			Te enviamos un código de verificación. Ingresalo a continuación para continuar.
+			Te enviamos un código de verificación a {emailDestino || 'tu correo electrónico'}. Ingresalo a
+			continuación para continuar.
 		</p>
 
 		<input
@@ -93,7 +95,7 @@
 	<!-- Etapa: Error -->
 {:else if etapa === 'error'}
 	<div class="mb-20">
-		<Stepper current={pasoActual} total={pasosTotales} />
+		<Stepper {pasoActual} {pasosTotales} />
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-red-100 p-6 shadow-xl">

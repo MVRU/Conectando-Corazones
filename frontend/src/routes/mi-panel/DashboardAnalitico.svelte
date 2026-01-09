@@ -9,6 +9,8 @@ FIX: revisar y corregir errores tras cambios en interfaces
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProgressBar from '$lib/components/ui/elementos/ProgressBar.svelte';
+	import { ChartBar, Clock, PresentationChartLine, BuildingOffice } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	// Datos simulados para análisis temporal
 	const tendenciasMensuales = [
@@ -133,7 +135,9 @@ FIX: revisar y corregir errores tras cambios en interfaces
 		class:translate-y-4={!animate}
 		style="transition-delay: 200ms"
 	>
-		<h2 class="mb-6 text-xl font-bold text-gray-900">📊 Evolución Mensual 2024</h2>
+		<h2 class="mb-6 flex items-center gap-2 text-xl font-bold text-gray-900">
+			<Icon src={ChartBar} class="h-6 w-6 text-blue-600" /> Evolución Mensual 2024
+		</h2>
 
 		<div class="mb-6 grid gap-4 text-center sm:grid-cols-3">
 			<div class="rounded-xl bg-blue-50 p-4">
@@ -192,7 +196,9 @@ FIX: revisar y corregir errores tras cambios en interfaces
 		class:translate-y-4={!animate}
 		style="transition-delay: 300ms"
 	>
-		<h2 class="mb-6 text-xl font-bold text-gray-900">⏱️ Timeline de Proyectos Activos</h2>
+		<h2 class="mb-6 flex items-center gap-2 text-xl font-bold text-gray-900">
+			<Icon src={Clock} class="h-6 w-6 text-blue-600" /> Timeline de Proyectos Activos
+		</h2>
 
 		<div class="space-y-6">
 			{#each proyectosDetallados as proyecto, i (i)}
@@ -203,7 +209,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 				>
 					<!-- Punto del timeline -->
 					<div
-						class="absolute top-0 -left-2 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
+						class="absolute -left-2 top-0 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
 					></div>
 
 					<div class="rounded-xl bg-gray-50 p-4">
@@ -256,7 +262,9 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			class:translate-y-4={!animate}
 			style="transition-delay: 700ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-gray-900">📈 Comparativa Anual</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+				<Icon src={PresentationChartLine} class="h-5 w-5 text-blue-600" /> Comparativa Anual
+			</h2>
 
 			<div class="space-y-4">
 				<div class="flex items-center justify-between rounded-lg bg-blue-50 p-3">
@@ -321,7 +329,9 @@ FIX: revisar y corregir errores tras cambios en interfaces
 			class:translate-y-4={!animate}
 			style="transition-delay: 800ms"
 		>
-			<h2 class="mb-6 text-lg font-bold text-gray-900">🏢 Análisis de Instituciones</h2>
+			<h2 class="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+				<Icon src={BuildingOffice} class="h-5 w-5 text-gray-600" /> Análisis de Instituciones
+			</h2>
 
 			<div class="space-y-3">
 				{#each instituciones as institucion, i (i)}

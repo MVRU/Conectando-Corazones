@@ -44,11 +44,11 @@
 
 <section
 	bind:this={sectionRef}
-	class="relative w-full overflow-hidden bg-[rgb(var(--base-color))] px-4 pt-30 pb-20 text-white md:px-8"
+	class="pt-30 relative w-full overflow-hidden bg-[rgb(var(--base-color))] px-4 pb-20 text-white md:px-8"
 >
 	<!-- -*-Fondo radial y líneas decorativas -->
 	<span
-		class="bg-gradient-radial pointer-events-none absolute top-0 left-1/2 z-0 h-[700px] w-[150vw] -translate-x-1/2 from-sky-500/30 via-transparent to-transparent"
+		class="bg-gradient-radial pointer-events-none absolute left-1/2 top-0 z-0 h-[700px] w-[150vw] -translate-x-1/2 from-sky-500/30 via-transparent to-transparent"
 	></span>
 	<span
 		class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-br from-transparent via-blue-900/10 to-sky-900/20"
@@ -56,7 +56,7 @@
 
 	<!-- -*-Luz azul suave detrás de la hero -->
 	<span
-		class="pointer-events-none absolute top-1/2 left-[60%] z-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/20 blur-3xl"
+		class="pointer-events-none absolute left-[60%] top-1/2 z-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500/20 blur-3xl"
 	></span>
 
 	<div
@@ -76,7 +76,7 @@
 				/>
 			</div>
 			<h1
-				class="custom-margin mt-16 mb-4 text-4xl leading-tight font-black tracking-tight drop-shadow-[0_6px_32px_rgba(0,137,255,0.11)] transition-all duration-1000 sm:text-5xl"
+				class="custom-margin mb-4 mt-16 text-4xl font-black leading-tight tracking-tight drop-shadow-[0_6px_32px_rgba(0,137,255,0.11)] transition-all duration-1000 sm:text-5xl"
 				class:hero-fade={!mostrarHero}
 				style="transition-delay: 180ms"
 			>
@@ -101,7 +101,7 @@
 				style="transition-delay: 330ms"
 			>
 				<div
-					class="drop-shadow-lg transition-transform duration-400 hover:scale-105 active:scale-95"
+					class="duration-400 drop-shadow-lg transition-transform hover:scale-105 active:scale-95"
 				>
 					<Button
 						label="Registrarse"
@@ -120,22 +120,22 @@
 			class:hero-images={!mostrarImagenes}
 		>
 			<div
-				class="aspect-square w-full translate-x-3 -translate-y-2 rotate-6 transform overflow-hidden rounded-4xl shadow-xl ring-2 ring-sky-300/30"
+				class="rounded-4xl aspect-square w-full -translate-y-2 translate-x-3 rotate-6 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
 				<Image src="/img/hero-1.webp" alt="Manos plantando árbol" animate="zoom" />
 			</div>
 			<div
-				class="aspect-square w-full -translate-x-4 translate-y-2 -rotate-6 transform overflow-hidden rounded-4xl shadow-xl ring-2 ring-sky-300/30"
+				class="rounded-4xl aspect-square w-full -translate-x-4 translate-y-2 -rotate-6 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
 				<Image src="/img/hero-2.webp" alt="Bomberos solidarios" animate="zoom" />
 			</div>
 			<div
-				class="aspect-square w-full -translate-y-8 -rotate-6 transform overflow-hidden rounded-4xl shadow-lg ring-2 ring-sky-300/30"
+				class="rounded-4xl aspect-square w-full -translate-y-8 -rotate-6 transform overflow-hidden shadow-lg ring-2 ring-sky-300/30"
 			>
 				<Image src="/img/hero-3.webp" alt="Profesionales de salud" animate="zoom" />
 			</div>
 			<div
-				class="aspect-square w-full -translate-x-4 -translate-y-4 rotate-4 transform overflow-hidden rounded-4xl shadow-xl ring-2 ring-sky-300/30"
+				class="rotate-4 rounded-4xl aspect-square w-full -translate-x-4 -translate-y-4 transform overflow-hidden shadow-xl ring-2 ring-sky-300/30"
 			>
 				<Image src="/img/hero-4.webp" alt="Niños corriendo y sonriendo" animate="zoom" />
 			</div>

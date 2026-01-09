@@ -8,10 +8,13 @@
 		MAX_BENEFICIARIOS,
 		formatearFechaLarga,
 		obtenerIconoCategoria,
+		obtenerColorCategoria,
+		obtenerClasesColor,
 		capitalizarPrimera,
 		normalizarTitulo,
 		validarTituloProyecto
 	} from '$lib/utils/util-proyecto-form';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let titulo = '';
 	export let descripcion = '';
@@ -31,7 +34,6 @@
 		if (beneficiarios > MAX_BENEFICIARIOS) beneficiarios = MAX_BENEFICIARIOS;
 	}
 
-
 	function toggleCategoria(categoriaId?: number) {
 		if (categoriaId == null) return;
 
@@ -42,6 +44,10 @@
 				limpiarError('categoria_otra');
 			}
 		} else {
+			// Prevenir seleccionar más de 5 categorías
+			if (categoriasSeleccionadas.length >= 5) {
+				return;
+			}
 			categoriasSeleccionadas = [...categoriasSeleccionadas, categoriaId];
 		}
 	}
@@ -70,6 +76,7 @@
 				id="titulo"
 				type="text"
 				bind:value={titulo}
+				maxlength="60"
 				on:blur={() => normalizarTitulo(titulo)}
 				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 				placeholder="Ejemplo: Infancias felices 2025"
@@ -103,7 +110,7 @@
 			>
 			<input
 				id="urlPortada"
-				type="url"
+				type="text"
 				bind:value={urlPortada}
 				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 				class:border-red-300={errores.urlPortada}
@@ -151,6 +158,11 @@
 					step="1"
 					inputmode="numeric"
 					on:blur={normalizarBeneficiarios}
+					on:keydown={(e) => {
+						if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
+							e.preventDefault();
+						}
+					}}
 					class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 					class:border-red-300={errores.beneficiarios}
 					aria-invalid={!!errores.beneficiarios}
@@ -173,35 +185,30 @@
 
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 		{#each mockCategorias as categoria (categoria.id_categoria)}
+			{@const seleccionado = categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+			{@const color = obtenerColorCategoria(categoria.descripcion || '')}
+			{@const clases = obtenerClasesColor(color, seleccionado)}
 			<button
 				type="button"
 				on:click={() => toggleCategoria(categoria.id_categoria)}
-				class="group relative flex items-center rounded-lg border-2 border-dashed p-3 transition-all duration-200 hover:shadow-sm"
-				class:border-blue-500={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:bg-blue-50={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:border-gray-300={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:bg-white={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-				class:hover:border-blue-400={!categoriasSeleccionadas.includes(
-					categoria.id_categoria ?? -1
-				)}
-				class:hover:bg-gray-50={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 hover:shadow-sm {clases.border} {clases.bg} {clases.hover}"
 			>
-				<span class="mr-2 flex-shrink-0 text-lg"
-					>{obtenerIconoCategoria(categoria.descripcion)}</span
-				>
+				<span class="mr-2 flex-shrink-0 text-lg {clases.iconColor}">
+					<Icon src={obtenerIconoCategoria(categoria.descripcion || '')} class="h-6 w-6" />
+				</span>
 				<div class="min-w-0 flex-1 text-left">
 					<span
-						class="block text-xs font-medium leading-tight"
-						class:text-blue-900={categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-						class:text-gray-700={!categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
+						class="block text-xs font-medium leading-tight {seleccionado
+							? 'text-gray-900'
+							: 'text-gray-700'}"
 					>
 						{categoria.descripcion}
 					</span>
 				</div>
 				<div class="ml-1 flex-shrink-0">
-					{#if categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
-						<div class="flex h-4 w-4 items-center justify-center rounded-full bg-blue-500">
-							<svg class="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+					{#if seleccionado}
+						<div class="flex h-4 w-4 items-center justify-center rounded-full {clases.iconBg}">
+							<svg class="h-2.5 w-2.5 {clases.iconColor}" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -211,13 +218,26 @@
 						</div>
 					{:else}
 						<div
-							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-300"
+							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-gray-400"
 						></div>
 					{/if}
 				</div>
 			</button>
 		{/each}
 	</div>
+
+	{#if categoriasSeleccionadas.length >= 5}
+		<div class="mt-4 flex items-center rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
+			<svg class="mr-2 h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+				<path
+					fill-rule="evenodd"
+					d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+					clip-rule="evenodd"
+				/>
+			</svg>
+			<span>Has alcanzado el límite máximo de 5 categorías por proyecto.</span>
+		</div>
+	{/if}
 
 	{#if seleccionoOtra}
 		<div class="mt-4">

@@ -76,8 +76,8 @@
 	<!-- ! Ignorar el error que aparece, está ok -->
 	<div
 		use:swipe={{}}
-		on:swipe-left={mostrarSiguiente}
-		on:swipe-right={mostrarAnterior}
+		on:swipeleft={mostrarSiguiente}
+		on:swiperight={mostrarAnterior}
 		class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
 	>
 		<!-- Contenedor de tarjetas -->

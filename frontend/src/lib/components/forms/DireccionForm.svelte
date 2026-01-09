@@ -3,43 +3,60 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
+	import { validarCiudadEnProvincia, MENSAJES_ERROR } from '$lib/utils/validaciones';
 	import {
-		validarCalle,
-		validarNumeroCalle,
-		validarCiudadEnProvincia,
-		MENSAJES_ERROR
-	} from '$lib/utils/validaciones';
+		construirUrlsVistaPreviaGoogleMaps,
+		type UrlsVistaPreviaGoogleMaps
+	} from '$lib/utils/googleMaps';
 
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
 	import type { Provincia } from '$lib/types/Provincia';
 	import type { Localidad } from '$lib/types/Localidad';
-	import type { Direccion } from '$lib/types/Direccion';
 	import { createEventDispatcher } from 'svelte';
+	import { toastStore } from '$lib/stores/toast';
+
+	type DireccionPayload = {
+		provinciaId: number | null;
+		provinciaNombre: string;
+		localidadId: number | null;
+		localidadNombre: string;
+		referencia?: string;
+		url_google_maps?: string;
+	};
 
 	let enviando = false;
 	let editandoUrlMapaGoogle = false;
+	let idProvincia = '';
+	let idLocalidad = '';
 	let provincia: Provincia | undefined;
 	let localidad: Localidad | undefined;
 	let localidadesProvincia: Localidad[] = [];
 	let urlGoogleMaps = '';
+	let googleMapsPreview: UrlsVistaPreviaGoogleMaps | null = null;
+	let urlGoogleMapsLegible = '';
+	let referencia = '';
+
+	function decodeUrlForDisplay(url: string): string {
+		try {
+			return decodeURI(url);
+		} catch (_error) {
+			return url;
+		}
+	}
+
+	$: urlGoogleMapsLegible = urlGoogleMaps ? decodeUrlForDisplay(urlGoogleMaps) : '';
 	let intentoEnvio = false;
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+	export let solicitarSoloUbicacion = false;
 
-	// Props para pre-llenar el formulario
-	export let calle = '';
-	export let numero = '';
-	export let piso = '';
-	export let departamento = '';
-	export let referencia = '';
-	export let idProvincia = '';
-	export let idLocalidad = '';
-
-	const dispatch = createEventDispatcher();
+	const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; skip: void }>();
 
 	const convertirAString = (n?: number) => (n == null ? '' : String(n));
+
+	$: requiereGeolocalizacion = !solicitarSoloUbicacion;
 
 	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
 
@@ -59,19 +76,24 @@
 
 	// Genera la URL automáticamente
 	$: {
-		if (
-			validarCalle(calle) &&
-			validarNumeroCalle(numero) &&
-			validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
-		) {
-			const direccionCompleta = `${calle} ${numero}, ${localidad?.nombre}, ${provincia?.nombre}`;
-			urlGoogleMaps = `https://maps.google.com/?q=${encodeURIComponent(direccionCompleta)}`;
+		if (!requiereGeolocalizacion) {
+			urlGoogleMaps = '';
+			googleMapsPreview = null;
+			editandoUrlMapaGoogle = false;
+		} else if (validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)) {
+			googleMapsPreview = construirUrlsVistaPreviaGoogleMaps({
+				localidad: localidad?.nombre,
+				provincia: provincia?.nombre
+			});
+
+			urlGoogleMaps = googleMapsPreview?.urlLugar ?? '';
+		} else {
+			googleMapsPreview = null;
+			urlGoogleMaps = '';
 		}
 	}
 
 	$: errores = {
-		calle: validarCalle(calle) ? '' : MENSAJES_ERROR.calleInvalida,
-		numero: validarNumeroCalle(numero) ? '' : MENSAJES_ERROR.numeroCalleInvalido,
 		provincia: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
 		localidad: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
 			? ''
@@ -89,206 +111,191 @@
 
 		setTimeout(() => {
 			enviando = false;
-			const direccion: Direccion = {
-				calle,
-				numero,
-				piso: piso || undefined,
-				departamento: departamento || undefined,
-				referencia: referencia || undefined,
-				url_google_maps: urlGoogleMaps || undefined,
-				localidad_id: localidad?.id_localidad,
-				localidad
+			const payload: DireccionPayload = {
+				provinciaId: provincia?.id_provincia ?? null,
+				provinciaNombre: provincia?.nombre ?? '',
+				localidadId: localidad?.id_localidad ?? null,
+				localidadNombre: localidad?.nombre ?? '',
+				referencia: referencia?.trim() || undefined,
+				url_google_maps: requiereGeolocalizacion && urlGoogleMaps ? urlGoogleMaps : undefined
 			};
-			dispatch('submit', direccion);
+			dispatch('submit', payload);
+			toastStore.show({
+				variant: 'success',
+				title: 'Ubicación guardada',
+				message: 'Registramos tu ubicación principal. Podrás sumar más direcciones desde tu panel.'
+			});
 		}, 800);
+	}
+
+	function omitirDireccion() {
+		toastStore.show({
+			variant: 'info',
+			title: 'Paso omitido',
+			message: 'Podés completar tu ubicación más adelante desde el panel de la institución.'
+		});
+		dispatch('skip');
 	}
 </script>
 
 <form
 	on:submit={manejarEnvio}
-	class="rounded-2xl bg-white p-6 shadow-xl ring-1 ring-gray-200 md:p-10"
+	class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-200 sm:p-8 md:p-12"
 >
-	<h3 class="mb-10 text-center text-xl font-semibold text-gray-800">
-		Dirección de la institución u organización
-	</h3>
+	<header class="mx-auto max-w-3xl text-center">
+		<h3 class="text-2xl font-semibold text-gray-900 md:text-3xl">Definí tu ubicación principal</h3>
+	</header>
 
-	<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-		<!-- Calle -->
-		<div>
-			<label for="calle" class="mb-2 block text-sm font-semibold text-gray-700">
-				Calle <span class="text-red-600">*</span>
-			</label>
-			<Input id="calle" bind:value={calle} error={intentoEnvio ? errores.calle : ''} />
-		</div>
-
-		<!-- Número -->
-		<div>
-			<label for="numero" class="mb-2 block text-sm font-semibold text-gray-700">
-				Número <span class="text-red-600">*</span>
-			</label>
-			<Input id="numero" bind:value={numero} error={intentoEnvio ? errores.numero : ''} />
-		</div>
-
-		<!-- Piso -->
-		<div>
-			<label for="piso" class="mb-2 block text-sm font-semibold text-gray-700">
-				Piso (opcional)
-			</label>
-			<Input id="piso" bind:value={piso} placeholder="Ej: PB, 1, 2" />
-		</div>
-
-		<!-- Departamento -->
-		<div>
-			<label for="departamento" class="mb-2 block text-sm font-semibold text-gray-700">
-				Departamento (opcional)
-			</label>
-			<Input id="departamento" bind:value={departamento} placeholder="Ej: A, B, 101" />
-		</div>
-
+	<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
 		<!-- Provincia -->
-		<Select
-			id="provincia"
-			required={true}
-			placeholder="Seleccioná una provincia"
-			options={provincias
-				.filter((p) => p.id_provincia != null)
-				.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
-			bind:value={idProvincia}
-			error={intentoEnvio ? errores.provincia : ''}
-		/>
-
-		<!-- Localidad -->
-		<Select
-			id="localidad"
-			required={true}
-			placeholder="Seleccioná una localidad"
-			options={localidadesProvincia
-				.filter((c) => c.id_localidad != null)
-				.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
-			bind:value={idLocalidad}
-			disabled={!provincia}
-			error={intentoEnvio ? errores.localidad : ''}
-		/>
-
-		<!-- Referencia -->
-		<div class="md:col-span-2">
-			<label for="referencia" class="mb-2 block text-sm font-semibold text-gray-700">
-				Referencia (opcional)
+		<div class="space-y-2">
+			<label for="provincia" class="block text-sm font-semibold text-gray-800">
+				Provincia <span class="text-red-600">*</span>
 			</label>
-			<Input
-				id="referencia"
-				bind:value={referencia}
-				placeholder="Ej: Edificio al lado de la plaza"
-				customClass="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
+			<Select
+				id="provincia"
+				required={true}
+				placeholder="Seleccioná una provincia"
+				options={provincias
+					.filter((p) => p.id_provincia != null)
+					.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
+				bind:value={idProvincia}
+				error={intentoEnvio ? errores.provincia : ''}
+				ariaDescribedBy="provincia-helper"
 			/>
 		</div>
 
-		<!-- Campo URL Google Maps -->
-		<div class="md:col-span-2">
-			<label for="urlGoogleMaps" class="mb-2 block text-sm font-semibold text-gray-700">
-				URL de Google Maps (opcional)
+		<!-- Localidad -->
+		<div class="space-y-2">
+			<label for="localidad" class="block text-sm font-semibold text-gray-800">
+				Localidad <span class="text-red-600">*</span>
 			</label>
-			<div class="relative">
-				{#if editandoUrlMapaGoogle}
-					<!-- Modo edición: Input -->
-					<Input
-						id="urlGoogleMaps"
-						bind:value={urlGoogleMaps}
-						placeholder="Se genera automáticamente"
-						customClass="w-full rounded-xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300 disabled:bg-gray-100"
-					/>
-				{:else if urlGoogleMaps}
-					<!-- Modo lectura: Enlace clickeable -->
-					<a
-						href={urlGoogleMaps}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="block w-full rounded-xl border border-gray-300 bg-gray-100 px-4 py-2 text-base text-blue-600 underline placeholder:text-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-300"
-					>
-						{urlGoogleMaps}
-					</a>
-				{:else}
-					<!-- Sin URL: solo texto informativo -->
-					<p
-						class="rounded-xl border border-gray-300 bg-gray-50 px-4 py-2 text-base text-gray-400 italic"
-					>
-						Se genera automáticamente
-					</p>
-				{/if}
-
-				<!-- Botón de edición -->
-				<button
-					type="button"
-					on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
-					class="absolute top-0 right-0 flex h-full w-10 items-center justify-center rounded-r-xl border border-gray-300 bg-gray-100 text-blue-600 transition-all duration-300 hover:bg-gray-200 focus:outline-none"
-					aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
-				>
-					{#if editandoUrlMapaGoogle}
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
-					{:else}
-						<svg
-							width="45px"
-							height="45px"
-							viewBox="-9 -9 36.00 36.00"
-							version="1.1"
-							xmlns="http://www.w3.org/2000/svg"
-							xmlns:xlink="http://www.w3.org/1999/xlink"
-							fill="#000000"
-						>
-							<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-							<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-							<g id="SVGRepo_iconCarrier">
-								<title>icon/18/icon-edit</title>
-								<desc>Created with Sketch.</desc>
-								<defs></defs>
-								<g id="out" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-									<path
-										d="M2.25,12.9378906 L2.25,15.75 L5.06210943,15.75 L13.3559575,7.45615192 L10.5438481,4.64404249 L2.25,12.9378906 Z M15.5306555,5.28145396 C15.8231148,4.98899458 15.8231148,4.5165602 15.5306555,4.22410082 L13.7758992,2.46934454 C13.4834398,2.17688515 13.0110054,2.17688515 12.718546,2.46934454 L11.3462366,3.84165394 L14.1583461,6.65376337 L15.5306555,5.28145396 Z"
-										id="path"
-										fill="#007fff"
-									/>
-								</g>
-							</g>
-						</svg>
-					{/if}
-				</button>
-			</div>
+			<Select
+				id="localidad"
+				required={true}
+				placeholder="Seleccioná una localidad"
+				options={localidadesProvincia
+					.filter((c) => c.id_localidad != null)
+					.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
+				bind:value={idLocalidad}
+				disabled={!provincia}
+				error={intentoEnvio ? errores.localidad : ''}
+				ariaDescribedBy="localidad-helper"
+			/>
 		</div>
 
-		<!-- Vista previa del mapa -->
-		<!-- {#if urlGoogleMaps && !editandoUrlMapaGoogle}
-			<div
-				class="relative mx-auto mt-10 aspect-square max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-lg transition duration-300 hover:shadow-2xl"
-			>
-				<div class="relative w-full overflow-hidden rounded-3xl bg-gray-200 shadow-md">
-					<iframe
-						src="{urlGoogleMaps}&output=embed"
-						class="min-h-[350px] w-full border-0 sm:min-h-[420px] md:min-h-[480px] lg:min-h-[520px] xl:min-h-[580px]"
-						title="Vista previa del mapa"
-						allowfullscreen
-						loading="lazy"
-						referrerpolicy="no-referrer-when-downgrade"
-					></iframe>
+		{#if requiereGeolocalizacion}
+			<!-- Campo URL Google Maps -->
+			<div class="md:col-span-2">
+				<label for="urlGoogleMaps" class="mb-2 block text-sm font-semibold text-gray-800">
+					URL de Google Maps
+				</label>
+				<div class="relative">
+					{#if editandoUrlMapaGoogle}
+						<!-- Modo edición: Input -->
+						<Input
+							id="urlGoogleMaps"
+							bind:value={urlGoogleMaps}
+							placeholder="Se genera automáticamente"
+							customClass="w-full rounded-2xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100"
+						/>
+					{:else if urlGoogleMaps}
+						<!-- Modo lectura: Enlace clickeable -->
+						<a
+							href={urlGoogleMaps}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+						>
+							{urlGoogleMapsLegible}
+						</a>
+					{:else}
+						<!-- Sin URL: solo texto informativo -->
+						<p
+							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base italic text-gray-500"
+						>
+							Se genera automáticamente
+						</p>
+					{/if}
+
+					<!-- Botón de edición -->
+					<button
+						type="button"
+						on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
+						class="absolute right-0 top-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+						aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
+						aria-pressed={editandoUrlMapaGoogle}
+					>
+						{#if editandoUrlMapaGoogle}
+							<svg
+								class="h-5 w-5"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						{:else}
+							<svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+								<path d="M4 16.5V20h3.5l10-10-3.5-3.5-10 10z"></path>
+								<path d="M14.5 5.5l3 3" fill="none" stroke="currentColor" stroke-linecap="round"
+								></path>
+							</svg>
+						{/if}
+					</button>
 				</div>
 			</div>
-		{/if} -->
+
+			<!-- Vista previa del mapa -->
+			{#if googleMapsPreview && !editandoUrlMapaGoogle}
+				<section class="md:col-span-2">
+					<div class="mx-auto w-full max-w-3xl text-center">
+						<h4 class="text-lg font-semibold text-gray-900">Vista previa del mapa</h4>
+						<p class="mt-2 text-sm text-gray-600 md:text-base">
+							Confirmá que el marcador se ubique donde esperás. Podés abrirlo en una nueva pestaña
+							para ajustar detalles si lo necesitás.
+						</p>
+					</div>
+					<div class="mx-auto mt-6 w-full max-w-3xl">
+						<div
+							class="rounded-[28px] bg-gradient-to-r from-blue-100 via-purple-100 to-blue-50 p-[1px] shadow-lg"
+						>
+							<div class="rounded-[26px] bg-white p-3 sm:p-4">
+								<div class="relative overflow-hidden rounded-3xl">
+									<iframe
+										src={googleMapsPreview.urlInsertar}
+										class="h-[320px] w-full border-0 sm:h-[360px] md:h-[420px] lg:h-[460px] xl:h-[500px]"
+										title="Vista previa del mapa"
+										aria-label="Vista previa de la ubicación seleccionada en Google Maps"
+										allowfullscreen
+										loading="lazy"
+										referrerpolicy="no-referrer-when-downgrade"
+									></iframe>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+			{/if}
+		{/if}
 	</div>
 
 	<!-- Botones de acción -->
-	<div class="mt-8 flex justify-end gap-4">
+	<div
+		class="mt-12 flex flex-col-reverse gap-4 text-center md:flex-row md:items-center md:justify-end"
+	>
 		{#if mostrarOmitir}
 			<Button
 				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
-				on:click={() => dispatch('skip')}
+				on:click={omitirDireccion}
 				customClass="w-full md:w-auto"
 			/>
 		{/if}
