@@ -8,7 +8,6 @@
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
 	import EditarCategoriasModal from '$lib/components/modals/EditarCategoriasModal.svelte';
-	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Resena } from '$lib/types/Resena';
 	import type { Categoria } from '$lib/types/Categoria';
 	import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
@@ -256,27 +255,6 @@
 									{/each}
 								</div>
 							</div>
-
-							{#if perfilUsuario.rol === 'institucion'}
-								<div>
-									<div class="mb-2 flex items-center gap-2">
-										<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-										</svg>
-										<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Número de Institución</span>
-									</div>
-									<p class="ml-7 text-base font-semibold text-gray-900">#{(perfilUsuario as any).numero_institucion || perfilUsuario.id_usuario}</p>
-								</div>
-								<div>
-									<div class="mb-2 flex items-center gap-2">
-										<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-										</svg>
-										<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Representante Legal</span>
-									</div>
-									<p class="ml-7 text-base text-gray-900">{perfilUsuario.nombre} {perfilUsuario.apellido}</p>
-								</div>
-							{/if}
 						</div>
 
 						<!-- Columna derecha: Información de cuenta -->
