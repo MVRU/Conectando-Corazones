@@ -64,6 +64,8 @@
 	$: dropdownItems = [
 		{ label: 'Perfil', href: '/perfil' },
 		{ label: $isAdmin ? 'Panel de administración' : 'Mi panel', href: '/mi-panel' },
+		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
+		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
 		...($isInstitucion
 			? [
 					{

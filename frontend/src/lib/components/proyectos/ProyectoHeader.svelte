@@ -2,11 +2,30 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
-	import { Photo } from '@steeze-ui/heroicons';
+	import { Photo, EllipsisHorizontal, Flag } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import { pushState } from '$app/navigation';
+	import { clickOutside } from '$lib/utils/util-click-outside';
+	import { haReportado } from '$lib/utils/util-reportes';
+	import { usuario } from '$lib/stores/auth';
 
 	export let proyecto: Proyecto;
 	export let esAdministrador: boolean = false;
+	export let esCreador: boolean = false;
+
+	let mostrarMenuReportar = false;
+	let yaReporto = false;
+
+	$: if ($usuario && proyecto?.id_proyecto) {
+		yaReporto = haReportado($usuario.id_usuario, proyecto.id_proyecto);
+	}
+
+	function reportarIrregularidad() {
+		mostrarMenuReportar = false;
+		pushState(`/proyectos/${proyecto.id_proyecto}/reportar`, {
+			showReportModal: true
+		});
+	}
 </script>
 
 <div class="group relative h-48 w-full overflow-hidden rounded-xl shadow-lg md:h-64 lg:h-80">
@@ -25,6 +44,50 @@
 	{/if}
 
 	<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
+
+	<!-- Menú de más acciones -->
+	{#if $usuario && !esCreador && !esAdministrador}
+		<div class="absolute right-4 top-4 z-10">
+			<div class="relative" use:clickOutside={() => (mostrarMenuReportar = false)}>
+				<button
+					type="button"
+					class="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+					on:click={() => (mostrarMenuReportar = !mostrarMenuReportar)}
+					aria-label="Más acciones"
+					aria-expanded={mostrarMenuReportar}
+				>
+					<Icon src={EllipsisHorizontal} class="h-6 w-6" />
+				</button>
+
+				{#if mostrarMenuReportar}
+					<div
+						class="absolute right-0 top-full mt-2 w-48 origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+						role="menu"
+						aria-orientation="vertical"
+						aria-labelledby="user-menu-button"
+						tabindex="-1"
+					>
+						<button
+							type="button"
+							class={yaReporto
+								? 'flex w-full cursor-not-allowed items-center px-4 py-2 text-sm text-gray-400'
+								: 'flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'}
+							role="menuitem"
+							tabindex="-1"
+							on:click={reportarIrregularidad}
+							disabled={yaReporto}
+						>
+							<Icon
+								src={Flag}
+								class="mr-3 h-4 w-4 {yaReporto ? 'text-gray-400' : 'text-gray-500'}"
+							/>
+							{yaReporto ? 'Reporte pendiente' : 'Reportar irregularidad'}
+						</button>
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
 
 	<div class="absolute bottom-0 left-0 w-full p-4 text-white sm:p-6">
 		<div class="flex flex-col gap-2">

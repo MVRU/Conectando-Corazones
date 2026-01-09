@@ -62,6 +62,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -200,6 +201,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={isDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -271,6 +273,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
+		{...$$restProps}
 	>
 		{#if loading}
 			<svg

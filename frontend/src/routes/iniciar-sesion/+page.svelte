@@ -85,7 +85,7 @@ TODO:
 					animate="heartbeat"
 				/>
 			</div>
-			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Iniciar Sesión</h1>
+			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Iniciar sesión</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
 				Accedé a tu cuenta para gestionar tus proyectos y contribuir a causas sociales
 			</p>
