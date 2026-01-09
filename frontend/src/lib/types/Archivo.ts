@@ -9,4 +9,5 @@ export interface Archivo {
 	// * Relaciones (FKs)
 	usuario_id?: number;
 	evidencia_id?: number;
+	proyecto_id?: number;
 }

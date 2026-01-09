@@ -71,8 +71,18 @@ interface AuthState {
 	error: string | null;
 }
 
+// TODO: corregir la lógica de autenticación
+
 // Estado inicial
 const initialState: AuthState = {
+	usuario: null,
+	isAuthenticated: false,
+	isLoading: true, // Estado de carga inicial verdadero para evitar destellos/condiciones de carrera
+	error: null
+};
+
+// Estado para usuario no autenticado (cargado pero no conectado)
+const unauthenticatedState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
 	isLoading: false,
@@ -115,7 +125,7 @@ export const authActions = {
 			!password?.trim() ||
 			(!validarCorreo(credencial) && !validarUsername(credencial))
 		) {
-			authStore.update((s) => ({ ...s, error: 'Credenciales inválidas' }));
+			authStore.update((s) => ({ ...s, error: 'Credenciales inválidas', isLoading: false }));
 			return null;
 		}
 
@@ -167,7 +177,7 @@ export const authActions = {
 		} catch (error) {
 			console.error('Error al cerrar sesión:', error);
 		} finally {
-			authStore.set(initialState);
+			authStore.set(unauthenticatedState);
 		}
 	},
 
@@ -188,11 +198,11 @@ export const authActions = {
 					error: null
 				}));
 			} else {
-				authStore.set(initialState);
+				authStore.set(unauthenticatedState);
 			}
 		} catch (error) {
 			console.error('Error al verificar autenticación:', error);
-			authStore.set(initialState);
+			authStore.set(unauthenticatedState);
 		}
 	},
 

@@ -19,7 +19,7 @@ export interface Estado {
 // * Mapa de labels para UI
 export const ESTADO_LABELS: Record<EstadoDescripcion, string> = {
 	en_curso: 'En curso',
-	pendiente_solicitud_cierre: 'Pendiente de solicitud de cierre',
+	pendiente_solicitud_cierre: 'Pendiente de cierre',
 	en_revision: 'En revisión',
 	en_auditoria: 'En auditoría',
 	completado: 'Completado',
