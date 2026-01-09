@@ -127,12 +127,18 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		contactos: [
-			{
-				tipo_contacto: 'email',
-				valor: 'maria.gonzalez@gmail.com',
-				etiqueta: 'principal'
-			}
+			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },
+			{ tipo_contacto: 'telefono', valor: '341 44443665', etiqueta: 'celular secundario' },
+			{ tipo_contacto: 'web', valor: 'https://www.maria-gonzalez.com.ar', etiqueta: 'principal' }
 		],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación
+			mockCategorias[2], // Cultura y arte
+			mockCategorias[16], // Salud
+			mockCategorias[0] // Alimentación y nutrición
+		],
+
 		consentimientos: [
 			{
 				id_consentimiento: 9,
