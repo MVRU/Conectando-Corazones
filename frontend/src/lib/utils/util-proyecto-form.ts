@@ -100,8 +100,7 @@ export function objetivoTexto(p: {
 
 	if (tipo === 'Especie') {
 		const item = (p.especie || '').trim();
-		const muestraUnidad = unidad && unidadLc !== 'unidades';
-		return `Objetivo: alcanzar ${num}${muestraUnidad ? ` ${unidad}` : ''} de ${item}`;
+		return `Objetivo: alcanzar ${num} ${unidad} de ${item}`;
 	}
 
 	if (tipo === 'Monetaria') {
