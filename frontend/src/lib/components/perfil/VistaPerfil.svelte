@@ -218,14 +218,6 @@
 							<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {obtenerColorRol(perfilUsuario.rol)}">
 								{perfilUsuario.rol}
 							</span>
-							
-							{#if perfilUsuario.categorias_preferidas}
-								{#each perfilUsuario.categorias_preferidas.slice(0, 3) as categoria}
-									<span class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-										{categoria.descripcion}
-									</span>
-								{/each}
-							{/if}
 						</div>
 					</div>
 				</div>
