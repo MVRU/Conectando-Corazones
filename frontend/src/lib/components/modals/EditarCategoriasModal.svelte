@@ -2,7 +2,8 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/types/Categoria';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
-	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
+	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let mostrar: boolean = false;
 	export let categoriasSeleccionadas: Categoria[] = [];
@@ -13,6 +14,33 @@
 	}>();
 
 	let categoriasMarcadas: Set<number> = new Set();
+	let categoriaOtraDescripcion = '';
+	let errorCategoriaOtra = '';
+	let categoriaOtraTouched = false;
+
+	const { validarCategoriaOtraDescripcion, esCategoriaRepetida } = crearValidadorCategoria(
+		mockCategorias.map((c) => c.descripcion || '')
+	);
+
+	const idCategoriaOtra = mockCategorias.find(
+		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+	)?.id_categoria;
+
+	$: seleccionoOtra =
+		idCategoriaOtra != null && categoriasMarcadas.has(idCategoriaOtra ?? -1);
+
+	$: if (seleccionoOtra && categoriaOtraTouched) {
+		const err = validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+		if (err) {
+			errorCategoriaOtra = err;
+		} else {
+			errorCategoriaOtra = '';
+		}
+	} else if (!seleccionoOtra) {
+		errorCategoriaOtra = '';
+		categoriaOtraDescripcion = '';
+		categoriaOtraTouched = false;
+	}
 
 	// Inicializar categorías marcadas cuando cambian las seleccionadas
 	$: if (categoriasSeleccionadas && categoriasSeleccionadas.length > 0) {
@@ -49,9 +77,33 @@
 	}
 
 	function guardar() {
-		const categoriasFinales = mockCategorias.filter(cat => 
-			cat.id_categoria !== undefined && categoriasMarcadas.has(cat.id_categoria)
+		// Marcar como touched para mostrar validación si no se ha hecho
+		if (seleccionoOtra) {
+			categoriaOtraTouched = true;
+			const err = validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+			if (err) {
+				errorCategoriaOtra = err;
+				return;
+			}
+		}
+
+		let categoriasFinales = mockCategorias.filter(cat => 
+			cat.id_categoria !== undefined && 
+			categoriasMarcadas.has(cat.id_categoria) &&
+			cat.id_categoria !== idCategoriaOtra // Excluir "Otra" de las finales
 		);
+
+		// Si seleccionó "Otra", agregar la categoría personalizada
+		if (seleccionoOtra && categoriaOtraDescripcion.trim()) {
+			categoriasFinales = [
+				...categoriasFinales,
+				{
+					id_categoria: undefined, // Sin ID porque es personalizada
+					descripcion: categoriaOtraDescripcion.trim()
+				}
+			];
+		}
+
 		console.log('Guardando categorías:', categoriasFinales);
 		dispatch('guardar', categoriasFinales);
 		cerrar();
@@ -123,10 +175,9 @@
 							</div>
 							
 							<!-- Icono -->
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-xl">
-								{obtenerIconoCategoria(categoria.descripcion)}
-							</div>
-							
+						<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+							<Icon src={obtenerIconoCategoria(categoria.descripcion)} class="h-5 w-5 text-blue-600" />
+						</div>
 							<!-- Nombre de la categoría -->
 							<div class="flex-1">
 								<span class="font-medium text-gray-900">{categoria.descripcion}</span>
@@ -135,6 +186,30 @@
 					{/each}
 				</div>
 			</div>
+
+			<!-- Campo para "Otra" categoría -->
+			{#if seleccionoOtra}
+				<div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+					<label for="categoria-otra" class="mb-2 block text-sm font-medium text-gray-900">
+						Especificá la categoría:
+					</label>
+					<input
+						type="text"
+						id="categoria-otra"
+						bind:value={categoriaOtraDescripcion}
+						on:input={() => (categoriaOtraTouched = true)}
+						on:blur={() => (categoriaOtraTouched = true)}
+						placeholder="Ej: Derechos humanos, Deportes, etc."
+						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 {errorCategoriaOtra ? 'border-red-500 bg-red-50' : 'bg-white'}"
+					/>
+					{#if errorCategoriaOtra}
+						<p class="mt-2 text-sm text-red-600">{errorCategoriaOtra}</p>
+					{/if}
+					<p class="mt-2 text-xs text-gray-600">
+						Ingresá una categoría que no esté en la lista. Debe tener al menos 3 caracteres y no puede repetirse.
+					</p>
+				</div>
+			{/if}
 
 			<!-- Contador de seleccionadas -->
 			<div class="mb-6 rounded-lg bg-blue-50 p-3">
@@ -155,7 +230,8 @@
 				<button
 					type="button"
 					on:click={guardar}
-					class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					disabled={seleccionoOtra && errorCategoriaOtra !== ''}
+					class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					Guardar Cambios
 				</button>

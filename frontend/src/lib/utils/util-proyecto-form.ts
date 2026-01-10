@@ -287,3 +287,30 @@ export function validarPiso(piso: string): string | null {
 	if (!/^[a-zA-Z0-9\s]+$/.test(v)) return 'Caracteres inválidos';
 	return null;
 }
+
+export function crearValidadorCategoria(categoriasExistentes: string[]) {
+	const categoriasKeys = categoriasExistentes.map((c) => toKey(c)).filter(Boolean);
+
+	function esCategoriaRepetida(s: string): boolean {
+		const key = toKey(s);
+		return categoriasKeys.includes(key);
+	}
+
+	function validarCategoriaOtraDescripcion(s: string): string | null {
+		if (s == null) return 'Este campo es obligatorio';
+		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
+		if (v.length < 3) return 'Debe tener al menos 3 caracteres.';
+		if (v.length > 60) return 'Máximo 60 caracteres.';
+		const ban = ['n/a', 'na', '-', 'otro', 'otra', 'ninguna', 'ninguno', 'no sé', 'nose'];
+		if (ban.includes(v.toLowerCase())) return 'Por favor, especificá una categoría válida.';
+		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra.';
+		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
+		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,''/&()-]+$/u.test(v))
+			return 'Usá solo letras, números y signos comunes';
+		if (esCategoriaRepetida(v))
+			return 'Esa categoría ya existe en el catálogo. Elegíla de la lista.';
+		return null;
+	}
+
+	return { validarCategoriaOtraDescripcion, esCategoriaRepetida };
+}
