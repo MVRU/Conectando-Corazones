@@ -17,10 +17,13 @@
 	import { yaReseno, filtrarResenasPorTipo, obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { obtenerColorRol, formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
-	import { ocultarDatoSensible, debeOcultarContacto } from '$lib/utils/util-perfil';
+	import { puedeVerContactos } from '$lib/utils/util-perfil';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
+
+	// Verificar si el usuario actual puede ver los contactos del perfil
+	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Proyectos del usuario
 	$: proyectosUsuario = perfilUsuario.rol === 'institucion'
@@ -141,18 +144,6 @@
 		? yaReseno($usuarioStore.username || '', mockTestimonios, 'usuario', perfilUsuario.id_usuario)
 		: false;
 	$: reseñasUsuario = filtrarResenasPorTipo(mockTestimonios, 'usuario', perfilUsuario.id_usuario);
-
-	// Función para obtener el valor de contacto (oculto si es perfil de otro usuario)
-	function obtenerValorContacto(contacto: { tipo_contacto: string; valor: string }): string {
-		if (esMiPerfil) {
-			return contacto.valor;
-		}
-		// Ocultar datos sensibles en perfiles de otros usuarios
-		if (debeOcultarContacto(contacto.tipo_contacto)) {
-			return ocultarDatoSensible(contacto.valor, contacto.tipo_contacto);
-		}
-		return contacto.valor;
-	}
 </script>
 
 <main class="min-h-screen bg-gray-50">
@@ -233,27 +224,47 @@
 									</svg>
 									<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Información de Contacto</span>
 								</div>
-								<div class="ml-7 space-y-3">
-									{#each (perfilUsuario.contactos ?? []).slice(0, 5) as c}
-										<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-3">
-											<svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={obtenerIconoContacto(c.tipo_contacto)} />
+								{#if puedeVerContactosPerfil}
+									<div class="ml-7 space-y-3">
+										{#each (perfilUsuario.contactos ?? []).slice(0, 5) as c}
+											<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-3">
+												<svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={obtenerIconoContacto(c.tipo_contacto)} />
+												</svg>
+												<div class="flex-1">
+													<div class="text-xs font-medium uppercase tracking-wide text-gray-500">
+														{c.tipo_contacto === 'email' ? 'Correo Electrónico' : 
+														 c.tipo_contacto === 'telefono' ? 'Teléfono' :
+														 c.tipo_contacto === 'web' ? 'Sitio Web' :
+														 c.tipo_contacto === 'red_social' ? 'Red Social' : c.tipo_contacto}
+														{#if c.etiqueta}
+															<span class="ml-1 text-gray-400">({formatearEtiquetaContacto(c.etiqueta)})</span>
+														{/if}
+													</div>
+												<p class="mt-0.5 text-sm font-medium text-gray-900">{c.valor}</p>
+												</div>
+											</div>
+										{/each}
+									</div>
+								{:else}
+									<div class="ml-7 rounded-lg bg-gray-50 p-4">
+										<div class="flex items-start gap-3">
+											<svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
 											</svg>
 											<div class="flex-1">
-												<div class="text-xs font-medium uppercase tracking-wide text-gray-500">
-													{c.tipo_contacto === 'email' ? 'Correo Electrónico' : 
-													 c.tipo_contacto === 'telefono' ? 'Teléfono' :
-													 c.tipo_contacto === 'web' ? 'Sitio Web' :
-													 c.tipo_contacto === 'red_social' ? 'Red Social' : c.tipo_contacto}
-													{#if c.etiqueta}
-														<span class="ml-1 text-gray-400">({formatearEtiquetaContacto(c.etiqueta)})</span>
+												<p class="text-sm font-medium text-gray-700">Información de contacto privada</p>
+												<p class="mt-1 text-xs text-gray-500">
+													{#if perfilUsuario.rol === 'institucion'}
+														Para ver los contactos de esta institución, debés tener al menos una colaboración aprobada en uno de sus proyectos.
+													{:else}
+														Para ver los contactos de este usuario, debés haber colaborado juntos en un mismo proyecto.
 													{/if}
-												</div>
-												<p class="mt-0.5 text-sm font-medium text-gray-900">{obtenerValorContacto(c)}</p>
+												</p>
 											</div>
 										</div>
-									{/each}
-								</div>
+									</div>
+								{/if}
 							</div>
 						</div>
 
