@@ -138,6 +138,10 @@ export const mockUsuarios = {
 			mockCategorias[16], // Salud
 			mockCategorias[0] // Alimentación y nutrición
 		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Especie' }
+		],
 
 		consentimientos: [
 			{
@@ -176,6 +180,10 @@ export const mockUsuarios = {
 			mockCategorias[2], // Cultura y arte (índice 2)
 			mockCategorias[9] // Liderazgo (índice 9)
 		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Especie' },
+			{ descripcion: 'Monetaria' }
+		],
 
 		consentimientos: [
 			{
@@ -210,6 +218,11 @@ export const mockUsuarios = {
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Especie' },
+			{ descripcion: 'Monetaria' }
 		],
 
 		consentimientos: [
@@ -262,6 +275,9 @@ export const mockUsuarios = {
 				etiqueta: 'principal'
 			}
 		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Monetaria' }
+		],
 
 		consentimientos: [
 			{
@@ -298,6 +314,10 @@ export const mockUsuarios = {
 				etiqueta: 'principal'
 			}
 		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' }
+		],
+
 		consentimientos: [
 			{
 				id_consentimiento: 18,
