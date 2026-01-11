@@ -16,6 +16,7 @@ export interface Usuario {
 	rol: 'institucion' | 'colaborador' | 'administrador';
 	url_foto: string;
 	estado_verificacion?: string; // ! Cálculo para simplificar
+	descripcion?: string;
 
 	// * Relaciones
 	// -*- FKs para create/update

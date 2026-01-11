@@ -58,6 +58,15 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+	export let valoresIniciales: Contacto[] = [];
+
+// Si vienen valores iniciales y el formulario está "vacío", precargamos
+$: if (valoresIniciales && valoresIniciales.length > 0) {
+    const formularioVacio = contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+    if (formularioVacio) {
+        contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+    }
+}
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
