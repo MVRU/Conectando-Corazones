@@ -4,6 +4,8 @@
 	import { TIPOS_PARTICIPACION_DESCRIPCION } from '$lib/types/TipoParticipacion';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	export let mostrar: boolean = false;
 	export let tiposSeleccionados: TipoParticipacion[] = [];
@@ -14,6 +16,7 @@
 	}>();
 
 	let tiposMarcados: Set<TipoParticipacionDescripcion> = new Set();
+	let guardando = false;
 
 	// Inicializar tipos marcados cuando cambian los seleccionados
 	$: if (tiposSeleccionados && tiposSeleccionados.length > 0) {
@@ -40,12 +43,24 @@
 	}
 
 	function guardar() {
-		const tiposFinales: TipoParticipacion[] = Array.from(tiposMarcados).map(descripcion => ({
-			descripcion
-		}));
-		console.log('Guardando tipos de participación:', tiposFinales);
-		dispatch('guardar', tiposFinales);
-		cerrar();
+		guardando = true;
+
+		setTimeout(() => {
+			const tiposFinales: TipoParticipacion[] = Array.from(tiposMarcados).map(descripcion => ({
+				descripcion
+			}));
+			console.log('Guardando tipos de participación:', tiposFinales);
+			dispatch('guardar', tiposFinales);
+			
+			toastStore.show({
+				variant: 'success',
+				title: 'Cambios guardados',
+				message: 'Tus tipos de participacion favoritos se guardaron correctamente.'
+			});
+			
+			guardando = false;
+			cerrar();
+		}, 500);
 	}
 
 	function abrir() {
@@ -138,23 +153,25 @@
 			</div>
 
 			<!-- Botones de acción -->
-			<div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-				<button
-					type="button"
-					on:click={cerrar}
-					class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					Cancelar
-				</button>
-				<button
-					type="button"
-					on:click={guardar}
-					disabled={tiposMarcados.size === 0}
-					class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
-				>
-					Guardar Cambios
-				</button>
-			</div>
+		<div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				size="md"
+				type="button"
+				on:click={cerrar}
+				customClass="w-full md:w-auto"
+			/>
+			<Button
+				label={guardando ? 'Guardando...' : 'Continuar'}
+				variant="primary"
+				size="md"
+				type="button"
+				disabled={tiposMarcados.size === 0 || guardando}
+				on:click={guardar}
+				customClass="w-full md:w-auto"
+			/>
 		</div>
 	</div>
+</div>
 {/if}

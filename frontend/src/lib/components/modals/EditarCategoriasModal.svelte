@@ -4,6 +4,8 @@
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	export let mostrar: boolean = false;
 	export let categoriasSeleccionadas: Categoria[] = [];
@@ -17,6 +19,7 @@
 	let categoriaOtraDescripcion = '';
 	let errorCategoriaOtra = '';
 	let categoriaOtraTouched = false;
+	let guardando = false;
 
 	const { validarCategoriaOtraDescripcion, esCategoriaRepetida } = crearValidadorCategoria(
 		mockCategorias.map((c) => c.descripcion || '')
@@ -87,26 +90,38 @@
 			}
 		}
 
-		let categoriasFinales = mockCategorias.filter(cat => 
-			cat.id_categoria !== undefined && 
-			categoriasMarcadas.has(cat.id_categoria) &&
-			cat.id_categoria !== idCategoriaOtra // Excluir "Otra" de las finales
-		);
+		guardando = true;
 
-		// Si seleccionó "Otra", agregar la categoría personalizada
-		if (seleccionoOtra && categoriaOtraDescripcion.trim()) {
-			categoriasFinales = [
-				...categoriasFinales,
-				{
-					id_categoria: undefined, // Sin ID porque es personalizada
-					descripcion: categoriaOtraDescripcion.trim()
-				}
-			];
-		}
+		setTimeout(() => {
+			let categoriasFinales = mockCategorias.filter(cat => 
+				cat.id_categoria !== undefined && 
+				categoriasMarcadas.has(cat.id_categoria) &&
+				cat.id_categoria !== idCategoriaOtra // Excluir "Otra" de las finales
+			);
 
-		console.log('Guardando categorías:', categoriasFinales);
-		dispatch('guardar', categoriasFinales);
-		cerrar();
+			// Si seleccionó "Otra", agregar la categoría personalizada
+			if (seleccionoOtra && categoriaOtraDescripcion.trim()) {
+				categoriasFinales = [
+					...categoriasFinales,
+					{
+						id_categoria: undefined, // Sin ID porque es personalizada
+						descripcion: categoriaOtraDescripcion.trim()
+					}
+				];
+			}
+
+			console.log('Guardando categorías:', categoriasFinales);
+			dispatch('guardar', categoriasFinales);
+			
+			toastStore.show({
+				variant: 'success',
+				title: 'Cambios guardados',
+				message: 'Tus categorías favoritas se guardaron correctamente.'
+			});
+			
+			guardando = false;
+			cerrar();
+		}, 500);
 	}
 
 	function abrir() {
@@ -219,23 +234,25 @@
 			</div>
 
 			<!-- Botones de acción -->
-			<div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-				<button
-					type="button"
-					on:click={cerrar}
-					class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-				>
-					Cancelar
-				</button>
-				<button
-					type="button"
-					on:click={guardar}
-					disabled={seleccionoOtra && errorCategoriaOtra !== ''}
-					class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					Guardar Cambios
-				</button>
-			</div>
+		<div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				size="md"
+				type="button"
+				on:click={cerrar}
+				customClass="w-full md:w-auto"
+			/>
+			<Button
+				label={guardando ? 'Guardando...' : 'Continuar'}
+				variant="primary"
+				size="md"
+				type="button"
+				disabled={seleccionoOtra && errorCategoriaOtra !== '' || guardando}
+				on:click={guardar}
+				customClass="w-full md:w-auto"
+			/>
 		</div>
 	</div>
+</div>
 {/if}

@@ -148,8 +148,8 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 			dispatch('submit', contactos);
 			toastStore.show({
 				variant: 'success',
-				title: 'Contactos guardados',
-				message: 'Guardamos tus formas de contacto. Podés sumar o editarlas luego desde tu panel.'
+				title: 'Cambios guardados',
+				message: 'Tu descripción y formas de contacto se actualizaron correctamente.'
 			});
 		}, 800);
 	}
@@ -284,6 +284,7 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 				customClass="w-full md:w-auto"
 			/>
 		{/if}
+		<slot name="botones-extra" />
 		<Button
 			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"

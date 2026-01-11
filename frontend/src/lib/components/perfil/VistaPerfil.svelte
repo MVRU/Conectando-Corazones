@@ -4,6 +4,7 @@
 	import type { EditarPerfilForm } from '$lib/types/forms/EditarPerfilForm';
 	import { crearFormularioVacio } from '$lib/types/forms/EditarPerfilForm';
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
@@ -688,15 +689,38 @@
 				</div>
 
 				<!-- Información de contacto (múltiples) -->
-				<div class="border-b border-gray-200 pb-6">
-					<h4 class="text-lg font-medium text-gray-900 mb-4">Métodos de Contacto</h4>
-					<MetodosContactoForm
-						valoresIniciales={datosEdicion.contactos}
-						on:submit={(e) => {
-							datosEdicion.contactos = e.detail;
-						}}
-					/>
-				</div>		</form>
+			<div class="pb-6">
+				<h4 class="text-lg font-medium text-gray-900 mb-4">Métodos de Contacto</h4>
+				<MetodosContactoForm
+					valoresIniciales={datosEdicion.contactos}
+					mostrarOmitir={false}
+					on:submit={(e) => {
+						datosEdicion.contactos = e.detail;
+						// Actualizar el store con toda la información del modal
+						if ($usuarioStore) {
+							authActions.updateUsuario({
+								...$usuarioStore,
+								url_foto: datosEdicion.url_foto,
+								descripcion: datosEdicion.descripcion,
+								contactos: e.detail
+							} as any);
+						}
+						cerrarModalEdicion();
+					}}
+				>
+					<svelte:fragment slot="botones-extra">
+						<Button
+							label="Cancelar"
+							variant="secondary"
+							size="md"
+							type="button"
+							on:click={cerrarModalEdicion}
+							customClass="w-full md:w-auto"
+						/>
+					</svelte:fragment>
+				</MetodosContactoForm>
+			</div>
+		</form>
 	</div>
 </div>
 {/if}
