@@ -19,8 +19,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4, 
-		evidencia_id: 1,
-		proyecto_id: 1
+		evidencia_id: 1
 	},
 	{
 		id_archivo: 2,
@@ -29,8 +28,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4, 
-		evidencia_id: 1,
-		proyecto_id: 1
+		evidencia_id: 1
 	},
 
 	// Donación de 7 libros infantiles
@@ -41,8 +39,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-20'),
 		usuario_id: 5, 
-		evidencia_id: 2,
-		proyecto_id: 1
+		evidencia_id: 2
 	},
 
 	// === EVIDENCIAS DE SALIDA - Institución mostrando recepción y uso ===
@@ -55,8 +52,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2, 
-		evidencia_id: 3,
-		proyecto_id: 1
+		evidencia_id: 3
 	},
 	{
 		id_archivo: 5,
@@ -65,8 +61,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2, 
-		evidencia_id: 3,
-		proyecto_id: 1
+		evidencia_id: 3
 	},
 
 	// EVIDENCIAS DE ENTRADA - Voluntariado docente 
@@ -78,8 +73,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-18'),
 		usuario_id: 8, 
-		evidencia_id: 4,
-		proyecto_id: 1
+		evidencia_id: 4
 	},
 	{
 		id_archivo: 7,
@@ -88,8 +82,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-20'),
 		usuario_id: 4, // María González - colaborador
-		evidencia_id: 4,
-		proyecto_id: 1
+		evidencia_id: 4
 	},
 	{
 		id_archivo: 8,
@@ -98,8 +91,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-22'),
 		usuario_id: 6, // Patricia Morales (Fundación Manos Unidas) - colaborador
-		evidencia_id: 4,
-		proyecto_id: 1
+		evidencia_id: 4
 	},
 
 	//  EVIDENCIAS DE SALIDA - Docentes trabajando en el taller 
@@ -111,8 +103,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-04-15'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 5,
-		proyecto_id: 1
+		evidencia_id: 5
 	},
 
 	// --- PROYECTO 4: "Equipamiento Médico Hospitalario" (Hospital Central - id: 9) ---
@@ -127,8 +118,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-04-15'),
 		usuario_id: 7,
-		evidencia_id: 5,
-		proyecto_id: 4
+		evidencia_id: 5
 	},
 
 	{
@@ -138,8 +128,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-04-20'),
 		usuario_id: 8, 
-		evidencia_id: 6,
-		proyecto_id: 4
+		evidencia_id: 6
 	},
 
 	// === EVIDENCIAS DE SALIDA - Hospital mostrando compra de equipamiento ===
@@ -152,8 +141,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-05-10'),
 		usuario_id: 9, 
-		evidencia_id: 7,
-		proyecto_id: 4
+		evidencia_id: 7
 	},
 	{
 		id_archivo: 13,
@@ -162,8 +150,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9, 
-		evidencia_id: 7,
-		proyecto_id: 4
+		evidencia_id: 7
 	},
 	{
 		id_archivo: 14,
@@ -172,8 +159,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9, 
-		evidencia_id: 7,
-		proyecto_id: 4
+		evidencia_id: 7
 	},
 
 	// --- PROYECTO 9: "Luz para aprender" (Escuela Esperanza - id: 2) ---
@@ -190,8 +176,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-01'),
 		usuario_id: 10, 
-		evidencia_id: 8,
-		proyecto_id: 9
+		evidencia_id: 8
 	},
 	{
 		id_archivo: 16,
@@ -200,8 +185,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-05'),
 		usuario_id: 10, 
-		evidencia_id: 8,
-		proyecto_id: 9
+		evidencia_id: 8
 	},
 
 	//  Donación de luminarias LED
@@ -212,8 +196,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-10'),
 		usuario_id: 4, 
-		evidencia_id: 9,
-		proyecto_id: 9
+		evidencia_id: 9
 	},
 	{
 		id_archivo: 18,
@@ -222,8 +205,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-10'),
 		usuario_id: 4, 
-		evidencia_id: 9,
-		proyecto_id: 9
+		evidencia_id: 9
 	},
 
 	// === EVIDENCIAS DE SALIDA - Institución mostrando instalación ===
@@ -236,8 +218,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-04-20'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 10,
-		proyecto_id: 9
+		evidencia_id: 10
 	},
 	{
 		id_archivo: 20,
@@ -246,8 +227,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-04-25'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 10,
-		proyecto_id: 9
+		evidencia_id: 10
 	},
 
 	// Escuela Esperanza (id: 2) - Instalación de luminarias LED
@@ -258,8 +238,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-05-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 11,
-		proyecto_id: 9
+		evidencia_id: 11
 	},
 	{
 		id_archivo: 22,
@@ -268,8 +247,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'video/mp4',
 		created_at: new Date('2025-05-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 11,
-		proyecto_id: 9
+		evidencia_id: 11
 	},
 
 	// --- PROYECTO 22: "Apoyo escolar en contraturno" (Escuela Esperanza) ---
@@ -282,8 +260,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-09-22'),
 		usuario_id: 4, // Colaborador
-		evidencia_id: 13,
-		proyecto_id: 22
+		evidencia_id: 13
 	},
 	{
 		id_archivo: 24,
@@ -292,8 +269,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-09-22'),
 		usuario_id: 4, // Colaborador
-		evidencia_id: 13,
-		proyecto_id: 22
+		evidencia_id: 13
 	},
 
 	// Evidencia 14: Clases de apoyo en marcha (SALIDA)
@@ -304,8 +280,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-10-15'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 14,
-		proyecto_id: 22
+		evidencia_id: 14
 	},
 	{
 		id_archivo: 26,
@@ -314,8 +289,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-10-15'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 14,
-		proyecto_id: 22
+		evidencia_id: 14
 	},
 
 	// Evidencia 15: Donación de útiles escolares (ENTRADA)
@@ -326,8 +300,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-10-05'),
 		usuario_id: 5, // Colaborador
-		evidencia_id: 15,
-		proyecto_id: 22
+		evidencia_id: 15
 	},
 	{
 		id_archivo: 28,
@@ -336,8 +309,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-10-05'),
 		usuario_id: 5, // Colaborador
-		evidencia_id: 15,
-		proyecto_id: 22
+		evidencia_id: 15
 	},
 
 	// Evidencia 16: Útiles escolares en uso (SALIDA)
@@ -348,8 +320,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-11-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 16,
-		proyecto_id: 22
+		evidencia_id: 16
 	},
 	{
 		id_archivo: 30,
@@ -358,8 +329,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-11-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 16,
-		proyecto_id: 22
+		evidencia_id: 16
 	}
 ];
 
@@ -373,10 +343,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 1: Donación de libros (ENTRADA - colaborador)
 	{
 		id_evidencia: 1,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-15'),
 		archivos_ids: [1, 2],
 		id_participacion_permitida: 1, // 20 libros (especie)
-		id_proyecto: 1,
 		archivos: [mockArchivos[0], mockArchivos[1]],
 		participacion_permitida: {
 			id_participacion_permitida: 1,
@@ -392,10 +362,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 2: Donación de libros (ENTRADA - colaborador)
 	{
 		id_evidencia: 2,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-20'),
 		archivos_ids: [3],
 		id_participacion_permitida: 1, // 20 libros (especie)
-		id_proyecto: 1,
 		archivos: [mockArchivos[2]],
 		participacion_permitida: {
 			id_participacion_permitida: 1,
@@ -409,14 +379,12 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// Evidencia 3: Recepción y catalogación de libros (SALIDA - institución)
-	// Esta evidencia de salida referencia a las evidencias de entrada (1 y 2)
 	{
 		id_evidencia: 3,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-04-10'),
 		archivos_ids: [4, 5],
-		evidencias_entradas_ids: [1, 2], // Referencias a las donaciones de María y Juan
 		id_participacion_permitida: 1, // 20 libros (especie)
-		id_proyecto: 1,
 		archivos: [mockArchivos[3], mockArchivos[4]],
 		participacion_permitida: {
 			id_participacion_permitida: 1,
@@ -432,10 +400,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 4: Inscripción de docentes voluntarias (ENTRADA - colaboradores)
 	{
 		id_evidencia: 4,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-18'),
 		archivos_ids: [6, 7, 8],
 		id_participacion_permitida: 2, // 10 docentes voluntarios
-		id_proyecto: 1,
 		archivos: [mockArchivos[5], mockArchivos[6], mockArchivos[7]],
 		participacion_permitida: {
 			id_participacion_permitida: 2,
@@ -451,11 +419,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 5: Docentes trabajando en taller (SALIDA - institución)
 	{
 		id_evidencia: 5,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-04-15'),
 		archivos_ids: [9],
-		evidencias_entradas_ids: [4], // Referencia a las inscripciones de las docentes
 		id_participacion_permitida: 2, // 10 docentes voluntarios
-		id_proyecto: 1,
 		archivos: [mockArchivos[8]],
 		participacion_permitida: {
 			id_participacion_permitida: 2,
@@ -473,10 +440,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 6: Donación monetaria 
 	{
 		id_evidencia: 6,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-04-15'),
 		archivos_ids: [8],
 		id_participacion_permitida: 4, // $500,000 ARS (monetaria)
-		id_proyecto: 4,
 		archivos: [mockArchivos[7]],
 		participacion_permitida: {
 			id_participacion_permitida: 4,
@@ -492,10 +459,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 7: Donación monetaria 
 	{
 		id_evidencia: 7,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-04-20'),
 		archivos_ids: [11],
 		id_participacion_permitida: 4, // $500,000 ARS (monetaria)
-		id_proyecto: 4,
 		archivos: [mockArchivos[10]],
 		participacion_permitida: {
 			id_participacion_permitida: 4,
@@ -509,14 +476,12 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// Evidencia 8: Compra de equipamiento médico (SALIDA - institución)
-	// Esta evidencia de salida referencia a las donaciones monetarias (6 y 7)
 	{
 		id_evidencia: 8,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-05-10'),
 		archivos_ids: [12, 13, 14],
-		evidencias_entradas_ids: [6, 7], 
 		id_participacion_permitida: 4, 
-		id_proyecto: 4,
 		archivos: [mockArchivos[11], mockArchivos[12], mockArchivos[13]],
 		participacion_permitida: {
 			id_participacion_permitida: 4,
@@ -534,10 +499,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 9: Donación de cableado eléctrico 
 	{
 		id_evidencia: 9,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-01'),
 		archivos_ids: [15, 16],
 		id_participacion_permitida: 8, 
-		id_proyecto: 9,
 		archivos: [mockArchivos[14], mockArchivos[15]],
 		participacion_permitida: {
 			id_participacion_permitida: 8,
@@ -553,10 +518,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 10: Donación de luminarias LED 
 	{
 		id_evidencia: 10,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-10'),
 		archivos_ids: [17, 18],
 		id_participacion_permitida: 9, 
-		id_proyecto: 9,
 		archivos: [mockArchivos[16], mockArchivos[17]],
 		participacion_permitida: {
 			id_participacion_permitida: 9,
@@ -570,14 +535,12 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// Evidencia 11: Instalación del nuevo cableado (SALIDA - institución)
-	// Esta evidencia de salida referencia a la donación de cables (evidencia 9)
 	{
 		id_evidencia: 11,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-04-20'),
 		archivos_ids: [19, 20],
-		evidencias_entradas_ids: [9], 
 		id_participacion_permitida: 8, 
-		id_proyecto: 9,
 		archivos: [mockArchivos[18], mockArchivos[19]],
 		participacion_permitida: {
 			id_participacion_permitida: 8,
@@ -591,14 +554,12 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// Evidencia 12: Instalación de luminarias LED (SALIDA - institución)
-	// Esta evidencia de salida referencia a la donación de luminarias (evidencia 10)
 	{
 		id_evidencia: 12,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-05-10'),
 		archivos_ids: [21, 22],
-		evidencias_entradas_ids: [10], 
 		id_participacion_permitida: 9, 
-		id_proyecto: 9,
 		archivos: [mockArchivos[20], mockArchivos[21]],
 		participacion_permitida: {
 			id_participacion_permitida: 9,
@@ -616,11 +577,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 13: Docentes voluntarios confirmándose (ENTRADA - colaboradores)
 	{
 		id_evidencia: 13,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-09-22'),
 		archivos_ids: [23, 24],
-		evidencias_entradas_ids: [],
 		id_participacion_permitida: 36,
-		id_proyecto: 22,
 		archivos: [mockArchivos[22], mockArchivos[23]],
 		participacion_permitida: {
 			id_participacion_permitida: 36,
@@ -636,11 +596,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 14: Clases de apoyo en marcha (SALIDA - institución)
 	{
 		id_evidencia: 14,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-10-15'),
 		archivos_ids: [25, 26],
-		evidencias_entradas_ids: [13],
 		id_participacion_permitida: 36,
-		id_proyecto: 22,
 		archivos: [mockArchivos[24], mockArchivos[25]],
 		participacion_permitida: {
 			id_participacion_permitida: 36,
@@ -656,11 +615,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 15: Donación de útiles escolares (ENTRADA - colaboradores)
 	{
 		id_evidencia: 15,
+		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-10-05'),
 		archivos_ids: [27, 28],
-		evidencias_entradas_ids: [],
 		id_participacion_permitida: 37,
-		id_proyecto: 22,
 		archivos: [mockArchivos[26], mockArchivos[27]],
 		participacion_permitida: {
 			id_participacion_permitida: 37,
@@ -677,11 +635,10 @@ export const mockEvidencias: Evidencia[] = [
 	// Evidencia 16: Útiles escolares en uso (SALIDA - institución)
 	{
 		id_evidencia: 16,
+		tipo_evidencia: 'salida',
 		created_at: new Date('2025-11-10'),
 		archivos_ids: [29, 30],
-		evidencias_entradas_ids: [15],
 		id_participacion_permitida: 37,
-		id_proyecto: 22,
 		archivos: [mockArchivos[28], mockArchivos[29]],
 		participacion_permitida: {
 			id_participacion_permitida: 37,

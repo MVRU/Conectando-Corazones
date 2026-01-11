@@ -48,7 +48,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [1, 2],
 		institucion_id: 2,
-		evidencia_ids: [1],
 		solicitud_finalizacion_ids: [1],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
@@ -87,7 +86,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [3],
 		institucion_id: 11,
-		evidencia_ids: [2],
 		solicitud_finalizacion_ids: [2],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -136,7 +134,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [4],
 		institucion_id: 3,
-		evidencia_ids: [3],
 		solicitud_finalizacion_ids: [3],
 		estado: 'en_revision',
 		participacion_permitida: [
@@ -164,7 +161,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [5],
 		institucion_id: 9,
-		evidencia_ids: [4],
 		solicitud_finalizacion_ids: [4],
 		estado: 'en_auditoria',
 		participacion_permitida: [
@@ -193,7 +189,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [6],
 		institucion_id: 2,
-		evidencia_ids: [5],
 		solicitud_finalizacion_ids: [5],
 		estado: 'cancelado',
 		participacion_permitida: [
@@ -221,7 +216,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [7],
 		institucion_id: 11,
-		evidencia_ids: [6],
 		solicitud_finalizacion_ids: [6],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -250,7 +244,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [8],
 		institucion_id: 14,
-		evidencia_ids: [7],
 		solicitud_finalizacion_ids: [7],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -280,7 +273,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [9],
 		institucion_id: 15,
-		evidencia_ids: [8],
 		solicitud_finalizacion_ids: [8],
 		estado: 'completado',
 		participacion_permitida: [
@@ -307,7 +299,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [10],
 		institucion_id: 2,
-		evidencia_ids: [9],
 		solicitud_finalizacion_ids: [9],
 		estado: 'completado',
 		participacion_permitida: [
@@ -345,7 +336,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 2,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
@@ -392,7 +382,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 6,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
@@ -430,7 +419,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 13,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -468,7 +456,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 17,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'cancelado',
 		participacion_permitida: [
@@ -506,7 +493,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [],
 		institucion_id: 16,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -553,7 +539,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 10,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_revision',
 		participacion_permitida: [
@@ -591,7 +576,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 17,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
@@ -629,7 +613,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 13,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -676,7 +659,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 18,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -714,7 +696,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -752,7 +733,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -781,7 +761,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -812,7 +791,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [36, 37],
 		colaboracion_ids: [],
 		institucion_id: 2,
-		evidencia_ids: [13, 14, 15, 16],
 		solicitud_finalizacion_ids: [10, 11, 12],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [

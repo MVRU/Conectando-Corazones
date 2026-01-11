@@ -3,7 +3,6 @@ import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';
 import type { ProyectoUbicacion } from './ProyectoUbicacion';
-import type { Evidencia } from './Evidencia';
 import type { SolicitudFinalizacion } from './SolicitudFinalizacion';
 import type { EstadoDescripcion } from '$lib/types/Estado';
 
@@ -29,7 +28,6 @@ export interface Proyecto {
   participacion_permitida_ids?: number[];
   categoria_ids?: number[];
   colaboracion_ids?: number[];
-  evidencia_ids?: number[];
   solicitud_finalizacion_ids?: number[];
 
   // -*- Objetos expandidos para read
@@ -39,6 +37,5 @@ export interface Proyecto {
   colaboraciones?: Colaboracion[];
   institucion?: Institucion;
   ubicaciones?: ProyectoUbicacion[];
-  evidencias?: Evidencia[];
   solicitudes_finalizacion?: SolicitudFinalizacion[];
 }

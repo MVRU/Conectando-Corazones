@@ -121,10 +121,10 @@
 				);
 				// Separar evidencias de entrada y salida
 				const evidenciasEntrada = evidenciasObjetivo.filter(
-					(e) => !e.evidencias_entradas_ids || e.evidencias_entradas_ids.length === 0
+					(e) => e.tipo_evidencia === 'entrada'
 				);
 				const evidenciasSalida = evidenciasObjetivo.filter(
-					(e) => e.evidencias_entradas_ids && e.evidencias_entradas_ids.length > 0
+					(e) => e.tipo_evidencia === 'salida'
 				);
 
 				return {
