@@ -126,6 +126,7 @@ export const mockUsuarios = {
 		rol: 'colaborador',
 		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
+		descripcion: 'Apasionada por la educación y el arte. Me encanta colaborar en proyectos que promuevan el desarrollo cultural y educativo de la comunidad. Tengo experiencia en organización de eventos y talleres para niños.',
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
 			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },

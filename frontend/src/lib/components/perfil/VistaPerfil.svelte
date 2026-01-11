@@ -19,7 +19,7 @@
 	import { mockTestimonios } from '$lib/mocks/mock-testimonios';
 	import { yaReseno, filtrarResenasPorTipo, obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { obtenerColorRol, formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
-	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
+	import { obtenerIconoCategoria, validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
 	import { puedeVerContactos } from '$lib/utils/util-perfil';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 
@@ -60,6 +60,19 @@
 
 	// Estado para el formulario de edición
 	let datosEdicion: EditarPerfilForm = crearFormularioVacio();
+	let errorDescripcion: string | null = null;
+
+	// Validar descripción en tiempo real
+	$: {
+		if (mostrarModalEdicion) {
+			const desc = datosEdicion.descripcion || '';
+			if (desc.trim().length === 0) {
+				errorDescripcion = null;
+			} else {
+				errorDescripcion = validarDescripcionProyecto(desc, { min: 0, max: 500 });
+			}
+		}
+	}
 
 	function abrirModalEdicion() {
 		if (!esMiPerfil) return;
@@ -69,6 +82,7 @@
 			nombre: perfilUsuario.nombre || '',
 			apellido: perfilUsuario.apellido || '',
 			url_foto: perfilUsuario.url_foto || '',
+			descripcion: perfilUsuario.descripcion || '',
 			contactos: perfilUsuario.contactos ?? []
 		};
 		mostrarModalEdicion = true;
@@ -79,6 +93,27 @@
 	}
 
 	function handleGuardarPerfil() {
+		// Validar descripción antes de guardar
+		if (datosEdicion.descripcion && datosEdicion.descripcion.trim().length > 0) {
+			const error = validarDescripcionProyecto(datosEdicion.descripcion, { min: 0, max: 500 });
+			if (error) {
+				errorDescripcion = error;
+				return;
+			}
+		}
+		
+		// Actualizar el usuario en el store
+		if ($usuarioStore) {
+			authActions.updateUsuario({
+				...$usuarioStore,
+				nombre: datosEdicion.nombre,
+				apellido: datosEdicion.apellido,
+				url_foto: datosEdicion.url_foto,
+				descripcion: datosEdicion.descripcion,
+				contactos: datosEdicion.contactos
+			} as any);
+		}
+		
 		// Aquí iría la llamada a la API para guardar todos los datos del perfil
 		console.log('Perfil guardado:', datosEdicion);
 		cerrarModalEdicion();
@@ -218,8 +253,11 @@
 							<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {obtenerColorRol(perfilUsuario.rol)}">
 								{perfilUsuario.rol}
 							</span>
-						</div>
-					</div>
+						</div>					
+					<!-- Descripción -->
+					{#if perfilUsuario.descripcion}
+						<p class="mt-4 text-gray-700 leading-relaxed">{perfilUsuario.descripcion}</p>
+					{/if}					</div>
 				</div>
 
 				<!-- Botón de editar solo en perfil propio -->
@@ -617,6 +655,35 @@
 								/>
 							{/if}
 						</div>
+					</div>
+				</div>
+
+				<!-- Descripción -->
+				<div class="border-b border-gray-200 pb-6">
+					<h4 class="text-lg font-medium text-gray-900 mb-4">Descripción</h4>
+					<div>
+						<label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">
+							Cuéntanos sobre {perfilUsuario.rol === 'institucion' ? 'tu institución' : 'vos'}
+						</label>
+						<textarea
+							id="descripcion"
+							bind:value={datosEdicion.descripcion}
+							rows="4"
+						maxlength="500"
+						placeholder="{perfilUsuario.rol === 'institucion' ? 'Describe tu institución, misión, valores...' : 'Describe tus intereses, experiencia, motivaciones...'}"
+						class="mt-1 block w-full rounded-lg shadow-sm focus:ring-blue-500 {errorDescripcion ? 'border-red-300 focus:border-red-500' : 'border-gray-300 focus:border-blue-500'}"
+					></textarea>
+					{#if errorDescripcion}
+						<p class="mt-1 flex items-center gap-1 text-sm text-red-600">
+							<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+							</svg>
+							{errorDescripcion}
+						</p>
+					{/if}
+					<p class="mt-1 text-xs {(datosEdicion.descripcion?.length || 0) > 500 ? 'text-red-600' : 'text-gray-500'}">
+						Caracteres: {datosEdicion.descripcion?.length || 0} / 500
+					</p>
 					</div>
 				</div>
 

@@ -5,6 +5,7 @@ export interface EditarPerfilForm {
     nombre: string;
     apellido: string;
     url_foto: string;
+    descripcion: string;
     contactos: Contacto[];
 }
 
@@ -15,6 +16,7 @@ export function crearFormularioVacio(): EditarPerfilForm {
         nombre: '',
         apellido: '',
         url_foto: '',
+        descripcion: '',
         contactos: []
 	};
 }
