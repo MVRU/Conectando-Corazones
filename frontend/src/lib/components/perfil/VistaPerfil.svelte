@@ -612,6 +612,21 @@
 				</div>
 			{/if}
 		</section>
+
+		<!-- Footer: Reportar perfil -->
+		{#if !esMiPerfil && $isAuthenticated}
+			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
+				<p class="text-sm text-gray-500">
+					¿Algo no está bien? 
+					<button 
+						on:click={() => console.log('Reportar perfil:', perfilUsuario.username)}
+						class="text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
+					>
+						Reportar este perfil
+					</button>
+				</p>
+			</div>
+		{/if}
 	</div>
 </main>
 
