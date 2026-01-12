@@ -8,24 +8,24 @@
 		{
 			key: 'evidenciasSuficientes',
 			label:
-				'Para cada objetivo del proyecto, se cargaron evidencias suficientes (ej.: fotos, comprobantes, facturas, documentos).'
+				'Declaro que las evidencias cargadas corresponden a los objetivos definidos del proyecto.'
 		},
 		{
 			key: 'archivosLegibles',
-			label: 'Todos los archivos son legibles, correctos y pertinentes.'
+			label: 'Declaro que los archivos adjuntos son legibles, completos y no contienen información falsa o engañosa.'
 		},
 		{
 			key: 'evidenciasRespaldadas',
 			label:
-				'Se revisó que las evidencias respaldan adecuadamente los aportes recibidos de los colaboradores.'
+				'Confirmo que las evidencias presentadas respaldan adecuadamente los aportes realizados por los colaboradores.'
 		},
 		{
 			key: 'noRequiereMasEvidencias',
-			label: 'Se confirma que el proyecto ya no requiere más carga de evidencias.'
+			label: 'Tomo conocimiento de que la revisión del proyecto puede requerir ajustes posteriores.'
 		},
 		{
 			key: 'conformidadRevision',
-			label: 'Se da conformidad para que el sistema lo envíe a revisión de los colaboradores.'
+			label: 'Otorgo conformidad para que el proyecto sea enviado a revisión por parte de los colaboradores.'
 		}
 	];
 
