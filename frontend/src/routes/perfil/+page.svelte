@@ -7,8 +7,8 @@
 		if (!$isAuthenticated || !$usuarioStore) {
 			goto('/iniciar-sesion');
 		} else {
-			// Redirigir al perfil del usuario autenticado usando su ID
-			goto(`/perfil/${$usuarioStore.id_usuario}`);
+			// Redirigir al perfil del usuario autenticado usando su username
+			goto(`/perfil/${$usuarioStore.username}`);
 		}
 	});
 </script>

@@ -10,33 +10,22 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
-	let perfilUsuario: UsuarioCompleto | null = null;
+	let perfilUsuario: UsuarioCompleto | undefined = undefined;
 	let esMiPerfil = false;
 
 	$: {
-		const idParam = $page.params.id;
-		if (idParam) {
-			const idUsuario = parseInt(idParam, 10);
-			if (isNaN(idUsuario)) {
-				throw error(404, 'ID de usuario inválido');
-			}
-
-			// Buscar usuario en los mocks
+		const usernameParam = $page.params.username;
+		if (usernameParam) {
 			const usuarioEncontrado = Object.values(mockUsuarios).find(
-				(u) => u.id_usuario === idUsuario
+				(u) => u.username.toLowerCase() === usernameParam.toLowerCase()
 			);
 
 			if (!usuarioEncontrado) {
 				throw error(404, 'Usuario no encontrado');
 			}
-
-			// Omitir password del usuario encontrado
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { password: _pw, ...usuarioSinPassword } = usuarioEncontrado;
 			perfilUsuario = usuarioSinPassword as UsuarioCompleto;
-
-			// Verificar si es el perfil del usuario autenticado
-			esMiPerfil = $usuarioStore?.id_usuario === idUsuario;
+			esMiPerfil = $usuarioStore?.username.toLowerCase() === usernameParam.toLowerCase();
 		}
 	}
 
@@ -68,4 +57,3 @@
 		</div>
 	</div>
 {/if}
-
