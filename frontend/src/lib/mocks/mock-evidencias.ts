@@ -339,6 +339,160 @@ export const mockArchivos: Archivo[] = [
 		created_at: new Date('2025-11-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 16
+	},
+
+	// --- PROYECTO 15: "Mochilas Solidarias"
+
+	// === EVIDENCIAS DE ENTRADA - Donación de mochilas ===
+	{
+		id_archivo: 31,
+		descripcion: 'Comprobante de donación de 30 mochilas escolares',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fcomprobante_donacion_mochilas_30.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 256000, // ~250 KB
+		created_at: new Date('2026-02-01'),
+		usuario_id: 4, // Colaborador - María González
+		evidencia_id: 17
+	},
+	{
+		id_archivo: 32,
+		descripcion: 'Fotografía de las 30 mochilas donadas (embaladas)',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_donadas_30.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 1843200, // ~1.8 MB
+		created_at: new Date('2026-02-01'),
+		usuario_id: 4, // Colaborador - María González
+		evidencia_id: 17
+	},
+
+	{
+		id_archivo: 33,
+		descripcion: 'Comprobante de donación de 20 mochilas escolares',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fcomprobante_donacion_mochilas_20.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 230400, // ~225 KB
+		created_at: new Date('2026-02-08'),
+		usuario_id: 5, // Colaborador - Luis Martínez
+		evidencia_id: 18
+	},
+	{
+		id_archivo: 34,
+		descripcion: 'Fotografía de las 20 mochilas donadas con etiquetas',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_donadas_20.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 1536000, // ~1.5 MB
+		created_at: new Date('2026-02-08'),
+		usuario_id: 5, // Colaborador - Luis Martínez
+		evidencia_id: 18
+	},
+
+	// === EVIDENCIAS DE SALIDA - Recepción y distribución de mochilas ===
+
+	{
+		id_archivo: 35,
+		descripcion: 'Acta de recepción de las 50 mochilas en depósito escolar',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Facta_recepcion_mochilas.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 307200, // ~300 KB
+		created_at: new Date('2026-02-20'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 19
+	},
+	{
+		id_archivo: 36,
+		descripcion: 'Fotografía de las mochilas almacenadas en la escuela',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_deposito.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 2048000, // ~2 MB
+		created_at: new Date('2026-02-20'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 19
+	},
+	{
+		id_archivo: 37,
+		descripcion: 'Fotografía del acto de entrega de mochilas a los estudiantes',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_entrega_mochilas_alumnos.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 2457600, // ~2.4 MB
+		created_at: new Date('2026-02-25'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 19
+	},
+
+	// === EVIDENCIAS DE ENTRADA - Donación de sets de útiles ===
+
+	{
+		id_archivo: 38,
+		descripcion: 'Factura de compra de 50 sets de útiles escolares completos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffactura_compra_utiles_50.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 358400, // ~350 KB
+		created_at: new Date('2026-02-10'),
+		usuario_id: 7, // Colaborador - Carlos Rodríguez
+		evidencia_id: 20
+	},
+	{
+		id_archivo: 39,
+		descripcion: 'Fotografía de los 50 sets de útiles escolares (embalados por tipo)',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_utiles_embalados.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 1945600, // ~1.9 MB
+		created_at: new Date('2026-02-10'),
+		usuario_id: 7, // Colaborador - Carlos Rodríguez
+		evidencia_id: 20
+	},
+	{
+		id_archivo: 40,
+		descripcion: 'Detalle del contenido de cada set de útiles escolares',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fdetalle_contenido_set_utiles.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 204800, // ~200 KB
+		created_at: new Date('2026-02-10'),
+		usuario_id: 7, // Colaborador - Carlos Rodríguez
+		evidencia_id: 20
+	},
+
+	// === EVIDENCIAS DE SALIDA - Recepción y distribución de sets de útiles ===
+
+	{
+		id_archivo: 41,
+		descripcion: 'Acta de recepción de los 50 sets de útiles en la escuela',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Facta_recepcion_utiles.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 281600, // ~275 KB
+		created_at: new Date('2026-02-22'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 21
+	},
+	{
+		id_archivo: 42,
+		descripcion: 'Fotografía de los sets de útiles organizados para entrega',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_utiles_organizados.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 1740800, // ~1.7 MB
+		created_at: new Date('2026-02-22'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 21
+	},
+	{
+		id_archivo: 43,
+		descripcion: 'Fotografía de niños recibiendo sus kits escolares completos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_ninos_recibiendo_kits.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamaño: 2252800, // ~2.2 MB
+		created_at: new Date('2026-02-28'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 21
+	},
+	{
+		id_archivo: 44,
+		descripcion: 'Listado de estudiantes beneficiarios con firma de padres',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Flistado_beneficiarios_firmas.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamaño: 409600, // ~400 KB
+		created_at: new Date('2026-02-28'),
+		usuario_id: 2, // Escuela Esperanza - institución
+		evidencia_id: 21
 	}
 ];
 
@@ -660,6 +814,103 @@ export const mockEvidencias: Evidencia[] = [
 			especie: 'útiles escolares',
 			objetivo: 40,
 			actual: 38,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// --- PROYECTO 15: "Mochilas Solidarias" (Escuela Esperanza - id: 2) ---
+
+	// Evidencia 17: Donación de 30 mochilas (ENTRADA - colaborador)
+	{
+		id_evidencia: 17,
+		tipo_evidencia: 'entrada',
+		created_at: new Date('2026-02-01'),
+		archivos_ids: [31, 32],
+		id_participacion_permitida: 18, // 50 mochilas
+		archivos: [mockArchivos[30], mockArchivos[31]],
+		participacion_permitida: {
+			id_participacion_permitida: 18,
+			id_proyecto: 15,
+			id_tipo_participacion: 1,
+			unidad_medida: 'mochilas',
+			objetivo: 50,
+			actual: 50,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 18: Donación de 20 mochilas (ENTRADA - colaborador)
+	{
+		id_evidencia: 18,
+		tipo_evidencia: 'entrada',
+		created_at: new Date('2026-02-08'),
+		archivos_ids: [33, 34],
+		id_participacion_permitida: 18, // 50 mochilas
+		archivos: [mockArchivos[32], mockArchivos[33]],
+		participacion_permitida: {
+			id_participacion_permitida: 18,
+			id_proyecto: 15,
+			id_tipo_participacion: 1,
+			unidad_medida: 'mochilas',
+			objetivo: 50,
+			actual: 50,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 19: Recepción y distribución de mochilas (SALIDA - institución)
+	{
+		id_evidencia: 19,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-02-20'),
+		archivos_ids: [35, 36, 37],
+		id_participacion_permitida: 18, // 50 mochilas
+		archivos: [mockArchivos[34], mockArchivos[35], mockArchivos[36]],
+		participacion_permitida: {
+			id_participacion_permitida: 18,
+			id_proyecto: 15,
+			id_tipo_participacion: 1,
+			unidad_medida: 'mochilas',
+			objetivo: 50,
+			actual: 50,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 20: Donación de 50 sets de útiles (ENTRADA - colaborador)
+	{
+		id_evidencia: 20,
+		tipo_evidencia: 'entrada',
+		created_at: new Date('2026-02-10'),
+		archivos_ids: [38, 39, 40],
+		id_participacion_permitida: 29, // 50 sets de útiles
+		archivos: [mockArchivos[37], mockArchivos[38], mockArchivos[39]],
+		participacion_permitida: {
+			id_participacion_permitida: 29,
+			id_proyecto: 15,
+			id_tipo_participacion: 1,
+			unidad_medida: 'sets de útiles',
+			objetivo: 50,
+			actual: 50,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// Evidencia 21: Recepción y distribución de sets de útiles (SALIDA - institución)
+	{
+		id_evidencia: 21,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-02-22'),
+		archivos_ids: [41, 42, 43, 44],
+		id_participacion_permitida: 29, // 50 sets de útiles
+		archivos: [mockArchivos[40], mockArchivos[41], mockArchivos[42], mockArchivos[43]],
+		participacion_permitida: {
+			id_participacion_permitida: 29,
+			id_proyecto: 15,
+			id_tipo_participacion: 1,
+			unidad_medida: 'sets de útiles',
+			objetivo: 50,
+			actual: 50,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 		}
 	}

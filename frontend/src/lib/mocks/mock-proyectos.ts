@@ -538,9 +538,9 @@ const proyectosBase: Proyecto[] = [
 		id_chat_firebase: 1015,
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
-		institucion_id: 10,
+		institucion_id: 2,
 		solicitud_finalizacion_ids: [],
-		estado: 'en_revision',
+		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 18,
@@ -548,7 +548,7 @@ const proyectosBase: Proyecto[] = [
 				id_tipo_participacion: 1,
 				unidad_medida: 'mochilas',
 				objetivo: 50,
-				actual: 45,
+				actual: 50,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
@@ -557,7 +557,7 @@ const proyectosBase: Proyecto[] = [
 				id_tipo_participacion: 1,
 				unidad_medida: 'sets de útiles',
 				objetivo: 50,
-				actual: 60,
+				actual: 50,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			}
 		]
