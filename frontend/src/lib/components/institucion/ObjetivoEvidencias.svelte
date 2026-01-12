@@ -3,6 +3,7 @@
 	import { obtenerNombreUsuario } from '$lib/utils/util-usuarios';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 	import type { Evidencia } from '$lib/types/Evidencia';
+	import ArchivoPreview from './ArchivoPreview.svelte';
 
 	export let objetivo: ParticipacionPermitida;
 	export let evidencias: Evidencia[];
@@ -133,37 +134,11 @@
 									</div>
 
 									{#if evidencia.archivos && evidencia.archivos.length > 0}
-										<ul class="space-y-1.5">
+										<div class="space-y-2">
 											{#each evidencia.archivos as archivo}
-												<li class="flex items-start gap-2 text-sm">
-													<svg
-														class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400"
-														fill="none"
-														stroke="currentColor"
-														stroke-width="2"
-														viewBox="0 0 24 24"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-														/>
-													</svg>
-													<div class="flex-1">
-														<p
-															class="text-gray-700"
-															title="{archivo.descripcion}
-Usuario: {obtenerNombreUsuario(archivo.usuario_id || 0)}"
-													>
-														{archivo.descripcion}
-													</p>
-													<p class="mt-0.5 text-xs text-gray-500">
-														{obtenerNombreUsuario(archivo.usuario_id || 0)}
-														</p>
-													</div>
-												</li>
+												<ArchivoPreview {archivo} />
 											{/each}
-										</ul>
+										</div>
 									{/if}
 								</div>
 							{/each}
@@ -206,37 +181,11 @@ Usuario: {obtenerNombreUsuario(archivo.usuario_id || 0)}"
 									</div>
 
 									{#if evidencia.archivos && evidencia.archivos.length > 0}
-										<ul class="space-y-1.5">
+										<div class="space-y-2">
 											{#each evidencia.archivos as archivo}
-												<li class="flex items-start gap-2 text-sm">
-													<svg
-														class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400"
-														fill="none"
-														stroke="currentColor"
-														stroke-width="2"
-														viewBox="0 0 24 24"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-														/>
-													</svg>
-													<div class="flex-1">
-														<p
-															class="text-gray-700"
-															title="{archivo.descripcion}
-Usuario: {obtenerNombreUsuario(archivo.usuario_id || 0)}"
-														>
-															{archivo.descripcion}
-														</p>
-														<p class="mt-0.5 text-xs text-gray-500">
-															{obtenerNombreUsuario(archivo.usuario_id || 0)}
-														</p>
-													</div>
-												</li>
+												<ArchivoPreview {archivo} />
 											{/each}
-										</ul>
+										</div>
 									{/if}
 								</div>
 							{/each}

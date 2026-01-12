@@ -15,8 +15,9 @@ export const mockArchivos: Archivo[] = [
 	{
 		id_archivo: 1,
 		descripcion: 'Comprobante de donación de 5 libros infantiles',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fcomprobante_donacion_libros_maria.pdf?alt=media',
+		url: 'https://drive.google.com/file/d/1z0OY07s5lmRh3rVzU16KPeA_KEELEPfJ/view?usp=sharing',
 		tipo_mime: 'application/pdf',
+		tamaño: 245760, // ~240 KB
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4, 
 		evidencia_id: 1
@@ -24,8 +25,9 @@ export const mockArchivos: Archivo[] = [
 	{
 		id_archivo: 2,
 		descripcion: 'Fotografía de los libros donados por María',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_libros_donados_maria.jpg?alt=media',
+		url: 'https://drive.google.com/file/d/1l0ltnQ3Ll8hIqObKDiGpNGV9r9JsCMdG/view?usp=sharing',
 		tipo_mime: 'image/jpeg',
+		tamaño: 1024000, // ~1 MB
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4, 
 		evidencia_id: 1
@@ -35,8 +37,9 @@ export const mockArchivos: Archivo[] = [
 	{
 		id_archivo: 3,
 		descripcion: 'Recibo de donación de 7 libros infantiles de aventuras y cuentos',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Frecibo_donacion_libros_juan.pdf?alt=media',
+		url: 'https://drive.google.com/file/d/1z0OY07s5lmRh3rVzU16KPeA_KEELEPfJ/view',
 		tipo_mime: 'application/pdf',
+		tamaño: 307200, // ~300 KB
 		created_at: new Date('2025-03-20'),
 		usuario_id: 5, 
 		evidencia_id: 2
@@ -50,6 +53,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de la biblioteca escolar armada con los libros recibidos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_biblioteca_armada.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
+		tamaño: 1536000, // ~1.5 MB
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2, 
 		evidencia_id: 3
@@ -59,6 +63,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Registro y catálogo de libros recibidos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fregistro_libros_recibidos.xlsx?alt=media',
 		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		tamaño: 51200, // ~50 KB
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2, 
 		evidencia_id: 3
@@ -116,6 +121,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de transferencia bancaria por $50,000',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ftransferencia_bancaria_carlos_50mil.pdf?alt=media',
 		tipo_mime: 'application/pdf',
+		tamaño: 184320, // ~180 KB
 		created_at: new Date('2025-04-15'),
 		usuario_id: 7,
 		evidencia_id: 5
@@ -126,6 +132,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de donación por MercadoPago - $50,000',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Fcomprobante_donacion_mercadopago.pdf?alt=media',
 		tipo_mime: 'application/pdf',
+		tamaño: 163840, // ~160 KB
 		created_at: new Date('2025-04-20'),
 		usuario_id: 8, 
 		evidencia_id: 6
@@ -139,6 +146,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Factura de compra de equipamiento médico para sala de urgencias',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffactura_compra_equipamiento_medico.pdf?alt=media',
 		tipo_mime: 'application/pdf',
+		tamaño: 409600, // ~400 KB
 		created_at: new Date('2025-05-10'),
 		usuario_id: 9, 
 		evidencia_id: 7
@@ -148,6 +156,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía del equipamiento médico instalado en sala de urgencias',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffoto_equipamiento_instalado.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
+		tamaño: 2048000, // ~2 MB
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9, 
 		evidencia_id: 7
@@ -352,7 +361,8 @@ export const mockEvidencias: Evidencia[] = [
 			id_participacion_permitida: 1,
 			id_proyecto: 1,
 			id_tipo_participacion: 1,
-			unidad_medida: 'libros',
+			unidad_medida: 'unidades',
+			especie: 'libros',
 			objetivo: 20,
 			actual: 12,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -371,7 +381,8 @@ export const mockEvidencias: Evidencia[] = [
 			id_participacion_permitida: 1,
 			id_proyecto: 1,
 			id_tipo_participacion: 1,
-			unidad_medida: 'libros',
+			unidad_medida: 'unidades',
+			especie: 'libros',
 			objetivo: 20,
 			actual: 12,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -390,7 +401,8 @@ export const mockEvidencias: Evidencia[] = [
 			id_participacion_permitida: 1,
 			id_proyecto: 1,
 			id_tipo_participacion: 1,
-			unidad_medida: 'libros',
+			unidad_medida: 'unidades',
+			especie: 'libros',
 			objetivo: 20,
 			actual: 12,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
