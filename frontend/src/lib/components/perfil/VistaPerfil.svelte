@@ -263,7 +263,27 @@
 							<!-- Tag del rol con color -->
 							<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {obtenerColorRol(perfilUsuario.rol)}">
 								{perfilUsuario.rol === 'institucion' ? 'Institución' : 'Colaborador'}
-							</span>						
+							</span>
+							
+							<!-- Badge de subtipo -->
+							{#if perfilUsuario.rol === 'institucion'}
+								<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-blue-100 text-blue-800">
+									{(perfilUsuario as Institucion).tipo_institucion}
+								</span>
+							{:else if perfilUsuario.rol === 'colaborador'}
+								{#if (perfilUsuario as any).tipo_colaborador === 'unipersonal'}
+									<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-green-100 text-green-800">
+										Unipersonal
+									</span>
+								{:else if (perfilUsuario as any).tipo_colaborador === 'organizacion'}
+									<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-green-100 text-green-800">
+										{(perfilUsuario as Organizacion).con_fines_de_lucro 
+											? 'Organización con fines de lucro' 
+											: 'Organización sin fines de lucro'}
+									</span>
+								{/if}
+							{/if}
+						
 						<!-- Badge de verificación -->
 						<BadgeVerificacion estado={estadoVerificacion} />						</div>					
 					<!-- Descripción -->
