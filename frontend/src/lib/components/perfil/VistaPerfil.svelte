@@ -23,6 +23,9 @@
 	import { obtenerIconoCategoria, validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
 	import { puedeVerContactos } from '$lib/utils/util-perfil';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
+	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
+	import { determinarEstadoVerificacion, obtenerVerificacionesUsuario } from '$lib/utils/util-verificacion';
+	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
@@ -214,6 +217,13 @@
 		? yaReseno($usuarioStore.username || '', mockTestimonios, 'usuario', perfilUsuario.id_usuario)
 		: false;
 	$: reseñasUsuario = filtrarResenasPorTipo(mockTestimonios, 'usuario', perfilUsuario.id_usuario);
+
+	// Determinar estado de verificación del usuario
+	$: verificacionesUsuario = obtenerVerificacionesUsuario(
+		perfilUsuario.id_usuario,
+		mockVerificaciones
+	);
+	$: estadoVerificacion = determinarEstadoVerificacion(verificacionesUsuario);
 </script>
 
 <main class="min-h-screen bg-gray-50">
@@ -252,9 +262,10 @@
 						<div class="mt-4 flex flex-wrap gap-2">
 							<!-- Tag del rol con color -->
 							<span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium {obtenerColorRol(perfilUsuario.rol)}">
-								{perfilUsuario.rol}
-							</span>
-						</div>					
+								{perfilUsuario.rol === 'institucion' ? 'Institución' : 'Colaborador'}
+							</span>						
+						<!-- Badge de verificación -->
+						<BadgeVerificacion estado={estadoVerificacion} />						</div>					
 					<!-- Descripción -->
 					{#if perfilUsuario.descripcion}
 						<p class="mt-4 text-gray-700 leading-relaxed">{perfilUsuario.descripcion}</p>
