@@ -234,7 +234,7 @@
 				<div class="flex items-start gap-6">
 					<div class="relative group">
 						<img
-							src={perfilUsuario.url_foto ?? '/users/default-avatar.jpg'}
+							src={perfilUsuario.url_foto ?? '/logo-1.png'}
 							alt="Foto de perfil"
 							class="h-24 w-24 rounded-full object-cover"
 						/>
@@ -252,11 +252,24 @@
 						{/if}
 					</div>
 					<div class="flex-1">
-						<h2 class="text-3xl font-bold text-gray-900">
-							{perfilUsuario.rol === 'institucion' 
-								? (perfilUsuario as any).nombre_legal || perfilUsuario.nombre 
-								: perfilUsuario.nombre + ' ' + perfilUsuario.apellido}
-						</h2>
+						<div class="flex items-center justify-between">
+							<h2 class="text-3xl font-bold text-gray-900">
+								{perfilUsuario.rol === 'institucion' 
+									? (perfilUsuario as any).nombre_legal || perfilUsuario.nombre 
+									: perfilUsuario.nombre + ' ' + perfilUsuario.apellido}
+							</h2>
+							{#if esMiPerfil}
+								<button
+									on:click={abrirModalEdicion}
+									class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+								>
+									<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+									</svg>
+									Editar
+								</button>
+							{/if}
+						</div>
 						
 						<!-- Tags -->
 						<div class="mt-4 flex flex-wrap gap-2">
@@ -291,21 +304,6 @@
 						<p class="mt-4 text-gray-700 leading-relaxed">{perfilUsuario.descripcion}</p>
 					{/if}					</div>
 				</div>
-
-				<!-- Botón de editar solo en perfil propio -->
-				{#if esMiPerfil}
-					<div class="mt-6 flex justify-end">
-						<button
-							on:click={abrirModalEdicion}
-							class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-						>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-							</svg>
-							Editar información
-						</button>
-					</div>
-				{/if}
 
 				<!-- Información de contacto -->
 				<div class="mt-8 border-t border-gray-200 pt-8">
@@ -624,7 +622,7 @@
 					<div class="flex items-center gap-6">
 						<div class="relative">
 							<img
-								src={datosEdicion.url_foto || '/users/default-avatar.jpg'}
+								src={datosEdicion.url_foto || '/logo-1.png'}
 								alt="Foto de perfil"
 								class="h-20 w-20 rounded-full object-cover"
 							/>
@@ -649,14 +647,14 @@
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						<div>
 							<label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-							{#if perfilUsuario.rol === 'colaborador' && (perfilUsuario as any).tipo_colaborador === 'unipersonal'}
+							{#if (perfilUsuario.rol === 'colaborador' && (perfilUsuario as any).tipo_colaborador === 'unipersonal') || perfilUsuario.rol === 'institucion'}
 								<input
 									type="text"
 									id="nombre"
 									bind:value={datosEdicion.nombre}
 									disabled
 									class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed text-gray-500"
-									title="Los usuarios unipersonales no pueden modificar su nombre"
+									title={perfilUsuario.rol === 'institucion' ? 'El nombre del representante legal no puede modificarse' : 'Los usuarios unipersonales no pueden modificar su nombre'}
 								/>
 							{:else}
 								<input
@@ -669,14 +667,14 @@
 						</div>
 						<div>
 							<label for="apellido" class="block text-sm font-medium text-gray-700">Apellido</label>
-							{#if perfilUsuario.rol === 'colaborador' && (perfilUsuario as any).tipo_colaborador === 'unipersonal'}
+							{#if (perfilUsuario.rol === 'colaborador' && (perfilUsuario as any).tipo_colaborador === 'unipersonal') || perfilUsuario.rol === 'institucion'}
 								<input
 									type="text"
 									id="apellido"
 									bind:value={datosEdicion.apellido}
 									disabled
 									class="mt-1 block w-full rounded-lg border-gray-300 bg-gray-100 shadow-sm cursor-not-allowed text-gray-500"
-									title="Los usuarios unipersonales no pueden modificar su apellido"
+									title={perfilUsuario.rol === 'institucion' ? 'El apellido del representante legal no puede modificarse' : 'Los usuarios unipersonales no pueden modificar su apellido'}
 								/>
 							{:else}
 								<input
