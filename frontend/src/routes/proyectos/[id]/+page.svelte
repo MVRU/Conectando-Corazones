@@ -418,6 +418,15 @@
 										></div>
 									{/if}
 								</div>
+							{:else if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
+								<a
+									href="/institucion/solicitar-cierre?proyecto={proyecto.id_proyecto}"
+									class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-orange-600 to-orange-400 font-semibold text-white shadow-[0_8px_24px_rgba(249,115,22,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+									aria-label="Solicitar cierre del proyecto"
+								>
+									<Icon src={CheckCircle} class="h-4 w-4" aria-hidden="true" />
+									Solicitar cierre
+								</a>
 							{:else if esCreador || esColaboradorAprobado}
 								<a
 									href="/proyectos/{proyecto.id_proyecto}/panel"

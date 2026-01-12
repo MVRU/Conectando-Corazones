@@ -1,40 +1,43 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
-	
+	import { onMount } from 'svelte';
+	import { mockProyectos } from '$lib/mocks/mock-proyectos';
+	import { getEstadoCodigo } from '$lib/utils/util-estados';
+
 	// Obtener ID del proyecto automáticamente de la ruta
 	$: proyectoId = $page.params.id;
-	
-	function solicitarCierre() {
-		// Redirigir al formulario con el proyecto preseleccionado
-		goto(`/institucion/solicitar-cierre?proyecto=${proyectoId}`);
-	}
+
+	onMount(() => {
+		// Buscar el proyecto en los mocks
+		const proyecto = mockProyectos.find((p) => p.id_proyecto?.toString() === proyectoId);
+		
+		if (!proyecto) {
+			// Si no se encuentra el proyecto, redirigir a la página de detalles (que mostrará 404)
+			goto(`/proyectos/${proyectoId}`, { replaceState: true });
+			return;
+		}
+
+		// Obtener el estado del proyecto
+		const estadoCodigo = getEstadoCodigo(proyecto.estado, proyecto.estado_id);
+
+		// Redirigir según el estado del proyecto
+		if (estadoCodigo === 'pendiente_solicitud_cierre') {
+			// Si está pendiente de solicitud de cierre, redirigir a la página de solicitar cierre
+			goto(`/institucion/solicitar-cierre?proyecto=${proyectoId}`, { replaceState: true });
+		} else {
+			// Para otros estados (en_curso, completado, etc.), redirigir a la página de detalles del proyecto
+			goto(`/proyectos/${proyectoId}`, { replaceState: true });
+		}
+	});
 </script>
 
 <svelte:head>
-	<title>Panel de Proyecto - Conectando Corazones</title>
+	<title>Redirigiendo... - Conectando Corazones</title>
 </svelte:head>
 
 <div class="container mx-auto px-4 py-8">
-	<div class="max-w-2xl mx-auto">
-		<h1 class="text-3xl font-bold mb-4">Panel del Proyecto</h1>
-		
-		<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-			<p class="text-sm text-blue-800">
-				🧪 <strong>Modo de prueba</strong> - Esta es una página temporal para probar la funcionalidad
-			</p>
-			<p class="text-sm text-blue-600 mt-2">
-				Proyecto seleccionado: <code class="bg-blue-100 px-2 py-1 rounded">{proyectoId}</code>
-			</p>
-		</div>
-
-		<div class="bg-white rounded-lg shadow-md p-6">
-			<Button
-				label="Solicitar cierre del proyecto"
-				on:click={solicitarCierre}
-				customClass="w-full"
-			/>
-		</div>
+	<div class="max-w-2xl mx-auto text-center">
+		<p class="text-gray-600">Redirigiendo...</p>
 	</div>
 </div>
