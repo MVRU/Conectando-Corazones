@@ -21,9 +21,10 @@
 	import { yaReseno, filtrarResenasPorTipo, obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { obtenerColorRol, formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
 	import { obtenerIconoCategoria, validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
-	import { puedeVerContactos } from '$lib/utils/util-perfil';
+	import { puedeVerContactos, puedeDejarResena } from '$lib/utils/util-perfil';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
+	import { toastStore } from '$lib/stores/toast';
 	import { determinarEstadoVerificacion, obtenerVerificacionesUsuario } from '$lib/utils/util-verificacion';
 	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
 
@@ -37,6 +38,9 @@
 
 	// Verificar si el usuario actual puede ver los contactos del perfil
 	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, mockProyectos);
+
+	// Verificar si el usuario actual puede dejar reseña
+	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Proyectos del usuario
 	$: proyectosUsuario = perfilUsuario.rol === 'institucion'
@@ -152,8 +156,7 @@
 
 	// Funciones para reseñas
 	function abrirModalResena() {
-		// Solo permitir agregar reseñas si NO es tu propio perfil
-		if (esMiPerfil) return;
+		if (esMiPerfil || !puedeResenar) return;
 		mostrarModalResena = true;
 	}
 
@@ -162,8 +165,26 @@
 	}
 
 	function handleGuardarResena(event: CustomEvent<Resena>) {
-		// TODO: Aquí iría la llamada a la API para guardar la reseña
-		console.log('Reseña guardada:', event.detail);
+		if (!$usuarioStore) return;
+		const nuevaResena: Resena = {
+			...event.detail,
+			id_resena: mockTestimonios.length + 1,
+			username: $usuarioStore.username || `${$usuarioStore.nombre} ${$usuarioStore.apellido}`,
+			rol: $usuarioStore.rol === 'colaborador' 
+				? ($usuarioStore as any).razon_social || 'Colaborador'
+				: ($usuarioStore as any).nombre_legal || 'Institución',
+			aprobado: true 
+		};
+		mockTestimonios.push(nuevaResena);
+		reseñasUsuario = filtrarResenasPorTipo(mockTestimonios, 'usuario', perfilUsuario.id_usuario);
+		
+		toastStore.show({
+			variant: 'success',
+			title: 'Reseña publicada correctamente',
+			message: '¡Gracias por tu reseña! Tu aporte ayuda a mejorar la comunidad.'
+		});
+		
+		console.log('Reseña guardada:', nuevaResena);
 		cerrarModalResena();
 	}
 
@@ -553,7 +574,7 @@
 		<section class="mb-8">
 			<div class="flex items-center justify-between mb-4">
 				<h3 class="text-xl font-semibold text-gray-900">Reseñas</h3>
-				{#if !esMiPerfil && $isAuthenticated && $usuarioStore && !yaResenoUsuario}
+				{#if !esMiPerfil && $isAuthenticated && $usuarioStore && !yaResenoUsuario && puedeResenar}
 					<button
 						on:click={abrirModalResena}
 						class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -563,6 +584,13 @@
 						</svg>
 						Añadir Reseña
 					</button>
+				{:else if !esMiPerfil && $isAuthenticated && $usuarioStore && !yaResenoUsuario && !puedeResenar}
+					<div class="flex items-center gap-2 text-sm text-gray-500">
+						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+						</svg>
+						<span>Colaborá con este usuario para poder dejar una reseña</span>
+					</div>
 				{/if}
 			</div>
 			

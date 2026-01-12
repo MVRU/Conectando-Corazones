@@ -125,3 +125,43 @@ function tienenColaboracionEnComun(
 		return tieneColab1 && tieneColab2;
 	});
 }
+
+export function puedeDejarResena(
+	usuarioActual: Usuario | null,
+	perfilUsuario: Usuario,
+	proyectos: Proyecto[]
+): boolean {
+	if (!usuarioActual) {
+		return false;
+	}
+	if (usuarioActual.id_usuario === perfilUsuario.id_usuario) {
+		return false;
+	}
+	if (perfilUsuario.rol === 'institucion') {
+		if (usuarioActual.rol === 'colaborador') {
+			return tieneColaboracionConInstitucion(
+				usuarioActual.id_usuario!,
+				perfilUsuario.id_usuario!,
+				proyectos
+			);
+		}
+		return false;
+	}
+	if (perfilUsuario.rol === 'colaborador') {
+		if (usuarioActual.rol === 'institucion') {
+			return tieneColaboracionConInstitucion(
+				perfilUsuario.id_usuario!,
+				usuarioActual.id_usuario!,
+				proyectos
+			);
+		}
+		if (usuarioActual.rol === 'colaborador') {
+			return tienenColaboracionEnComun(
+				usuarioActual.id_usuario!,
+				perfilUsuario.id_usuario!,
+				proyectos
+			);
+		}
+	}
+	return false;
+}

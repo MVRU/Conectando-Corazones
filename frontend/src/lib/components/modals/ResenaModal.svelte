@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Resena } from '$lib/types/Resena';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let mostrar: boolean = false;
 	export let titulo: string = 'Añadir Reseña';
@@ -96,21 +97,23 @@
 				</div>
 
 				<!-- Botones de acción -->
-				<div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-					<button
+				<div class="flex justify-end gap-4 pt-6 border-t border-gray-200">
+					<Button
+						label="Cancelar"
+						variant="secondary"
+						size="md"
 						type="button"
 						on:click={cerrar}
-						class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-					>
-						Cancelar
-					</button>
-					<button
+						customClass="w-full md:w-auto"
+					/>
+					<Button
+						label="Publicar Reseña"
+						variant="primary"
+						size="md"
 						type="submit"
 						disabled={!nuevaResena.contenido.trim()}
-						class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						Publicar Reseña
-					</button>
+						customClass="w-full md:w-auto"
+					/>
 				</div>
 			</form>
 		</div>
