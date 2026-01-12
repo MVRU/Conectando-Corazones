@@ -195,8 +195,7 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
 							error={intentoEnvio || camposTocados[i]?.valor ? errors[i] : ''}
-							on:blur={() => marcarCampoComoTocado(i, 'valor')}
-						/>
+							on:blur={() => marcarCampoComoTocado(i, 'valor')}						disabled={i === 0}						/>
 					</div>
 
 					<!-- Etiqueta -->
@@ -238,6 +237,7 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 								]}
 								searchable={false}
 								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								disabled={i === 0}
 							/>
 						{/if}
 					</div>
