@@ -2,6 +2,7 @@
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
 import { mockCategorias } from '$lib/mocks/mock-categorias';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 export const mockUsuarios = {
 	admin1: {
@@ -15,6 +16,8 @@ export const mockUsuarios = {
 		created_at: new Date('2020-01-01'),
 		rol: 'administrador',
 		url_foto: '/users/user-default.png',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
@@ -49,6 +52,8 @@ export const mockUsuarios = {
 		url_foto: '/users/escuela-esperanza.jpg',
 		nombre_legal: 'Escuela Primaria Esperanza',
 		tipo_institucion: 'Educación pública',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'direccion@escuelaesperanza.edu.ar', etiqueta: 'principal' },
@@ -94,6 +99,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
 		tipo_institucion: 'Salud pública',
+		localidad_id: 3,
+		localidad: mockLocalidades[2],
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }
@@ -127,6 +134,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		descripcion: 'Apasionada por la educación y el arte. Me encanta colaborar en proyectos que promuevan el desarrollo cultural y educativo de la comunidad. Tengo experiencia en organización de eventos y talleres para niños.',
+		localidad_id: 5,
+		localidad: mockLocalidades[4],
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
 			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },
@@ -174,6 +183,8 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Biblioteca Popular Los Libros',
 		con_fines_de_lucro: false,
+		localidad_id: 2,
+		localidad: mockLocalidades[1],
 
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
 		categorias_preferidas: [
@@ -216,6 +227,8 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Fundación Manos Unidas Argentina',
 		con_fines_de_lucro: false,
+		localidad_id: 6,
+		localidad: mockLocalidades[5],
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }
@@ -268,6 +281,8 @@ export const mockUsuarios = {
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Empresa Solidaria S.A.',
 		con_fines_de_lucro: true,
+		localidad_id: 7,
+		localidad: mockLocalidades[6],
 
 		contactos: [
 			{
@@ -308,6 +323,8 @@ export const mockUsuarios = {
 		rol: 'colaborador',
 		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
+		localidad_id: 8,
+		localidad: mockLocalidades[7],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -354,6 +371,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Clínica San Jorge S.A.',
 		tipo_institucion: 'Salud privada',
+		localidad_id: 9,
+		localidad: mockLocalidades[8],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -396,6 +415,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Siempre',
 		tipo_institucion: 'Fundación',
+		localidad_id: 10,
+		localidad: mockLocalidades[9],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -419,6 +440,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Comedor Los Pinos',
 		tipo_institucion: 'Comedor',
+		localidad_id: 11,
+		localidad: mockLocalidades[10],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -442,6 +465,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital General San José',
 		tipo_institucion: 'Hospital',
+		localidad_id: 12,
+		localidad: mockLocalidades[11],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -465,6 +490,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Instituto de Formación Laboral',
 		tipo_institucion: 'Instituto',
+		localidad_id: 13,
+		localidad: mockLocalidades[12],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -488,6 +515,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Calor Humano',
 		tipo_institucion: 'Fundación',
+		localidad_id: 14,
+		localidad: mockLocalidades[13],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -511,6 +540,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hogar Santa Teresa',
 		tipo_institucion: 'Hogar',
+		localidad_id: 15,
+		localidad: mockLocalidades[14],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -534,6 +565,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Asociación Civil Refugio Patitas',
 		tipo_institucion: 'Protección Animal',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -557,6 +590,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Ecologistas Unidos de Córdoba',
 		tipo_institucion: 'Medio Ambiente',
+		localidad_id: 5,
+		localidad: mockLocalidades[4],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -580,6 +615,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Biblioteca Popular El Saber',
 		tipo_institucion: 'Biblioteca',
+		localidad_id: 1,
+		localidad: mockLocalidades[0],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -603,6 +640,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Esperanza Fallida',
 		tipo_institucion: 'Fundación',
+		localidad_id: 3,
+		localidad: mockLocalidades[2],
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -626,6 +665,8 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		nombre_legal: 'ONG Nuevo Horizonte',
 		tipo_institucion: 'ONG',
+		localidad_id: 7,
+		localidad: mockLocalidades[6],
 		contactos: [
 			{
 				tipo_contacto: 'email',

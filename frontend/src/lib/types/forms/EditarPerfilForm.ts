@@ -7,6 +7,7 @@ export interface EditarPerfilForm {
     url_foto: string;
     descripcion: string;
     contactos: Contacto[];
+    localidad_id?: number;
 }
 
 

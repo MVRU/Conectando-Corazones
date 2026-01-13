@@ -18,6 +18,8 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 	import { mockTestimonios } from '$lib/mocks/mock-testimonios';
+	import { mockLocalidades } from '$lib/mocks/mock-localidades';
+	import { provincias } from '$lib/data/provincias';
 	import { yaReseno, filtrarResenasPorTipo, obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { obtenerColorRol, formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
 	import { obtenerIconoCategoria, validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
@@ -69,6 +71,12 @@
 	// Estado para el formulario de edición
 	let datosEdicion: EditarPerfilForm = crearFormularioVacio();
 	let errorDescripcion: string | null = null;
+	let provinciaSeleccionada: number | undefined = undefined;
+
+	// Filtrar localidades según provincia seleccionada
+	$: localidadesFiltradas = provinciaSeleccionada !== undefined
+		? mockLocalidades.filter(l => l.id_provincia === provinciaSeleccionada)
+		: [];
 
 	// Validar descripción en tiempo real
 	$: {
@@ -91,8 +99,15 @@
 			apellido: perfilUsuario.apellido || '',
 			url_foto: perfilUsuario.url_foto || '',
 			descripcion: perfilUsuario.descripcion || '',
-			contactos: perfilUsuario.contactos ?? []
+			contactos: perfilUsuario.contactos ?? [],
+			localidad_id: perfilUsuario.localidad_id
 		};
+		
+		// Inicializar provincia seleccionada si existe localidad
+		if (perfilUsuario.localidad?.id_provincia !== undefined) {
+			provinciaSeleccionada = perfilUsuario.localidad.id_provincia;
+		}
+		
 		mostrarModalEdicion = true;
 	}
 
@@ -112,13 +127,19 @@
 		
 		// Actualizar el usuario en el store
 		if ($usuarioStore) {
+			const localidadExpandida = datosEdicion.localidad_id 
+				? mockLocalidades.find(l => l.id_localidad === datosEdicion.localidad_id)
+				: undefined;
+			
 			authActions.updateUsuario({
 				...$usuarioStore,
 				nombre: datosEdicion.nombre,
 				apellido: datosEdicion.apellido,
 				url_foto: datosEdicion.url_foto,
 				descripcion: datosEdicion.descripcion,
-				contactos: datosEdicion.contactos
+				contactos: datosEdicion.contactos,
+				localidad_id: datosEdicion.localidad_id,
+				localidad: localidadExpandida
 			} as any);
 		}
 		
@@ -394,6 +415,23 @@
 								</div>
 								<p class="ml-7 text-base text-gray-900">@{perfilUsuario.username}</p>
 							</div>
+							
+							<!-- Ubicación -->
+							{#if perfilUsuario.localidad}
+								<div>
+									<div class="mb-2 flex items-center gap-2">
+										<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+										</svg>
+										<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Ubicación</span>
+									</div>
+									<p class="ml-7 text-base text-gray-900">
+										{perfilUsuario.localidad.nombre}, {perfilUsuario.localidad.provincia?.nombre || 'Provincia no disponible'}
+									</p>
+								</div>
+							{/if}
+
 							<div>
 								<div class="mb-2 flex items-center gap-2">
 									<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -731,8 +769,53 @@
 					</div>
 				</div>
 
-				<!-- Descripción -->
+				<!-- Ubicación -->
 				<div class="border-b border-gray-200 pb-6">
+					<h4 class="text-lg font-medium text-gray-900 mb-4">Ubicación</h4>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+					<div>
+						<label for="provincia" class="block text-sm font-medium text-gray-700">
+							Provincia
+						</label>
+						<select
+							id="provincia"
+							bind:value={provinciaSeleccionada}
+							on:change={() => { datosEdicion.localidad_id = undefined; }}
+							class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+						>
+							<option value={undefined}>Selecciona una provincia</option>
+							{#each provincias as prov}
+								<option value={prov.id_provincia}>
+									{prov.nombre}
+								</option>
+							{/each}
+						</select>
+					</div>
+					<div>
+						<label for="localidad" class="block text-sm font-medium text-gray-700">
+							Localidad
+						</label>
+						<select
+							id="localidad"
+							bind:value={datosEdicion.localidad_id}
+							disabled={provinciaSeleccionada === undefined}
+							class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 {provinciaSeleccionada === undefined ? 'bg-gray-100 cursor-not-allowed' : ''}"
+						>
+							<option value={undefined}>
+								{provinciaSeleccionada === undefined ? 'Primero selecciona una provincia' : 'Selecciona una localidad'}
+							</option>
+							{#each localidadesFiltradas as loc}
+								<option value={loc.id_localidad}>
+									{loc.nombre}
+								</option>
+							{/each}
+						</select>
+					</div>
+				</div>
+			</div>
+
+			<!-- Descripción -->
+			<div class="border-b border-gray-200 pb-6">
 					<h4 class="text-lg font-medium text-gray-900 mb-4">Descripción</h4>
 					<div>
 						<label for="descripcion" class="block text-sm font-medium text-gray-700 mb-1">
@@ -768,16 +851,7 @@
 					mostrarOmitir={false}
 					on:submit={(e) => {
 						datosEdicion.contactos = e.detail;
-						// Actualizar el store con toda la información del modal
-						if ($usuarioStore) {
-							authActions.updateUsuario({
-								...$usuarioStore,
-								url_foto: datosEdicion.url_foto,
-								descripcion: datosEdicion.descripcion,
-								contactos: e.detail
-							} as any);
-						}
-						cerrarModalEdicion();
+						handleGuardarPerfil();
 					}}
 				>
 					<svelte:fragment slot="botones-extra">
