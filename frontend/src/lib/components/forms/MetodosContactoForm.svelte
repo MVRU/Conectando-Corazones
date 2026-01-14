@@ -58,6 +58,15 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+	export let valoresIniciales: Contacto[] = [];
+
+// Si vienen valores iniciales y el formulario está "vacío", precargamos
+$: if (valoresIniciales && valoresIniciales.length > 0) {
+    const formularioVacio = contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+    if (formularioVacio) {
+        contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+    }
+}
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
@@ -139,8 +148,8 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 			dispatch('submit', contactos);
 			toastStore.show({
 				variant: 'success',
-				title: 'Contactos guardados',
-				message: 'Guardamos tus formas de contacto. Podés sumar o editarlas luego desde tu panel.'
+				title: 'Cambios guardados',
+				message: 'Tu descripción y formas de contacto se actualizaron correctamente.'
 			});
 		}, 800);
 	}
@@ -186,8 +195,7 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
 							error={intentoEnvio || camposTocados[i]?.valor ? errors[i] : ''}
-							on:blur={() => marcarCampoComoTocado(i, 'valor')}
-						/>
+							on:blur={() => marcarCampoComoTocado(i, 'valor')}						disabled={i === 0}						/>
 					</div>
 
 					<!-- Etiqueta -->
@@ -229,6 +237,7 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 								]}
 								searchable={false}
 								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								disabled={i === 0}
 							/>
 						{/if}
 					</div>
@@ -275,6 +284,7 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 				customClass="w-full md:w-auto"
 			/>
 		{/if}
+		<slot name="botones-extra" />
 		<Button
 			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"

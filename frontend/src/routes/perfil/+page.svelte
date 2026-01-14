@@ -1,30 +1,25 @@
-<!-- TODOs:
- 	- [ ] Rehacer todo para cuando los types y los datos coincidan con DER -->
-
 <script lang="ts">
-	import { authActions, usuario as usuarioStore } from '$lib/stores/auth';
-	import Loader from '$lib/components/feedback/Loader.svelte';
+	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
+	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import type { Usuario } from '$lib/types/Usuario';
-	import { onDestroy } from 'svelte';
 
-	let usuario: Usuario | null = null;
-
-	const unsubscribe = usuarioStore.subscribe((value) => {
-		usuario = value;
+	onMount(() => {
+		if (!$isAuthenticated || !$usuarioStore) {
+			goto('/iniciar-sesion');
+		} else {
+			// Redirigir al perfil del usuario autenticado usando su username
+			goto(`/perfil/${$usuarioStore.username}`);
+		}
 	});
-
-	onMount(async () => {
-		await authActions.login('escuela_esperanza', '123456');
-	});
-
-	onDestroy(() => unsubscribe());
 </script>
 
-<div class="mx-auto max-w-6xl px-4 py-10">
-	{#if !usuario}
-		<Loader loading />
-	{:else}
-		<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl"></div>
-	{/if}
+<svelte:head>
+	<title>Mi Perfil - Conectando Corazones</title>
+</svelte:head>
+
+<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+	<div class="text-center">
+		<h2 class="text-xl font-semibold text-gray-900">Redirigiendo a tu perfil...</h2>
+		<p class="text-gray-600 mt-2">Por favor espera...</p>
+	</div>
 </div>
