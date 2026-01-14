@@ -32,10 +32,10 @@
 	</div>
 	
 	{#if tieneCategorias}
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full">
 			{#each categorias as categoria}
-				<div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-					<div class="flex items-center gap-3">
+				<div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md w-full">
+					<div class="flex items-center gap-3 w-full">
 						<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50">
 							<Icon src={obtenerIconoCategoria(categoria.descripcion)} class="h-6 w-6 text-blue-600" />
 						</div>

@@ -33,11 +33,11 @@
 		</div>
 		
 		{#if tieneTipos}
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 w-full">
 				{#each tiposParticipacion as tipoParticipacion}
 					{@const info = INFO_TIPOS_PARTICIPACION[tipoParticipacion.descripcion]}
-					<div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md">
-						<div class="flex items-center gap-3">
+					<div class="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md w-full">
+						<div class="flex items-center gap-3 w-full">
 							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-{info.color}-50">
 								<Icon src={info.icon} class="h-6 w-6 text-{info.color}-600" />
 							</div>

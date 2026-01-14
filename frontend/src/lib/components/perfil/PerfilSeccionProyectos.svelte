@@ -17,9 +17,11 @@
 	<h3 class="mb-4 text-xl font-semibold text-gray-900">Últimos Proyectos</h3>
 	
 	{#if tieneProyectos}
-		<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
 			{#each proyectosMostrados as proyecto (proyecto.id_proyecto)}
-				<ProyectoCard {proyecto} />
+				<div class="w-full">
+					<ProyectoCard {proyecto} />
+				</div>
 			{/each}
 		</div>
 	{:else}

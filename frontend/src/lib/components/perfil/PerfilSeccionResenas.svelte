@@ -40,9 +40,11 @@
 	</div>
 	
 	{#if tieneResenas}
-		<div class="grid gap-6 md:grid-cols-2">
+		<div class="grid grid-cols-1 gap-6 md:grid-cols-2 w-full">
 			{#each resenasMostradas as resena (resena.id_resena || resena.contenido)}
-				<ResenaCard {resena} />
+				<div class="w-full">
+					<ResenaCard {resena} />
+				</div>
 			{/each}
 		</div>
 	{:else}

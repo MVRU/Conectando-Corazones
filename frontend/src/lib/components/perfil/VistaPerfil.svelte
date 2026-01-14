@@ -158,6 +158,8 @@
 				<PerfilInfoContacto 
 					{perfilUsuario} 
 					puedeVerContactos={puedeVerContactosPerfil}
+					esMiPerfil={esMiPerfil}
+					onEditarClick={abrirModalEdicion}
 				/>
 			</div>
 		</div>

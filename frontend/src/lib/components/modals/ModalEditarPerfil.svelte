@@ -78,20 +78,17 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-xl" on:click|stopPropagation>
-			<div class="mb-6 flex items-center justify-between">
-				<h3 class="text-xl font-semibold text-gray-900">Editar Perfil</h3>
-				<div class="flex items-center gap-4 flex-1 justify-end">
-					<p class="text-lg font-semibold text-gray-900">{nombreUsuario}</p>
-					<button
-						on:click={handleCerrar}
-						aria-label="Cerrar modal"
-						class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-					>
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
-					</button>
-				</div>
+			<div class="mb-6 flex items-center justify-center relative">
+				<h3 class="text-xl font-semibold text-gray-900 mx-auto">Editar Perfil</h3>
+				<button
+					on:click={handleCerrar}
+					aria-label="Cerrar modal"
+					class="absolute right-0 rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
 			</div>
 
 			<form on:submit|preventDefault={handleSubmit} class="space-y-6">
