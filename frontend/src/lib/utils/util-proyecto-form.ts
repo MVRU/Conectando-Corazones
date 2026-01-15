@@ -127,7 +127,7 @@ export function validarTituloProyecto(t: string): string | null {
 	const v = t.normalize('NFC').trim().replace(/\s+/g, ' ');
 	if (!v) return 'Este campo es obligatorio';
 	if (v.length < 3) return 'Debe tener al menos 3 caracteres';
-	if (v.length > 120) return 'Máximo 120 caracteres';
+	if (v.length > 60) return 'Máximo 60 caracteres';
 	if (/^\d/.test(v)) return 'No puede comenzar con un número';
 	if (/^\d+$/u.test(v)) return 'No puede ser solo números';
 	if (!/\p{L}/u.test(v)) return 'Debe incluir letras';

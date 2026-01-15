@@ -7,7 +7,7 @@ import { getLocalidad } from '$lib/utils/util-ubicaciones';
 export const mockUsuarios = {
 	admin1: {
 		id_usuario: 1,
-		username: 'alexis_sklate',
+		username: 'admin_conectando',
 		password: '123456',
 		nombre: 'Alexis',
 		apellido: 'Sklate',
@@ -15,7 +15,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2020-01-01'),
 		rol: 'administrador',
-		url_foto: '/users/admin-default.png',
+		url_foto: '/users/user-default.png',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
@@ -92,7 +92,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-10'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-garrahan.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
 		tipo_institucion: 'Salud pública',
 
@@ -125,7 +125,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-01'),
 		rol: 'colaborador',
-		url_foto: '/users/maria-gonzalez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		contactos: [
 			{
@@ -160,7 +160,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-15'),
 		rol: 'colaborador',
-		url_foto: '/users/biblioteca-popular.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Biblioteca Popular Los Libros',
 		con_fines_de_lucro: false,
@@ -193,7 +193,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-01-20'),
 		rol: 'colaborador',
-		url_foto: '/users/fundacion-manos-unidas.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Fundación Manos Unidas Argentina',
 		con_fines_de_lucro: false,
@@ -240,7 +240,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-05'),
 		rol: 'colaborador',
-		url_foto: '/users/empresa-solidaria.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Empresa Solidaria S.A.',
 		con_fines_de_lucro: true,
@@ -279,7 +279,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-01'),
 		rol: 'colaborador',
-		url_foto: '/users/ana-martinez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
 		contactos: [
 			{
@@ -320,7 +320,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/clinica-san-jorge.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Clínica San Jorge S.A.',
 		tipo_institucion: 'Salud privada',
 		contactos: [
@@ -362,7 +362,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-10'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-siempre.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Siempre',
 		tipo_institucion: 'Fundación',
 		contactos: [
@@ -385,7 +385,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/comedor-los-pinos.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Comedor Los Pinos',
 		tipo_institucion: 'Comedor',
 		contactos: [
@@ -408,7 +408,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-04-01'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-sanjose.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital General San José',
 		tipo_institucion: 'Hospital',
 		contactos: [
@@ -431,7 +431,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-05-01'),
 		rol: 'institucion',
-		url_foto: '/users/instituto-formacion.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Instituto de Formación Laboral',
 		tipo_institucion: 'Instituto',
 		contactos: [
@@ -454,7 +454,7 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-06-01'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-calor.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Calor Humano',
 		tipo_institucion: 'Fundación',
 		contactos: [
@@ -477,13 +477,128 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-07-01'),
 		rol: 'institucion',
-		url_foto: '/users/hogar-santa-teresa.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hogar Santa Teresa',
 		tipo_institucion: 'Hogar',
 		contactos: [
 			{
 				tipo_contacto: 'email',
 				valor: 'info@hogarsantateresa.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	refugio_patitas: {
+		id_usuario: 16,
+		username: 'refugio_patitas',
+		password: '123456',
+		nombre: 'Clara',
+		apellido: 'Benitez',
+		fecha_nacimiento: new Date('1990-01-20'),
+		estado: 'activo',
+		created_at: new Date('2024-08-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Asociación Civil Refugio Patitas',
+		tipo_institucion: 'Protección Animal',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'adopciones@patitasfelices.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ecologistas_cordoba: {
+		id_usuario: 17,
+		username: 'ecologistas_cba',
+		password: '123456',
+		nombre: 'Lucas',
+		apellido: 'Serrano',
+		fecha_nacimiento: new Date('1985-05-05'),
+		estado: 'activo',
+		created_at: new Date('2024-08-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Ecologistas Unidos de Córdoba',
+		tipo_institucion: 'Medio Ambiente',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@ecologistas.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	biblioteca_barrial: {
+		id_usuario: 18,
+		username: 'biblioread',
+		password: '123456',
+		nombre: 'Marta',
+		apellido: 'Quiroga',
+		fecha_nacimiento: new Date('1960-12-01'),
+		estado: 'activo',
+		created_at: new Date('2024-08-15'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Biblioteca Popular El Saber',
+		tipo_institucion: 'Biblioteca',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@bibliotecasaber.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	fundacion_esperanza_fallida: { // creé esta institución que tiene verificación documental "rechazada" para pruebas
+		id_usuario: 19,
+		username: 'fundacion_fail',
+		password: '123456',
+		nombre: 'Carlos',
+		apellido: 'Díaz',
+		fecha_nacimiento: new Date('1980-05-15'),
+		estado: 'activo',
+		created_at: new Date('2024-09-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Fundación Esperanza Fallida',
+		tipo_institucion: 'Fundación',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@esperanzafallida.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ong_nuevo_horizonte: { // creé esta institución que tiene verificación documental "pendiente" para pruebas
+		id_usuario: 20,
+		username: 'ong_horizonte',
+		password: '123456',
+		nombre: 'Laura',
+		apellido: 'Gómez',
+		fecha_nacimiento: new Date('1985-11-20'),
+		estado: 'activo',
+		created_at: new Date('2024-09-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'ONG Nuevo Horizonte',
+		tipo_institucion: 'ONG',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@nuevohorizonte.org',
 				etiqueta: 'principal'
 			}
 		],

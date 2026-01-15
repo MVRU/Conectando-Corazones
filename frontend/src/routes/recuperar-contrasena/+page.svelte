@@ -11,6 +11,7 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { validarCorreo } from '$lib/utils/validaciones';
+	import { toastStore } from '$lib/stores/toast';
 	import { Key } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -47,11 +48,23 @@ TODO:
 			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			// Simulamos éxito (en la implementación real, aquí iría la llamada al backend)
+			const esReenvio = emailEnviado;
 			emailEnviado = true;
 			mensajeExito = `Te enviamos un email a ${email} con las instrucciones para recuperar tu contraseña.`;
+
+			if (esReenvio) {
+				toastStore.show({
+					variant: 'success',
+					message: 'Email reenviado correctamente.'
+				});
+			}
 		} catch (error) {
 			mensajeError = 'Hubo un problema al enviar el email. Por favor intenta nuevamente.';
 			console.error('Error al enviar email de recuperación:', error);
+			toastStore.show({
+				variant: 'error',
+				message: 'No pudimos enviar el correo. Por favor intentá más tarde.'
+			});
 		} finally {
 			cargando = false;
 		}

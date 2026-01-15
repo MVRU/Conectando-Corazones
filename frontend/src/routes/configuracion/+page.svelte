@@ -14,6 +14,7 @@
 	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
 	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import { toastStore } from '$lib/stores/toast';
 
 	// Usamos un usuario real de los mocks
 	let usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador =
@@ -75,28 +76,44 @@
 		);
 
 		// Simular persistencia
-		alert('Cambios guardados exitosamente');
+		toastStore.show({
+			variant: 'success',
+			title: 'Datos actualizados',
+			message: 'Tus preferencias se guardaron correctamente.'
+		});
 	}
 
 	function cambiarPassword() {
 		// Validar que las contraseñas coincidan
 		if (passNueva !== passConfirm) {
 			console.error('Error: Las contraseñas no coinciden');
-			alert('Error: Las contraseñas no coinciden');
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: 'Las contraseñas nuevas no coinciden.'
+			});
 			return;
 		}
 
 		// Validar que se ingresó una contraseña
 		if (!passNueva.trim()) {
 			console.error('Error: La nueva contraseña no puede estar vacía');
-			alert('Error: La nueva contraseña no puede estar vacía');
+			toastStore.show({
+				variant: 'error',
+				title: 'Campo requerido',
+				message: 'Por favor, ingresá una contraseña nueva.'
+			});
 			return;
 		}
 
 		// Validar contraseña actual (simulado)
 		if (!passActual.trim()) {
 			console.error('Error: Debe ingresar la contraseña actual');
-			alert('Error: Debe ingresar la contraseña actual');
+			toastStore.show({
+				variant: 'error',
+				title: 'Falta contraseña actual',
+				message: 'Para seguridad, ingresá tu contraseña actual.'
+			});
 			return;
 		}
 
@@ -111,7 +128,11 @@
 		passNueva = '';
 		passConfirm = '';
 
-		alert('Contraseña cambiada exitosamente');
+		toastStore.show({
+			variant: 'success',
+			title: 'Contraseña actualizada',
+			message: 'Tu contraseña se cambió con éxito.'
+		});
 	}
 
 	let showDeleteModal = false;
@@ -122,7 +143,12 @@
 		console.log('=== ELIMINAR CUENTA ===');
 		console.log('Usuario eliminado:', usuario.id_usuario);
 		showDeleteModal = false;
-		alert('Cuenta eliminada (simulación)');
+		toastStore.show({
+			variant: 'info',
+			message: 'Tu cuenta ha sido eliminada. Lamentamos que te vayas.'
+		});
+		// Simular logout y redirect
+		window.location.href = '/';
 	}
 	function cancelarEliminarCuenta() {
 		showDeleteModal = false;

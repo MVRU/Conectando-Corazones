@@ -1,5 +1,6 @@
 import type { Localidad } from '$lib/types/Localidad';
 import type { Provincia } from '$lib/types/Provincia';
+import type { Proyecto } from '$lib/types/Proyecto';
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import type { UbicacionDisyuncion, UbicacionPresencial, UbicacionVirtual } from '$lib/types/Ubicacion';
@@ -141,4 +142,74 @@ export function obtenerLocalidadesPorProvincia(nombreProvincia: string): Localid
 	const provincia = provincias.find((p) => p.nombre === nombreProvincia);
 	if (!provincia) return [];
 	return mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia);
+}
+
+/**
+ * Obtiene todas las provincias disponibles desde un array de proyectos
+ * Solo incluye proyectos con ubicaciones presenciales
+ */
+export function obtenerProvinciasDisponibles(proyectos: Proyecto[]): string[] {
+	const provinciasSet = new Set<string>();
+
+	proyectos.forEach((p) => {
+		const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
+		if (primeraUbicacion?.modalidad === 'presencial') {
+			const provincia = getProvinciaFromLocalidad(primeraUbicacion.localidad);
+			if (provincia?.nombre) {
+				provinciasSet.add(provincia.nombre);
+			}
+		}
+	});
+
+	return ['Todas', ...Array.from(provinciasSet).sort()];
+}
+
+/**
+ * Obtiene todas las localidades disponibles desde un array de proyectos
+ * Opcionalmente filtra por provincia
+ */
+export function obtenerLocalidadesDisponibles(
+	proyectos: Proyecto[],
+	provincia?: string
+): string[] {
+	const localidadesSet = new Set<string>();
+
+	proyectos.forEach((p) => {
+		const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
+		if (primeraUbicacion?.modalidad === 'presencial') {
+			// Si se especifica provincia, filtrar por ella
+			if (provincia && provincia !== 'Todas') {
+				const prov = getProvinciaFromLocalidad(primeraUbicacion.localidad);
+				if (prov?.nombre !== provincia) return;
+			}
+
+			const localidadNombre = primeraUbicacion.localidad?.nombre;
+			if (localidadNombre) {
+				localidadesSet.add(localidadNombre);
+			}
+		}
+	});
+
+	return ['Todas', ...Array.from(localidadesSet).sort()];
+}
+
+/**
+ * Filtra proyectos por localidad específica
+ * Solo aplica a proyectos presenciales
+ */
+export function filtrarPorLocalidad(
+	proyectos: Proyecto[],
+	localidad: string,
+	tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual'
+): Proyecto[] {
+	if (localidad !== 'Todas' && tipoUbicacion === 'Presencial') {
+		return proyectos.filter((p) => {
+			const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
+			if (primeraUbicacion?.modalidad === 'presencial') {
+				return primeraUbicacion.localidad?.nombre === localidad;
+			}
+			return false;
+		});
+	}
+	return proyectos;
 }

@@ -1,4 +1,6 @@
 ﻿<script lang="ts">
+	import { toastStore } from '$lib/stores/toast';
+	import { goto } from '$app/navigation';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
@@ -31,6 +33,9 @@
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/types/dto/ParticipacionPermitidaCreate';
+	import Alert from '$lib/components/ui/feedback/Alert.svelte';
+
+	export let limiteProyectosAlcanzado: boolean = false;
 
 	let titulo = '';
 	let descripcion = '';
@@ -349,6 +354,8 @@
 	let enviando = false;
 
 	async function enviarFormulario() {
+		if (limiteProyectosAlcanzado) return;
+
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
 			return;
@@ -405,7 +412,12 @@
 
 		console.log('Payload listo', payload);
 		enviando = false;
-		alert('¡Proyecto creado con éxito! (simulación)');
+		toastStore.show({
+			variant: 'success',
+			title: '¡Proyecto creado!',
+			message: 'El proyecto se ha creado exitosamente. Ahora podés verlo en tu panel.'
+		});
+		goto('/proyectos');
 	}
 </script>
 
@@ -420,6 +432,16 @@
 			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">Crear nuevo proyecto</h1>
 			<p class="mt-2 text-gray-600">Completá la información para crear tu proyecto</p>
 		</div>
+
+		{#if limiteProyectosAlcanzado}
+			<div class="mb-6">
+				<Alert
+					variant="warning"
+					title="Límite de proyectos alcanzado"
+					message="Ya superaste la cantidad máxima de proyectos en curso (5). No podés crear un nuevo proyecto hasta que finalices o interrumpas alguno de los actuales."
+				/>
+			</div>
+		{/if}
 
 		<form on:submit|preventDefault={enviarFormulario} class="space-y-8">
 			<ProyectoInfoBasica
@@ -445,7 +467,13 @@
 			<ProyectoUbicaciones bind:ubicaciones {errores} />
 
 			<div class="flex justify-end">
-				<Button type="submit" label="Crear proyecto" loading={enviando} loadingLabel="Creando..." />
+				<Button
+					type="submit"
+					label="Crear proyecto"
+					loading={enviando}
+					loadingLabel="Creando..."
+					disabled={limiteProyectosAlcanzado}
+				/>
 			</div>
 		</form>
 	</div>

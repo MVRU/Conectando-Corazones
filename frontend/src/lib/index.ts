@@ -4,6 +4,7 @@ export { default as Button } from './components/ui/elementos/Button.svelte';
 export { default as Select } from './components/ui/elementos/Select.svelte';
 export { default as ProyectoCard } from './components/ui/cards/ProyectoCard.svelte';
 export { default as Breadcrumbs } from './components/ui/navegacion/Breadcrumbs.svelte';
+export { default as ModalReportarIrregularidad } from './components/ui/ModalReportarIrregularidad.svelte';
 
 // Componentes de páginas
 export { default as Proyectos } from './components/proyectos/Proyectos.svelte';
