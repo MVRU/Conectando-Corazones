@@ -20,12 +20,12 @@
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
 
-let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
-let enviando = false;
-let intentoEnvio = false;
-let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
-	{ valor: false, etiqueta: false }
-];
+	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
+	let enviando = false;
+	let intentoEnvio = false;
+	let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
+		{ valor: false, etiqueta: false }
+	];
 
 	const etiquetasTipoContacto: Record<TipoContacto, string> = {
 		telefono: 'Teléfono',
@@ -60,13 +60,14 @@ let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
 	export let etiquetaOmitir = 'Omitir';
 	export let valoresIniciales: Contacto[] = [];
 
-// Si vienen valores iniciales y el formulario está "vacío", precargamos
-$: if (valoresIniciales && valoresIniciales.length > 0) {
-    const formularioVacio = contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
-    if (formularioVacio) {
-        contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
-    }
-}
+	// Si vienen valores iniciales y el formulario está "vacío", precargamos
+	$: if (valoresIniciales && valoresIniciales.length > 0) {
+		const formularioVacio =
+			contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+		if (formularioVacio) {
+			contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+		}
+	}
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
@@ -149,7 +150,7 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 			toastStore.show({
 				variant: 'success',
 				title: 'Cambios guardados',
-				message: 'Tu descripción y formas de contacto se actualizaron correctamente.'
+				message: 'Tu descripción, ubicación y formas de contacto se actualizaron correctamente.'
 			});
 		}, 800);
 	}
@@ -165,17 +166,17 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 </script>
 
 <form on:submit={manejarEnvio}>
-		<div class="space-y-6">
-			{#each contactos as contacto, i (contacto)}
-				<div
-					class="group relative flex flex-row items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
-				>
-					<div class="flex w-full flex-wrap gap-4 md:flex-nowrap">
-						<!-- Tipo de contacto -->
-						<div class="min-w-[180px] flex-1 md:max-w-[240px]">
-							<label for={'tipo-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
-								Tipo de contacto
-							</label>
+	<div class="space-y-6">
+		{#each contactos as contacto, i (contacto)}
+			<div
+				class="group relative flex flex-row items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+			>
+				<div class="flex w-full flex-wrap gap-4 md:flex-nowrap">
+					<!-- Tipo de contacto -->
+					<div class="min-w-[180px] flex-1 md:max-w-[240px]">
+						<label for={'tipo-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
+							Tipo de contacto
+						</label>
 						<Select
 							id={'tipo-' + i}
 							bind:value={contacto.tipo_contacto}
@@ -194,8 +195,10 @@ $: if (valoresIniciales && valoresIniciales.length > 0) {
 							id={'valor-' + i}
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
-							error={intentoEnvio || camposTocados[i]?.valor ? errors[i] : ''}
-							on:blur={() => marcarCampoComoTocado(i, 'valor')}						disabled={i === 0}						/>
+							error={contacto.valor.trim() ? errors[i] : ''}
+							on:blur={() => marcarCampoComoTocado(i, 'valor')}
+							disabled={i === 0}
+						/>
 					</div>
 
 					<!-- Etiqueta -->
