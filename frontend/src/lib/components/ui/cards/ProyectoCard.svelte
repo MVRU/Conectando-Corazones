@@ -11,6 +11,7 @@
 		getUbicacionCorta,
 		formatearFechaBadge
 	} from '$lib/utils/util-proyectos';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
@@ -196,8 +197,20 @@
 						class="h-5 w-5 rounded-full object-cover shadow-sm"
 						loading="lazy"
 					/>
-					<span class="truncate font-medium text-gray-700">{proyecto.institucion.nombre_legal}</span
-					>
+					{#if obtenerUrlPerfil(proyecto.institucion)}
+						<a
+							href={obtenerUrlPerfil(proyecto.institucion)}
+							class="truncate font-medium text-gray-700 transition-colors hover:text-blue-600 hover:underline"
+							on:click|stopPropagation
+							on:keydown|stopPropagation
+						>
+							{proyecto.institucion.nombre_legal}
+						</a>
+					{:else}
+						<span class="truncate font-medium text-gray-700"
+							>{proyecto.institucion.nombre_legal}</span
+						>
+					{/if}
 				</div>
 			{/if}
 		</div>

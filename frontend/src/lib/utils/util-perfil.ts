@@ -3,7 +3,7 @@
  */
 
 import type { Proyecto } from '$lib/types/Proyecto';
-import type { Usuario } from '$lib/types/Usuario';
+import type { Usuario, Institucion, ColaboradorDisyuncion } from '$lib/types/Usuario';
 
 /**
  * Verifica si el usuario actual puede ver los contactos del perfil visitado
@@ -114,14 +114,14 @@ function tienenColaboracionEnComun(
 	// Buscar proyectos donde ambos colaboradores tienen colaboración aprobada
 	return proyectos.some((proyecto) => {
 		const colaboraciones = proyecto.colaboraciones || [];
-		
+
 		const tieneColab1 = colaboraciones.some(
 			(c) => c.colaborador_id === colaboradorId1 && c.estado === 'aprobada'
 		);
 		const tieneColab2 = colaboraciones.some(
 			(c) => c.colaborador_id === colaboradorId2 && c.estado === 'aprobada'
 		);
-		
+
 		return tieneColab1 && tieneColab2;
 	});
 }
@@ -164,4 +164,20 @@ export function puedeDejarResena(
 		}
 	}
 	return false;
+}
+
+
+export function obtenerUrlPerfil(
+	usuario?: Usuario | Institucion | ColaboradorDisyuncion | { username?: string }
+): string | null {
+	if (!usuario || !usuario.username) return null;
+	return `/perfil/${usuario.username}`;
+}
+
+export function obtenerUsernameDeInstitucion(institucion?: Institucion): string | null {
+	return institucion?.username || null;
+}
+
+export function obtenerUsernameDeColaborador(colaborador?: ColaboradorDisyuncion): string | null {
+	return colaborador?.username || null;
 }

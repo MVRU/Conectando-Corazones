@@ -22,6 +22,7 @@
 	import ModalColaboracion from '$lib/components/proyectos/ModalColaboracion.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
@@ -496,43 +497,84 @@
 							</div>
 
 							<div class="flex items-center justify-between">
-								<div class="flex min-w-0 items-center gap-3">
-									<div
-										class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-										aria-label="Identidad visual de la institución"
+								{#if obtenerUrlPerfil(proyecto.institucion)}
+									<a
+										href={obtenerUrlPerfil(proyecto.institucion)}
+										class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
 									>
-										{#if proyecto.institucion?.url_foto}
-											<img
-												src={proyecto.institucion.url_foto}
-												alt="Logo o foto de la institución"
-												class="h-full w-full object-cover"
-												loading="lazy"
-											/>
-										{:else}
-											<span class="text-[11px] font-semibold text-gray-600"
-												>{iniciales(proyecto.institucion?.nombre_legal)}</span
-											>
-										{/if}
-									</div>
-
-									<div class="min-w-0 flex-1">
-										<span
-											class="block truncate text-sm font-medium text-gray-900"
-											title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-											aria-label="Institución organizadora"
+										<div
+											class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+											aria-label="Identidad visual de la institución"
 										>
-											{(proyecto.institucion?.nombre_legal || 'Institución organizadora') +
-												(esCreador ? ' (vos)' : '')}
-										</span>
-										<div class="mt-1">
+											{#if proyecto.institucion?.url_foto}
+												<img
+													src={proyecto.institucion.url_foto}
+													alt="Logo o foto de la institución"
+													class="h-full w-full object-cover"
+													loading="lazy"
+												/>
+											{:else}
+												<span class="text-[11px] font-semibold text-gray-600"
+													>{iniciales(proyecto.institucion?.nombre_legal)}</span
+												>
+											{/if}
+										</div>
+
+										<div class="min-w-0 flex-1">
 											<span
-												class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+												class="block truncate text-sm font-medium text-gray-900 hover:text-blue-600"
+												title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+												aria-label="Institución organizadora"
 											>
-												{proyecto.institucion?.tipo_institucion || 'Institución'}
+												{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
 											</span>
+											<div class="mt-1">
+												<span
+													class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+												>
+													{proyecto.institucion?.tipo_institucion || 'Institución'}
+												</span>
+											</div>
+										</div>
+									</a>
+								{:else}
+									<div class="flex min-w-0 items-center gap-3">
+										<div
+											class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+											aria-label="Identidad visual de la institución"
+										>
+											{#if proyecto.institucion?.url_foto}
+												<img
+													src={proyecto.institucion.url_foto}
+													alt="Logo o foto de la institución"
+													class="h-full w-full object-cover"
+													loading="lazy"
+												/>
+											{:else}
+												<span class="text-[11px] font-semibold text-gray-600"
+													>{iniciales(proyecto.institucion?.nombre_legal)}</span
+												>
+											{/if}
+										</div>
+
+										<div class="min-w-0 flex-1">
+											<span
+												class="block truncate text-sm font-medium text-gray-900"
+												title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+												aria-label="Institución organizadora"
+											>
+												{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+											</span>
+											<div class="mt-1">
+												<span
+													class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+												>
+													{proyecto.institucion?.tipo_institucion || 'Institución'}
+												</span>
+											</div>
 										</div>
 									</div>
-								</div>
+								{/if}
 							</div>
 						</div>
 					</section>
@@ -646,14 +688,22 @@
 									<li
 										class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
 									>
-										<span
-											class="block flex-1 truncate text-sm text-gray-700"
-											title={obtenerNombreColaborador(colab.colaborador)}
-											>{obtenerNombreColaborador(colab.colaborador) +
-												($usuario?.id_usuario === colab.colaborador?.id_usuario
-													? ' (vos)'
-													: '')}</span
-										>
+										{#if obtenerUrlPerfil(colab.colaborador)}
+											<a
+												href={obtenerUrlPerfil(colab.colaborador)}
+												class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
+												title={obtenerNombreColaborador(colab.colaborador)}
+											>
+												{obtenerNombreColaborador(colab.colaborador)}
+											</a>
+										{:else}
+											<span
+												class="block flex-1 truncate text-sm text-gray-700"
+												title={obtenerNombreColaborador(colab.colaborador)}
+											>
+												{obtenerNombreColaborador(colab.colaborador)}
+											</span>
+										{/if}
 										<span
 											class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
 											aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}

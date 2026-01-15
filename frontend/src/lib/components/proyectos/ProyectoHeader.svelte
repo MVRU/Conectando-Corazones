@@ -4,6 +4,7 @@
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
 	import { Photo } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 
 	export let proyecto: Proyecto;
 	export let esAdministrador: boolean = false;
@@ -47,9 +48,18 @@
 			</h1>
 
 			{#if proyecto.institucion?.nombre_legal}
-				<p class="text-lg font-medium text-white/90">
-					{proyecto.institucion.nombre_legal}
-				</p>
+				{#if obtenerUrlPerfil(proyecto.institucion)}
+					<a
+						href={obtenerUrlPerfil(proyecto.institucion)}
+						class="text-lg font-medium text-white/90 transition-colors hover:text-white hover:underline"
+					>
+						{proyecto.institucion.nombre_legal}
+					</a>
+				{:else}
+					<p class="text-lg font-medium text-white/90">
+						{proyecto.institucion.nombre_legal}
+					</p>
+				{/if}
 			{/if}
 
 			{#if esAdministrador}
