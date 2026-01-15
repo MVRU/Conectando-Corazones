@@ -4,6 +4,7 @@ import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
 // Tipos específicos del formulario de creación de proyecto
 
 export interface UbicacionFormulario {
+  id_proyecto_ubicacion?: number; // Presente si la ubicación existe (modo edición)
   tipo_ubicacion: TipoUbicacion | '';
   modalidad: ModalidadUbicacion | '';
   direccion_presencial?: DireccionPresencialFormulario;
