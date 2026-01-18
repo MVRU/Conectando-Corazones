@@ -26,7 +26,6 @@ TODO:
 		{ value: 'colaboracion', label: 'Propuesta de colaboración' },
 		{ value: 'institucion', label: 'Soy una institución' },
 		{ value: 'feedback', label: 'Feedback del sistema' },
-		{ value: 'denuncia', label: 'Denuncia o reporte' },
 		{ value: 'otro', label: 'Otro' }
 	];
 
