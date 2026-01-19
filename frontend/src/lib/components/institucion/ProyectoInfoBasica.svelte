@@ -26,7 +26,7 @@
 	export let categoriaOtraDescripcion = '';
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
-	
+
 	// Modo edición
 	export let modoEdicion = false;
 	export let beneficiariosOriginales: number | undefined = undefined;
@@ -34,32 +34,24 @@
 	function normalizarBeneficiarios() {
 		if (beneficiarios == null || Number.isNaN(beneficiarios)) return;
 		beneficiarios = Math.trunc(beneficiarios);
-		
-		// En modo edición, no puede ser menor al original
-		if (modoEdicion && beneficiariosOriginales != null && beneficiarios < beneficiariosOriginales) {
-			errores.beneficiarios = `El número de beneficiarios no puede ser menor al valor actual (${beneficiariosOriginales})`;
-			beneficiarios = beneficiariosOriginales;
-			return;
+
+		if (beneficiarios > 0) {
+			limpiarError('beneficiarios');
 		}
-		
-		// Limpiar error si el valor es válido
-		limpiarError('beneficiarios');
-		
+
 		if (beneficiarios < 1) beneficiarios = 1;
 		if (beneficiarios > MAX_BENEFICIARIOS) beneficiarios = MAX_BENEFICIARIOS;
 	}
 
 	function validarBeneficiariosInput() {
-		// Validar en tiempo real sin modificar el valor
-		if (modoEdicion && beneficiariosOriginales != null && beneficiarios != null && beneficiarios < beneficiariosOriginales) {
-			errores.beneficiarios = `El número de beneficiarios no puede ser menor al valor actual (${beneficiariosOriginales})`;
-		} else {
+		if (beneficiarios && beneficiarios > 0) {
 			limpiarError('beneficiarios');
 		}
 	}
 
 	function toggleCategoria(categoriaId?: number) {
 		if (categoriaId == null) return;
+		if (modoEdicion) return;
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
 			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);

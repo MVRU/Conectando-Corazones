@@ -12,7 +12,8 @@
 		normalizarUnidadLibre,
 		validarUnidadLibre,
 		normalizarEspecie,
-		validarEspecie
+		validarEspecie,
+		validarAumentoObjetivo
 	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
@@ -26,7 +27,7 @@
 	export let participacionesPermitidas: ParticipacionForm[] = [];
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
-	
+
 	// Modo edición
 	export let modoEdicion = false;
 	export let participacionesOriginales: ParticipacionPermitida[] = [];
@@ -38,21 +39,6 @@
 		const key = toKey(texto);
 		const lista = unidadesPorTipo[(tipo ?? 'Voluntariado') as keyof typeof unidadesPorTipo] ?? [];
 		return lista.map(toKey).includes(key);
-	}
-
-	function validarUnidadMedidaOtra(s: string, tipo?: TipoParticipacionDescripcion): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
-		if (v.length < 2) return 'Debe tener al menos 2 caracteres';
-		if (v.length > 40) return 'Máximo 40 caracteres';
-		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/%()-]+$/u.test(v))
-			return 'Usá letras, números y signos comunes';
-		if (esUnidadRepetida(tipo, v)) {
-			return 'Esa unidad ya existe. Elegíla de la lista.';
-		}
-		return null;
 	}
 
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
@@ -93,25 +79,21 @@
 			else limpiarError(`participacion_${index}_especie`);
 		} else if (field === 'objetivo') {
 			const valNum = value as number | undefined;
-			
-			// En modo edición, validar que el objetivo no sea menor al original
-			if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida) {
-				const original = participacionesOriginales.find(
-					p => p.id_participacion_permitida === participacionesPermitidas[index].id_participacion_permitida
-				);
-				if (original && valNum !== undefined && valNum < original.objetivo) {
-					errores[`participacion_${index}_objetivo`] = `El objetivo no puede ser menor al actual (${original.objetivo})`;
-					return;
-				}
-			}
-			
+			const original = participacionesOriginales.find(
+				(p) =>
+					p.id_participacion_permitida ===
+					participacionesPermitidas[index].id_participacion_permitida
+			);
+
+			const errAumento = validarAumentoObjetivo(valNum, original?.objetivo);
+
 			participacionesPermitidas[index] = {
 				...participacionesPermitidas[index],
 				objetivo: valNum
 			};
 
-			if (valNum !== undefined && valNum <= 0) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo debe ser mayor a 0';
+			if (errAumento) {
+				errores[`participacion_${index}_objetivo`] = errAumento;
 			} else {
 				limpiarError(`participacion_${index}_objetivo`);
 			}
@@ -155,7 +137,7 @@
 		if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida) {
 			return;
 		}
-		
+
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
@@ -265,9 +247,11 @@
 			tiposParticipacionInfo[participacion.tipo_participacion?.descripcion || 'Voluntariado']}
 		{@const clases = obtenerClasesColor(tipoInfo.color, true)}
 		{@const esOriginal = modoEdicion && !!participacion.id_participacion_permitida}
-		{@const original = esOriginal ? participacionesOriginales.find(
-			p => p.id_participacion_permitida === participacion.id_participacion_permitida
-		) : undefined}
+		{@const original = esOriginal
+			? participacionesOriginales.find(
+					(p) => p.id_participacion_permitida === participacion.id_participacion_permitida
+				)
+			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
 			<div class="mb-4 flex items-center justify-between">
 				<h4 class="flex items-center gap-2 font-medium text-gray-900">
@@ -294,7 +278,6 @@
 					<div>
 						<label for="especie_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 							¿Qué necesitás? *
-
 						</label>
 						<input
 							id="especie_{index}"
@@ -349,7 +332,6 @@
 					<div>
 						<label for="unidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 							Unidad de medida
-
 						</label>
 						<select
 							id="unidad_{index}"

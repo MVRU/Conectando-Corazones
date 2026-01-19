@@ -1,6 +1,7 @@
 import { ICONOS_CATEGORIA, COLORES_UI, COLORES_CATEGORIA } from './constants';
 import { ClipboardDocumentList } from '@steeze-ui/heroicons';
 import type { IconSource } from '@steeze-ui/svelte-icon';
+import { MENSAJES_ERROR } from './validaciones';
 
 export const MAX_BENEFICIARIOS = 100_000;
 
@@ -14,6 +15,24 @@ export function validarBeneficiariosValor(
 	if (n <= 0) return 'El número de beneficiarios debe ser mayor a 0';
 	if (n > max)
 		return `El número ingresado es poco realista (máximo ${max.toLocaleString('es-AR')}).`;
+	return null;
+}
+
+export function validarAumentoBeneficiarios(nuevo: number | undefined, original: number | undefined): string | null {
+	if (original == null) return null;
+	if (nuevo == null) return null;
+	if (nuevo < original) {
+		return `${MENSAJES_ERROR.beneficiariosNoReducir} Mínimo: ${original}.`;
+	}
+	return null;
+}
+
+export function validarAumentoObjetivo(nuevo: number | undefined, original: number | undefined): string | null {
+	if (nuevo != null && nuevo <= 0) return 'El objetivo debe ser mayor a 0';
+	if (original == null || nuevo == null) return null;
+	if (nuevo < original) {
+		return `${MENSAJES_ERROR.objetivoNoReducir} (${original})`;
+	}
 	return null;
 }
 
@@ -153,6 +172,19 @@ export function validarDescripcionProyecto(
 	return null;
 }
 
+export function validarExtensionFecha(nuevaFecha: string | undefined, fechaOriginal: string | undefined): string | null {
+	if (!fechaOriginal || !nuevaFecha) return null;
+	const dNueva = new Date(nuevaFecha);
+	const dOriginal = new Date(fechaOriginal);
+
+	if (isNaN(dNueva.getTime()) || isNaN(dOriginal.getTime())) return null;
+
+	if (dNueva < dOriginal) {
+		return `${MENSAJES_ERROR.fechaNoAnterior} La fecha actual es ${fechaOriginal}.`;
+	}
+	return null;
+}
+
 export function esFechaDemasiadoLejana(fecha?: Date | string, maxAnios: number = 2): boolean {
 	if (!fecha) return false;
 
@@ -173,13 +205,13 @@ export function esFechaDemasiadoLejana(fecha?: Date | string, maxAnios: number =
 export function validarUrlImagen(url: string): string | null {
 	if (!url) return null; // Campo opcional
 	const v = url.trim();
-	
+
 	// Validar longitud máxima
 	if (v.length > 255) return 'La URL es demasiado extensa. Por favor proporcione una mas breve';
-	
+
 	const isDataImage = /^data:image\//i.test(v);
 	if (isDataImage) return null;
-	
+
 	// Detectar si parece una URL pero no tiene protocolo
 	if (!v.startsWith('http://') && !v.startsWith('https://')) {
 		// Si parece una URL (tiene www. o tiene punto y barra)
@@ -187,25 +219,25 @@ export function validarUrlImagen(url: string): string | null {
 			return 'La URL debe comenzar con http:// o https://.';
 		}
 	}
-	
-	// Validar que sea una URL válida
+
+	// Validar que sea una URL válida 
 	let urlObj: URL;
 	try {
 		urlObj = new URL(v);
 	} catch {
 		return 'El formato de la URL no es válido.';
 	}
-	
+
 	// Validar que tenga protocolo http o https
 	if (!['http:', 'https:'].includes(urlObj.protocol)) {
 		return 'La URL debe comenzar con http:// o https://.';
 	}
-	
+
 	// Luego validar la extensión de imagen
 	const path = urlObj.pathname.toLowerCase();
 	const hasValidExt = /(\.jpg|\.jpeg|\.png|\.webp|\.gif)$/.test(path);
 	if (!hasValidExt) return 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)';
-	
+
 	return null;
 }
 

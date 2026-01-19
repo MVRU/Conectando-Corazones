@@ -29,7 +29,15 @@ export const MENSAJES_ERROR = {
 	fechaMuyAntigua: 'La fecha es demasiado antigua',
 	nombreLegalDuplicado: 'El nombre legal ya se encuentra registrado',
 	nombreCorto: 'El nombre debe tener al menos 3 caracteres',
-	razonSocialDuplicada: 'La razón social ya se encuentra registrada'
+	razonSocialDuplicada: 'La razón social ya se encuentra registrada',
+	fechaFinObligatoria: 'La fecha de fin es obligatoria.',
+	fechaFinFutura: 'La fecha de fin debe ser futura.',
+	fechaLejana: 'La fecha es demasiado lejana.',
+	imagenUrlInvalida: 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)',
+	especieObligatoria: 'Especificá el ítem.',
+	beneficiariosNoReducir: 'El número de beneficiarios no puede reducirse.',
+	objetivoNoReducir: 'El objetivo no puede ser menor al actual.',
+	fechaNoAnterior: 'Solo puedes extender la fecha.'
 };
 
 /**
