@@ -222,7 +222,16 @@
 					on:keydown|stopPropagation={() => {}}
 					role="presentation"
 				>
-					{#if esInstitucion && proyecto.estado === 'en_curso'}
+					{#if esInstitucion && proyecto.estado === 'pendiente_solicitud_cierre'}
+						<!-- Institución: Proyecto listo para solicitar cierre -->
+						<Button
+							label="Solicitar cierre"
+							href={`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`}
+							size="sm"
+							customClass="w-full"
+							customAriaLabel="Solicitar cierre del proyecto"
+						/>
+					{:else if esInstitucion && proyecto.estado === 'en_curso'}
 						<!-- Institución: Editar + Ver panel -->
 						<Button
 							label="Editar"
