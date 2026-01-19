@@ -782,7 +782,7 @@ const proyectosBase: Proyecto[] = [
 		descripcion: 'Acompañamiento educativo para estudiantes con dificultades de aprendizaje. Clases de apoyo en matemática y lengua durante las tardes.',
 		resumen: 'Reforzamos contenidos clave para evitar el abandono escolar.',
 		aprendizajes: 'El apoyo individualizado marca la diferencia en el rendimiento académico.',
-		url_portada: '/img/proyectos-22.jpg',
+		url_portada: '/img/proyectos-22.webp',
 		created_at: new Date('2025-09-10'),
 		updated_at: new Date('2025-12-20'),
 		fecha_cierre_postulaciones: new Date('2025-10-15'),
