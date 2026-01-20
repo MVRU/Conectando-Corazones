@@ -90,23 +90,11 @@ const usuariosPorRol = usuariosArray.reduce(
 		</div>
 
 		<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-			<p class="text-xs font-medium text-gray-500">Acciones rápidas</p>
-			<div class="mt-2 flex flex-col gap-2 text-xs">
-				<Button
-					label="Ver usuarios"
-					variant="secondary"
-					size="sm"
-					type="button"
-					on:click={() => (window.location.href = '/admin/usuarios')}
-				/>
-				<Button
-					label="Ver proyectos"
-					variant="secondary"
-					size="sm"
-					type="button"
-					on:click={() => (window.location.href = '/admin/proyectos')}
-				/>
-			</div>
+			<p class="text-xs font-medium text-gray-500">Estado del sistema</p>
+			<p class="mt-2 text-sm font-semibold text-gray-900">Todo en orden</p>
+			<p class="mt-1 text-xs text-gray-500">
+				Seguimiento general de métricas y actividad reciente del sistema.
+			</p>
 		</div>
 	</section>
 

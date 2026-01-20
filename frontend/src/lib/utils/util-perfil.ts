@@ -32,6 +32,11 @@ export function puedeVerContactos(
 		return false;
 	}
 
+	// Si es admin, siempre puede ver contactos
+	if (usuarioActual.rol === 'administrador') {
+		return true;
+	}
+
 	// Si es su propio perfil, siempre puede ver
 	if (usuarioActual.id_usuario === perfilUsuario.id_usuario) {
 		return true;

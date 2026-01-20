@@ -25,16 +25,6 @@
 			isActive: (pathname: string) => pathname.startsWith('/admin/proyectos')
 		},
 		{
-			label: 'Reportes',
-			href: '/admin/reportes',
-			isActive: (pathname: string) => pathname.startsWith('/admin/reportes')
-		},
-		{
-			label: 'Usuarios con bajas calificaciones',
-			href: '/admin/usuarios-bajas-calificaciones',
-			isActive: (pathname: string) => pathname.startsWith('/admin/usuarios-bajas-calificaciones')
-		},
-		{
 			label: 'Moderacion de resenas',
 			href: '/admin/moderacion-resenas',
 			isActive: (pathname: string) => pathname.startsWith('/admin/moderacion-resenas')
@@ -63,11 +53,11 @@
 </svelte:head>
 
 <main class="min-h-screen bg-gray-50 text-gray-900">
-		<div class="flex min-h-screen">
+		<div class="mx-auto flex min-h-screen w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 			<!-- Sidebar -->
-			<aside class="hidden w-64 flex-shrink-0 border-r border-gray-200 bg-white/95 px-4 py-6 shadow-sm lg:block">
+			<aside class="hidden w-64 flex-shrink-0 rounded-2xl border border-gray-200 bg-white px-4 py-6 shadow-sm lg:block">
 				<div class="mb-8">
-					<h1 class="text-lg font-semibold text-[rgb(var(--base-color))]">Admin</h1>
+					<h1 class="text-lg font-semibold text-[rgb(var(--base-color))]">Administración</h1>
 					<p class="mt-1 text-xs text-gray-500">Gestión de la plataforma</p>
 				</div>
 
@@ -85,9 +75,9 @@
 			</aside>
 
 			<!-- Contenido principal -->
-			<section class="flex-1">
+			<section class="flex-1 lg:pl-6">
 				<!-- Topbar -->
-			<header class="flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+				<header class="flex items-center justify-between rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
 					<div>
 						<h2 class="text-base font-semibold text-gray-900">Panel de administración</h2>
 						<p class="text-xs text-gray-500">Control de usuarios, proyectos y colaboraciones</p>
@@ -111,18 +101,11 @@
 								<span class="text-[10px] uppercase tracking-wide text-[rgb(var(--color-primary))]">Administrador</span>
 							</div>
 						{/if}
-						<Button
-							label="Volver al panel"
-							variant="secondary"
-							size="sm"
-							type="button"
-							on:click={() => goto('/mi-panel')}
-						/>
 					</div>
 			</header>
 
 			{#if menuAbierto}
-				<nav class="border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
+				<nav class="mt-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
 					<div class="flex flex-col gap-1">
 						{#each adminLinks as link}
 							<a
@@ -139,7 +122,7 @@
 			{/if}
 
 				<!-- Slot para las páginas hijas -->
-				<div class="px-4 py-6 sm:px-6 lg:px-8">
+				<div class="mt-6 rounded-2xl border border-gray-200 bg-white px-4 py-6 shadow-sm sm:px-6 lg:px-8">
 					<slot />
 				</div>
 			</section>

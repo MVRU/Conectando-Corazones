@@ -74,8 +74,8 @@
 					}
 				]
 			: []),
-					{ label: 'Mi perfil', href: '/perfil' },
-		{ label: $isAdmin ? 'Panel de administración' : 'Panel de control', href: '/mi-panel' },
+		{ label: 'Mi perfil', href: '/perfil' },
+		{ label: $isAdmin ? 'Panel de administración' : 'Panel de control', href: $isAdmin ? '/admin' : '/mi-panel' },
 		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
 		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
 		...($isColaborador

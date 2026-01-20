@@ -11,7 +11,7 @@
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { authActions, canAccessRoute, isLoading, isAdmin } from '$lib/stores/auth';
+	import { authActions, canAccessRoute, isLoading } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 
@@ -19,10 +19,6 @@
 
 	let showBreadcrumbs = false;
 	$: showBreadcrumbs = shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2;
-
-	let esVistaAdmin = false;
-	// TODO: mover esta lógica de detección de admin a un guard de rutas o a load functions cuando se integre backend real.
-	$: esVistaAdmin = $isAdmin && $page.url.pathname.startsWith('/admin');
 
 	let mounted = false;
 	/**
@@ -58,13 +54,11 @@
 	}
 </script>
 
-{#if !esVistaAdmin}
-	<Header />
-	<MotionNotice />
-{/if}
+<Header />
+<MotionNotice />
 <ToastHost />
 
-{#if showBreadcrumbs && !esVistaAdmin}
+{#if showBreadcrumbs}
 	<Breadcrumbs />
 {/if}
 
@@ -74,6 +68,4 @@
 	<slot />
 </main>
 
-{#if !esVistaAdmin}
-	<Footer />
-{/if}
+<Footer />
