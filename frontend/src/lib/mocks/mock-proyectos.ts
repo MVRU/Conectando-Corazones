@@ -46,7 +46,7 @@ const proyectosBase: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2025-10-01'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
-		colaboracion_ids: [1, 2],
+		colaboracion_ids: [1, 2, 25],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [1],
 		estado: 'en_curso',

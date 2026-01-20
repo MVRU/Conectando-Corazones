@@ -110,5 +110,43 @@ export const mockVerificaciones: Verificacion[] = [
 		estado: 'pendiente',
 		created_at: new Date('2024-09-10'),
 		usuario_id: 20
+	},
+	{
+		id_verificacion: 15,
+		tipo: 'email_institucional',
+		estado: 'aprobada',
+		created_at: new Date('2024-10-01'),
+		fecha_vencimiento: new Date('2025-10-01'),
+		usuario_id: 5
+	},
+	{
+		id_verificacion: 16,
+		tipo: 'renaper',
+		estado: 'aprobada',
+		created_at: new Date('2024-11-01'),
+		fecha_vencimiento: new Date('2025-11-01'),
+		usuario_id: 4
+	},
+	{
+		id_verificacion: 17,
+		tipo: 'email_institucional',
+		estado: 'pendiente',
+		created_at: new Date('2024-12-01'),
+		usuario_id: 7 
+	},
+	{
+		id_verificacion: 18,
+		tipo: 'renaper',
+		estado: 'pendiente',
+		created_at: new Date('2024-12-15'),
+		usuario_id: 8 
+	},
+	{
+		id_verificacion: 19,
+		tipo: 'email_institucional',
+		estado: 'aprobada',
+		created_at: new Date('2024-05-10'),
+		fecha_vencimiento: new Date('2025-05-10'),
+		usuario_id: 6 
 	}
 ];

@@ -12,7 +12,6 @@
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
 	import type { Provincia } from '$lib/types/Provincia';
-	import { crearUrlGoogleMapsBasica } from '$lib/utils/util-ubicaciones';
 	import type { Localidad } from '$lib/types/Localidad';
 	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
@@ -33,10 +32,10 @@
 	let provincia: Provincia | undefined;
 	let localidad: Localidad | undefined;
 	let localidadesProvincia: Localidad[] = [];
-	let referencia = '';
 	let urlGoogleMaps = '';
 	let googleMapsPreview: UrlsVistaPreviaGoogleMaps | null = null;
 	let urlGoogleMapsLegible = '';
+	let referencia = '';
 
 	function decodeUrlForDisplay(url: string): string {
 		try {

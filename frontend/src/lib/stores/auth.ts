@@ -316,7 +316,6 @@ export function canAccessRoute(route: string): boolean {
 		'/institucion': ['institucion', 'administrador'],
 		'/colaborador': ['colaborador', 'administrador'],
 		'/proyectos/crear': ['institucion', 'administrador'],
-		'/perfil': ['institucion', 'colaborador', 'administrador'],
 		'/mi-panel': ['institucion', 'colaborador', 'administrador'],
 		'/configuracion': ['institucion', 'colaborador', 'administrador'],
 		'/reportes': ['institucion', 'colaborador', 'administrador']
