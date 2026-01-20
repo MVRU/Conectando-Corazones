@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import { redirect, type Handle } from '@sveltejs/kit';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -12,5 +12,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.cookies.delete('auth_token', { path: '/' });
 		}
 	}
+
+	if (event.url.pathname.startsWith('/mis-proyectos')) {
+		if (!event.locals.usuario) {
+			throw redirect(303, '/iniciar-sesion');
+		}
+	}
+
 	return resolve(event);
 };

@@ -3,6 +3,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	import {
 		TIPOS_CONTACTO,
@@ -21,6 +22,10 @@
 
 	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
 	let enviando = false;
+	let intentoEnvio = false;
+	let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
+		{ valor: false, etiqueta: false }
+	];
 
 	const etiquetasTipoContacto: Record<TipoContacto, string> = {
 		telefono: 'Teléfono',
@@ -53,6 +58,17 @@
 
 	export let mostrarOmitir = false;
 	export let etiquetaOmitir = 'Omitir';
+	export let valoresIniciales: Contacto[] = [];
+	export let bloquearPrimerContacto = true;
+
+	// Si vienen valores iniciales y el formulario está "vacío", precargamos
+	$: if (valoresIniciales && valoresIniciales.length > 0) {
+		const formularioVacio =
+			contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+		if (formularioVacio) {
+			contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+		}
+	}
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
@@ -70,6 +86,11 @@
 				return 'Ej: Valor del contacto';
 		}
 	}
+
+	$: camposTocados =
+		camposTocados.length === contactos.length
+			? camposTocados
+			: contactos.map((_, idx) => camposTocados[idx] ?? { valor: false, etiqueta: false });
 
 	$: errors = contactos.map((contacto, index) => {
 		const { tipo_contacto, valor, etiqueta } = contacto;
@@ -103,14 +124,23 @@
 
 	function agregarContacto() {
 		contactos = [...contactos, { tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
+		camposTocados = [...camposTocados, { valor: false, etiqueta: false }];
 	}
 
 	function eliminarContacto(index: number) {
 		contactos = contactos.filter((_, i) => i !== index);
+		camposTocados = camposTocados.filter((_, i) => i !== index);
+	}
+
+	function marcarCampoComoTocado(indice: number, campo: 'valor' | 'etiqueta') {
+		camposTocados = camposTocados.map((item, idx) =>
+			idx === indice ? { ...item, [campo]: true } : item
+		);
 	}
 
 	function manejarEnvio(event: SubmitEvent) {
 		event.preventDefault();
+		intentoEnvio = true;
 		if (tieneErrores) return;
 
 		enviando = true;
@@ -118,7 +148,21 @@
 		setTimeout(() => {
 			enviando = false;
 			dispatch('submit', contactos);
+			toastStore.show({
+				variant: 'success',
+				title: 'Cambios guardados',
+				message: 'Tu descripción, ubicación y formas de contacto se actualizaron correctamente.'
+			});
 		}, 800);
+	}
+
+	function omitirContactos() {
+		toastStore.show({
+			variant: 'info',
+			title: 'Paso omitido',
+			message: 'Podés agregar formas de contacto más adelante desde tu panel de registro.'
+		});
+		dispatch('skip');
 	}
 </script>
 
@@ -126,40 +170,47 @@
 	<div class="space-y-6">
 		{#each contactos as contacto, i (contacto)}
 			<div
-				class="group relative flex flex-row items-start gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+				class="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md sm:flex sm:items-start sm:gap-4"
 			>
-				<div class="flex flex-1 flex-wrap gap-4">
+				<!-- Indicador para mobile -->
+				<div class="absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 sm:hidden">
+					{i + 1}
+				</div>
+
+				<div class="flex flex-1 flex-col gap-4 sm:flex-row sm:items-start">
 					<!-- Tipo de contacto -->
-					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for={'tipo-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
-							Tipo de contacto
+					<div class="w-full sm:w-1/3 md:w-1/4">
+						<label for={'tipo-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
+							Tipo <span class="sr-only">de contacto</span>
 						</label>
 						<Select
 							id={'tipo-' + i}
 							bind:value={contacto.tipo_contacto}
-							disabled={i === 0}
+							disabled={i === 0 && bloquearPrimerContacto}
 							options={opcionesTipoContacto as unknown as Array<{ value: string; label: string }>}
 							searchable={false}
 						/>
 					</div>
 
 					<!-- Valor del contacto -->
-					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for={'valor-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
+					<div class="w-full sm:flex-1">
+						<label for={'valor-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
 							Valor <span class="text-red-600">*</span>
 						</label>
 						<Input
 							id={'valor-' + i}
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
-							error={errors[i]}
+							error={contacto.valor.trim() ? errors[i] : ''}
+							on:blur={() => marcarCampoComoTocado(i, 'valor')}
+							disabled={i === 0 && bloquearPrimerContacto}
 						/>
 					</div>
 
 					<!-- Etiqueta -->
-					<div class="min-w-[200px] flex-1 md:flex-none">
-						<label for={'etiqueta-' + i} class="mb-2 block text-sm font-semibold text-gray-700">
-							{contacto.tipo_contacto === 'otro' ? 'Especificar tipo' : 'Etiqueta'}
+					<div class="w-full sm:w-1/3 md:w-1/4">
+						<label for={'etiqueta-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
+							{contacto.tipo_contacto === 'otro' ? 'Especificar' : 'Etiqueta'}
 						</label>
 						{#if contacto.tipo_contacto === 'red_social'}
 							<Select
@@ -168,17 +219,19 @@
 								options={[
 									{
 										value: '',
-										label: 'Elegí una red social'
+										label: 'Elegí red social'
 									},
 									...redesSociales.map((r) => ({ value: r, label: r }))
 								]}
 								searchable={false}
+								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
 							/>
 						{:else if contacto.tipo_contacto === 'otro'}
 							<Input
 								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								placeholder="Ej: Telegram..."
+								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
 							/>
 						{:else}
 							<Select
@@ -192,23 +245,32 @@
 									...opcionesEtiqueta
 								]}
 								searchable={false}
+								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								disabled={i === 0 && bloquearPrimerContacto}
 							/>
 						{/if}
 					</div>
-
-					<!-- Botón eliminar -->
-					{#if i > 0}
-						<div class="ml-auto">
-							<button
-								type="button"
-								on:click={() => eliminarContacto(i)}
-								class="cursor-pointer rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-100 focus:outline-none"
-							>
-								Eliminar
-							</button>
-						</div>
-					{/if}
 				</div>
+
+				<!-- Botón eliminar -->
+				{#if i > 0}
+					<div class="mt-4 flex justify-end sm:mt-6 sm:w-auto">
+						<button
+							type="button"
+							on:click={() => eliminarContacto(i)}
+							title="Eliminar contacto"
+							aria-label="Eliminar contacto"
+							class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-200"
+						>
+							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+							</svg>
+						</button>
+					</div>
+				{:else}
+					<!-- Espaciador para alinear con filas que tienen botón de eliminar (solo desktop) -->
+					<div class="hidden sm:block sm:w-[36px] sm:mt-6"></div>
+				{/if}
 			</div>
 		{/each}
 
@@ -217,12 +279,12 @@
 			<button
 				type="button"
 				on:click={agregarContacto}
-				class="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
+				class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 px-6 py-3 text-sm font-medium text-blue-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6H6m6 0h6" />
 				</svg>
-				Agregar contacto
+				Agregar otro contacto
 			</button>
 		</div>
 	</div>
@@ -233,15 +295,16 @@
 			<Button
 				label={etiquetaOmitir}
 				variant="secondary"
-				size="md"
-				on:click={() => dispatch('skip')}
+				size="sm"
+				on:click={omitirContactos}
 				customClass="w-full md:w-auto"
 			/>
 		{/if}
+		<slot name="botones-extra" />
 		<Button
 			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"
-			size="md"
+			size="sm"
 			disabled={tieneErrores || enviando}
 			customClass="w-full md:w-auto"
 		/>

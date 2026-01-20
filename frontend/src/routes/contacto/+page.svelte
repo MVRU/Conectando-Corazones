@@ -11,6 +11,7 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import type { PageData } from '../contacto/$types';
+	import { toastStore } from '$lib/stores/toast';
 
 	export let data: PageData;
 	let formularioEnviado = false;
@@ -25,7 +26,6 @@ TODO:
 		{ value: 'colaboracion', label: 'Propuesta de colaboración' },
 		{ value: 'institucion', label: 'Soy una institución' },
 		{ value: 'feedback', label: 'Feedback del sistema' },
-		{ value: 'denuncia', label: 'Denuncia o reporte' },
 		{ value: 'otro', label: 'Otro' }
 	];
 
@@ -59,6 +59,11 @@ TODO:
 		setTimeout(() => {
 			enviandoFormulario = false;
 			formularioEnviado = true;
+			toastStore.show({
+				variant: 'success',
+				title: 'Mensaje enviado',
+				message: 'Recibimos tu consulta. Te responderemos a la brevedad.'
+			});
 
 			setTimeout(() => {
 				formularioEnviado = false;
@@ -191,7 +196,7 @@ TODO:
 							rows="5"
 							required
 							placeholder="Escribí tu mensaje aquí..."
-							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						></textarea>
 					</div>
 

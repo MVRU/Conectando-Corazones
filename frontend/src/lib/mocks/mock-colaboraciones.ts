@@ -25,6 +25,15 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(5)
 	},
 	{
+		id_colaboracion: 25,
+		estado: 'aprobada',
+		mensaje: 'Como empresa nos interesa apoyar iniciativas educativas. Podemos aportar recursos materiales y voluntarios de nuestro equipo.',
+		created_at: new Date('2025-03-08'),
+		proyecto_id: 1,
+		colaborador_id: 7,
+		colaborador: getColaborador(7) // empresa_solidaria - Juan Carlos Mendoza
+	},
+	{
 		id_colaboracion: 3,
 		estado: 'aprobada',
 		created_at: new Date('2025-02-15'),
@@ -75,13 +84,23 @@ export const mockColaboraciones: Colaboracion[] = [
 	{
 		id_colaboracion: 9,
 		estado: 'aprobada',
-		created_at: new Date('2025-04-15'),
+		mensaje: 'Tengo experiencia en talleres de arte y puedo contribuir con materiales y tiempo para enseñar técnicas de pintura.',
+		created_at: new Date('2025-04-20'),
 		proyecto_id: 8,
-		colaborador_id: 7,
-		colaborador: getColaborador(7)
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g - Proyecto completado
 	},
 	{
 		id_colaboracion: 10,
+		estado: 'aprobada',
+		mensaje: 'Me encantaría colaborar en la biblioteca digital aportando mi experiencia en catalogos y gestión de recursos digitales.',
+		created_at: new Date('2024-09-01'),
+		proyecto_id: 9,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g - Proyecto completado
+	},
+	{
+		id_colaboracion: 11,
 		estado: 'pendiente',
 		mensaje:
 			'Como biblioteca popular, tenemos muchos libros infantiles que podríamos donar y experiencia organizando actividades de lectura para niños.',
@@ -91,7 +110,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(5) // biblioteca_popular
 	},
 	{
-		id_colaboracion: 11,
+		id_colaboracion: 12,
 		estado: 'pendiente',
 		mensaje:
 			'Nuestra fundación tiene amplia experiencia en proyectos educativos y podemos aportar recursos humanos, materiales didácticos y voluntarios especializados.',
@@ -101,7 +120,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(6) // fundacion_manos_unidas
 	},
 	{
-		id_colaboracion: 12,
+		id_colaboracion: 13,
 		estado: 'pendiente',
 		mensaje:
 			'Como parte de nuestra responsabilidad social empresaria, queremos apoyar la educación infantil con donaciones económicas y voluntarios de nuestro equipo.',
@@ -111,7 +130,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 13,
+		id_colaboracion: 14,
 		estado: 'pendiente',
 		mensaje:
 			'Soy docente jubilada y me encantaría colaborar con mi experiencia pedagógica. Puedo ayudar con clases de apoyo y actividades recreativas.',
@@ -121,7 +140,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(8) // ana_martinez
 	},
 	{
-		id_colaboracion: 14,
+		id_colaboracion: 15,
 		estado: 'pendiente',
 		mensaje:
 			'Tengo experiencia en trabajo comunitario y me gustaría aportar tiempo de voluntariado los fines de semana para ayudar con las actividades del proyecto.',
@@ -131,7 +150,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(4) // maria_gonzalez
 	},
 	{
-		id_colaboracion: 15,
+		id_colaboracion: 16,
 		estado: 'aprobada',
 		mensaje:
 			'Nuestra fundación tiene amplia experiencia en proyectos educativos y podemos aportar recursos humanos y materiales.',
@@ -141,7 +160,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(6) // fundacion_manos_unidas
 	},
 	{
-		id_colaboracion: 16,
+		id_colaboracion: 17,
 		estado: 'pendiente',
 		mensaje:
 			'Como empresa comprometida con la RSE, queremos apoyar la educación con donaciones y voluntarios corporativos.',
@@ -152,7 +171,7 @@ export const mockColaboraciones: Colaboracion[] = [
 	},
 	// Colaboraciones para proyecto 2
 	{
-		id_colaboracion: 17,
+		id_colaboracion: 18,
 		estado: 'pendiente',
 		mensaje:
 			'Podemos donar alimentos no perecederos y coordinar jornadas de voluntariado para ayudar con la alimentación.',
@@ -162,17 +181,17 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 18,
+		id_colaboracion: 19,
 		estado: 'aprobada',
 		mensaje: 'Como nutricionista, puedo asesorar sobre alimentación saludable y planificar menús.',
 		created_at: new Date('2025-02-20'),
-		proyecto_id: 7,
+		proyecto_id: 7,	
 		colaborador_id: 8,
 		colaborador: getColaborador(8) // ana_martinez
 	},
 
 	{
-		id_colaboracion: 19,
+		id_colaboracion: 20,
 		estado: 'rechazada',
 		mensaje: 'Quiero ayudar en lo que sea necesario.',
 		justificacion:
@@ -183,7 +202,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(4) // maria_gonzalez
 	},
 	{
-		id_colaboracion: 20,
+		id_colaboracion: 21,
 		estado: 'rechazada',
 		mensaje: 'Mi empresa puede ayudar con donaciones económicas grandes.',
 		justificacion:
@@ -194,7 +213,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(7) // empresa_solidaria_sa
 	},
 	{
-		id_colaboracion: 21,
+		id_colaboracion: 22,
 		estado: 'rechazada',
 		mensaje: 'Tengo tiempo libre los martes por la tarde.',
 		justificacion:
@@ -203,5 +222,34 @@ export const mockColaboraciones: Colaboracion[] = [
 		proyecto_id: 2,
 		colaborador_id: 8,
 		colaborador: getColaborador(8) // ana_martinez
+	},
+	{
+		id_colaboracion: 23,
+		estado: 'pendiente',
+		mensaje: 'Me encantaría colaborar para reducir la brecha digital.',
+		created_at: new Date('2026-01-04'),
+		proyecto_id: 12,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	},
+	{
+		id_colaboracion: 24,
+		estado: 'rechazada',
+		mensaje: 'Quiero ayudar en lo que sea necesario.',
+		justificacion:
+			'El mensaje es muy genérico y no especifica cómo puede contribuir al proyecto específico.',
+		created_at: new Date('2026-01-04'),
+		proyecto_id: 19,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	},
+	{
+		id_colaboracion: 25,
+		estado: 'aprobada',
+		mensaje: 'Colaboración para evaluación de cierre.',
+		created_at: new Date('2025-04-01'),
+		proyecto_id: 3,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
 	}
 ];

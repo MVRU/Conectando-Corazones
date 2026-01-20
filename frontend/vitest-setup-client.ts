@@ -1,21 +1,29 @@
 import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
+// import { vi } from 'vitest';
 
 /**
  * * Mocks globales para jsdom
  */
 
+const buildMatchMedia = (query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        dispatchEvent: () => false
+});
+
 Object.defineProperty(window, 'matchMedia', {
-	writable: true,
-	enumerable: true,
-	value: vi.fn().mockImplementation((query) => ({
-		matches: false,
-		media: query,
-		onchange: null,
-		addEventListener: vi.fn(),
-		removeEventListener: vi.fn(),
-		dispatchEvent: vi.fn()
-	}))
+        writable: true,
+        enumerable: true,
+        value: buildMatchMedia
+});
+
+Object.defineProperty(globalThis, 'matchMedia', {
+        writable: true,
+        enumerable: true,
+        value: buildMatchMedia
 });
 
 // * Mock para ResizeObserver, requerido por Breadcrumbs

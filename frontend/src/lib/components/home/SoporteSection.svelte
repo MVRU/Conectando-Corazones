@@ -24,7 +24,7 @@
 			icon: 'alert',
 			title: 'Denuncias y Reportes',
 			description: 'Nos tomamos muy en serio la seguridad y transparencia de nuestra comunidad.',
-			link: '/contacto?tipo=denuncia',
+			link: '/reportar-irregularidad',
 			linkText: 'Reportar incidencia'
 		}
 	] as const;
@@ -58,7 +58,7 @@
 			<Badge text="Estamos aquí para ayudarte" />
 		</div>
 		<h2
-			class="mb-10 text-center text-2xl leading-tight font-extrabold text-white drop-shadow transition-all duration-1000 sm:text-3xl md:text-4xl"
+			class="mb-10 text-center text-2xl font-extrabold leading-tight text-white drop-shadow transition-all duration-1000 sm:text-3xl md:text-4xl"
 			class:fade-down={visible}
 			class:fade-initial-down={!visible}
 			style="transition-delay:80ms"

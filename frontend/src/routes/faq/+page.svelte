@@ -71,7 +71,7 @@
 	<!-- Barra de búsqueda -->
 	<div class="animate-fade-in-up mx-auto mb-16 w-full max-w-xl">
 		<SearchBar
-			bind:value={searchQuery}
+			bind:value={$searchQuery}
 			placeholder="Buscar entre las preguntas..."
 			ariaLabel="Campo de búsqueda de preguntas frecuentes"
 			autofocus={true}
@@ -130,7 +130,7 @@
 		{#each $faqsFiltradas as categoria, i (categoria.categoria)}
 			<div class="fade-slide-in" style="animation-delay: {i * 120}ms">
 				<div
-					class="rounded-xl border border-gray-100 bg-white px-6 pt-5 pb-6 shadow-sm transition-all hover:shadow-md"
+					class="rounded-xl border border-gray-100 bg-white px-6 pb-6 pt-5 shadow-sm transition-all hover:shadow-md"
 				>
 					<h3
 						class="mb-5 flex items-center justify-between border-b border-gray-100 pb-2 text-xl font-medium text-stone-700"
@@ -158,7 +158,7 @@
 										<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
 									</svg>
 								</summary>
-								<p class="mt-3 overflow-hidden text-sm leading-relaxed text-ellipsis text-gray-600">
+								<p class="mt-3 overflow-hidden text-ellipsis text-sm leading-relaxed text-gray-600">
 									<Highlight text={item.respuesta} query={$searchQuery} />
 								</p>
 							</details>

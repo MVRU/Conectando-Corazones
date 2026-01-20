@@ -1,11 +1,12 @@
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
-import { getLocalidad } from '$lib/utils/util-ubicaciones';
+import { mockCategorias } from '$lib/mocks/mock-categorias';
+import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 export const mockUsuarios = {
 	admin1: {
 		id_usuario: 1,
-		username: 'alexis_sklate',
+		username: 'admin_conectando',
 		password: '123456',
 		nombre: 'Alexis',
 		apellido: 'Sklate',
@@ -13,16 +14,11 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2020-01-01'),
 		rol: 'administrador',
-		url_foto: '/users/admin-default.png',
-		direccion: {
-			calle: 'Av. Corrientes',
-			numero: '1234',
-			piso: '5',
-			departamento: 'A',
-			referencia: 'Edificio Torre Central, entre Callao y Uruguay',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+		url_foto: '/users/user-default.png',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
+		descripcion: 'Administrador principal de la plataforma Conectando Corazones. Encargado de la supervisión, gestión de usuarios y validación de contenidos para asegurar el correcto funcionamiento de la comunidad.',
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
 		],
@@ -55,15 +51,11 @@ export const mockUsuarios = {
 		rol: 'institucion',
 		url_foto: '/users/escuela-esperanza.jpg',
 		nombre_legal: 'Escuela Primaria Esperanza',
-		tipo_institucion: 'educacion_publica',
-		direccion: {
-			calle: 'San Martín',
-			numero: '456',
-			referencia: 'Frente a la plaza principal',
-			localidad_id: 4,
+		tipo_institucion: 'Educación pública',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
+		descripcion: 'Somos una institución educativa comprometida con la formación integral de niños y jóvenes. Nuestro objetivo es brindar educación de calidad y fomentar valores solidarios en la comunidad de Rosario.',
 
-			localidad: getLocalidad(4)
-		},
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'direccion@escuelaesperanza.edu.ar', etiqueta: 'principal' },
 			{
@@ -71,7 +63,7 @@ export const mockUsuarios = {
 				valor: 'direccion2@escuelaesperanza.edu.ar',
 				etiqueta: 'secundario'
 			},
-			{ tipo_contacto: 'telefono', valor: '341 XXXXXXX', etiqueta: 'celular' }
+			{ tipo_contacto: 'telefono', valor: '341 1234567', etiqueta: 'celular' }
 		],
 		consentimientos: [
 			{
@@ -105,16 +97,13 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-10'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-garrahan.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital de Pediatría Prof. Dr. Juan P. Garrahan',
-		tipo_institucion: 'salud_publica',
-		direccion: {
-			calle: 'Combate de los Pozos',
-			numero: '1881',
-			referencia: 'Hospital Garrahan - Sector Administrativo',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+		tipo_institucion: 'Salud pública',
+		localidad_id: 3,
+		localidad: mockLocalidades[2],
+		descripcion: 'Centro de referencia nacional en salud pública pediátrica. Nos dedicamos a la atención integral de niños y adolescentes, promoviendo la investigación y la docencia para garantizar el bienestar infantil.',
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }
 		],
@@ -140,22 +129,30 @@ export const mockUsuarios = {
 		password: '123456',
 		nombre: 'María',
 		apellido: 'González',
-		fecha_nacimiento: new Date('1988-07-22'),
+		fecha_nacimiento: new Date('1985-05-20'),
 		estado: 'activo',
 		created_at: new Date('2024-02-01'),
 		rol: 'colaborador',
-		url_foto: '/users/maria-gonzalez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
-		direccion: {
-			calle: 'Mitre',
-			numero: '789',
-			piso: '2',
-			departamento: 'B',
-			localidad_id: 5,
-			localidad: getLocalidad(5)
-		},
+		descripcion: 'Apasionada por la educación y el arte. Me encanta colaborar en proyectos que promuevan el desarrollo cultural y educativo de la comunidad. Tengo experiencia en organización de eventos y talleres para niños.',
+		localidad_id: 5,
+		localidad: mockLocalidades[4],
 		contactos: [
-			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' }
+			{ tipo_contacto: 'email', valor: 'maria.gonzalez@gmail.com', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '341 22233665', etiqueta: 'celular' },
+			{ tipo_contacto: 'telefono', valor: '341 44443665', etiqueta: 'celular secundario' },
+			{ tipo_contacto: 'web', valor: 'https://www.maria-gonzalez.com.ar', etiqueta: 'principal' }
+		],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación
+			mockCategorias[2], // Cultura y arte
+			mockCategorias[16], // Salud
+			mockCategorias[0] // Alimentación y nutrición
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Especie' }
 		],
 
 		consentimientos: [
@@ -184,18 +181,24 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-15'),
 		rol: 'colaborador',
-		url_foto: '/users/biblioteca-popular.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Biblioteca Popular Los Libros',
 		con_fines_de_lucro: false,
-		direccion: {
-			calle: 'Belgrano',
-			numero: '987',
-			referencia: 'Esquina con Sarmiento',
-			localidad_id: 6,
-			localidad: getLocalidad(6)
-		},
+		localidad_id: 2,
+		localidad: mockLocalidades[1],
+		descripcion: 'Espacio cultural abierto a la comunidad de La Plata. Incentivamos la lectura, el aprendizaje y el acceso libre a la información a través de talleres y actividades para todas las edades.',
+
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
+		categorias_preferidas: [
+			mockCategorias[4], // Educación (índice 4)
+			mockCategorias[2], // Cultura y arte (índice 2)
+			mockCategorias[9] // Liderazgo (índice 9)
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Especie' },
+			{ descripcion: 'Monetaria' }
+		],
 
 		consentimientos: [
 			{
@@ -223,20 +226,21 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-01-20'),
 		rol: 'colaborador',
-		url_foto: '/users/fundacion-manos-unidas.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Fundación Manos Unidas Argentina',
 		con_fines_de_lucro: false,
-		direccion: {
-			calle: 'Av. Santa Fe',
-			numero: '1456',
-			piso: '3',
-			departamento: 'C',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+		localidad_id: 6,
+		localidad: mockLocalidades[5],
+		descripcion: 'Organización sin fines de lucro dedicada a la asistencia social en Santa Fe. Trabajamos incansablemente para mejorar la calidad de vida de familias vulnerables mediante programas de alimentación y apoyo escolar.',
+
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Especie' },
+			{ descripcion: 'Monetaria' }
 		],
 
 		consentimientos: [
@@ -277,25 +281,23 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-05'),
 		rol: 'colaborador',
-		url_foto: '/users/empresa-solidaria.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'organizacion',
 		razon_social: 'Empresa Solidaria S.A.',
 		con_fines_de_lucro: true,
-		direccion: {
-			calle: 'Av. del Libertador',
-			numero: '5678',
-			piso: '12',
-			departamento: 'A',
-			referencia: 'Torre Empresarial Norte',
-			localidad_id: 21,
-			localidad: getLocalidad(21)
-		},
+		localidad_id: 7,
+		localidad: mockLocalidades[6],
+		descripcion: 'Empresa comprometida con la Responsabilidad Social Empresarial en Mendoza. Apoyamos financiamiento de proyectos sustentables y de alto impacto social para devolver a la comunidad parte de nuestro crecimiento.',
+
 		contactos: [
 			{
 				tipo_contacto: 'email',
 				valor: 'rse@empresasolidaria.com.ar',
 				etiqueta: 'principal'
 			}
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Monetaria' }
 		],
 
 		consentimientos: [
@@ -324,20 +326,20 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-01'),
 		rol: 'colaborador',
-		url_foto: '/users/ana-martinez.jpg',
+		url_foto: '/users/user-default.png',
 		tipo_colaborador: 'unipersonal',
-		direccion: {
-			calle: 'San Juan',
-			numero: '1122',
-			localidad_id: 22,
-			localidad: getLocalidad(22)
-		},
+		localidad_id: 8,
+		localidad: mockLocalidades[7],
+		descripcion: 'Profesional de la salud y voluntaria activa. Busco oportunidades para aportar mis conocimientos y tiempo en campañas de vacunación y asistencia primaria en zonas rurales de Mar del Plata.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
 				valor: 'ana.martinez@outlook.com',
 				etiqueta: 'principal'
 			}
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' }
 		],
 
 		consentimientos: [
@@ -372,16 +374,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/clinica-san-jorge.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Clínica San Jorge S.A.',
-		tipo_institucion: 'salud_privada',
-		direccion: {
-			calle: 'Av. 9 de Julio',
-			numero: '3456',
-			referencia: 'Edificio principal, planta baja',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+		tipo_institucion: 'Salud privada',
+		localidad_id: 9,
+		localidad: mockLocalidades[8],
+		descripcion: 'Institución de salud privada en Salta con un fuerte compromiso social. Colaboramos con campañas de prevención y ofrecemos asistencia médica gratuita a sectores carenciados.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -389,7 +387,6 @@ export const mockUsuarios = {
 				etiqueta: 'principal'
 			}
 		],
-
 		consentimientos: [
 			{
 				id_consentimiento: 21,
@@ -422,16 +419,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-03-10'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-siempre.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Siempre',
-		tipo_institucion: 'fundacion',
-		direccion: {
-			calle: 'Av. Belgrano',
-			numero: '123',
-			referencia: 'Frente a la plaza central',
-			localidad_id: 3,
-			localidad: getLocalidad(3)
-		},
+		tipo_institucion: 'Fundación',
+		localidad_id: 10,
+		localidad: mockLocalidades[9],
+		descripcion: 'Somos una fundación en San Miguel de Tucumán dedicada al apoyo integral de adultos mayores. Promovemos su inclusión social, bienestar físico y emocional a través de diversas actividades recreativas.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -452,16 +445,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-02-20'),
 		rol: 'institucion',
-		url_foto: '/users/comedor-los-pinos.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Comedor Los Pinos',
-		tipo_institucion: 'comedor',
-		direccion: {
-			calle: 'Calle 8',
-			numero: '456',
-			referencia: 'Barrio Norte',
-			localidad_id: 2,
-			localidad: getLocalidad(2)
-		},
+		tipo_institucion: 'Comedor',
+		localidad_id: 11,
+		localidad: mockLocalidades[10],
+		descripcion: 'Comedor comunitario en Corrientes Capital. Brindamos almuerzos y meriendas nutritivas a más de 100 niños diariamente, funcionando también como un centro de contención y apoyo escolar.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -482,16 +471,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-04-01'),
 		rol: 'institucion',
-		url_foto: '/users/hospital-sanjose.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hospital General San José',
-		tipo_institucion: 'hospital',
-		direccion: {
-			calle: 'Av. San Martín',
-			numero: '789',
-			referencia: 'Esquina con Av. Rivadavia',
-			localidad_id: 5,
-			localidad: getLocalidad(5)
-		},
+		tipo_institucion: 'Hospital',
+		localidad_id: 12,
+		localidad: mockLocalidades[11],
+		descripcion: 'Hospital público en Posadas enfocado en la atención de emergencias y especialidades médicas. Nuestro compromiso es garantizar el acceso a la salud pública de calidad para todos los habitantes de la región.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -512,16 +497,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-05-01'),
 		rol: 'institucion',
-		url_foto: '/users/instituto-formacion.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Instituto de Formación Laboral',
-		tipo_institucion: 'instituto',
-		direccion: {
-			calle: 'Av. Independencia',
-			numero: '321',
-			referencia: 'Cerca de la estación',
-			localidad_id: 22,
-			localidad: getLocalidad(22)
-		},
+		tipo_institucion: 'Instituto',
+		localidad_id: 13,
+		localidad: mockLocalidades[12],
+		descripcion: 'Centro educativo en Neuquén Capital dedicado a la capacitación técnica y profesional. Nuestro objetivo es mejorar la empleabilidad de jóvenes y adultos mediante cursos de oficios y habilidades digitales.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -542,16 +523,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-06-01'),
 		rol: 'institucion',
-		url_foto: '/users/fundacion-calor.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Fundación Calor Humano',
-		tipo_institucion: 'fundacion',
-		direccion: {
-			calle: 'Av. Mitre',
-			numero: '654',
-			referencia: 'A metros del hospital',
-			localidad_id: 23,
-			localidad: getLocalidad(23)
-		},
+		tipo_institucion: 'Fundación',
+		localidad_id: 14,
+		localidad: mockLocalidades[13],
+		descripcion: 'Organización en Bariloche que asiste a personas en situación de calle durante el invierno. Proveemos abrigo, alimentos calientes y un espacio seguro para quienes más lo necesitan.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -572,16 +549,12 @@ export const mockUsuarios = {
 		estado: 'activo',
 		created_at: new Date('2024-07-01'),
 		rol: 'institucion',
-		url_foto: '/users/hogar-santa-teresa.jpg',
+		url_foto: '/users/user-default.png',
 		nombre_legal: 'Hogar Santa Teresa',
-		tipo_institucion: 'hogar',
-		direccion: {
-			calle: 'Calle 25',
-			numero: '789',
-			referencia: 'Barrio Sur',
-			localidad_id: 9,
-			localidad: getLocalidad(9)
-		},
+		tipo_institucion: 'Hogar',
+		localidad_id: 15,
+		localidad: mockLocalidades[14],
+		descripcion: 'Hogar de tránsito en Tandil para mujeres y niños víctimas de violencia. Ofrecemos refugio, contención psicológica y asesoramiento legal para acompañarlas en su proceso de recuperación.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -590,7 +563,227 @@ export const mockUsuarios = {
 			}
 		],
 		consentimientos: []
-	} satisfies Institucion
+	} satisfies Institucion,
+
+	refugio_patitas: {
+		id_usuario: 16,
+		username: 'refugio_patitas',
+		password: '123456',
+		nombre: 'Clara',
+		apellido: 'Benitez',
+		fecha_nacimiento: new Date('1990-01-20'),
+		estado: 'activo',
+		created_at: new Date('2024-08-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Asociación Civil Refugio Patitas',
+		tipo_institucion: 'Protección Animal',
+		localidad_id: 4,
+		localidad: mockLocalidades[3],
+		descripcion: 'Refugio de animales en Rosario. Nos dedicamos al rescate, rehabilitación y adopción responsable de perros y gatos abandonados. ¡Ayúdanos a encontrarles un hogar lleno de amor!',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'adopciones@patitasfelices.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ecologistas_cordoba: {
+		id_usuario: 17,
+		username: 'ecologistas_cba',
+		password: '123456',
+		nombre: 'Lucas',
+		apellido: 'Serrano',
+		fecha_nacimiento: new Date('1985-05-05'),
+		estado: 'activo',
+		created_at: new Date('2024-08-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Ecologistas Unidos de Córdoba',
+		tipo_institucion: 'Medio Ambiente',
+		localidad_id: 5,
+		localidad: mockLocalidades[4],
+		descripcion: 'Agrupación ambientalista en Córdoba Capital. Trabajamos en la preservación de bosques nativos, reciclaje y educación ambiental para construir un futuro más verde y sostenible.',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@ecologistas.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	biblioteca_barrial: {
+		id_usuario: 18,
+		username: 'biblioread',
+		password: '123456',
+		nombre: 'Marta',
+		apellido: 'Quiroga',
+		fecha_nacimiento: new Date('1960-12-01'),
+		estado: 'activo',
+		created_at: new Date('2024-08-15'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Biblioteca Popular El Saber',
+		tipo_institucion: 'Biblioteca',
+		localidad_id: 1,
+		localidad: mockLocalidades[0],
+		descripcion: 'Centro cultural y biblioteca en Buenos Aires. Un punto de encuentro para vecinos donde fomentamos la lectura, el arte y la cultura barrial mediante talleres y eventos gratuitos.',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@bibliotecasaber.org.ar',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	fundacion_esperanza_fallida: { // creé esta institución que tiene verificación documental "rechazada" para pruebas
+		id_usuario: 19,
+		username: 'fundacion_fail',
+		password: '123456',
+		nombre: 'Carlos',
+		apellido: 'Díaz',
+		fecha_nacimiento: new Date('1980-05-15'),
+		estado: 'activo',
+		created_at: new Date('2024-09-01'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'Fundación Esperanza Fallida',
+		tipo_institucion: 'Fundación',
+		localidad_id: 3,
+		localidad: mockLocalidades[2],
+		descripcion: 'Fundación en proceso de reestructuración en Mendoza. Nuestro foco está en proyectos de innovación social, aunque actualmente estamos revisando nuestros procesos para servir mejor a la comunidad.',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'contacto@esperanzafallida.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	ong_nuevo_horizonte: { // creé esta institución que tiene verificación documental "pendiente" para pruebas
+		id_usuario: 20,
+		username: 'ong_horizonte',
+		password: '123456',
+		nombre: 'Laura',
+		apellido: 'Gómez',
+		fecha_nacimiento: new Date('1985-11-20'),
+		estado: 'activo',
+		created_at: new Date('2024-09-10'),
+		rol: 'institucion',
+		url_foto: '/users/user-default.png',
+		nombre_legal: 'ONG Nuevo Horizonte',
+		tipo_institucion: 'ONG',
+		localidad_id: 7,
+		localidad: mockLocalidades[6],
+		descripcion: 'Organización no gubernamental en Mendoza enfocada en el desarrollo comunitario sostenible. Impulsamos proyectos de emprendedurismo y capacitación para empoderar a los líderes del mañana.',
+		contactos: [
+			{
+				tipo_contacto: 'email',
+				valor: 'info@nuevohorizonte.org',
+				etiqueta: 'principal'
+			}
+		],
+		consentimientos: []
+	} satisfies Institucion,
+
+	rotary_club: {
+		id_usuario: 21,
+		username: 'rotary_club',
+		password: '123456',
+		nombre: 'Juan',
+		apellido: 'Pérez',
+		fecha_nacimiento: new Date('1960-02-23'),
+		estado: 'activo',
+		created_at: new Date('2024-01-10'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/rotary.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'Rotary Club de Buenos Aires',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Organización internacional dedicada a la prestación de servicios humanitarios, la promoción de normas éticas y la contribución al desarrollo de la buena voluntad y la paz en el mundo. Enfoque en liderazgo, educación y salud.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'contacto@rotaryinnovacion.org', etiqueta: 'principal' },
+			{ tipo_contacto: 'web', valor: 'https://www.rotary.org', etiqueta: 'oficial' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Monetaria' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 24, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-10') }
+		]
+	} satisfies Organizacion,
+
+	unicef_arg: {
+		id_usuario: 22,
+		username: 'unicef_arg',
+		password: '123456',
+		nombre: 'Ana',
+		apellido: 'García',
+		fecha_nacimiento: new Date('1946-12-11'),
+		estado: 'activo',
+		created_at: new Date('2024-01-12'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/unicef.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'UNICEF Argentina',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Fondo de las Naciones Unidas para la Infancia. Trabajamos para defender los derechos de los niños y niñas, ayudando a cubrir sus necesidades básicas y ampliando sus oportunidades para alcanzar su pleno potencial.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'contacto@unicef.org.ar', etiqueta: 'principal' },
+			{ tipo_contacto: 'web', valor: 'https://www.unicef.org/argentina', etiqueta: 'oficial' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Monetaria' },
+			{ descripcion: 'Especie' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 25, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-12') }
+		]
+	} satisfies Organizacion,
+
+	cruz_roja_arg: {
+		id_usuario: 23,
+		username: 'cruz_roja_arg',
+		password: '123456',
+		nombre: 'Carlos',
+		apellido: 'Saavedra',
+		fecha_nacimiento: new Date('1880-06-10'),
+		estado: 'activo',
+		created_at: new Date('2024-01-15'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/cruz-roja.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'Cruz Roja Argentina',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Asociación civil humanitaria y voluntaria. Nuestra misión es contribuir a mejorar la vida de las personas, en especial de aquellas que se encuentran en situación de vulnerabilidad, impulsando acciones humanitarias.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'info@cruzroja.org.ar', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '0810 999 2222', etiqueta: 'atención' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Monetaria' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 26, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-15') }
+		]
+	} satisfies Organizacion
 } as const;
 
 export type MockUsuarios = typeof mockUsuarios;

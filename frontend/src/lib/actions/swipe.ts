@@ -12,8 +12,8 @@ export interface SwipeParams {
 }
 
 export interface SwipeEvents {
-	'swipe-left': CustomEvent<void>;
-	'swipe-right': CustomEvent<void>;
+	'on:swipeleft'?: (event: CustomEvent<void>) => void;
+	'on:swiperight'?: (event: CustomEvent<void>) => void;
 }
 
 export const swipe: Action<HTMLElement, SwipeParams, SwipeEvents> = (
@@ -46,7 +46,7 @@ export const swipe: Action<HTMLElement, SwipeParams, SwipeEvents> = (
 		const deltaX = point.clientX - startX;
 		if (Math.abs(deltaX) < threshold) return;
 
-		const direction = deltaX < 0 ? 'swipe-left' : 'swipe-right';
+		const direction = deltaX < 0 ? 'swipeleft' : 'swiperight';
 		node.dispatchEvent(new CustomEvent(direction));
 	}
 

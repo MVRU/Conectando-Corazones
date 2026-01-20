@@ -23,12 +23,13 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	import Image from '$lib/components/ui/elementos/Image.svelte';
-
-	import { authActions, authError, isLoading, usuario } from '$lib/stores/auth';
-
+	import { authActions, authError, isLoading } from '$lib/stores/auth';
+	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 
 	import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
+	import { LockClosed, Eye, EyeSlash } from '@steeze-ui/heroicons';
+	import { Icon } from '@steeze-ui/svelte-icon';
 
 
 
@@ -84,6 +85,12 @@ TODO:
 
 
 
+			toastStore.show({
+				variant: 'success',
+				title: '¡Hola de nuevo!',
+				message: 'Iniciaste sesión correctamente.'
+			});
+
 			// Redirigir según el rol del usuario
 
 			if (user?.rol === 'administrador') {
@@ -97,11 +104,14 @@ TODO:
 			}
 
 		} catch (error) {
-
-			// El error ya se maneja en el store
-
-			console.error('Error en login:', error);
-
+		// El error ya se maneja en el store, pero mostramos toast también
+		console.error('Error en login:', error);
+		toastStore.show({
+			variant: 'error',
+			title: 'Error de acceso',
+			message:
+				error instanceof Error ? error.message : 'Verificá tus credenciales e intentá nuevamente.'
+		});
 		}
 
 	}
@@ -111,9 +121,7 @@ TODO:
 
 
 <svelte:head>
-
-	<title>Iniciar Sesión - Conectando Corazones</title>
-
+	<title>Iniciar sesión - Conectando Corazones</title>
 	<meta
 
 		name="description"
@@ -150,8 +158,7 @@ TODO:
 
 			</div>
 
-			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Iniciar Sesión</h1>
-
+			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Iniciar sesión</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
 
 				Accedé a tu cuenta para gestionar tus proyectos y contribuir a causas sociales
@@ -168,10 +175,10 @@ TODO:
 
 			<div class="rounded-2xl bg-white p-8 shadow-lg">
 
-				<h2 class="mb-6 text-2xl font-semibold text-[rgb(var(--base-color))]">
-
-					🔐 Acceder a tu cuenta
-
+				<h2
+					class="mb-6 flex items-center gap-2 text-2xl font-semibold text-[rgb(var(--base-color))]"
+				>
+					<Icon src={LockClosed} class="h-6 w-6" /> Acceder a tu cuenta
 				</h2>
 
 
@@ -241,7 +248,6 @@ TODO:
 							customClass="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 
 						/>
-
 						<p class="mt-1 text-xs text-gray-500">
 
 							Prueba con: <code class="rounded bg-gray-100 px-1">alexis_sklate</code>,
@@ -289,65 +295,15 @@ TODO:
 							/>
 
 							<button
-
 								type="button"
-
 								class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-
 								on:click={() => (mostrarPassword = !mostrarPassword)}
-
 							>
-
 								{#if mostrarPassword}
-
-									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-										<path
-
-											stroke-linecap="round"
-
-											stroke-linejoin="round"
-
-											stroke-width="2"
-
-											d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21"
-
-										/>
-
-									</svg>
-
+									<Icon src={EyeSlash} class="h-5 w-5" />
 								{:else}
-
-									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-										<path
-
-											stroke-linecap="round"
-
-											stroke-linejoin="round"
-
-											stroke-width="2"
-
-											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-
-										/>
-
-										<path
-
-											stroke-linecap="round"
-
-											stroke-linejoin="round"
-
-											stroke-width="2"
-
-											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-
-										/>
-
-									</svg>
-
+									<Icon src={Eye} class="h-5 w-5" />
 								{/if}
-
 							</button>
 
 						</div>
@@ -403,9 +359,7 @@ TODO:
 					<Button
 
 						type="submit"
-
-						label="Iniciar Sesión"
-
+						label="Iniciar sesión"
 						loading={$isLoading}
 
 						loadingLabel="Iniciando sesión..."
