@@ -15,7 +15,7 @@
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-ubicaciones';
 	import { error } from '@sveltejs/kit';
-	import { goto } from '$app/navigation';
+	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/proyectos/DetallesProyecto.svelte';
@@ -30,6 +30,9 @@
 	import { mockColaboracionTipoParticipacion } from '$lib/mocks/mock-colaboracion-tipo-participacion';
 	import type { ColaboracionTipoParticipacion } from '$lib/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
+	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
+	import { toastStore } from '$lib/stores/toast';
+	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
 
 	import {
 		CheckCircle,
@@ -263,6 +266,25 @@
 		}
 	}
 
+	let yaReporto = false;
+
+	$: if ($usuario && proyecto?.id_proyecto) {
+		yaReporto = haReportado($usuario.id_usuario, proyecto.id_proyecto);
+	}
+
+	function handleReportSuccess() {
+		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
+			guardarReporteLog($usuario.id_usuario, proyecto.id_proyecto);
+			yaReporto = true;
+			toastStore.show({
+				variant: 'success',
+				message:
+					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
+			});
+			history.back();
+		}
+	}
+
 	onMount(() => {
 		layoutStore.showStickyBottomBar();
 	});
@@ -300,10 +322,25 @@
 			</div>
 		{/if}
 
+		{#if estadoCodigo === 'en_auditoria' && !esAdministrador}
+			<div
+				class="sticky z-40 -mt-6 mb-6 flex w-full items-center justify-center bg-purple-800 px-4 py-3 text-center text-sm font-medium text-purple-50 shadow-md transition-all duration-500 sm:-mt-10 sm:mb-10 {$layoutStore.headerVisible
+					? 'top-[4.5rem]'
+					: 'top-0'}"
+				role="alert"
+			>
+				<p>
+					Este proyecto se encuentra bajo revisión administrativa tras detectarse posibles
+					irregularidades. Estamos trabajando para garantizar la transparencia y seguridad de
+					nuestra comunidad. Agradecemos su comprensión.
+				</p>
+			</div>
+		{/if}
+
 		<div
 			class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 		>
-			<ProyectoHeader {proyecto} {esAdministrador} />
+			<ProyectoHeader {proyecto} {esAdministrador} {esCreador} />
 
 			<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 				<!-- Columna principal -->
@@ -864,9 +901,65 @@
 							<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
 						{/if}
 					</section>
+
+					{#if $usuario}
+						<section
+							class="hidden rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6 lg:block"
+							aria-label="Reportar irregularidad"
+						>
+							<div class="flex flex-col gap-3">
+								<p class="text-center text-sm font-medium text-gray-700">
+									¿Hay algún problema con este proyecto?
+								</p>
+								<button
+									type="button"
+									disabled={yaReporto}
+									on:click={() => pushState('', { showReportModal: true })}
+									class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+								>
+									<Icon src={Flag} class="h-4 w-4" />
+									{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+								</button>
+							</div>
+						</section>
+					{/if}
 				</div>
 			</div>
+
+			{#if $usuario}
+				<div class="order-3 lg:hidden">
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+						aria-label="Reportar irregularidad"
+					>
+						<div class="flex flex-col gap-3">
+							<p class="text-center text-sm font-medium text-gray-700">
+								¿Hay algún problema con este proyecto?
+							</p>
+							<button
+								type="button"
+								disabled={yaReporto}
+								on:click={() => pushState('', { showReportModal: true })}
+								class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+							>
+								<Icon src={Flag} class="h-4 w-4" />
+								{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+							</button>
+						</div>
+					</section>
+				</div>
+			{/if}
 		</div>
+		<!-- Modal de reporte interceptado (Shallow Routing) -->
+		<ModalReportarIrregularidad
+			open={!!$page.state.showReportModal}
+			tipo_objeto="Proyecto"
+			id_objeto={proyecto.id_proyecto ?? 0}
+			nombre_objeto={proyecto.titulo}
+			on:close={() => history.back()}
+			on:success={handleReportSuccess}
+		/>
+		<slot />
 
 		<div
 			class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
