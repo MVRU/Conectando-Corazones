@@ -223,7 +223,6 @@
 					role="presentation"
 				>
 					{#if esInstitucion && proyecto.estado === 'en_curso'}
-						<!-- Institución: Editar + Ver panel -->
 						<Button
 							label="Editar"
 							href={`/proyectos/${proyecto.id_proyecto}/editar`}
@@ -233,20 +232,19 @@
 							customAriaLabel="Editar proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else}
-						<!-- Institución (completado) o Colaborador: Solo Ver panel -->
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="w-full"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{/if}
 				</div>
@@ -267,11 +265,11 @@
 							customAriaLabel="Editar proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else if esParticipante}
 						<Button
@@ -283,11 +281,11 @@
 							customAriaLabel="Abrir chat del proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel de participación"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else if esAdmin}
 						<Button
@@ -298,18 +296,11 @@
 							customClass="flex-1"
 							customAriaLabel="Ver detalles del proyecto"
 						/>
-						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
-							size="sm"
-							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
-						/>
 					{:else}
 						<Button
 							label="Ver detalles"
 							href={`/proyectos/${proyecto.id_proyecto}`}
-							variant={usuario?.rol === 'institucion' ||
+							variant={!usuario || usuario?.rol === 'institucion' ||
 							(botonColaborarDeshabilitado && !esRechazada)
 								? 'primary'
 								: 'secondary'}
@@ -347,7 +338,7 @@
 				<Button
 					label="Ver detalles"
 					href={`/proyectos/${proyecto.id_proyecto}`}
-					variant="secondary"
+					variant={!usuario ? 'primary' : 'secondary'}
 					size="sm"
 					customClass="flex-1"
 					customAriaLabel="Ver detalles del proyecto"
