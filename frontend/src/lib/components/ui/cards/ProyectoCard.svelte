@@ -11,6 +11,7 @@
 		getUbicacionCorta,
 		formatearFechaBadge
 	} from '$lib/utils/util-proyectos';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
@@ -196,8 +197,20 @@
 						class="h-5 w-5 rounded-full object-cover shadow-sm"
 						loading="lazy"
 					/>
-					<span class="truncate font-medium text-gray-700">{proyecto.institucion.nombre_legal}</span
-					>
+					{#if obtenerUrlPerfil(proyecto.institucion)}
+						<a
+							href={obtenerUrlPerfil(proyecto.institucion)}
+							class="truncate font-medium text-gray-700 transition-colors hover:text-blue-600 hover:underline"
+							on:click|stopPropagation
+							on:keydown|stopPropagation
+						>
+							{proyecto.institucion.nombre_legal}
+						</a>
+					{:else}
+						<span class="truncate font-medium text-gray-700"
+							>{proyecto.institucion.nombre_legal}</span
+						>
+					{/if}
 				</div>
 			{/if}
 		</div>
@@ -223,7 +236,6 @@
 					role="presentation"
 				>
 					{#if esInstitucion && proyecto.estado === 'en_curso'}
-						<!-- Institución: Editar + Ver panel -->
 						<Button
 							label="Editar"
 							href={`/proyectos/${proyecto.id_proyecto}/editar`}
@@ -233,20 +245,19 @@
 							customAriaLabel="Editar proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else}
-						<!-- Institución (completado) o Colaborador: Solo Ver panel -->
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="w-full"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{/if}
 				</div>
@@ -267,11 +278,11 @@
 							customAriaLabel="Editar proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else if esParticipante}
 						<Button
@@ -283,11 +294,11 @@
 							customAriaLabel="Abrir chat del proyecto"
 						/>
 						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
+							label="Ver detalles"
+							href={`/proyectos/${proyecto.id_proyecto}`}
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Ver panel de participación"
+							customAriaLabel="Ver detalles del proyecto"
 						/>
 					{:else if esAdmin}
 						<Button
@@ -298,18 +309,11 @@
 							customClass="flex-1"
 							customAriaLabel="Ver detalles del proyecto"
 						/>
-						<Button
-							label="Ver panel"
-							href={`/proyectos/${proyecto.id_proyecto}/panel`}
-							size="sm"
-							customClass="flex-1"
-							customAriaLabel="Ver panel del proyecto"
-						/>
 					{:else}
 						<Button
 							label="Ver detalles"
 							href={`/proyectos/${proyecto.id_proyecto}`}
-							variant={usuario?.rol === 'institucion' ||
+							variant={!usuario || usuario?.rol === 'institucion' ||
 							(botonColaborarDeshabilitado && !esRechazada)
 								? 'primary'
 								: 'secondary'}
@@ -347,7 +351,7 @@
 				<Button
 					label="Ver detalles"
 					href={`/proyectos/${proyecto.id_proyecto}`}
-					variant="secondary"
+					variant={!usuario ? 'primary' : 'secondary'}
 					size="sm"
 					customClass="flex-1"
 					customAriaLabel="Ver detalles del proyecto"

@@ -27,7 +27,8 @@
 		esFechaDemasiadoLejana,
 		validarUnidadLibre,
 		validarReferencia,
-		validarPiso
+		validarPiso,
+		crearValidadorCategoria
 	} from '$lib/utils/util-proyecto-form';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/types/dto/ProyectoCreate';
@@ -69,29 +70,10 @@
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
-	import { toKey } from '$lib/utils/util-proyecto-form';
-	const categoriasKeys = mockCategorias.map((c) => toKey(c.descripcion || '')).filter(Boolean);
+	const { validarCategoriaOtraDescripcion } = crearValidadorCategoria(
+		mockCategorias.map((c) => c.descripcion || '')
+	);
 
-	function esCategoriaRepetida(s: string): boolean {
-		const key = toKey(s);
-		return categoriasKeys.includes(key);
-	}
-
-	function validarCategoriaOtraDescripcion(s: string): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
-		if (v.length < 3) return 'Debe tener al menos 3 caracteres.';
-		if (v.length > 60) return 'Máximo 60 caracteres.';
-		const ban = ['n/a', 'na', '-', 'otro', 'otra', 'ninguna', 'ninguno', 'no sé', 'nose'];
-		if (ban.includes(v.toLowerCase())) return 'Por favor, especificá una categoría válida.';
-		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra.';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/&()-]+$/u.test(v))
-			return 'Usá solo letras, números y signos comunes';
-		if (esCategoriaRepetida(v))
-			return 'Esa categoría ya existe en el catálogo. Elegíla de la lista.';
-		return null;
-	}
 
 	const idCategoriaOtra = mockCategorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'

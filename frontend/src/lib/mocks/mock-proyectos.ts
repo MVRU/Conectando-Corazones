@@ -46,9 +46,8 @@ const proyectosBase: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2026-01-10'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
-		colaboracion_ids: [1, 2],
+		colaboracion_ids: [1, 2, 25],
 		institucion_id: 2,
-		evidencia_ids: [1],
 		solicitud_finalizacion_ids: [1],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -57,7 +56,7 @@ const proyectosBase: Proyecto[] = [
 				id_proyecto: 1,
 				id_tipo_participacion: 1,
 				unidad_medida: 'unidades',
-				especie: 'Libros infantiles',
+				especie: 'libros',
 				objetivo: 20,
 				actual: 12,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -87,7 +86,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [3],
 		institucion_id: 11,
-		evidencia_ids: [2],
 		solicitud_finalizacion_ids: [2],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -104,7 +102,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 2,
 				id_proyecto: 2,
 				id_tipo_participacion: 2,
-				unidad_medida: 'kg de harina',
+				unidad_medida: 'kg',
+				especie: 'de harina',
 				objetivo: 10,
 				actual: 15,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -113,7 +112,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 3,
 				id_proyecto: 2,
 				id_tipo_participacion: 3,
-				unidad_medida: 'docenas de huevos',
+				unidad_medida: 'docenas',
+				especie: 'de huevos',
 				objetivo: 6,
 				actual: 3,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -132,9 +132,8 @@ const proyectosBase: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2025-04-20'),
 		id_chat_firebase: 1003,
 		participacion_permitida_ids: [1],
-		colaboracion_ids: [4],
+		colaboracion_ids: [4, 25],
 		institucion_id: 3,
-		evidencia_ids: [3],
 		solicitud_finalizacion_ids: [3],
 		estado: 'en_revision',
 		participacion_permitida: [
@@ -162,7 +161,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [5],
 		institucion_id: 9,
-		evidencia_ids: [4],
 		solicitud_finalizacion_ids: [4],
 		estado: 'en_auditoria',
 		participacion_permitida: [
@@ -191,7 +189,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [6],
 		institucion_id: 2,
-		evidencia_ids: [5],
 		solicitud_finalizacion_ids: [5],
 		estado: 'cancelado',
 		participacion_permitida: [
@@ -219,7 +216,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [7],
 		institucion_id: 11,
-		evidencia_ids: [6],
 		solicitud_finalizacion_ids: [6],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -248,7 +244,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [8],
 		institucion_id: 14,
-		evidencia_ids: [7],
 		solicitud_finalizacion_ids: [7],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -256,7 +251,8 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 7,
 				id_proyecto: 7,
 				id_tipo_participacion: 1,
-				unidad_medida: 'abrigos',
+				unidad_medida: 'unidades',
+				especie: 'abrigo',
 				objetivo: 50,
 				actual: 8,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
@@ -277,7 +273,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [9],
 		institucion_id: 15,
-		evidencia_ids: [8],
 		solicitud_finalizacion_ids: [8],
 		estado: 'completado',
 		participacion_permitida: [
@@ -304,7 +299,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [10],
 		institucion_id: 2,
-		evidencia_ids: [9],
 		solicitud_finalizacion_ids: [9],
 		estado: 'completado',
 		participacion_permitida: [
@@ -342,9 +336,8 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 2,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
-		estado: 'en_curso',
+		estado: 'en_revision',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 11,
@@ -389,7 +382,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 6,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
@@ -427,7 +419,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 13,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -465,7 +456,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 17,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'cancelado',
 		participacion_permitida: [
@@ -503,7 +493,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 3],
 		colaboracion_ids: [],
 		institucion_id: 16,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -549,10 +538,9 @@ const proyectosBase: Proyecto[] = [
 		id_chat_firebase: 1015,
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
-		institucion_id: 10,
-		evidencia_ids: [],
+		institucion_id: 2,
 		solicitud_finalizacion_ids: [],
-		estado: 'en_revision',
+		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 18,
@@ -560,7 +548,7 @@ const proyectosBase: Proyecto[] = [
 				id_tipo_participacion: 1,
 				unidad_medida: 'mochilas',
 				objetivo: 50,
-				actual: 45,
+				actual: 50,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
@@ -569,7 +557,7 @@ const proyectosBase: Proyecto[] = [
 				id_tipo_participacion: 1,
 				unidad_medida: 'sets de útiles',
 				objetivo: 50,
-				actual: 60,
+				actual: 50,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			}
 		]
@@ -588,7 +576,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 17,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
@@ -626,7 +613,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [],
 		institucion_id: 13,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -673,7 +659,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 18,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -711,7 +696,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -749,7 +733,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -778,7 +761,6 @@ const proyectosBase: Proyecto[] = [
 		participacion_permitida_ids: [1],
 		colaboracion_ids: [],
 		institucion_id: 11,
-		evidencia_ids: [],
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
@@ -790,6 +772,46 @@ const proyectosBase: Proyecto[] = [
 				objetivo: 2,
 				actual: 1,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+			}
+		]
+	},
+	{
+		id_proyecto: 22,
+		titulo: 'Apoyo escolar en contraturno',
+		beneficiarios: 35,
+		descripcion: 'Acompañamiento educativo para estudiantes con dificultades de aprendizaje. Clases de apoyo en matemática y lengua durante las tardes.',
+		resumen: 'Reforzamos contenidos clave para evitar el abandono escolar.',
+		aprendizajes: 'El apoyo individualizado marca la diferencia en el rendimiento académico.',
+		url_portada: '/img/proyectos-22.webp',
+		created_at: new Date('2025-09-10'),
+		updated_at: new Date('2025-12-20'),
+		fecha_cierre_postulaciones: new Date('2025-10-15'),
+		fecha_fin_tentativa: new Date('2025-12-30'),
+		id_chat_firebase: 1022,
+		participacion_permitida_ids: [36, 37],
+		colaboracion_ids: [],
+		institucion_id: 2,
+		solicitud_finalizacion_ids: [10, 11, 12],
+		estado: 'pendiente_solicitud_cierre',
+		participacion_permitida: [
+			{
+				id_participacion_permitida: 36,
+				id_proyecto: 22,
+				id_tipo_participacion: 1,
+				unidad_medida: 'docentes voluntarios',
+				objetivo: 5,
+				actual: 5,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+			},
+			{
+				id_participacion_permitida: 37,
+				id_proyecto: 22,
+				id_tipo_participacion: 1,
+				unidad_medida: 'unidades',
+				especie: 'útiles escolares',
+				objetivo: 40,
+				actual: 38,
+				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			}
 		]
 	}

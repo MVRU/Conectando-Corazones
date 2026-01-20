@@ -57,6 +57,10 @@ export let ariaDescribedBy: string | undefined = undefined;
 		);
 	})();
 
+	$: if (!isTyping) {
+		searchValue = selectedOption ? selectedOption.label : '';
+	}
+
 	function handleSelect(option: { value: string; label: string }) {
 		value = option.value;
 		searchValue = selectedOption?.label || '';

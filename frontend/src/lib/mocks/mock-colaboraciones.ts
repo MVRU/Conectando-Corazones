@@ -25,6 +25,15 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador: getColaborador(5)
 	},
 	{
+		id_colaboracion: 25,
+		estado: 'aprobada',
+		mensaje: 'Como empresa nos interesa apoyar iniciativas educativas. Podemos aportar recursos materiales y voluntarios de nuestro equipo.',
+		created_at: new Date('2025-03-08'),
+		proyecto_id: 1,
+		colaborador_id: 7,
+		colaborador: getColaborador(7) // empresa_solidaria - Juan Carlos Mendoza
+	},
+	{
 		id_colaboracion: 3,
 		estado: 'aprobada',
 		created_at: new Date('2025-02-15'),
@@ -234,4 +243,13 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador_id: 4,
 		colaborador: getColaborador(4) // maria_g
 	},
+	{
+		id_colaboracion: 25,
+		estado: 'aprobada',
+		mensaje: 'Colaboración para evaluación de cierre.',
+		created_at: new Date('2025-04-01'),
+		proyecto_id: 3,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	}
 ];

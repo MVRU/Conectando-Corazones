@@ -30,7 +30,6 @@
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
 	export let variant: 'compact' | 'extended' = 'compact';
-	export let ocultarEtiquetaObjetivo = false;
 
 	const especieEmoji: Record<string, IconSource> = {
 		libros: BookOpen,

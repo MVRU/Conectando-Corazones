@@ -176,3 +176,29 @@ export function esFechaMuyAntigua(fecha?: Date | string): boolean {
 		return false;
 	}
 }
+
+// Verifica que fecha_entrada <= fecha_salida.
+export function validarCoherenciaTemporal(
+	fechaEntrada?: Date | string | null,
+	fechaSalida?: Date | string | null
+): boolean {
+	if (!fechaEntrada || !fechaSalida) return false;
+
+	try {
+		const fechaEntradaObj = fechaEntrada instanceof Date ? fechaEntrada : new Date(fechaEntrada);
+		const fechaSalidaObj = fechaSalida instanceof Date ? fechaSalida : new Date(fechaSalida);
+
+		// Validar que las fechas sean válidas antes de comparar
+		const entradaValida = !isNaN(fechaEntradaObj.getTime());
+		const salidaValida = !isNaN(fechaSalidaObj.getTime());
+
+		if (!entradaValida || !salidaValida) {
+			return false;
+		}
+
+		// La fecha de entrada debe ser menor o igual a la fecha de salida
+		return fechaEntradaObj <= fechaSalidaObj;
+	} catch {
+		return false;
+	}
+}
