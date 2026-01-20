@@ -33,13 +33,11 @@ git clone https://github.com/MVRU/Conectando-Corazones.git
 cd Conectando-Corazones
 ````
 
-Instalá las dependencias en cada módulo:
-
 ```bash
-cd backend
-npm install
+# Entrar a la carpeta de la aplicación (Monorepo)
+cd app
 
-cd ../frontend
+# Instalar dependencias
 npm install
 ```
 
@@ -106,10 +104,7 @@ cd Conectando-Corazones
 Install dependencies:
 
 ```bash
-cd backend
-npm install
-
-cd ../frontend
+cd app
 npm install
 ```
 

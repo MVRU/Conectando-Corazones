@@ -3,7 +3,7 @@
 	import type { Usuario } from '$lib/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import usuarioPorDefecto from '$lib/assets/user-default.png';
+	const usuarioPorDefecto = '/users/user-default.png';
 
 	import {
 		getParticipacionVisual,

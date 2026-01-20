@@ -48,6 +48,7 @@
 		"@fontsource/raleway": "^5.2.6",
 		"@steeze-ui/heroicons": "^2.4.2",
 		"@steeze-ui/svelte-icon": "^1.6.2",
+		"@supabase/supabase-js": "^2.91.0",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
 		"aos": "^2.3.4",

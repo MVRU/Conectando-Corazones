@@ -1,1 +1,1 @@
-// TODO: Implementar la entidad Usuario
+// TODO: Implementar Usuario

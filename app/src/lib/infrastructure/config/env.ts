@@ -1,0 +1,6 @@
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
+
+export const env = {
+	SUPABASE_URL: PUBLIC_SUPABASE_URL,
+	SUPABASE_ANON_KEY: PUBLIC_SUPABASE_ANON_KEY
+};

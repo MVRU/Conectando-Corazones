@@ -1,3 +1,7 @@
+# Conectando Corazones - Application Monorepo
+
+This directory contains the source code for the entire application (Frontend + Backend), built with SvelteKit.
+
 # sv
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).

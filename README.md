@@ -108,16 +108,19 @@ flowchart LR
 <table>
   <tr>
     <td align="center" width="33%">
-      <h3>Frontend</h3>
-      <img src="https://skillicons.dev/icons?i=svelte,ts,tailwind" alt="Svelte, TypeScript, Tailwind" />
+      <h3>Frontend & Backend</h3>
+      <img src="https://skillicons.dev/icons?i=svelte,ts,tailwind" alt="SvelteKit, TypeScript, Tailwind" />
+      <p>SvelteKit</p>
     </td>
     <td align="center" width="33%">
-      <h3>Backend</h3>
-      <img src="https://skillicons.dev/icons?i=nodejs,express,ts,prisma,postgres" alt="Node.js, Express, Prisma, PostgreSQL" />
+      <h3>Base de Datos</h3>
+      <img src="https://skillicons.dev/icons?i=supabase,postgres" alt="Supabase, PostgreSQL" />
+      <p>Supabase</p>
     </td>
     <td align="center" width="33%">
       <h3>Infraestructura</h3>
-      <img src="https://skillicons.dev/icons?i=vercel,firebase" alt="Vercel, Firebase" />
+      <img src="https://skillicons.dev/icons?i=vercel" alt="Vercel" />
+      <p>Vercel</p>
     </td>
   </tr>
 </table>
@@ -150,10 +153,10 @@ flowchart LR
 
 ```plaintext
 📦 Conectando-Corazones
-├── 🟦 frontend/       → SvelteKit + TailwindCSS
-├── ⬛ backend/         → Express + Prisma + PostgreSQL
+├── 📂 app/             → Monorepo (SvelteKit: Frontend + Backend)
 ├── 🟨 docs-site/       → Documentación con Docusaurus
 ├── 📂 .github/         → Workflows, issues, CODE_OF_CONDUCT
+├── 📄 ARCHITECTURE.md  → Arquitectura del proyecto
 ├── 📄 CONTRIBUTING.md  → Guía de contribución
 ├── 📄 LICENSE          → AGPL-3.0
 └── 📄 SECURITY.md      → Política de seguridad
@@ -174,8 +177,7 @@ flowchart LR
 git clone https://github.com/MVRU/Conectando-Corazones.git
 
 # 2. Instalar dependencias
-cd frontend && npm install
-cd ../backend && npm install
+cd app && npm install
 
 # 3. Crear una rama
 git checkout -b feature/descripcion-clara

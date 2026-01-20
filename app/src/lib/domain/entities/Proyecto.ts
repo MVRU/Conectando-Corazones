@@ -1,1 +1,1 @@
-// TODO: Implementar la entidad Proyecto.
+// TODO: Implementar Proyecto
