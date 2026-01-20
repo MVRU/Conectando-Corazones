@@ -18,12 +18,12 @@
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 	import { obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
 	import { puedeVerContactos, puedeDejarResena } from '$lib/utils/util-perfil';
-	import PerfilHeader from '$lib/components/perfil/PerfilHeader.svelte';
-	import PerfilInfoContacto from '$lib/components/perfil/PerfilInfoContacto.svelte';
-	import PerfilSeccionCategorias from '$lib/components/perfil/PerfilSeccionCategorias.svelte';
-	import PerfilSeccionTiposParticipacion from '$lib/components/perfil/PerfilSeccionTiposParticipacion.svelte';
-	import PerfilSeccionProyectos from '$lib/components/perfil/PerfilSeccionProyectos.svelte';
-	import PerfilSeccionResenas from '$lib/components/perfil/PerfilSeccionResenas.svelte';
+	import PerfilHeader from './PerfilHeader.svelte';
+	import PerfilInfoContacto from './PerfilInfoContacto.svelte';
+	import PerfilSeccionCategorias from './PerfilSeccionCategorias.svelte';
+	import PerfilSeccionTiposParticipacion from './PerfilSeccionTiposParticipacion.svelte';
+	import PerfilSeccionProyectos from './PerfilSeccionProyectos.svelte';
+	import PerfilSeccionResenas from './PerfilSeccionResenas.svelte';
 	import ModalEditarPerfil from '$lib/components/modals/ModalEditarPerfil.svelte';
 	import { usePerfilModales } from '$lib/composables/usePerfilModales';
 	import { usePerfilEdicion } from '$lib/composables/usePerfilEdicion';
@@ -220,11 +220,11 @@
 
 		<!-- Reportar perfil -->
 		{#if !esMiPerfil && $isAuthenticated}
-			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
+			<div class="mt-12 border-t border-gray-200 pb-4 pt-8 text-center">
 				{#if $isAdmin}
 					<div class="mb-4 text-center">
 						<span
-							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
+							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
 						>
 							ID: {perfilUsuario.id_usuario}
 						</span>

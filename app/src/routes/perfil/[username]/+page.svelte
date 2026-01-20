@@ -5,7 +5,7 @@
 	import { error } from '@sveltejs/kit';
 	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
-	import VistaPerfil from '$lib/components/perfil/VistaPerfil.svelte';
+	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
 	import type {
 		Usuario,
 		Institucion,

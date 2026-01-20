@@ -79,7 +79,7 @@
 					<svelte:component
 						this={VARIANT_STYLES[toast.variant].icon}
 						class={`relative h-5 w-5 ${VARIANT_STYLES[toast.variant].iconClass}`}
-						stroke-width={1.8}
+						strokeWidth={1.8}
 					/>
 				</span>
 				<div class="flex-1 space-y-1">
@@ -96,7 +96,7 @@
 					on:click={() => closeToast(toast.id)}
 					aria-label="Cerrar notificación"
 				>
-					<X class="h-4 w-4" stroke-width={1.8} />
+					<X class="h-4 w-4" strokeWidth={1.8} />
 				</button>
 			</div>
 		</div>

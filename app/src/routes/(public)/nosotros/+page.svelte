@@ -237,12 +237,15 @@
 		</div>
 
 		<div class="grid gap-10 md:grid-cols-3">
-			{#each [{ name: 'Alexis Julian Sklate', role: 'Socio', quote: 'La solidaridad es el lenguaje universal del corazón', img: '/team/member1.jpg' }, { name: 'Marina Ana Milo', role: 'Socia', quote: 'A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando.', img: '/team/member2.jpg' }, { name: 'Martin Tomas Alvarez', role: 'Socio', quote: 'La empatía es el puente que conecta corazones', img: '/team/member3.jpg' }] as member, i (i)}
+			{#each [{ name: 'Alexis Julián Sklate', role: 'Cofundador y desarrollador', quote: 'La solidaridad es el lenguaje universal del corazón', img: 'https://github.com/AleSklate0807.png', url: 'https://github.com/AleSklate0807' }, { name: 'Marina Ana Milo', role: 'Cofundadora y desarrolladora', quote: 'A veces, un simple gesto de amor puede ser el milagro que alguien estaba esperando.', img: 'https://github.com/MVRU.png', url: 'https://github.com/MVRU' }, { name: 'Martín Tomás Álvarez', role: 'Cofundador y desarrollador', quote: 'La empatía es el puente que conecta corazones', img: 'https://github.com/TomasAlvarez0.png', url: 'https://github.com/TomasAlvarez0' }] as member, i (i)}
 				<div
 					class="group rounded-2xl border-t-4 border-blue-100 bg-white/90 p-6 text-center shadow-xl transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
 				>
-					<div
-						class="mx-auto mb-4 h-40 w-40 overflow-hidden rounded-3xl border-4 border-white/80 bg-gradient-to-br from-blue-100 via-purple-100 to-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+					<a
+						href={member.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="mx-auto mb-4 block h-40 w-40 overflow-hidden rounded-3xl border-4 border-white/80 bg-gradient-to-br from-blue-100 via-purple-100 to-white shadow-lg transition-transform duration-300 group-hover:scale-105"
 					>
 						<img
 							src={member.img}
@@ -250,7 +253,7 @@
 							class="h-full w-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-95"
 							on:error={handleImageError}
 						/>
-					</div>
+					</a>
 					<h3 class="mb-2 text-xl font-semibold tracking-wide text-gray-800">{member.name}</h3>
 					<p class="mb-2 font-medium text-blue-600">{member.role}</p>
 					<p class="text-gray-600 italic">"{member.quote}"</p>
