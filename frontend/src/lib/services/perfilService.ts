@@ -3,11 +3,12 @@ import type { Resena } from '$lib/types/Resena';
 import type { Localidad } from '$lib/types/Localidad';
 import { mockProyectos } from '$lib/mocks/mock-proyectos';
 import { mockTestimonios } from '$lib/mocks/mock-testimonios';
+import { mockResenas } from '$lib/mocks/mock-resenas';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import { filtrarResenasPorTipo } from '$lib/utils/resenas';
 import { writable } from 'svelte/store';
 
-const resenasStore = writable<Resena[]>([...mockTestimonios]);
+const resenasStore = writable<Resena[]>([...mockTestimonios, ...mockResenas]);
 
 export const perfilService = {
 	

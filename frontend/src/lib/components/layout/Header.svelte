@@ -62,10 +62,6 @@
 	}
 
 	$: dropdownItems = [
-		{ label: 'Perfil', href: '/perfil' },
-		{ label: $isAdmin ? 'Panel de administración' : 'Mi panel', href: '/mi-panel' },
-		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
-		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
 		...($isInstitucion
 			? [
 					{
@@ -78,6 +74,10 @@
 					}
 				]
 			: []),
+					{ label: 'Mi perfil', href: '/perfil' },
+		{ label: $isAdmin ? 'Panel de administración' : 'Panel de control', href: '/mi-panel' },
+		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
+		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
 		...($isColaborador
 			? [{ label: 'Solicitudes de colaboración', href: '/colaborador/solicitudes-colaboracion' }]
 			: []),

@@ -1,4 +1,3 @@
-
 import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
 
 import { mockCategorias } from '$lib/mocks/mock-categorias';
@@ -18,6 +17,7 @@ export const mockUsuarios = {
 		url_foto: '/users/user-default.png',
 		localidad_id: 4,
 		localidad: mockLocalidades[3],
+		descripcion: 'Administrador principal de la plataforma Conectando Corazones. Encargado de la supervisión, gestión de usuarios y validación de contenidos para asegurar el correcto funcionamiento de la comunidad.',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'admin@conectandocorazones.org', etiqueta: 'principal' }
@@ -54,6 +54,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Educación pública',
 		localidad_id: 4,
 		localidad: mockLocalidades[3],
+		descripcion: 'Somos una institución educativa comprometida con la formación integral de niños y jóvenes. Nuestro objetivo es brindar educación de calidad y fomentar valores solidarios en la comunidad de Rosario.',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'direccion@escuelaesperanza.edu.ar', etiqueta: 'principal' },
@@ -101,6 +102,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Salud pública',
 		localidad_id: 3,
 		localidad: mockLocalidades[2],
+		descripcion: 'Centro de referencia nacional en salud pública pediátrica. Nos dedicamos a la atención integral de niños y adolescentes, promoviendo la investigación y la docencia para garantizar el bienestar infantil.',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'proyectos@garrahan.gov.ar', etiqueta: 'principal' }
@@ -185,6 +187,7 @@ export const mockUsuarios = {
 		con_fines_de_lucro: false,
 		localidad_id: 2,
 		localidad: mockLocalidades[1],
+		descripcion: 'Espacio cultural abierto a la comunidad de La Plata. Incentivamos la lectura, el aprendizaje y el acceso libre a la información a través de talleres y actividades para todas las edades.',
 
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
 		categorias_preferidas: [
@@ -229,6 +232,7 @@ export const mockUsuarios = {
 		con_fines_de_lucro: false,
 		localidad_id: 6,
 		localidad: mockLocalidades[5],
+		descripcion: 'Organización sin fines de lucro dedicada a la asistencia social en Santa Fe. Trabajamos incansablemente para mejorar la calidad de vida de familias vulnerables mediante programas de alimentación y apoyo escolar.',
 
 		contactos: [
 			{ tipo_contacto: 'email', valor: 'contacto@manosunidas.org.ar', etiqueta: 'principal' }
@@ -283,6 +287,7 @@ export const mockUsuarios = {
 		con_fines_de_lucro: true,
 		localidad_id: 7,
 		localidad: mockLocalidades[6],
+		descripcion: 'Empresa comprometida con la Responsabilidad Social Empresarial en Mendoza. Apoyamos financiamiento de proyectos sustentables y de alto impacto social para devolver a la comunidad parte de nuestro crecimiento.',
 
 		contactos: [
 			{
@@ -325,6 +330,7 @@ export const mockUsuarios = {
 		tipo_colaborador: 'unipersonal',
 		localidad_id: 8,
 		localidad: mockLocalidades[7],
+		descripcion: 'Profesional de la salud y voluntaria activa. Busco oportunidades para aportar mis conocimientos y tiempo en campañas de vacunación y asistencia primaria en zonas rurales de Mar del Plata.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -373,6 +379,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Salud privada',
 		localidad_id: 9,
 		localidad: mockLocalidades[8],
+		descripcion: 'Institución de salud privada en Salta con un fuerte compromiso social. Colaboramos con campañas de prevención y ofrecemos asistencia médica gratuita a sectores carenciados.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -417,6 +424,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Fundación',
 		localidad_id: 10,
 		localidad: mockLocalidades[9],
+		descripcion: 'Somos una fundación en San Miguel de Tucumán dedicada al apoyo integral de adultos mayores. Promovemos su inclusión social, bienestar físico y emocional a través de diversas actividades recreativas.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -442,6 +450,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Comedor',
 		localidad_id: 11,
 		localidad: mockLocalidades[10],
+		descripcion: 'Comedor comunitario en Corrientes Capital. Brindamos almuerzos y meriendas nutritivas a más de 100 niños diariamente, funcionando también como un centro de contención y apoyo escolar.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -467,6 +476,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Hospital',
 		localidad_id: 12,
 		localidad: mockLocalidades[11],
+		descripcion: 'Hospital público en Posadas enfocado en la atención de emergencias y especialidades médicas. Nuestro compromiso es garantizar el acceso a la salud pública de calidad para todos los habitantes de la región.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -492,6 +502,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Instituto',
 		localidad_id: 13,
 		localidad: mockLocalidades[12],
+		descripcion: 'Centro educativo en Neuquén Capital dedicado a la capacitación técnica y profesional. Nuestro objetivo es mejorar la empleabilidad de jóvenes y adultos mediante cursos de oficios y habilidades digitales.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -517,6 +528,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Fundación',
 		localidad_id: 14,
 		localidad: mockLocalidades[13],
+		descripcion: 'Organización en Bariloche que asiste a personas en situación de calle durante el invierno. Proveemos abrigo, alimentos calientes y un espacio seguro para quienes más lo necesitan.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -542,6 +554,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Hogar',
 		localidad_id: 15,
 		localidad: mockLocalidades[14],
+		descripcion: 'Hogar de tránsito en Tandil para mujeres y niños víctimas de violencia. Ofrecemos refugio, contención psicológica y asesoramiento legal para acompañarlas en su proceso de recuperación.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -567,6 +580,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Protección Animal',
 		localidad_id: 4,
 		localidad: mockLocalidades[3],
+		descripcion: 'Refugio de animales en Rosario. Nos dedicamos al rescate, rehabilitación y adopción responsable de perros y gatos abandonados. ¡Ayúdanos a encontrarles un hogar lleno de amor!',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -592,6 +606,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Medio Ambiente',
 		localidad_id: 5,
 		localidad: mockLocalidades[4],
+		descripcion: 'Agrupación ambientalista en Córdoba Capital. Trabajamos en la preservación de bosques nativos, reciclaje y educación ambiental para construir un futuro más verde y sostenible.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -617,6 +632,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Biblioteca',
 		localidad_id: 1,
 		localidad: mockLocalidades[0],
+		descripcion: 'Centro cultural y biblioteca en Buenos Aires. Un punto de encuentro para vecinos donde fomentamos la lectura, el arte y la cultura barrial mediante talleres y eventos gratuitos.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -642,6 +658,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'Fundación',
 		localidad_id: 3,
 		localidad: mockLocalidades[2],
+		descripcion: 'Fundación en proceso de reestructuración en Mendoza. Nuestro foco está en proyectos de innovación social, aunque actualmente estamos revisando nuestros procesos para servir mejor a la comunidad.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -667,6 +684,7 @@ export const mockUsuarios = {
 		tipo_institucion: 'ONG',
 		localidad_id: 7,
 		localidad: mockLocalidades[6],
+		descripcion: 'Organización no gubernamental en Mendoza enfocada en el desarrollo comunitario sostenible. Impulsamos proyectos de emprendedurismo y capacitación para empoderar a los líderes del mañana.',
 		contactos: [
 			{
 				tipo_contacto: 'email',
@@ -675,7 +693,97 @@ export const mockUsuarios = {
 			}
 		],
 		consentimientos: []
-	} satisfies Institucion
+	} satisfies Institucion,
+
+	rotary_club: {
+		id_usuario: 21,
+		username: 'rotary_club',
+		password: '123456',
+		nombre: 'Juan',
+		apellido: 'Pérez',
+		fecha_nacimiento: new Date('1960-02-23'),
+		estado: 'activo',
+		created_at: new Date('2024-01-10'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/rotary.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'Rotary Club de Buenos Aires',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Organización internacional dedicada a la prestación de servicios humanitarios, la promoción de normas éticas y la contribución al desarrollo de la buena voluntad y la paz en el mundo. Enfoque en liderazgo, educación y salud.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'contacto@rotaryinnovacion.org', etiqueta: 'principal' },
+			{ tipo_contacto: 'web', valor: 'https://www.rotary.org', etiqueta: 'oficial' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Monetaria' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 24, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-10') }
+		]
+	} satisfies Organizacion,
+
+	unicef_arg: {
+		id_usuario: 22,
+		username: 'unicef_arg',
+		password: '123456',
+		nombre: 'Ana',
+		apellido: 'García',
+		fecha_nacimiento: new Date('1946-12-11'),
+		estado: 'activo',
+		created_at: new Date('2024-01-12'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/unicef.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'UNICEF Argentina',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Fondo de las Naciones Unidas para la Infancia. Trabajamos para defender los derechos de los niños y niñas, ayudando a cubrir sus necesidades básicas y ampliando sus oportunidades para alcanzar su pleno potencial.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'contacto@unicef.org.ar', etiqueta: 'principal' },
+			{ tipo_contacto: 'web', valor: 'https://www.unicef.org/argentina', etiqueta: 'oficial' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Monetaria' },
+			{ descripcion: 'Especie' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 25, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-12') }
+		]
+	} satisfies Organizacion,
+
+	cruz_roja_arg: {
+		id_usuario: 23,
+		username: 'cruz_roja_arg',
+		password: '123456',
+		nombre: 'Carlos',
+		apellido: 'Saavedra',
+		fecha_nacimiento: new Date('1880-06-10'),
+		estado: 'activo',
+		created_at: new Date('2024-01-15'),
+		rol: 'colaborador',
+		url_foto: '/instituciones/cruz-roja.png',
+		tipo_colaborador: 'organizacion',
+		razon_social: 'Cruz Roja Argentina',
+		con_fines_de_lucro: false,
+		localidad_id: 1, // Buenos Aires
+		localidad: mockLocalidades[0],
+		descripcion: 'Asociación civil humanitaria y voluntaria. Nuestra misión es contribuir a mejorar la vida de las personas, en especial de aquellas que se encuentran en situación de vulnerabilidad, impulsando acciones humanitarias.',
+		contactos: [
+			{ tipo_contacto: 'email', valor: 'info@cruzroja.org.ar', etiqueta: 'principal' },
+			{ tipo_contacto: 'telefono', valor: '0810 999 2222', etiqueta: 'atención' }
+		],
+		tipos_participacion_preferidas: [
+			{ descripcion: 'Voluntariado' },
+			{ descripcion: 'Monetaria' }
+		],
+		consentimientos: [
+			{ id_consentimiento: 26, tipo: 'terminos', version: '1.0', created_at: new Date('2024-01-15') }
+		]
+	} satisfies Organizacion
 } as const;
 
 export type MockUsuarios = typeof mockUsuarios;

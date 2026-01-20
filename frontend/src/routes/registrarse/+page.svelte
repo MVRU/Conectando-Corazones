@@ -432,6 +432,7 @@
 
 				<MetodosContactoForm
 					mostrarOmitir
+					bloquearPrimerContacto={false}
 					on:skip={() => setEtapaConPersistencia('direccion')}
 					on:submit={() => setEtapaConPersistencia('direccion')}
 				/>

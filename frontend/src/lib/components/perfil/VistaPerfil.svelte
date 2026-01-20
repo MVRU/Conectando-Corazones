@@ -146,8 +146,8 @@
 <main class="min-h-screen bg-gray-50">
 	<!-- Contenido principal -->
 	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-		<div class="mb-8 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
-			<div class="p-8">
+		<div class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+			<div class="p-4 sm:p-6 lg:p-8">
 				<PerfilHeader 
 					{perfilUsuario} 
 					{esMiPerfil} 

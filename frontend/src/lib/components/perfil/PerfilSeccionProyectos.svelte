@@ -14,7 +14,7 @@
 </script>
 
 <section class="mb-8">
-	<h3 class="mb-4 text-xl font-semibold text-gray-900">Últimos Proyectos</h3>
+	<h3 class="mb-4 text-xl font-semibold text-gray-900">Últimos proyectos</h3>
 	
 	{#if tieneProyectos}
 		<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">

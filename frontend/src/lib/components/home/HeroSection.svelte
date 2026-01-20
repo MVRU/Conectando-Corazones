@@ -6,9 +6,9 @@
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 
 	const logos = [
-		'/instituciones/rotary.png',
-		'/instituciones/unicef.png',
-		'/instituciones/cruz-roja.png'
+		{ src: '/instituciones/rotary.png', href: '/perfil/rotary_club' },
+		{ src: '/instituciones/unicef.png', href: '/perfil/unicef_arg' },
+		{ src: '/instituciones/cruz-roja.png', href: '/perfil/cruz_roja_arg' }
 	];
 
 	let mostrarHero = false;

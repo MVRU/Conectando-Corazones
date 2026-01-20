@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Usuario, Institucion, Organizacion } from '$lib/types/Usuario';
-	import { formatearEtiquetaContacto, obtenerIconoContacto } from '$lib/utils/util-ui';
+	import { formatearEtiquetaContacto } from '$lib/utils/util-ui';
+	import { Mail, Phone, Globe, Share2, MapPin, Calendar, Activity, Lock, User as UserIcon } from 'lucide-svelte';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
@@ -8,7 +9,6 @@
 	export let puedeVerContactos: boolean;
 	export let esMiPerfil: boolean;
 	export let onEditarClick: () => void;
-
 
 	function obtenerTextoTipoContacto(tipo: string): string {
 		const tipos: Record<string, string> = {
@@ -19,7 +19,6 @@
 		};
 		return tipos[tipo] || tipo;
 	}
-
 	
 	function obtenerMensajePrivacidad(rol: string): string {
 		if (rol === 'institucion') {
@@ -30,122 +29,146 @@
 
 	$: contactosVisibles = (perfilUsuario.contactos ?? []).slice(0, 5);
 	$: mensajePrivacidad = obtenerMensajePrivacidad(perfilUsuario.rol);
+
+	function getIcon(tipo: string) {
+		switch(tipo) {
+			case 'email': return Mail;
+			case 'telefono': return Phone;
+			case 'web': return Globe;
+			case 'red_social': return Share2;
+			default: return Mail;
+		}
+	}
+	
+	function getIconTheme(tipo: string) {
+		switch(tipo) {
+			case 'email': return 'bg-purple-50 text-purple-600';
+			case 'telefono': return 'bg-green-50 text-green-600';
+			case 'web': return 'bg-blue-50 text-blue-600';
+			case 'red_social': return 'bg-pink-50 text-pink-600';
+			default: return 'bg-gray-50 text-gray-600';
+		}
+	}
 </script>
 
-<div class="mt-8 border-t border-gray-200 pt-8">
-	<div class="grid grid-cols-1 gap-8 md:grid-cols-2 w-full">
-		<!-- Columna izquierda: Información de contacto -->
-		<div class="space-y-6 w-full">
-			<div class="w-full">
-				<div class="mb-3 flex items-center gap-2 w-full">
-					<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-					</svg>
-					<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Información de Contacto</span>
+<div class="mt-8 border-t border-gray-100 pt-8">
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
+		
+		<div class="space-y-6">
+			<h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 mb-4">
+				Información general
+			</h3>
+			
+			<div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden divide-y divide-gray-100">
+				<!-- Usuario -->
+				<div class="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
+					<div class="p-2 rounded-lg bg-gray-100 text-gray-600 shrink-0">
+						<UserIcon class="h-5 w-5" />
+					</div>
+					<div>
+						<p class="text-xs font-semibold uppercase text-gray-500 mb-0.5">Usuario</p>
+						<p class="font-medium text-gray-900">@{perfilUsuario.username}</p>
+					</div>
 				</div>
-				
-				{#if puedeVerContactos}
-					<!-- Lista de contactos visible -->
-					<div class="ml-7 space-y-3">
+
+				<!-- Ubicación -->
+				{#if perfilUsuario.localidad}
+					<div class="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
+						<div class="p-2 rounded-lg bg-blue-50 text-blue-600 shrink-0">
+							<MapPin class="h-5 w-5" />
+						</div>
+						<div>
+							<p class="text-xs font-semibold uppercase text-gray-500 mb-0.5">Ubicación</p>
+							<p class="font-medium text-gray-900">
+								{perfilUsuario.localidad.nombre}, {perfilUsuario.localidad.provincia?.nombre || 'Argentina'}
+							</p>
+						</div>
+					</div>
+				{/if}
+
+				<!-- Estado -->
+				<div class="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
+					<div class="p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+						<Activity class="h-5 w-5" />
+					</div>
+					<div>
+						<p class="text-xs font-semibold uppercase text-gray-500 mb-0.5">Estado</p>
+						<p class="font-medium text-gray-900 capitalize">{perfilUsuario.estado}</p>
+					</div>
+				</div>
+
+				<!-- Miembro desde -->
+				<div class="p-4 flex items-start gap-4 hover:bg-gray-50 transition-colors">
+					<div class="p-2 rounded-lg bg-amber-50 text-amber-600 shrink-0">
+						<Calendar class="h-5 w-5" />
+					</div>
+					<div>
+						<p class="text-xs font-semibold uppercase text-gray-500 mb-0.5">Miembro desde</p>
+						<p class="font-medium text-gray-900">
+							{perfilUsuario.created_at 
+								? new Date(perfilUsuario.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) 
+								: 'No disponible'}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Sección de Contacto -->
+		<div class="space-y-6">
+			<div class="flex items-center justify-between mb-4">
+				<h3 class="text-sm font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2">
+					Contacto
+				</h3>
+			</div>
+
+			{#if puedeVerContactos}
+				{#if contactosVisibles.length > 0}
+					<div class="grid grid-cols-1 gap-3">
 						{#each contactosVisibles as contacto}
-							<div class="flex items-start gap-3 border-l-2 border-gray-100 pl-3">
-								<svg class="mt-0.5 h-4 w-4 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={obtenerIconoContacto(contacto.tipo_contacto)} />
-								</svg>
-								<div class="flex-1">
-									<div class="text-xs font-medium uppercase tracking-wide text-gray-500">
+							{@const Icon = getIcon(contacto.tipo_contacto)}
+							{@const iconTheme = getIconTheme(contacto.tipo_contacto)}
+							
+							<div class="group relative flex items-center gap-4 p-4 bg-white rounded-xl border border-gray-100 transition-all duration-200 hover:shadow-md hover:border-gray-200">
+								<div class="p-2 rounded-lg {iconTheme} shrink-0 transition-colors">
+									<svelte:component this={Icon} class="h-5 w-5" />
+								</div>
+								<div class="min-w-0 flex-1">
+									<p class="text-xs font-bold uppercase text-gray-400 mb-0.5 flex items-center gap-2 transition-colors group-hover:text-gray-500">
 										{obtenerTextoTipoContacto(contacto.tipo_contacto)}
 										{#if contacto.etiqueta}
-											<span class="ml-1 text-gray-400">({formatearEtiquetaContacto(contacto.etiqueta)})</span>
+											<span class="inline-block w-1 h-1 rounded-full bg-gray-300"></span>
+											<span class="font-normal normal-case">{formatearEtiquetaContacto(contacto.etiqueta)}</span>
 										{/if}
-									</div>
-									<p class="mt-0.5 text-sm font-medium text-gray-900">{contacto.valor}</p>
+									</p>
+									<p class="text-sm font-medium text-gray-900 truncate select-all">{contacto.valor}</p>
 								</div>
 							</div>
 						{/each}
 					</div>
 				{:else}
-					<!-- Mensaje de privacidad -->
-					<div class="ml-7 rounded-lg bg-gray-50 p-4">
-						<div class="flex items-start gap-3">
-							<svg class="mt-0.5 h-5 w-5 flex-shrink-0 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-							</svg>
-							<div class="flex-1">
-								<p class="text-sm font-medium text-gray-700">Información de contacto privada</p>
-								<p class="mt-1 text-xs text-gray-500">{mensajePrivacidad}</p>
-							</div>
+					<div class="p-6 rounded-xl bg-gray-50 border border-gray-200 border-dashed text-center">
+						<p class="text-gray-500 text-sm">Este usuario no tiene información de contacto pública cargada.</p>
+					</div>
+				{/if}
+			{:else}
+				<!-- Estado Privado -->
+				<div class="relative overflow-hidden rounded-xl bg-gray-50 p-6 border border-gray-200">
+					<div class="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+						<Lock class="h-32 w-32" />
+					</div>
+					
+					<div class="relative z-10 flex flex-col items-center text-center sm:items-start sm:text-left gap-4">
+						<div class="p-3 bg-white rounded-full shadow-sm ring-1 ring-gray-200">
+							<Lock class="h-6 w-6 text-gray-400" />
+						</div>
+						<div>
+							<h4 class="text-base font-semibold text-gray-900">Información privada</h4>
+							<p class="mt-1 text-sm text-gray-500 text-pretty">{mensajePrivacidad}</p>
 						</div>
 					</div>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Columna derecha: Información de cuenta -->
-		<div class="space-y-6">
-			<!-- Username -->
-			<div>
-				<div class="mb-2 flex items-center gap-2">
-					<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-					</svg>
-					<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Usuario</span>
-				</div>
-				<p class="ml-7 text-base text-gray-900">@{perfilUsuario.username}</p>
-			</div>
-			
-			<!-- Ubicación -->
-			{#if perfilUsuario.localidad}
-				<div>
-					<div class="mb-2 flex items-center gap-2">
-						<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-						</svg>
-						<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Ubicación</span>
-					</div>
-					<p class="ml-7 text-base text-gray-900">
-						{perfilUsuario.localidad.nombre}, {perfilUsuario.localidad.provincia?.nombre || 'Provincia no disponible'}
-					</p>
 				</div>
 			{/if}
-
-			<!-- Estado -->
-			<div>
-				<div class="mb-2 flex items-center gap-2">
-					<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
-					<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Estado</span>
-				</div>
-				<p class="ml-7 text-base capitalize text-gray-900">{perfilUsuario.estado}</p>
-			</div>
-			
-			<!-- Fecha de registro -->
-			<div>
-				<div class="mb-2 flex items-center gap-2">
-					<svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-					</svg>
-					<span class="text-sm font-semibold uppercase tracking-wide text-gray-600">Miembro desde</span>
-				</div>
-				<p class="ml-7 text-base text-gray-900">
-					{perfilUsuario.created_at 
-						? new Date(perfilUsuario.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) 
-						: 'No disponible'}
-				</p>
-				   {#if esMiPerfil}
-					   <button
-						   on:click={onEditarClick}
-						   class="sm:hidden mt-4 w-full inline-flex justify-center items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-					   >
-						   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-						   </svg>
-						   <span class="text-center">Editar</span>
-					   </button>
-				{/if}
-			</div>
 		</div>
 	</div>
 </div>
