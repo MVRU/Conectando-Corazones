@@ -30,6 +30,8 @@
 		if (!log.id_objeto) return null;
 		if (log.tipo_objeto === 'Proyecto') return `/proyectos/${log.id_objeto}`;
 		if (log.tipo_objeto === 'Usuario') return obtenerUrlUsuario(log.id_objeto);
+		if (log.tipo_objeto === 'Reporte') return '/admin/reportes';
+		if (log.tipo_objeto === 'Resena') return '/admin/moderacion-resenas';
 		return null;
 	}
 

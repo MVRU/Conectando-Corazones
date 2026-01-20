@@ -10,6 +10,7 @@
 
 	import type { Usuario } from '$lib/types/Usuario';
 	import { exportarUsuarios } from '$lib/utils/export-csv';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 
 
 
@@ -51,12 +52,36 @@
 
 
 
-	function cambiarRol(usuarioId: number | undefined, nuevoRol: Usuario['rol']) {
+	function obtenerIniciales(nombre?: string, apellido?: string) {
+		const n = `${nombre ?? ''} ${apellido ?? ''}`.trim();
+		if (!n) return 'U';
+		return n
+			.split(' ')
+			.filter(Boolean)
+			.slice(0, 2)
+			.map((p) => p[0]?.toUpperCase())
+			.join('');
+	}
 
-		if (!usuarioId) return;
+	function getRolLabel(rol?: Usuario['rol']) {
+		if (rol === 'administrador') return 'Administrador';
+		if (rol === 'institucion') return 'Institución';
+		if (rol === 'colaborador') return 'Colaborador';
+		return 'Sin rol';
+	}
 
-		usuarios = usuarios.map((u) => (u.id_usuario === usuarioId ? { ...u, rol: nuevoRol } : u));
+	function getRolClases(rol?: Usuario['rol']) {
+		if (rol === 'administrador') return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+		if (rol === 'institucion') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+		if (rol === 'colaborador') return 'bg-sky-50 text-sky-700 border-sky-200';
+		return 'bg-gray-50 text-gray-600 border-gray-200';
+	}
 
+	function getEstadoClases(estado?: string) {
+		if (estado === 'activo') return 'bg-emerald-50 text-emerald-700';
+		if (estado === 'pendiente') return 'bg-amber-50 text-amber-700';
+		if (estado === 'suspendido') return 'bg-red-50 text-red-700';
+		return 'bg-gray-100 text-gray-600';
 	}
 
 
@@ -273,33 +298,37 @@
 						<tr>
 
 							<td class="whitespace-nowrap px-3 py-2">
-
-								<p class="text-sm font-medium text-gray-900">{u.nombre} {u.apellido}</p>
-
-								<p class="text-xs text-gray-500">{u.username}</p>
+								<div class="flex items-center gap-3">
+									<div
+										class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-xs font-semibold text-blue-700"
+									>
+										{obtenerIniciales(u.nombre, u.apellido)}
+									</div>
+									<div>
+										<p class="text-sm font-medium text-gray-900">
+											{#if obtenerUrlPerfil(u)}
+												<a
+													href={obtenerUrlPerfil(u)!}
+													class="transition hover:text-blue-600 hover:underline"
+												>
+													{u.nombre} {u.apellido}
+												</a>
+											{:else}
+												{u.nombre} {u.apellido}
+											{/if}
+										</p>
+										<p class="text-xs text-gray-500">@{u.username}</p>
+									</div>
+								</div>
 
 							</td>
 
 							<td class="whitespace-nowrap px-3 py-2">
-
-								<select
-
-									class="rounded-md border border-gray-300 px-2 py-1 text-xs shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-
-									bind:value={u.rol}
-
-									on:change={(e) => cambiarRol(u.id_usuario, (e.currentTarget as HTMLSelectElement).value as Usuario['rol'])}
-
+								<span
+									class={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${getRolClases(u.rol)}`}
 								>
-
-									<option value="administrador">Administrador</option>
-
-									<option value="institucion">Institución</option>
-
-									<option value="colaborador">Colaborador</option>
-
-								</select>
-
+									{getRolLabel(u.rol)}
+								</span>
 							</td>
 
 							<td class="whitespace-nowrap px-3 py-2">
@@ -310,11 +339,7 @@
 
 									class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
 
-										u.estado === 'activo'
-
-											? 'bg-emerald-50 text-emerald-700'
-
-											: 'bg-gray-100 text-gray-600'
+										getEstadoClases(u.estado)
 
 										}`}
 
@@ -328,16 +353,19 @@
 
 							</td>
 
-							<td class="whitespace-nowrap px-3 py-2 text-xs text-gray-500 space-x-2">
-
-								<span>Simulación en memoria</span>
-
-								<a href={`/admin/usuarios/${u.id_usuario}`} class="text-[rgb(var(--color-primary))] hover:underline">
-
-									Ver detalle
-
-								</a>
-
+							<td class="whitespace-nowrap px-3 py-2 text-xs text-gray-500">
+								<div class="flex items-center gap-3">
+									{#if obtenerUrlPerfil(u)}
+										<a
+											href={obtenerUrlPerfil(u)!}
+											class="font-medium text-[rgb(var(--color-primary))] hover:underline"
+										>
+											Ver perfil
+										</a>
+									{:else}
+										<span class="text-gray-400">Sin perfil</span>
+									{/if}
+								</div>
 							</td>
 
 						</tr>

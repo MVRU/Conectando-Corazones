@@ -8,24 +8,20 @@
 
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import { exportarProyectos } from '$lib/utils/export-csv';
+	import {
+		actualizarEstadoProyecto,
+		filtrarProyectosAdmin,
+		type EstadoProyectoAdmin,
+		type FiltroEstadoProyecto
+	} from '$lib/utils/util-proyectos-admin';
 
 
 
-	type ProyectoConDestacado = Proyecto & { destacado: boolean };
+	let proyectos: Proyecto[] = mockProyectos as Proyecto[];
 
 
 
-	let proyectos: ProyectoConDestacado[] = (mockProyectos as Proyecto[]).map((p) => ({
-
-		...(p as ProyectoConDestacado),
-
-		destacado: (p as ProyectoConDestacado).destacado ?? false
-
-	}));
-
-
-
-	let filtroEstado: '' | 'en_curso' | 'completado' | 'en_revision' | 'en_auditoria' | 'cancelado' = '';
+	let filtroEstado: FiltroEstadoProyecto = '';
 
 	let filtroInstitucion = '';
 
@@ -33,64 +29,21 @@
 
 
 
-	let proyectosFiltrados: ProyectoConDestacado[] = proyectos;
+	let proyectosFiltrados: Proyecto[] = proyectos;
 
 
 
-	$: proyectosFiltrados = proyectos.filter((p) => {
-
-		const coincideEstado = !filtroEstado || p.estado === filtroEstado;
-
-		const coincideInstitucion =
-
-			!filtroInstitucion ||
-
-			p.institucion?.nombre_legal?.toLowerCase().includes(filtroInstitucion.toLowerCase());
-
-		const coincideBusqueda =
-
-			!busquedaProyecto || p.titulo.toLowerCase().includes(busquedaProyecto.toLowerCase());
-
-		return coincideEstado && coincideInstitucion && coincideBusqueda;
-
-	});
+	$: proyectosFiltrados = filtrarProyectosAdmin(
+		proyectos,
+		filtroEstado,
+		filtroInstitucion,
+		busquedaProyecto
+	);
 
 
 
-	function cambiarEstado(idProyecto: number | undefined, nuevoEstado: Proyecto['estado'] | 'en_curso') {
-
-		if (!idProyecto) return;
-
-		proyectos = proyectos.map((p) =>
-
-			p.id_proyecto === idProyecto
-
-				? {
-
-						...p,
-
-						estado: nuevoEstado
-
-				  }
-
-				: p
-
-		);
-
-	}
-
-
-
-	function toggleDestacado(idProyecto: number | undefined) {
-
-		if (!idProyecto) return;
-
-		proyectos = proyectos.map((p) =>
-
-			p.id_proyecto === idProyecto ? ({ ...p, destacado: !p.destacado } as ProyectoConDestacado) : p
-
-		);
-
+	function cambiarEstado(idProyecto: number | undefined, nuevoEstado: EstadoProyectoAdmin) {
+		proyectos = actualizarEstadoProyecto(proyectos, idProyecto, nuevoEstado);
 	}
 
 </script>
@@ -243,7 +196,7 @@
 
 					<tr>
 
-						<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
+						<th class="px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-gray-500">
 
 							Proyecto
 
@@ -269,12 +222,6 @@
 
 						<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
 
-							Destacado
-
-						</th>
-
-						<th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-
 							Acciones
 
 						</th>
@@ -295,7 +242,7 @@
 
 								<p class="text-xs text-gray-500">
 
-									{p.created_at ? p.created_at.toLocaleDateString('es-AR') : 's/f'}
+									{p.created_at ? new Date(p.created_at).toLocaleDateString('es-AR') : 's/f'}
 
 								</p>
 
@@ -333,42 +280,23 @@
 
 							</td>
 
-							<td class="whitespace-nowrap px-3 py-2 text-xs text-gray-700">
+							<td class="whitespace-nowrap px-3 py-2 text-center text-xs text-gray-700">
 
 								{p.colaboraciones?.length ?? 0}
 
 							</td>
 
-							<td class="whitespace-nowrap px-3 py-2">
-
-								<button
-
-									type="button"
-
-									class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-
-										p.destacado ? 'bg-yellow-50 text-yellow-700' : 'bg-gray-100 text-gray-600'
-
-									}`}
-
-									on:click={() => toggleDestacado(p.id_proyecto)}
-
-								>
-
-									{p.destacado ? 'Destacado' : 'No destacado'}
-
-								</button>
-
-							</td>
-
 							<td class="whitespace-nowrap px-3 py-2 text-xs text-gray-500">
-
-								<a href={`/admin/proyectos/${p.id_proyecto}`} class="text-[rgb(var(--color-primary))] hover:underline">
-
-									Ver detalle
-
-								</a>
-
+								{#if p.id_proyecto}
+									<a
+										href={`/proyectos/${p.id_proyecto}`}
+										class="text-[rgb(var(--color-primary))] hover:underline"
+									>
+										Ver detalle
+									</a>
+								{:else}
+									<span class="text-gray-400">Sin detalle</span>
+								{/if}
 							</td>
 
 						</tr>

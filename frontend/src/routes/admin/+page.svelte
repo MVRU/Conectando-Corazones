@@ -5,6 +5,7 @@
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import type { MockUsuarios } from '$lib/mocks/mock-usuarios';
 	import type { Proyecto } from '$lib/types/Proyecto';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 
 	const usuariosArray = Object.values(mockUsuarios as MockUsuarios);
 	const proyectosArray: Proyecto[] = mockProyectos;
@@ -121,7 +122,18 @@ const usuariosPorRol = usuariosArray.reduce(
 					{#each recientesUsuarios as u}
 						<li class="flex items-center justify-between py-2">
 							<div>
-								<p class="text-sm font-medium text-gray-800">{u.nombre} {u.apellido}</p>
+								<p class="text-sm font-medium text-gray-800">
+									{#if obtenerUrlPerfil(u)}
+										<a
+											href={obtenerUrlPerfil(u)!}
+											class="transition hover:text-blue-600 hover:underline"
+										>
+											{u.nombre} {u.apellido}
+										</a>
+									{:else}
+										{u.nombre} {u.apellido}
+									{/if}
+								</p>
 								<p class="text-xs text-gray-500">{u.username} • {u.rol}</p>
 							</div>
 							<p class="text-xs text-gray-400">
@@ -143,9 +155,29 @@ const usuariosPorRol = usuariosArray.reduce(
 					{#each recientesProyectos as p}
 						<li class="flex items-center justify-between py-2">
 							<div>
-								<p class="text-sm font-medium text-gray-800">{p.titulo}</p>
+								<p class="text-sm font-medium text-gray-800">
+									{#if p.id_proyecto}
+										<a
+											href={`/proyectos/${p.id_proyecto}`}
+											class="transition hover:text-blue-600 hover:underline"
+										>
+											{p.titulo}
+										</a>
+									{:else}
+										{p.titulo}
+									{/if}
+								</p>
 								<p class="text-xs text-gray-500">
-									{p.institucion?.nombre_legal || 'Institución sin nombre'}
+									{#if obtenerUrlPerfil(p.institucion)}
+										<a
+											href={obtenerUrlPerfil(p.institucion)!}
+											class="transition hover:text-blue-600 hover:underline"
+										>
+											{p.institucion?.nombre_legal || 'Institución sin nombre'}
+										</a>
+									{:else}
+										{p.institucion?.nombre_legal || 'Institución sin nombre'}
+									{/if}
 								</p>
 							</div>
 							<p class="text-xs text-gray-400">
