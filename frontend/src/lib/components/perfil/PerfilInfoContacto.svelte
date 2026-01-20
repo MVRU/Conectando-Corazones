@@ -7,8 +7,6 @@
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let puedeVerContactos: boolean;
-	export let esMiPerfil: boolean;
-	export let onEditarClick: () => void;
 
 	function obtenerTextoTipoContacto(tipo: string): string {
 		const tipos: Record<string, string> = {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { usuario as usuarioStore, isAuthenticated, authActions, isAdmin } from '$lib/stores/auth';
+	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
 	import EditarCategoriasModal from '$lib/components/modals/EditarCategoriasModal.svelte';
 	import EditarTiposParticipacionModal from '$lib/components/modals/EditarTiposParticipacionModal.svelte';
@@ -135,6 +136,17 @@
 		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () => modales.cerrar('tiposParticipacion'));
 	}
 
+	// Lógica para reportar perfil
+	let mostrarModalReporte = false;
+
+	function abrirModalReporte() {
+		mostrarModalReporte = true;
+	}
+
+	function handleConfirmarReporte(event: CustomEvent) {
+		console.log('Reporte generado:', event.detail);
+	}
+
 	// Determinar estado de verificación del usuario
 	$: verificacionesUsuario = obtenerVerificacionesUsuario(
 		perfilUsuario.id_usuario,
@@ -211,7 +223,7 @@
 					<p class="text-sm text-gray-500">
 						¿Algo no está bien? 
 						<button 
-							on:click={() => console.log('Reportar perfil:', perfilUsuario.username)}
+							on:click={abrirModalReporte}
 							class="text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
 						>
 							Reportar este perfil
@@ -271,3 +283,14 @@
 	/>
 {/if}
 
+<!-- Modal de reportar irregularidad -->
+{#if mostrarModalReporte}
+	<ModalReportarIrregularidad
+		bind:open={mostrarModalReporte}
+		tipo_objeto="Usuario"
+		id_objeto={perfilUsuario.id_usuario ?? 0}
+		nombre_objeto={perfilUsuario.username}
+		on:close={() => mostrarModalReporte = false}
+		on:success={handleConfirmarReporte}
+	/>
+{/if}
