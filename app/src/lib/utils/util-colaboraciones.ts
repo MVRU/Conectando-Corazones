@@ -1,5 +1,5 @@
-import type { Colaboracion } from '$lib/types/Colaboracion';
-import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
+﻿import type { Colaboracion } from '$lib/domain/types/Colaboracion';
+import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
 import { BuildingOffice, User } from '@steeze-ui/heroicons';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 

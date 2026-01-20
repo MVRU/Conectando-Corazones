@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { Usuario, Institucion, Organizacion } from '$lib/types/Usuario';
+﻿<script lang="ts">
+	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { formatearEtiquetaContacto } from '$lib/utils/util-ui';
 	import {
 		Mail,

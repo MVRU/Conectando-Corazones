@@ -1,8 +1,8 @@
-<script lang="ts">
-	import type { Usuario, Institucion, Organizacion } from '$lib/types/Usuario';
+﻿<script lang="ts">
+	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import type { Writable, Readable } from 'svelte/store';
-	import type { EditarPerfilForm } from '$lib/types/forms/EditarPerfilForm';
-	import type { Localidad } from '$lib/types/Localidad';
+	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
+	import type { Localidad } from '$lib/domain/types/Localidad';
 	import { provincias } from '$lib/data/provincias';
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';

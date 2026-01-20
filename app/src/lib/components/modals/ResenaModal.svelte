@@ -1,11 +1,11 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Resena } from '$lib/types/Resena';
+	import type { Resena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let mostrar: boolean = false;
-	export let titulo: string = 'Añadir Reseña';
-	export let placeholder: string = 'Comparte tu experiencia...';
+	export let titulo: string = 'Agregar reseña';
+	export let placeholder: string = 'Compartí tu experiencia...';
 	export let tipoObjeto: string = 'usuario';
 	export let idObjeto: number | undefined = undefined;
 
@@ -122,7 +122,7 @@
 						customClass="w-full md:w-auto"
 					/>
 					<Button
-						label="Publicar Reseña"
+						label="Publicar reseña"
 						variant="primary"
 						size="md"
 						type="submit"

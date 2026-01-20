@@ -1,8 +1,8 @@
-import type {
+﻿import type {
 	UbicacionDisyuncion,
 	UbicacionPresencial,
 	UbicacionVirtual
-} from '$lib/types/Ubicacion';
+} from '$lib/domain/types/Ubicacion';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 // para obtener localidad por ID
@@ -125,7 +125,7 @@ const ubicacionesBase: UbicacionDisyuncion[] = [
 		id_ubicacion: 12,
 		tipo_ubicacion: 'principal',
 		modalidad: 'presencial',
-		calle: 'Av. Calchaquí',
+		calle: 'Av. Calchaquí',	
 		numero: '3050',
 		referencia: 'Refugio Animales',
 		localidad_id: 24,

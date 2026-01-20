@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
@@ -8,7 +8,7 @@
 		Organizacion,
 		Unipersonal,
 		Administrador
-	} from '$lib/types/Usuario';
+	} from '$lib/domain/types/Usuario';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
@@ -95,7 +95,7 @@
 			return;
 		}
 
-		// Validar que se ingresó una contraseña
+		// Validar que se ingresá una contraseña
 		if (!passNueva.trim()) {
 			console.error('Error: La nueva contraseña no puede estar vacía');
 			toastStore.show({
@@ -376,7 +376,7 @@
 			<div class="flex w-full max-w-sm flex-col items-center rounded-2xl bg-white p-8 shadow-xl">
 				<Icon src={ExclamationCircle} class="mb-4 h-12 w-12 text-red-400" />
 				<p class="mb-4 text-center text-lg font-semibold text-red-600">
-					¿Está seguro de eliminar su cuenta?
+					¿Estás seguro de eliminar tu cuenta?
 				</p>
 				<div class="mt-2 flex gap-4">
 					<Button label="Cancelar" variant="secondary" on:click={cancelarEliminarCuenta} />

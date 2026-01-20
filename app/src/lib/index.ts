@@ -7,14 +7,14 @@ export { default as Breadcrumbs } from './components/ui/navegacion/Breadcrumbs.s
 export { default as ModalReportarIrregularidad } from './components/ui/ModalReportarIrregularidad.svelte';
 
 // Componentes de páginas
-export { default as Proyectos } from './components/proyectos/Proyectos.svelte';
+export { default as Proyectos } from './components/feature/proyectos/Proyectos.svelte';
 
 export { default as Image } from './components/ui/elementos/Image.svelte';
 
 export { default as Header } from './components/layout/Header.svelte';
 export { default as Footer } from './components/layout/Footer.svelte';
 
-export { default as Ticker } from './components/visual/Ticker.svelte';
+export { default as Ticker } from './components/ui/Ticker.svelte';
 
 // Stores y utilidades
 export * from './stores/breadcrumbs';
@@ -27,4 +27,4 @@ export * from './mocks/mock-proyecto-ubicaciones';
 export * from './mocks/mock-ubicaciones';
 
 // Modelos
-export * from './types/Usuario';
+export * from './domain/types/Usuario';

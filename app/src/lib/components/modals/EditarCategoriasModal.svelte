@@ -1,6 +1,6 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Categoria } from '$lib/types/Categoria';
+	import type { Categoria } from '$lib/domain/types/Categoria';
 	import { mockCategorias } from '$lib/mocks/mock-categorias';
 	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
@@ -239,7 +239,7 @@
 			{#if seleccionoOtra}
 				<div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
 					<label for="categoria-otra" class="mb-2 block text-sm font-medium text-gray-900">
-						Especificá la categoría:
+						Específica la categoría:
 					</label>
 					<input
 						type="text"

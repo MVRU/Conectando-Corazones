@@ -1,5 +1,5 @@
-import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
-import type { Proyecto } from '$lib/types/Proyecto';
+﻿import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
 import { supabase } from '$lib/infrastructure/supabase/client';
 
 export class ProyectoRepoSupabase implements ProyectoRepository {

@@ -1,4 +1,4 @@
-import type { Resena } from '$lib/types/Resena';
+﻿import type { Resena } from '$lib/domain/types/Resena';
 
 export const mockResenas: Resena[] = [
 	{

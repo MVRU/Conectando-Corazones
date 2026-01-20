@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { Usuario, Institucion, Organizacion } from '$lib/types/Usuario';
+﻿<script lang="ts">
+	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 
@@ -17,7 +17,7 @@
 	<section class="mb-8">
 		<div class="mb-4 flex items-center justify-between">
 			<h3 class="text-xl font-semibold text-gray-900">
-				{esMiPerfil ? 'Mis Tipos de Participación Favoritas' : 'Tipos de Participación Favoritas'}
+				{esMiPerfil ? 'Mis tipos de participación favoritas' : 'Tipos de participación favoritas'}
 			</h3>
 			{#if esMiPerfil}
 				<button
@@ -86,7 +86,7 @@
 								d="M12 4v16m8-8H4"
 							/>
 						</svg>
-						Agregar Tipos de Participación
+						Agregar tipos de participación
 					</button>
 				{/if}
 			</div>

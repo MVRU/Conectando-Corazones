@@ -1,4 +1,4 @@
-import type { Resena } from '$lib/types/Resena';
+﻿import type { Resena } from '$lib/domain/types/Resena';
 
 export const mockTestimonios: Resena[] = [
 	{
@@ -36,7 +36,7 @@ export const mockTestimonios: Resena[] = [
 	},
 	{
 		puntaje: 5,
-		contenido: 'El sitio es súper simple y logramos sumar donaciones en poco tiempo.',
+		contenido: 'El sitio es super simple y logramos sumar donaciones en poco tiempo.',
 		username: 'Carlos F.',
 		rol: 'Referente barrial'
 	},

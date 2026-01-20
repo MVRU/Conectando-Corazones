@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { Resena } from '$lib/types/Resena';
+﻿<script lang="ts">
+	import type { Resena } from '$lib/domain/types/Resena';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 
 	export let resenas: Resena[];

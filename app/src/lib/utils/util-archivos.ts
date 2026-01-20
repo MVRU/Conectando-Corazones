@@ -4,15 +4,15 @@
  *     -*- Facilita el reuso de funciones para formateo, detección de tipos y manejo de Google Drive.
  */
 
-import type { Archivo } from '$lib/types/Archivo';
+import type { Archivo } from '$lib/domain/types/Archivo';
 
 /**
  * Formatea el tamaño de un archivo en bytes a una representación legible
- * @param bytes - Tamaño en bytes (opcional)
+ * @param bytes - tamaño en bytes (opcional)
  * @returns String formateado (ej: "240.0 KB", "1.5 MB")
  */
 export function formatearTamaño(bytes?: number): string {
-	if (!bytes) return 'Tamaño desconocido';
+	if (!bytes) return 'tamaño desconocido';
 
 	if (bytes < 1024) return `${bytes} B`;
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -23,7 +23,7 @@ export function formatearTamaño(bytes?: number): string {
  * Obtiene la extensión del archivo desde tipo_mime o URL
  * @param tipoMime - Tipo MIME del archivo (ej: "image/jpeg")
  * @param url - URL del archivo como fallback
- * @returns Extensión en mayúsculas (ej: "JPG", "PDF")
+ * @returns extensión en mayúsculas (ej: "JPG", "PDF")
  */
 export function obtenerExtension(tipoMime?: string, url?: string): string {
 	if (tipoMime) {

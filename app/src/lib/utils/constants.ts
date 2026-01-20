@@ -1,6 +1,6 @@
-import type { EstadoDescripcion } from '$lib/types/Estado';
-import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
-import type { TipoUbicacion } from '$lib/types/Ubicacion';
+import type { EstadoDescripcion } from '$lib/domain/types/Estado';
+import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+import type { TipoUbicacion } from '$lib/domain/types/Ubicacion';
 import {
 	CurrencyDollar,
 	Home,

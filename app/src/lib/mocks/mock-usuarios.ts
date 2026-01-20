@@ -1,4 +1,4 @@
-import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/types/Usuario';
+﻿import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/domain/types/Usuario';
 
 import { mockCategorias } from '$lib/mocks/mock-categorias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
@@ -193,9 +193,9 @@ export const mockUsuarios = {
 
 		contactos: [{ tipo_contacto: 'email', valor: 'info@bploslibros.org', etiqueta: 'principal' }],
 		categorias_preferidas: [
-			mockCategorias[4], // Educación (índice 4)
-			mockCategorias[2], // Cultura y arte (índice 2)
-			mockCategorias[9] // Liderazgo (índice 9)
+			mockCategorias[4], // Educación (Índice 4)
+			mockCategorias[2], // Cultura y arte (Índice 2)
+			mockCategorias[9] // Liderazgo (Índice 9)
 		],
 		tipos_participacion_preferidas: [{ descripcion: 'Especie' }, { descripcion: 'Monetaria' }],
 
@@ -586,7 +586,7 @@ export const mockUsuarios = {
 		localidad_id: 4,
 		localidad: mockLocalidades[3],
 		descripcion:
-			'Refugio de animales en Rosario. Nos dedicamos al rescate, rehabilitación y adopción responsable de perros y gatos abandonados. ¡Ayúdanos a encontrarles un hogar lleno de amor!',
+			'Refugio de animales en Rosario. Nos dedicamos al rescate, rehabilitación y adopción responsable de perros y gatos abandonados. ¡Ayudanos a encontrarles un hogar lleno de amor!',
 		contactos: [
 			{
 				tipo_contacto: 'email',

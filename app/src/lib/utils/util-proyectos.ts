@@ -1,11 +1,11 @@
-import { error } from '@sveltejs/kit';
+﻿import { error } from '@sveltejs/kit';
 import type { IconSource } from '@steeze-ui/svelte-icon';
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { Usuario } from '$lib/types/Usuario';
-import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Usuario } from '$lib/domain/types/Usuario';
+import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
-import { ESTADO_LABELS } from '$lib/types/Estado';
-import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+import { ESTADO_LABELS } from '$lib/domain/types/Estado';
+import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 import {
 	ESTADO_PRIORIDAD,
 	ICONOS_UNIDAD,

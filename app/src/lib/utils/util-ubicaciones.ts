@@ -1,13 +1,13 @@
-import type { Localidad } from '$lib/types/Localidad';
-import type { Provincia } from '$lib/types/Provincia';
-import type { Proyecto } from '$lib/types/Proyecto';
+﻿import type { Localidad } from '$lib/domain/types/Localidad';
+import type { Provincia } from '$lib/domain/types/Provincia';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 import type {
 	UbicacionDisyuncion,
 	UbicacionPresencial,
 	UbicacionVirtual
-} from '$lib/types/Ubicacion';
+} from '$lib/domain/types/Ubicacion';
 
 /**
  * * Getters sencillos

@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { Proyecto } from '$lib/types/Proyecto';
+﻿<script lang="ts">
+	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 
 	export let proyectos: Proyecto[];

@@ -1,4 +1,4 @@
-import type { Verificacion } from '$lib/types/Verificacion';
+﻿import type { Verificacion } from '$lib/domain/types/Verificacion';
 
 export const mockVerificaciones: Verificacion[] = [
 	{

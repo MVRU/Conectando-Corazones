@@ -1,4 +1,4 @@
-import { writable, derived, get } from 'svelte/store';
+﻿import { writable, derived, get } from 'svelte/store';
 import type {
 	Usuario,
 	Institucion,
@@ -6,8 +6,8 @@ import type {
 	Organizacion,
 	Unipersonal,
 	Administrador
-} from '$lib/types/Usuario';
-import type { Contacto } from '$lib/types/Contacto';
+} from '$lib/domain/types/Usuario';
+import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
@@ -16,7 +16,7 @@ import { mockUsuarios } from '$lib/mocks/mock-usuarios';
  *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
  */
 
-// Tipo unión para todos los tipos de usuario posibles
+// Tipo uniión para todos los tipos de usuario posibles
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
 interface RegisterPerfilBase
@@ -242,7 +242,7 @@ export const authActions = {
 		validarRegistroInstitucion(input);
 		const endpoint = '/api/registro/institucion';
 		const fallbackError =
-			'No pudimos registrar la cuenta institucional. Revisá los datos e intentá más tarde.';
+			'No pudimos registrar la cuenta institucional. Revisa los datos e intentá más tarde.';
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {

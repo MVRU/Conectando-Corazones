@@ -1,5 +1,5 @@
-import type { Reporte } from '$lib/types/Reporte';
-import { MotivoReporte } from '$lib/types/Reporte';
+﻿import type { Reporte } from '$lib/domain/types/Reporte';
+import { MotivoReporte } from '$lib/domain/types/Reporte';
 
 export const mockReportes: Reporte[] = [
 	{

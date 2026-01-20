@@ -1,4 +1,4 @@
-import type { ColaboracionTipoParticipacion } from '$lib/types/ColaboracionTipoParticipacion';
+﻿import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 
 export const mockColaboracionTipoParticipacion: ColaboracionTipoParticipacion[] = [
 	// Colaboraciones para Proyecto 1 (Un libro, un sueño)

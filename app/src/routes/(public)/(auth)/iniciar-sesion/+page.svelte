@@ -69,7 +69,7 @@ TODO:
 	<title>Iniciar sesión - Conectando Corazones</title>
 	<meta
 		name="description"
-		content="Inicia sesión en Conectando Corazones para acceder a tu cuenta y gestionar tus proyectos."
+		content="Iniciá sesión en Conectando Corazones para acceder a tu cuenta y gestionar tus proyectos."
 	/>
 </svelte:head>
 
@@ -102,7 +102,7 @@ TODO:
 
 				{#if erroresValidacion.length > 0}
 					<div class="mb-6 rounded-lg border border-red-200 bg-red-100 p-4">
-						<p class="mb-2 font-medium text-red-700">Por favor corrige los siguientes errores:</p>
+						<p class="mb-2 font-medium text-red-700">Por favor corregí los siguientes errores:</p>
 						<ul class="list-inside list-disc text-sm text-red-600">
 							{#each erroresValidacion as error (error)}
 								<li>{error}</li>
@@ -134,7 +134,7 @@ TODO:
 							customClass="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 						/>
 						<p class="mt-1 text-xs text-gray-500">
-							Prueba con: <code class="rounded bg-gray-100 px-1">admin_conectando</code>,
+							Probá con: <code class="rounded bg-gray-100 px-1">admin_conectando</code>,
 							<code class="rounded bg-gray-100 px-1">escuela_esperanza</code>,
 							<code class="rounded bg-gray-100 px-1">maria_g</code>
 						</p>

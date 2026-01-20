@@ -1,4 +1,4 @@
-import type { Proyecto } from '$lib/types/Proyecto'; // TODO: reemplazar por la interface real de Proyecto
+﻿import type { Proyecto } from '$lib/domain/types/Proyecto'; // TODO: reemplazar por la interface real de Proyecto
 
 export interface ProyectoRepository {
 	findAll(): Promise<Proyecto[]>;

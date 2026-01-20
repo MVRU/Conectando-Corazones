@@ -1,6 +1,6 @@
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { Resena } from '$lib/types/Resena';
-import type { Localidad } from '$lib/types/Localidad';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Resena } from '$lib/domain/types/Resena';
+import type { Localidad } from '$lib/domain/types/Localidad';
 import { mockProyectos } from '$lib/mocks/mock-proyectos';
 import { mockTestimonios } from '$lib/mocks/mock-testimonios';
 import { mockResenas } from '$lib/mocks/mock-resenas';

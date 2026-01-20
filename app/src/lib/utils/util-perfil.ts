@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Utilidades para manejo de perfiles de usuario
  */
 
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { Usuario, Institucion, ColaboradorDisyuncion } from '$lib/types/Usuario';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Usuario, Institucion, ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
 
 /**
  * Verifica si el usuario actual puede ver los contactos del perfil visitado
@@ -12,7 +12,7 @@ import type { Usuario, Institucion, ColaboradorDisyuncion } from '$lib/types/Usu
  * Reglas:
  * - Si es el propio perfil, siempre puede ver
  * - Si el perfil es de una Institución: el colaborador actual debe tener al menos una
- *   solicitud de colaboración aprobada en algún proyecto de esa institución
+ *   solicitud de colaboración aprobada en algú́n proyecto de esa institución
  * - Si el perfil es de un Colaborador: el usuario actual debe tener al menos una
  *   solicitud de colaboración aprobada en un proyecto donde el colaborador del perfil
  *   también tiene una colaboración aprobada
@@ -56,7 +56,7 @@ export function puedeVerContactos(
 				proyectos
 			);
 		}
-		// Si el usuario actual es también colaborador
+		// Si el usuario actual es tambíen colaborador
 		return tienenColaboracionEnComun(
 			usuarioActual.id_usuario!,
 			perfilUsuario.id_usuario!,
@@ -70,7 +70,7 @@ export function puedeVerContactos(
 
 /**
  * Verifica si un colaborador tiene al menos una colaboración aprobada
- * en algún proyecto de una institución específica
+ * en algú́n proyecto de una institución especí́fica
  
  * @param colaboradorId - ID del colaborador
  * @param institucionId - ID de la institución

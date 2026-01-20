@@ -1,4 +1,4 @@
-// * DECISIÓN DE DISEÑO: esta capa traduce los formularios de registro en los inputs esperados por authStore,
+﻿// * DECISIÓN DE DISEÑO: esta capa traduce los formularios de registro en los inputs esperados por authStore,
 // * evitando dependencias directas de la UI con Firebase y habilitando pruebas unitarias.
 
 /**
@@ -6,12 +6,12 @@
  * - [ ] Agregar inputs a auth.
  */
 
-import type { Contacto } from '$lib/types/Contacto';
+import type { Contacto } from '$lib/domain/types/Contacto';
 import type {
 	ColaboradorFormSubmitDetail,
 	InstitucionFormSubmitDetail,
 	RegistroCuentaSubmitDetail
-} from '$lib/types/forms/registro';
+} from '$lib/domain/types/forms/registro';
 import type { RegisterColaboradorInput, RegisterInstitucionInput } from '$lib/stores/auth';
 
 interface RegistroMapeado<TInput> {

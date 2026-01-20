@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+﻿import { describe, it, expect } from 'vitest';
 import {
 	esUbicacionPresencial,
 	esUbicacionVirtual,
@@ -14,8 +14,8 @@ import {
 	searchCities, // TODO: Actualmente no se usa. ¿Es para implementación futura? Sino borrar.
 	getAllProvinceNames // TODO: Actualmente no se usa. ¿Es para implementación futura? Sino borrar.
 } from './util-ubicaciones';
-import type { UbicacionPresencial, UbicacionVirtual } from '$lib/types/Ubicacion';
-import type { Localidad } from '$lib/types/Localidad';
+import type { UbicacionPresencial, UbicacionVirtual } from '$lib/domain/types/Ubicacion';
+import type { Localidad } from '$lib/domain/types/Localidad';
 
 describe('util-ubicaciones', () => {
 	describe('Type guards', () => {

@@ -1,10 +1,10 @@
-/// <reference types="svelte" />
+﻿/// <reference types="svelte" />
 /// <reference types="vite/client" />
-import '$lib/types/otros/svelte-jsx';
+import '$lib/domain/types/otros/svelte-jsx';
 
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
-import type { Usuario } from '$lib/types/Usuario';
+import type { Usuario } from '$lib/domain/types/Usuario';
 
 declare global {
 	namespace App {

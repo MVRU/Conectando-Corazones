@@ -1,4 +1,4 @@
-import type { Proyecto } from '$lib/types/Proyecto';
+﻿import type { Proyecto } from '$lib/domain/types/Proyecto';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
 import {
 	obtenerLocalidadesDisponibles,
@@ -6,7 +6,7 @@ import {
 	filtrarPorLocalidad
 } from '$lib/utils/util-ubicaciones';
 import { writable, derived, type Writable } from 'svelte/store';
-import { ESTADO_LABELS } from '$lib/types/Estado';
+import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import {
 	filtrarProyectos,
 	filtrarPorTipoUbicacion,

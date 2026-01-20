@@ -1,11 +1,11 @@
-/**
+﻿/**
  * * DECISIÓN DE DISEÑO:
  *     -*- Centralizamos el cálculo del porcentaje de avance de un proyecto.
  *     -*- Se consideran tanto los objetivos cumplidos como el tiempo transcurrido.
  */
 
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 
 /**
  * Calcula el porcentaje de cumplimiento de los objetivos

@@ -5,9 +5,9 @@
 
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
-	import ProyectoInfoBasica from '$lib/components/institucion/ProyectoInfoBasica.svelte';
-	import ProyectoParticipaciones from '$lib/components/institucion/ProyectoParticipaciones.svelte';
-	import ProyectoUbicaciones from '$lib/components/institucion/ProyectoUbicaciones.svelte';
+	import ProyectoInfoBasica from '$lib/components/feature/institucion/ProyectoInfoBasica.svelte';
+	import ProyectoParticipaciones from '$lib/components/feature/institucion/ProyectoParticipaciones.svelte';
+	import ProyectoUbicaciones from '$lib/components/feature/institucion/ProyectoUbicaciones.svelte';
 	import type { PageData } from './$types';
 
 	import { MENSAJES_ERROR, esFechaFutura } from '$lib/utils/validaciones';
@@ -127,7 +127,7 @@
 		// Validar participaciones
 		participacionesPermitidas.forEach((p, index) => {
 			if (p.objetivo === undefined || p.objetivo <= 0) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio y debe ser > 0.';
+				errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio y tiene que ser > 0.';
 			} else {
 				if (p.id_participacion_permitida) {
 					const original = originales.participacionesOriginales.find(

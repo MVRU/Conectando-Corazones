@@ -4,16 +4,16 @@
 	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
 	import EditarCategoriasModal from '$lib/components/modals/EditarCategoriasModal.svelte';
 	import EditarTiposParticipacionModal from '$lib/components/modals/EditarTiposParticipacionModal.svelte';
-	import type { Resena } from '$lib/types/Resena';
-	import type { Categoria } from '$lib/types/Categoria';
-	import type { TipoParticipacion } from '$lib/types/TipoParticipacion';
+	import type { Resena } from '$lib/domain/types/Resena';
+	import type { Categoria } from '$lib/domain/types/Categoria';
+	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type {
 		Usuario,
 		Institucion,
 		Organizacion,
 		Unipersonal,
 		Administrador
-	} from '$lib/types/Usuario';
+	} from '$lib/domain/types/Usuario';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 	import { obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
@@ -50,7 +50,7 @@
 		perfilService.obtenerTodosLosProyectos()
 	);
 
-	// Verificar si el usuario actual puede dejar reseña
+	// Verificar si el usuario actual puede dejar Reseña
 	$: puedeResenar = puedeDejarResena(
 		$usuarioStore,
 		perfilUsuario,
@@ -120,7 +120,7 @@
 		edicion.cambiarFoto(event);
 	}
 
-	// Funciones para reseñas
+	// Funciones para Reseñas
 	function abrirModalResena() {
 		if (esMiPerfil || !puedeResenar) return;
 		modales.abrir('resena');
@@ -141,7 +141,7 @@
 		toastStore.show({
 			variant: 'success',
 			title: 'Reseña publicada correctamente',
-			message: '¡Gracias por tu reseña! Tu aporte ayuda a mejorar la comunidad.'
+			message: '¡Gracias por tu Reseña! Tu aporte ayuda a mejorar la comunidad.'
 		});
 
 		console.log('Reseña guardada:', nuevaResena);
@@ -269,7 +269,7 @@
 	on:guardar={handleGuardarPerfil}
 	on:cerrar={() => modales.cerrar('edicion')}
 />
-<!-- Modal de añadir reseña  -->
+<!-- Modal de añadir Reseña  -->
 {#if $modales.resena && !esMiPerfil && $isAuthenticated && $usuarioStore}
 	<ResenaModal
 		mostrar={$modales.resena}
@@ -282,7 +282,7 @@
 	/>
 {/if}
 
-<!-- Modal de editar categorías favoritas  -->
+<!-- Modal de editar categorías favoritas -->
 {#if $modales.categorias && esMiPerfil}
 	<EditarCategoriasModal
 		mostrar={$modales.categorias}

@@ -1,10 +1,10 @@
 import { error } from '@sveltejs/kit';
 import { mockProyectos } from '$lib/mocks/mock-proyectos';
 import type { PageServerLoad } from './$types';
-import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
-import type { ParticipacionForm, UbicacionFormulario } from '$lib/types/forms/CrearProyectoForm';
-import type { UbicacionPresencial } from '$lib/types/Ubicacion';
-import type { Proyecto } from '$lib/types/Proyecto';
+import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+import type { ParticipacionForm, UbicacionFormulario } from '$lib/domain/types/forms/CrearProyectoForm';
+import type { UbicacionPresencial } from '$lib/domain/types/Ubicacion';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 function formatearFechaParaInput(fechaIso: Date | string | null | undefined): string {
 	if (!fechaIso) return '';

@@ -5,7 +5,7 @@
 
 <script lang="ts">
 	export let data: { error: Error; estado: number };
-	import PaginaError from '$lib/components/errores/PaginaError.svelte';
+	import PaginaError from '$lib/components/feedback/errores/PaginaError.svelte';
 
 	const { error, estado } = data;
 </script>

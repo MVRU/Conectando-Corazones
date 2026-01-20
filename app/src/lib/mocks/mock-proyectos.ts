@@ -1,6 +1,6 @@
-import type { Proyecto } from '$lib/types/Proyecto';
-import type { ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
-import type { Institucion } from '$lib/types/Usuario';
+﻿import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
+import type { Institucion } from '$lib/domain/types/Usuario';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import { mockProyectoCategorias } from '$lib/mocks/mock-proyecto-categorias';
 import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
@@ -124,7 +124,7 @@ const proyectosBase: Proyecto[] = [
 		id_proyecto: 3,
 		titulo: 'Hogar de sonrisas',
 		descripcion: 'Acompañamiento y contención a niños en situación de vulnerabilidad.',
-		resumen: 'Acompañamos niños con actividades recreativas y contencion.',
+		resumen: 'Acompañamos niños con actividades recreativas y contención.',
 		aprendizajes: 'Trabajamos en protocolos de cuidado junto a las familias.',
 		url_portada: '/img/proyectos-3.webp',
 		created_at: new Date('2025-01-20'),
@@ -180,7 +180,7 @@ const proyectosBase: Proyecto[] = [
 		titulo: 'Apoyo Escolar Comunitario',
 		descripcion: 'Clases de apoyo escolar gratuitas para niños y adolescentes.',
 		resumen: 'Convertimos terrenos urbanos en huertas comunitarias vivas.',
-		aprendizajes: 'Compartimos tecnicas agroecologicas y cultivamos en colectivo.',
+		aprendizajes: 'Compartimos técnicas agroecológicas y cultivamos en colectivo.',
 		url_portada: '/img/proyectos-5.webp',
 		created_at: new Date('2025-03-15'),
 		fecha_cierre_postulaciones: new Date('2025-04-15'),
@@ -265,7 +265,7 @@ const proyectosBase: Proyecto[] = [
 		titulo: 'Cuidadores de Adultos Mayores',
 		descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
 		resumen: 'Capacitamos cuidadores de adultos mayores y articulamos redes.',
-		aprendizajes: 'Profundizamos en el cuidado domiciliario y la comunicacion con las familias.',
+		aprendizajes: 'Profundizamos en el cuidado domiciliario y la comunicación con las familias.',
 		url_portada: '/img/proyectos-8.webp',
 		created_at: new Date('2025-04-10'),
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
@@ -563,7 +563,7 @@ const proyectosBase: Proyecto[] = [
 				id_participacion_permitida: 29,
 				id_proyecto: 15,
 				id_tipo_participacion: 1,
-				unidad_medida: 'sets de útiles',
+				unidad_medida: 'sets de útiles escolares',
 				objetivo: 50,
 				actual: 50,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }

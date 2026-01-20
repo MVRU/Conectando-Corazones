@@ -1,10 +1,10 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type {
 		TipoParticipacion,
 		TipoParticipacionDescripcion
-	} from '$lib/types/TipoParticipacion';
-	import { TIPOS_PARTICIPACION_DESCRIPCION } from '$lib/types/TipoParticipacion';
+	} from '$lib/domain/types/TipoParticipacion';
+	import { TIPOS_PARTICIPACION_DESCRIPCION } from '$lib/domain/types/TipoParticipacion';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -58,7 +58,7 @@
 			toastStore.show({
 				variant: 'success',
 				title: 'Cambios guardados',
-				message: 'Tus tipos de participacion favoritos se guardaron correctamente.'
+				message: 'Tus tipos de participación favoritos se guardaron correctamente.'
 			});
 
 			guardando = false;
@@ -95,7 +95,7 @@
 			on:click|stopPropagation
 		>
 			<div class="mb-6 flex items-center justify-between">
-				<h3 class="text-xl font-semibold text-gray-900">Editar Tipos de Participación Favoritas</h3>
+				<h3 class="text-xl font-semibold text-gray-900">Editar tipos de participación favoritos</h3>
 				<button
 					on:click={cerrar}
 					aria-label="Cerrar modal"

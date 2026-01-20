@@ -1,4 +1,4 @@
-import type { Reporte } from '$lib/types/Reporte';
+﻿import type { Reporte } from '$lib/domain/types/Reporte';
 import { mockReportes } from '$lib/mocks/mock-reportes';
 
 /**

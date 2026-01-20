@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -11,7 +11,7 @@
 		type Contacto,
 		type TipoContacto,
 		type EtiquetaContacto
-	} from '$lib/types/Contacto';
+	} from '$lib/domain/types/Contacto';
 
 	import {
 		validarCorreo,

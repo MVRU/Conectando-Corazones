@@ -61,7 +61,7 @@
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h2 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-			Preguntas Frecuentes
+			Preguntas frecuentes
 		</h2>
 		<p class="mx-auto mt-2 max-w-2xl text-lg text-gray-500">
 			<strong>Todo lo que necesitás saber:</strong> simple, ordenado y sin vueltas.

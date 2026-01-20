@@ -1,6 +1,6 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { page } from '$app/stores';
-	import type { Reporte } from '$lib/types/Reporte';
+	import type { Reporte } from '$lib/domain/types/Reporte';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { Button } from '$lib';
 
@@ -22,7 +22,7 @@
 		enviandoFormulario = true;
 
 		if (!$usuario?.id_usuario) {
-			errorEnvio = 'Debés iniciar sesión para enviar un reporte.';
+			errorEnvio = 'Tenés que iniciar sesión para enviar un reporte.';
 			enviandoFormulario = false;
 			return;
 		}
@@ -142,7 +142,7 @@
 							/>
 						</svg>
 					</div>
-					<h3 class="text-2xl font-bold text-gray-900">Debés iniciar sesión</h3>
+					<h3 class="text-2xl font-bold text-gray-900">Tenés que iniciar sesión</h3>
 					<p class="mt-4 max-w-md text-gray-600">
 						Para garantizar la seguridad y el correcto seguimiento de los reportes, es necesario que
 						inicies sesión en tu cuenta.

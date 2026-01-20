@@ -1,5 +1,5 @@
-import type { Colaboracion } from '$lib/types/Colaboracion';
-import type { ColaboradorDisyuncion } from '$lib/types/Usuario';
+﻿import type { Colaboracion } from '$lib/domain/types/Colaboracion';
+import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
 import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 
 const getColaborador = (id: number): ColaboradorDisyuncion | undefined => {

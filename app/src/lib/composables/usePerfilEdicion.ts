@@ -1,13 +1,13 @@
-import { writable, derived, get } from 'svelte/store';
-import type { EditarPerfilForm } from '$lib/types/forms/EditarPerfilForm';
+﻿import { writable, derived, get } from 'svelte/store';
+import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 import type {
 	Usuario,
 	Institucion,
 	Organizacion,
 	Unipersonal,
 	Administrador
-} from '$lib/types/Usuario';
-import type { Localidad } from '$lib/types/Localidad';
+} from '$lib/domain/types/Usuario';
+import type { Localidad } from '$lib/domain/types/Localidad';
 import { validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
 import { perfilService } from '$lib/services/perfilService';
 

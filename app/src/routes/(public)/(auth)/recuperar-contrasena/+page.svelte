@@ -36,7 +36,7 @@ TODO:
 		}
 
 		if (!validarCorreo(email)) {
-			validacionErrores.push('Por favor ingresa un email válido');
+			validacionErrores.push('Por favor ingresá un email válido');
 			return;
 		}
 
@@ -59,7 +59,7 @@ TODO:
 				});
 			}
 		} catch (error) {
-			mensajeError = 'Hubo un problema al enviar el email. Por favor intenta nuevamente.';
+			mensajeError = 'Hubo un problema al enviar el email. Por favor intentá nuevamente.';
 			console.error('Error al enviar email de recuperación:', error);
 			toastStore.show({
 				variant: 'error',
@@ -79,7 +79,7 @@ TODO:
 	<title>Recuperar Contraseña - Conectando Corazones</title>
 	<meta
 		name="description"
-		content="Recupera tu contraseña de Conectando Corazones. Te ayudamos a volver a acceder a tu cuenta."
+		content="Recuperá tu contraseña de Conectando Corazones. Te ayudamos a volver a acceder a tu cuenta."
 	/>
 </svelte:head>
 
@@ -97,7 +97,7 @@ TODO:
 			</div>
 			<h1 class="mb-4 text-4xl font-bold text-[rgb(var(--base-color))]">Recuperar Contraseña</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
-				Ingresa tu email y te enviaremos las instrucciones para crear una nueva contraseña
+				Ingresá tu email y te enviaremos las instrucciones para crear una nueva contraseña
 			</p>
 		</div>
 
@@ -114,7 +114,7 @@ TODO:
 
 					{#if validacionErrores.length > 0}
 						<div class="mb-6 rounded-lg border border-red-200 bg-red-100 p-4">
-							<p class="mb-2 font-medium text-red-700">Por favor corrige los siguientes errores:</p>
+							<p class="mb-2 font-medium text-red-700">Por favor corregí los siguientes errores:</p>
 							<ul class="list-inside list-disc text-sm text-red-600">
 								{#each validacionErrores as error (error)}
 									<li>{error}</li>

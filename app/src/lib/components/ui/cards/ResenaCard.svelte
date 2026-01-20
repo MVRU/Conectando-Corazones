@@ -1,12 +1,12 @@
-<script lang="ts">
-	import type { Resena } from '$lib/types/Resena';
+﻿<script lang="ts">
+	import type { Resena } from '$lib/domain/types/Resena';
 	import type {
 		Usuario,
 		Institucion,
 		Organizacion,
 		Unipersonal,
 		Administrador
-	} from '$lib/types/Usuario';
+	} from '$lib/domain/types/Usuario';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 

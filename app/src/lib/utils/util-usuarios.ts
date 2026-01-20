@@ -1,5 +1,5 @@
-import { mockUsuarios } from '$lib/mocks/mock-usuarios';
-import type { Usuario, Institucion } from '$lib/types/Usuario';
+﻿import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
 
 /**
  * Obtiene el nombre completo de un usuario por su ID

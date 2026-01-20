@@ -306,7 +306,7 @@
 						class="mb-2 rounded-lg px-4 py-3 text-base font-medium text-blue-300 transition-colors duration-200 hover:bg-blue-500/10 hover:text-white"
 						on:click={() => (menuAbierto = false)}
 					>
-						Iniciar sesión
+						Iniciá sesión
 					</a>
 				{/if}
 

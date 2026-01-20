@@ -1,5 +1,5 @@
-<script lang="ts">
-	import type { Usuario, Institucion, Organizacion } from '$lib/types/Usuario';
+﻿<script lang="ts">
+	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';

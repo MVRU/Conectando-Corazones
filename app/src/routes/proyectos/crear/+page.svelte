@@ -1,5 +1,5 @@
 <script lang="ts">
-	import CrearProyecto from '$lib/components/institucion/CrearProyecto.svelte';
+	import CrearProyecto from '$lib/components/feature/institucion/CrearProyecto.svelte';
 	import { goto } from '$app/navigation';
 	import { usuario, isLoading } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
@@ -17,7 +17,7 @@
 			toastStore.show({
 				title: 'Acceso restringido',
 				message:
-					'Para crear un proyecto, debes verificar la identidad de la institución exitosamente antes de continuar.',
+					'Para crear un proyecto, tenés que verificar la identidad de la institución exitosamente antes de continuar.',
 				variant: 'error'
 			});
 			goto('/');

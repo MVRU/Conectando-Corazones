@@ -1,4 +1,4 @@
-import type { Resena } from '$lib/types/Resena';
+import type { Resena } from '$lib/domain/types/Resena';
 
 /**
  * Verifica si un usuario ya reseñó un objeto específico
@@ -58,7 +58,7 @@ export function obtenerTituloResena(tipoObjeto: string): string {
 	const titulos = {
 		usuario: 'Reseñar Usuario',
 		proyecto: 'Reseñar Proyecto',
-		institucion: 'Reseñar Institución'
+		institucion: 'Reseñar institución'
 	};
 	return titulos[tipoObjeto as keyof typeof titulos] || 'Añadir Reseña';
 }

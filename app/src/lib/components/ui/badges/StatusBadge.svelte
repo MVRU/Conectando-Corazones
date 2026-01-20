@@ -1,5 +1,5 @@
-<script lang="ts">
-	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+﻿<script lang="ts">
+	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/domain/types/Estado';
 	import {
 		CheckCircle,
 		Clock,

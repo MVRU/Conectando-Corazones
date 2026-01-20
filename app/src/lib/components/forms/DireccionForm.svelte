@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -11,8 +11,8 @@
 
 	import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import { provincias } from '$lib/data/provincias';
-	import type { Provincia } from '$lib/types/Provincia';
-	import type { Localidad } from '$lib/types/Localidad';
+	import type { Provincia } from '$lib/domain/types/Provincia';
+	import type { Localidad } from '$lib/domain/types/Localidad';
 	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
 

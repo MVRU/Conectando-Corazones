@@ -1,4 +1,4 @@
-import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/types/Estado';
+﻿import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/domain/types/Estado';
 
 export const ESTADO_POR_ID: Record<number, EstadoDescripcion> = {
 	1: 'en_curso',

@@ -1,6 +1,6 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import { MotivoReporte } from '$lib/types/Reporte';
+	import { MotivoReporte } from '$lib/domain/types/Reporte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let isLoading = false;
@@ -42,7 +42,7 @@
 
 		console.log('Motivo actual:', motivo);
 		if (!motivo) {
-			errorMotivo = 'Debés seleccionar un motivo';
+			errorMotivo = 'Tenés que seleccionar un motivo';
 			esValido = false;
 			console.log('Error motivo set:', errorMotivo);
 		}
@@ -50,7 +50,7 @@
 		if (motivo === MotivoReporte.OTRO) {
 			const motivoOtroTrimmed = motivoOtro.trim();
 			if (!motivoOtroTrimmed) {
-				errorMotivoOtro = 'Debés especificar el motivo';
+				errorMotivoOtro = 'Tenés que especificar el motivo';
 				esValido = false;
 			} else if (motivoOtroTrimmed.length < 5) {
 				errorMotivoOtro = 'El motivo debe tener al menos 5 caracteres';

@@ -1,7 +1,7 @@
-<script lang="ts">
+﻿<script lang="ts">
 	import { onMount } from 'svelte';
-	import RegistroCuentaForm from '$lib/components/registro/RegistroCuentaForm.svelte';
-	import RolCard from '$lib/components/registro/RolCard.svelte';
+	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
+	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
 	import Loader from '$lib/components/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
@@ -13,7 +13,7 @@
 	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
-	import type { RegistroCuentaSubmitDetail } from '$lib/types/forms/registro';
+	import type { RegistroCuentaSubmitDetail } from '$lib/domain/types/forms/registro';
 	import { authActions, isAuthenticated } from '$lib/stores/auth';
 	import {
 		obtenerSiguienteEtapaCuenta,
@@ -25,14 +25,14 @@
 		mapearFormularioInstitucionAInputRegistro
 	} from '$lib/services/auth/registration.mapper';
 	import {
-		REGISTRO_FORM_STORAGE_KEY,
+		REGISTRO_STORAGE_KEY,
 		REGISTRO_PAGE_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
 	} from '$lib/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
 
-	let cargada = false; // para saber si la página terminó de cargar
+	let cargada = false; // para saber si la página terminó de cargar	
 
 	const TOTAL_PASOS = 5;
 	let etapa: RegistroEtapa = 'seleccion';
@@ -215,7 +215,7 @@
 		if (!storageRegistroDisponible) {
 			return;
 		}
-		window.sessionStorage.removeItem(REGISTRO_FORM_STORAGE_KEY);
+		window.sessionStorage.removeItem(REGISTRO_STORAGE_KEY);
 	}
 
 	function limpiarProgresoTotal() {
@@ -275,7 +275,7 @@
 			variant: 'info',
 			title: 'Progreso asegurado',
 			message:
-				'Recordamos el paso del registro en este dispositivo. Si necesitás salir, podrás retomar desde donde quedaste.'
+				'Recordamos el paso del registro en este dispositivo. Si necesitas salir, podrás retomar desde donde quedaste.'
 		});
 	}
 
@@ -304,7 +304,7 @@
 <!-- ! Fondo decorativo -->
 <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
-	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
+	class="absolute bottom-0 left-0 right-0 top-[80%] -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
 	style="background-size: 100% 400px; background-repeat: repeat-y;"
 ></div>
 
@@ -424,10 +424,12 @@
 			</div>
 
 			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-				<h2 class="text-center text-3xl font-extrabold text-gray-900">Agregá formas de contacto</h2>
+				<h2 class="text-center text-3xl font-extrabold text-gray-900">
+					Agregá formas de contacto
+				</h2>
 				<p class="mx-auto max-w-2xl text-center text-base text-gray-600">
-					Agregá al menos un número de teléfono. Podés incluir otros medios como redes sociales o
-					emails secundarios.
+					Agregá al menos un número de teléfono. Podés incluir otros medios como redes
+					sociales o emails secundarios.
 				</p>
 
 				<MetodosContactoForm
@@ -469,9 +471,9 @@
 						Contanos desde dónde ayudás
 					</h2>
 					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
-						Seleccioná la provincia y localidad donde funciona tu organización o donde te encontrás
-						para colaborar. Esta información nos ayuda a conectarte con iniciativas cercanas. Podrás
-						sumar más ubicaciones luego desde tu panel.
+						Seleccioná la provincia y localidad donde funciona tu organización o donde te
+						encontrás para colaborar. Esta información nos ayuda a conectarte con iniciativas
+						cercanas. Podrás sumar más ubicaciones luego desde tu panel.
 					</p>
 				</div>
 
@@ -504,8 +506,8 @@
 				</div>
 				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Cuenta creada exitosamente!</h2>
 				<p class="mt-4 max-w-md text-base text-gray-600">
-					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o publicar
-					tus proyectos solidarios.
+					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o
+					publicar tus proyectos solidarios.
 				</p>
 				<div class="mt-8">
 					<Button label="Ir al panel" variant="primary" on:click={() => goto('/mi-panel')} />

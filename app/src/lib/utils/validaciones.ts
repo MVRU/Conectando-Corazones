@@ -14,14 +14,14 @@ export const MENSAJES_ERROR = {
 		'El nombre de usuario debe tener entre 3 y 30 caracteres y solo puede contener letras, números, puntos, guiones bajos o guiones',
 	contrasenasNoCoinciden: 'Las contraseñas no coinciden',
 	requisitoEdad: 'Debés tener al menos 18 años',
-	tipoInstitucionObligatorio: 'Debe especificar el tipo de institución',
+	tipoInstitucionObligatorio: 'Especificá el tipo de institución',
 	nombreInvalido: 'Nombre inválido. Solo se permiten letras y espacios.',
 	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
 	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
-	numeroCalleInvalido: 'Número inválido. Debe ser un número positivo.',
+	numeroCalleInvalido: 'Número inválido. Tiene que ser un número positivo.',
 	provinciaInvalida: 'Provincia inválida. Seleccioná una opción.',
 	ciudadNoPerteneceProvincia: 'La ciudad seleccionada no pertenece a la provincia elegida.',
-	otroContactoObligatorio: 'Debe especificar el tipo de contacto',
+	otroContactoObligatorio: 'Especificá el tipo de contacto',
 	telefonoInvalido: 'Número de teléfono inválido',
 	urlInvalida: 'URL inválida',
 	contactoDuplicado: 'Método de contacto duplicado',
@@ -31,13 +31,13 @@ export const MENSAJES_ERROR = {
 	nombreCorto: 'El nombre debe tener al menos 3 caracteres',
 	razonSocialDuplicada: 'La razón social ya se encuentra registrada',
 	fechaFinObligatoria: 'La fecha de fin es obligatoria.',
-	fechaFinFutura: 'La fecha de fin debe ser futura.',
+	fechaFinFutura: 'La fecha de fin tiene que ser futura.',
 	fechaLejana: 'La fecha es demasiado lejana.',
 	imagenUrlInvalida: 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)',
 	especieObligatoria: 'Especificá el ítem.',
 	beneficiariosNoReducir: 'El número de beneficiarios no puede reducirse.',
 	objetivoNoReducir: 'El objetivo no puede ser menor al actual.',
-	fechaNoAnterior: 'Solo puedes extender la fecha.'
+	fechaNoAnterior: 'Solo podés extender la fecha.'
 };
 
 /**

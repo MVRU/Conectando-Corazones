@@ -1,4 +1,4 @@
-import type { ProyectoCategoria } from '$lib/types/ProyectoCategoria';
+﻿import type { ProyectoCategoria } from '$lib/domain/types/ProyectoCategoria';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
 
 export const mockProyectoCategorias: ProyectoCategoria[] = [

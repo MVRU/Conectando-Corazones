@@ -1,4 +1,4 @@
-import type { Categoria } from '$lib/types/Categoria';
+﻿import type { Categoria } from '$lib/domain/types/Categoria';
 
 export const mockCategorias: Categoria[] = [
 	{ id_categoria: 1, descripcion: 'Alimentación y nutrición' },

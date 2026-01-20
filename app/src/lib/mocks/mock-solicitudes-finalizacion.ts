@@ -1,4 +1,4 @@
-import type { SolicitudFinalizacion } from '$lib/types/SolicitudFinalizacion';
+﻿import type { SolicitudFinalizacion } from '$lib/domain/types/SolicitudFinalizacion';
 
 /**
  * Mock de solicitudes de finalización para testing

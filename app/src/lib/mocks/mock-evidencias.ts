@@ -1,5 +1,5 @@
-import type { Evidencia } from '$lib/types/Evidencia';
-import type { Archivo } from '$lib/types/Archivo';
+import type { Evidencia } from '$lib/domain/types/Evidencia';
+import type { Archivo } from '$lib/domain/types/Archivo';
 
 // ============================================================================
 // ARCHIVOS (EVIDENCIAS) - Organizados por proyecto y tipo
