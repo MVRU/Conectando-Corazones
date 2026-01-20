@@ -82,35 +82,33 @@ function mapearParticipaciones(proyectoOriginal: Proyecto): {
 }
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-    // 1. Verificar autenticación
     if (!locals.usuario) {
         throw error(401, { message: 'No autorizado' });
     }
 
-    // 2. Validar ID del proyecto
     const idProyecto = Number(params.id);
     if (isNaN(idProyecto)) {
         throw error(400, 'ID de proyecto inválido');
     }
 
-    // 3. Buscar el proyecto
     const proyectoOriginal = mockProyectos.find((p) => p.id_proyecto === idProyecto);
 
     if (!proyectoOriginal) {
         throw error(404, 'Proyecto no encontrado');
     }
 
-    // 4. Verificar que el usuario sea una institución
-    if (locals.usuario.rol !== 'institucion') {
-        throw error(403, { message: 'Acceso denegado - Solo instituciones' });
+    const esAdmin = locals.usuario.rol === 'administrador';
+
+    if (!esAdmin) {
+        if (locals.usuario.rol !== 'institucion') {
+            throw error(403, { message: 'Acceso denegado - Solo instituciones o administradores' });
+        }
+
+        if (proyectoOriginal.institucion_id !== locals.usuario.id_usuario) {
+            throw error(403, { message: 'Acceso denegado - No es su proyecto' });
+        }
     }
 
-    // 5. Verificar que la institución sea dueña del proyecto
-    if (proyectoOriginal.institucion_id !== locals.usuario.id_usuario) {
-        throw error(403, { message: 'Acceso denegado - No eres dueño' });
-    }
-
-    // 6. Preparar datos del formulario
     const fechaFinTentativa = formatearFechaParaInput(proyectoOriginal.fecha_fin_tentativa);
     const ubicaciones = mapearUbicaciones(proyectoOriginal);
     const {

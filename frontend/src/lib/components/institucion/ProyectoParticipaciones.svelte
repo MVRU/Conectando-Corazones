@@ -31,6 +31,7 @@
 	// Modo edición
 	export let modoEdicion = false;
 	export let participacionesOriginales: ParticipacionPermitida[] = [];
+	export let esAdmin = false;
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -92,7 +93,7 @@
 				objetivo: valNum
 			};
 
-			if (errAumento) {
+			if (errAumento && !esAdmin) {
 				errores[`participacion_${index}_objetivo`] = errAumento;
 			} else {
 				limpiarError(`participacion_${index}_objetivo`);
@@ -134,7 +135,7 @@
 
 	function eliminarParticipacion(index: number) {
 		// En modo edición, no permitir eliminar participaciones originales
-		if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida) {
+		if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida && !esAdmin) {
 			return;
 		}
 
@@ -210,8 +211,10 @@
 		{/if}
 	</h2>
 	<p class="mb-6 text-gray-600">
-		{#if modoEdicion}
+		{#if modoEdicion && !esAdmin}
 			Los objetivos solo pueden aumentar. Podés agregar nuevos tipos de participación.
+		{:else if esAdmin}
+			Como administrador tenés control total sobre los objetivos y tipos de participación.
 		{:else}
 			Defina los objetivos y cómo los colaboradores pueden ayudarle.
 		{/if}
@@ -263,11 +266,11 @@
 				<button
 					type="button"
 					on:click={() => eliminarParticipacion(index)}
-					disabled={esOriginal}
+					disabled={esOriginal && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
-					class:opacity-50={esOriginal}
-					class:cursor-not-allowed={esOriginal}
-					title={esOriginal ? 'No se pueden eliminar participaciones existentes' : 'Eliminar'}
+					class:opacity-50={esOriginal && !esAdmin}
+					class:cursor-not-allowed={esOriginal && !esAdmin}
+					title={esOriginal && !esAdmin ? 'No se pueden eliminar participaciones existentes' : 'Eliminar'}
 					aria-label="Eliminar participación"
 				>
 					<Trash2 class="h-5 w-5" />
@@ -284,13 +287,13 @@
 							type="text"
 							value={participacion.especie || ''}
 							on:input={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-							class:border-gray-300={!esOriginal}
-							class:border-red-300={errores[`participacion_${index}_especie`] && !esOriginal}
-							class:cursor-not-allowed={esOriginal}
-							class:bg-gray-50={esOriginal}
-							class:text-gray-600={esOriginal}
+							class:border-gray-300={!esOriginal || esAdmin}
+							class:border-red-300={errores[`participacion_${index}_especie`] && (!esOriginal || esAdmin)}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 							placeholder="Ejemplo: libros, alimentos, ropa, medicamentos..."
 						/>
 						{#if errores[`participacion_${index}_especie`]}
@@ -315,7 +318,7 @@
 								const val = e.currentTarget.value;
 								updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
 							}}
-							min={esOriginal && original ? original.objetivo : 1}
+							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
 							placeholder="100"
@@ -337,12 +340,12 @@
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
 							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-							class:border-gray-300={!esOriginal}
-							class:cursor-not-allowed={esOriginal}
-							class:bg-gray-50={esOriginal}
-							class:text-gray-600={esOriginal}
+							class:border-gray-300={!esOriginal || esAdmin}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 						>
 							{#each [...unidadesPorTipo[participacion.tipo_participacion?.descripcion || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>

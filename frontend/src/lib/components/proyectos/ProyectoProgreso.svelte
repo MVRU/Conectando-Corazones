@@ -30,6 +30,7 @@
 	export let proyecto!: Proyecto;
 	export let mostrarBotones = false;
 	export let variant: 'compact' | 'extended' = 'compact';
+	export let ocultarEtiquetaObjetivo = false;
 
 	const especieEmoji: Record<string, IconSource> = {
 		libros: BookOpen,
@@ -126,10 +127,12 @@
 		{/if}
 		{#if variant === 'compact'}
 			<div class="flex justify-between text-xs font-medium text-gray-700">
-				<div class="flex items-center gap-1.5">
-					<Icon src={icono} class="h-4 w-4" />
-					<span>Objetivo</span>
-				</div>
+				{#if !ocultarEtiquetaObjetivo}
+					<div class="flex items-center gap-1.5">
+						<Icon src={icono} class="h-4 w-4" />
+						<span>Objetivo</span>
+					</div>
+				{/if}
 				<span class={getMensajeProgreso().clase}>{getMensajeProgreso().texto}</span>
 			</div>
 		{/if}

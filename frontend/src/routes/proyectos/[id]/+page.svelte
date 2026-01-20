@@ -527,6 +527,7 @@
 											<button
 												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 												role="menuitem"
+												on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 											>
 												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
 												Editar proyecto
@@ -628,6 +629,16 @@
 											<div class="my-1 border-t border-gray-100"></div>
 
 											{#if esCreador}
+											{#if estadoCodigo === 'en_curso'}
+													<button
+														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+														role="menuitem"
+														on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+													>
+														<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
+														Editar proyecto
+													</button>
+												{/if}
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors {estadoCodigo === 'pendiente_solicitud_cierre' ? 'text-red-600 hover:bg-red-50 active:bg-red-100' : 'text-gray-400 cursor-not-allowed opacity-50'}"
 													role="menuitem"
@@ -637,6 +648,8 @@
 													<Icon src={LockClosed} class="h-4 w-4 {estadoCodigo === 'pendiente_solicitud_cierre' ? 'text-red-500' : 'text-gray-400'}" />
 													Cerrar proyecto
 												</button>
+
+												
 											{:else if esColaboradorAprobado}
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
@@ -1039,6 +1052,7 @@
 							>
 								<button
 									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+									on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 								>
 									<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
 									Editar proyecto

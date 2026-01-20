@@ -30,6 +30,7 @@
 	// Modo edición
 	export let modoEdicion = false;
 	export let beneficiariosOriginales: number | undefined = undefined;
+	export let esAdmin = false;
 
 	function normalizarBeneficiarios() {
 		if (beneficiarios == null || Number.isNaN(beneficiarios)) return;
@@ -51,7 +52,7 @@
 
 	function toggleCategoria(categoriaId?: number) {
 		if (categoriaId == null) return;
-		if (modoEdicion) return;
+		if (modoEdicion && !esAdmin) return;
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
 			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);
@@ -94,14 +95,14 @@
 				bind:value={titulo}
 				maxlength="60"
 				on:blur={() => normalizarTitulo(titulo)}
-				disabled={modoEdicion}
+				disabled={modoEdicion && !esAdmin}
 				class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-				class:border-gray-300={!modoEdicion}
-				class:border-red-300={errores.titulo && !modoEdicion}
-				class:cursor-not-allowed={modoEdicion}
-				class:bg-gray-50={modoEdicion}
-				class:text-gray-600={modoEdicion}
-				class:border-gray-200={modoEdicion}
+				class:border-gray-300={!modoEdicion || esAdmin}
+				class:border-red-300={errores.titulo && (!modoEdicion || esAdmin)}
+				class:cursor-not-allowed={modoEdicion && !esAdmin}
+				class:bg-gray-50={modoEdicion && !esAdmin}
+				class:text-gray-600={modoEdicion && !esAdmin}
+				class:border-gray-200={modoEdicion && !esAdmin}
 				placeholder="Ejemplo: Infancias felices 2025"
 			/>
 			{#if errores.titulo}
@@ -176,7 +177,7 @@
 					id="beneficiarios"
 					type="number"
 					bind:value={beneficiarios}
-					min={modoEdicion && beneficiariosOriginales ? beneficiariosOriginales : 1}
+					min={modoEdicion && beneficiariosOriginales && !esAdmin ? beneficiariosOriginales : 1}
 					step="1"
 					inputmode="numeric"
 					on:blur={normalizarBeneficiarios}
@@ -224,11 +225,11 @@
 			<button
 				type="button"
 				on:click={() => toggleCategoria(categoria.id_categoria)}
-				disabled={modoEdicion}
+				disabled={modoEdicion && !esAdmin}
 				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 {clases.border} {clases.bg} {clases.hover}"
-				class:cursor-not-allowed={modoEdicion}
-				class:opacity-75={modoEdicion}
-				class:hover:shadow-none={modoEdicion}
+				class:cursor-not-allowed={modoEdicion && !esAdmin}
+				class:opacity-75={modoEdicion && !esAdmin}
+				class:hover:shadow-none={modoEdicion && !esAdmin}
 			>
 				<span class="mr-2 flex-shrink-0 text-lg {clases.iconColor}">
 					<Icon src={obtenerIconoCategoria(categoria.descripcion || '')} class="h-6 w-6" />
@@ -250,10 +251,10 @@
 									fill-rule="evenodd"
 									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
 									clip-rule="evenodd"
-								/>
+									/>
 							</svg>
 						</div>
-					{:else if !modoEdicion}
+					{:else if !modoEdicion || esAdmin}
 						<div
 							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-gray-400"
 						></div>
@@ -263,7 +264,7 @@
 		{/each}
 	</div>
 
-	{#if !modoEdicion && categoriasSeleccionadas.length >= 5}
+	{#if (!modoEdicion || esAdmin) && categoriasSeleccionadas.length >= 5}
 		<div class="mt-4 flex items-center rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
 			<svg class="mr-2 h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
 				<path
@@ -276,7 +277,7 @@
 		</div>
 	{/if}
 
-	{#if seleccionoOtra && !modoEdicion}
+	{#if seleccionoOtra && (!modoEdicion || esAdmin)}
 		<div class="mt-4">
 			<label for="categoria_otra" class="mb-2 block text-sm font-medium text-gray-700"
 				>Especificá la categoría *</label
@@ -298,7 +299,7 @@
 		</div>
 	{/if}
 
-	{#if errores.categorias && !modoEdicion}
+	{#if errores.categorias && (!modoEdicion || esAdmin)}
 		<p class="mt-4 flex items-center text-sm text-red-600">
 			<svg class="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 				<path
