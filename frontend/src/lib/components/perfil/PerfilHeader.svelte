@@ -104,9 +104,15 @@
 				<!-- Badges container -->
 				<div class="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
 					<!-- Badge del rol -->
-					<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors {obtenerColorRol(perfilUsuario.rol)}">
-						{perfilUsuario.rol === 'institucion' ? 'Institución' : 'Colaborador'}
-					</span>
+					{#if perfilUsuario.rol === 'administrador'}
+						<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors bg-purple-50 text-purple-700 ring-purple-700/10">
+							Administrador
+						</span>
+					{:else}
+						<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors {obtenerColorRol(perfilUsuario.rol)}">
+							{perfilUsuario.rol === 'institucion' ? 'Institución' : 'Colaborador'}
+						</span>
+					{/if}
 					
 					<!-- Badge del subtipo -->
 					{#if subtipoBadge}
@@ -115,8 +121,10 @@
 						</span>
 					{/if}
 					
-					<!-- Badge de verificación -->
-					<BadgeVerificacion estado={estadoVerificacion} />
+					<!-- Badge de verificación (Solo para Instituciones) -->
+					{#if perfilUsuario.rol === 'institucion'}
+						<BadgeVerificacion estado={estadoVerificacion} />
+					{/if}
 				</div>
 			</div>
 

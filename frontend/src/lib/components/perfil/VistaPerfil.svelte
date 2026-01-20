@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { usuario as usuarioStore, isAuthenticated, authActions } from '$lib/stores/auth';
+	import { usuario as usuarioStore, isAuthenticated, authActions, isAdmin } from '$lib/stores/auth';
 	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
 	import EditarCategoriasModal from '$lib/components/modals/EditarCategoriasModal.svelte';
 	import EditarTiposParticipacionModal from '$lib/components/modals/EditarTiposParticipacionModal.svelte';
@@ -192,15 +192,32 @@
 		<!-- Reportar perfil -->
 		{#if !esMiPerfil && $isAuthenticated}
 			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
-				<p class="text-sm text-gray-500">
-					¿Algo no está bien? 
-					<button 
-						on:click={() => console.log('Reportar perfil:', perfilUsuario.username)}
-						class="text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
-					>
-						Reportar este perfil
-					</button>
-				</p>
+				{#if $isAdmin}
+					<div class="mb-4 text-center">
+						<span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+							ID: {perfilUsuario.id_usuario}
+						</span>
+					</div>
+					<p class="text-sm text-gray-500">
+						¿Algo no está bien?
+						<button 
+							on:click={() => console.log('Auditar perfil:', perfilUsuario.username)}
+							class="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
+						>
+							Auditar este perfil
+						</button>
+					</p>
+				{:else}
+					<p class="text-sm text-gray-500">
+						¿Algo no está bien? 
+						<button 
+							on:click={() => console.log('Reportar perfil:', perfilUsuario.username)}
+							class="text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
+						>
+							Reportar este perfil
+						</button>
+					</p>
+				{/if}
 			</div>
 		{/if}
 	</div>
