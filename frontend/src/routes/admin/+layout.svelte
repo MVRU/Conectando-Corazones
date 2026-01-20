@@ -3,6 +3,58 @@
 	import { page } from '$app/stores';
 	import { usuario } from '$lib/stores/auth';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+
+	let menuAbierto = false;
+
+	const adminLinks = [
+		{
+			label: 'Dashboard',
+			href: '/admin',
+			isActive: (pathname: string) => pathname === '/admin'
+		},
+		{
+			label: 'Usuarios',
+			href: '/admin/usuarios',
+			isActive: (pathname: string) =>
+				pathname.startsWith('/admin/usuarios') &&
+				!pathname.startsWith('/admin/usuarios-bajas-calificaciones')
+		},
+		{
+			label: 'Proyectos',
+			href: '/admin/proyectos',
+			isActive: (pathname: string) => pathname.startsWith('/admin/proyectos')
+		},
+		{
+			label: 'Reportes',
+			href: '/admin/reportes',
+			isActive: (pathname: string) => pathname.startsWith('/admin/reportes')
+		},
+		{
+			label: 'Usuarios con bajas calificaciones',
+			href: '/admin/usuarios-bajas-calificaciones',
+			isActive: (pathname: string) => pathname.startsWith('/admin/usuarios-bajas-calificaciones')
+		},
+		{
+			label: 'Moderacion de resenas',
+			href: '/admin/moderacion-resenas',
+			isActive: (pathname: string) => pathname.startsWith('/admin/moderacion-resenas')
+		},
+		{
+			label: 'Logs de actividad',
+			href: '/admin/logs-actividad',
+			isActive: (pathname: string) => pathname.startsWith('/admin/logs-actividad')
+		},
+		{
+			label: 'Analytics',
+			href: '/admin/analytics',
+			isActive: (pathname: string) => pathname.startsWith('/admin/analytics')
+		},
+		{
+			label: 'Configuracion',
+			href: '/admin/configuracion',
+			isActive: (pathname: string) => pathname.startsWith('/admin/configuracion')
+		}
+	];
 </script>
 
 <svelte:head>
@@ -19,82 +71,40 @@
 					<p class="mt-1 text-xs text-gray-500">Gestión de la plataforma</p>
 				</div>
 
-				<nav class="space-y-1 text-sm">
+			<nav class="space-y-1 text-sm">
+				{#each adminLinks as link}
 					<a
-						href="/admin"
+						href={link.href}
 						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname === '/admin'}
+						class:selected={link.isActive($page.url.pathname)}
 					>
-						<span>Dashboard</span>
+						<span>{link.label}</span>
 					</a>
-					<a
-						href="/admin/usuarios"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/usuarios') && !$page.url.pathname.startsWith('/admin/usuarios-bajas-calificaciones')}
-					>
-						<span>Usuarios</span>
-					</a>
-					<a
-						href="/admin/proyectos"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/proyectos')}
-					>
-						<span>Proyectos</span>
-					</a>
-					<a
-						href="/admin/reportes"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/reportes')}
-					>
-						<span>Reportes</span>
-					</a>
-					<a
-						href="/admin/usuarios-bajas-calificaciones"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/usuarios-bajas-calificaciones')}
-					>
-						<span>Usuarios con bajas calificaciones</span>
-					</a>
-					<a
-						href="/admin/moderacion-resenas"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/moderacion-resenas')}
-					>
-						<span>Moderación de reseñas</span>
-					</a>
-					<a
-						href="/admin/logs-actividad"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/logs-actividad')}
-					>
-						<span>Logs de actividad</span>
-					</a>
-					<a
-						href="/admin/analytics"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/analytics')}
-					>
-						<span>Analytics</span>
-					</a>
-					<a
-						href="/admin/configuracion"
-						class="flex items-center justify-between rounded-lg px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-						class:selected={$page.url.pathname.startsWith('/admin/configuracion')}
-					>
-						<span>Configuración</span>
-					</a>
-				</nav>
+				{/each}
+			</nav>
 			</aside>
 
 			<!-- Contenido principal -->
 			<section class="flex-1">
 				<!-- Topbar -->
-				<header class="flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+			<header class="flex items-center justify-between border-b border-gray-200 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
 					<div>
 						<h2 class="text-base font-semibold text-gray-900">Panel de administración</h2>
 						<p class="text-xs text-gray-500">Control de usuarios, proyectos y colaboraciones</p>
 					</div>
 					<div class="flex items-center gap-3">
+					<button
+						type="button"
+						class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-700 transition hover:bg-gray-100 lg:hidden"
+						aria-label={menuAbierto ? 'Cerrar menu admin' : 'Abrir menu admin'}
+						on:click={() => (menuAbierto = !menuAbierto)}
+					>
+						{#if menuAbierto}
+							<span aria-hidden="true">✕</span>
+						{:else}
+							<span aria-hidden="true">☰</span>
+						{/if}
+					</button>
 						{#if $usuario}
 							<div class="hidden flex-col items-end text-xs text-gray-600 sm:flex">
 								<span class="font-medium">{$usuario.nombre} {$usuario.apellido}</span>
@@ -109,7 +119,24 @@
 							on:click={() => goto('/mi-panel')}
 						/>
 					</div>
-				</header>
+			</header>
+
+			{#if menuAbierto}
+				<nav class="border-b border-gray-200 bg-white px-4 py-3 shadow-sm lg:hidden">
+					<div class="flex flex-col gap-1">
+						{#each adminLinks as link}
+							<a
+								href={link.href}
+								class="flex items-center justify-between rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+								class:selected={link.isActive($page.url.pathname)}
+								on:click={() => (menuAbierto = false)}
+							>
+								<span>{link.label}</span>
+							</a>
+						{/each}
+					</div>
+				</nav>
+			{/if}
 
 				<!-- Slot para las páginas hijas -->
 				<div class="px-4 py-6 sm:px-6 lg:px-8">
