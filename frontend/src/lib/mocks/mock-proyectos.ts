@@ -49,7 +49,7 @@ const proyectosBase: Proyecto[] = [
 		colaboracion_ids: [1, 2],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [1],
-		estado: 'pendiente_solicitud_cierre',
+		estado: 'en_curso',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 1,
@@ -132,7 +132,7 @@ const proyectosBase: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2025-04-20'),
 		id_chat_firebase: 1003,
 		participacion_permitida_ids: [1],
-		colaboracion_ids: [4],
+		colaboracion_ids: [4, 25],
 		institucion_id: 3,
 		solicitud_finalizacion_ids: [3],
 		estado: 'en_revision',
@@ -337,7 +337,7 @@ const proyectosBase: Proyecto[] = [
 		colaboracion_ids: [],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [],
-		estado: 'pendiente_solicitud_cierre',
+		estado: 'en_revision',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 11,

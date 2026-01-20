@@ -234,4 +234,13 @@ export const mockColaboraciones: Colaboracion[] = [
 		colaborador_id: 4,
 		colaborador: getColaborador(4) // maria_g
 	},
+	{
+		id_colaboracion: 25,
+		estado: 'aprobada',
+		mensaje: 'Colaboración para evaluación de cierre.',
+		created_at: new Date('2025-04-01'),
+		proyecto_id: 3,
+		colaborador_id: 4,
+		colaborador: getColaborador(4) // maria_g
+	}
 ];

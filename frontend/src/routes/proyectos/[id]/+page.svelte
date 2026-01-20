@@ -3,6 +3,7 @@
 	import type { EstadoDescripcion } from '$lib/types/Estado';
 	import type { Colaboracion } from '$lib/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
+	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
@@ -26,6 +27,8 @@
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
 	import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
+	import { mockColaboracionTipoParticipacion } from '$lib/mocks/mock-colaboracion-tipo-participacion';
+	import type { ColaboracionTipoParticipacion } from '$lib/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 
 	import {
@@ -49,7 +52,9 @@
 		Photo,
 		LockClosed,
 		Star,
-		Flag
+		Flag,
+		Plus,
+		ClipboardDocumentCheck
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -57,6 +62,7 @@
 	let colaboracionesActivas: Colaboracion[] = [];
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
+	let misAportes: ColaboracionTipoParticipacion[] = [];
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -67,6 +73,19 @@
 		mockColaboraciones.find(
 			(c) => c.proyecto_id === proyecto?.id_proyecto && c.colaborador_id === $usuario?.id_usuario
 		);
+
+	$: if (colaboracionUsuario && colaboracionUsuario.id_colaboracion && proyecto) {
+		misAportes = mockColaboracionTipoParticipacion
+			.filter((ctp) => ctp.colaboracion_id === colaboracionUsuario!.id_colaboracion)
+			.map((ctp) => {
+				const pp = proyecto!.participacion_permitida?.find(
+					(p) => p.id_participacion_permitida === ctp.participacion_permitida_id
+				);
+				return { ...ctp, participacion_permitida: pp };
+			});
+	} else {
+		misAportes = [];
+	}
 
 	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
 	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
@@ -168,6 +187,26 @@
 
 	function esParticipacionMonetaria(p: ParticipacionPermitida): boolean {
 		return p.tipo_participacion?.descripcion === 'Monetaria';
+	}
+
+	function esParticipacionEspecie(p: ParticipacionPermitida): boolean {
+		return p.tipo_participacion?.descripcion === 'Especie';
+	}
+
+	function formatoUnidad(p: ParticipacionPermitida): string {
+		if (p.unidad_medida === 'personas') return 'voluntarios';
+		
+		if (esParticipacionEspecie(p)) {
+			const especie = p.especie || '';
+			const unidad = p.unidad_medida || '';
+			
+			if (unidad.toLowerCase().includes('unidad')) {
+				return especie;
+			}
+			return `${unidad} ${especie}`.trim();
+		}
+
+		return p.unidad_medida || '';
 	}
 
 	function formatoNumero(valor: number): string {
@@ -347,7 +386,7 @@
 												<p class="font-medium text-gray-800">
 													{esParticipacionMonetaria(p)
 														? `$ ${formatoNumero(p.actual || 0)} / $ ${formatoNumero(p.objetivo)} ${p.unidad_medida?.toUpperCase() || ''}`
-														: `${p.actual || 0} / ${p.objetivo} ${p.unidad_medida === 'personas' ? 'voluntarios' : p.unidad_medida}`}
+														: `${p.actual || 0} / ${p.objetivo} ${formatoUnidad(p)}`}
 												</p>
 												<div
 													class="mt-1 flex justify-between text-xs text-gray-500"
@@ -366,6 +405,45 @@
 							{/if}
 						</div>
 					</section>
+
+					{#if esColaboradorAprobado}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-mis-aportes"
+						>
+							<h2 id="titulo-mis-aportes" class="mb-4 text-xl font-semibold sm:text-2xl">
+								Mis aportes
+							</h2>
+
+							{#if misAportes.length > 0}
+								<ul class="space-y-3">
+									{#each misAportes as aporte}
+										<li class="flex items-center justify-between rounded-lg border border-gray-100 p-3">
+											<span class="font-medium text-gray-700">
+												{aporte.participacion_permitida?.tipo_participacion?.descripcion || 'Aporte'}
+												{#if aporte.participacion_permitida?.especie}
+													({aporte.participacion_permitida.especie})
+												{/if}
+											</span>
+											<span class="font-semibold text-gray-900">
+												{#if aporte.participacion_permitida && esParticipacionMonetaria(aporte.participacion_permitida)}
+													$
+												{/if}
+												{formatoNumero(aporte.cantidad)}
+												{aporte.participacion_permitida?.unidad_medida}
+											</span>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="text-gray-500">Aún no has registrado aportes específicos.</p>
+							{/if}
+
+							<div class="mt-6">
+							<Button label="Agregar aporte" variant="primary" size="sm" disabled={estadoCodigo !== 'en_curso'}></Button>
+							</div>
+						</section>
+					{/if}
 
 					<section
 						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
@@ -471,14 +549,36 @@
 												<Icon src={ChatBubbleLeftRight} class="h-4 w-4 text-gray-500" />
 												Ir al chat
 											</button>
-											<button
-												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-												role="menuitem"
-												on:click={() => goto(esCreador ? `/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}` : `/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)}
-											>
-												<Icon src={ClipboardDocumentList} class="h-4 w-4 text-gray-500" />
-												{esCreador ? 'Ver solicitudes' : 'Ver solicitud'}
-											</button>
+											{#if esCreador}
+												<button
+													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+													role="menuitem"
+													on:click={() => goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)}
+												>
+													<Icon src={ClipboardDocumentList} class="h-4 w-4 text-gray-500" />
+													Ver solicitudes
+												</button>
+											{/if}
+											{#if esColaboradorAprobado && estadoCodigo === 'en_curso'}
+												<button
+													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+													role="menuitem"
+													on:click={irAColaborar}
+												>
+													<Icon src={Plus} class="h-4 w-4 text-gray-500" />
+													Agregar aporte
+												</button>
+											{/if}
+											{#if esColaboradorAprobado && estadoCodigo === 'en_revision'}
+												<button
+													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+													role="menuitem"
+													on:click={() => goto(`/colaborador/evaluar-finalizacion?proyecto=${proyecto.id_proyecto}`)}
+												>
+													<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
+													Evaluar finalización
+												</button>
+											{/if}
 											<button
 												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 												role="menuitem"
