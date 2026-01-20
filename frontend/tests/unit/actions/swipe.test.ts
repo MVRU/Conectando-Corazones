@@ -22,7 +22,7 @@ function createSwipeElement(
 	const events: string[] = [];
 	const action = swipe(element, { threshold });
 	element.addEventListener(eventName, () => events.push(eventName));
-	return { element, events, destroy: action?.destroy ?? (() => { }) };
+	return { element, events, destroy: action?.destroy ?? (() => {}) };
 }
 
 describe('swipe', () => {
@@ -152,7 +152,7 @@ describe('swipe', () => {
 			const events: string[] = [];
 			const action = swipe(element, {}); // No threshold specified, should use default 40
 			element.addEventListener('swipeleft', () => events.push('swipeleft'));
-			contexts.push({ element, events, destroy: action?.destroy ?? (() => { }) });
+			contexts.push({ element, events, destroy: action?.destroy ?? (() => {}) });
 
 			// Movement of 30 should not trigger with default threshold of 40
 			element.dispatchEvent(new MouseEvent('mousedown', { clientX: 100, bubbles: true }));

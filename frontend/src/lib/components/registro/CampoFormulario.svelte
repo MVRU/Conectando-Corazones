@@ -25,7 +25,7 @@
 	>
 		<span>{label}</span>
 		{#if required}
-			<span class="text-base font-semibold leading-none text-red-500" aria-hidden="true">*</span>
+			<span class="text-base leading-none font-semibold text-red-500" aria-hidden="true">*</span>
 		{/if}
 	</label>
 	<Input

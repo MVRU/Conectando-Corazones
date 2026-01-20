@@ -5,7 +5,7 @@
 	import { mockProyectos } from '$lib/mocks/mock-proyectos';
 	import type { Reporte } from '$lib/types/Reporte';
 	import { fly } from 'svelte/transition';
-	import { User, Folder, Heart, Trash2, AlertCircle } from 'lucide-svelte';
+	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';
 
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
@@ -235,7 +235,7 @@
 			class="mb-6 flex flex-col items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:flex-row"
 		>
 			<div class="flex w-full items-center gap-2 sm:w-auto">
-				<label for="status-filter" class="whitespace-nowrap text-sm font-medium text-gray-700"
+				<label for="status-filter" class="text-sm font-medium whitespace-nowrap text-gray-700"
 					>Estado:</label
 				>
 				<select
@@ -251,7 +251,7 @@
 			</div>
 
 			<div class="flex w-full items-center gap-2 sm:w-auto">
-				<label for="sort-order" class="whitespace-nowrap text-sm font-medium text-gray-700"
+				<label for="sort-order" class="text-sm font-medium whitespace-nowrap text-gray-700"
 					>Orden:</label
 				>
 				<select
@@ -271,7 +271,7 @@
 				{#each paginatedReportes as reporte (reporte.id_reporte)}
 					<div
 						in:fly={{ y: 20, duration: 300 }}
-						class={`overflow-hidden rounded-l-md rounded-r-xl border-y border-l-4 border-r border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md ${getEstadoBorderColor(reporte.estado)}`}
+						class={`overflow-hidden rounded-l-md rounded-r-xl border-y border-r border-l-4 border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md ${getEstadoBorderColor(reporte.estado)}`}
 					>
 						<div class="p-6">
 							<div class="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row">
@@ -313,7 +313,7 @@
 									</p>
 
 									{#if $isAdmin}
-										<div class="ml-7 mt-1 flex items-center gap-1 text-sm text-gray-600">
+										<div class="mt-1 ml-7 flex items-center gap-1 text-sm text-gray-600">
 											<span class="font-medium">Reportado por:</span>
 											<div class="flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5">
 												<User class="h-3 w-3 text-gray-500" />
@@ -340,14 +340,14 @@
 								<div class="pl-7">
 									<div class="mb-3">
 										<span
-											class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500"
+											class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
 											>Motivo</span
 										>
 										<p class="font-medium text-gray-900">{reporte.motivo}</p>
 									</div>
 									<div>
 										<span
-											class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500"
+											class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
 											>Descripción</span
 										>
 										<p class="text-sm leading-relaxed text-gray-700">{reporte.descripcion}</p>
@@ -356,7 +356,7 @@
 									{#if $isAdmin}
 										<div class="mt-3">
 											<span
-												class="mb-1 block text-xs font-semibold uppercase tracking-wider text-gray-500"
+												class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
 												>Objeto Reportado</span
 											>
 											<div class="flex items-center gap-2">
@@ -400,11 +400,11 @@
 												</p>
 											{/if}
 											{#if reporte.comentario_resolucion}
-												<p class="text-sm italic text-gray-700">
+												<p class="text-sm text-gray-700 italic">
 													"{reporte.comentario_resolucion}"
 												</p>
 											{:else}
-												<p class="text-sm italic text-gray-500">Sin comentarios adicionales.</p>
+												<p class="text-sm text-gray-500 italic">Sin comentarios adicionales.</p>
 											{/if}
 										</div>
 									{:else}
@@ -571,14 +571,14 @@
 		<div slot="footer" class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
 			<button
 				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
 				on:click={cerrarModalResolucion}
 			>
 				Cancelar
 			</button>
 			<button
 				type="button"
-				class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:text-sm ${
+				class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm ${
 					resolucionEstado === 'resuelto'
 						? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
 						: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
@@ -610,14 +610,14 @@
 		<div slot="footer" class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
 			<button
 				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
 				on:click={cerrarModalRetiro}
 			>
 				Cancelar
 			</button>
 			<button
 				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:w-auto sm:text-sm"
+				class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm"
 				on:click={confirmarRetiro}
 			>
 				Confirmar retiro

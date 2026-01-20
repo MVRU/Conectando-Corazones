@@ -48,11 +48,11 @@
 
 	<!-- Menú de más acciones -->
 	{#if $usuario && !esCreador && !esAdministrador}
-		<div class="absolute right-4 top-4 z-10">
+		<div class="absolute top-4 right-4 z-10">
 			<div class="relative" use:clickOutside={() => (mostrarMenuReportar = false)}>
 				<button
 					type="button"
-					class="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+					class="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:ring-2 focus:ring-white/50 focus:outline-none"
 					on:click={() => (mostrarMenuReportar = !mostrarMenuReportar)}
 					aria-label="Más acciones"
 					aria-expanded={mostrarMenuReportar}
@@ -62,7 +62,7 @@
 
 				{#if mostrarMenuReportar}
 					<div
-						class="absolute right-0 top-full mt-2 w-48 origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
+						class="absolute top-full right-0 mt-2 w-48 origin-top-right rounded-lg bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none"
 						role="menu"
 						aria-orientation="vertical"
 						aria-labelledby="user-menu-button"
@@ -98,7 +98,7 @@
 			</div>
 
 			<h1
-				class="text-shadow-sm flex flex-wrap items-center gap-2 text-2xl font-bold leading-tight sm:text-3xl lg:text-4xl"
+				class="flex flex-wrap items-center gap-2 text-2xl leading-tight font-bold text-shadow-sm sm:text-3xl lg:text-4xl"
 			>
 				{proyecto.titulo}
 				{#if esAdministrador}

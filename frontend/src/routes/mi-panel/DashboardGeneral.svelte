@@ -82,7 +82,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 100ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">
 				<Icon src={ChartBar} class="h-24 w-24" />
 			</div>
 			<div class="relative">
@@ -108,7 +108,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 200ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">
 				<Icon src={CurrencyDollar} class="h-24 w-24" />
 			</div>
 			<div class="relative">
@@ -127,7 +127,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 300ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">
 				<Icon src={BuildingOffice} class="h-24 w-24" />
 			</div>
 			<div class="relative">
@@ -144,7 +144,7 @@
 			class:translate-y-4={!animate}
 			style="transition-delay: 400ms"
 		>
-			<div class="absolute -right-4 -top-4 text-6xl opacity-10">
+			<div class="absolute -top-4 -right-4 text-6xl opacity-10">
 				<Icon src={Heart} class="h-24 w-24" />
 			</div>
 			<div class="relative">

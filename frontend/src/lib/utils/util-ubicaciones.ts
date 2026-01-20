@@ -3,7 +3,11 @@ import type { Provincia } from '$lib/types/Provincia';
 import type { Proyecto } from '$lib/types/Proyecto';
 import { provincias } from '$lib/data/provincias';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
-import type { UbicacionDisyuncion, UbicacionPresencial, UbicacionVirtual } from '$lib/types/Ubicacion';
+import type {
+	UbicacionDisyuncion,
+	UbicacionPresencial,
+	UbicacionVirtual
+} from '$lib/types/Ubicacion';
 
 /**
  * * Getters sencillos
@@ -89,7 +93,6 @@ export function esUbicacionVirtual(u?: UbicacionDisyuncion): u is UbicacionVirtu
 	return !!u && (u as UbicacionVirtual).modalidad === 'virtual';
 }
 
-
 /**
  * Construye una dirección completa desde una ubicación presencial
  */
@@ -168,10 +171,7 @@ export function obtenerProvinciasDisponibles(proyectos: Proyecto[]): string[] {
  * Obtiene todas las localidades disponibles desde un array de proyectos
  * Opcionalmente filtra por provincia
  */
-export function obtenerLocalidadesDisponibles(
-	proyectos: Proyecto[],
-	provincia?: string
-): string[] {
+export function obtenerLocalidadesDisponibles(proyectos: Proyecto[], provincia?: string): string[] {
 	const localidadesSet = new Set<string>();
 
 	proyectos.forEach((p) => {

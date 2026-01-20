@@ -43,7 +43,7 @@ const proyectosBase: Proyecto[] = [
 		created_at: new Date('2025-03-01'),
 		updated_at: new Date('2025-03-05'),
 		fecha_cierre_postulaciones: new Date('2025-08-01'),
-		fecha_fin_tentativa: new Date('2025-10-01'),
+		fecha_fin_tentativa: new Date('2026-01-10'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
 		colaboracion_ids: [1, 2, 25],
@@ -64,11 +64,11 @@ const proyectosBase: Proyecto[] = [
 			{
 				id_participacion_permitida: 2,
 				id_proyecto: 1,
-				id_tipo_participacion: 1,
-				unidad_medida: 'docentes',
+				id_tipo_participacion: 2,
+				unidad_medida: 'personas',
 				objetivo: 10,
 				actual: 2,
-				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Voluntariado' }
 			}
 		]
 	},
@@ -235,7 +235,8 @@ const proyectosBase: Proyecto[] = [
 		titulo: 'Ropa de Abrigo Invernal',
 		descripcion: 'Donación y distribución de ropa de abrigo para personas en situación de calle.',
 		resumen: 'Distribuimos ropa termica para personas en situacion de calle.',
-		aprendizajes: 'Fortalecimos la red de voluntarios y aprendimos a mantener inventarios rotativos.',
+		aprendizajes:
+			'Fortalecimos la red de voluntarios y aprendimos a mantener inventarios rotativos.',
 		url_portada: '/img/proyectos-7.webp',
 		created_at: new Date('2025-05-01'),
 		fecha_cierre_postulaciones: new Date('2025-06-01'),
@@ -290,7 +291,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 9,
 		titulo: 'Biblioteca Digital Comunitaria',
-		descripcion: 'Proyecto completado de creación de una biblioteca digital con acceso libre para la comunidad educativa.',
+		descripcion:
+			'Proyecto completado de creación de una biblioteca digital con acceso libre para la comunidad educativa.',
 		url_portada: '/img/proyectos-9.webp',
 		created_at: new Date('2024-08-15'),
 		fecha_cierre_postulaciones: new Date('2024-09-15'),
@@ -325,7 +327,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 10,
 		titulo: 'Huerta Escolar Rosario',
-		descripcion: 'Creación de huertas orgánicas en escuelas públicas de Rosario para comedores escolares. Buscamos enseñar a los chicos sobre soberanía alimentaria y proveer verduras frescas al comedor.',
+		descripcion:
+			'Creación de huertas orgánicas en escuelas públicas de Rosario para comedores escolares. Buscamos enseñar a los chicos sobre soberanía alimentaria y proveer verduras frescas al comedor.',
 		resumen: 'Huertas escolares para alimentación saludable y aprendizaje.',
 		aprendizajes: 'Los alumnos se involucran activamente en el cuidado de la tierra.',
 		url_portada: '/img/proyectos-10.jpg',
@@ -366,12 +369,13 @@ const proyectosBase: Proyecto[] = [
 				actual: 1,
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			}
-		]	
+		]
 	},
 	{
 		id_proyecto: 11,
 		titulo: 'Abrigo para la Puna',
-		descripcion: 'Recolección de ropa de invierno y mantas para comunidades de la Puna Jujeña. Las temperaturas bajan de 0 grados y muchas familias no tienen calefacción.',
+		descripcion:
+			'Recolección de ropa de invierno y mantas para comunidades de la Puna Jujeña. Las temperaturas bajan de 0 grados y muchas familias no tienen calefacción.',
 		resumen: 'Llevamos abrigo a zonas de alta montaña.',
 		aprendizajes: 'La logística es clave para llegar a los parajes más aislados.',
 		url_portada: '/img/proyectos-11.jpg',
@@ -408,7 +412,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 12,
 		titulo: 'Alfabetización Digital',
-		descripcion: 'Talleres de uso de celular y computadora para adultos mayores en CABA. Reducimos la brecha digital y la soledad.',
+		descripcion:
+			'Talleres de uso de celular y computadora para adultos mayores en CABA. Reducimos la brecha digital y la soledad.',
 		resumen: 'Inclusión digital para la tercera edad.',
 		aprendizajes: 'La paciencia y la práctica constante son fundamentales.',
 		url_portada: '/img/proyectos-12.jpg',
@@ -445,7 +450,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 13,
 		titulo: 'Reciclaje en el Barrio',
-		descripcion: 'Puntos de reciclaje gestionados por vecinos para reducir basura en Córdoba Capital. Buscamos concientizar y limpiar nuestros espacios comunes.',
+		descripcion:
+			'Puntos de reciclaje gestionados por vecinos para reducir basura en Córdoba Capital. Buscamos concientizar y limpiar nuestros espacios comunes.',
 		resumen: 'Gestionamos residuos reciclables vecinales.',
 		aprendizajes: 'La educación ambiental empieza por el ejemplo cotidiano.',
 		url_portada: '/img/proyectos-13.jpg',
@@ -482,7 +488,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 14,
 		titulo: 'Refugio Patitas Felices',
-		descripcion: 'Construcción de caniles nuevos para el refugio de perros en Quilmes. Necesitamos mejorar las condiciones de vida de nuestros 150 animales rescatados.',
+		descripcion:
+			'Construcción de caniles nuevos para el refugio de perros en Quilmes. Necesitamos mejorar las condiciones de vida de nuestros 150 animales rescatados.',
 		resumen: 'Mejoramos la infraestructura del refugio.',
 		aprendizajes: 'El trabajo en equipo permite grandes construcciones con pocos recursos.',
 		url_portada: '/img/proyectos-14.jpg',
@@ -528,7 +535,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 15,
 		titulo: 'Mochilas Solidarias',
-		descripcion: 'Armado de kits escolares completos para inicio de clases en escuelas rurales de Catamarca. Queremos que 50 chicos empiecen el año con todo lo necesario.',
+		descripcion:
+			'Armado de kits escolares completos para inicio de clases en escuelas rurales de Catamarca. Queremos que 50 chicos empiecen el año con todo lo necesario.',
 		resumen: 'Kits escolares para igualdad de oportunidades.',
 		aprendizajes: 'Cada kit entregado es una sonrisa y una oportunidad de estudiar.',
 		url_portada: '/img/proyectos-15.jpg',
@@ -565,7 +573,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 16,
 		titulo: 'Forestando Futuro',
-		descripcion: 'Plantación de árboles nativos en zonas afectadas por incendios en las sierras. Restauramos el ecosistema con tabaquillos y maitenes.',
+		descripcion:
+			'Plantación de árboles nativos en zonas afectadas por incendios en las sierras. Restauramos el ecosistema con tabaquillos y maitenes.',
 		resumen: 'Recuperamos el bosque nativo local.',
 		aprendizajes: 'La naturaleza tiene sus tiempos y debemos respetarlos.',
 		url_portada: '/img/proyectos-16.jpg',
@@ -602,7 +611,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 17,
 		titulo: 'Taller de Costura Solidaria',
-		descripcion: 'Enseñanza de costura y confección para mujeres jefas de hogar en Rosario. Empoderamos a través del oficio.',
+		descripcion:
+			'Enseñanza de costura y confección para mujeres jefas de hogar en Rosario. Empoderamos a través del oficio.',
 		resumen: 'Oficio y salida laboral para mujeres.',
 		aprendizajes: 'El empoderamiento económico transforma familias enteras.',
 		url_portada: '/img/proyectos-17.jpg',
@@ -648,7 +658,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 18,
 		titulo: 'Biblioteca Móvil',
-		descripcion: 'Camioneta equipada con libros que recorre barrios periféricos fomentando la lectura. Llevamos mundos de fantasía a quienes no pueden acceder a una biblioteca.',
+		descripcion:
+			'Camioneta equipada con libros que recorre barrios periféricos fomentando la lectura. Llevamos mundos de fantasía a quienes no pueden acceder a una biblioteca.',
 		resumen: 'Cultura sobre ruedas para todos.',
 		aprendizajes: 'Los niños esperan con ansias la llegada de la biblioteca cada semana.',
 		url_portada: '/img/proyectos-18.jpg',
@@ -685,7 +696,8 @@ const proyectosBase: Proyecto[] = [
 	{
 		id_proyecto: 19,
 		titulo: 'Juegoteca Barrial',
-		descripcion: 'Espacio de juego seguro y acompañado para niños y niñas del barrio. Promovemos el derecho al juego y la socialización saludable.',
+		descripcion:
+			'Espacio de juego seguro y acompañado para niños y niñas del barrio. Promovemos el derecho al juego y la socialización saludable.',
 		resumen: 'Derecho al juego en un entorno seguro.',
 		aprendizajes: 'El juego es fundamental para el desarrollo sano de la infancia.',
 		url_portada: '/img/proyectos-19.jpg',
@@ -779,7 +791,8 @@ const proyectosBase: Proyecto[] = [
 		id_proyecto: 22,
 		titulo: 'Apoyo escolar en contraturno',
 		beneficiarios: 35,
-		descripcion: 'Acompañamiento educativo para estudiantes con dificultades de aprendizaje. Clases de apoyo en matemática y lengua durante las tardes.',
+		descripcion:
+			'Acompañamiento educativo para estudiantes con dificultades de aprendizaje. Clases de apoyo en matemática y lengua durante las tardes.',
 		resumen: 'Reforzamos contenidos clave para evitar el abandono escolar.',
 		aprendizajes: 'El apoyo individualizado marca la diferencia en el rendimiento académico.',
 		url_portada: '/img/proyectos-22.webp',

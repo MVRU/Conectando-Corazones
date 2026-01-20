@@ -8,7 +8,6 @@ TODO:
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { steps } from '$lib/data/como-funciona';
 	import { inView } from '$lib/actions/inView';
-	import { reducedMotion } from '$lib/stores/reducedMotion';
 
 	let inViewSection = false;
 </script>
@@ -31,7 +30,6 @@ TODO:
 		class="relative mx-auto mb-12 max-w-4xl text-center
                        transition-transform duration-600 ease-out
                        md:max-w-3xl"
-		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
 		class:translate-y-8={!inViewSection}
 	>
@@ -50,7 +48,6 @@ TODO:
 		class="relative mx-auto grid max-w-7xl gap-8
                        transition-opacity duration-600
                        ease-out sm:grid-cols-2 lg:grid-cols-3"
-		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
 		class:translate-y-6={!inViewSection}
 	>
@@ -62,7 +59,6 @@ TODO:
 	<!-- *CTA -->
 	<div
 		class="relative mt-12 flex justify-center transition-opacity duration-600"
-		class:duration-0={$reducedMotion}
 		class:opacity-0={!inViewSection}
 	>
 		<Button

@@ -16,7 +16,7 @@ export function determinarEstadoVerificacion(
 	}
 
 	// Si tiene alguna aprobada, mostramos la de mayor nivel
-	const aprobada = verificaciones.find(v => v.estado === 'aprobada');
+	const aprobada = verificaciones.find((v) => v.estado === 'aprobada');
 	if (aprobada) {
 		switch (aprobada.tipo) {
 			case 'renaper':
@@ -29,7 +29,7 @@ export function determinarEstadoVerificacion(
 	}
 
 	// Si no tiene aprobadas pero sí pendientes
-	if (verificaciones.some(v => v.estado === 'pendiente')) {
+	if (verificaciones.some((v) => v.estado === 'pendiente')) {
 		return 'verificacion_pendiente';
 	}
 
@@ -42,5 +42,5 @@ export function obtenerVerificacionesUsuario(
 	mockVerificaciones: Verificacion[]
 ): Verificacion[] {
 	if (!usuarioId) return [];
-	return mockVerificaciones.filter(v => v.usuario_id === usuarioId);
+	return mockVerificaciones.filter((v) => v.usuario_id === usuarioId);
 }

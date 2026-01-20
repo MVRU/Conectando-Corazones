@@ -53,7 +53,9 @@ export function obtenerColorRol(rol: string): string {
  */
 export function formatearContacto(tipo: string, etiqueta?: string, valor?: string): string {
 	const tipoFormateado = tipo.charAt(0).toUpperCase() + tipo.slice(1);
-	const etiquetaFormateada = etiqueta ? ` (${etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1)})` : '';
+	const etiquetaFormateada = etiqueta
+		? ` (${etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1)})`
+		: '';
 	return `${tipoFormateado}${etiquetaFormateada}: ${valor || ''}`;
 }
 
@@ -65,12 +67,12 @@ export function formatearContacto(tipo: string, etiqueta?: string, valor?: strin
 export function formatearEtiquetaContacto(etiqueta?: string): string {
 	if (!etiqueta) return '';
 	const etiquetas: Record<string, string> = {
-		'principal': 'Principal',
-		'secundario': 'Secundario',
-		'celular': 'Celular',
+		principal: 'Principal',
+		secundario: 'Secundario',
+		celular: 'Celular',
 		'celular secundario': 'Celular Secundario',
-		'fijo': 'Fijo',
-		'oficina': 'Oficina'
+		fijo: 'Fijo',
+		oficina: 'Oficina'
 	};
 	return etiquetas[etiqueta.toLowerCase()] || etiqueta.charAt(0).toUpperCase() + etiqueta.slice(1);
 }

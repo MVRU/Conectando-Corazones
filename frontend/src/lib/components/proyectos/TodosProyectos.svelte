@@ -2,10 +2,9 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import { mockProyectos as defaultProyectos } from '$lib/mocks/mock-proyectos';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import { usuario } from '$lib/stores/auth';
-	import { createProyectosFiltros, FILTROS_INICIALES } from '$lib/composables/useProyectosFiltros';
+	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
 	import { useProyectosFiltrosUrl } from '$lib/composables/useProyectosFiltrosUrl';
 
 	export let proyectos: Proyecto[] = defaultProyectos;
@@ -41,7 +40,7 @@
 	useProyectosFiltrosUrl(filtros);
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-4 pb-6 pt-2 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-4 pt-2 pb-6 sm:px-10 lg:px-20">
 	<ProyectosBase
 		proyectos={$proyectosOrdenados}
 		titulo="Proyectos solidarios"

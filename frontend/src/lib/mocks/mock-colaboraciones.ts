@@ -27,7 +27,8 @@ export const mockColaboraciones: Colaboracion[] = [
 	{
 		id_colaboracion: 25,
 		estado: 'aprobada',
-		mensaje: 'Como empresa nos interesa apoyar iniciativas educativas. Podemos aportar recursos materiales y voluntarios de nuestro equipo.',
+		mensaje:
+			'Como empresa nos interesa apoyar iniciativas educativas. Podemos aportar recursos materiales y voluntarios de nuestro equipo.',
 		created_at: new Date('2025-03-08'),
 		proyecto_id: 1,
 		colaborador_id: 7,
@@ -84,7 +85,8 @@ export const mockColaboraciones: Colaboracion[] = [
 	{
 		id_colaboracion: 9,
 		estado: 'aprobada',
-		mensaje: 'Tengo experiencia en talleres de arte y puedo contribuir con materiales y tiempo para enseñar técnicas de pintura.',
+		mensaje:
+			'Tengo experiencia en talleres de arte y puedo contribuir con materiales y tiempo para enseñar técnicas de pintura.',
 		created_at: new Date('2025-04-20'),
 		proyecto_id: 8,
 		colaborador_id: 4,
@@ -93,7 +95,8 @@ export const mockColaboraciones: Colaboracion[] = [
 	{
 		id_colaboracion: 10,
 		estado: 'aprobada',
-		mensaje: 'Me encantaría colaborar en la biblioteca digital aportando mi experiencia en catalogos y gestión de recursos digitales.',
+		mensaje:
+			'Me encantaría colaborar en la biblioteca digital aportando mi experiencia en catalogos y gestión de recursos digitales.',
 		created_at: new Date('2024-09-01'),
 		proyecto_id: 9,
 		colaborador_id: 4,
@@ -185,7 +188,7 @@ export const mockColaboraciones: Colaboracion[] = [
 		estado: 'aprobada',
 		mensaje: 'Como nutricionista, puedo asesorar sobre alimentación saludable y planificar menús.',
 		created_at: new Date('2025-02-20'),
-		proyecto_id: 7,	
+		proyecto_id: 7,
 		colaborador_id: 8,
 		colaborador: getColaborador(8) // ana_martinez
 	},

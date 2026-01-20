@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { usuario as usuarioStore } from '$lib/stores/auth';
-	import type { Reporte } from '$lib/types/Reporte';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { crearReporte } from '$lib/utils/util-reportes';
 	import { portal } from '$lib/actions/portal';
@@ -104,7 +103,7 @@
 				type="button"
 				on:click={cerrarModal}
 				disabled={enviando}
-				class="absolute right-4 top-4 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
+				class="absolute top-4 right-4 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
 				aria-label="Cerrar"
 			>
 				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

@@ -5,15 +5,15 @@ import type { Contacto } from '$lib/types/Contacto';
 export type TipoColaborador = 'unipersonal' | 'organizacion';
 
 export function crearContactoPrincipal(valor = ''): Contacto {
-        return {
-                tipo_contacto: 'email',
-                etiqueta: 'principal',
-                valor
-        };
+	return {
+		tipo_contacto: 'email',
+		etiqueta: 'principal',
+		valor
+	};
 }
 
 export function normalizarSeleccionBoolean(valor: '' | 'true' | 'false'): boolean | null {
-        if (valor === 'true') return true;
-        if (valor === 'false') return false;
-        return null;
+	if (valor === 'true') return true;
+	if (valor === 'false') return false;
+	return null;
 }

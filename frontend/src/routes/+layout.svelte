@@ -3,8 +3,6 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
-	import MotionNotice from '$lib/components/feedback/MotionNotice.svelte';
-	import '$lib/stores/reducedMotion';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
 	import { page } from '$app/stores';
@@ -60,7 +58,6 @@
 </script>
 
 <Header />
-<MotionNotice />
 <ToastHost />
 
 {#if showBreadcrumbs}

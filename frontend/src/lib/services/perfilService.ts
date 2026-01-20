@@ -11,27 +11,22 @@ import { writable } from 'svelte/store';
 const resenasStore = writable<Resena[]>([...mockTestimonios, ...mockResenas]);
 
 export const perfilService = {
-	
 	obtenerProyectosUsuario(idUsuario: number | undefined, rol: string): Proyecto[] {
 		if (!idUsuario) return [];
 
 		if (rol === 'institucion') {
-			return mockProyectos.filter(p => p.institucion_id === idUsuario);
+			return mockProyectos.filter((p) => p.institucion_id === idUsuario);
 		}
 
-		return mockProyectos.filter(p =>
-			p.colaboraciones?.some(c =>
-				c.colaborador_id === idUsuario &&
-				c.estado === 'aprobada'
-			)
+		return mockProyectos.filter((p) =>
+			p.colaboraciones?.some((c) => c.colaborador_id === idUsuario && c.estado === 'aprobada')
 		);
 	},
 
 	filtrarProyectosPorEstado(proyectos: Proyecto[], estado: string): Proyecto[] {
-		return proyectos.filter(p => p.estado === estado);
+		return proyectos.filter((p) => p.estado === estado);
 	},
 
-	
 	obtenerResenasStore() {
 		return resenasStore;
 	},
@@ -41,27 +36,29 @@ export const perfilService = {
 		return filtrarResenasPorTipo(resenas, 'usuario', idUsuario);
 	},
 
-	
-	yaResenoUsuario(username: string, idUsuarioResenado: number | undefined, resenas: Resena[]): boolean {
+	yaResenoUsuario(
+		username: string,
+		idUsuarioResenado: number | undefined,
+		resenas: Resena[]
+	): boolean {
 		if (!username || !idUsuarioResenado) return false;
-		
+
 		const resenasDelUsuario = resenas.filter(
-			r => r.tipo_objeto === 'usuario' &&
-				r.id_objeto === idUsuarioResenado &&
-				r.username === username
+			(r) =>
+				r.tipo_objeto === 'usuario' && r.id_objeto === idUsuarioResenado && r.username === username
 		);
-		
+
 		return resenasDelUsuario.length > 0;
 	},
 
 	obtenerLocalidadesPorProvincia(idProvincia: number | undefined): Localidad[] {
 		if (idProvincia === undefined) return [];
-		return mockLocalidades.filter(l => l.id_provincia === idProvincia);
+		return mockLocalidades.filter((l) => l.id_provincia === idProvincia);
 	},
 
 	obtenerLocalidadPorId(idLocalidad: number | undefined): Localidad | undefined {
 		if (!idLocalidad) return undefined;
-		return mockLocalidades.find(l => l.id_localidad === idLocalidad);
+		return mockLocalidades.find((l) => l.id_localidad === idLocalidad);
 	},
 
 	/**
@@ -73,10 +70,10 @@ export const perfilService = {
 			id_resena: Date.now(),
 			aprobado: true
 		};
-		
-		// Actualiza el store 
-		resenasStore.update(resenas => [...resenas, nuevaResena]);
-		
+
+		// Actualiza el store
+		resenasStore.update((resenas) => [...resenas, nuevaResena]);
+
 		return nuevaResena;
 	},
 

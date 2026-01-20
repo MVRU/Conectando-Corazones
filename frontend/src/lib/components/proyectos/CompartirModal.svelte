@@ -108,16 +108,16 @@
 				if (e.key === 'Escape') cerrar();
 			}}
 		>
-			<div class="flex items-center justify-between border-b border-gray-100 px-6 pb-4 pt-5">
+			<div class="flex items-center justify-between border-b border-gray-100 px-6 pt-5 pb-4">
 				<h2
 					id="modal-compartir-titulo"
-					class="text-lg font-semibold leading-tight text-gray-900 sm:text-xl"
+					class="text-lg leading-tight font-semibold text-gray-900 sm:text-xl"
 				>
 					Compartir proyecto
 				</h2>
 				<button
 					type="button"
-					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					on:click={cerrar}
 					aria-label="Cerrar modal"
 				>
@@ -125,7 +125,7 @@
 				</button>
 			</div>
 
-			<div class="space-y-5 px-6 pb-6 pt-5">
+			<div class="space-y-5 px-6 pt-5 pb-6">
 				{#if !compartido && !copiado}
 					<div class="rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 p-4 ring-1 ring-sky-100">
 						<div class="flex items-start gap-3">
@@ -149,7 +149,7 @@
 					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
 						<button
 							type="button"
-							class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 font-semibold text-white shadow-sm transition hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 active:translate-y-[1px]"
+							class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 font-semibold text-white shadow-sm transition hover:brightness-105 focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:outline-none active:translate-y-[1px]"
 							on:click={compartirWhatsApp}
 						>
 							<Icon src={ChatBubbleLeftRight} class="h-5 w-5" aria-hidden="true" />
@@ -158,7 +158,7 @@
 
 						<button
 							type="button"
-							class="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 font-semibold text-gray-700 shadow-sm transition hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 active:translate-y-[1px]"
+							class="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 font-semibold text-gray-700 shadow-sm transition hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:outline-none active:translate-y-[1px]"
 							on:click={compartirEmail}
 						>
 							<Icon src={Envelope} class="h-5 w-5" aria-hidden="true" />
@@ -169,7 +169,7 @@
 					<div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row">
 						<button
 							type="button"
-							class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 active:translate-y-[1px]"
+							class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none active:translate-y-[1px]"
 							on:click={copiarAlPortapapeles}
 						>
 							<Icon src={ClipboardDocument} class="h-4 w-4" aria-hidden="true" />
@@ -179,7 +179,7 @@
 						{#if typeof navigator !== 'undefined' && 'share' in navigator}
 							<button
 								type="button"
-								class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 active:translate-y-[1px]"
+								class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none active:translate-y-[1px]"
 								on:click={compartirNativo}
 							>
 								<Icon src={EllipsisHorizontal} class="h-4 w-4" aria-hidden="true" />
@@ -219,7 +219,7 @@
 				{/if}
 
 				<div class="mt-4 rounded-lg bg-gray-50 p-3">
-					<pre class="whitespace-pre-wrap text-sm">{textoCompartir}</pre>
+					<pre class="text-sm whitespace-pre-wrap">{textoCompartir}</pre>
 				</div>
 			</div>
 		</div>

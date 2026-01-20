@@ -144,7 +144,7 @@
 						<select
 							id="project-select"
 							bind:value={proyectoSeleccionadoId}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						>
 							{#each proyectos as proyecto}
 								<option value={proyecto.id_proyecto}>
@@ -478,7 +478,7 @@
 					id="justificacion-rechazo"
 					bind:value={justificacionRechazo}
 					rows="4"
-					class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+					class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
 					placeholder="Ejemplo: No cumple con los requisitos específicos del proyecto..."
 				></textarea>
 			</div>

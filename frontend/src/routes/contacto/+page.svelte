@@ -196,7 +196,7 @@ TODO:
 							rows="5"
 							required
 							placeholder="Escribí tu mensaje aquí..."
-							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						></textarea>
 					</div>
 

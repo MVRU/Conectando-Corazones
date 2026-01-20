@@ -132,14 +132,14 @@ export const mockVerificaciones: Verificacion[] = [
 		tipo: 'email_institucional',
 		estado: 'pendiente',
 		created_at: new Date('2024-12-01'),
-		usuario_id: 7 
+		usuario_id: 7
 	},
 	{
 		id_verificacion: 18,
 		tipo: 'renaper',
 		estado: 'pendiente',
 		created_at: new Date('2024-12-15'),
-		usuario_id: 8 
+		usuario_id: 8
 	},
 	{
 		id_verificacion: 19,
@@ -147,6 +147,6 @@ export const mockVerificaciones: Verificacion[] = [
 		estado: 'aprobada',
 		created_at: new Date('2024-05-10'),
 		fecha_vencimiento: new Date('2025-05-10'),
-		usuario_id: 6 
+		usuario_id: 6
 	}
 ];

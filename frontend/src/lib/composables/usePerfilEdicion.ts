@@ -1,6 +1,12 @@
 import { writable, derived, get } from 'svelte/store';
 import type { EditarPerfilForm } from '$lib/types/forms/EditarPerfilForm';
-import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
+import type {
+	Usuario,
+	Institucion,
+	Organizacion,
+	Unipersonal,
+	Administrador
+} from '$lib/types/Usuario';
 import type { Localidad } from '$lib/types/Localidad';
 import { validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
 import { perfilService } from '$lib/services/perfilService';
@@ -21,11 +27,10 @@ export function usePerfilEdicion() {
 
 	const provinciaSeleccionada = writable<number | undefined>(undefined);
 
-	const localidadesFiltradas = derived(
-		provinciaSeleccionada,
-		$provinciaSeleccionada => perfilService.obtenerLocalidadesPorProvincia($provinciaSeleccionada)
+	const localidadesFiltradas = derived(provinciaSeleccionada, ($provinciaSeleccionada) =>
+		perfilService.obtenerLocalidadesPorProvincia($provinciaSeleccionada)
 	);
-	
+
 	function inicializar(perfilUsuario: UsuarioCompleto): void {
 		datosEdicion.set({
 			nombre: perfilUsuario.nombre || '',
@@ -54,7 +59,7 @@ export function usePerfilEdicion() {
 	}
 
 	function actualizarDescripcion(descripcion: string): void {
-		datosEdicion.update(d => ({ ...d, descripcion }));
+		datosEdicion.update((d) => ({ ...d, descripcion }));
 		const error = validarDescripcion(descripcion);
 		errorDescripcion.set(error);
 	}
@@ -62,7 +67,7 @@ export function usePerfilEdicion() {
 	function cambiarProvincia(idProvincia: number | undefined): void {
 		provinciaSeleccionada.set(idProvincia);
 		// Resetear localidad al cambiar provincia
-		datosEdicion.update(d => ({ ...d, localidad_id: undefined }));
+		datosEdicion.update((d) => ({ ...d, localidad_id: undefined }));
 	}
 
 	function cambiarFoto(event: Event): boolean {
@@ -84,11 +89,10 @@ export function usePerfilEdicion() {
 		}
 
 		const urlFoto = URL.createObjectURL(file);
-		datosEdicion.update(d => ({ ...d, url_foto: urlFoto }));
+		datosEdicion.update((d) => ({ ...d, url_foto: urlFoto }));
 
 		return true;
 	}
-
 
 	function prepararDatosParaGuardar(): {
 		valido: boolean;
@@ -137,10 +141,10 @@ export function usePerfilEdicion() {
 	return {
 		datosEdicion,
 		provinciaSeleccionada,
-		
+
 		errorDescripcion: { subscribe: errorDescripcion.subscribe },
 		localidadesFiltradas: { subscribe: localidadesFiltradas.subscribe },
-		
+
 		datos: { subscribe: datosEdicion.subscribe },
 
 		// Acciones
@@ -153,7 +157,7 @@ export function usePerfilEdicion() {
 		reset,
 
 		actualizarCampo: <K extends keyof EditarPerfilForm>(campo: K, valor: EditarPerfilForm[K]) => {
-			datosEdicion.update(d => ({ ...d, [campo]: valor }));
+			datosEdicion.update((d) => ({ ...d, [campo]: valor }));
 		}
 	};
 }

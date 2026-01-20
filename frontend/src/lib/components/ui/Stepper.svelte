@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
+
 	export let pasoActual = 1;
 	export let pasosTotales = 4;
 	export let etiquetas: string[] = [
@@ -11,121 +13,105 @@
 
 	$: totalNormalizado = Math.max(pasosTotales, 0);
 	const ETIQUETA_COMPLETADO = 'Completado';
+
 	$: etiquetasEfectivas = Array.from(
 		{ length: totalNormalizado },
 		(_, index) => etiquetas[index] ?? `Paso ${index + 1}`
 	);
+
+	$: porcentajeProgreso = Math.min((pasoActual / totalNormalizado) * 100, 100);
+
 	$: etiquetaActual =
 		pasoActual > 0 && pasoActual <= totalNormalizado
 			? etiquetasEfectivas[pasoActual - 1]
 			: ETIQUETA_COMPLETADO;
-	$: etiquetaUltimoPaso =
-		totalNormalizado > 0 ? etiquetasEfectivas[totalNormalizado - 1] : ETIQUETA_COMPLETADO;
 </script>
 
-<div class="mb-8 w-full px-4 sm:px-6 md:px-8">
-	<!-- Vista completa en sm y superior -->
-	<ol
-		class="hidden flex-wrap items-center justify-center gap-x-4 gap-y-4 text-sm text-gray-500 sm:flex"
-	>
-		{#each etiquetasEfectivas as etiqueta, i (i)}
-			<li class="flex flex-col items-center">
-				<div class="flex items-center">
+<div class="w-full">
+	<!-- Vista de desktop-->
+	<div class="hidden md:block">
+		<ol class="relative flex w-full items-center justify-between">
+			<div
+				class="absolute top-1/2 left-0 -z-10 h-1 w-full -translate-y-1/2 rounded-full bg-gray-200"
+			></div>
+
+			<div
+				class="absolute top-1/2 left-0 -z-10 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-in-out"
+				style="width: {((Math.min(pasoActual, totalNormalizado) - 1) / (totalNormalizado - 1)) *
+					100}%"
+			></div>
+
+			{#each etiquetasEfectivas as etiqueta, i (i)}
+				{@const isCompleted = pasoActual > i + 1}
+				{@const isCurrent = pasoActual === i + 1}
+				{@const isUpcoming = pasoActual < i + 1}
+
+				<li class="group relative flex cursor-default flex-col items-center">
 					<div
-						class={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-							pasoActual > i + 1
-								? 'border-green-500 bg-green-500 text-white'
-								: pasoActual === i + 1
-									? 'border-blue-500 bg-blue-500 text-white'
+						class={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold ring-offset-2 transition-all duration-300 
+						${
+							isCompleted
+								? 'overflow-hidden border-green-500 bg-green-500 text-white shadow-lg'
+								: isCurrent
+									? 'scale-110 border-blue-500 bg-white text-blue-600 shadow-md ring-2 ring-blue-200'
 									: 'border-gray-300 bg-white text-gray-400'
 						}`}
 					>
-						{i + 1}
+						{#if isCompleted}
+							<svg
+								in:fade={{ duration: 200 }}
+								class="h-6 w-6"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2.5"
+									d="M5 13l4 4L19 7"
+								/>
+							</svg>
+						{:else}
+							<span>{i + 1}</span>
+						{/if}
 					</div>
 
-					{#if i < totalNormalizado}
-						<div class="mx-2 hidden h-1 w-10 bg-gray-300 sm:block md:w-16 lg:w-24"></div>
-					{/if}
-				</div>
-
-				<!-- Label -->
-				<div class="mt-2 w-28 text-center text-xs font-medium text-gray-600 sm:w-32 md:w-36">
-					{etiqueta}
-				</div>
-			</li>
-		{/each}
-
-		<!-- Círculo final -->
-		<li class="flex flex-col items-center">
-			<div class="flex items-center">
-				<div
-					class={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-						pasoActual > totalNormalizado
-							? 'border-green-500 bg-green-500 text-white'
-							: 'border-gray-300 bg-white text-gray-400'
-					}`}
-				>
-					{#if pasoActual > totalNormalizado}
-						<svg
-							class="h-4 w-4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="3"
-							viewBox="0 0 24 24"
-						>
-							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-						</svg>
-					{:else}
-						<div class="h-2 w-2 rounded-full bg-gray-300"></div>
-					{/if}
-				</div>
-			</div>
-			<div class="mt-2 h-4 sm:h-5"></div>
-		</li>
-	</ol>
-
-	<!-- Vista reducida en mobile -->
-	<div class="flex items-center justify-center gap-4 text-gray-500 sm:hidden">
-		<!-- Paso actual -->
-		<div class="flex flex-col items-center">
-			<div
-				class={`flex h-8 w-8 items-center justify-center rounded-full border-2 ${
-					pasoActual === totalNormalizado + 1
-						? 'border-green-500 bg-green-500 text-white'
-						: 'border-blue-500 bg-blue-500 text-white'
-				}`}
-			>
-				{#if pasoActual <= totalNormalizado}
-					{pasoActual}
-				{:else}
-					<svg
-						class="h-4 w-4"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="3"
-						viewBox="0 0 24 24"
+					<!-- Label -->
+					<div
+						class={`absolute -bottom-8 w-32 text-center text-xs font-medium transition-colors duration-300
+						${isCompleted ? 'text-green-600' : isCurrent ? 'font-bold text-blue-600' : 'text-gray-500'}`}
 					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-					</svg>
-				{/if}
-			</div>
-			<div class="mt-1 w-24 text-center text-xs font-medium text-gray-600">
-				{etiquetaActual}
-			</div>
-		</div>
+						{etiqueta}
+					</div>
+				</li>
+			{/each}
+		</ol>
+	</div>
 
-		<!-- Puntos suspensivos -->
-		<span class="text-xl font-semibold text-gray-400">...</span>
-
-		<!-- Paso final -->
-		<div class="flex flex-col items-center">
-			<div
-				class="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gray-300 bg-white text-gray-400"
-			>
-				{totalNormalizado}
+	<!-- Vista de móvil -->
+	<div class="md:hidden">
+		<div class="flex flex-col gap-2">
+			<div class="mb-1 flex items-end justify-between">
+				<div>
+					<span class="text-xs font-semibold tracking-wider text-blue-600 uppercase">
+						Paso {Math.min(pasoActual, totalNormalizado)} de {totalNormalizado}
+					</span>
+					<h3 class="text-lg leading-tight font-bold text-gray-900">
+						{etiquetaActual}
+					</h3>
+				</div>
+				<span class="rounded-full bg-gray-100 px-2 py-1 text-xs font-bold text-gray-500">
+					{Math.round(porcentajeProgreso)}%
+				</span>
 			</div>
-			<div class="mt-1 w-24 text-center text-xs font-medium text-gray-400">
-				{etiquetaUltimoPaso}
+
+			<!-- Progress Bar -->
+			<div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+				<div
+					class="h-full bg-gradient-to-r from-blue-500 to-green-400 transition-all duration-500 ease-out"
+					style="width: {porcentajeProgreso}%"
+				></div>
 			</div>
 		</div>
 	</div>

@@ -10,7 +10,7 @@ import type { Archivo } from '$lib/types/Archivo';
 
 export const mockArchivos: Archivo[] = [
 	// === EVIDENCIAS DE ENTRADA - Colaboradores donando ===
-	
+
 	//  Donación de 5 libros infantiles
 	{
 		id_archivo: 1,
@@ -19,7 +19,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		tamaño: 245760, // ~240 KB
 		created_at: new Date('2025-03-15'),
-		usuario_id: 4, 
+		usuario_id: 4,
 		evidencia_id: 1
 	},
 	{
@@ -29,7 +29,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		tamaño: 1024000, // ~1 MB
 		created_at: new Date('2025-03-15'),
-		usuario_id: 4, 
+		usuario_id: 4,
 		evidencia_id: 1
 	},
 
@@ -41,12 +41,12 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		tamaño: 307200, // ~300 KB
 		created_at: new Date('2025-03-20'),
-		usuario_id: 5, 
+		usuario_id: 5,
 		evidencia_id: 2
 	},
 
 	// === EVIDENCIAS DE SALIDA - Institución mostrando recepción y uso ===
-	
+
 	//  Recepción de libros y armado de biblioteca
 	{
 		id_archivo: 4,
@@ -55,7 +55,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		tamaño: 1536000, // ~1.5 MB
 		created_at: new Date('2025-04-10'),
-		usuario_id: 2, 
+		usuario_id: 2,
 		evidencia_id: 3
 	},
 	{
@@ -65,19 +65,19 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		tamaño: 51200, // ~50 KB
 		created_at: new Date('2025-04-10'),
-		usuario_id: 2, 
+		usuario_id: 2,
 		evidencia_id: 3
 	},
 
-	// EVIDENCIAS DE ENTRADA - Voluntariado docente 
-	
+	// EVIDENCIAS DE ENTRADA - Voluntariado docente
+
 	{
 		id_archivo: 6,
 		descripcion: 'Selfie de Ana Martínez confirmando su participación como docente voluntaria',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fselfie_ana_martinez.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-18'),
-		usuario_id: 8, 
+		usuario_id: 8,
 		evidencia_id: 4
 	},
 	{
@@ -99,8 +99,8 @@ export const mockArchivos: Archivo[] = [
 		evidencia_id: 4
 	},
 
-	//  EVIDENCIAS DE SALIDA - Docentes trabajando en el taller 
-	
+	//  EVIDENCIAS DE SALIDA - Docentes trabajando en el taller
+
 	{
 		id_archivo: 9,
 		descripcion: 'Fotografía de las docentes voluntarias trabajando en el taller de lectura',
@@ -114,7 +114,7 @@ export const mockArchivos: Archivo[] = [
 	// --- PROYECTO 4: "Equipamiento Médico Hospitalario" (Hospital Central - id: 9) ---
 	// Objetivo: $500,000 ARS (donación monetaria)
 
-	// EVIDENCIAS DE ENTRADA - Colaboradores donando dinero 
+	// EVIDENCIAS DE ENTRADA - Colaboradores donando dinero
 
 	{
 		id_archivo: 10,
@@ -134,12 +134,12 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		tamaño: 163840, // ~160 KB
 		created_at: new Date('2025-04-20'),
-		usuario_id: 8, 
+		usuario_id: 8,
 		evidencia_id: 6
 	},
 
 	// === EVIDENCIAS DE SALIDA - Hospital mostrando compra de equipamiento ===
-	
+
 	//  Compra e instalación de equipamiento
 	{
 		id_archivo: 12,
@@ -148,7 +148,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		tamaño: 409600, // ~400 KB
 		created_at: new Date('2025-05-10'),
-		usuario_id: 9, 
+		usuario_id: 9,
 		evidencia_id: 7
 	},
 	{
@@ -158,7 +158,7 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'image/jpeg',
 		tamaño: 2048000, // ~2 MB
 		created_at: new Date('2025-05-15'),
-		usuario_id: 9, 
+		usuario_id: 9,
 		evidencia_id: 7
 	},
 	{
@@ -167,16 +167,15 @@ export const mockArchivos: Archivo[] = [
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Facta_recepcion_equipamiento.pdf?alt=media',
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-05-15'),
-		usuario_id: 9, 
+		usuario_id: 9,
 		evidencia_id: 7
 	},
 
 	// --- PROYECTO 9: "Luz para aprender" (Escuela Esperanza - id: 2) ---
 	// Objetivos: 100 metros de cableado, 20 luminarias LED, 30 personas capacitadas
-	
 
-	// === EVIDENCIAS DE ENTRADA - 
-	
+	// === EVIDENCIAS DE ENTRADA -
+
 	// - Donación de materiales eléctricos (cables)
 	{
 		id_archivo: 15,
@@ -184,7 +183,7 @@ export const mockArchivos: Archivo[] = [
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_cableado_viejo.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-01'),
-		usuario_id: 10, 
+		usuario_id: 10,
 		evidencia_id: 8
 	},
 	{
@@ -193,7 +192,7 @@ export const mockArchivos: Archivo[] = [
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffactura_compra_cables.pdf?alt=media',
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-05'),
-		usuario_id: 10, 
+		usuario_id: 10,
 		evidencia_id: 8
 	},
 
@@ -204,7 +203,7 @@ export const mockArchivos: Archivo[] = [
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_lamparas_nuevas_embaladas.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
 		created_at: new Date('2025-03-10'),
-		usuario_id: 4, 
+		usuario_id: 4,
 		evidencia_id: 9
 	},
 	{
@@ -213,12 +212,12 @@ export const mockArchivos: Archivo[] = [
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcomprobante_donacion_lamparas.pdf?alt=media',
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-10'),
-		usuario_id: 4, 
+		usuario_id: 4,
 		evidencia_id: 9
 	},
 
 	// === EVIDENCIAS DE SALIDA - Institución mostrando instalación ===
-	
+
 	// Escuela Esperanza (id: 2) - Instalación del nuevo cableado
 	{
 		id_archivo: 19,
@@ -260,7 +259,7 @@ export const mockArchivos: Archivo[] = [
 	},
 
 	// --- PROYECTO 22: "Apoyo escolar en contraturno" (Escuela Esperanza) ---
-	
+
 	// Evidencia 13: Docentes voluntarios confirmándose (ENTRADA)
 	{
 		id_archivo: 23,
@@ -497,12 +496,12 @@ export const mockArchivos: Archivo[] = [
 ];
 
 // ============================================================================
-// EVIDENCIAS 
+// EVIDENCIAS
 // ============================================================================
 
 export const mockEvidencias: Evidencia[] = [
 	// --- PROYECTO 1: "Un libro, un sueño" ---
-	
+
 	// Evidencia 1: Donación de libros (ENTRADA - colaborador)
 	{
 		id_evidencia: 1,
@@ -602,8 +601,8 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// --- PROYECTO 4: "Equipamiento Médico Hospitalario" ---
-	
-	// Evidencia 6: Donación monetaria 
+
+	// Evidencia 6: Donación monetaria
 	{
 		id_evidencia: 6,
 		tipo_evidencia: 'entrada',
@@ -622,7 +621,7 @@ export const mockEvidencias: Evidencia[] = [
 		}
 	},
 
-	// Evidencia 7: Donación monetaria 
+	// Evidencia 7: Donación monetaria
 	{
 		id_evidencia: 7,
 		tipo_evidencia: 'entrada',
@@ -647,7 +646,7 @@ export const mockEvidencias: Evidencia[] = [
 		tipo_evidencia: 'salida',
 		created_at: new Date('2025-05-10'),
 		archivos_ids: [12, 13, 14],
-		id_participacion_permitida: 4, 
+		id_participacion_permitida: 4,
 		archivos: [mockArchivos[11], mockArchivos[12], mockArchivos[13]],
 		participacion_permitida: {
 			id_participacion_permitida: 4,
@@ -661,14 +660,14 @@ export const mockEvidencias: Evidencia[] = [
 	},
 
 	// --- PROYECTO 9: "Luz para aprender" ---
-	
-	// Evidencia 9: Donación de cableado eléctrico 
+
+	// Evidencia 9: Donación de cableado eléctrico
 	{
 		id_evidencia: 9,
 		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-01'),
 		archivos_ids: [15, 16],
-		id_participacion_permitida: 8, 
+		id_participacion_permitida: 8,
 		archivos: [mockArchivos[14], mockArchivos[15]],
 		participacion_permitida: {
 			id_participacion_permitida: 8,
@@ -681,13 +680,13 @@ export const mockEvidencias: Evidencia[] = [
 		}
 	},
 
-	// Evidencia 10: Donación de luminarias LED 
+	// Evidencia 10: Donación de luminarias LED
 	{
 		id_evidencia: 10,
 		tipo_evidencia: 'entrada',
 		created_at: new Date('2025-03-10'),
 		archivos_ids: [17, 18],
-		id_participacion_permitida: 9, 
+		id_participacion_permitida: 9,
 		archivos: [mockArchivos[16], mockArchivos[17]],
 		participacion_permitida: {
 			id_participacion_permitida: 9,
@@ -706,7 +705,7 @@ export const mockEvidencias: Evidencia[] = [
 		tipo_evidencia: 'salida',
 		created_at: new Date('2025-04-20'),
 		archivos_ids: [19, 20],
-		id_participacion_permitida: 8, 
+		id_participacion_permitida: 8,
 		archivos: [mockArchivos[18], mockArchivos[19]],
 		participacion_permitida: {
 			id_participacion_permitida: 8,
@@ -725,7 +724,7 @@ export const mockEvidencias: Evidencia[] = [
 		tipo_evidencia: 'salida',
 		created_at: new Date('2025-05-10'),
 		archivos_ids: [21, 22],
-		id_participacion_permitida: 9, 
+		id_participacion_permitida: 9,
 		archivos: [mockArchivos[20], mockArchivos[21]],
 		participacion_permitida: {
 			id_participacion_permitida: 9,

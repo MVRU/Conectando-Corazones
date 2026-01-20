@@ -22,36 +22,43 @@ tests/
 ## 🚀 Ejecutar tests
 
 ### Todos los tests
+
 ```bash
 npm run test:unit
 ```
 
 ### Solo tests unitarios
+
 ```bash
 npm run test:unit -- tests/unit
 ```
 
 ### Solo tests de componentes
+
 ```bash
 npm run test:unit -- tests/component
 ```
 
 ### Solo tests de integración
+
 ```bash
 npm run test:unit -- tests/integration
 ```
 
 ### Con coverage
+
 ```bash
 npm run test:unit -- --coverage
 ```
 
 ### En modo watch (desarrollo)
+
 ```bash
 npm run test:unit -- --watch
 ```
 
 ### Ejecutar un archivo específico
+
 ```bash
 npm run test:unit -- tests/unit/utils/validaciones.test.ts
 ```
@@ -59,16 +66,19 @@ npm run test:unit -- tests/unit/utils/validaciones.test.ts
 ## 📝 Convenciones
 
 ### Naming
+
 - **Archivos de test**: `*.test.ts` (consistente para todos los tipos)
 - **Helpers**: sin sufijo `.test` (ej: `test-utils.ts`, `factories.ts`)
 - **Nombres descriptivos**: `validaciones.test.ts`, `Image.test.ts`
 
 ### Organización
+
 - **Unit tests**: funciones puras, lógica de negocio sin dependencias externas
 - **Integration tests**: flujos completos que involucran múltiples módulos
 - **Component tests**: tests de componentes Svelte con interacción de usuario
 
 ### Imports
+
 - **Código fuente**: usar alias `$lib` para imports absolutos
   ```typescript
   import { validarUsername } from '$lib/utils/validaciones';
@@ -79,34 +89,37 @@ npm run test:unit -- tests/unit/utils/validaciones.test.ts
   ```
 
 ### Estructura de tests
+
 ```typescript
 import { describe, it, expect } from 'vitest';
 
 describe('NombreDelModulo', () => {
-    describe('Funcionalidad específica', () => {
-        it('debe hacer algo específico', () => {
-            // Arrange
-            const input = 'test';
-            
-            // Act
-            const result = funcionATestear(input);
-            
-            // Assert
-            expect(result).toBe('expected');
-        });
-    });
+	describe('Funcionalidad específica', () => {
+		it('debe hacer algo específico', () => {
+			// Arrange
+			const input = 'test';
+
+			// Act
+			const result = funcionATestear(input);
+
+			// Assert
+			expect(result).toBe('expected');
+		});
+	});
 });
 ```
 
 ## 🛠️ Helpers disponibles
 
 ### test-utils.ts
+
 - `renderComponent()` - wrapper para render de Svelte Testing Library
 - `flushPromises()` - esperar resolución de promesas
 - `wait(ms)` - esperar tiempo específico
 - Re-exports de `@testing-library/svelte`: `screen`, `fireEvent`, `waitFor`
 
 ### factories.ts
+
 - `createTestUser()` - crear usuario de prueba
 - `createBirthdateForAge(age)` - crear fecha de nacimiento para edad específica
 - `createBirthdayToday(age)` - crear fecha que cumple años hoy
@@ -116,6 +129,7 @@ describe('NombreDelModulo', () => {
 ## 📊 Coverage
 
 El coverage se genera en la carpeta `coverage/` después de ejecutar:
+
 ```bash
 npm run test:unit -- --coverage
 ```
@@ -134,11 +148,13 @@ Puedes ver el reporte HTML en `coverage/index.html`
 ## 🔍 Debugging
 
 Para debuggear un test específico:
+
 ```bash
 npm run test:unit -- --reporter=verbose tests/unit/utils/validaciones.test.ts
 ```
 
 Para ver output detallado:
+
 ```bash
 npm run test:unit -- --reporter=verbose
 ```

@@ -45,7 +45,7 @@
 	<div class={clsx('relative', prefixIcon && 'group/prefix-input')}>
 		{#if prefixIcon}
 			<span
-				class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 transition-colors duration-200 group-focus-within/prefix-input:text-sky-600"
+				class="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-slate-400 transition-colors duration-200 group-focus-within/prefix-input:text-sky-600"
 				aria-hidden="true"
 			>
 				<svelte:component
@@ -68,7 +68,7 @@
 				'focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgba(var(--color-primary),0.45)] focus:ring-offset-1 focus:ring-offset-white focus:outline-none',
 				error &&
 					'border-red-400 bg-red-50/80 text-red-900 placeholder:text-red-400 focus:border-red-500 focus:ring-red-300 focus:ring-offset-0',
-				'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:shadow-none disabled:opacity-80',
+				'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:shadow-none',
 				prefixIcon && 'pl-12',
 				customClass
 			)}

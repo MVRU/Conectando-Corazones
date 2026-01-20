@@ -61,9 +61,8 @@ export const getColaboracionesPendientes = (proyecto: {
 	colaboraciones?: Colaboracion[];
 }): number => proyecto.colaboraciones?.filter((c) => c.estado === 'pendiente')?.length || 0;
 
-export const getColaboracionesAprobadas = (proyecto: {
-	colaboraciones?: Colaboracion[];
-}): number => proyecto.colaboraciones?.filter((c) => c.estado === 'aprobada')?.length || 0;
+export const getColaboracionesAprobadas = (proyecto: { colaboraciones?: Colaboracion[] }): number =>
+	proyecto.colaboraciones?.filter((c) => c.estado === 'aprobada')?.length || 0;
 
 /**
  * * Calcula días desde la fecha dada hasta hoy

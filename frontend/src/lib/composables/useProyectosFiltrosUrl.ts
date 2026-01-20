@@ -123,23 +123,23 @@ export function useProyectosFiltrosUrl(filtros: ProyectosFiltros) {
 			goto(url, { replaceState: true, noScroll: true, keepFocus: true });
 		}, 300);
 	};
-    
-    const unsubs = [
-        consultaBusqueda.subscribe(() => browser && updateUrl()),
-        filtroParticipacion.subscribe(() => browser && updateUrl()),
-        categoriaSeleccionada.subscribe(() => browser && updateUrl()),
-        tipoUbicacion.subscribe(() => browser && updateUrl()),
-        provinciaSeleccionada.subscribe(() => browser && updateUrl()),
-        localidadSeleccionada.subscribe(() => browser && updateUrl()),
-        fechaDesde.subscribe(() => browser && updateUrl()),
-        fechaHasta.subscribe(() => browser && updateUrl()),
-        estadoSeleccionado.subscribe(() => browser && updateUrl()),
-        criterioOrden.subscribe(() => browser && updateUrl()),
-        mostrarFiltros.subscribe(() => browser && updateUrl())
-    ];
 
-    onDestroy(() => {
-        unsubs.forEach(unsub => unsub());
-        clearTimeout(timeout);
-    });
+	const unsubs = [
+		consultaBusqueda.subscribe(() => browser && updateUrl()),
+		filtroParticipacion.subscribe(() => browser && updateUrl()),
+		categoriaSeleccionada.subscribe(() => browser && updateUrl()),
+		tipoUbicacion.subscribe(() => browser && updateUrl()),
+		provinciaSeleccionada.subscribe(() => browser && updateUrl()),
+		localidadSeleccionada.subscribe(() => browser && updateUrl()),
+		fechaDesde.subscribe(() => browser && updateUrl()),
+		fechaHasta.subscribe(() => browser && updateUrl()),
+		estadoSeleccionado.subscribe(() => browser && updateUrl()),
+		criterioOrden.subscribe(() => browser && updateUrl()),
+		mostrarFiltros.subscribe(() => browser && updateUrl())
+	];
+
+	onDestroy(() => {
+		unsubs.forEach((unsub) => unsub());
+		clearTimeout(timeout);
+	});
 }

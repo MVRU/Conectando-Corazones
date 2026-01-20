@@ -11,8 +11,7 @@
 		obtenerColorCategoria,
 		obtenerClasesColor,
 		capitalizarPrimera,
-		normalizarTitulo,
-		validarTituloProyecto
+		normalizarTitulo
 	} from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -27,15 +26,32 @@
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
 
+	// Modo edición
+	export let modoEdicion = false;
+	export let beneficiariosOriginales: number | undefined = undefined;
+	export let esAdmin = false;
+
 	function normalizarBeneficiarios() {
 		if (beneficiarios == null || Number.isNaN(beneficiarios)) return;
 		beneficiarios = Math.trunc(beneficiarios);
+
+		if (beneficiarios > 0) {
+			limpiarError('beneficiarios');
+		}
+
 		if (beneficiarios < 1) beneficiarios = 1;
 		if (beneficiarios > MAX_BENEFICIARIOS) beneficiarios = MAX_BENEFICIARIOS;
 	}
 
+	function validarBeneficiariosInput() {
+		if (beneficiarios && beneficiarios > 0) {
+			limpiarError('beneficiarios');
+		}
+	}
+
 	function toggleCategoria(categoriaId?: number) {
 		if (categoriaId == null) return;
+		if (modoEdicion && !esAdmin) return;
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
 			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);
@@ -69,18 +85,24 @@
 
 	<div class="grid gap-6">
 		<div>
-			<label for="titulo" class="mb-2 block text-sm font-medium text-gray-700"
-				>Título del proyecto *</label
-			>
+			<label for="titulo" class="mb-2 block text-sm font-medium text-gray-700">
+				Título del proyecto *
+			</label>
 			<input
 				id="titulo"
 				type="text"
 				bind:value={titulo}
 				maxlength="60"
 				on:blur={() => normalizarTitulo(titulo)}
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				disabled={modoEdicion && !esAdmin}
+				class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+				class:border-gray-300={!modoEdicion || esAdmin}
+				class:border-red-300={errores.titulo && (!modoEdicion || esAdmin)}
+				class:cursor-not-allowed={modoEdicion && !esAdmin}
+				class:bg-gray-50={modoEdicion && !esAdmin}
+				class:text-gray-600={modoEdicion && !esAdmin}
+				class:border-gray-200={modoEdicion && !esAdmin}
 				placeholder="Ejemplo: Infancias felices 2025"
-				class:border-red-300={errores.titulo}
 			/>
 			{#if errores.titulo}
 				<p class="mt-1 text-sm text-red-600">{errores.titulo}</p>
@@ -95,7 +117,7 @@
 				id="descripcion"
 				bind:value={descripcion}
 				rows="4"
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				placeholder="Describa su proyecto, objetivos y cómo ayudará a la comunidad..."
 				class:border-red-300={errores.descripcion}
 			></textarea>
@@ -112,7 +134,7 @@
 				id="urlPortada"
 				type="text"
 				bind:value={urlPortada}
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.urlPortada}
 				placeholder="https://ejemplo.com/imagen.jpg"
 			/>
@@ -132,7 +154,7 @@
 					lang="es-AR"
 					bind:value={fechaFinTentativa}
 					min={fechaMinima}
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+					class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 					class:border-red-300={errores.fechaFinTentativa}
 					aria-invalid={!!errores.fechaFinTentativa}
 				/>
@@ -154,23 +176,28 @@
 					id="beneficiarios"
 					type="number"
 					bind:value={beneficiarios}
-					min="1"
+					min={modoEdicion && beneficiariosOriginales && !esAdmin ? beneficiariosOriginales : 1}
 					step="1"
 					inputmode="numeric"
 					on:blur={normalizarBeneficiarios}
+					on:input={validarBeneficiariosInput}
 					on:keydown={(e) => {
 						if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
 							e.preventDefault();
 						}
 					}}
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+					class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 					class:border-red-300={errores.beneficiarios}
 					aria-invalid={!!errores.beneficiarios}
 					aria-describedby="beneficiarios-help"
 					placeholder="Ejemplo: 150"
 				/>
 				<p id="beneficiarios-help" class="mt-1 text-xs text-gray-500">
-					Si no está seguro/a, déjelo vacío.
+					{#if modoEdicion && beneficiariosOriginales}
+						Solo puede aumentar. Valor actual: {beneficiariosOriginales}
+					{:else}
+						Si no está seguro/a, déjelo vacío.
+					{/if}
 				</p>
 				{#if errores.beneficiarios}
 					<p class="mt-1 text-sm text-red-600">{errores.beneficiarios}</p>
@@ -181,7 +208,13 @@
 </div>
 
 <div class="mt-8 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-	<h2 class="mb-6 text-xl font-semibold text-gray-900">Seleccione al menos una categoría *</h2>
+	<h2 class="mb-6 text-xl font-semibold text-gray-900">
+		{#if modoEdicion}
+			Categorías del proyecto
+		{:else}
+			Seleccione al menos una categoría *
+		{/if}
+	</h2>
 
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 		{#each mockCategorias as categoria (categoria.id_categoria)}
@@ -191,14 +224,18 @@
 			<button
 				type="button"
 				on:click={() => toggleCategoria(categoria.id_categoria)}
-				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 hover:shadow-sm {clases.border} {clases.bg} {clases.hover}"
+				disabled={modoEdicion && !esAdmin}
+				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 {clases.border} {clases.bg} {clases.hover}"
+				class:cursor-not-allowed={modoEdicion && !esAdmin}
+				class:opacity-75={modoEdicion && !esAdmin}
+				class:hover:shadow-none={modoEdicion && !esAdmin}
 			>
 				<span class="mr-2 flex-shrink-0 text-lg {clases.iconColor}">
 					<Icon src={obtenerIconoCategoria(categoria.descripcion || '')} class="h-6 w-6" />
 				</span>
 				<div class="min-w-0 flex-1 text-left">
 					<span
-						class="block text-xs font-medium leading-tight {seleccionado
+						class="block text-xs leading-tight font-medium {seleccionado
 							? 'text-gray-900'
 							: 'text-gray-700'}"
 					>
@@ -216,7 +253,7 @@
 								/>
 							</svg>
 						</div>
-					{:else}
+					{:else if !modoEdicion || esAdmin}
 						<div
 							class="h-4 w-4 rounded-full border-2 border-dashed border-gray-300 group-hover:border-gray-400"
 						></div>
@@ -226,7 +263,7 @@
 		{/each}
 	</div>
 
-	{#if categoriasSeleccionadas.length >= 5}
+	{#if (!modoEdicion || esAdmin) && categoriasSeleccionadas.length >= 5}
 		<div class="mt-4 flex items-center rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800">
 			<svg class="mr-2 h-5 w-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
 				<path
@@ -239,7 +276,7 @@
 		</div>
 	{/if}
 
-	{#if seleccionoOtra}
+	{#if seleccionoOtra && (!modoEdicion || esAdmin)}
 		<div class="mt-4">
 			<label for="categoria_otra" class="mb-2 block text-sm font-medium text-gray-700"
 				>Especificá la categoría *</label
@@ -250,7 +287,7 @@
 				bind:value={categoriaOtraDescripcion}
 				maxlength="60"
 				on:blur={normalizarCategoriaOtra}
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.categoria_otra}
 				placeholder="Ejemplo: Personas mayores, Acceso al agua, Inclusión digital…"
 				aria-invalid={!!errores.categoria_otra}
@@ -261,7 +298,7 @@
 		</div>
 	{/if}
 
-	{#if errores.categorias}
+	{#if errores.categorias && (!modoEdicion || esAdmin)}
 		<p class="mt-4 flex items-center text-sm text-red-600">
 			<svg class="mr-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
 				<path

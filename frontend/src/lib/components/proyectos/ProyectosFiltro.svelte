@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
-	import { Filter, ChevronDown, ChevronUp } from 'lucide-svelte';
+	import { ChevronDown, ChevronUp } from 'lucide-svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	export let mostrar: boolean = false;
@@ -65,7 +65,7 @@
 	<div class="relative">
 		<select
 			bind:value={criterioOrden}
-			class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+			class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 			aria-label="Ordenar proyectos"
 		>
 			<option value="recientes">Más recientes</option>
@@ -117,14 +117,14 @@
 				<div class="flex flex-col gap-1.5">
 					<span
 						id="{prefijoId}-label-participacion"
-						class="text-xs font-medium uppercase tracking-wide text-gray-500"
+						class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 					>
 						Tipo de participación
 					</span>
 					<div class="relative">
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 							on:click={() => (participacionDropdownOpen = !participacionDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={participacionDropdownOpen}
@@ -154,7 +154,7 @@
 								role="presentation"
 							></div>
 							<div
-								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 								in:fly={{ y: -5, duration: 150 }}
 							>
 								<!-- Opción Seleccionar Todos -->
@@ -203,7 +203,7 @@
 				<div class="flex flex-col gap-1.5">
 					<span
 						id="{prefijoId}-label-categoria"
-						class="text-xs font-medium uppercase tracking-wide text-gray-500"
+						class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 					>
 						Categoría
 					</span>
@@ -211,7 +211,7 @@
 						<!-- Botón Trigger -->
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 							on:click={() => (categoriaDropdownOpen = !categoriaDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={categoriaDropdownOpen}
@@ -244,7 +244,7 @@
 							></div>
 
 							<div
-								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 								in:fly={{ y: -5, duration: 150 }}
 							>
 								<!-- Opción Seleccionar Todos -->
@@ -295,14 +295,14 @@
 				<div class="flex flex-col gap-1.5">
 					<span
 						id="{prefijoId}-label-ubicacion"
-						class="text-xs font-medium uppercase tracking-wide text-gray-500"
+						class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 					>
 						Ubicación
 					</span>
 					<div class="relative">
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 							on:click={() => (ubicacionDropdownOpen = !ubicacionDropdownOpen)}
 						>
 							<span class="block truncate">{tipoUbicacion}</span>
@@ -321,7 +321,7 @@
 								role="presentation"
 							></div>
 							<div
-								class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+								class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 								in:fly={{ y: -5, duration: 150 }}
 							>
 								<div class="space-y-0.5">
@@ -353,14 +353,14 @@
 					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
 						<span
 							id="{prefijoId}-label-provincia"
-							class="text-xs font-medium uppercase tracking-wide text-gray-500"
+							class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 						>
 							Provincia
 						</span>
 						<div class="relative">
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 								on:click={() => (provinciaDropdownOpen = !provinciaDropdownOpen)}
 							>
 								<span class="block truncate">{provincia}</span>
@@ -379,7 +379,7 @@
 									role="presentation"
 								></div>
 								<div
-									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 									in:fly={{ y: -5, duration: 150 }}
 								>
 									<div class="space-y-0.5">
@@ -408,14 +408,14 @@
 					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
 						<span
 							id="{prefijoId}-label-localidad"
-							class="text-xs font-medium uppercase tracking-wide text-gray-500"
+							class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 						>
 							Localidad
 						</span>
 						<div class="relative">
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 								on:click={() => (localidadDropdownOpen = !localidadDropdownOpen)}
 								disabled={provincia === 'Todas'}
 							>
@@ -435,7 +435,7 @@
 									role="presentation"
 								></div>
 								<div
-									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 									in:fly={{ y: -5, duration: 150 }}
 								>
 									<div class="space-y-0.5">
@@ -466,7 +466,7 @@
 					<div class="flex flex-col gap-1.5" in:fade={{ duration: 150 }}>
 						<span
 							id="{prefijoId}-label-estado"
-							class="text-xs font-medium uppercase tracking-wide text-gray-500"
+							class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 						>
 							Estado
 						</span>
@@ -475,7 +475,7 @@
 							<!-- Botón Trigger -->
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 								on:click={() => (estadoDropdownOpen = !estadoDropdownOpen)}
 								aria-haspopup="listbox"
 								aria-expanded={estadoDropdownOpen}
@@ -508,7 +508,7 @@
 								></div>
 
 								<div
-									class="absolute left-0 right-0 top-full z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
+									class="absolute top-full right-0 left-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-100 bg-white p-2 shadow-lg"
 									in:fly={{ y: -5, duration: 150 }}
 								>
 									<!-- Opción Seleccionar Todos -->
@@ -559,7 +559,7 @@
 				<div class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}">
 					<span
 						id="{prefijoId}-label-fecha"
-						class="text-xs font-medium uppercase tracking-wide text-gray-500"
+						class="text-xs font-medium tracking-wide text-gray-500 uppercase"
 					>
 						Rango de Fechas
 					</span>
@@ -568,7 +568,7 @@
 						<!-- Botón Trigger -->
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
 							on:click={() => (fechaDropdownOpen = !fechaDropdownOpen)}
 							aria-haspopup="dialog"
 							aria-expanded={fechaDropdownOpen}
@@ -619,7 +619,7 @@
 							></div>
 
 							<div
-								class="absolute left-0 right-0 top-full z-20 mt-1 min-w-[280px] rounded-lg border border-gray-100 bg-white p-4 shadow-lg lg:right-auto lg:w-auto"
+								class="absolute top-full right-0 left-0 z-20 mt-1 min-w-[280px] rounded-lg border border-gray-100 bg-white p-4 shadow-lg lg:right-auto lg:w-auto"
 								in:fly={{ y: -5, duration: 150 }}
 							>
 								<div class="flex flex-col gap-4">
@@ -632,7 +632,7 @@
 												id="{prefijoId}-fecha-desde"
 												type="date"
 												bind:value={fechaDesde}
-												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
 											/>
 										</div>
 										<div class="flex flex-col gap-1.5">
@@ -644,7 +644,7 @@
 												type="date"
 												bind:value={fechaHasta}
 												min={fechaDesde}
-												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
 											/>
 										</div>
 									</div>

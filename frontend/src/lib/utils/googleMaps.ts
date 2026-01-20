@@ -95,4 +95,3 @@ export function construirUrlsVistaPreviaGoogleMaps(
 
 	return { urlInsertar, urlLugar };
 }
-

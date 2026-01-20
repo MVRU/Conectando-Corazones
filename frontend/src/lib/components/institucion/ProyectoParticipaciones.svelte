@@ -12,7 +12,8 @@
 		normalizarUnidadLibre,
 		validarUnidadLibre,
 		normalizarEspecie,
-		validarEspecie
+		validarEspecie,
+		validarAumentoObjetivo
 	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/types/ParticipacionPermitida';
@@ -27,6 +28,11 @@
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
 
+	// Modo edición
+	export let modoEdicion = false;
+	export let participacionesOriginales: ParticipacionPermitida[] = [];
+	export let esAdmin = false;
+
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
 		texto: string
@@ -34,21 +40,6 @@
 		const key = toKey(texto);
 		const lista = unidadesPorTipo[(tipo ?? 'Voluntariado') as keyof typeof unidadesPorTipo] ?? [];
 		return lista.map(toKey).includes(key);
-	}
-
-	function validarUnidadMedidaOtra(s: string, tipo?: TipoParticipacionDescripcion): string | null {
-		if (s == null) return 'Este campo es obligatorio';
-		const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
-		if (v.length < 2) return 'Debe tener al menos 2 caracteres';
-		if (v.length > 40) return 'Máximo 40 caracteres';
-		if (!/[A-Za-zÁÉÍÓÚÜáéíóúüÑñ]/u.test(v)) return 'Debe incluir al menos una letra';
-		if (/^\d+$/u.test(v)) return 'No puede ser solo números';
-		if (!/^[A-Za-zÁÉÍÓÚÜáéíóúüÑñ0-9 .,'’/%()-]+$/u.test(v))
-			return 'Usá letras, números y signos comunes';
-		if (esUnidadRepetida(tipo, v)) {
-			return 'Esa unidad ya existe. Elegíla de la lista.';
-		}
-		return null;
 	}
 
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
@@ -89,13 +80,21 @@
 			else limpiarError(`participacion_${index}_especie`);
 		} else if (field === 'objetivo') {
 			const valNum = value as number | undefined;
+			const original = participacionesOriginales.find(
+				(p) =>
+					p.id_participacion_permitida ===
+					participacionesPermitidas[index].id_participacion_permitida
+			);
+
+			const errAumento = validarAumentoObjetivo(valNum, original?.objetivo);
+
 			participacionesPermitidas[index] = {
 				...participacionesPermitidas[index],
 				objetivo: valNum
 			};
 
-			if (valNum !== undefined && valNum <= 0) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo debe ser mayor a 0';
+			if (errAumento && !esAdmin) {
+				errores[`participacion_${index}_objetivo`] = errAumento;
 			} else {
 				limpiarError(`participacion_${index}_objetivo`);
 			}
@@ -135,6 +134,11 @@
 	}
 
 	function eliminarParticipacion(index: number) {
+		// En modo edición, no permitir eliminar participaciones originales
+		if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida && !esAdmin) {
+			return;
+		}
+
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
@@ -199,8 +203,22 @@
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-	<h2 class="mb-2 text-xl font-semibold text-gray-900">Tipos de participación *</h2>
-	<p class="mb-6 text-gray-600">Defina los objetivos y cómo los colaboradores pueden ayudarle.</p>
+	<h2 class="mb-2 text-xl font-semibold text-gray-900">
+		{#if modoEdicion}
+			Objetivos del proyecto
+		{:else}
+			Tipos de participación *
+		{/if}
+	</h2>
+	<p class="mb-6 text-gray-600">
+		{#if modoEdicion && !esAdmin}
+			Los objetivos solo pueden aumentar. Podés agregar nuevos tipos de participación.
+		{:else if esAdmin}
+			Como administrador tenés control total sobre los objetivos y tipos de participación.
+		{:else}
+			Defina los objetivos y cómo los colaboradores pueden ayudarle.
+		{/if}
+	</p>
 
 	{#if Object.entries(tiposParticipacionInfo).filter(([tipo]) => !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)).length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -231,6 +249,12 @@
 		{@const tipoInfo =
 			tiposParticipacionInfo[participacion.tipo_participacion?.descripcion || 'Voluntariado']}
 		{@const clases = obtenerClasesColor(tipoInfo.color, true)}
+		{@const esOriginal = modoEdicion && !!participacion.id_participacion_permitida}
+		{@const original = esOriginal
+			? participacionesOriginales.find(
+					(p) => p.id_participacion_permitida === participacion.id_participacion_permitida
+				)
+			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
 			<div class="mb-4 flex items-center justify-between">
 				<h4 class="flex items-center gap-2 font-medium text-gray-900">
@@ -242,8 +266,13 @@
 				<button
 					type="button"
 					on:click={() => eliminarParticipacion(index)}
+					disabled={esOriginal && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
-					title="Eliminar"
+					class:opacity-50={esOriginal && !esAdmin}
+					class:cursor-not-allowed={esOriginal && !esAdmin}
+					title={esOriginal && !esAdmin
+						? 'No se pueden eliminar participaciones existentes'
+						: 'Eliminar'}
 					aria-label="Eliminar participación"
 				>
 					<Trash2 class="h-5 w-5" />
@@ -252,17 +281,23 @@
 			<div class="grid gap-4">
 				{#if participacion.tipo_participacion?.descripcion === 'Especie'}
 					<div>
-						<label for="especie_{index}" class="mb-2 block text-sm font-medium text-gray-700"
-							>¿Qué necesitás? *</label
-						>
+						<label for="especie_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							¿Qué necesitás? *
+						</label>
 						<input
 							id="especie_{index}"
 							type="text"
 							value={participacion.especie || ''}
 							on:input={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							disabled={esOriginal && !esAdmin}
+							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class:border-gray-300={!esOriginal || esAdmin}
+							class:border-red-300={errores[`participacion_${index}_especie`] &&
+								(!esOriginal || esAdmin)}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 							placeholder="Ejemplo: libros, alimentos, ropa, medicamentos..."
-							class:border-red-300={errores[`participacion_${index}_especie`]}
 						/>
 						{#if errores[`participacion_${index}_especie`]}
 							<p class="mt-1 text-sm text-red-600">{errores[`participacion_${index}_especie`]}</p>
@@ -272,9 +307,12 @@
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
-						<label for="objetivo_{index}" class="mb-2 block text-sm font-medium text-gray-700"
-							>Objetivo *</label
-						>
+						<label for="objetivo_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							Objetivo *
+							{#if esOriginal && original}
+								<span class="ml-2 text-xs text-gray-500">(Min: {original.objetivo})</span>
+							{/if}
+						</label>
 						<input
 							id="objetivo_{index}"
 							type="number"
@@ -283,31 +321,40 @@
 								const val = e.currentTarget.value;
 								updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
 							}}
-							min="1"
+							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							placeholder="100"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
 							<p class="mt-1 text-sm text-red-600">{errores[`participacion_${index}_objetivo`]}</p>
+						{:else if esOriginal && original}
+							<p class="mt-1 text-xs text-gray-500">
+								Progreso actual: {original.actual || 0} / {original.objetivo}
+							</p>
 						{/if}
 					</div>
 					<div>
-						<label for="unidad_{index}" class="mb-2 block text-sm font-medium text-gray-700"
-							>Unidad de medida</label
-						>
+						<label for="unidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							Unidad de medida
+						</label>
 						<select
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
 							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
-							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							disabled={esOriginal && !esAdmin}
+							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class:border-gray-300={!esOriginal || esAdmin}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 						>
 							{#each [...unidadesPorTipo[participacion.tipo_participacion?.descripcion || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>
 							{/each}
 						</select>
-						{#if participacion.unidad_medida === 'Otra'}
+						{#if participacion.unidad_medida === 'Otra' && !esOriginal}
 							<div class="mt-2">
 								<label for="unidad_otra_{index}" class="mb-2 block text-sm text-gray-700"
 									>Especificá la unidad *</label
@@ -318,7 +365,7 @@
 									value={participacion.unidad_medida_otra || ''}
 									on:input={(e) =>
 										updateParticipacion(index, 'unidad_medida_otra', e.currentTarget.value)}
-									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
 									placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'

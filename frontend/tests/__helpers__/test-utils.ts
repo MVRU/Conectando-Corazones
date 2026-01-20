@@ -6,11 +6,11 @@ import type { ComponentProps, SvelteComponent } from 'svelte';
  * con configuración común para todos los tests de componentes
  */
 export function renderComponent<T extends SvelteComponent>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    component: any,
-    props?: ComponentProps<T>
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	component: any,
+	props?: ComponentProps<T>
 ) {
-    return render(component, { props });
+	return render(component, { props });
 }
 
 /**
@@ -18,7 +18,7 @@ export function renderComponent<T extends SvelteComponent>(
  * Útil para tests asíncronos
  */
 export async function flushPromises() {
-    return new Promise((resolve) => setTimeout(resolve, 0));
+	return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
 /**
@@ -26,7 +26,7 @@ export async function flushPromises() {
  * @param ms Milisegundos a esperar
  */
 export async function wait(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
