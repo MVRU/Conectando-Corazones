@@ -9,7 +9,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import ProgressBar from '$lib/components/ui/elementos/ProgressBar.svelte';
-	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import {
 		Fire,
 		Bolt,

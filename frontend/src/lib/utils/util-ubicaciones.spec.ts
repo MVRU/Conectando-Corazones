@@ -134,7 +134,9 @@ describe('util-ubicaciones', () => {
 
 			const url = generarUrlGoogleMaps(ubicacion)!;
 			expect(url.startsWith('https://www.google.com/maps/search/?api=1&query=')).toBe(true);
-			expect(decodeURIComponent(url.split('query=')[1])).toBe('Av. Corrientes 1234, Buenos Aires, CABA');
+			expect(decodeURIComponent(url.split('query=')[1])).toBe(
+				'Av. Corrientes 1234, Buenos Aires, CABA'
+			);
 		});
 
 		it('devuelve null si no hay dirección para generar URL', () => {
@@ -247,7 +249,7 @@ describe('util-ubicaciones', () => {
 			const localidades = obtenerLocalidadesPorProvincia('Buenos Aires');
 			if (localidades.length > 0) {
 				const primerIdProvincia = localidades[0].id_provincia;
-				expect(localidades.every(l => l.id_provincia === primerIdProvincia)).toBe(true);
+				expect(localidades.every((l) => l.id_provincia === primerIdProvincia)).toBe(true);
 			}
 		});
 	});
@@ -313,7 +315,7 @@ describe('util-ubicaciones', () => {
 			const ciudades1 = getCitiesByProvince('Buenos Aires');
 			const ciudades2 = getCitiesByProvince('buenos aires');
 			const ciudades3 = getCitiesByProvince('BUENOS AIRES');
-			
+
 			expect(ciudades1).toEqual(ciudades2);
 			expect(ciudades2).toEqual(ciudades3);
 		});
@@ -349,7 +351,7 @@ describe('util-ubicaciones', () => {
 			const resultados = searchCities('Buenos');
 			expect(Array.isArray(resultados)).toBe(true);
 			// Todas deberían contener "Buenos"
-			resultados.forEach(ciudad => {
+			resultados.forEach((ciudad) => {
 				expect(ciudad.toLowerCase()).toContain('buenos');
 			});
 		});
@@ -363,7 +365,7 @@ describe('util-ubicaciones', () => {
 			const res1 = searchCities('buenos');
 			const res2 = searchCities('Buenos');
 			const res3 = searchCities('BUENOS');
-			
+
 			expect(res1).toEqual(res2);
 			expect(res2).toEqual(res3);
 		});

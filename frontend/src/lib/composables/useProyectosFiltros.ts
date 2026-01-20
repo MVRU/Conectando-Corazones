@@ -1,11 +1,17 @@
 import type { Proyecto } from '$lib/types/Proyecto';
-import type { TipoParticipacionDescripcion } from '$lib/types/TipoParticipacion';
 import { mockCategorias } from '$lib/mocks/mock-categorias';
-import { obtenerLocalidadesDisponibles, getProvinciaFromLocalidad, filtrarPorLocalidad } from '$lib/utils/util-ubicaciones';
+import {
+	obtenerLocalidadesDisponibles,
+	getProvinciaFromLocalidad,
+	filtrarPorLocalidad
+} from '$lib/utils/util-ubicaciones';
 import { writable, derived, type Writable } from 'svelte/store';
 import { ESTADO_LABELS } from '$lib/types/Estado';
-import { TIPO_PARTICIPACION_LABELS } from '$lib/types/TipoParticipacion';
-import { filtrarProyectos, filtrarPorTipoUbicacion, filtrarPorRangoFechas } from '$lib/utils/util-proyectos';
+import {
+	filtrarProyectos,
+	filtrarPorTipoUbicacion,
+	filtrarPorRangoFechas
+} from '$lib/utils/util-proyectos';
 import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 
 /**
@@ -145,14 +151,10 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		return ['Todos', ...Array.from(tiposSet)];
 	});
 
-
 	/**
 	 * Calcula las localidades disponibles basadas en los proyectos y provincia seleccionada
 	 */
-	function calcularLocalidadesDisponibles(
-		proyectos: Proyecto[],
-		provincia: string
-	): string[] {
+	function calcularLocalidadesDisponibles(proyectos: Proyecto[], provincia: string): string[] {
 		return obtenerLocalidadesDisponibles(proyectos, provincia);
 	}
 
@@ -195,7 +197,7 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 
 		// Datos estáticos
 		categoriasDisponibles,
-		
+
 		// Funciones
 		calcularLocalidadesDisponibles,
 		restablecerFiltros

@@ -18,7 +18,10 @@ export function validarBeneficiariosValor(
 	return null;
 }
 
-export function validarAumentoBeneficiarios(nuevo: number | undefined, original: number | undefined): string | null {
+export function validarAumentoBeneficiarios(
+	nuevo: number | undefined,
+	original: number | undefined
+): string | null {
 	if (original == null) return null;
 	if (nuevo == null) return null;
 	if (nuevo < original) {
@@ -27,7 +30,10 @@ export function validarAumentoBeneficiarios(nuevo: number | undefined, original:
 	return null;
 }
 
-export function validarAumentoObjetivo(nuevo: number | undefined, original: number | undefined): string | null {
+export function validarAumentoObjetivo(
+	nuevo: number | undefined,
+	original: number | undefined
+): string | null {
 	if (nuevo != null && nuevo <= 0) return 'El objetivo debe ser mayor a 0';
 	if (original == null || nuevo == null) return null;
 	if (nuevo < original) {
@@ -164,7 +170,8 @@ export function validarDescripcionProyecto(
 	if (s == null) return 'Este campo es obligatorio';
 	const v = s.normalize('NFC').trim().replace(/\s+/g, ' ');
 	if (!v) return 'Este campo es obligatorio';
-	if (v.length < min) return `Por favor, brinde mas detalles sobre el proyecto (mínimo ${min} caracteres).`;
+	if (v.length < min)
+		return `Por favor, brinde mas detalles sobre el proyecto (mínimo ${min} caracteres).`;
 	if (v.length > max) return `Maximo ${max} caracteres. Por favor, sea más breve`;
 	if (/^\d/.test(v)) return 'No puede comenzar con un numero';
 	if (!/\p{L}/u.test(v)) return 'Debe incluir letras';
@@ -172,7 +179,10 @@ export function validarDescripcionProyecto(
 	return null;
 }
 
-export function validarExtensionFecha(nuevaFecha: string | undefined, fechaOriginal: string | undefined): string | null {
+export function validarExtensionFecha(
+	nuevaFecha: string | undefined,
+	fechaOriginal: string | undefined
+): string | null {
 	if (!fechaOriginal || !nuevaFecha) return null;
 	const dNueva = new Date(nuevaFecha);
 	const dOriginal = new Date(fechaOriginal);
@@ -220,7 +230,7 @@ export function validarUrlImagen(url: string): string | null {
 		}
 	}
 
-	// Validar que sea una URL válida 
+	// Validar que sea una URL válida
 	let urlObj: URL;
 	try {
 		urlObj = new URL(v);
@@ -253,10 +263,7 @@ export function toKey(s: string): string {
 }
 
 export function normalizarUnidadLibre(texto: string, preserveCase = false): string {
-	const t = (texto ?? '')
-		.normalize('NFC')
-		.trim()
-		.replace(/\s+/g, ' ');
+	const t = (texto ?? '').normalize('NFC').trim().replace(/\s+/g, ' ');
 	return preserveCase ? t : t.toLocaleLowerCase('es-AR');
 }
 
@@ -279,11 +286,7 @@ export function validarUnidadLibre(
 }
 
 export function normalizarEspecie(texto: string): string {
-	return (texto ?? '')
-		.normalize('NFC')
-		.trim()
-		.replace(/\s+/g, ' ')
-		.toLocaleLowerCase('es-AR');
+	return (texto ?? '').normalize('NFC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('es-AR');
 }
 
 export function validarEspecie(texto: string): string | null {

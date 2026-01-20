@@ -205,14 +205,14 @@
 							href={urlGoogleMaps}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						>
 							{urlGoogleMapsLegible}
 						</a>
 					{:else}
 						<!-- Sin URL: solo texto informativo -->
 						<p
-							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base italic text-gray-500"
+							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-500 italic"
 						>
 							Se genera automáticamente
 						</p>
@@ -222,7 +222,7 @@
 					<button
 						type="button"
 						on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
-						class="absolute right-0 top-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
+						class="absolute top-0 right-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 						aria-pressed={editandoUrlMapaGoogle}
 					>

@@ -1,4 +1,8 @@
-import type { UbicacionDisyuncion, UbicacionPresencial, UbicacionVirtual } from '$lib/types/Ubicacion';
+import type {
+	UbicacionDisyuncion,
+	UbicacionPresencial,
+	UbicacionVirtual
+} from '$lib/types/Ubicacion';
 import { mockLocalidades } from '$lib/mocks/mock-localidades';
 
 // para obtener localidad por ID

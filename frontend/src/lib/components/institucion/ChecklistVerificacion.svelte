@@ -12,7 +12,8 @@
 		},
 		{
 			key: 'archivosLegibles',
-			label: 'Declaro que los archivos adjuntos son legibles, completos y no contienen información falsa o engañosa.'
+			label:
+				'Declaro que los archivos adjuntos son legibles, completos y no contienen información falsa o engañosa.'
 		},
 		{
 			key: 'evidenciasRespaldadas',
@@ -25,7 +26,8 @@
 		},
 		{
 			key: 'conformidadRevision',
-			label: 'Otorgo conformidad para que el proyecto sea enviado a revisión por parte de los colaboradores.'
+			label:
+				'Otorgo conformidad para que el proyecto sea enviado a revisión por parte de los colaboradores.'
 		}
 	];
 
@@ -69,7 +71,7 @@
 					type="checkbox"
 					checked={checks[item.key]}
 					on:change={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
-					disabled={disabled}
+					{disabled}
 					class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 {disabled
 						? 'cursor-not-allowed'
 						: 'cursor-pointer'}"

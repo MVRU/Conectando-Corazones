@@ -87,7 +87,7 @@
 		{:else}
 			<span
 				class={clsx(
-					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					'text-animation font-inter z-10 leading-[1.11] whitespace-nowrap',
 					textSize[size]
 				)}
 			>
@@ -156,7 +156,7 @@
 		{:else}
 			<span
 				class={clsx(
-					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					'text-animation font-inter z-10 leading-[1.11] whitespace-nowrap',
 					textSize[size]
 				)}
 			>
@@ -226,7 +226,7 @@
 		{:else}
 			<span
 				class={clsx(
-					'text-animation font-inter z-10 whitespace-nowrap leading-[1.11]',
+					'text-animation font-inter z-10 leading-[1.11] whitespace-nowrap',
 					textSize[size]
 				)}
 			>

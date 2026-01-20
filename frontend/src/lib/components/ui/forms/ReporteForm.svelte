@@ -138,7 +138,7 @@
 			id="motivo"
 			bind:value={motivo}
 			disabled={isLoading}
-			class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {errorMotivo
+			class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorMotivo
 				? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 				: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
 		>
@@ -174,7 +174,7 @@
 				bind:value={motivoOtro}
 				disabled={isLoading}
 				placeholder="Detalle su motivo..."
-				class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {errorMotivoOtro
+				class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorMotivoOtro
 					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
 			/>
@@ -211,7 +211,7 @@
 			rows="6"
 			disabled={isLoading}
 			placeholder="Describí en detalle la irregularidad observada. Incluí fechas, nombres, montos o cualquier evidencia que ayude a la investigación..."
-			class="mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 {errorDescripcion
+			class="mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorDescripcion
 				? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 				: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
 		></textarea>

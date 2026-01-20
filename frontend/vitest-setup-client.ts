@@ -6,24 +6,24 @@ import '@testing-library/jest-dom/vitest';
  */
 
 const buildMatchMedia = (query: string) => ({
-        matches: false,
-        media: query,
-        onchange: null,
-        addEventListener: () => undefined,
-        removeEventListener: () => undefined,
-        dispatchEvent: () => false
+	matches: false,
+	media: query,
+	onchange: null,
+	addEventListener: () => undefined,
+	removeEventListener: () => undefined,
+	dispatchEvent: () => false
 });
 
 Object.defineProperty(window, 'matchMedia', {
-        writable: true,
-        enumerable: true,
-        value: buildMatchMedia
+	writable: true,
+	enumerable: true,
+	value: buildMatchMedia
 });
 
 Object.defineProperty(globalThis, 'matchMedia', {
-        writable: true,
-        enumerable: true,
-        value: buildMatchMedia
+	writable: true,
+	enumerable: true,
+	value: buildMatchMedia
 });
 
 // * Mock para ResizeObserver, requerido por Breadcrumbs

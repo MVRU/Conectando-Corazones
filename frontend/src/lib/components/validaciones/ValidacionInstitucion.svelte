@@ -176,7 +176,7 @@
 							aria-label="Seleccionar revisión documental manual"
 						/>
 					</div>
-					<span class="text-xs font-medium uppercase tracking-wide text-blue-700">
+					<span class="text-xs font-medium tracking-wide text-blue-700 uppercase">
 						Recomendado
 					</span>
 				</label>
@@ -200,7 +200,7 @@
 							disabled={!renaperDisponible}
 						/>
 					</div>
-					<span class="text-xs font-medium uppercase tracking-wide text-gray-500"> Bloqueado </span>
+					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase"> Bloqueado </span>
 				</label>
 
 				<label
@@ -222,7 +222,7 @@
 							aria-label="Omitir verificación por ahora"
 						/>
 					</div>
-					<span class="text-xs font-medium uppercase tracking-wide text-gray-500">
+					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
 						Sin validación inmediata
 					</span>
 				</label>
@@ -253,7 +253,7 @@
 							id="documentos"
 							name="documentos"
 							type="file"
-							class="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 							accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
 							multiple
 							on:change={actualizarArchivos}
@@ -271,7 +271,7 @@
 									<li class="flex items-center justify-between px-4 py-2">
 										<span class="truncate pr-4" title={archivo.name}>{archivo.name}</span>
 										<div class="flex items-center gap-4">
-											<span class="whitespace-nowrap text-xs text-gray-500"
+											<span class="text-xs whitespace-nowrap text-gray-500"
 												>{Math.ceil(archivo.size / 1024)} KB</span
 											>
 											<button

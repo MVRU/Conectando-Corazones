@@ -173,7 +173,9 @@
 				class="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md sm:flex sm:items-start sm:gap-4"
 			>
 				<!-- Indicador para mobile -->
-				<div class="absolute -left-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 sm:hidden">
+				<div
+					class="absolute -top-2 -left-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 sm:hidden"
+				>
 					{i + 1}
 				</div>
 
@@ -260,16 +262,21 @@
 							on:click={() => eliminarContacto(i)}
 							title="Eliminar contacto"
 							aria-label="Eliminar contacto"
-							class="rounded-lg p-2 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-200"
+							class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-200 focus:outline-none"
 						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+								/>
 							</svg>
 						</button>
 					</div>
 				{:else}
 					<!-- Espaciador para alinear con filas que tienen botón de eliminar (solo desktop) -->
-					<div class="hidden sm:block sm:w-[36px] sm:mt-6"></div>
+					<div class="hidden sm:mt-6 sm:block sm:w-[36px]"></div>
 				{/if}
 			</div>
 		{/each}
@@ -279,7 +286,7 @@
 			<button
 				type="button"
 				on:click={agregarContacto}
-				class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 px-6 py-3 text-sm font-medium text-blue-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:shadow-sm"
+				class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 px-6 py-3 text-sm font-medium text-blue-600 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6H6m6 0h6" />

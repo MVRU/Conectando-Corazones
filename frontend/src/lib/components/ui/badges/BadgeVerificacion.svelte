@@ -40,7 +40,7 @@
 	};
 
 	$: config = badgeConfig[estado];
-	
+
 	// Textos cortos para mobile
 	const textosMobile = {
 		sin_verificacion: 'Sin verificar',

@@ -209,7 +209,7 @@ FIX: revisar y corregir errores tras cambios en interfaces
 				>
 					<!-- Punto del timeline -->
 					<div
-						class="absolute -left-2 top-0 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
+						class="absolute top-0 -left-2 h-4 w-4 rounded-full border-2 border-white bg-blue-500 shadow"
 					></div>
 
 					<div class="rounded-xl bg-gray-50 p-4">

@@ -8,15 +8,15 @@ import type { Usuario, Institucion, ColaboradorDisyuncion } from '$lib/types/Usu
 /**
  * Verifica si el usuario actual puede ver los contactos del perfil visitado
  * según las reglas de colaboración establecidas.
- * 
+ *
  * Reglas:
  * - Si es el propio perfil, siempre puede ver
- * - Si el perfil es de una Institución: el colaborador actual debe tener al menos una 
+ * - Si el perfil es de una Institución: el colaborador actual debe tener al menos una
  *   solicitud de colaboración aprobada en algún proyecto de esa institución
- * - Si el perfil es de un Colaborador: el usuario actual debe tener al menos una 
+ * - Si el perfil es de un Colaborador: el usuario actual debe tener al menos una
  *   solicitud de colaboración aprobada en un proyecto donde el colaborador del perfil
  *   también tiene una colaboración aprobada
- * 
+ *
  * @param usuarioActual - Usuario que está visitando el perfil (puede ser null si no está autenticado)
  * @param perfilUsuario - Usuario cuyo perfil se está viendo
  * @param proyectos - Lista de todos los proyectos disponibles
@@ -83,16 +83,12 @@ function tieneColaboracionConInstitucion(
 	proyectos: Proyecto[]
 ): boolean {
 	// Buscar proyectos de la institución
-	const proyectosInstitucion = proyectos.filter(
-		(p) => p.institucion_id === institucionId
-	);
+	const proyectosInstitucion = proyectos.filter((p) => p.institucion_id === institucionId);
 
 	// Verificar si el colaborador tiene alguna colaboración aprobada en esos proyectos
 	return proyectosInstitucion.some((proyecto) =>
 		proyecto.colaboraciones?.some(
-			(colab) =>
-				colab.colaborador_id === colaboradorId &&
-				colab.estado === 'aprobada'
+			(colab) => colab.colaborador_id === colaboradorId && colab.estado === 'aprobada'
 		)
 	);
 }
@@ -100,7 +96,7 @@ function tieneColaboracionConInstitucion(
 /**
  * Verifica si dos colaboradores tienen al menos una colaboración aprobada
  * en el mismo proyecto
- * 
+ *
  * @param colaboradorId1 - ID del primer colaborador
  * @param colaboradorId2 - ID del segundo colaborador
  * @param proyectos - Lista de proyectos
@@ -165,7 +161,6 @@ export function puedeDejarResena(
 	}
 	return false;
 }
-
 
 export function obtenerUrlPerfil(
 	usuario?: Usuario | Institucion | ColaboradorDisyuncion | { username?: string }

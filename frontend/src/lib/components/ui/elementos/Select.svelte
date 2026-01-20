@@ -10,11 +10,11 @@
 	export let required = false;
 	export let disabled = false;
 	export let error: string = '';
-export let size: 'sm' | 'md' | 'lg' = 'md';
-export let name: string = '';
-export let id: string = '';
-export let searchable = true;
-export let ariaDescribedBy: string | undefined = undefined;
+	export let size: 'sm' | 'md' | 'lg' = 'md';
+	export let name: string = '';
+	export let id: string = '';
+	export let searchable = true;
+	export let ariaDescribedBy: string | undefined = undefined;
 
 	let isOpen = false;
 	let selectRef: HTMLElement;
@@ -181,17 +181,17 @@ export let ariaDescribedBy: string | undefined = undefined;
 			readonly={!searchable || !isTyping}
 			role="combobox"
 			aria-controls="select-options"
-		aria-haspopup="listbox"
-		aria-expanded={isOpen}
-		aria-labelledby={label ? id : undefined}
-		aria-describedby={ariaDescribedBy}
-	/>
+			aria-haspopup="listbox"
+			aria-expanded={isOpen}
+			aria-labelledby={label ? id : undefined}
+			aria-describedby={ariaDescribedBy}
+		/>
 
 		<button
 			type="button"
 			class={clsx(
-			 'absolute right-4 top-1/2 -translate-y-1/2 transform rounded-full p-1',
-			 'text-slate-400 transition-colors duration-200 hover:text-slate-600 group-focus-within:text-[rgb(var(--color-primary))]'
+				'absolute top-1/2 right-4 -translate-y-1/2 transform rounded-full p-1',
+				'text-slate-400 transition-colors duration-200 group-focus-within:text-[rgb(var(--color-primary))] hover:text-slate-600'
 			)}
 			aria-label="Toggle dropdown"
 			on:click={toggleDropdown}

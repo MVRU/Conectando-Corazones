@@ -120,7 +120,7 @@
 			errorInterno = MENSAJE_ARCHIVO_INVALIDO;
 			return false;
 		}
-		
+
 		// Validar tamaño de archivo (máximo 2MB)
 		const MAX_SIZE_MB = 2;
 		const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
@@ -128,7 +128,7 @@
 			errorInterno = `El archivo es demasiado grande. El tamaño máximo permitido es ${MAX_SIZE_MB} MB.`;
 			return false;
 		}
-		
+
 		errorInterno = '';
 		return true;
 	}

@@ -13,7 +13,7 @@ import type { Archivo } from '$lib/types/Archivo';
  */
 export function formatearTamaño(bytes?: number): string {
 	if (!bytes) return 'Tamaño desconocido';
-	
+
 	if (bytes < 1024) return `${bytes} B`;
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 	return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
@@ -70,10 +70,10 @@ export function obtenerIdGoogleDrive(url: string): string | null {
 	// Formato: https://drive.google.com/open?id=FILE_ID
 	const match1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
 	if (match1) return match1[1];
-	
+
 	const match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
 	if (match2) return match2[1];
-	
+
 	return null;
 }
 
@@ -111,7 +111,7 @@ export function obtenerUrlVisualizacionGoogleDrive(fileId: string): string {
  */
 export async function descargarArchivo(archivo: Archivo): Promise<void> {
 	const driveId = obtenerIdGoogleDrive(archivo.url);
-	
+
 	// Si es Google Drive, usar URL de descarga directa
 	if (driveId) {
 		const downloadUrl = obtenerUrlDescargaGoogleDrive(driveId);
@@ -132,17 +132,17 @@ export async function descargarArchivo(archivo: Archivo): Promise<void> {
 			credentials: 'omit'
 		});
 		if (!response.ok) throw new Error('Error al obtener el archivo');
-		
+
 		const blob = await response.blob();
 		const blobUrl = URL.createObjectURL(blob);
-		
+
 		const link = document.createElement('a');
 		link.href = blobUrl;
 		link.download = archivo.descripcion || `archivo_${archivo.id_archivo || 'descarga'}`;
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
-		
+
 		// Limpiar el blob URL después de un tiempo
 		setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
 	} catch (error) {
@@ -160,7 +160,7 @@ export function abrirArchivo(archivo: Archivo): void {
 	const driveId = obtenerIdGoogleDrive(archivo.url);
 	const esPDFArchivo = esPDF(archivo.tipo_mime);
 	const esImagenArchivo = esImagen(archivo.tipo_mime);
-	
+
 	// Si es Google Drive, usar URL de preview/visualización según el tipo
 	if (driveId) {
 		if (esPDFArchivo) {

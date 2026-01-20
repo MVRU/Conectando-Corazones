@@ -11,8 +11,7 @@
 		obtenerColorCategoria,
 		obtenerClasesColor,
 		capitalizarPrimera,
-		normalizarTitulo,
-		validarTituloProyecto
+		normalizarTitulo
 	} from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -96,7 +95,7 @@
 				maxlength="60"
 				on:blur={() => normalizarTitulo(titulo)}
 				disabled={modoEdicion && !esAdmin}
-				class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-gray-300={!modoEdicion || esAdmin}
 				class:border-red-300={errores.titulo && (!modoEdicion || esAdmin)}
 				class:cursor-not-allowed={modoEdicion && !esAdmin}
@@ -118,7 +117,7 @@
 				id="descripcion"
 				bind:value={descripcion}
 				rows="4"
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				placeholder="Describa su proyecto, objetivos y cómo ayudará a la comunidad..."
 				class:border-red-300={errores.descripcion}
 			></textarea>
@@ -135,7 +134,7 @@
 				id="urlPortada"
 				type="text"
 				bind:value={urlPortada}
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.urlPortada}
 				placeholder="https://ejemplo.com/imagen.jpg"
 			/>
@@ -155,7 +154,7 @@
 					lang="es-AR"
 					bind:value={fechaFinTentativa}
 					min={fechaMinima}
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+					class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 					class:border-red-300={errores.fechaFinTentativa}
 					aria-invalid={!!errores.fechaFinTentativa}
 				/>
@@ -187,7 +186,7 @@
 							e.preventDefault();
 						}
 					}}
-					class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+					class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 					class:border-red-300={errores.beneficiarios}
 					aria-invalid={!!errores.beneficiarios}
 					aria-describedby="beneficiarios-help"
@@ -236,7 +235,7 @@
 				</span>
 				<div class="min-w-0 flex-1 text-left">
 					<span
-						class="block text-xs font-medium leading-tight {seleccionado
+						class="block text-xs leading-tight font-medium {seleccionado
 							? 'text-gray-900'
 							: 'text-gray-700'}"
 					>
@@ -251,7 +250,7 @@
 									fill-rule="evenodd"
 									d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
 									clip-rule="evenodd"
-									/>
+								/>
 							</svg>
 						</div>
 					{:else if !modoEdicion || esAdmin}
@@ -288,7 +287,7 @@
 				bind:value={categoriaOtraDescripcion}
 				maxlength="60"
 				on:blur={normalizarCategoriaOtra}
-				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.categoria_otra}
 				placeholder="Ejemplo: Personas mayores, Acceso al agua, Inclusión digital…"
 				aria-invalid={!!errores.categoria_otra}

@@ -29,34 +29,34 @@
 				clases: 'bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-700/10'
 			};
 		}
-		
+
 		if (usuario.rol === 'colaborador') {
 			const tipoColaborador = (usuario as any).tipo_colaborador;
-			
+
 			if (tipoColaborador === 'unipersonal') {
 				return {
 					texto: 'Unipersonal',
 					clases: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
 				};
 			}
-			
+
 			if (tipoColaborador === 'organizacion') {
 				const esConFines = (usuario as Organizacion).con_fines_de_lucro;
 				return {
-					texto: esConFines 
-						? 'Org. con fines de lucro' 
-						: 'Org. sin fines de lucro',
+					texto: esConFines ? 'Org. con fines de lucro' : 'Org. sin fines de lucro',
 					clases: 'bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20'
 				};
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	function debeMostrarRepresentante(usuario: UsuarioCompleto): boolean {
-		return usuario.rol === 'institucion' || 
-			(usuario.rol === 'colaborador' && (usuario as any).tipo_colaborador === 'organizacion');
+		return (
+			usuario.rol === 'institucion' ||
+			(usuario.rol === 'colaborador' && (usuario as any).tipo_colaborador === 'organizacion')
+		);
 	}
 
 	$: nombreCompleto = obtenerNombreCompleto(perfilUsuario);
@@ -64,10 +64,14 @@
 	$: mostrarRepresentante = debeMostrarRepresentante(perfilUsuario);
 </script>
 
-<div class="flex flex-col md:flex-row gap-6 md:gap-8 items-start w-full transition-all duration-300">
+<div
+	class="flex w-full flex-col items-start gap-6 transition-all duration-300 md:flex-row md:gap-8"
+>
 	<!-- Foto de perfil con overlay de edición -->
-	<div class="relative group mx-auto md:mx-0 shrink-0">
-		<div class="relative h-28 w-28 md:h-32 md:w-32 rounded-full ring-4 ring-white shadow-lg overflow-hidden bg-white">
+	<div class="group relative mx-auto shrink-0 md:mx-0">
+		<div
+			class="relative h-28 w-28 overflow-hidden rounded-full bg-white shadow-lg ring-4 ring-white md:h-32 md:w-32"
+		>
 			<img
 				src={perfilUsuario.url_foto ?? '/logo-1.png'}
 				alt="Foto de perfil"
@@ -75,8 +79,8 @@
 			/>
 			{#if esMiPerfil}
 				<!-- Overlay con ícono de edición -->
-				<button 
-					class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer backdrop-blur-[1px]"
+				<button
+					class="absolute inset-0 flex cursor-pointer items-center justify-center bg-black/40 opacity-0 backdrop-blur-[1px] transition-all duration-200 group-hover:opacity-100"
 					on:click={onEditarClick}
 					aria-label="Cambiar foto de perfil"
 				>
@@ -87,40 +91,50 @@
 	</div>
 
 	<!-- Información del perfil -->
-	<div class="flex-1 w-full min-w-0 text-center md:text-left pt-2">
+	<div class="w-full min-w-0 flex-1 pt-2 text-center md:text-left">
 		<!-- Header superior con nombre y botón -->
-		<div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+		<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 			<div>
-				<h1 class="text-2xl md:text-3xl font-bold text-gray-900 leading-tight">
+				<h1 class="text-2xl leading-tight font-bold text-gray-900 md:text-3xl">
 					{nombreCompleto}
 				</h1>
-				
+
 				{#if mostrarRepresentante}
-					<p class="text-sm text-gray-500 mt-1">
-						Representante Legal: <span class="font-medium text-gray-700">{perfilUsuario.nombre} {perfilUsuario.apellido}</span>
+					<p class="mt-1 text-sm text-gray-500">
+						Representante Legal: <span class="font-medium text-gray-700"
+							>{perfilUsuario.nombre} {perfilUsuario.apellido}</span
+						>
 					</p>
 				{/if}
-				
+
 				<!-- Badges container -->
-				<div class="mt-3 flex flex-wrap items-center justify-center md:justify-start gap-2">
+				<div class="mt-3 flex flex-wrap items-center justify-center gap-2 md:justify-start">
 					<!-- Badge del rol -->
 					{#if perfilUsuario.rol === 'administrador'}
-						<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors bg-purple-50 text-purple-700 ring-purple-700/10">
+						<span
+							class="inline-flex items-center rounded-md bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700 ring-1 ring-purple-700/10 transition-colors ring-inset"
+						>
 							Administrador
 						</span>
 					{:else}
-						<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 ring-inset transition-colors {obtenerColorRol(perfilUsuario.rol)}">
+						<span
+							class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium ring-1 transition-colors ring-inset {obtenerColorRol(
+								perfilUsuario.rol
+							)}"
+						>
 							{perfilUsuario.rol === 'institucion' ? 'Institución' : 'Colaborador'}
 						</span>
 					{/if}
-					
+
 					<!-- Badge del subtipo -->
 					{#if subtipoBadge}
-						<span class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium transition-colors {subtipoBadge.clases}">
+						<span
+							class="inline-flex items-center rounded-md px-2.5 py-1 text-xs font-medium transition-colors {subtipoBadge.clases}"
+						>
 							{subtipoBadge.texto}
 						</span>
 					{/if}
-					
+
 					<!-- Badge de verificación (Solo para Instituciones) -->
 					{#if perfilUsuario.rol === 'institucion'}
 						<BadgeVerificacion estado={estadoVerificacion} />
@@ -130,19 +144,19 @@
 
 			{#if esMiPerfil}
 				<button
-					class="hidden md:inline-flex px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm shadow-sm hover:shadow transition-all items-center gap-2 shrink-0 group"
+					class="group hidden shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow md:inline-flex"
 					on:click={onEditarClick}
 					type="button"
 				>
-					<Pencil class="h-4 w-4 group-hover:scale-110 transition-transform" />
+					<Pencil class="h-4 w-4 transition-transform group-hover:scale-110" />
 					Editar perfil
 				</button>
 			{/if}
 		</div>
-		
+
 		<!-- Descripción -->
 		{#if perfilUsuario.descripcion}
-			<p class="mt-4 text-gray-600 text-sm md:text-base leading-relaxed max-w-3xl mx-auto md:mx-0">
+			<p class="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-gray-600 md:mx-0 md:text-base">
 				{perfilUsuario.descripcion}
 			</p>
 		{/if}
@@ -151,7 +165,7 @@
 		{#if esMiPerfil}
 			<button
 				on:click={onEditarClick}
-				class="md:hidden mt-6 w-full inline-flex justify-center items-center gap-2 rounded-lg bg-white border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 active:bg-gray-100 transition-colors"
+				class="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 active:bg-gray-100 md:hidden"
 			>
 				<Pencil class="h-4 w-4 text-gray-500" />
 				Editar perfil

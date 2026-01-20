@@ -4,7 +4,7 @@
 	import TodosProyectos from './TodosProyectos.svelte';
 	import MisProyectos from './MisProyectos.svelte';
 	import { usuario } from '$lib/stores/auth';
-	import { fade, fly } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 
 	export let proyectos: Proyecto[] = defaultProyectos;
@@ -39,7 +39,7 @@
 		<div class="mb-8 flex justify-center">
 			<div class="inline-flex rounded-full bg-gray-100/80 p-1.5 shadow-inner">
 				<button
-					class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
+					class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
 					'todos'
 						? 'bg-white text-gray-900 shadow-sm'
 						: 'text-gray-500 hover:text-gray-900'}"
@@ -49,7 +49,7 @@
 				</button>
 				{#if esAdministrador}
 					<button
-						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
 						'auditoria'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"
@@ -59,7 +59,7 @@
 					</button>
 				{:else}
 					<button
-						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-black/5 {activeTab ===
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
 						'mis-proyectos'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"

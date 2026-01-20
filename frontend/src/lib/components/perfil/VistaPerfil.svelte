@@ -7,7 +7,13 @@
 	import type { Resena } from '$lib/types/Resena';
 	import type { Categoria } from '$lib/types/Categoria';
 	import type { TipoParticipacion } from '$lib/types/TipoParticipacion';
-	import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
+	import type {
+		Usuario,
+		Institucion,
+		Organizacion,
+		Unipersonal,
+		Administrador
+	} from '$lib/types/Usuario';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 	import { obtenerPlaceholderResena, obtenerTituloResena } from '$lib/utils/resenas';
@@ -23,7 +29,10 @@
 	import { usePerfilEdicion } from '$lib/composables/usePerfilEdicion';
 	import { perfilService } from '$lib/services/perfilService';
 	import { toastStore } from '$lib/stores/toast';
-	import { determinarEstadoVerificacion, obtenerVerificacionesUsuario } from '$lib/utils/util-verificacion';
+	import {
+		determinarEstadoVerificacion,
+		obtenerVerificacionesUsuario
+	} from '$lib/utils/util-verificacion';
 	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
 
 	export let perfilUsuario: UsuarioCompleto;
@@ -35,23 +44,36 @@
 	}
 
 	// Verificar si el usuario actual puede ver los contactos del perfil
-	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, perfilService.obtenerTodosLosProyectos());
+	$: puedeVerContactosPerfil = puedeVerContactos(
+		$usuarioStore,
+		perfilUsuario,
+		perfilService.obtenerTodosLosProyectos()
+	);
 
 	// Verificar si el usuario actual puede dejar reseña
-	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, perfilService.obtenerTodosLosProyectos());
+	$: puedeResenar = puedeDejarResena(
+		$usuarioStore,
+		perfilUsuario,
+		perfilService.obtenerTodosLosProyectos()
+	);
 
 	// Proyectos del usuario
 	$: proyectosUsuario = perfilService.obtenerProyectosUsuario(
 		perfilUsuario.id_usuario,
 		perfilUsuario.rol
 	);
-	
+
 	// Reseñas del usuario
 	const resenasStore = perfilService.obtenerResenasStore();
 
-	$: yaResenoUsuario = $usuarioStore && !esMiPerfil
-		? perfilService.yaResenoUsuario($usuarioStore.username || '', perfilUsuario.id_usuario, $resenasStore)
-		: false;
+	$: yaResenoUsuario =
+		$usuarioStore && !esMiPerfil
+			? perfilService.yaResenoUsuario(
+					$usuarioStore.username || '',
+					perfilUsuario.id_usuario,
+					$resenasStore
+				)
+			: false;
 	$: reseñasUsuario = perfilService.obtenerResenasUsuario(perfilUsuario.id_usuario, $resenasStore);
 
 	// Gestión de modales usando composable
@@ -106,21 +128,22 @@
 
 	function handleGuardarResena(event: CustomEvent<Resena>) {
 		if (!$usuarioStore) return;
-		
+
 		const nuevaResena = perfilService.agregarResena({
 			...event.detail,
 			username: $usuarioStore.username || `${$usuarioStore.nombre} ${$usuarioStore.apellido}`,
-			rol: $usuarioStore.rol === 'colaborador' 
-				? ($usuarioStore as any).razon_social || 'Colaborador'
-				: ($usuarioStore as any).nombre_legal || 'Institución'
+			rol:
+				$usuarioStore.rol === 'colaborador'
+					? ($usuarioStore as any).razon_social || 'Colaborador'
+					: ($usuarioStore as any).nombre_legal || 'Institución'
 		});
-		
+
 		toastStore.show({
 			variant: 'success',
 			title: 'Reseña publicada correctamente',
 			message: '¡Gracias por tu reseña! Tu aporte ayuda a mejorar la comunidad.'
 		});
-		
+
 		console.log('Reseña guardada:', nuevaResena);
 		modales.cerrar('resena');
 	}
@@ -129,11 +152,15 @@
 	const abrirModalTiposParticipacion = crearAbrirModal('tiposParticipacion');
 
 	function handleGuardarCategorias(event: CustomEvent<Categoria[]>) {
-		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () => modales.cerrar('categorias'));
+		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () =>
+			modales.cerrar('categorias')
+		);
 	}
 
 	function handleGuardarTiposParticipacion(event: CustomEvent<TipoParticipacion[]>) {
-		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () => modales.cerrar('tiposParticipacion'));
+		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () =>
+			modales.cerrar('tiposParticipacion')
+		);
 	}
 
 	// Lógica para reportar perfil
@@ -158,44 +185,34 @@
 <main class="min-h-screen bg-gray-50">
 	<!-- Contenido principal -->
 	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-		<div class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+		<div
+			class="mb-8 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
+		>
 			<div class="p-4 sm:p-6 lg:p-8">
-				<PerfilHeader 
-					{perfilUsuario} 
-					{esMiPerfil} 
-					{estadoVerificacion} 
+				<PerfilHeader
+					{perfilUsuario}
+					{esMiPerfil}
+					{estadoVerificacion}
 					onEditarClick={abrirModalEdicion}
 				/>
 
-				<PerfilInfoContacto 
-					{perfilUsuario} 
-					puedeVerContactos={puedeVerContactosPerfil}
-					esMiPerfil={esMiPerfil}
-					onEditarClick={abrirModalEdicion}
-				/>
+				<PerfilInfoContacto {perfilUsuario} puedeVerContactos={puedeVerContactosPerfil} />
 			</div>
 		</div>
 
-		<PerfilSeccionCategorias 
-			{perfilUsuario} 
-			{esMiPerfil} 
-			onEditarClick={abrirModalCategorias}
-		/>
+		<PerfilSeccionCategorias {perfilUsuario} {esMiPerfil} onEditarClick={abrirModalCategorias} />
 
-		<PerfilSeccionTiposParticipacion 
-			{perfilUsuario} 
-			{esMiPerfil} 
+		<PerfilSeccionTiposParticipacion
+			{perfilUsuario}
+			{esMiPerfil}
 			onEditarClick={abrirModalTiposParticipacion}
 		/>
 
-		<PerfilSeccionProyectos 
-			proyectos={proyectosUsuario} 
-			rol={perfilUsuario.rol}
-		/>
+		<PerfilSeccionProyectos proyectos={proyectosUsuario} rol={perfilUsuario.rol} />
 
-		<PerfilSeccionResenas 
-			resenas={reseñasUsuario} 
-			{esMiPerfil} 
+		<PerfilSeccionResenas
+			resenas={reseñasUsuario}
+			{esMiPerfil}
 			puedeAgregarResena={puedeResenar}
 			{yaResenoUsuario}
 			onAgregarResenaClick={abrirModalResena}
@@ -206,25 +223,27 @@
 			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
 				{#if $isAdmin}
 					<div class="mb-4 text-center">
-						<span class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10">
+						<span
+							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
+						>
 							ID: {perfilUsuario.id_usuario}
 						</span>
 					</div>
 					<p class="text-sm text-gray-500">
 						¿Algo no está bien?
-						<button 
+						<button
 							on:click={() => console.log('Auditar perfil:', perfilUsuario.username)}
-							class="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
+							class="font-medium text-blue-600 transition-colors hover:text-blue-700 hover:underline"
 						>
 							Auditar este perfil
 						</button>
 					</p>
 				{:else}
 					<p class="text-sm text-gray-500">
-						¿Algo no está bien? 
-						<button 
+						¿Algo no está bien?
+						<button
 							on:click={abrirModalReporte}
-							class="text-red-600 hover:text-red-700 hover:underline font-medium transition-colors"
+							class="font-medium text-red-600 transition-colors hover:text-red-700 hover:underline"
 						>
 							Reportar este perfil
 						</button>
@@ -290,7 +309,7 @@
 		tipo_objeto="Usuario"
 		id_objeto={perfilUsuario.id_usuario ?? 0}
 		nombre_objeto={perfilUsuario.username}
-		on:close={() => mostrarModalReporte = false}
+		on:close={() => (mostrarModalReporte = false)}
 		on:success={handleConfirmarReporte}
 	/>
 {/if}

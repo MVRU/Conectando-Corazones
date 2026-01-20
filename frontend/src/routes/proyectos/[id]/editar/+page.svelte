@@ -150,8 +150,6 @@
 	let mostrarModalConfirmacion = false;
 	let enviando = false;
 
-
-
 	async function intentarEnviar() {
 		if (!validarFormulario()) {
 			toastStore.show({
@@ -167,9 +165,9 @@
 	async function confirmarEnvio() {
 		mostrarModalConfirmacion = false;
 		enviando = true;
-		
+
 		// Simular request
-		await new Promise((resolve) => setTimeout(resolve, 1500)); 
+		await new Promise((resolve) => setTimeout(resolve, 1500));
 
 		console.log('Update payload:', {
 			idProyecto,
@@ -197,12 +195,16 @@
 
 <main class="min-h-screen bg-gray-50 pb-20">
 	{#if esAdmin}
-		<div class="bg-amber-50 border-b border-amber-200 px-4 py-3">
+		<div class="border-b border-amber-200 bg-amber-50 px-4 py-3">
 			<div class="mx-auto flex max-w-4xl items-start gap-3">
-				<Icon src={ShieldExclamation} class="mt-0.5 h-5 w-5 text-amber-600 flex-shrink-0" />
+				<Icon src={ShieldExclamation} class="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
 				<div class="text-sm text-amber-800">
 					<p class="font-medium">Modo Superadmin</p>
-					<p>Estás editando este proyecto con privilegios de administrador. Tené cuidado, ya que podés modificar o eliminar datos que normalmente están protegidos para garantizar la integridad del proyecto.</p>
+					<p>
+						Estás editando este proyecto con privilegios de administrador. Tené cuidado, ya que
+						podés modificar o eliminar datos que normalmente están protegidos para garantizar la
+						integridad del proyecto.
+					</p>
 				</div>
 			</div>
 		</div>
@@ -260,16 +262,13 @@
 		</form>
 	</div>
 
-	<Modal
-		bind:abierto={mostrarModalConfirmacion}
-		titulo="Confirmar cambios"
-		anchoMaximo="max-w-md"
-	>
+	<Modal bind:abierto={mostrarModalConfirmacion} titulo="Confirmar cambios" anchoMaximo="max-w-md">
 		<div class="p-6 pt-2">
 			<p class="mb-6 text-gray-600">
-				¿Estás seguro de que querés guardar los cambios realizados en el proyecto? Esta acción actualizará la información visible para todos los usuarios.
+				¿Estás seguro de que querés guardar los cambios realizados en el proyecto? Esta acción
+				actualizará la información visible para todos los usuarios.
 			</p>
-			
+
 			<div class="flex justify-end gap-3">
 				<Button
 					label="Cancelar"

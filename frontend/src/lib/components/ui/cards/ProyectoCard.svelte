@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Usuario } from '$lib/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
@@ -11,7 +10,6 @@
 		getUbicacionCorta,
 		formatearFechaBadge
 	} from '$lib/utils/util-proyectos';
-	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/proyectos/ProyectoProgreso.svelte';
@@ -62,7 +60,6 @@
 		}
 	}
 
-	$: participaciones = (proyecto.participacion_permitida || []).map(getParticipacionVisual);
 	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro;
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
 	$: esVirtual = ubicacionCorta === 'Virtual';
@@ -78,7 +75,7 @@
 	<!-- Link principal del contenido -->
 	<a
 		href={`/proyectos/${proyecto.id_proyecto}`}
-		class="flex flex-grow flex-col text-inherit no-underline focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
+		class="flex flex-grow flex-col text-inherit no-underline focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset"
 	>
 		<!-- Imagen Cover -->
 		<div class="relative h-48 overflow-hidden bg-gray-100">
@@ -98,7 +95,7 @@
 			{/if}
 
 			<!-- Badges flotantes -->
-			<div class="absolute left-3 top-3 flex items-center gap-2 pointer-events-none">
+			<div class="pointer-events-none absolute top-3 left-3 flex items-center gap-2">
 				{#if esCreador || esParticipante}
 					<div
 						class="relative h-8 w-8 overflow-hidden rounded-full border-2 bg-white shadow-sm"
@@ -123,7 +120,7 @@
 			</div>
 
 			<!-- Badge de ubicación -->
-			<div class="absolute right-3 top-3 pointer-events-none">
+			<div class="pointer-events-none absolute top-3 right-3">
 				<span
 					class="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-gray-700 shadow-sm backdrop-blur-sm"
 				>
@@ -137,7 +134,7 @@
 			</div>
 			<!-- Rango de fechas -->
 			<div
-				class="absolute bottom-0 left-0 right-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+				class="absolute right-0 bottom-0 left-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
 				<span
 					class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
@@ -150,10 +147,10 @@
 		</div>
 
 		<!-- Contenido principal -->
-		<div class="flex flex-col p-3 sm:p-4 pb-0">
+		<div class="flex flex-col p-3 pb-0 sm:p-4">
 			<div class="mb-3">
 				<h3
-					class="mb-1.5 line-clamp-2 break-words text-lg font-bold leading-tight text-gray-900 transition-colors group-hover:text-blue-600"
+					class="mb-1.5 line-clamp-2 text-lg leading-tight font-bold break-words text-gray-900 transition-colors group-hover:text-blue-600"
 					title={proyecto.titulo}
 				>
 					{proyecto.titulo}
@@ -174,14 +171,19 @@
 				{/if}
 			</div>
 
-			<p class="mb-3 line-clamp-2 text-sm leading-relaxed text-gray-600" title={proyecto.descripcion}>
+			<p
+				class="mb-3 line-clamp-2 text-sm leading-relaxed text-gray-600"
+				title={proyecto.descripcion}
+			>
 				{proyecto.descripcion}
 			</p>
 		</div>
 	</a>
 
 	<!-- Sección de Acciones (Botones) - Fuera del link principal -->
-	<div class="mt-auto flex flex-col gap-2.5 px-3 pb-3 sm:px-4 sm:pb-4 border-t border-gray-100 pt-3">
+	<div
+		class="mt-auto flex flex-col gap-2.5 border-t border-gray-100 px-3 pt-3 pb-3 sm:px-4 sm:pb-4"
+	>
 		<ProyectoProgreso
 			{proyecto}
 			variant="compact"
@@ -266,7 +268,8 @@
 					<Button
 						label="Ver detalles"
 						href={`/proyectos/${proyecto.id_proyecto}`}
-						variant={!usuario || usuario?.rol === 'institucion' ||
+						variant={!usuario ||
+						usuario?.rol === 'institucion' ||
 						(botonColaborarDeshabilitado && !esRechazada)
 							? 'primary'
 							: 'secondary'}
@@ -289,7 +292,7 @@
 									? 'secondary'
 									: 'primary'}
 							disabled={esRechazada ? false : botonColaborarDeshabilitado}
-							customClass={'flex-1 cursor-pointer'}
+							customClass="flex-1 cursor-pointer"
 							customAriaLabel={esRechazada
 								? 'Ver justificación del rechazo'
 								: yaColaboro
@@ -319,7 +322,7 @@
 		ocultarEncabezado={true}
 		anchoMaximo="max-w-sm"
 	>
-		<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+		<div class="flex flex-col items-center gap-3 px-6 pt-6 pb-4 text-center">
 			<span
 				class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 ring-1 ring-red-100"
 			>
@@ -334,7 +337,7 @@
 		<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 			<button
 				type="button"
-				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 				on:click={() => (mostrarJustificacion = false)}
 			>
 				Cerrar

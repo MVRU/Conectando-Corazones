@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { inView } from '$lib/actions/inView';
-	import { reducedMotion } from '$lib/stores/reducedMotion';
 
 	export let stepNumber: number;
 	export let title: string;
@@ -16,10 +15,8 @@
 	role="region"
 	aria-label={`Paso ${stepNumber}: ${title}`}
 	class="group relative h-96 transform-gpu overflow-hidden rounded-3xl bg-white
-               shadow-md transition-transform duration-300"
-	class:duration-0={$reducedMotion}
-	class:hover:-translate-y-1={!$reducedMotion}
-	class:hover:scale-[1.015]={!$reducedMotion}
+               shadow-md transition-transform duration-300
+               hover:-translate-y-1 hover:scale-[1.015]"
 	style={`transition-delay:${delay}ms`}
 	class:opacity-0={!animate}
 	class:translate-y-8={!animate}
@@ -53,17 +50,14 @@
 		<!-- *Textos -->
 		<h3
 			class="mt-4 text-lg font-semibold text-white drop-shadow
-                               transition-transform duration-300"
-			class:duration-0={$reducedMotion}
-			class:group-hover:translate-y-6={!$reducedMotion}
+                               transition-transform duration-300
+                               group-hover:translate-y-6"
 		>
 			{title}
 		</h3>
 		<p
-			class="text-sm text-white/90 transition-all duration-300"
-			class:duration-0={$reducedMotion}
-			class:group-hover:translate-y-2={!$reducedMotion}
-			class:group-hover:opacity-0={!$reducedMotion}
+			class="text-sm text-white/90 transition-all duration-300
+                               group-hover:translate-y-2 group-hover:opacity-0"
 		>
 			{summary}
 		</p>
@@ -71,10 +65,8 @@
 		<!-- *Detalles (fade on hover) -->
 		<p
 			class="translate-y-4 text-xs text-white/80 opacity-0
-                               transition-all duration-300"
-			class:duration-0={$reducedMotion}
-			class:group-hover:translate-y-0={!$reducedMotion}
-			class:group-hover:opacity-100={!$reducedMotion}
+                               transition-all duration-300
+                               group-hover:translate-y-0 group-hover:opacity-100"
 		>
 			{details}
 		</p>

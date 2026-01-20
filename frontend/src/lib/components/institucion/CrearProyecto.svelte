@@ -23,7 +23,6 @@
 		validarTituloProyecto,
 		validarDescripcionProyecto,
 		validarUrlImagen,
-		unidadEfectiva,
 		esFechaDemasiadoLejana,
 		validarUnidadLibre,
 		validarReferencia,
@@ -73,7 +72,6 @@
 	const { validarCategoriaOtraDescripcion } = crearValidadorCategoria(
 		mockCategorias.map((c) => c.descripcion || '')
 	);
-
 
 	const idCategoriaOtra = mockCategorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'

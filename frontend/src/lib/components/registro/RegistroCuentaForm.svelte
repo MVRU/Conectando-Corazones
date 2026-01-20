@@ -1030,7 +1030,7 @@
 		<section class="rounded-2xl bg-white p-6">
 			<header class="mb-6 space-y-2 text-center sm:text-left">
 				<p
-					class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+					class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
 				>
 					Paso 1 · Elegí cómo registrarte
 				</p>
@@ -1055,7 +1055,7 @@
 						tabindex={obtenerTabIndexMetodo(metodo.id, metodo.disponible)}
 						on:click={() => seleccionarMetodoAcceso(metodo.id)}
 						on:keydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
-						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white ${
+						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none ${
 							metodo.disponible
 								? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]'
 								: 'cursor-not-allowed opacity-70'
@@ -1072,7 +1072,7 @@
 								>
 									<Mail class="h-6 w-6" stroke-width={1.6} />
 									<span
-										class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
+										class="absolute -right-1 -bottom-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
 									>
 										<KeyRound class="h-4 w-4 text-[#2563EB]" stroke-width={1.7} />
 									</span>
@@ -1083,7 +1083,7 @@
 								>
 									<Globe class="h-6 w-6" stroke-width={1.4} />
 									<span
-										class="absolute -bottom-1 -right-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
+										class="absolute -right-1 -bottom-1 rounded-full bg-white p-0.5 shadow ring-1 ring-slate-100"
 									>
 										{#if metodoAcceso === 'federado' && metodo.disponible}
 											<ShieldCheck class="h-4 w-4 text-emerald-500" stroke-width={1.7} />
@@ -1128,7 +1128,7 @@
 			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
 				<header class="mb-4 space-y-2 text-center sm:text-left">
 					<p
-						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
 					>
 						Acceso rápido
 					</p>
@@ -1164,7 +1164,7 @@
 							</div>
 							<div class="flex items-center justify-between">
 								<span
-									class={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${proveedor.badgeClass}`}
+									class={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase ${proveedor.badgeClass}`}
 								>
 									Próximamente
 								</span>
@@ -1197,7 +1197,7 @@
 			<section class="rounded-2xl bg-white/95 p-6">
 				<div class="flex flex-col gap-2">
 					<p
-						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
 					>
 						Credenciales
 					</p>
@@ -1255,7 +1255,7 @@
 							/>
 							<button
 								type="button"
-								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
+								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 								on:click={() => (mostrarPassword = !mostrarPassword)}
 								aria-pressed={mostrarPassword}
 								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -1291,7 +1291,7 @@
 							/>
 							<button
 								type="button"
-								class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
+								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 								on:click={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
 								aria-pressed={mostrarPasswordConfirm}
 								aria-label={mostrarPasswordConfirm
@@ -1331,7 +1331,7 @@
 			</div>
 			<button
 				type="button"
-				class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
+				class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold tracking-wide text-slate-600 uppercase transition hover:border-slate-400 hover:text-slate-900"
 				on:click={volverAPasoCredenciales}
 			>
 				<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1352,7 +1352,7 @@
 			>
 				<header class="space-y-2">
 					<p
-						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
 					>
 						Paso 2 · Perfil institucional
 					</p>
@@ -1507,7 +1507,7 @@
 			>
 				<header class="space-y-2">
 					<p
-						class="text-xs font-semibold uppercase tracking-[0.35em] text-[rgb(var(--color-primary))]/70"
+						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
 					>
 						Paso 2 · Perfil de colaborador/a
 					</p>
@@ -1729,7 +1729,7 @@
 					<h2 class="text-lg font-semibold text-slate-900">Reingresá tu contraseña</h2>
 				</div>
 			</div>
-			<p class="mb-6 mt-1 text-sm text-slate-600">
+			<p class="mt-1 mb-6 text-sm text-slate-600">
 				Por seguridad no almacenamos tu contraseña, te pedimos que vuelvas a ingresarla antes de
 				continuar.
 			</p>
@@ -1744,7 +1744,7 @@
 							id="modal_password"
 							name="modal_password"
 							type={mostrarModalPasswordTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Ingresá una contraseña segura"
@@ -1752,7 +1752,7 @@
 						/>
 						<button
 							type="button"
-							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
+							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 							on:click={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
 							aria-pressed={mostrarModalPasswordTexto}
 							aria-label={mostrarModalPasswordTexto ? 'Ocultar contraseña' : 'Mostrar contraseña'}
@@ -1777,7 +1777,7 @@
 							id="modal_password_confirm"
 							name="modal_password_confirm"
 							type={mostrarModalPasswordConfirmTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Repetí la contraseña"
@@ -1785,7 +1785,7 @@
 						/>
 						<button
 							type="button"
-							class="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
+							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
 							on:click={() =>
 								(mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
 							aria-pressed={mostrarModalPasswordConfirmTexto}

@@ -2,7 +2,7 @@
 	export let puntaje: number = 5;
 	export let contenido: string = '';
 	export let username: string = '';
-export let rol: string | undefined = undefined;
+	export let rol: string | undefined = undefined;
 	export let active: boolean = false;
 	export let locked: boolean = false;
 
@@ -13,12 +13,12 @@ export let rol: string | undefined = undefined;
 </script>
 
 <div
-	class="group relative flex h-[320px] min-h-[260px] w-full min-w-[280px] max-w-[380px] select-none flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/80 bg-gradient-to-b from-white via-white to-gray-50 px-7 py-8 shadow-[0_4px_32px_0_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-500 will-change-transform
+	class="group relative flex h-[320px] min-h-[260px] w-full max-w-[380px] min-w-[280px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/80 bg-gradient-to-b from-white via-white to-gray-50 px-7 py-8 shadow-[0_4px_32px_0_rgba(0,0,0,0.06)] backdrop-blur-xl transition-all duration-500 will-change-transform select-none
     hover:shadow-[0_12px_48px_0_rgba(30,100,200,0.12)]
     {active && !locked ? 'z-10 scale-105 ring-1 ring-blue-100/60' : ''}
     {locked
 		? 'pointer-events-none opacity-75 blur-[0.5px]'
-		: ' hover:-translate-y-1.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-50/70'}
+		: ' hover:-translate-y-1.5 focus-visible:ring-4 focus-visible:ring-blue-50/70 focus-visible:outline-none'}
   "
 >
 	<div class="mb-5 flex justify-center gap-1.5">
@@ -41,7 +41,7 @@ export let rol: string | undefined = undefined;
 	</div>
 
 	<blockquote
-		class="relative mb-6 flex-grow text-center text-base italic leading-relaxed text-gray-700/90 selection:bg-blue-50 selection:text-blue-800"
+		class="relative mb-6 flex-grow text-center text-base leading-relaxed text-gray-700/90 italic selection:bg-blue-50 selection:text-blue-800"
 	>
 		<span class="relative z-10">{contenidoTruncado}</span>
 	</blockquote>

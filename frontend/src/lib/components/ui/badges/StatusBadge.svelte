@@ -5,8 +5,7 @@
 		Clock,
 		ExclamationCircle,
 		DocumentCheck,
-		XCircle,
-		QuestionMarkCircle
+		XCircle
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 

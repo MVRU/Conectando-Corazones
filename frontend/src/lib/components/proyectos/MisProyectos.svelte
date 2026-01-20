@@ -2,7 +2,6 @@
 	import type { Proyecto } from '$lib/types/Proyecto';
 	import type { Usuario } from '$lib/types/Usuario';
 	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
 	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
@@ -110,7 +109,7 @@
 	};
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pb-6 pt-8 sm:px-10 lg:px-20">
+<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
 	<ProyectosBase
 		proyectos={$proyectosOrdenados}
 		titulo={tituloSeccion}
@@ -139,28 +138,28 @@
 		<svelte:fragment slot="header-actions">
 			<div class="mb-4 flex flex-wrap justify-center gap-3">
 				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900/10 {pestanaActiva ===
+					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
 					'todos'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-900'}"
+						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
 					on:click={() => cambiarPestana('todos')}
 				>
 					Todos
 				</button>
 				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900/10 {pestanaActiva ===
+					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
 					'activos'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-900'}"
+						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
 					on:click={() => cambiarPestana('activos')}
 				>
 					Activos
 				</button>
 				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-900/10 {pestanaActiva ===
+					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
 					'completados'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-inset ring-gray-200 hover:bg-gray-50 hover:text-gray-900'}"
+						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
 					on:click={() => cambiarPestana('completados')}
 				>
 					Completados
@@ -182,7 +181,7 @@
 		{#if verificationAprobada}
 			<a
 				href="/proyectos/crear"
-				class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
+				class="fixed right-6 bottom-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:right-8 sm:bottom-8"
 				aria-label="Crear nuevo proyecto"
 			>
 				<Plus size={24} />
@@ -191,7 +190,7 @@
 		{:else}
 			<button
 				disabled
-				class="fixed bottom-6 right-6 z-50 flex cursor-not-allowed items-center gap-2 rounded-full bg-gray-400 px-6 py-3 text-white shadow-lg sm:bottom-8 sm:right-8"
+				class="fixed right-6 bottom-6 z-50 flex cursor-not-allowed items-center gap-2 rounded-full bg-gray-400 px-6 py-3 text-white shadow-lg sm:right-8 sm:bottom-8"
 				title="Debes validar tu identidad para crear proyectos"
 				aria-label="Crear nuevo proyecto (Deshabilitado)"
 			>
@@ -202,7 +201,7 @@
 	{:else if usuario?.rol === 'colaborador'}
 		<a
 			href="/proyectos"
-			class="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:bottom-8 sm:right-8"
+			class="fixed right-6 bottom-6 z-50 flex items-center gap-2 rounded-full bg-[#007fff] px-6 py-3 text-white shadow-lg transition-all hover:scale-105 hover:bg-[#55aaff] hover:shadow-xl sm:right-8 sm:bottom-8"
 			aria-label="Descubrir proyectos"
 		>
 			<Search size={24} />

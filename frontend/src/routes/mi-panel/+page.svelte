@@ -10,45 +10,45 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { goto } from '$app/navigation';
 
-	import { fly, fade } from 'svelte/transition';
-	import DashboardGeneral from './DashboardGeneral.svelte';
-	import DashboardAnalitico from './DashboardAnalitico.svelte';
-	import DashboardColaborador from './DashboardColaborador.svelte';
-	import DashboardInstitucion from './DashboardInstitucion.svelte';
+	// import { fly, fade } from 'svelte/transition';
+	// import DashboardGeneral from './DashboardGeneral.svelte';
+	// import DashboardAnalitico from './DashboardAnalitico.svelte';
+	// import DashboardColaborador from './DashboardColaborador.svelte';
+	// import DashboardInstitucion from './DashboardInstitucion.svelte';
 
-	let selectedDashboard: 'general' | 'analitico' | 'colaborador' | 'institucion' = 'general';
+	// let selectedDashboard: 'general' | 'analitico' | 'colaborador' | 'institucion' = 'general';
 	let animate = false;
 
 	onMount(() => {
 		animate = true;
 	});
 
-	const dashboardOptions = [
-		{
-			key: 'general' as const,
-			title: 'Dashboard General',
-			description: 'Vista completa con métricas principales en formato de tarjetas',
-			icon: '📊'
-		},
-		{
-			key: 'analitico' as const,
-			title: 'Dashboard Analítico',
-			description: 'Enfoque temporal con evolución de impacto y progreso detallado',
-			icon: '📈'
-		},
-		{
-			key: 'colaborador' as const,
-			title: 'Dashboard Colaborador',
-			description: 'Vista personalizada para seguimiento de participación individual',
-			icon: '🤝'
-		},
-		{
-			key: 'institucion' as const,
-			title: 'Dashboard Institución',
-			description: 'Panel de gestión para organizaciones que administran proyectos',
-			icon: '🏢'
-		}
-	];
+	// const dashboardOptions = [
+	// 	{
+	// 		key: 'general' as const,
+	// 		title: 'Dashboard General',
+	// 		description: 'Vista completa con métricas principales en formato de tarjetas',
+	// 		icon: '📊'
+	// 	},
+	// 	{
+	// 		key: 'analitico' as const,
+	// 		title: 'Dashboard Analítico',
+	// 		description: 'Enfoque temporal con evolución de impacto y progreso detallado',
+	// 		icon: '📈'
+	// 	},
+	// 	{
+	// 		key: 'colaborador' as const,
+	// 		title: 'Dashboard Colaborador',
+	// 		description: 'Vista personalizada para seguimiento de participación individual',
+	// 		icon: '🤝'
+	// 	},
+	// 	{
+	// 		key: 'institucion' as const,
+	// 		title: 'Dashboard Institución',
+	// 		description: 'Panel de gestión para organizaciones que administran proyectos',
+	// 		icon: '🏢'
+	// 	}
+	// ];
 </script>
 
 <svelte:head>

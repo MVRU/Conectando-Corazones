@@ -47,7 +47,9 @@ export function filtrarProyectosPorUsuario(
 
 	if (usuario.rol === 'colaborador') {
 		return proyectos.filter((p) =>
-			p.colaboraciones?.some((c) => c.colaborador_id === usuario.id_usuario && c.estado === 'aprobada')
+			p.colaboraciones?.some(
+				(c) => c.colaborador_id === usuario.id_usuario && c.estado === 'aprobada'
+			)
 		);
 	}
 
@@ -77,7 +79,7 @@ export function filtrarProyectos(
 
 	// Filtro por Categoría (multi-select)
 	// Si el array está vacío, o incluye "Todas", no filtramos
-	const categoriasActivas = categoria.filter(c => c !== 'Todas');
+	const categoriasActivas = categoria.filter((c) => c !== 'Todas');
 	if (categoriasActivas.length > 0) {
 		resultado = resultado.filter((p) =>
 			p.categorias?.some((c) => categoriasActivas.includes(c.descripcion))
@@ -89,11 +91,10 @@ export function filtrarProyectos(
 	}
 
 	if (provincia !== 'Todas') {
-		resultado = resultado.filter(
-			(p) =>
-				p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
-					? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
-					: false
+		resultado = resultado.filter((p) =>
+			p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
+				? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
+				: false
 		);
 	}
 
@@ -141,14 +142,17 @@ export function seleccionarUbicacion(
 }
 
 export const getUbicacionPrincipal = (proyecto: Proyecto): ProyectoUbicacion | undefined =>
-	proyecto.ubicaciones?.find((u) => u.ubicacion?.tipo_ubicacion === 'principal') ?? proyecto.ubicaciones?.[0];
+	proyecto.ubicaciones?.find((u) => u.ubicacion?.tipo_ubicacion === 'principal') ??
+	proyecto.ubicaciones?.[0];
 
 export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'): string {
 	const ubicacion = getUbicacionPrincipal(proyecto);
 	if (!ubicacion) return virtualLabel;
 
 	const localidadObj =
-		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion
+			? ubicacion.ubicacion.localidad
+			: undefined;
 	const ciudad = localidadObj?.nombre;
 	const provincia = getProvinciaFromLocalidad(localidadObj)?.nombre;
 
@@ -161,7 +165,9 @@ export function getUbicacionCorta(proyecto: Proyecto, virtualLabel = 'Virtual'):
 	if (!ubicacion) return virtualLabel;
 
 	const localidadObj =
-		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion ? ubicacion.ubicacion.localidad : undefined;
+		ubicacion.ubicacion && 'localidad' in ubicacion.ubicacion
+			? ubicacion.ubicacion.localidad
+			: undefined;
 	const ciudad = localidadObj?.nombre;
 
 	return ciudad ?? virtualLabel;
@@ -285,7 +291,6 @@ export function filtrarPorRangoFechas(
 		return true;
 	});
 }
-
 
 /**
  * Formatea una fecha o string de fecha a un formato "5 Feb 2025"

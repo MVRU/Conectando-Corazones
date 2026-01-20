@@ -4,14 +4,14 @@
 export type RegistroRol = 'institucion' | 'colaborador';
 
 export type RegistroEtapa =
-        | 'seleccion'
-        | 'formulario'
-        | 'verificacion'
-        | 'contacto'
-        | 'direccion'
-        | 'exito'
-        | 'error';
+	| 'seleccion'
+	| 'formulario'
+	| 'verificacion'
+	| 'contacto'
+	| 'direccion'
+	| 'exito'
+	| 'error';
 
 export function obtenerSiguienteEtapaCuenta(rol: RegistroRol): RegistroEtapa {
-        return rol === 'institucion' ? 'verificacion' : 'contacto';
+	return rol === 'institucion' ? 'verificacion' : 'contacto';
 }

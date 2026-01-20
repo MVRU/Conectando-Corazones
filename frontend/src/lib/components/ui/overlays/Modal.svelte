@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { XMark } from '@steeze-ui/heroicons';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { createEventDispatcher } from 'svelte';
+	import { scale } from 'svelte/transition';
 
 	export let abierto = false;
 	export let titulo = '';
@@ -38,7 +38,7 @@
 	on:keydown={(e) => {
 		if (e.key === 'Escape') cerrar();
 	}}
-	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl outline-none transition-all backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-none backdrop:bg-black/30 backdrop:backdrop-blur-sm"
 >
 	{#if abierto}
 		<div
@@ -49,7 +49,7 @@
 			{#if !ocultarEncabezado}
 				<div class="flex items-center justify-between border-b border-gray-100 px-4 py-3 sm:px-6">
 					{#if titulo}
-						<h3 class="text-lg font-semibold leading-6 text-gray-900" id="modal-title">
+						<h3 class="text-lg leading-6 font-semibold text-gray-900" id="modal-title">
 							{titulo}
 						</h3>
 					{:else}
@@ -57,7 +57,7 @@
 					{/if}
 					<button
 						type="button"
-						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 						on:click={cerrar}
 						aria-label="Cerrar modal"
 					>

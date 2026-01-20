@@ -81,7 +81,6 @@ export function validarNombreLegal(nombre: string): boolean {
 	return nombreNormalizado.length >= 3;
 }
 
-
 export function validarCalle(calle: string): boolean {
 	return calle.trim().length >= 3;
 }

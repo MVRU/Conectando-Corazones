@@ -74,7 +74,7 @@
 					}
 				]
 			: []),
-					{ label: 'Mi perfil', href: '/perfil' },
+		{ label: 'Mi perfil', href: '/perfil' },
 		{ label: $isAdmin ? 'Panel de administración' : 'Panel de control', href: '/mi-panel' },
 		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
 		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
@@ -206,7 +206,7 @@
 						aria-haspopup="true"
 						aria-expanded={mostrarDropdown}
 						on:click={toggleDropdown}
-						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400/50"
+						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-blue-400/50 focus:outline-none"
 					>
 						<img
 							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
@@ -221,7 +221,7 @@
 							style="animation:scaleIn .3s cubic-bezier(0.16, 1, 0.3, 1) forwards;"
 						>
 							<li
-								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-blue-300"
+								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold tracking-wider text-blue-300 uppercase"
 							>
 								Mi cuenta
 							</li>
@@ -270,7 +270,7 @@
 			<!-- Hamburguesa -->
 			<button
 				aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
-				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-blue-100 transition-all duration-300 hover:bg-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-400/50 md:hidden"
+				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-blue-100 transition-all duration-300 hover:bg-blue-600/30 focus:ring-2 focus:ring-blue-400/50 focus:outline-none md:hidden"
 				on:click={() => (menuAbierto = !menuAbierto)}
 			>
 				<svg
@@ -296,7 +296,7 @@
 	<!-- Menú Mobile -->
 	{#if menuAbierto}
 		<nav
-			class="absolute left-0 right-0 top-full z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
+			class="absolute top-full right-0 left-0 z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
 			style="animation:slideUp .4s cubic-bezier(0.22, 1, 0.36, 1) forwards;"
 		>
 			<div class="flex flex-col gap-1 px-5 py-4">

@@ -22,7 +22,8 @@
 		},
 		success: {
 			border: 'border-emerald-200/80 bg-white text-slate-700',
-			iconWrapper: 'from-emerald-500/20 via-emerald-500/10 to-emerald-500/0 ring-1 ring-emerald-200/50',
+			iconWrapper:
+				'from-emerald-500/20 via-emerald-500/10 to-emerald-500/0 ring-1 ring-emerald-200/50',
 			label: 'Listo',
 			icon: CheckCircle2,
 			iconClass: 'text-emerald-600'
@@ -56,7 +57,9 @@
 	}
 </script>
 
-<div class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-end gap-3 p-4 sm:p-6">
+<div
+	class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-end gap-3 p-4 sm:p-6"
+>
 	{#each toasts as toast (toast.id)}
 		<div
 			role="status"
@@ -70,7 +73,9 @@
 					class={`relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${VARIANT_STYLES[toast.variant].iconWrapper}`}
 					aria-hidden="true"
 				>
-					<span class="absolute inset-0 animate-pulse bg-gradient-to-br from-white/50 to-transparent opacity-50"></span>
+					<span
+						class="absolute inset-0 animate-pulse bg-gradient-to-br from-white/50 to-transparent opacity-50"
+					></span>
 					<svelte:component
 						this={VARIANT_STYLES[toast.variant].icon}
 						class={`relative h-5 w-5 ${VARIANT_STYLES[toast.variant].iconClass}`}

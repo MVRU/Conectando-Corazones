@@ -14,19 +14,13 @@ export default defineConfig({
 		environment: 'jsdom',
 		clearMocks: true,
 		globals: true,
-		include: [
-			'tests/**/*.test.{js,ts}'
-		],
+		include: ['tests/**/*.test.{js,ts}'],
 		exclude: ['src/lib/server/**', 'node_modules', '**/node_modules/**'],
 		setupFiles: ['./vitest-setup-client.ts'],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html'],
-			exclude: [
-				'**/node_modules/**',
-				'**/tests/**',
-				'**/.svelte-kit/**'
-			]
+			exclude: ['**/node_modules/**', '**/tests/**', '**/.svelte-kit/**']
 		}
 	}
 });

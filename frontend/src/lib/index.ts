@@ -15,14 +15,11 @@ export { default as Header } from './components/layout/Header.svelte';
 export { default as Footer } from './components/layout/Footer.svelte';
 
 export { default as Ticker } from './components/visual/Ticker.svelte';
-export { default as MotionNotice } from './components/feedback/MotionNotice.svelte';
 
 // Stores y utilidades
 export * from './stores/breadcrumbs';
-export * from './stores/reducedMotion';
 export * from './stores/auth';
 export * from './actions/inView';
-export * from './utils/device';
 export * from './utils/sanitize';
 export * from './mocks/mock-proyectos';
 export * from './mocks/mock-proyecto-categorias';

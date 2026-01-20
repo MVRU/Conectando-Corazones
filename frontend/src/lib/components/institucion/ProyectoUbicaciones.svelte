@@ -5,17 +5,23 @@
 
 <script lang="ts">
 	import { provincias } from '$lib/data/provincias';
-	import { mockLocalidades } from '$lib/mocks/mock-localidades';
-	import { TIPO_UBICACION, MODALIDAD_UBICACION, type TipoUbicacion, type ModalidadUbicacion } from '$lib/types/Ubicacion';
-	import type { UbicacionFormulario, DireccionPresencialFormulario } from '$lib/types/forms/CrearProyectoForm';
+	// import { mockLocalidades } from '$lib/mocks/mock-localidades';
 	import {
-		obtenerDescripcionTipo
-	} from '$lib/utils/util-proyecto-form';
+		TIPO_UBICACION,
+		MODALIDAD_UBICACION
+		// type TipoUbicacion,
+		// type ModalidadUbicacion
+	} from '$lib/types/Ubicacion';
+	import type {
+		UbicacionFormulario,
+		DireccionPresencialFormulario
+	} from '$lib/types/forms/CrearProyectoForm';
+	import { obtenerDescripcionTipo } from '$lib/utils/util-proyecto-form';
 	import { obtenerLocalidadesPorProvincia } from '$lib/utils/util-ubicaciones';
 
 	export let ubicaciones: UbicacionFormulario[] = [];
 	export let errores: Record<string, string> = {};
-	
+
 	// Modo edición
 	export let modoEdicion = false;
 
@@ -43,10 +49,10 @@
 		];
 	}
 
-function esTipoPredefinido(tipo: string): boolean {
-	const normalizado = (tipo || '').trim().toLowerCase();
-	return TIPO_UBICACION.some((t) => t.toLowerCase() === normalizado);
-}
+	function esTipoPredefinido(tipo: string): boolean {
+		const normalizado = (tipo || '').trim().toLowerCase();
+		return TIPO_UBICACION.some((t) => t.toLowerCase() === normalizado);
+	}
 
 	function manejarCambioTipo(index: number, valor: string) {
 		if (valor === 'personalizado') {
@@ -59,12 +65,12 @@ function esTipoPredefinido(tipo: string): boolean {
 
 	function eliminarUbicacion(index: number) {
 		if (index === 0) return;
-		
+
 		// En modo edición, no permitir eliminar ubicaciones originales
 		if (modoEdicion && ubicaciones[index].id_proyecto_ubicacion) {
 			return;
 		}
-		
+
 		if (ubicaciones.length > 1) {
 			ubicaciones = ubicaciones.filter((_, i) => i !== index);
 		}
@@ -76,33 +82,45 @@ function esTipoPredefinido(tipo: string): boolean {
 		valor: string
 	) {
 		// Si está escribiendo un tipo personalizado, verificar si coincide con la lista oficial
-		if (campo === 'tipo_ubicacion' && valor && ubicaciones[index].tipo_ubicacion !== '' && !esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')) {
+		if (
+			campo === 'tipo_ubicacion' &&
+			valor &&
+			ubicaciones[index].tipo_ubicacion !== '' &&
+			!esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')
+		) {
 			const valorNormalizado = valor.trim().toLowerCase();
-			const existeEnLista = TIPO_UBICACION.some(tipo => tipo.toLowerCase() === valorNormalizado);
-			
+			const existeEnLista = TIPO_UBICACION.some((tipo) => tipo.toLowerCase() === valorNormalizado);
+
 			if (existeEnLista) {
 				errores[`ubicacion_${index}_tipo`] = 'Ese tipo de ubicación ya existe en la lista oficial.';
 				ubicaciones[index] = { ...ubicaciones[index], [campo]: valor };
 				return;
 			} else {
 				// Limpiar el error si ya no coincide con la lista
-				if (errores[`ubicacion_${index}_tipo`] === 'Ese tipo de ubicación ya existe en la lista oficial.') {
+				if (
+					errores[`ubicacion_${index}_tipo`] ===
+					'Ese tipo de ubicación ya existe en la lista oficial.'
+				) {
 					limpiarError(`ubicacion_${index}_tipo`);
 				}
 			}
 		}
-		
+
 		// Verificar si intenta marcar como "Principal" cuando ya existe una
 		if (campo === 'tipo_ubicacion' && valor.toLowerCase() === 'principal') {
-			const yaTienePrincipal = ubicaciones.some((u, i) => 
-				i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
+			const yaTienePrincipal = ubicaciones.some(
+				(u, i) => i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
 			);
 			if (yaTienePrincipal) {
-				errores[`ubicacion_${index}_tipo`] = "Solo puede existir una ubicación de tipo 'Principal'.";
+				errores[`ubicacion_${index}_tipo`] =
+					"Solo puede existir una ubicación de tipo 'Principal'.";
 				return;
 			} else {
 				// Limpiar el error si ya no hay conflicto
-				if (errores[`ubicacion_${index}_tipo`] === "Solo puede existir una ubicación de tipo 'Principal'.") {
+				if (
+					errores[`ubicacion_${index}_tipo`] ===
+					"Solo puede existir una ubicación de tipo 'Principal'."
+				) {
 					limpiarError(`ubicacion_${index}_tipo`);
 				}
 			}
@@ -110,7 +128,7 @@ function esTipoPredefinido(tipo: string): boolean {
 
 		// Simplemente actualizamos el valor
 		ubicaciones[index] = { ...ubicaciones[index], [campo]: valor };
-		
+
 		// Limpiar datos cuando cambia modalidad
 		if (campo === 'modalidad') {
 			if (valor === 'virtual') {
@@ -153,7 +171,7 @@ function esTipoPredefinido(tipo: string): boolean {
 		}
 	}
 
-	$: yaTienePrincipal = ubicaciones.some(u => u.tipo_ubicacion?.toLowerCase() === 'principal');
+	$: yaTienePrincipal = ubicaciones.some((u) => u.tipo_ubicacion?.toLowerCase() === 'principal');
 
 	// Función para obtener tipos disponibles según el índice
 	function obtenerTiposDisponibles(index: number): readonly string[] {
@@ -164,7 +182,7 @@ function esTipoPredefinido(tipo: string): boolean {
 		}
 		// Si ya hay una Principal en otra ubicación, filtrarla
 		if (yaTienePrincipal) {
-			return TIPO_UBICACION.filter(tipo => tipo.toLowerCase() !== 'principal');
+			return TIPO_UBICACION.filter((tipo) => tipo.toLowerCase() !== 'principal');
 		}
 		return TIPO_UBICACION;
 	}
@@ -172,9 +190,7 @@ function esTipoPredefinido(tipo: string): boolean {
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 	<div class="mb-3 flex items-center justify-between">
-		<h2 class="text-xl font-semibold text-gray-900">
-			Ubicaciones del proyecto *
-		</h2>
+		<h2 class="text-xl font-semibold text-gray-900">Ubicaciones del proyecto *</h2>
 	</div>
 
 	{#if errores.ubicaciones}
@@ -210,7 +226,6 @@ function esTipoPredefinido(tipo: string): boolean {
 				<div>
 					<label for="tipo_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 						Tipo de ubicación *
-
 					</label>
 					{#if esTipoPredefinido(ubicacion.tipo_ubicacion) || ubicacion.tipo_ubicacion === ''}
 						<!-- Dropdown para tipos predefinidos -->
@@ -219,7 +234,7 @@ function esTipoPredefinido(tipo: string): boolean {
 							value={ubicacion.tipo_ubicacion}
 							on:change={(e) => manejarCambioTipo(index, e.currentTarget.value)}
 							disabled={esOriginal}
-							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_tipo`] && !esOriginal}
 							class:cursor-not-allowed={esOriginal}
@@ -240,16 +255,19 @@ function esTipoPredefinido(tipo: string): boolean {
 							<input
 								id="tipo_{index}"
 								type="text"
-								value={ubicacion.tipo_ubicacion === 'personalizado_input' ? '' : ubicacion.tipo_ubicacion}
-								on:input={(e) => actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
+								value={ubicacion.tipo_ubicacion === 'personalizado_input'
+									? ''
+									: ubicacion.tipo_ubicacion}
+								on:input={(e) =>
+									actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
 								placeholder="Escriba el tipo de ubicación..."
-								class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-red-300={errores[`ubicacion_${index}_tipo`]}
 							/>
 							<button
 								type="button"
 								on:click={() => actualizarUbicacion(index, 'tipo_ubicacion', '')}
-								class="px-3 py-2 text-sm text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+								class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
 								title="Volver a opciones predefinidas"
 							>
 								↺
@@ -264,14 +282,13 @@ function esTipoPredefinido(tipo: string): boolean {
 				<div>
 					<label for="modalidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 						Modalidad *
-
 					</label>
 					<select
 						id="modalidad_{index}"
 						value={ubicacion.modalidad}
 						on:change={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
 						disabled={esOriginal}
-						class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						class:border-gray-300={!esOriginal}
 						class:border-red-300={errores[`ubicacion_${index}_modalidad`] && !esOriginal}
 						class:cursor-not-allowed={esOriginal}
@@ -280,7 +297,9 @@ function esTipoPredefinido(tipo: string): boolean {
 					>
 						<option value="">Seleccionar modalidad</option>
 						{#each MODALIDAD_UBICACION as modalidad (modalidad)}
-							<option value={modalidad}>{modalidad === 'presencial' ? 'Presencial' : 'Virtual'}</option>
+							<option value={modalidad}
+								>{modalidad === 'presencial' ? 'Presencial' : 'Virtual'}</option
+							>
 						{/each}
 					</select>
 					{#if errores[`ubicacion_${index}_modalidad`]}
@@ -292,7 +311,6 @@ function esTipoPredefinido(tipo: string): boolean {
 					<div>
 						<label for="url_virtual_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 							URL Virtual
-
 						</label>
 						<input
 							id="url_virtual_{index}"
@@ -300,10 +318,9 @@ function esTipoPredefinido(tipo: string): boolean {
 							value={ubicacion.url_virtual || ''}
 							on:input={(e) => {
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
-
 							}}
 							disabled={esOriginal}
-							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_url_virtual`] && !esOriginal}
 							class:cursor-not-allowed={esOriginal}
@@ -322,14 +339,13 @@ function esTipoPredefinido(tipo: string): boolean {
 						<div>
 							<label for="provincia_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 								Provincia *
-
 							</label>
 							<select
 								id="provincia_{index}"
 								value={ubicacion.direccion_presencial?.provincia}
 								on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
 								disabled={esOriginal}
-								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_provincia`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -356,9 +372,9 @@ function esTipoPredefinido(tipo: string): boolean {
 									const localidadId = e.currentTarget.value
 										? parseInt(e.currentTarget.value)
 										: undefined;
-									const localidad = obtenerLocalidadesPorProvincia(ubicacion.direccion_presencial?.provincia || '').find(
-										(l) => l.id_localidad === localidadId
-									);
+									const localidad = obtenerLocalidadesPorProvincia(
+										ubicacion.direccion_presencial?.provincia || ''
+									).find((l) => l.id_localidad === localidadId);
 									ubicaciones[index] = {
 										...ubicaciones[index],
 										direccion_presencial: {
@@ -367,10 +383,9 @@ function esTipoPredefinido(tipo: string): boolean {
 											localidad_nombre: localidad?.nombre || ''
 										}
 									};
-
 								}}
 								disabled={esOriginal || !ubicacion.direccion_presencial?.provincia}
-								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_localidad`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -393,45 +408,45 @@ function esTipoPredefinido(tipo: string): boolean {
 							<label for="calle_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 								Calle *
 							</label>
-								<input
-									id="calle_{index}"
-									type="text"
-									value={ubicacion.direccion_presencial?.calle}
-									on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
-									disabled={esOriginal}
-									class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-									class:border-gray-300={!esOriginal}
-									class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
-									class:cursor-not-allowed={esOriginal}
-									class:bg-gray-50={esOriginal}
-									class:text-gray-600={esOriginal}
-									placeholder="Nombre de la calle"
-								/>
-								{#if errores[`ubicacion_${index}_calle`]}
-									<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_calle`]}</p>
-								{/if}
+							<input
+								id="calle_{index}"
+								type="text"
+								value={ubicacion.direccion_presencial?.calle}
+								on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
+								disabled={esOriginal}
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class:border-gray-300={!esOriginal}
+								class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
+								class:cursor-not-allowed={esOriginal}
+								class:bg-gray-50={esOriginal}
+								class:text-gray-600={esOriginal}
+								placeholder="Nombre de la calle"
+							/>
+							{#if errores[`ubicacion_${index}_calle`]}
+								<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_calle`]}</p>
+							{/if}
 						</div>
 						<div>
 							<label for="numero_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 								Número *
 							</label>
-								<input
-									id="numero_{index}"
-									type="text"
-									value={ubicacion.direccion_presencial?.numero}
-									on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
-									disabled={esOriginal}
-									class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
-									class:border-gray-300={!esOriginal}
-									class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
-									class:cursor-not-allowed={esOriginal}
-									class:bg-gray-50={esOriginal}
-									class:text-gray-600={esOriginal}
-									placeholder="1234"
-								/>
-								{#if errores[`ubicacion_${index}_numero`]}
-									<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_numero`]}</p>
-								{/if}
+							<input
+								id="numero_{index}"
+								type="text"
+								value={ubicacion.direccion_presencial?.numero}
+								on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
+								disabled={esOriginal}
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class:border-gray-300={!esOriginal}
+								class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
+								class:cursor-not-allowed={esOriginal}
+								class:bg-gray-50={esOriginal}
+								class:text-gray-600={esOriginal}
+								placeholder="1234"
+							/>
+							{#if errores[`ubicacion_${index}_numero`]}
+								<p class="mt-1 text-sm text-red-600">{errores[`ubicacion_${index}_numero`]}</p>
+							{/if}
 						</div>
 					</div>
 
@@ -439,7 +454,6 @@ function esTipoPredefinido(tipo: string): boolean {
 						<div>
 							<label for="piso_{index}" class="mb-2 block text-sm font-medium text-gray-700">
 								Piso
-
 							</label>
 							<input
 								id="piso_{index}"
@@ -447,7 +461,7 @@ function esTipoPredefinido(tipo: string): boolean {
 								value={ubicacion.direccion_presencial?.piso || ''}
 								on:input={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
 								disabled={esOriginal}
-								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_piso`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -460,9 +474,11 @@ function esTipoPredefinido(tipo: string): boolean {
 							{/if}
 						</div>
 						<div>
-							<label for="departamento_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							<label
+								for="departamento_{index}"
+								class="mb-2 block text-sm font-medium text-gray-700"
+							>
 								Departamento
-
 							</label>
 							<input
 								id="departamento_{index}"
@@ -470,7 +486,7 @@ function esTipoPredefinido(tipo: string): boolean {
 								value={ubicacion.direccion_presencial?.departamento || ''}
 								on:input={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
 								disabled={esOriginal}
-								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:cursor-not-allowed={esOriginal}
 								class:bg-gray-50={esOriginal}
@@ -492,7 +508,7 @@ function esTipoPredefinido(tipo: string): boolean {
 							value={ubicacion.direccion_presencial?.referencia}
 							on:input={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
-							class="w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20"
+							class="focus:ring-opacity-20 w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={true}
 							class:border-red-300={errores[`ubicacion_${index}_referencia`]}
 						></textarea>

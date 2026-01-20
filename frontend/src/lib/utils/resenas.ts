@@ -3,21 +3,30 @@ import type { Resena } from '$lib/types/Resena';
 /**
  * Verifica si un usuario ya reseñó un objeto específico
  */
-export function yaReseno(usuario: string, reseñas: Resena[], tipoObjeto: string, idObjeto?: number): boolean {
-	return reseñas.some(r => 
-		r.username === usuario && 
-		r.tipo_objeto === tipoObjeto && 
-		(idObjeto === undefined || r.id_objeto === idObjeto)
+export function yaReseno(
+	usuario: string,
+	reseñas: Resena[],
+	tipoObjeto: string,
+	idObjeto?: number
+): boolean {
+	return reseñas.some(
+		(r) =>
+			r.username === usuario &&
+			r.tipo_objeto === tipoObjeto &&
+			(idObjeto === undefined || r.id_objeto === idObjeto)
 	);
 }
 
 /**
  * Filtra reseñas por tipo de objeto
  */
-export function filtrarResenasPorTipo(reseñas: Resena[], tipoObjeto: string, idObjeto?: number): Resena[] {
-	return reseñas.filter(r => 
-		r.tipo_objeto === tipoObjeto && 
-		(idObjeto === undefined || r.id_objeto === idObjeto)
+export function filtrarResenasPorTipo(
+	reseñas: Resena[],
+	tipoObjeto: string,
+	idObjeto?: number
+): Resena[] {
+	return reseñas.filter(
+		(r) => r.tipo_objeto === tipoObjeto && (idObjeto === undefined || r.id_objeto === idObjeto)
 	);
 }
 

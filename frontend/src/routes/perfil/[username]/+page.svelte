@@ -6,7 +6,13 @@
 	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import VistaPerfil from '$lib/components/perfil/VistaPerfil.svelte';
-	import type { Usuario, Institucion, Organizacion, Unipersonal, Administrador } from '$lib/types/Usuario';
+	import type {
+		Usuario,
+		Institucion,
+		Organizacion,
+		Unipersonal,
+		Administrador
+	} from '$lib/types/Usuario';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
@@ -51,7 +57,7 @@
 {#if perfilUsuario}
 	<VistaPerfil {perfilUsuario} {esMiPerfil} />
 {:else}
-	<div class="min-h-screen bg-gray-50 flex items-center justify-center">
+	<div class="flex min-h-screen items-center justify-center bg-gray-50">
 		<div class="text-center">
 			<h2 class="text-xl font-semibold text-gray-900">Cargando perfil...</h2>
 		</div>

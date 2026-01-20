@@ -44,7 +44,8 @@ export const mockTestimonios: Resena[] = [
 	{
 		id_resena: 7,
 		puntaje: 4,
-		contenido: 'María es una colaboradora excepcional. Su dedicación y compromiso con los proyectos educativos es admirable. Siempre está dispuesta a ayudar y aporta ideas muy valiosas.',
+		contenido:
+			'María es una colaboradora excepcional. Su dedicación y compromiso con los proyectos educativos es admirable. Siempre está dispuesta a ayudar y aporta ideas muy valiosas.',
 		username: 'Ana R.',
 		rol: 'ONG Pequeños Corazones',
 		tipo_objeto: 'usuario',
@@ -53,7 +54,8 @@ export const mockTestimonios: Resena[] = [
 	{
 		id_resena: 8,
 		puntaje: 5,
-		contenido: 'Trabajar con María ha sido una experiencia muy positiva. Su profesionalismo y su pasión por la educación rural se nota en cada proyecto que apoya.',
+		contenido:
+			'Trabajar con María ha sido una experiencia muy positiva. Su profesionalismo y su pasión por la educación rural se nota en cada proyecto que apoya.',
 		username: 'Carlos F.',
 		rol: 'Referente barrial',
 		tipo_objeto: 'usuario',
@@ -62,7 +64,8 @@ export const mockTestimonios: Resena[] = [
 	{
 		id_resena: 9,
 		puntaje: 5,
-		contenido: 'María es una persona muy comprometida con las causas sociales. Su experiencia en educación rural aporta mucho valor a los proyectos. La recomiendo totalmente.',
+		contenido:
+			'María es una persona muy comprometida con las causas sociales. Su experiencia en educación rural aporta mucho valor a los proyectos. La recomiendo totalmente.',
 		username: 'Lucía M.',
 		rol: 'Voluntaria',
 		tipo_objeto: 'usuario',
@@ -71,7 +74,8 @@ export const mockTestimonios: Resena[] = [
 	{
 		id_resena: 10,
 		puntaje: 4,
-		contenido: 'Excelente colaboradora. María siempre cumple con sus compromisos y aporta una perspectiva muy valiosa desde su experiencia en educación rural.',
+		contenido:
+			'Excelente colaboradora. María siempre cumple con sus compromisos y aporta una perspectiva muy valiosa desde su experiencia en educación rural.',
 		username: 'Rotaract Club Local',
 		rol: 'Club de servicio',
 		tipo_objeto: 'usuario',

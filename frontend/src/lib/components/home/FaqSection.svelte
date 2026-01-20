@@ -3,7 +3,6 @@
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { faqs as allFaqs } from '$lib/data/faqs';
 	import { inView } from '$lib/actions/inView';
-	import { reducedMotion } from '$lib/stores/reducedMotion';
 
 	let faqVisible = false;
 	let imagenVisible = false;
@@ -20,7 +19,6 @@
 		<!-- *Contenido -->
 		<div
 			class="flex flex-col justify-center transition-all duration-1000"
-			class:duration-0={$reducedMotion}
 			class:faq-appear={faqVisible}
 			class:faq-hidden={!faqVisible}
 			use:inView={{ onChange: (v) => (faqVisible = v), threshold: 0.12 }}
@@ -49,7 +47,6 @@
 		<!-- *Imagen aparece debajo en mobile -->
 		<div
 			class="group relative mx-auto w-full max-w-[350px] overflow-visible rounded-[1.6rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-800 hover:ring-blue-400/30 sm:max-w-[340px] md:w-[92%] md:max-w-[360px] lg:w-[90%] lg:max-w-[380px] xl:w-[80%] xl:max-w-[400px]"
-			class:duration-0={$reducedMotion}
 			class:img-appear={imagenVisible}
 			class:img-hidden={!imagenVisible}
 			use:inView={{ onChange: (v) => (imagenVisible = v), threshold: 0.12 }}
