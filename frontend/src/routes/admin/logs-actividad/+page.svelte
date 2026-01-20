@@ -3,6 +3,8 @@
 	import { mockHistorialCambios } from '$lib/mocks/mock-historial-cambios';
 	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 	import type { HistorialDeCambios } from '$lib/types/HistorialDeCambios';
+	import { obtenerNombreUsuario, obtenerUsuarioPorId } from '$lib/utils/util-usuarios';
+	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 
 	let filtroTipo: '' | 'Usuario' | 'Proyecto' | 'Resena' | 'Reporte' | 'Categoria' = '';
 	let filtroAccion: '' | 'creado' | 'actualizado' | 'eliminado' | 'aprobado' | 'rechazado' | 'suspendido' | 'activado' = '';
@@ -18,10 +20,17 @@
 		return coincideTipo && coincideAccion && coincideBusqueda;
 	});
 
-	function obtenerNombreUsuario(usuarioId: number | undefined): string {
-		if (!usuarioId) return 'Sistema';
-		const usuario = Object.values(mockUsuarios).find((u) => u.id_usuario === usuarioId);
-		return usuario ? `${usuario.nombre} ${usuario.apellido} (@${usuario.username})` : `Usuario #${usuarioId}`;
+	function obtenerUrlUsuario(usuarioId: number | undefined): string | null {
+		if (!usuarioId) return null;
+		const usuario = obtenerUsuarioPorId(usuarioId);
+		return usuario ? obtenerUrlPerfil(usuario) : null;
+	}
+
+	function obtenerUrlObjeto(log: HistorialDeCambios): string | null {
+		if (!log.id_objeto) return null;
+		if (log.tipo_objeto === 'Proyecto') return `/proyectos/${log.id_objeto}`;
+		if (log.tipo_objeto === 'Usuario') return obtenerUrlUsuario(log.id_objeto);
+		return null;
 	}
 
 	function getAccionColor(accion: string): string {
@@ -133,6 +142,7 @@
 		</div>
 
 		{#each logsFiltrados as log}
+			{@const urlObjeto = obtenerUrlObjeto(log)}
 			<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
 				<div class="flex items-start gap-4">
 					<div class="flex-shrink-0 text-2xl">{getTipoIcono(log.tipo_objeto)}</div>
@@ -141,9 +151,18 @@
 							<span class="rounded-full border px-3 py-1 text-xs font-medium {getAccionColor(log.accion)}">
 								{log.accion.charAt(0).toUpperCase() + log.accion.slice(1)}
 							</span>
-							<span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-								{log.tipo_objeto} #{log.id_objeto}
-							</span>
+							{#if urlObjeto}
+								<a
+									href={urlObjeto}
+									class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 transition hover:bg-blue-100 hover:underline"
+								>
+									{log.tipo_objeto} #{log.id_objeto}
+								</a>
+							{:else}
+								<span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+									{log.tipo_objeto} #{log.id_objeto}
+								</span>
+							{/if}
 						</div>
 						{#if log.atributo_afectado}
 							<div class="mb-2 text-sm">
@@ -162,7 +181,21 @@
 							<p class="mb-2 text-sm text-gray-600 italic">"{log.justificacion}"</p>
 						{/if}
 						<div class="mt-2 flex items-center gap-4 text-xs text-gray-500">
-							<span><span class="font-medium">Por:</span> {obtenerNombreUsuario(log.usuario_id)}</span>
+							<span>
+								<span class="font-medium">Por:</span>
+								{#if obtenerUrlUsuario(log.usuario_id)}
+									<a
+										href={obtenerUrlUsuario(log.usuario_id)}
+										class="ml-1 text-gray-600 transition hover:text-blue-600 hover:underline"
+									>
+										{log.usuario_id ? obtenerNombreUsuario(log.usuario_id) : 'Sistema'}
+									</a>
+								{:else}
+									<span class="ml-1">
+										{log.usuario_id ? obtenerNombreUsuario(log.usuario_id) : 'Sistema'}
+									</span>
+								{/if}
+							</span>
 							<span>•</span>
 							<span>{log.created_at?.toLocaleString('es-AR') || 'Fecha no disponible'}</span>
 						</div>

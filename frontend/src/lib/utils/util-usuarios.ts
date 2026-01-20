@@ -2,13 +2,21 @@ import { mockUsuarios } from '$lib/mocks/mock-usuarios';
 import type { Usuario, Institucion } from '$lib/types/Usuario';
 
 /**
+ * Obtiene un usuario por ID .
+ */
+export function obtenerUsuarioPorId(usuarioId: number | undefined): Usuario | Institucion | null {
+	if (!usuarioId) return null;
+	const usuarios = Object.values(mockUsuarios);
+	return usuarios.find((u) => u.id_usuario === usuarioId) ?? null;
+}
+
+/**
  * Obtiene el nombre completo de un usuario por su ID
  * @param usuarioId - ID del usuario
  * @returns Nombre completo del usuario o 'Usuario desconocido' si no existe
  */
 export function obtenerNombreUsuario(usuarioId: number): string {
-	const usuarios = Object.values(mockUsuarios);
-	const user = usuarios.find((u) => u.id_usuario === usuarioId);
+	const user = obtenerUsuarioPorId(usuarioId);
 	
 	if (!user) return 'Usuario desconocido';
 
