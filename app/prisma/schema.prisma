@@ -1,0 +1,398 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Archivo {
+  id_archivo        Int       @id @default(autoincrement())
+  url               String
+  descripcion       String?
+  tipo_mime         String?
+  tamano            Int?      @map("tamaño") // tamaño in TS
+  created_at        DateTime? @default(now())
+  fecha_vencimiento DateTime?
+
+  usuario_id   Int?
+  evidencia_id Int?
+  proyecto_id  Int?
+
+  usuario   Usuario?   @relation(fields: [usuario_id], references: [id_usuario])
+  evidencia Evidencia? @relation(fields: [evidencia_id], references: [id_evidencia])
+  proyecto  Proyecto?  @relation(fields: [proyecto_id], references: [id_proyecto])
+
+  @@map("archivos")
+}
+
+model Categoria {
+  id_categoria Int    @id @default(autoincrement())
+  descripcion  String
+
+  proyecto_categorias   ProyectoCategoria[]
+  categorias_preferidas CategoriasPreferidas[]
+
+  @@map("categorias")
+}
+
+model CategoriasPreferidas {
+  id_categoria_preferida Int @id @default(autoincrement())
+  usuario_id             Int
+  categoria_id           Int
+
+  usuario   Usuario   @relation(fields: [usuario_id], references: [id_usuario])
+  categoria Categoria @relation(fields: [categoria_id], references: [id_categoria])
+
+  @@map("categorias_preferidas")
+}
+
+model Colaboracion {
+  id_colaboracion Int       @id @default(autoincrement())
+  estado          String // pending, approved, refused, cancelled
+  justificacion   String?
+  created_at      DateTime? @default(now())
+  mensaje         String?
+
+  proyecto_id    Int?
+  colaborador_id Int?
+
+  proyecto    Proyecto? @relation(fields: [proyecto_id], references: [id_proyecto])
+  colaborador Usuario?  @relation(fields: [colaborador_id], references: [id_usuario])
+
+  colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
+
+  @@map("colaboraciones")
+}
+
+model ColaboracionTipoParticipacion {
+  id_colaboracion_tipo_participacion Int @id @default(autoincrement())
+  colaboracion_id                    Int?
+  participacion_permitida_id         Int?
+  cantidad                           Int
+
+  colaboracion            Colaboracion?           @relation(fields: [colaboracion_id], references: [id_colaboracion])
+  participacion_permitida ParticipacionPermitida? @relation(fields: [participacion_permitida_id], references: [id_participacion_permitida])
+
+  @@map("colaboraciones_tipo_participacion")
+}
+
+model Consentimiento {
+  id_consentimiento Int       @id @default(autoincrement())
+  tipo              String
+  version           String
+  created_at        DateTime? @default(now())
+  usuario_id        Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("consentimientos")
+}
+
+model Contacto {
+  id_contacto   Int     @id @default(autoincrement())
+  tipo_contacto String
+  valor         String
+  etiqueta      String?
+  usuario_id    Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("contactos")
+}
+
+model Estado {
+  id_estado   Int    @id @default(autoincrement())
+  descripcion String
+
+  @@map("estados")
+}
+
+model Evaluacion {
+  id_evaluacion  Int       @id @default(autoincrement())
+  voto           String? // aprobado, rechazado
+  created_at     DateTime? @default(now())
+  justificacion  String?
+  solicitud_id   Int?
+  colaborador_id Int?
+
+  solicitud   SolicitudFinalizacion? @relation(fields: [solicitud_id], references: [id_solicitud])
+  colaborador Usuario?               @relation(fields: [colaborador_id], references: [id_usuario])
+
+  @@map("evaluaciones")
+}
+
+model Evidencia {
+  id_evidencia               Int       @id @default(autoincrement())
+  tipo_evidencia             String // entrada, salida
+  created_at                 DateTime? @default(now())
+  id_participacion_permitida Int
+
+  participacion_permitida ParticipacionPermitida @relation(fields: [id_participacion_permitida], references: [id_participacion_permitida])
+
+  archivos               Archivo[]
+  solicitud_evidencias   SolicitudFinalizacionEvidencia[]
+
+  @@map("evidencias")
+}
+
+model HistorialDeCambios {
+  id_cambio         Int       @id @default(autoincrement())
+  tipo_objeto       String
+  id_objeto         Int
+  accion            String
+  atributo_afectado String
+  valor_anterior    String
+  valor_nuevo       String
+  justificacion     String?
+  created_at        DateTime? @default(now())
+  usuario_id        Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("historial_de_cambios")
+}
+
+model Localidad {
+  id_localidad  Int    @id @default(autoincrement())
+  codigo_postal String
+  nombre        String
+  id_provincia  Int?
+
+  provincia     Provincia? @relation(fields: [id_provincia], references: [id_provincia])
+  ubicaciones   Ubicacion[]
+
+  @@map("localidades")
+}
+
+model Parametro {
+  id_parametro String @id
+  nombre       String
+  valor        String
+  tipo         String
+  descripcion  String
+
+  @@map("parametros")
+}
+
+model ParticipacionPermitida {
+  id_participacion_permitida Int     @id @default(autoincrement())
+  id_proyecto                Int?
+  id_tipo_participacion      Int?
+  objetivo                   Int
+  actual                     Int?    @default(0)
+  unidad_medida              String?
+  especie                    String?
+
+  proyecto           Proyecto?          @relation(fields: [id_proyecto], references: [id_proyecto])
+  tipo_participacion TipoParticipacion? @relation(fields: [id_tipo_participacion], references: [id_tipo_participacion])
+
+  colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
+  evidencias                        Evidencia[]
+
+  @@map("participaciones_permitidas")
+}
+
+model Provincia {
+  id_provincia Int     @id @default(autoincrement())
+  nombre       String
+  nombre_corto String?
+  codigo_iso   String?
+
+  localidades Localidad[]
+
+  @@map("provincias")
+}
+
+model Proyecto {
+  id_proyecto                Int       @id @default(autoincrement())
+  titulo                     String
+  descripcion                String
+  resumen                    String?
+  url_portada                String?
+  created_at                 DateTime? @default(now())
+  updated_at                 DateTime? @updatedAt
+  fecha_cierre_postulaciones DateTime?
+  fecha_fin_tentativa        DateTime?
+  beneficiarios              Int?
+  estado                     String // en_curso, etc.
+  institucion_id             Int?
+
+  institucion Usuario? @relation(fields: [institucion_id], references: [id_usuario])
+
+  archivos                 Archivo[]
+  colaboraciones           Colaboracion[]
+  participacion_permitida  ParticipacionPermitida[]
+  proyecto_categorias      ProyectoCategoria[]
+  proyecto_ubicaciones     ProyectoUbicacion[]
+  solicitudes_finalizacion SolicitudFinalizacion[]
+
+  @@map("proyectos")
+}
+
+model ProyectoCategoria {
+  id_proyecto_categoria Int @id @default(autoincrement())
+  categoria_id          Int
+  proyecto_id           Int
+
+  categoria Categoria @relation(fields: [categoria_id], references: [id_categoria])
+  proyecto  Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
+
+  @@map("proyecto_categorias")
+}
+
+model ProyectoUbicacion {
+  id_proyecto_ubicacion Int @id @default(autoincrement())
+  proyecto_id           Int
+  ubicacion_id          Int
+
+  proyecto  Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
+  ubicacion Ubicacion @relation(fields: [ubicacion_id], references: [id_ubicacion])
+
+  @@map("proyecto_ubicaciones")
+}
+
+model Reporte {
+  id_reporte            Int       @id @default(autoincrement())
+  tipo_objeto           String
+  id_objeto             Int
+  motivo                String
+  descripcion           String
+  created_at            DateTime? @default(now())
+  estado                String? // pendiente, resuelto, rechazado
+  fecha_resolucion      DateTime?
+  comentario_resolucion String?
+
+  reportante_id Int
+  admin_id      Int?
+
+  reportante Usuario  @relation("Reportante", fields: [reportante_id], references: [id_usuario])
+  admin      Usuario? @relation("AdminResolutor", fields: [admin_id], references: [id_usuario])
+
+  @@map("reportes")
+}
+
+model Resena {
+  id_resena   Int     @id @default(autoincrement())
+  tipo_objeto String?
+  id_objeto   Int?
+  contenido   String
+  puntaje     Int
+  aprobado    Boolean?
+  rol         String?
+  username    String?
+
+  @@map("resenas")
+}
+
+model SolicitudFinalizacion {
+  id_solicitud Int       @id @default(autoincrement())
+  estado       String?
+  created_at   DateTime? @default(now())
+  proyecto_id  Int
+
+  proyecto Proyecto @relation(fields: [proyecto_id], references: [id_proyecto])
+
+  evaluaciones         Evaluacion[]
+  solicitud_evidencias SolicitudFinalizacionEvidencia[]
+
+  @@map("solicitudes_finalizacion")
+}
+
+model SolicitudFinalizacionEvidencia {
+  id_solicitud_finalizacion_evidencia Int @id @default(autoincrement())
+  evidencia_id                        Int @unique
+  solicitud_finalizacion_id           Int @unique // Note: Types say UNIQUE, checking validity logic
+
+  evidencia             Evidencia             @relation(fields: [evidencia_id], references: [id_evidencia])
+  solicitud_finalizacion SolicitudFinalizacion @relation(fields: [solicitud_finalizacion_id], references: [id_solicitud])
+
+  @@map("solicitud_finalizacion_evidencias")
+}
+
+model TipoParticipacion {
+  id_tipo_participacion Int    @id @default(autoincrement())
+  descripcion           String
+
+  participaciones                ParticipacionPermitida[]
+  tipos_participacion_preferidos TiposParticipacionPreferidos[]
+
+  @@map("tipos_participacion")
+}
+
+model TiposParticipacionPreferidos {
+  id_tipos_participacion_preferidas Int @id @default(autoincrement())
+  usuario_id                        Int
+  tipo_participacion_id             Int
+
+  usuario            Usuario           @relation(fields: [usuario_id], references: [id_usuario])
+  tipo_participacion TipoParticipacion @relation(fields: [tipo_participacion_id], references: [id_tipo_participacion])
+
+  @@map("tipos_participacion_preferidos")
+}
+
+model Ubicacion {
+  id_ubicacion    Int     @id @default(autoincrement())
+  tipo_ubicacion  String
+  modalidad       String
+  calle           String?
+  numero          String?
+  piso            String?
+  departamento    String?
+  referencia      String?
+  url_google_maps String?
+  url_virtual     String?
+
+  localidad_id Int?
+
+  localidad            Localidad?          @relation(fields: [localidad_id], references: [id_localidad])
+  proyecto_ubicaciones ProyectoUbicacion[]
+
+  @@map("ubicaciones")
+}
+
+model Usuario {
+  id_usuario       Int       @id @default(autoincrement())
+  username         String    @unique
+  nombre           String?
+  apellido         String?
+  url_foto         String?
+  rol              String    @default("colaborador")
+  email            String?   @unique // Assuming email is unique if present
+  telefono         String?
+  fecha_nacimiento DateTime?
+  biografia        String?
+  nombre_legal     String? // Institucion
+  tipo_institucion String? // Institucion
+  cuit             String? // Institucion
+  direccion        String? // Institucion (simple field or relation?)
+  sitio_web        String? // Institucion
+
+  archivos                       Archivo[]
+  categorias_preferidas          CategoriasPreferidas[]
+  colaboraciones                 Colaboracion[]
+  consentimientos                Consentimiento[]
+  contactos                      Contacto[]
+  evaluaciones                   Evaluacion[]
+  historial_cambios              HistorialDeCambios[]
+  proyectos_institucion          Proyecto[] // Relation to Proyecto.institucion_id
+  reportes_creados               Reporte[]                      @relation("Reportante")
+  reportes_resueltos             Reporte[]                      @relation("AdminResolutor")
+  tipos_participacion_preferidos TiposParticipacionPreferidos[]
+  verificaciones                 Verificacion[]
+
+  @@map("usuarios")
+}
+
+model Verificacion {
+  id_verificacion   Int       @id @default(autoincrement())
+  tipo              String
+  estado            String
+  created_at        DateTime? @default(now())
+  fecha_vencimiento DateTime?
+  usuario_id        Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+
+  @@map("verificaciones")
+}
