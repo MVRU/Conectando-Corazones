@@ -208,4 +208,3 @@
 		animation: fade-slide-in 0.5s ease-out forwards;
 	}
 </style>
-

@@ -11,4 +11,3 @@
 </script>
 
 <PaginaError {estado} mensaje={error?.message} />
-

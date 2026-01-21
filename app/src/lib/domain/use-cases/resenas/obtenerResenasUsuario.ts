@@ -5,7 +5,7 @@ import { filtrarResenasPorTipo } from '$lib/utils/resenas';
 
 /**
  * Caso de uso: Obtener reseñas de un usuario
- * 
+ *
  * @param idUsuario - ID del usuario
  * @param resenas - Lista de todas las reseñas
  * @returns Lista de reseñas del usuario

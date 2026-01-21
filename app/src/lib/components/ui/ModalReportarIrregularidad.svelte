@@ -192,5 +192,3 @@
 		animation: slide-up 0.3s ease-out;
 	}
 </style>
-
-

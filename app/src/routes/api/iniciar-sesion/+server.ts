@@ -30,4 +30,3 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	const { password: _pw, ...safeUsuario } = usuario;
 	return json({ usuario: safeUsuario });
 };
-

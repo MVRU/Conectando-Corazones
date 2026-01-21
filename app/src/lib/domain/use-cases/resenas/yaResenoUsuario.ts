@@ -4,7 +4,7 @@ import type { Resena } from '$lib/domain/types/Resena';
 
 /**
  * Caso de uso: Verificar si un usuario ya reseñó a otro usuario
- * 
+ *
  * @param username - Username del usuario que reseña
  * @param idUsuarioResenado - ID del usuario que recibe la reseña
  * @param resenas - Lista de todas las reseñas

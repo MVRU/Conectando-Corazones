@@ -4,15 +4,15 @@ import type { LocalidadRepository } from '$lib/domain/repositories/LocalidadRepo
 import type { Localidad } from '$lib/domain/types/Localidad';
 
 export class ObtenerLocalidades {
-    constructor(private localidadRepository: LocalidadRepository) {}
+	constructor(private localidadRepository: LocalidadRepository) {}
 
-    async porProvincia(idProvincia: number | undefined): Promise<Localidad[]> {
-        if (idProvincia === undefined) return [];
-        return this.localidadRepository.findByProvincia(idProvincia);
-    }
+	async porProvincia(idProvincia: number | undefined): Promise<Localidad[]> {
+		if (idProvincia === undefined) return [];
+		return this.localidadRepository.findByProvincia(idProvincia);
+	}
 
-    async porId(idLocalidad: number | undefined): Promise<Localidad | undefined> {
-        if (!idLocalidad) return undefined;
-        return this.localidadRepository.findById(idLocalidad);
-    }
+	async porId(idLocalidad: number | undefined): Promise<Localidad | undefined> {
+		if (!idLocalidad) return undefined;
+		return this.localidadRepository.findById(idLocalidad);
+	}
 }

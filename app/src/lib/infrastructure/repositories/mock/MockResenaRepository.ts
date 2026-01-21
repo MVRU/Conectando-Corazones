@@ -6,16 +6,16 @@ import { mockTestimonios } from '$lib/infrastructure/mocks/mock-testimonios';
 let resenasInMemory: Resena[] = [...mockTestimonios, ...mockResenas];
 
 export class MockResenaRepository implements ResenaRepository {
-    async findByUsuario(usuarioId: number): Promise<Resena[]> {
-        return resenasInMemory.filter(r => r.tipo_objeto === 'usuario' && r.id_objeto === usuarioId);
-    }
+	async findByUsuario(usuarioId: number): Promise<Resena[]> {
+		return resenasInMemory.filter((r) => r.tipo_objeto === 'usuario' && r.id_objeto === usuarioId);
+	}
 
-    async findAll(): Promise<Resena[]> {
-        return [...resenasInMemory];
-    }
+	async findAll(): Promise<Resena[]> {
+		return [...resenasInMemory];
+	}
 
-    async save(resena: Resena): Promise<Resena> {
-        resenasInMemory = [...resenasInMemory, resena];
-        return resena;
-    }
+	async save(resena: Resena): Promise<Resena> {
+		resenasInMemory = [...resenasInMemory, resena];
+		return resena;
+	}
 }

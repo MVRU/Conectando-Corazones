@@ -124,4 +124,3 @@ export function cargarReportesPersistidos(): void {
 		console.error('Error cargando reportes persistidos', e);
 	}
 }
-

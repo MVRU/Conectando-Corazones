@@ -127,7 +127,8 @@
 		// Validar participaciones
 		participacionesPermitidas.forEach((p, index) => {
 			if (p.objetivo === undefined || p.objetivo <= 0) {
-				errores[`participacion_${index}_objetivo`] = 'El objetivo es obligatorio y tiene que ser > 0.';
+				errores[`participacion_${index}_objetivo`] =
+					'El objetivo es obligatorio y tiene que ser > 0.';
 			} else {
 				if (p.id_participacion_permitida) {
 					const original = originales.participacionesOriginales.find(

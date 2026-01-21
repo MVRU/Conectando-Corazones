@@ -10,10 +10,10 @@ const resenasStore = writable<Resena[]>([...mockTestimonios, ...mockResenas]);
 
 /**
  * Caso de uso: Agregar una nueva reseña
- * 
+ *
  * @param resena - Datos de la reseña (sin id_resena)
  * @returns La reseña creada con su ID
- * 
+ *
  * TODO: Reemplazar con llamada real a Supabase
  */
 export function agregarResena(resena: Omit<Resena, 'id_resena'>): Resena {

@@ -629,5 +629,3 @@ function clonarMetadata(metadata: RegistroMetadata | undefined): RegistroMetadat
 		return null;
 	}
 }
-
-

@@ -378,7 +378,7 @@
 								<Icon src={HandRaised} class="h-12 w-12 text-gray-400" />
 							</div>
 							<h3 class="mb-2 text-lg font-medium text-gray-900">Aún no tenés colaboradores</h3>
-							<p class="text-gray-500">	
+							<p class="text-gray-500">
 								Los colaboradores aceptados aparecerán aquí. Revisá las solicitudes pendientes para
 								encontrar personas dispuestas a ayudar.
 							</p>
@@ -504,5 +504,3 @@
 		</div>
 	</div>
 {/if}
-
-

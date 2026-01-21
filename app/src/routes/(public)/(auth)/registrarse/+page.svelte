@@ -32,7 +32,7 @@
 	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
 
-	let cargada = false; // para saber si la página terminó de cargar	
+	let cargada = false; // para saber si la página terminó de cargar
 
 	const TOTAL_PASOS = 5;
 	let etapa: RegistroEtapa = 'seleccion';
@@ -304,7 +304,7 @@
 <!-- ! Fondo decorativo -->
 <div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
-	class="absolute bottom-0 left-0 right-0 top-[80%] -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
+	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
 	style="background-size: 100% 400px; background-repeat: repeat-y;"
 ></div>
 
@@ -424,12 +424,10 @@
 			</div>
 
 			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-				<h2 class="text-center text-3xl font-extrabold text-gray-900">
-					Agregá formas de contacto
-				</h2>
+				<h2 class="text-center text-3xl font-extrabold text-gray-900">Agregá formas de contacto</h2>
 				<p class="mx-auto max-w-2xl text-center text-base text-gray-600">
-					Agregá al menos un número de teléfono. Podés incluir otros medios como redes
-					sociales o emails secundarios.
+					Agregá al menos un número de teléfono. Podés incluir otros medios como redes sociales o
+					emails secundarios.
 				</p>
 
 				<MetodosContactoForm
@@ -471,9 +469,9 @@
 						Contanos desde dónde ayudás
 					</h2>
 					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
-						Seleccioná la provincia y localidad donde funciona tu organización o donde te
-						encontrás para colaborar. Esta información nos ayuda a conectarte con iniciativas
-						cercanas. Podrás sumar más ubicaciones luego desde tu panel.
+						Seleccioná la provincia y localidad donde funciona tu organización o donde te encontrás
+						para colaborar. Esta información nos ayuda a conectarte con iniciativas cercanas. Podrás
+						sumar más ubicaciones luego desde tu panel.
 					</p>
 				</div>
 
@@ -506,8 +504,8 @@
 				</div>
 				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Cuenta creada exitosamente!</h2>
 				<p class="mt-4 max-w-md text-base text-gray-600">
-					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o
-					publicar tus proyectos solidarios.
+					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o publicar
+					tus proyectos solidarios.
 				</p>
 				<div class="mt-8">
 					<Button label="Ir al panel" variant="primary" on:click={() => goto('/mi-panel')} />
@@ -518,4 +516,3 @@
 
 	<Loader size={80} loading={!cargada} />
 </main>
-

@@ -96,5 +96,3 @@
 		transition: all 1.08s cubic-bezier(0.36, 0, 0.19, 1);
 	}
 </style>
-
-

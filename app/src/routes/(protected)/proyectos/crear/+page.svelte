@@ -35,5 +35,3 @@
 {#if !$isLoading && $usuario?.rol === 'institucion'}
 	<CrearProyecto {limiteProyectosAlcanzado} />
 {/if}
-
-

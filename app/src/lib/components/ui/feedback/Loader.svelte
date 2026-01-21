@@ -75,4 +75,3 @@
 		animation: fade-in 0.6s ease-out forwards;
 	}
 </style>
-

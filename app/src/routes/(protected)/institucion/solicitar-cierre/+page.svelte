@@ -490,8 +490,8 @@
 													<div class="text-sm text-yellow-800">
 														<p class="font-medium">Atención: Faltan evidencias</p>
 														<p class="mt-1 text-yellow-700">
-															Algunos objetivos no tienen evidencias cargadas. Tenés que cargar al menos
-															una evidencia para cada objetivo antes de solicitar el cierre.
+															Algunos objetivos no tienen evidencias cargadas. Tenés que cargar al
+															menos una evidencia para cada objetivo antes de solicitar el cierre.
 														</p>
 													</div>
 												</div>
@@ -546,7 +546,7 @@
 												enviandoSolicitud ||
 												tieneSolicitudPendiente ||
 												tieneTresSolicitudesRechazadas}
-											class="w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none {todosLosChecksCompletos &&
+											class="w-full rounded-xl py-3.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none {todosLosChecksCompletos &&
 											todosLosObjetivosTienenEvidencias &&
 											!tieneSolicitudPendiente &&
 											!tieneTresSolicitudesRechazadas
@@ -611,4 +611,3 @@
 		animation: fade-in-up 0.5s ease-out forwards;
 	}
 </style>
-

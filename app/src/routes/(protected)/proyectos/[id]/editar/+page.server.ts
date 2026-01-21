@@ -2,7 +2,10 @@ import { error } from '@sveltejs/kit';
 import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 import type { PageServerLoad } from './$types';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
-import type { ParticipacionForm, UbicacionFormulario } from '$lib/domain/types/forms/CrearProyectoForm';
+import type {
+	ParticipacionForm,
+	UbicacionFormulario
+} from '$lib/domain/types/forms/CrearProyectoForm';
 import type { UbicacionPresencial } from '$lib/domain/types/Ubicacion';
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 

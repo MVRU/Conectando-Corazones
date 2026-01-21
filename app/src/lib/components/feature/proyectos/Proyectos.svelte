@@ -89,5 +89,3 @@
 		</div>
 	{/if}
 </section>
-
-

@@ -22,9 +22,9 @@ export class ProyectoRepoSupabase implements ProyectoRepository {
 			.single();
 
 		if (error) {
-            if (error.code === 'PGRST116') {
-                return null;
-            }
+			if (error.code === 'PGRST116') {
+				return null;
+			}
 			console.error(`Error fetching proyecto ${id}:`, error);
 			throw new Error(error.message);
 		}
@@ -33,11 +33,7 @@ export class ProyectoRepoSupabase implements ProyectoRepository {
 	}
 
 	async create(proyecto: Partial<Proyecto>): Promise<Proyecto> {
-		const { data, error } = await supabase
-			.from('proyectos')
-			.insert(proyecto)
-			.select()
-			.single();
+		const { data, error } = await supabase.from('proyectos').insert(proyecto).select().single();
 
 		if (error) {
 			console.error('Error creating proyecto:', error);

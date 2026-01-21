@@ -42,4 +42,3 @@
 		prefixIconClass={iconClass}
 	/>
 </div>
-

@@ -4,7 +4,7 @@ import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 /**
  * Caso de uso: Filtrar proyectos por estado
- * 
+ *
  * @param proyectos - Lista de proyectos a filtrar
  * @param estado - Estado por el cual filtrar
  * @returns Lista de proyectos filtrados

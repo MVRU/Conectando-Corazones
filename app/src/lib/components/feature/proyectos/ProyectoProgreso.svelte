@@ -383,4 +383,3 @@
 		animation: fade-up 0.5s ease-out forwards;
 	}
 </style>
-

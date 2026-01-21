@@ -34,4 +34,3 @@
 	{/if}
 	<span class="truncate">{ubicacionTexto}</span>
 </div>
-

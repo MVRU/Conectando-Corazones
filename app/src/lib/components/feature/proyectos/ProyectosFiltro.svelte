@@ -697,4 +697,3 @@
 		print-color-adjust: exact;
 	}
 </style>
-

@@ -213,4 +213,3 @@ export function filtrarPorLocalidad(
 	}
 	return proyectos;
 }
-

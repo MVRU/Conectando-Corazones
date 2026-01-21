@@ -50,4 +50,3 @@ export function obtenerInicialesUsuario(usuarioId: number): string {
 
 	return (palabras[0][0] + palabras[palabras.length - 1][0]).toUpperCase();
 }
-

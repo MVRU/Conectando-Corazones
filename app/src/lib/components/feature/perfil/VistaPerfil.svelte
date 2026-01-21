@@ -36,7 +36,7 @@
 	import { perfilAdapter } from '$lib/adapters/perfil.adapter';
 	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { writable } from 'svelte/store';
-    import type { Proyecto } from '$lib/domain/types/Proyecto';
+	import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
@@ -53,11 +53,12 @@
 	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Proyectos del usuario
-    let proyectosUsuario: Proyecto[] = [];
+	let proyectosUsuario: Proyecto[] = [];
 	$: {
-         perfilAdapter.obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol)
-            .then(p => proyectosUsuario = p);
-    }
+		perfilAdapter
+			.obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol)
+			.then((p) => (proyectosUsuario = p));
+	}
 
 	// Reseñas del usuario - usando writable store local
 	const resenasStore = writable<Resena[]>([]);
@@ -222,11 +223,11 @@
 
 		<!-- Reportar perfil -->
 		{#if !esMiPerfil && $isAuthenticated}
-			<div class="mt-12 border-t border-gray-200 pb-4 pt-8 text-center">
+			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
 				{#if $isAdmin}
 					<div class="mb-4 text-center">
 						<span
-							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
 						>
 							ID: {perfilUsuario.id_usuario}
 						</span>
@@ -315,5 +316,3 @@
 		on:success={handleConfirmarReporte}
 	/>
 {/if}
-
-

@@ -207,4 +207,3 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 function searchQueryStore(store: Writable<string>) {
 	return store;
 }
-

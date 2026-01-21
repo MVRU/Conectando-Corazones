@@ -301,7 +301,7 @@
 
 {#if proyecto}
 	<main
-		class="min-h-screen pb-24 pt-6 text-gray-800 sm:pt-10 {esAdministrador
+		class="min-h-screen pt-6 pb-24 text-gray-800 sm:pt-10 {esAdministrador
 			? 'bg-slate-50'
 			: 'bg-gray-50'}"
 		aria-label="Detalle del proyecto"
@@ -357,7 +357,7 @@
 								<!-- TODO: implementar función para actualizar el progreso de un proyecto -->
 								<a
 									href={`/proyectos/${proyecto.id_proyecto}`}
-									class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2"
+									class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-none"
 								>
 									<Icon src={Pencil} class="h-4 w-4" />
 									Actualizar progreso
@@ -511,7 +511,7 @@
 									<button
 										type="button"
 										on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 font-semibold text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-expanded={mostrarDropdownAdmin}
 										aria-haspopup="true"
 									>
@@ -527,7 +527,7 @@
 									{#if mostrarDropdownAdmin}
 										<!-- Dropdown menu -->
 										<div
-											class="animate-in fade-in zoom-in-95 absolute left-0 right-0 top-full mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+											class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
 											role="menu"
 											tabindex="-1"
 										>
@@ -569,7 +569,7 @@
 										type="button"
 										on:click={() =>
 											(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-expanded={mostrarDropdownGestionarProyecto}
 										aria-haspopup="true"
 									>
@@ -585,7 +585,7 @@
 									{#if mostrarDropdownGestionarProyecto}
 										<!-- Dropdown menu -->
 										<div
-											class="animate-in fade-in zoom-in-95 absolute left-0 top-full z-10 mt-2 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+											class="animate-in fade-in zoom-in-95 absolute top-full left-0 z-10 mt-2 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
 											role="menu"
 											tabindex="-1"
 										>
@@ -702,7 +702,7 @@
 									<button
 										type="button"
 										on:click={() => (mostrarModalJustificacion = true)}
-										class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+										class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-label="Ver motivo del rechazo"
 									>
 										Solicitud rechazada
@@ -713,8 +713,8 @@
 										on:click={manejarClickSolicitud}
 										disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
 										class={tieneSolicitudPendiente
-											? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 active:translate-y-[1px]'
-											: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+											? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
+											: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
 										aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
 											? 'Ver estado de solicitud'
 											: 'Colaborar ahora en este proyecto'}
@@ -733,7 +733,7 @@
 							<button
 								type="button"
 								on:click={compartirProyecto}
-								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 active:translate-y-[1px]"
+								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 								aria-label="Compartir este proyecto"
 							>
 								<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
@@ -999,7 +999,7 @@
 									type="button"
 									disabled={yaReporto}
 									on:click={() => pushState('', { showReportModal: true })}
-									class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+									class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 								>
 									<Icon src={Flag} class="h-4 w-4" />
 									{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
@@ -1024,7 +1024,7 @@
 								type="button"
 								disabled={yaReporto}
 								on:click={() => pushState('', { showReportModal: true })}
-								class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+								class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 							>
 								<Icon src={Flag} class="h-4 w-4" />
 								{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
@@ -1055,7 +1055,7 @@
 						<button
 							type="button"
 							on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-							class="flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-slate-900 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+							class="flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 						>
 							Gestionar proyecto
 							<Icon
@@ -1069,7 +1069,7 @@
 						{#if mostrarDropdownAdmin}
 							<!-- Dropdown menu popup -->
 							<div
-								class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 right-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
+								class="animate-in slide-in-from-bottom-5 absolute right-0 bottom-full left-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
 							>
 								<button
 									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
@@ -1107,7 +1107,7 @@
 							type="button"
 							on:click={() =>
 								(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-							class="flex w-full items-center justify-between gap-2 whitespace-nowrap rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+							class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 						>
 							<span>Gestionar proyecto</span>
 							<Icon
@@ -1223,7 +1223,7 @@
 		</div>
 	</main>
 {:else}
-	<main class="min-h-screen bg-gray-50 pb-24 pt-10 text-gray-800">
+	<main class="min-h-screen bg-gray-50 pt-10 pb-24 text-gray-800">
 		<div class="mx-auto w-full max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
 			<p>Cargando proyecto...</p>
 		</div>
@@ -1260,7 +1260,7 @@
 				if (e.key === 'Escape') mostrarModalExito = false;
 			}}
 		>
-			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+			<div class="flex flex-col items-center gap-3 px-6 pt-6 pb-4 text-center">
 				<span
 					class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50 ring-1 ring-emerald-100"
 				>
@@ -1274,7 +1274,7 @@
 			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 				<button
 					type="button"
-					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					on:click={() => (mostrarModalExito = false)}
 				>
 					Cerrar
@@ -1305,7 +1305,7 @@
 				if (e.key === 'Escape') mostrarModalJustificacion = false;
 			}}
 		>
-			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+			<div class="flex flex-col items-center gap-3 px-6 pt-6 pb-4 text-center">
 				<span
 					class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 ring-1 ring-red-100"
 				>
@@ -1325,7 +1325,7 @@
 			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 				<button
 					type="button"
-					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					on:click={() => (mostrarModalJustificacion = false)}
 				>
 					Cerrar
@@ -1356,7 +1356,7 @@
 				if (e.key === 'Escape') mostrarModalPendiente = false;
 			}}
 		>
-			<div class="flex flex-col items-center gap-3 px-6 pb-4 pt-6 text-center">
+			<div class="flex flex-col items-center gap-3 px-6 pt-6 pb-4 text-center">
 				<span
 					class="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 ring-1 ring-amber-100"
 				>
@@ -1377,7 +1377,7 @@
 			<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 				<button
 					type="button"
-					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					on:click={() => (mostrarModalPendiente = false)}
 				>
 					Cerrar

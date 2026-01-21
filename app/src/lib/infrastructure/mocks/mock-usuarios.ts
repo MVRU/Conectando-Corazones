@@ -1,4 +1,9 @@
-import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/domain/types/Usuario';
+import type {
+	Administrador,
+	Institucion,
+	Organizacion,
+	Unipersonal
+} from '$lib/domain/types/Usuario';
 
 import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';

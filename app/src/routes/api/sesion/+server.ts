@@ -31,4 +31,3 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	const { password: _password, ...usuarioSeguro } = usuario;
 	return json({ usuario: usuarioSeguro } as RespuestaSesion);
 };
-

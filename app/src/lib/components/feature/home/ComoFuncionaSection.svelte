@@ -68,5 +68,3 @@ TODO:
 		/>
 	</div>
 </section>
-
-

@@ -193,4 +193,3 @@
 		animation: fade-up 0.4s ease-out both;
 	}
 </style>
-

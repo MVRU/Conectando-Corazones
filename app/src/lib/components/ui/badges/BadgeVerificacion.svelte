@@ -59,4 +59,3 @@
 	<span class="hidden sm:inline">{config.label}</span>
 	<span class="sm:hidden">{textosMobile[estado]}</span>
 </span>
-

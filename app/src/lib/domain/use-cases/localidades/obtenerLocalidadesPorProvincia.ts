@@ -5,10 +5,10 @@ import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 
 /**
  * Caso de uso: Obtener localidades filtradas por provincia
- * 
+ *
  * @param idProvincia - ID de la provincia
  * @returns Lista de localidades de la provincia
- * 
+ *
  * TODO: Reemplazar mockLocalidades con llamada real a Supabase
  */
 export function obtenerLocalidadesPorProvincia(idProvincia: number | undefined): Localidad[] {

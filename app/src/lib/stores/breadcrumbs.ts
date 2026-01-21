@@ -68,4 +68,3 @@ export const BREADCRUMB_ROUTES = {
 	login: { label: 'Iniciar sesión', href: '/iniciar-sesion' },
 	registro: { label: 'Registrarse', href: '/registrarse' }
 };
-

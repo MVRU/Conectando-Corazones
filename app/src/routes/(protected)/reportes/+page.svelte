@@ -641,4 +641,3 @@
 		animation: fade-in-up 0.5s ease-out forwards;
 	}
 </style>
-

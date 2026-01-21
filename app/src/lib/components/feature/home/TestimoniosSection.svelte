@@ -146,5 +146,3 @@
 		pointer-events: none;
 	}
 </style>
-
-

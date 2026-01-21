@@ -6,7 +6,10 @@
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
 	import ProyectoParticipaciones from './ProyectoParticipaciones.svelte';
 	import ProyectoUbicaciones from './ProyectoUbicaciones.svelte';
-	import type { ParticipacionForm, UbicacionFormulario } from '$lib/domain/types/forms/CrearProyectoForm';
+	import type {
+		ParticipacionForm,
+		UbicacionFormulario
+	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
 	import { provincias } from '\$lib/domain/types/static-data/provincias';
 	import {
@@ -458,5 +461,3 @@
 		</form>
 	</div>
 </main>
-
-
