@@ -1,4 +1,4 @@
-﻿import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
+import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
 
 export interface UbicacionPresencialCreate {
 	calle: string;

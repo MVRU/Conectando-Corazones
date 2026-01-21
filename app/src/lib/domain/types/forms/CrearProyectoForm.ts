@@ -1,4 +1,4 @@
-﻿import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
+import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
 import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 
 // Tipos específicos del formulario de creación de proyecto

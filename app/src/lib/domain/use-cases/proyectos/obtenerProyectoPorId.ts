@@ -1,5 +1,7 @@
+// TODO: corregir todo esto
+
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { mockProyectos } from 'tests/mocks/mock-proyectos';
+import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 
 /**
  * Caso de uso: Obtener un proyecto por su ID

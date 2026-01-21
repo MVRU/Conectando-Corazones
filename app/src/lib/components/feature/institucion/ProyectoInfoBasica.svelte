@@ -3,7 +3,7 @@
  * -!- Sección de información básica y categorías del form de proyecto.
  -->
 <script lang="ts">
-	import { mockCategorias } from 'tests/mocks/mock-categorias';
+	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 	import {
 		MAX_BENEFICIARIOS,
 		formatearFechaLarga,

@@ -1,4 +1,4 @@
-﻿import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 
 /**
  * DTO para actualizar una participación permitida existente.

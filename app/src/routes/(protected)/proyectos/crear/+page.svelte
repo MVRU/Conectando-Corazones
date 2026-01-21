@@ -3,8 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { usuario, isLoading } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
-	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 
 	let limiteProyectosAlcanzado = false;
 

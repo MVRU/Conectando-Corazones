@@ -6,7 +6,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { page } from '$app/stores';
 	import {
 		esUbicacionPresencial,
@@ -27,8 +27,8 @@
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
-	import { mockColaboraciones } from 'tests/mocks/mock-colaboraciones';
-	import { mockColaboracionTipoParticipacion } from 'tests/mocks/mock-colaboracion-tipo-participacion';
+	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';

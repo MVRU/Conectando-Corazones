@@ -1,5 +1,5 @@
-﻿import type { ProyectoCategoria } from '$lib/domain/types/ProyectoCategoria';
-import { mockCategorias } from 'tests/mocks/mock-categorias';
+import type { ProyectoCategoria } from '$lib/domain/types/ProyectoCategoria';
+import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 
 export const mockProyectoCategorias: ProyectoCategoria[] = [
 	{ id_proyecto_categoria: 1, proyecto_id: 1, categoria_id: 5, categoria: mockCategorias[4] },

@@ -1,7 +1,9 @@
+// TODO: corregir todo esto
+
 import type { Resena } from '$lib/domain/types/Resena';
 import { writable } from 'svelte/store';
-import { mockTestimonios } from 'tests/mocks/mock-testimonios';
-import { mockResenas } from 'tests/mocks/mock-resenas';
+import { mockTestimonios } from '$lib/infrastructure/mocks/mock-testimonios';
+import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 
 // Store global de reseñas
 const resenasStore = writable<Resena[]>([...mockTestimonios, ...mockResenas]);

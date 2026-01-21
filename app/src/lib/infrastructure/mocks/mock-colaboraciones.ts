@@ -1,6 +1,6 @@
-﻿import type { Colaboracion } from '$lib/domain/types/Colaboracion';
+import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 const getColaborador = (id: number): ColaboradorDisyuncion | undefined => {
 	const usuario = Object.values(mockUsuarios).find((u) => u.id_usuario === id);

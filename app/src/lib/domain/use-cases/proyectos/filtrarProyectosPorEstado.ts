@@ -1,3 +1,5 @@
+// TODO: corregir todo esto
+
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 /**

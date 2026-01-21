@@ -2,7 +2,7 @@ import type { Localidad } from '$lib/domain/types/Localidad';
 import type { Provincia } from '$lib/domain/types/Provincia';
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 import { provincias } from '\$lib/domain/types/static-data/provincias';
-import { mockLocalidades } from 'tests/mocks/mock-localidades';
+import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 import type {
 	UbicacionDisyuncion,
 	UbicacionPresencial,

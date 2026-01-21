@@ -9,8 +9,8 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
-	import { mockCategorias } from 'tests/mocks/mock-categorias';
+	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
 	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';

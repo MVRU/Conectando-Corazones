@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { usuario as user, isAdmin, isInstitucion, isColaborador } from '$lib/stores/auth';
-	import { mockReportes } from 'tests/mocks/mock-reportes';
-	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockReportes } from '$lib/infrastructure/mocks/mock-reportes';
+	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import type { Reporte } from '$lib/domain/types/Reporte';
 	import { fly } from 'svelte/transition';
 	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';

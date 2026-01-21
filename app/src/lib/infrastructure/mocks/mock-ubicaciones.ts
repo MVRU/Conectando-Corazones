@@ -1,9 +1,9 @@
-﻿import type {
+import type {
 	UbicacionDisyuncion,
 	UbicacionPresencial,
 	UbicacionVirtual
 } from '$lib/domain/types/Ubicacion';
-import { mockLocalidades } from 'tests/mocks/mock-localidades';
+import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 
 // para obtener localidad por ID
 const getLocalidad = (id: number) => {

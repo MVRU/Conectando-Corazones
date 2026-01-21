@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
-	import { mockProyectos as proyectosPorDefecto } from 'tests/mocks/mock-proyectos';
+	import { mockProyectos as proyectosPorDefecto } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
@@ -10,7 +10,7 @@
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
+	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = proyectosPorDefecto;

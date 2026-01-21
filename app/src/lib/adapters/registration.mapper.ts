@@ -1,4 +1,4 @@
-﻿// * DECISIÓN DE DISEÑO: esta capa traduce los formularios de registro en los inputs esperados por authStore,
+// * DECISIÓN DE DISEÑO: esta capa traduce los formularios de registro en los inputs esperados por authStore,
 // * evitando dependencias directas de la UI con Firebase y habilitando pruebas unitarias.
 
 /**

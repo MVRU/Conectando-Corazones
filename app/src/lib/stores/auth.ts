@@ -9,7 +9,7 @@ import type {
 } from '$lib/domain/types/Usuario';
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 /**
  * * DECISIÓN DE DISEÑO:

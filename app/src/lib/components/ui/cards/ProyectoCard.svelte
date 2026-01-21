@@ -13,7 +13,7 @@
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
-	import { mockColaboraciones } from 'tests/mocks/mock-colaboraciones';
+	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
 	export let proyecto: Proyecto;

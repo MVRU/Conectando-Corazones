@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/domain/types/Categoria';
-	import { mockCategorias } from 'tests/mocks/mock-categorias';
+	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';

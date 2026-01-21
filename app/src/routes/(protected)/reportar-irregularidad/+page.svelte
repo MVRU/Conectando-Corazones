@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { page } from '$app/stores';
 	import type { Reporte } from '$lib/domain/types/Reporte';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';

@@ -25,7 +25,7 @@
 		OrganizacionFormData,
 		InstitucionFormData
 	} from '$lib/domain/types/forms/registro';
-	import type { RegistroRol } from '$lib/services/auth/registration-flow';
+	import type { RegistroRol } from '$lib/domain/use-cases/auth/registroFlow';
 	import {
 		crearContactoPrincipal,
 		normalizarSeleccionBoolean,
@@ -55,7 +55,7 @@
 		REGISTRO_STORAGE_VERSION
 	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
-	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;

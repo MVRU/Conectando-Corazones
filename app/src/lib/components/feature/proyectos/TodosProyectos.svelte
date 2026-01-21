@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Proyecto } from '$lib/domain/types/Proyecto';
-  import { mockProyectos as defaultProyectos } from 'tests/mocks/mock-proyectos';
+  import { mockProyectos as defaultProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
   import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
   import ProyectosBase from './ProyectosBase.svelte';
   import { usuario } from '$lib/stores/auth';

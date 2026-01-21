@@ -19,11 +19,11 @@
 		obtenerSiguienteEtapaCuenta,
 		type RegistroEtapa,
 		type RegistroRol
-	} from '$lib/services/auth/registration-flow';
+	} from '$lib/domain/use-cases/auth/registroFlow';
 	import {
 		mapearFormularioColaboradorAInputRegistro,
 		mapearFormularioInstitucionAInputRegistro
-	} from '$lib/services/auth/registration.mapper';
+	} from '$lib/adapters/registration.mapper';
 	import {
 		REGISTRO_STORAGE_KEY,
 		REGISTRO_PAGE_STORAGE_KEY,

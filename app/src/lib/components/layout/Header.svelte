@@ -14,8 +14,8 @@
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
 
-	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 
 	let menuAbierto = false;
 	let visible = false;

@@ -5,7 +5,7 @@
 
 <script lang="ts">
 	import { provincias } from '\$lib/domain/types/static-data/provincias';
-	// import { mockLocalidades } from 'tests/mocks/mock-localidades';
+	// import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 	import {
 		TIPO_UBICACION,
 		MODALIDAD_UBICACION

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Está en "data" porque es una lista de datos estáticos
     -*- No son "mocks" porque no simulan nada; son fuentes fijas de verdad (truthy constants).
     -*- Como no cambian (o muy raramente) tampoco se deberían consultar a una API constantemente.

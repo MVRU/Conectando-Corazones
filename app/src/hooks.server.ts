@@ -1,5 +1,5 @@
 import { redirect, type Handle } from '@sveltejs/kit';
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const token = event.cookies.get('auth_token');

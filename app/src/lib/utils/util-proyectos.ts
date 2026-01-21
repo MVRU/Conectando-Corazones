@@ -1,4 +1,4 @@
-﻿import { error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 import type { Usuario } from '$lib/domain/types/Usuario';

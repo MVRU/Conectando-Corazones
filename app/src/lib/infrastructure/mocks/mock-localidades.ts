@@ -1,4 +1,4 @@
-﻿/*
+/*
     *  Está en "mocks" porque hay alrededor de +2.200 ciudades/localidades por provincia...
         -*- Es mejor consultarlas a una API o ver si hay algún dataset que las contenga.
         -*- https://datos.gob.ar/

@@ -1,4 +1,4 @@
-﻿// * DECISIÓN DE DISEÑO: se centralizan utilidades del registro para compartirlas entre componentes y mantener una única fuente de verdad al generar el payload discriminado por rol
+// * DECISIÓN DE DISEÑO: se centralizan utilidades del registro para compartirlas entre componentes y mantener una única fuente de verdad al generar el payload discriminado por rol
 
 import type { Contacto } from '$lib/domain/types/Contacto';
 

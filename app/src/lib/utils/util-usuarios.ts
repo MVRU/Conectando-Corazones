@@ -1,4 +1,4 @@
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
 
 /**

@@ -32,10 +32,11 @@
 		determinarEstadoVerificacion,
 		obtenerVerificacionesUsuario
 	} from '$lib/utils/util-verificacion';
-	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
-	import { obtenerProyectosUsuario } from '$lib/domain/use-cases/perfil/obtenerProyectosUsuario';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	import { perfilAdapter } from '$lib/adapters/perfil.adapter';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { writable } from 'svelte/store';
+    import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
@@ -52,7 +53,11 @@
 	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Proyectos del usuario
-	$: proyectosUsuario = obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol);
+    let proyectosUsuario: Proyecto[] = [];
+	$: {
+         perfilAdapter.obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol)
+            .then(p => proyectosUsuario = p);
+    }
 
 	// Reseñas del usuario - usando writable store local
 	const resenasStore = writable<Resena[]>([]);

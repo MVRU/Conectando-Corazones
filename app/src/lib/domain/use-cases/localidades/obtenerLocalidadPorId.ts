@@ -1,5 +1,7 @@
+// TODO: corregir todo esto
+
 import type { Localidad } from '$lib/domain/types/Localidad';
-import { mockLocalidades } from 'tests/mocks/mock-localidades';
+import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 
 /**
  * Caso de uso: Obtener una localidad por su ID

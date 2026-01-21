@@ -1,5 +1,5 @@
-﻿import type { ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
-import { getUbicacion } from 'tests/mocks/mock-ubicaciones';
+import type { ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
+import { getUbicacion } from '$lib/infrastructure/mocks/mock-ubicaciones';
 
 const ubicacionesBase: ProyectoUbicacion[] = [
 	{

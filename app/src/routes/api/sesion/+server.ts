@@ -1,6 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 import type { Usuario } from '$lib/domain/types/Usuario';
 
 // Tipo para la respuesta de sesión sin el password

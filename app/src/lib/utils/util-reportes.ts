@@ -1,5 +1,5 @@
 import type { Reporte } from '$lib/domain/types/Reporte';
-import { mockReportes } from 'tests/mocks/mock-reportes';
+import { mockReportes } from '$lib/infrastructure/mocks/mock-reportes';
 
 /**
  * Utilidad para simular la persistencia de reportes en el frontend.

@@ -1,8 +1,8 @@
-﻿// * DECISIÓN DE DISEÑO: se consolidan los tipos del registro en estructuras reutilizables y documentamos riesgos de compatibilidad con el backend, evitando duplicidades al mapear eventos discriminados por rol
+// * DECISIÓN DE DISEÑO: se consolidan los tipos del registro en estructuras reutilizables y documentamos riesgos de compatibilidad con el backend, evitando duplicidades al mapear eventos discriminados por rol
 
 import type { Contacto } from '$lib/domain/types/Contacto';
 import type { Colaborador, Institucion, Organizacion, Usuario } from '$lib/domain/types/Usuario';
-import type { RegistroRol } from '$lib/services/auth/registration-flow';
+import type { RegistroRol } from '$lib/domain/use-cases/auth/registroFlow';
 
 export type RegistroCredencialesBase = Pick<
 	Usuario,

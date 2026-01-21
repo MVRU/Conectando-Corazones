@@ -7,7 +7,7 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
 	export let resena: Resena;

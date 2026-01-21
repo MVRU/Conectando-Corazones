@@ -1,4 +1,4 @@
-﻿/**
+/**
  * * DECISIÓN DE DISEÑO:
  *     -*- Centralizamos el cálculo del porcentaje de avance de un proyecto.
  *     -*- Se consideran tanto los objetivos cumplidos como el tiempo transcurrido.

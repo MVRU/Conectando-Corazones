@@ -29,7 +29,7 @@
 		validarPiso,
 		crearValidadorCategoria
 	} from '$lib/utils/util-proyecto-form';
-	import { mockCategorias } from 'tests/mocks/mock-categorias';
+	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/domain/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';

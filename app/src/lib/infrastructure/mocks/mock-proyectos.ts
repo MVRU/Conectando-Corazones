@@ -1,10 +1,10 @@
-﻿import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Proyecto } from '$lib/domain/types/Proyecto';
 import type { ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 import type { Institucion } from '$lib/domain/types/Usuario';
-import { mockUsuarios } from 'tests/mocks/mock-usuarios';
-import { mockProyectoCategorias } from 'tests/mocks/mock-proyecto-categorias';
-import { mockColaboraciones } from 'tests/mocks/mock-colaboraciones';
-import { mockProyectoUbicaciones } from 'tests/mocks/mock-proyecto-ubicaciones';
+import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+import { mockProyectoCategorias } from '$lib/infrastructure/mocks/mock-proyecto-categorias';
+import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+import { mockProyectoUbicaciones } from '$lib/infrastructure/mocks/mock-proyecto-ubicaciones';
 
 // ---------- Helpers ----------
 // TODO: considerar pasarlos a utils

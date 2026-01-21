@@ -1,4 +1,4 @@
-﻿/// <reference types="svelte" />
+/// <reference types="svelte" />
 /// <reference types="vite/client" />
 import '$lib/domain/types/otros/svelte-jsx';
 

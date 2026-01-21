@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
-	import { mockTestimonios } from 'tests/mocks/mock-testimonios';
+	import { mockTestimonios } from '$lib/infrastructure/mocks/mock-testimonios';
 	import { swipe } from '\$lib/utils/actions/swipe';
 
 	let centerIndex = 0;

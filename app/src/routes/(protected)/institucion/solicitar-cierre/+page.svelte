@@ -3,10 +3,10 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
-	import { mockEvidencias } from 'tests/mocks/mock-evidencias';
-	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
-	import { mockSolicitudesFinalizacion } from 'tests/mocks/mock-solicitudes-finalizacion';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+	import { mockEvidencias } from '$lib/infrastructure/mocks/mock-evidencias';
+	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	import { mockSolicitudesFinalizacion } from '$lib/infrastructure/mocks/mock-solicitudes-finalizacion';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';

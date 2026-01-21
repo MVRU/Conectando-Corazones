@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { goto } from '$app/navigation';
 

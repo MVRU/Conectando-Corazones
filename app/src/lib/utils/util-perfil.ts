@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Utilidades para manejo de perfiles de usuario
  */
 

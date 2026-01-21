@@ -1,7 +1,7 @@
-﻿import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/domain/types/Usuario';
+import type { Administrador, Institucion, Organizacion, Unipersonal } from '$lib/domain/types/Usuario';
 
-import { mockCategorias } from 'tests/mocks/mock-categorias';
-import { mockLocalidades } from 'tests/mocks/mock-localidades';
+import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 
 export const mockUsuarios = {
 	admin1: {

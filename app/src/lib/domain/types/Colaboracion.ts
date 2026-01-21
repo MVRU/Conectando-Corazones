@@ -1,4 +1,4 @@
-﻿import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
+import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
 export interface Colaboracion {
 	id_colaboracion?: number;
 	estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';

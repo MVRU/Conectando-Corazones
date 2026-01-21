@@ -8,8 +8,8 @@
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import { formatearFecha } from '$lib/utils/validaciones';
 	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
-	import { mockProyectos } from 'tests/mocks/mock-proyectos';
-	import { mockColaboraciones } from 'tests/mocks/mock-colaboraciones';
+	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { InboxArrowDown, CheckCircle, XCircle, ChartBar, HandRaised } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';

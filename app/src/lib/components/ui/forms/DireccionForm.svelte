@@ -9,7 +9,7 @@
 		type UrlsVistaPreviaGoogleMaps
 	} from '$lib/utils/googleMaps';
 
-	import { mockLocalidades } from 'tests/mocks/mock-localidades';
+	import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
 	import { provincias } from '\$lib/domain/types/static-data/provincias';
 	import type { Provincia } from '$lib/domain/types/Provincia';
 	import type { Localidad } from '$lib/domain/types/Localidad';

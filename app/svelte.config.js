@@ -6,8 +6,7 @@ const config = {
 	kit: {
 		adapter: adapter(),
 		alias: {
-			$lib: 'src/lib',
-			'tests/mocks': 'tests/mocks'
+			$lib: 'src/lib'
 		}
 	}
 };

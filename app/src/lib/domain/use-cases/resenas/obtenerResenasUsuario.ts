@@ -1,3 +1,5 @@
+// TODO: corregir todo esto
+
 import type { Resena } from '$lib/domain/types/Resena';
 import { filtrarResenasPorTipo } from '$lib/utils/resenas';
 

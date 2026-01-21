@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { mockCategorias } from 'tests/mocks/mock-categorias';
+import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 import {
 	obtenerLocalidadesDisponibles,
 	getProvinciaFromLocalidad,

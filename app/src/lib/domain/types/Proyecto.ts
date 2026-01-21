@@ -1,4 +1,4 @@
-﻿import type { ParticipacionPermitida } from './ParticipacionPermitida';
+import type { ParticipacionPermitida } from './ParticipacionPermitida';
 import type { Categoria } from './Categoria';
 import type { Colaboracion } from './Colaboracion';
 import type { Institucion } from './Usuario';

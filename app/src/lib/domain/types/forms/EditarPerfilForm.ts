@@ -1,4 +1,4 @@
-﻿import type { Contacto } from '$lib/domain/types/Contacto';
+import type { Contacto } from '$lib/domain/types/Contacto';
 
 // Tipo específico para el formulario de edición de perfil
 export interface EditarPerfilForm {
