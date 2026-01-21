@@ -1,5 +1,5 @@
-import { provincias } from '$lib/data/provincias';
-import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import { provincias } from '$lib/domain/types/static-data/provincias';
+import { mockLocalidades } from 'tests/mocks/mock-localidades';
 
 /**
  * ! Mensajes de error comunes para validaciones

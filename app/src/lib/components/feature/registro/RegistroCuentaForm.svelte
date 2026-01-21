@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	import type { ComponentType } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
@@ -53,9 +53,9 @@
 		REGISTRO_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
-	} from '$lib/constants/registro';
+	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
-	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;
@@ -774,7 +774,7 @@
 				: !validarCorreo(emailNormalizado)
 					? MENSAJES_ERROR.correoInvalido
 					: Object.values(mockUsuarios).some((u) =>
-								u.contactos.some((c) => c.tipo_contacto === 'email' && c.valor === emailNormalizado)
+								u.contactos?.some((c) => c.tipo_contacto === 'email' && c.valor === emailNormalizado)
 						  )
 						? `El correo electrónico "${emailNormalizado}" ya está en uso`
 						: '',
@@ -1827,3 +1827,5 @@
 		</div>
 	</div>
 {/if}
+
+

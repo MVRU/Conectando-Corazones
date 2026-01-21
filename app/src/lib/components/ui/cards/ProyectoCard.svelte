@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
@@ -13,7 +13,7 @@
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
-	import { mockColaboraciones } from '$lib/mocks/mock-colaboraciones';
+	import { mockColaboraciones } from 'tests/mocks/mock-colaboraciones';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
 	export let proyecto: Proyecto;
@@ -355,3 +355,5 @@
 		overflow: hidden;
 	}
 </style>
+
+

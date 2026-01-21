@@ -19,12 +19,8 @@ export { default as Ticker } from './components/ui/Ticker.svelte';
 // Stores y utilidades
 export * from './stores/breadcrumbs';
 export * from './stores/auth';
-export * from './actions/inView';
+export * from './utils/actions/inView';
 export * from './utils/sanitize';
-export * from './mocks/mock-proyectos';
-export * from './mocks/mock-proyecto-categorias';
-export * from './mocks/mock-proyecto-ubicaciones';
-export * from './mocks/mock-ubicaciones';
 
 // Modelos
 export * from './domain/types/Usuario';

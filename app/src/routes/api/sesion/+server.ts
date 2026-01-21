@@ -1,6 +1,6 @@
-﻿import type { RequestHandler } from '@sveltejs/kit';
+import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
-import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 import type { Usuario } from '$lib/domain/types/Usuario';
 
 // Tipo para la respuesta de sesión sin el password
@@ -31,3 +31,4 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	const { password: _password, ...usuarioSeguro } = usuario;
 	return json({ usuario: usuarioSeguro } as RespuestaSesion);
 };
+

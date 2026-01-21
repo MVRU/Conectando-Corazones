@@ -1,11 +1,11 @@
-﻿<!--
+<!--
 	* Componente: ProyectoUbicaciones
   	-*- Para agregar las ubicaciones del proyecto
  -->
 
 <script lang="ts">
-	import { provincias } from '$lib/data/provincias';
-	// import { mockLocalidades } from '$lib/mocks/mock-localidades';
+	import { provincias } from '\$lib/domain/types/static-data/provincias';
+	// import { mockLocalidades } from 'tests/mocks/mock-localidades';
 	import {
 		TIPO_UBICACION,
 		MODALIDAD_UBICACION
@@ -531,3 +531,5 @@
 		</button>
 	</div>
 </div>
+
+

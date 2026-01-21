@@ -1,16 +1,16 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
-	import { mockProyectos as proyectosPorDefecto } from '$lib/mocks/mock-proyectos';
+	import { mockProyectos as proyectosPorDefecto } from 'tests/mocks/mock-proyectos';
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
-	import { createProyectosFiltros } from '$lib/composables/useProyectosFiltros';
-	import { useProyectosFiltrosUrl } from '$lib/composables/useProyectosFiltrosUrl';
+	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
+	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
+	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = proyectosPorDefecto;
@@ -209,3 +209,9 @@
 		</a>
 	{/if}
 </section>
+
+
+
+
+
+

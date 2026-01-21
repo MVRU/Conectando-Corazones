@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { usuario as usuarioStore, isAuthenticated, authActions, isAdmin } from '$lib/stores/auth';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
-	import ResenaModal from '$lib/components/modals/ResenaModal.svelte';
-	import EditarCategoriasModal from '$lib/components/modals/EditarCategoriasModal.svelte';
-	import EditarTiposParticipacionModal from '$lib/components/modals/EditarTiposParticipacionModal.svelte';
+	import ResenaModal from '$lib/components/ui/modals/ResenaModal.svelte';
+	import EditarCategoriasModal from '$lib/components/ui/modals/EditarCategoriasModal.svelte';
+	import EditarTiposParticipacionModal from '$lib/components/ui/modals/EditarTiposParticipacionModal.svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import type { Categoria } from '$lib/domain/types/Categoria';
 	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
@@ -24,16 +24,18 @@
 	import PerfilSeccionTiposParticipacion from './PerfilSeccionTiposParticipacion.svelte';
 	import PerfilSeccionProyectos from './PerfilSeccionProyectos.svelte';
 	import PerfilSeccionResenas from './PerfilSeccionResenas.svelte';
-	import ModalEditarPerfil from '$lib/components/modals/ModalEditarPerfil.svelte';
-	import { usePerfilModales } from '$lib/composables/usePerfilModales';
-	import { usePerfilEdicion } from '$lib/composables/usePerfilEdicion';
-	import { perfilService } from '$lib/services/perfilService';
+	import ModalEditarPerfil from '$lib/components/ui/modals/ModalEditarPerfil.svelte';
+	import { usePerfilModales } from '$lib/stores/perfilModales';
+	import { usePerfilEdicion } from '$lib/stores/perfilEdicion';
 	import { toastStore } from '$lib/stores/toast';
 	import {
 		determinarEstadoVerificacion,
 		obtenerVerificacionesUsuario
 	} from '$lib/utils/util-verificacion';
-	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
+	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
+	import { obtenerProyectosUsuario } from '$lib/domain/use-cases/perfil/obtenerProyectosUsuario';
+	import { mockProyectos } from 'tests/mocks/mock-proyectos';
+	import { writable } from 'svelte/store';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
@@ -44,37 +46,29 @@
 	}
 
 	// Verificar si el usuario actual puede ver los contactos del perfil
-	$: puedeVerContactosPerfil = puedeVerContactos(
-		$usuarioStore,
-		perfilUsuario,
-		perfilService.obtenerTodosLosProyectos()
-	);
+	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Verificar si el usuario actual puede dejar Reseña
-	$: puedeResenar = puedeDejarResena(
-		$usuarioStore,
-		perfilUsuario,
-		perfilService.obtenerTodosLosProyectos()
-	);
+	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, mockProyectos);
 
 	// Proyectos del usuario
-	$: proyectosUsuario = perfilService.obtenerProyectosUsuario(
-		perfilUsuario.id_usuario,
-		perfilUsuario.rol
-	);
+	$: proyectosUsuario = obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol);
 
-	// Reseñas del usuario
-	const resenasStore = perfilService.obtenerResenasStore();
+	// Reseñas del usuario - usando writable store local
+	const resenasStore = writable<Resena[]>([]);
 
 	$: yaResenoUsuario =
 		$usuarioStore && !esMiPerfil
-			? perfilService.yaResenoUsuario(
-					$usuarioStore.username || '',
-					perfilUsuario.id_usuario,
-					$resenasStore
+			? $resenasStore.some(
+					(r) =>
+						r.username === ($usuarioStore.username || '') &&
+						r.id_objeto === perfilUsuario.id_usuario &&
+						r.tipo_objeto === 'usuario'
 				)
 			: false;
-	$: reseñasUsuario = perfilService.obtenerResenasUsuario(perfilUsuario.id_usuario, $resenasStore);
+	$: reseñasUsuario = $resenasStore.filter(
+		(r) => r.id_objeto === perfilUsuario.id_usuario && r.tipo_objeto === 'usuario'
+	);
 
 	// Gestión de modales usando composable
 	const modales = usePerfilModales();
@@ -129,14 +123,17 @@
 	function handleGuardarResena(event: CustomEvent<Resena>) {
 		if (!$usuarioStore) return;
 
-		const nuevaResena = perfilService.agregarResena({
+		const nuevaResena: Resena = {
 			...event.detail,
 			username: $usuarioStore.username || `${$usuarioStore.nombre} ${$usuarioStore.apellido}`,
 			rol:
 				$usuarioStore.rol === 'colaborador'
 					? ($usuarioStore as any).razon_social || 'Colaborador'
 					: ($usuarioStore as any).nombre_legal || 'Institución'
-		});
+		};
+
+		// Agregar reseña al store local
+		resenasStore.update((resenas) => [...resenas, nuevaResena]);
 
 		toastStore.show({
 			variant: 'success',
@@ -313,3 +310,5 @@
 		on:success={handleConfirmarReporte}
 	/>
 {/if}
+
+

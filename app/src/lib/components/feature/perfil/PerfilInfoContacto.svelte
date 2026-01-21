@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { formatearEtiquetaContacto } from '$lib/utils/util-ui';
 	import {
@@ -212,3 +212,4 @@
 		</div>
 	</div>
 </div>
+

@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { ESTADO_LABELS, type EstadoDescripcion } from '$lib/domain/types/Estado';
 	import {
 		CheckCircle,
@@ -48,3 +48,4 @@
 	<Icon src={config.icon} class="h-3.5 w-3.5" />
 	{label}
 </span>
+

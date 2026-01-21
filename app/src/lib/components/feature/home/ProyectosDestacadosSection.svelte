@@ -3,7 +3,7 @@
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
-	import { mockProyectos as proyectos } from '$lib/mocks/mock-proyectos';
+	import { mockProyectos as proyectos } from 'tests/mocks/mock-proyectos';
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -75,3 +75,5 @@
 		/>
 	</div>
 </section>
+
+

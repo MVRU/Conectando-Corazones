@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
@@ -8,7 +8,7 @@
 	import ProyectoUbicaciones from './ProyectoUbicaciones.svelte';
 	import type { ParticipacionForm, UbicacionFormulario } from '$lib/domain/types/forms/CrearProyectoForm';
 	import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
-	import { provincias } from '$lib/data/provincias';
+	import { provincias } from '\$lib/domain/types/static-data/provincias';
 	import {
 		MENSAJES_ERROR,
 		validarUrl,
@@ -29,7 +29,7 @@
 		validarPiso,
 		crearValidadorCategoria
 	} from '$lib/utils/util-proyecto-form';
-	import { mockCategorias } from '$lib/mocks/mock-categorias';
+	import { mockCategorias } from 'tests/mocks/mock-categorias';
 	import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/domain/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
@@ -458,3 +458,5 @@
 		</form>
 	</div>
 </main>
+
+

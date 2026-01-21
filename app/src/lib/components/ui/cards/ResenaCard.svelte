@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Resena } from '$lib/domain/types/Resena';
 	import type {
 		Usuario,
@@ -7,7 +7,7 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
 	export let resena: Resena;
@@ -107,3 +107,5 @@
 		</div>
 	{/if}
 </div>
+
+

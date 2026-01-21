@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
+	import MetodosContactoForm from '\$lib/components/ui/forms/MetodosContactoForm.svelte';
 </script>
 
 <!-- Fondo decorativo infinito -->
@@ -20,3 +20,4 @@
 
 	<MetodosContactoForm />
 </main>
+

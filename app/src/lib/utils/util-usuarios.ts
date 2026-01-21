@@ -1,4 +1,4 @@
-﻿import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
 
 /**
@@ -50,3 +50,4 @@ export function obtenerInicialesUsuario(usuarioId: number): string {
 
 	return (palabras[0][0] + palabras[palabras.length - 1][0]).toUpperCase();
 }
+

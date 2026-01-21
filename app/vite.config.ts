@@ -8,5 +8,11 @@ import { defineConfig } from 'vite';
  */
 
 export default defineConfig({
-	plugins: [tailwindcss(), sveltekit()]
+	plugins: [tailwindcss(), sveltekit()],
+	server: {
+		fs: {
+			// Allow serving files from the tests directory
+			allow: ['..']
+		}
+	}
 });

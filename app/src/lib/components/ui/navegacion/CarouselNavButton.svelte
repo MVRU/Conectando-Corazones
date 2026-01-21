@@ -10,3 +10,4 @@
 >
 	{#if direction === 'prev'}&#10094;{:else}&#10095;{/if}
 </button>
+

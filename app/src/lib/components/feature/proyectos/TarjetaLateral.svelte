@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import { getEstadoCodigo } from '$lib/utils/util-estados';
@@ -193,3 +193,4 @@
 		animation: fade-up 0.4s ease-out both;
 	}
 </style>
+

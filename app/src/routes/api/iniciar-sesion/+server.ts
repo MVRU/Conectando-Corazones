@@ -1,7 +1,7 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
 import { dev } from '$app/environment';
-import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	const { identificador, password, rememberMe } = await request.json();
@@ -30,3 +30,4 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	const { password: _pw, ...safeUsuario } = usuario;
 	return json({ usuario: safeUsuario });
 };
+

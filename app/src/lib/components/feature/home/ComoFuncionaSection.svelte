@@ -6,8 +6,8 @@ TODO:
 	import StepCard from '$lib/components/ui/cards/StepCard.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { steps } from '$lib/data/como-funciona';
-	import { inView } from '$lib/actions/inView';
+	import { steps } from '\$lib/domain/types/static-data/como-funciona';
+	import { inView } from '\$lib/utils/actions/inView';
 
 	let inViewSection = false;
 </script>
@@ -68,3 +68,5 @@ TODO:
 		/>
 	</div>
 </section>
+
+

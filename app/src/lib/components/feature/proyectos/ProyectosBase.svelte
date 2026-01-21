@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import { fade, fly } from 'svelte/transition';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
@@ -186,3 +186,4 @@
 		animation: fade-in-up 0.6s ease-out both;
 	}
 </style>
+

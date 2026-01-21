@@ -3,7 +3,7 @@
 	import { usuario as usuarioStore } from '$lib/stores/auth';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { crearReporte } from '$lib/utils/util-reportes';
-	import { portal } from '$lib/actions/portal';
+	import { portal } from '\$lib/utils/actions/portal';
 	import { Button } from '$lib';
 
 	const dispatch = createEventDispatcher();
@@ -192,3 +192,5 @@
 		animation: slide-up 0.3s ease-out;
 	}
 </style>
+
+

@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
@@ -143,3 +143,4 @@
 		</div>
 	</div>
 </div>
+

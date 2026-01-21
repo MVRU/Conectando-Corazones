@@ -1,8 +1,8 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { usuario as user, isAdmin, isInstitucion, isColaborador } from '$lib/stores/auth';
-	import { mockReportes } from '$lib/mocks/mock-reportes';
-	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
-	import { mockProyectos } from '$lib/mocks/mock-proyectos';
+	import { mockReportes } from 'tests/mocks/mock-reportes';
+	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+	import { mockProyectos } from 'tests/mocks/mock-proyectos';
 	import type { Reporte } from '$lib/domain/types/Reporte';
 	import { fly } from 'svelte/transition';
 	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';
@@ -641,3 +641,4 @@
 		animation: fade-in-up 0.5s ease-out forwards;
 	}
 </style>
+

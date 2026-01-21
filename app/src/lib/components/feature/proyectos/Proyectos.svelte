@@ -1,6 +1,6 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
-	import { mockProyectos as defaultProyectos } from '$lib/mocks/mock-proyectos';
+	import { mockProyectos as defaultProyectos } from 'tests/mocks/mock-proyectos';
 	import TodosProyectos from './TodosProyectos.svelte';
 	import MisProyectos from './MisProyectos.svelte';
 	import { usuario } from '$lib/stores/auth';
@@ -89,3 +89,5 @@
 		</div>
 	{/if}
 </section>
+
+

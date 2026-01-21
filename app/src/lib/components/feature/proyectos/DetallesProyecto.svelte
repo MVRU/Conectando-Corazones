@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import { Users, Tag, CalendarDays, Clock } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
@@ -162,3 +162,4 @@
 		animation: fade-up 0.4s ease-out both;
 	}
 </style>
+

@@ -4,7 +4,7 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
+	import { shouldShowBreadcrumbs } from '\$lib/infrastructure/config/breadcrumbs.config';
 	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate } from '$app/navigation';
@@ -71,3 +71,4 @@
 </main>
 
 <Footer />
+

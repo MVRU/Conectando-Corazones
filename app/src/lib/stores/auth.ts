@@ -1,4 +1,4 @@
-﻿import { writable, derived, get } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import type {
 	Usuario,
 	Institucion,
@@ -9,7 +9,7 @@ import type {
 } from '$lib/domain/types/Usuario';
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
-import { mockUsuarios } from '$lib/mocks/mock-usuarios';
+import { mockUsuarios } from 'tests/mocks/mock-usuarios';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -373,7 +373,7 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 	}
 
 	const emailExistente = Object.values(mockUsuarios).some((u) =>
-		u.contactos.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)
+		u.contactos?.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)
 	);
 
 	if (emailExistente) {
@@ -629,3 +629,5 @@ function clonarMetadata(metadata: RegistroMetadata | undefined): RegistroMetadat
 		return null;
 	}
 }
+
+

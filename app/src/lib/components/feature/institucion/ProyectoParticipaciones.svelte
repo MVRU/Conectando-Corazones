@@ -1,4 +1,4 @@
-﻿<!--
+<!--
  * * Componente: ProyectoParticipaciones
  * -!- Para agregar los tipos de participaciones permitidas y sus objetivos.
  -->
@@ -413,3 +413,4 @@
 		{/if}
 	{/if}
 </div>
+

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { writable, derived } from 'svelte/store';
 	import { onMount } from 'svelte';
-	import { faqs as allFaqs } from '$lib/data/faqs';
+	import { faqs as allFaqs } from '\$lib/domain/types/static-data/faqs';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import Highlight from '$lib/components/ui/Highlight.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -208,3 +208,4 @@
 		animation: fade-slide-in 0.5s ease-out forwards;
 	}
 </style>
+

@@ -1,16 +1,16 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
-	import Loader from '$lib/components/feedback/Loader.svelte';
+	import Loader from '\$lib/components/ui/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	// import ValidacionRenaper from '$lib/components/validaciones/ValidacionRenaper.svelte';
-	// import ValidacionEmail from '$lib/components/validaciones/ValidacionEmail.svelte';
-	import ValidacionInstitucion from '$lib/components/validaciones/ValidacionInstitucion.svelte';
-	import DireccionForm from '$lib/components/forms/DireccionForm.svelte';
-	import MetodosContactoForm from '$lib/components/forms/MetodosContactoForm.svelte';
+	// import ValidacionRenaper from '\$lib/validation/components/ValidacionRenaper.svelte';
+	// import ValidacionEmail from '\$lib/validation/components/ValidacionEmail.svelte';
+	import ValidacionInstitucion from '\$lib/validation/components/ValidacionInstitucion.svelte';
+	import DireccionForm from '\$lib/components/ui/forms/DireccionForm.svelte';
+	import MetodosContactoForm from '\$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import { goto } from '$app/navigation';
 	import { fly, fade } from 'svelte/transition';
 	import type { RegistroCuentaSubmitDetail } from '$lib/domain/types/forms/registro';
@@ -29,7 +29,7 @@
 		REGISTRO_PAGE_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
-	} from '$lib/constants/registro';
+	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
 
 	let cargada = false; // para saber si la página terminó de cargar	
@@ -518,3 +518,4 @@
 
 	<Loader size={80} loading={!cargada} />
 </main>
+

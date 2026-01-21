@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
-	import { mockTestimonios } from '$lib/mocks/mock-testimonios';
-	import { swipe } from '$lib/actions/swipe';
+	import { mockTestimonios } from 'tests/mocks/mock-testimonios';
+	import { swipe } from '\$lib/utils/actions/swipe';
 
 	let centerIndex = 0;
 	let cantidadVisible = 3;
@@ -146,3 +146,5 @@
 		pointer-events: none;
 	}
 </style>
+
+

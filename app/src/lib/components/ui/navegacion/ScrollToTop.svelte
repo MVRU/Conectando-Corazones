@@ -95,3 +95,4 @@
 		animation: bounceUp 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1;
 	}
 </style>
+

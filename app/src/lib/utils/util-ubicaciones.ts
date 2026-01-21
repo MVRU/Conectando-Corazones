@@ -1,8 +1,8 @@
-﻿import type { Localidad } from '$lib/domain/types/Localidad';
+import type { Localidad } from '$lib/domain/types/Localidad';
 import type { Provincia } from '$lib/domain/types/Provincia';
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { provincias } from '$lib/data/provincias';
-import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import { provincias } from '\$lib/domain/types/static-data/provincias';
+import { mockLocalidades } from 'tests/mocks/mock-localidades';
 import type {
 	UbicacionDisyuncion,
 	UbicacionPresencial,
@@ -213,3 +213,4 @@ export function filtrarPorLocalidad(
 	}
 	return proyectos;
 }
+

@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
@@ -9,8 +9,8 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from '$lib/mocks/mock-usuarios';
-	import { mockCategorias } from '$lib/mocks/mock-categorias';
+	import { mockUsuarios } from 'tests/mocks/mock-usuarios';
+	import { mockCategorias } from 'tests/mocks/mock-categorias';
 	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
 	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
@@ -391,3 +391,4 @@
 		</div>
 	{/if}
 </div>
+

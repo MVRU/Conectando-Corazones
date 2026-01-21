@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Contacto } from '$lib/domain/types/Contacto';
 	import {
 		Envelope,
@@ -120,3 +120,4 @@
 		animation: fade-up 0.4s ease-out both;
 	}
 </style>
+

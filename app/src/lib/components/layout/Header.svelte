@@ -14,8 +14,8 @@
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
 
-	import { mockVerificaciones } from '$lib/mocks/mock-verificaciones';
-	import { mockProyectos } from '$lib/mocks/mock-proyectos';
+	import { mockVerificaciones } from 'tests/mocks/mock-verificaciones';
+	import { mockProyectos } from 'tests/mocks/mock-proyectos';
 
 	let menuAbierto = false;
 	let visible = false;
@@ -351,3 +351,5 @@
 		}
 	}
 </style>
+
+

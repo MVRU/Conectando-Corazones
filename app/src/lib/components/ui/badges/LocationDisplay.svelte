@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { MapPin, GlobeAlt } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
@@ -34,3 +34,4 @@
 	{/if}
 	<span class="truncate">{ubicacionTexto}</span>
 </div>
+

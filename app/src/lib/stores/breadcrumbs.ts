@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { page } from '$app/stores';
-import { shouldShowBreadcrumbs } from '$lib/config/breadcrumbs.config';
+import { shouldShowBreadcrumbs } from '\$lib/infrastructure/config/breadcrumbs.config';
 
 // * DECISIÓN DE DISEÑO
 // -*- Fuente única de verdad para las migas de pan.
@@ -68,3 +68,4 @@ export const BREADCRUMB_ROUTES = {
 	login: { label: 'Iniciar sesión', href: '/iniciar-sesion' },
 	registro: { label: 'Registrarse', href: '/registrarse' }
 };
+

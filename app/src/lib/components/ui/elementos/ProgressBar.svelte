@@ -45,3 +45,4 @@
 		        width:${show ? percent + '%' : '0%'};`}
 	></div>
 </div>
+

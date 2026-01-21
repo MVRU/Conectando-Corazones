@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 
@@ -74,3 +74,4 @@
 		</div>
 	{/if}
 </section>
+

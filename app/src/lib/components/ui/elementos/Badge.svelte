@@ -24,3 +24,4 @@
 	></span>
 	<p class="text-m font-semibold" style={`color: ${customColor};`}>{text}</p>
 </div>
+

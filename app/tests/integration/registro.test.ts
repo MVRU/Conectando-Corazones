@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
 import '@testing-library/jest-dom/vitest';
-import RegistroCuentaForm from '$lib/components/registro/RegistroCuentaForm.svelte';
-import FotoPerfilUploader from '$lib/components/registro/FotoPerfilUploader.svelte';
+import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
+import FotoPerfilUploader from '$lib/components/feature/registro/FotoPerfilUploader.svelte';
 
 /**
  * Helper para simular la selección de archivos en inputs de tipo file

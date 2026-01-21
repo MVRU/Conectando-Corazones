@@ -1,10 +1,10 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 import type { Resena } from '$lib/domain/types/Resena';
 import type { Localidad } from '$lib/domain/types/Localidad';
-import { mockProyectos } from '$lib/mocks/mock-proyectos';
-import { mockTestimonios } from '$lib/mocks/mock-testimonios';
-import { mockResenas } from '$lib/mocks/mock-resenas';
-import { mockLocalidades } from '$lib/mocks/mock-localidades';
+import { mockProyectos } from 'tests/mocks/mock-proyectos';
+import { mockTestimonios } from 'tests/mocks/mock-testimonios';
+import { mockResenas } from 'tests/mocks/mock-resenas';
+import { mockLocalidades } from 'tests/mocks/mock-localidades';
 import { filtrarResenasPorTipo } from '$lib/utils/resenas';
 import { writable } from 'svelte/store';
 
@@ -81,3 +81,4 @@ export const perfilService = {
 		return mockProyectos;
 	}
 };
+

@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -383,3 +383,4 @@
 		animation: fade-up 0.5s ease-out forwards;
 	}
 </style>
+

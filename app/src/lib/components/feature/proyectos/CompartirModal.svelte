@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import {
 		Share,
@@ -225,3 +225,4 @@
 		</div>
 	</div>
 {/if}
+

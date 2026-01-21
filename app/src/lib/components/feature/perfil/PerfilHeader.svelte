@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
@@ -173,3 +173,4 @@
 		{/if}
 	</div>
 </div>
+

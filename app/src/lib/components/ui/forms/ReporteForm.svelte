@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { MotivoReporte } from '$lib/domain/types/Reporte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -284,3 +284,4 @@
 		/>
 	</div>
 </form>
+

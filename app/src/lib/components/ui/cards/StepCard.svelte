@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { inView } from '$lib/actions/inView';
+	import { inView } from '\$lib/utils/actions/inView';
 
 	export let stepNumber: number;
 	export let title: string;
@@ -98,3 +98,5 @@
 		transform: translateY(-3px) scale(1.02);
 	}
 </style>
+
+

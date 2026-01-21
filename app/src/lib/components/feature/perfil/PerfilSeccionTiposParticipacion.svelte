@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
@@ -93,3 +93,4 @@
 		{/if}
 	</section>
 {/if}
+

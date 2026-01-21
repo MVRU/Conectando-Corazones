@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
@@ -93,3 +93,4 @@
 		</div>
 	{/if}
 </section>
+

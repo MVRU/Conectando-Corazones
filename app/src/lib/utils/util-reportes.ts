@@ -1,5 +1,5 @@
-﻿import type { Reporte } from '$lib/domain/types/Reporte';
-import { mockReportes } from '$lib/mocks/mock-reportes';
+import type { Reporte } from '$lib/domain/types/Reporte';
+import { mockReportes } from 'tests/mocks/mock-reportes';
 
 /**
  * Utilidad para simular la persistencia de reportes en el frontend.
@@ -124,3 +124,4 @@ export function cargarReportesPersistidos(): void {
 		console.error('Error cargando reportes persistidos', e);
 	}
 }
+

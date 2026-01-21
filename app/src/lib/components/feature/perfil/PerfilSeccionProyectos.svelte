@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 
@@ -42,3 +42,4 @@
 		</div>
 	{/if}
 </section>
+
