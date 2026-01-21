@@ -1,3 +1,1 @@
-<script lang="ts">
-    // TODO: Implementar la vista "Visualizar aportes y cargar evidencia" del Miro
-</script>
+<!-- Esta página está vacía intencionalmente. El contenido vive en +layout.svelte para permitir que los modales se superpongan sin refrescar el fondo. -->

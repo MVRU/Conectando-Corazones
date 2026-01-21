@@ -285,6 +285,12 @@
 		}
 	}
 
+	function irAAportes() {
+		if (esInstitucion && proyecto?.id_proyecto) {
+			goto(`/institucion/proyectos/${proyecto.id_proyecto}/aportes`);
+		}
+	}
+
 	onMount(() => {
 		layoutStore.showStickyBottomBar();
 	});
@@ -510,7 +516,7 @@
 								<div class="relative flex-1">
 									<button
 										type="button"
-										on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+										onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
 										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-expanded={mostrarDropdownAdmin}
 										aria-haspopup="true"
@@ -534,7 +540,7 @@
 											<button
 												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 												role="menuitem"
-												on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+												onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 											>
 												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
 												Editar proyecto
@@ -558,7 +564,7 @@
 
 										<div
 											class="fixed inset-0 z-[-1]"
-											on:click={() => (mostrarDropdownAdmin = false)}
+											onclick={() => (mostrarDropdownAdmin = false)}
 											aria-hidden="true"
 										></div>
 									{/if}
@@ -567,7 +573,7 @@
 								<div class="relative flex-1">
 									<button
 										type="button"
-										on:click={() =>
+										onclick={() =>
 											(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
 										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-expanded={mostrarDropdownGestionarProyecto}
@@ -600,7 +606,7 @@
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
-													on:click={() =>
+													onclick={() =>
 														goto(
 															`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
 														)}
@@ -613,7 +619,7 @@
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
-													on:click={irAColaborar}
+													onclick={irAColaborar}
 												>
 													<Icon src={Plus} class="h-4 w-4 text-gray-500" />
 													Agregar aporte
@@ -623,7 +629,7 @@
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
-													on:click={() =>
+													onclick={() =>
 														goto(
 															`/colaborador/evaluar-finalizacion?proyecto=${proyecto.id_proyecto}`
 														)}
@@ -635,6 +641,7 @@
 											<button
 												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 												role="menuitem"
+												onclick={irAAportes}
 											>
 												<Icon src={Photo} class="h-4 w-4 text-gray-500" />
 												Ver aportes y evidencias
@@ -647,7 +654,7 @@
 													<button
 														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 														role="menuitem"
-														on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+														onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 													>
 														<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
 														Editar proyecto
@@ -660,7 +667,7 @@
 														: 'cursor-not-allowed text-gray-400 opacity-50'}"
 													role="menuitem"
 													disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-													on:click={() =>
+													onclick={() =>
 														goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
 												>
 													<Icon
@@ -691,7 +698,7 @@
 
 										<div
 											class="fixed inset-0 z-[-1]"
-											on:click={() => (mostrarDropdownGestionarProyecto = false)}
+											onclick={() => (mostrarDropdownGestionarProyecto = false)}
 											aria-hidden="true"
 										></div>
 									{/if}
@@ -701,7 +708,7 @@
 								{#if esSolicitudRechazada}
 									<button
 										type="button"
-										on:click={() => (mostrarModalJustificacion = true)}
+										onclick={() => (mostrarModalJustificacion = true)}
 										class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 										aria-label="Ver motivo del rechazo"
 									>
@@ -710,7 +717,7 @@
 								{:else}
 									<button
 										type="button"
-										on:click={manejarClickSolicitud}
+										onclick={manejarClickSolicitud}
 										disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
 										class={tieneSolicitudPendiente
 											? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
@@ -732,7 +739,7 @@
 
 							<button
 								type="button"
-								on:click={compartirProyecto}
+								onclick={compartirProyecto}
 								class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 								aria-label="Compartir este proyecto"
 							>
@@ -998,7 +1005,7 @@
 								<button
 									type="button"
 									disabled={yaReporto}
-									on:click={() => pushState('', { showReportModal: true })}
+									onclick={() => pushState('', { showReportModal: true })}
 									class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 								>
 									<Icon src={Flag} class="h-4 w-4" />
@@ -1023,7 +1030,7 @@
 							<button
 								type="button"
 								disabled={yaReporto}
-								on:click={() => pushState('', { showReportModal: true })}
+								onclick={() => pushState('', { showReportModal: true })}
 								class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 							>
 								<Icon src={Flag} class="h-4 w-4" />
@@ -1040,8 +1047,8 @@
 			tipo_objeto="Proyecto"
 			id_objeto={proyecto.id_proyecto ?? 0}
 			nombre_objeto={proyecto.titulo}
-			on:close={() => history.back()}
-			on:success={handleReportSuccess}
+			onclose={() => history.back()}
+			onsuccess={handleReportSuccess}
 		/>
 		<slot />
 
@@ -1054,7 +1061,7 @@
 					<div class="relative flex-1">
 						<button
 							type="button"
-							on:click={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+							onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
 							class="flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 						>
 							Gestionar proyecto
@@ -1073,7 +1080,7 @@
 							>
 								<button
 									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-									on:click={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+									onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 								>
 									<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
 									Editar proyecto
@@ -1096,7 +1103,7 @@
 							<!-- Backdrop -->
 							<div
 								class="fixed inset-0 z-[-1] bg-black/50"
-								on:click={() => (mostrarDropdownAdmin = false)}
+								onclick={() => (mostrarDropdownAdmin = false)}
 								aria-hidden="true"
 							></div>
 						{/if}
@@ -1105,7 +1112,7 @@
 					<div class="relative flex-1">
 						<button
 							type="button"
-							on:click={() =>
+							onclick={() =>
 								(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
 							class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 						>
@@ -1131,7 +1138,7 @@
 								</button>
 								<button
 									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-									on:click={() =>
+									onclick={() =>
 										goto(
 											esCreador
 												? `/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
@@ -1143,6 +1150,7 @@
 								</button>
 								<button
 									class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+									onclick={irAAportes}
 								>
 									<Icon src={Photo} class="h-5 w-5 text-gray-500" />
 									Ver aportes y evidencias
@@ -1157,7 +1165,7 @@
 											? 'text-red-600 active:bg-red-50'
 											: 'cursor-not-allowed text-gray-400 opacity-50'}"
 										disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-										on:click={() =>
+										onclick={() =>
 											goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
 									>
 										<Icon
@@ -1187,7 +1195,7 @@
 							<!-- Backdrop -->
 							<div
 								class="fixed inset-0 z-[-1] bg-black/50"
-								on:click={() => (mostrarDropdownGestionarProyecto = false)}
+								onclick={() => (mostrarDropdownGestionarProyecto = false)}
 								aria-hidden="true"
 							></div>
 						{/if}
@@ -1195,7 +1203,7 @@
 				{:else if esSolicitudRechazada}
 					<button
 						type="button"
-						on:click={() => (mostrarModalJustificacion = true)}
+						onclick={() => (mostrarModalJustificacion = true)}
 						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-sm transition active:scale-[0.98]"
 					>
 						<Icon src={XCircle} class="h-5 w-5" />
@@ -1204,7 +1212,7 @@
 				{:else if !esInstitucion}
 					<button
 						type="button"
-						on:click={manejarClickSolicitud}
+						onclick={manejarClickSolicitud}
 						class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
 					>
 						<Icon src={Heart} class="h-5 w-5" />
@@ -1213,7 +1221,7 @@
 				{/if}
 				<button
 					type="button"
-					on:click={compartirProyecto}
+					onclick={compartirProyecto}
 					class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
 					aria-label="Compartir"
 				>
@@ -1232,7 +1240,7 @@
 
 <ModalColaboracion
 	bind:open={mostrarModalColaborar}
-	on:submit={() => {
+	onsubmit={() => {
 		mostrarModalColaborar = false;
 		mostrarModalExito = true;
 		solicitudRecienEnviada = true;
@@ -1243,7 +1251,7 @@
 	<!-- Overlay -->
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={() => (mostrarModalExito = false)}
+		onclick={() => (mostrarModalExito = false)}
 		aria-hidden="true"
 	></div>
 
@@ -1255,8 +1263,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-exito-titulo"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
 				if (e.key === 'Escape') mostrarModalExito = false;
 			}}
 		>
@@ -1275,7 +1283,7 @@
 				<button
 					type="button"
 					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={() => (mostrarModalExito = false)}
+					onclick={() => (mostrarModalExito = false)}
 				>
 					Cerrar
 				</button>
@@ -1288,7 +1296,7 @@
 	<!-- Overlay -->
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={() => (mostrarModalJustificacion = false)}
+		onclick={() => (mostrarModalJustificacion = false)}
 		aria-hidden="true"
 	></div>
 
@@ -1300,8 +1308,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-justificacion-titulo"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
 				if (e.key === 'Escape') mostrarModalJustificacion = false;
 			}}
 		>
@@ -1326,7 +1334,7 @@
 				<button
 					type="button"
 					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={() => (mostrarModalJustificacion = false)}
+					onclick={() => (mostrarModalJustificacion = false)}
 				>
 					Cerrar
 				</button>
@@ -1339,7 +1347,7 @@
 	<!-- Overlay -->
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={() => (mostrarModalPendiente = false)}
+		onclick={() => (mostrarModalPendiente = false)}
 		aria-hidden="true"
 	></div>
 
@@ -1351,8 +1359,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-pendiente-titulo"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
 				if (e.key === 'Escape') mostrarModalPendiente = false;
 			}}
 		>
@@ -1378,7 +1386,7 @@
 				<button
 					type="button"
 					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={() => (mostrarModalPendiente = false)}
+					onclick={() => (mostrarModalPendiente = false)}
 				>
 					Cerrar
 				</button>

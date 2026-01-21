@@ -1,22 +1,28 @@
 <script lang="ts">
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { PaperAirplane, XMark } from '@steeze-ui/heroicons';
-	import { createEventDispatcher } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 
-	export let open = false;
+	let {
+		open = $bindable(false),
+		onclose,
+		onsubmit
+	} = $props<{
+		open: boolean;
+		onclose?: () => void;
+		onsubmit?: (detail: { mensaje: string }) => void;
+	}>();
 
-	const dispatch = createEventDispatcher();
-	let mensajeColaboracion = '';
-	let textarea: HTMLTextAreaElement;
+	let mensajeColaboracion = $state('');
+	let textarea = $state<HTMLTextAreaElement>();
 
 	function cerrar() {
 		open = false;
-		dispatch('close');
+		if (onclose) onclose();
 	}
 
 	function enviar() {
-		dispatch('submit', { mensaje: mensajeColaboracion });
+		if (onsubmit) onsubmit({ mensaje: mensajeColaboracion });
 		mensajeColaboracion = '';
 	}
 
@@ -24,9 +30,11 @@
 		if (open && e.key === 'Escape') cerrar();
 	}
 
-	$: if (open && textarea) {
-		setTimeout(() => textarea.focus(), 100);
-	}
+	$effect(() => {
+		if (open && textarea) {
+			setTimeout(() => textarea?.focus(), 100);
+		}
+	});
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -34,7 +42,7 @@
 {#if open}
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={cerrar}
+		onclick={cerrar}
 		transition:fade={{ duration: 200 }}
 		aria-hidden="true"
 	></div>
@@ -55,7 +63,7 @@
 				<button
 					type="button"
 					class="absolute top-4 right-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:ring-2 focus:ring-sky-200 focus:outline-none"
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 				>
 					<Icon src={XMark} class="h-5 w-5" />
@@ -97,14 +105,14 @@
 				<button
 					type="button"
 					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:outline-none sm:w-auto"
-					on:click={cerrar}
+					onclick={cerrar}
 				>
 					Cancelar
 				</button>
 				<button
 					type="button"
 					class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:outline-none active:translate-y-[1px] sm:w-auto"
-					on:click={enviar}
+					onclick={enviar}
 				>
 					<Icon src={PaperAirplane} class="h-4 w-4" aria-hidden="true" />
 					Enviar mi solicitud
