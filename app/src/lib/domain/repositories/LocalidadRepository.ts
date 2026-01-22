@@ -5,4 +5,5 @@ export interface LocalidadRepository {
 	findAll(): Promise<Localidad[]>;
 	findById(id: number): Promise<Localidad | null>;
 	findByProvinciaId(idProvincia: number): Promise<Localidad[]>;
+	findByCodigoPostal(codigoPostal: string): Promise<Localidad | null>;
 }
