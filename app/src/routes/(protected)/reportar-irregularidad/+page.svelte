@@ -16,8 +16,8 @@
 	$: idObjeto = parseInt(queryParams.get('id') || '0');
 	$: nombreObjeto = queryParams.get('name') || '';
 
-	async function handleFormSubmit(event: CustomEvent) {
-		const { motivo, motivoOtro, descripcion } = event.detail;
+	async function handleFormSubmit(detail: { motivo: any; motivoOtro?: string; descripcion: string }) {
+		const { motivo, motivoOtro, descripcion } = detail;
 		errorEnvio = '';
 		enviandoFormulario = true;
 
@@ -33,7 +33,7 @@
 			motivo,
 			descripcion:
 				motivo === 'Otro'
-					? `Motivo: ${motivoOtro.trim()}\n\n${descripcion.trim()}`
+					? `Motivo: ${motivoOtro?.trim() || ''}\n\n${descripcion.trim()}`
 					: descripcion.trim(),
 			id_reporte: undefined,
 			created_at: new Date(),
@@ -121,7 +121,7 @@
 						isLoading={enviandoFormulario}
 						{nombreObjeto}
 						{tipoObjeto}
-						on:submit={handleFormSubmit}
+						onsubmit={handleFormSubmit}
 					/>
 				{/if}
 			{:else}

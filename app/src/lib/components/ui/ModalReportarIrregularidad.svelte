@@ -1,25 +1,33 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { usuario as usuarioStore } from '$lib/stores/auth';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { crearReporte } from '$lib/utils/util-reportes';
 	import { portal } from '\$lib/utils/actions/portal';
 	import { Button } from '$lib';
 
-	const dispatch = createEventDispatcher();
-
 	// recibidas del componente padre
-	export let open = false;
-	export let tipo_objeto: 'Usuario' | 'Proyecto';
-	export let id_objeto: number;
-	export let nombre_objeto = '';
+	let { 
+		open = $bindable(false), 
+		tipo_objeto, 
+		id_objeto, 
+		nombre_objeto = '',
+		onclose,
+		onsuccess
+	} = $props<{
+		open: boolean;
+		tipo_objeto: 'Usuario' | 'Proyecto';
+		id_objeto: number;
+		nombre_objeto?: string;
+		onclose?: () => void;
+		onsuccess?: (detail: { reporte: any }) => void;
+	}>();
 
-	let enviando = false;
-	let reporteEnviado = false;
-	let errorEnvio = '';
-	let formComponent: ReporteForm;
+	let enviando = $state(false);
+	let reporteEnviado = $state(false);
+	let errorEnvio = $state('');
+	let formComponent = $state<ReporteForm>();
 
-	$: usuario = $usuarioStore;
+	let usuario = $derived($usuarioStore);
 
 	function cerrarModal() {
 		if (!enviando) {
@@ -27,12 +35,12 @@
 			errorEnvio = '';
 			reporteEnviado = false;
 			open = false;
-			dispatch('close');
+			if (onclose) onclose();
 		}
 	}
 
-	async function handleFormSubmit(event: CustomEvent) {
-		const { motivo, motivoOtro, descripcion } = event.detail;
+	async function handleFormSubmit(detail: { motivo: string; motivoOtro?: string; descripcion: string }) {
+		const { motivo, motivoOtro, descripcion } = detail;
 		errorEnvio = '';
 
 		if (!usuario?.id_usuario) {
@@ -46,17 +54,17 @@
 			const nuevoReporte = await crearReporte({
 				tipo_objeto,
 				id_objeto,
-				motivo,
+				motivo: motivo as any,
 				descripcion:
 					motivo === 'Otro'
-						? `Motivo: ${motivoOtro.trim()}\n\n${descripcion.trim()}`
+						? `Motivo: ${motivoOtro?.trim() || ''}\n\n${descripcion.trim()}`
 						: descripcion.trim(),
 				reportante_id: usuario.id_usuario,
 				admin_id: null
 			});
 
 			console.log('Reporte enviado real:', nuevoReporte);
-			dispatch('success', { reporte: nuevoReporte });
+			if (onsuccess) onsuccess({ reporte: nuevoReporte });
 
 			enviando = false;
 			reporteEnviado = true;
@@ -82,8 +90,8 @@
 	<div
 		use:portal
 		class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
-		on:click={cerrarModal}
-		on:keydown={(e: KeyboardEvent) => e.key === 'Enter' && cerrarModal()}
+		onclick={cerrarModal}
+		onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && cerrarModal()}
 		role="button"
 		tabindex="0"
 		aria-label="Cerrar modal"
@@ -91,8 +99,8 @@
 		<!-- Modal -->
 		<div
 			class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl sm:p-8"
-			on:click|stopPropagation
-			on:keydown|stopPropagation
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="modal-titulo"
@@ -101,7 +109,7 @@
 			<!-- Botón cerrar -->
 			<button
 				type="button"
-				on:click={cerrarModal}
+				onclick={cerrarModal}
 				disabled={enviando}
 				class="absolute top-4 right-4 rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50"
 				aria-label="Cerrar"
@@ -138,7 +146,7 @@
 					<p class="mt-2 max-w-sm text-gray-600">
 						Gracias por colaborar. El equipo de administración revisará tu reporte a la brevedad.
 					</p>
-					<Button on:click={cerrarModal} label="Cerrar" customClass="mt-8" />
+					<Button onclick={cerrarModal} label="Cerrar" customClass="mt-8" />
 				</div>
 			{:else}
 				<!-- Error general de envío -->
@@ -155,8 +163,8 @@
 					showCancelButton={true}
 					nombreObjeto={nombre_objeto}
 					tipoObjeto={tipo_objeto}
-					on:submit={handleFormSubmit}
-					on:cancel={cerrarModal}
+					onsubmit={handleFormSubmit}
+					oncancel={cerrarModal}
 				/>
 			{/if}
 		</div>

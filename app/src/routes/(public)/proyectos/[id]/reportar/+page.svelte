@@ -22,6 +22,6 @@
 		tipo_objeto="Proyecto"
 		id_objeto={proyecto.id_proyecto ?? 0}
 		nombre_objeto={proyecto.titulo}
-		on:close={handleClose}
+		onclose={handleClose}
 	/>
 {/if}
