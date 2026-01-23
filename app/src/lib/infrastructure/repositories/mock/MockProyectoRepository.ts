@@ -4,7 +4,7 @@ import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 
 export class MockProyectoRepository implements ProyectoRepository {
 	async findAll(): Promise<Proyecto[]> {
-		return mockProyectos;
+		return [...mockProyectos];
 	}
 
 	async findById(id: number): Promise<Proyecto | null> {
@@ -13,14 +13,12 @@ export class MockProyectoRepository implements ProyectoRepository {
 	}
 
 	async create(proyecto: Partial<Proyecto>): Promise<Proyecto> {
-		const nuevoProyecto = {
+		const newProyecto = {
 			...proyecto,
-			id_proyecto: Date.now(), // Simulación de ID
-			created_at: new Date(),
-			updated_at: new Date()
+			id_proyecto: Date.now(),
+			estado: 'en_curso'
 		} as Proyecto;
-		
-		mockProyectos.push(nuevoProyecto);
-		return nuevoProyecto;
+		mockProyectos.push(newProyecto);
+		return newProyecto;
 	}
 }

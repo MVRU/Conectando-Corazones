@@ -4,11 +4,10 @@
         -*- https://datos.gob.ar/
 **/
 
-import { Localidad as LocalidadEntity } from '$lib/domain/entities/Localidad';
-import { Provincia } from '$lib/domain/entities/Provincia';
+import type { Localidad } from '$lib/domain/types/Localidad';
 import { provincias } from '$lib/domain/types/static-data/provincias';
 
-const localidadesBase: Omit<LocalidadEntity, 'provincia'>[] = [
+const localidadesBase: Omit<Localidad, 'provincia'>[] = [
 	{
 		id_localidad: 1,
 		nombre: 'Buenos Aires',
@@ -161,12 +160,7 @@ const localidadesBase: Omit<LocalidadEntity, 'provincia'>[] = [
 	}
 ];
 
-export const mockLocalidades: LocalidadEntity[] = localidadesBase.map((localidad) => {
-	const pData = provincias.find((p) => p.id_provincia === localidad.id_provincia);
-	const provincia = pData ? new Provincia(pData) : undefined;
-
-	return new LocalidadEntity({
-		...localidad,
-		provincia
-	});
-});
+export const mockLocalidades: Localidad[] = localidadesBase.map((localidad) => ({
+	...localidad,
+	provincia: provincias.find((p) => p.id_provincia === localidad.id_provincia)
+}));

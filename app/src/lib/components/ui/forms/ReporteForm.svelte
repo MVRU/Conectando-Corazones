@@ -1,33 +1,25 @@
 <script lang="ts">
+	import { createEventDispatcher } from 'svelte';
 	import { MotivoReporte } from '$lib/domain/types/Reporte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let {
-		isLoading = false,
-		showCancelButton = false,
-		nombreObjeto = '',
-		tipoObjeto = '',
-		onsubmit,
-		oncancel
-	} = $props<{
-		isLoading?: boolean;
-		showCancelButton?: boolean;
-		nombreObjeto?: string;
-		tipoObjeto?: string;
-		onsubmit?: (detail: { motivo: string; motivoOtro?: string; descripcion: string }) => void;
-		oncancel?: () => void;
-	}>();
+	export let isLoading = false;
+	export let showCancelButton = false;
+	export let nombreObjeto = '';
+	export let tipoObjeto = '';
+
+	const dispatch = createEventDispatcher();
 
 	// Estado del formulario
-	let motivo = $state<MotivoReporte | ''>('');
-	let motivoOtro = $state('');
-	let descripcion = $state('');
-	let intentoEnvio = $state(false);
+	let motivo: MotivoReporte | '' = '';
+	let motivoOtro = '';
+	let descripcion = '';
+	let intentoEnvio = false;
 
 	// Errores
-	let errorMotivo = $state('');
-	let errorMotivoOtro = $state('');
-	let errorDescripcion = $state('');
+	let errorMotivo = '';
+	let errorMotivoOtro = '';
+	let errorDescripcion = '';
 
 	const motivosDisponibles = Object.values(MotivoReporte);
 
@@ -103,27 +95,27 @@
 			return;
 		}
 
-		if (onsubmit) {
-			onsubmit({
-				motivo,
-				motivoOtro: motivo === MotivoReporte.OTRO ? motivoOtro : undefined,
-				descripcion
-			});
-		}
+		dispatch('submit', {
+			motivo,
+			motivoOtro: motivo === MotivoReporte.OTRO ? motivoOtro : undefined,
+			descripcion
+		});
 	}
 
 	function handleCancel() {
-		if (oncancel) oncancel();
+		dispatch('cancel');
 	}
 
+	// Action to ensure novalidate is on the form
 	function ensureNovalidate(node: HTMLFormElement) {
 		node.setAttribute('novalidate', '');
+		// Also remove required from all inputs
 		const requiredInputs = node.querySelectorAll('[required]');
 		requiredInputs.forEach((input) => input.removeAttribute('required'));
 	}
 </script>
 
-<form onsubmit={handleSubmit} class="space-y-6" novalidate use:ensureNovalidate>
+<form on:submit={handleSubmit} class="space-y-6" novalidate use:ensureNovalidate>
 	<!-- Contexto del reporte -->
 	{#if nombreObjeto}
 		<div
@@ -280,7 +272,7 @@
 				label="Cancelar"
 				variant="secondary"
 				disabled={isLoading}
-				onclick={handleCancel}
+				on:click={handleCancel}
 			/>
 		{/if}
 		<Button

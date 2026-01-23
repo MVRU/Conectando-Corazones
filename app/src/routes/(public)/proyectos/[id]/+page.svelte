@@ -1040,8 +1040,8 @@
 			tipo_objeto="Proyecto"
 			id_objeto={proyecto.id_proyecto ?? 0}
 			nombre_objeto={proyecto.titulo}
-			onclose={() => history.back()}
-			onsuccess={handleReportSuccess}
+			on:close={() => history.back()}
+			on:success={handleReportSuccess}
 		/>
 		<slot />
 
