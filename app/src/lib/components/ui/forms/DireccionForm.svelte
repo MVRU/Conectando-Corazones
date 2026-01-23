@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -9,12 +10,15 @@
 		type UrlsVistaPreviaGoogleMaps
 	} from '$lib/utils/googleMaps';
 
-	import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
-	import { provincias } from '\$lib/domain/types/static-data/provincias';
-	import type { Provincia } from '$lib/domain/types/Provincia';
-	import type { Localidad } from '$lib/domain/types/Localidad';
+	import type { Provincia } from '$lib/domain/entities/Provincia';
+	import type { Localidad } from '$lib/domain/entities/Localidad';
 	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
+
+	// Estado para datos cargados desde API
+	let provincias: Provincia[] = [];
+	let cargandoProvincias = true;
+	let cargandoLocalidades = false;
 
 	type DireccionPayload = {
 		provinciaId: number | null;
@@ -60,9 +64,42 @@
 
 	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
 
-	$: localidadesProvincia = provincia
-		? mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia)
-		: [];
+	// Cargar provincias
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/ubicaciones/provincias');
+			if (response.ok) {
+				provincias = await response.json();
+			}
+		} catch (e) {
+			console.error('Error cargando provincias:', e);
+		} finally {
+			cargandoProvincias = false;
+		}
+	});
+
+	// Cargar localidades cuando cambia la provincia
+	async function cargarLocalidades(idProv: number) {
+		cargandoLocalidades = true;
+		localidadesProvincia = [];
+		try {
+			const response = await fetch(`/api/ubicaciones/provincias/${idProv}/localidades`);
+			if (response.ok) {
+				localidadesProvincia = await response.json();
+			}
+		} catch (e) {
+			console.error('Error cargando localidades:', e);
+		} finally {
+			cargandoLocalidades = false;
+		}
+	}
+
+	// Reactivo: cargar localidades cuando cambia la provincia
+	$: if (provincia?.id_provincia) {
+		cargarLocalidades(provincia.id_provincia);
+	} else {
+		localidadesProvincia = [];
+	}
 
 	$: if (
 		provincia &&
@@ -155,7 +192,8 @@
 			<Select
 				id="provincia"
 				required={true}
-				placeholder="Seleccioná una provincia"
+				placeholder={cargandoProvincias ? 'Cargando...' : 'Seleccioná una provincia'}
+				disabled={cargandoProvincias}
 				options={provincias
 					.filter((p) => p.id_provincia != null)
 					.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
@@ -173,12 +211,12 @@
 			<Select
 				id="localidad"
 				required={true}
-				placeholder="Seleccioná una localidad"
+				placeholder={cargandoLocalidades ? 'Cargando...' : 'Seleccioná una localidad'}
 				options={localidadesProvincia
 					.filter((c) => c.id_localidad != null)
 					.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
 				bind:value={idLocalidad}
-				disabled={!provincia}
+				disabled={!provincia || cargandoLocalidades}
 				error={intentoEnvio ? errores.localidad : ''}
 				ariaDescribedBy="localidad-helper"
 			/>
@@ -205,14 +243,14 @@
 							href={urlGoogleMaps}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						>
 							{urlGoogleMapsLegible}
 						</a>
 					{:else}
 						<!-- Sin URL: solo texto informativo -->
 						<p
-							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-500 italic"
+							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base italic text-gray-500"
 						>
 							Se genera automáticamente
 						</p>
@@ -222,7 +260,7 @@
 					<button
 						type="button"
 						on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
-						class="absolute top-0 right-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="absolute right-0 top-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-200"
 						aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 						aria-pressed={editandoUrlMapaGoogle}
 					>

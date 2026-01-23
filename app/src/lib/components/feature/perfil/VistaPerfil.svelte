@@ -106,8 +106,8 @@
 		modales.abrir('edicion');
 	}
 
-	function handleGuardarPerfil() {
-		const resultado = edicion.prepararDatosParaGuardar();
+	async function handleGuardarPerfil() {
+		const resultado = await edicion.prepararDatosParaGuardar();
 		if (!resultado.valido) {
 			return;
 		}
@@ -223,11 +223,11 @@
 
 		<!-- Reportar perfil -->
 		{#if !esMiPerfil && $isAuthenticated}
-			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
+			<div class="mt-12 border-t border-gray-200 pb-4 pt-8 text-center">
 				{#if $isAdmin}
 					<div class="mb-4 text-center">
 						<span
-							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
+							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
 						>
 							ID: {perfilUsuario.id_usuario}
 						</span>
