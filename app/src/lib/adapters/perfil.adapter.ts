@@ -69,7 +69,7 @@ export const perfilAdapter = {
 		return obtenerLocalidadesUC.porProvincia(idProvincia);
 	},
 
-	async obtenerLocalidadPorId(idLocalidad: number | undefined): Promise<Localidad | undefined> {
+	async obtenerLocalidadPorId(idLocalidad: number | undefined): Promise<Localidad | null> {
 		return obtenerLocalidadesUC.porId(idLocalidad);
 	}
 };
