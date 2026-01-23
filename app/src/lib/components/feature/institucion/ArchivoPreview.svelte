@@ -12,11 +12,9 @@
 
 	export let archivo: Archivo;
 
-	// Determinar si es una imagen o PDF usando las utilidades
 	$: esImagenArchivo = esImagen(archivo.tipo_mime);
 	$: esPDFArchivo = esPDF(archivo.tipo_mime);
 
-	// Funciones wrapper para mantener compatibilidad con el componente
 	function descargarArchivo() {
 		descargarArchivoUtil(archivo);
 	}
@@ -29,7 +27,7 @@
 <div class="rounded-lg border border-gray-200 bg-white p-3 transition-shadow hover:shadow-sm">
 	<!-- Información del archivo -->
 	<div class="flex items-start gap-3">
-		<!-- Ícono según tipo -->
+		<!-- Ícono según tipo -->
 		<div class="flex-shrink-0">
 			{#if esImagenArchivo}
 				<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
@@ -108,9 +106,9 @@
 				</span>
 				<span>•</span>
 				<span>{obtenerExtension(archivo.tipo_mime, archivo.url)}</span>
-				{#if archivo.tamaño}
+				{#if archivo.tamanio_bytes}
 					<span>•</span>
-					<span>{formatearTamaño(archivo.tamaño)}</span>
+					<span>{formatearTamaño(archivo.tamanio_bytes)}</span>
 				{/if}
 			</div>
 

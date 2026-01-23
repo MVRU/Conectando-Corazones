@@ -1,1 +1,6 @@
-<!-- Esta página está vacía intencionalmente. El contenido vive en +layout.svelte para permitir que los modales se superpongan sin refrescar el fondo. -->
+<script lang="ts">
+	import AportesList from '$lib/components/feature/aportes/AportesList.svelte';
+	let { data } = $props();
+</script>
+
+<AportesList colaboradores={data.colaboradores} />
