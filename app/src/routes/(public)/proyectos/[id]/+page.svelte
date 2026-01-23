@@ -3,18 +3,18 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { page } from '$app/stores';
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 	import {
 		esUbicacionPresencial,
 		esUbicacionVirtual,
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-ubicaciones';
-	import { error } from '@sveltejs/kit';
 	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
@@ -96,19 +96,14 @@
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
 
-	$: {
-		const id = $page.params.id;
-		const encontrado = mockProyectos.find((p) => p.id_proyecto?.toString() === id);
-		if (encontrado) {
-			proyecto = encontrado;
-			setBreadcrumbs([
-				BREADCRUMB_ROUTES.home,
-				BREADCRUMB_ROUTES.proyectos,
-				{ label: proyecto.titulo }
-			]);
-		} else {
-			throw error(404, 'Proyecto no encontrado');
-		}
+	$: proyecto = data.proyecto;
+
+	$: if (proyecto) {
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.home,
+			BREADCRUMB_ROUTES.proyectos,
+			{ label: proyecto.titulo }
+		]);
 	}
 
 	function aFecha(fecha: string | Date | undefined | null): Date | null {
@@ -288,6 +283,8 @@
 	function irAAportes() {
 		if (esInstitucion && proyecto?.id_proyecto) {
 			goto(`/institucion/proyectos/${proyecto.id_proyecto}/aportes`);
+		} else if (esColaboradorAprobado && proyecto?.id_proyecto) {
+			goto(`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes`);
 		}
 	}
 
@@ -484,15 +481,6 @@
 							{:else}
 								<p class="text-gray-500">Aún no registraste aportes específicos.</p>
 							{/if}
-
-							<div class="mt-6">
-								<Button
-									label="Agregar aporte"
-									variant="primary"
-									size="sm"
-									disabled={estadoCodigo !== 'en_curso'}
-								></Button>
-							</div>
 						</section>
 					{/if}
 
@@ -615,11 +603,14 @@
 													Ver solicitudes
 												</button>
 											{/if}
-											{#if esColaboradorAprobado && estadoCodigo === 'en_curso'}
+											{#if esColaboradorAprobado && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
 												<button
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
-													onclick={irAColaborar}
+													onclick={() =>
+														goto(
+															`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes/nuevo`
+														)}
 												>
 													<Icon src={Plus} class="h-4 w-4 text-gray-500" />
 													Agregar aporte
@@ -718,7 +709,9 @@
 									<button
 										type="button"
 										onclick={manejarClickSolicitud}
-										disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
+										disabled={(estadoCodigo !== 'en_curso' &&
+											estadoCodigo !== 'pendiente_solicitud_cierre') ||
+											solicitudRecienEnviada}
 										class={tieneSolicitudPendiente
 											? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
 											: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
@@ -1112,8 +1105,7 @@
 					<div class="relative flex-1">
 						<button
 							type="button"
-							onclick={() =>
-								(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
+							onclick={() => (mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
 							class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 						>
 							<span>Gestionar proyecto</span>

@@ -9,6 +9,9 @@
 	import ProyectosDestacadosSection from '$lib/components/feature/home/ProyectosDestacadosSection.svelte';
 	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { onMount } from 'svelte';
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 
 	onMount(() => {
 		clearBreadcrumbs(); // Limpia los breadcrumbs
@@ -21,5 +24,5 @@
 <CTASection />
 <TestimoniosSection />
 <FaqSection />
-<ProyectosDestacadosSection />
+<ProyectosDestacadosSection proyectos={data.proyectosDestacados} />
 <SoporteSection />

@@ -134,7 +134,7 @@ export const mockArchivos: Archivo[] = [
 		tamanio_bytes: 184320, // ~180 KB
 		created_at: new Date('2025-04-15'),
 		usuario_id: 7,
-		evidencia_id: 5
+		evidencia_id: 6
 	},
 
 	{
@@ -161,7 +161,7 @@ export const mockArchivos: Archivo[] = [
 		tamanio_bytes: 409600, // ~400 KB
 		created_at: new Date('2025-05-10'),
 		usuario_id: 9,
-		evidencia_id: 7
+		evidencia_id: 8 // Corrected to 8
 	},
 	{
 		id_archivo: 13,
@@ -172,7 +172,7 @@ export const mockArchivos: Archivo[] = [
 		tamanio_bytes: 2048000, // ~2 MB
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9,
-		evidencia_id: 7
+		evidencia_id: 8
 	},
 	{
 		id_archivo: 14,
@@ -182,102 +182,102 @@ export const mockArchivos: Archivo[] = [
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9,
-		evidencia_id: 7
+		evidencia_id: 8
 	},
 
-	// --- PROYECTO 9: "Luz para aprender" (Escuela Esperanza - id: 2) ---
-	// Objetivos: 100 metros de cableado, 20 luminarias LED, 30 personas capacitadas
+	// --- PROYECTO 9: "Biblioteca Digital Comunitaria" ---
+	// Objetivos: 500 libros (especie), $50,000 (monetaria)
 
-	// === EVIDENCIAS DE ENTRADA -
+	// === EVIDENCIAS DE ENTRADA ===
 
-	// - Donación de materiales eléctricos (cables)
+	// - Donación de licencias de libros (ID 15, 16)
 	{
 		id_archivo: 15,
-		nombre_original: 'foto_cableado_viejo.jpg',
-		descripcion: 'Fotografías del cableado eléctrico antiguo deteriorado',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_cableado_viejo.jpg?alt=media',
-		tipo_mime: 'image/jpeg',
+		nombre_original: 'comprobante_licencias_libros.pdf',
+		descripcion: 'Comprobante de compra/donación de licencias de 50 ebooks',
+		url: 'https://drive.google.com/file/d/stub_licencias_libros/view', // Mock URL
+		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-01'),
 		usuario_id: 10,
-		evidencia_id: 8
+		evidencia_id: 9
 	},
 	{
 		id_archivo: 16,
-		nombre_original: 'factura_compra_cables.pdf',
-		descripcion: 'Factura de compra de 100 metros de cable eléctrico',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffactura_compra_cables.pdf?alt=media',
-		tipo_mime: 'application/pdf',
+		nombre_original: 'lista_libros_cedidos.xlsx',
+		descripcion: 'Listado de títulos de libros cedidos por editorial',
+		url: 'https://drive.google.com/file/d/stub_lista_libros/view',
+		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
 		created_at: new Date('2025-03-05'),
 		usuario_id: 10,
-		evidencia_id: 8
+		evidencia_id: 9
 	},
 
-	//  Donación de luminarias LED
+	//  Donación de dinero para servidor (ID 17, 18)
 	{
 		id_archivo: 17,
-		nombre_original: 'foto_lamparas_nuevas_embaladas.jpg',
-		descripcion: 'Fotografías de las luminarias LED donadas (embaladas)',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_lamparas_nuevas_embaladas.jpg?alt=media',
-		tipo_mime: 'image/jpeg',
+		nombre_original: 'comprobante_transferencia_servidor.pdf',
+		descripcion: 'Comprobante de transferencia bancaria para compra de servidor',
+		url: 'https://drive.google.com/file/d/stub_transferencia_servidor/view',
+		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-10'),
 		usuario_id: 4,
-		evidencia_id: 9
+		evidencia_id: 10
 	},
 	{
 		id_archivo: 18,
-		nombre_original: 'comprobante_donacion_lamparas.pdf',
-		descripcion: 'Comprobante de donación de 20 luminarias LED',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcomprobante_donacion_lamparas.pdf?alt=media',
+		nombre_original: 'carta_intencion_donacion.pdf',
+		descripcion: 'Carta de intención de donación para infraestructura tecnológica',
+		url: 'https://drive.google.com/file/d/stub_carta_donacion/view',
 		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-03-10'),
 		usuario_id: 4,
-		evidencia_id: 9
+		evidencia_id: 10
 	},
 
-	// === EVIDENCIAS DE SALIDA - Institución mostrando instalación ===
+	// === EVIDENCIAS DE SALIDA - Institución mostrando resultados ===
 
-	// Escuela Esperanza (id: 2) - Instalación del nuevo cableado
+	// Compra de servidor (ID 19, 20)
 	{
 		id_archivo: 19,
-		nombre_original: 'foto_cableado_nuevo_instalado.jpg',
-		descripcion: 'Fotografías del nuevo cableado eléctrico instalado en las aulas',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_cableado_nuevo_instalado.jpg?alt=media',
-		tipo_mime: 'image/jpeg',
+		nombre_original: 'factura_compra_servidor_nube.pdf',
+		descripcion: 'Factura de servicio de hosting/servidor por 1 año',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffactura_servidor.pdf?alt=media',
+		tipo_mime: 'application/pdf',
 		created_at: new Date('2025-04-20'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 10
+		evidencia_id: 11
 	},
 	{
 		id_archivo: 20,
-		nombre_original: 'certificado_electricista_instalacion.pdf',
-		descripcion: 'Certificado de electricista matriculado - instalación conforme',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcertificado_electricista_instalacion.pdf?alt=media',
-		tipo_mime: 'application/pdf',
+		nombre_original: 'configuracion_servidor_log.txt',
+		descripcion: 'Log de configuración inicial del servidor de la biblioteca',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fconfig_log.txt?alt=media',
+		tipo_mime: 'text/plain',
 		created_at: new Date('2025-04-25'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 10
+		evidencia_id: 11
 	},
 
-	// Escuela Esperanza (id: 2) - Instalación de luminarias LED
+	// Plataforma funcionando (ID 21, 22)
 	{
 		id_archivo: 21,
-		nombre_original: 'foto_lamparas_instaladas.jpg',
-		descripcion: 'Fotografías de las luminarias LED instaladas en aulas y pasillos',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Ffoto_lamparas_instaladas.jpg?alt=media',
-		tipo_mime: 'image/jpeg',
+		nombre_original: 'captura_pantalla_biblioteca_home.png',
+		descripcion: 'Captura de pantalla de la página de inicio de la biblioteca digital',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fcaptura_home.png?alt=media',
+		tipo_mime: 'image/png',
 		created_at: new Date('2025-05-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 11
+		evidencia_id: 12
 	},
 	{
 		id_archivo: 22,
-		nombre_original: 'video_recorrido_iluminacion.mp4',
-		descripcion: 'Video recorriendo las instalaciones con la nueva iluminación',
-		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fvideo_recorrido_iluminacion.mp4?alt=media',
+		nombre_original: 'video_demo_navegacion.mp4',
+		descripcion: 'Video demostrativo de navegación por el catálogo de libros',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto9%2Fvideo_demo.mp4?alt=media',
 		tipo_mime: 'video/mp4',
 		created_at: new Date('2025-05-10'),
 		usuario_id: 2, // Escuela Esperanza - institución
-		evidencia_id: 11
+		evidencia_id: 12
 	},
 
 	// --- PROYECTO 22: "Apoyo escolar en contraturno" (Escuela Esperanza) ---

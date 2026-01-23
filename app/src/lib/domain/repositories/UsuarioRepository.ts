@@ -1,4 +1,4 @@
-import type { Usuario } from '$lib/domain/entities/Usuario';
+import type { Usuario } from '$lib/domain/types/Usuario';
 
 export interface UsuarioRepository {
 	getById(id: number): Promise<Usuario | null>;

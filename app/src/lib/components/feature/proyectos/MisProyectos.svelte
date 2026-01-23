@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
-	import { mockProyectos as proyectosPorDefecto } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { Plus, Search } from 'lucide-svelte';
 	import { filtrarProyectosPorUsuario } from '$lib/utils/util-proyectos';
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
@@ -13,7 +12,7 @@
 	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
-	export let proyectos: Proyecto[] = proyectosPorDefecto;
+	export let proyectos: Proyecto[] = [];
 
 	// Inicializar composable de filtros
 	const filtros = createProyectosFiltros();

@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
-	import { mockProyectos as defaultProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import { usuario } from '$lib/stores/auth';
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 
-	export let proyectos: Proyecto[] = defaultProyectos;
+	export let proyectos: Proyecto[] = [];
 
 	const filtros = createProyectosFiltros();
 	const {

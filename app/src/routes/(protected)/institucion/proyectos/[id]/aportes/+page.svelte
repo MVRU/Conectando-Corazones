@@ -3,4 +3,8 @@
 	let { data } = $props();
 </script>
 
-<AportesList colaboradores={data.colaboradores} />
+<AportesList
+	colaboradores={data.colaboradores}
+	participacion_permitida={data.proyecto.participacion_permitida}
+	estado={data.proyecto.estado}
+/>
