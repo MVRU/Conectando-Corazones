@@ -2,8 +2,10 @@ import { error } from '@sveltejs/kit';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 import type { Usuario } from '$lib/domain/types/Usuario';
+import type { Localidad } from '$lib/domain/entities/Localidad';
+import type { Provincia } from '$lib/domain/entities/Provincia';
+import type { Ubicacion, UbicacionPresencial, UbicacionVirtual } from '$lib/domain/types/Ubicacion';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
-import { getProvinciaFromLocalidad } from '$lib/utils/util-ubicaciones';
 import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 import {
@@ -93,7 +95,7 @@ export function filtrarProyectos(
 	if (provincia !== 'Todas') {
 		resultado = resultado.filter((p) =>
 			p.ubicaciones?.[0]?.ubicacion && 'localidad' in p.ubicaciones[0].ubicacion
-				? getProvinciaFromLocalidad(p.ubicaciones[0].ubicacion.localidad)?.nombre === provincia
+				? p.ubicaciones[0].ubicacion.localidad?.provincia?.nombre === provincia
 				: false
 		);
 	}
@@ -154,7 +156,7 @@ export function getUbicacionTexto(proyecto: Proyecto, virtualLabel = 'Virtual'):
 			? ubicacion.ubicacion.localidad
 			: undefined;
 	const ciudad = localidadObj?.nombre;
-	const provincia = getProvinciaFromLocalidad(localidadObj)?.nombre;
+	const provincia = localidadObj?.provincia?.nombre;
 
 	if (ciudad && provincia) return `${ciudad}, ${provincia}`;
 	return ciudad ?? provincia ?? virtualLabel;
@@ -328,4 +330,106 @@ export function formatearFecha(date: Date | string | null | undefined): string {
 		month: 'short',
 		year: 'numeric'
 	}).format(d);
+}
+
+//**
+// * Utilidades para Filtrado de Ubicaciones
+//  */
+
+/**
+ * Obtiene todas las localidades únicas disponibles para una provincia específica
+ * a partir de una lista de proyectos.
+ * (Cumple con la lógica de negocio de mostrar solo lo que tiene resultados)
+ */
+export function obtenerLocalidadesDisponibles(proyectos: Proyecto[], provincia: string): string[] {
+	if (provincia === 'Todas') return ['Todas'];
+
+	const localidadesSet = new Set<string>();
+	proyectos.forEach((p) => {
+		// Buscamos en todas las ubicaciones del proyecto
+		p.ubicaciones?.forEach((pu) => {
+			const u = pu.ubicacion;
+			if (u && u.modalidad === 'presencial' && u.localidad) {
+				// Comprobamos si la provincia coincide (por nombre para simplificar en UI)
+				if (u.localidad.provincia?.nombre === provincia) {
+					localidadesSet.add(u.localidad.nombre);
+				}
+			}
+		});
+	});
+
+	return ['Todas', ...Array.from(localidadesSet).sort()];
+}
+
+/**
+ * Obtiene la provincia de una localidad de forma segura.
+ */
+export function getProvinciaFromLocalidad(localidad: Localidad | undefined): Provincia | undefined {
+	return localidad?.provincia;
+}
+
+/**
+ * Filtra los proyectos por localidad y tipo de ubicación.
+ * respeta la modalidad presencial/virtual.
+ */
+export function filtrarPorLocalidad(
+	proyectos: Proyecto[],
+	localidad: string,
+	tipoUbicacion: string
+): Proyecto[] {
+	if (localidad === 'Todas' || tipoUbicacion === 'Virtual') return proyectos;
+
+	return proyectos.filter((p) => {
+		return p.ubicaciones?.some((pu) => {
+			const u = pu.ubicacion;
+			return u && u.modalidad === 'presencial' && u.localidad?.nombre === localidad;
+		});
+	});
+}
+
+/**
+ * Type guard verifica si una ubicación es presencial
+ */
+export function esUbicacionPresencial(u: Ubicacion | undefined): u is UbicacionPresencial {
+	return u?.modalidad === 'presencial';
+}
+
+/**
+ * Type guard verifica si una ubicación es virtual
+ */
+export function esUbicacionVirtual(u: Ubicacion | undefined): u is UbicacionVirtual {
+	return u?.modalidad === 'virtual';
+}
+
+/**
+ * Construye una dirección legible para mostrar
+ */
+export function construirDireccionCompleta(u: UbicacionPresencial): string {
+	const parts = [
+		u.calle ? `${u.calle} ${u.numero}` : '',
+		u.piso ? `Piso ${u.piso}` : '',
+		u.departamento ? `Dpto ${u.departamento}` : '',
+		u.localidad?.nombre,
+		u.localidad?.provincia?.nombre
+	];
+	return parts.filter(Boolean).join(', ');
+}
+
+/**
+ * Genera una URL de búsqueda en Google Maps si no existe una específica
+ */
+export function generarUrlGoogleMaps(u: UbicacionPresencial): string {
+	if (u.url_google_maps) return u.url_google_maps;
+
+	const query = [
+		u.calle,
+		u.numero,
+		u.localidad?.nombre,
+		u.localidad?.provincia?.nombre,
+		'Argentina'
+	]
+		.filter(Boolean)
+		.join(' ');
+
+	return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }

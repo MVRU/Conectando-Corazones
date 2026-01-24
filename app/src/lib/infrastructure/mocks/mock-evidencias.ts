@@ -17,7 +17,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de donación de 5 libros infantiles',
 		url: 'https://drive.google.com/file/d/1z0OY07s5lmRh3rVzU16KPeA_KEELEPfJ/view?usp=sharing',
 		tipo_mime: 'application/pdf',
-		tamaño: 245760, // ~240 KB
+		tamanio_bytes: 245760, // ~240 KB
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4,
 		evidencia_id: 1
@@ -27,7 +27,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de los libros donados por María',
 		url: 'https://drive.google.com/file/d/1l0ltnQ3Ll8hIqObKDiGpNGV9r9JsCMdG/view?usp=sharing',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1024000, // ~1 MB
+		tamanio_bytes: 1024000, // ~1 MB
 		created_at: new Date('2025-03-15'),
 		usuario_id: 4,
 		evidencia_id: 1
@@ -39,7 +39,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Recibo de donación de 7 libros infantiles de aventuras y cuentos',
 		url: 'https://drive.google.com/file/d/1z0OY07s5lmRh3rVzU16KPeA_KEELEPfJ/view',
 		tipo_mime: 'application/pdf',
-		tamaño: 307200, // ~300 KB
+		tamanio_bytes: 307200, // ~300 KB
 		created_at: new Date('2025-03-20'),
 		usuario_id: 5,
 		evidencia_id: 2
@@ -53,7 +53,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de la biblioteca escolar armada con los libros recibidos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Ffoto_biblioteca_armada.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1536000, // ~1.5 MB
+		tamanio_bytes: 1536000, // ~1.5 MB
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2,
 		evidencia_id: 3
@@ -63,7 +63,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Registro y catálogo de libros recibidos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto1%2Fregistro_libros_recibidos.xlsx?alt=media',
 		tipo_mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-		tamaño: 51200, // ~50 KB
+		tamanio_bytes: 51200, // ~50 KB
 		created_at: new Date('2025-04-10'),
 		usuario_id: 2,
 		evidencia_id: 3
@@ -121,7 +121,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de transferencia bancaria por $50,000',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ftransferencia_bancaria_carlos_50mil.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 184320, // ~180 KB
+		tamanio_bytes: 184320, // ~180 KB
 		created_at: new Date('2025-04-15'),
 		usuario_id: 7,
 		evidencia_id: 5
@@ -132,7 +132,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de donación por MercadoPago - $50,000',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Fcomprobante_donacion_mercadopago.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 163840, // ~160 KB
+		tamanio_bytes: 163840, // ~160 KB
 		created_at: new Date('2025-04-20'),
 		usuario_id: 8,
 		evidencia_id: 6
@@ -146,7 +146,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Factura de compra de equipamiento médico para sala de urgencias',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffactura_compra_equipamiento_medico.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 409600, // ~400 KB
+		tamanio_bytes: 409600, // ~400 KB
 		created_at: new Date('2025-05-10'),
 		usuario_id: 9,
 		evidencia_id: 7
@@ -156,7 +156,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía del equipamiento médico instalado en sala de urgencias',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto4%2Ffoto_equipamiento_instalado.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 2048000, // ~2 MB
+		tamanio_bytes: 2048000, // ~2 MB
 		created_at: new Date('2025-05-15'),
 		usuario_id: 9,
 		evidencia_id: 7
@@ -348,7 +348,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de donación de 30 mochilas escolares',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fcomprobante_donacion_mochilas_30.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 256000, // ~250 KB
+		tamanio_bytes: 256000, // ~250 KB
 		created_at: new Date('2026-02-01'),
 		usuario_id: 4, // Colaborador - María González
 		evidencia_id: 17
@@ -358,7 +358,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de las 30 mochilas donadas (embaladas)',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_donadas_30.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1843200, // ~1.8 MB
+		tamanio_bytes: 1843200, // ~1.8 MB
 		created_at: new Date('2026-02-01'),
 		usuario_id: 4, // Colaborador - María González
 		evidencia_id: 17
@@ -369,7 +369,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Comprobante de donación de 20 mochilas escolares',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fcomprobante_donacion_mochilas_20.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 230400, // ~225 KB
+		tamanio_bytes: 230400, // ~225 KB
 		created_at: new Date('2026-02-08'),
 		usuario_id: 5, // Colaborador - Luis Martínez
 		evidencia_id: 18
@@ -379,7 +379,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de las 20 mochilas donadas con etiquetas',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_donadas_20.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1536000, // ~1.5 MB
+		tamanio_bytes: 1536000, // ~1.5 MB
 		created_at: new Date('2026-02-08'),
 		usuario_id: 5, // Colaborador - Luis Martínez
 		evidencia_id: 18
@@ -392,7 +392,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Acta de recepción de las 50 mochilas en depósito escolar',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Facta_recepcion_mochilas.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 307200, // ~300 KB
+		tamanio_bytes: 307200, // ~300 KB
 		created_at: new Date('2026-02-20'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 19
@@ -402,7 +402,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de las mochilas almacenadas en la escuela',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_mochilas_deposito.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 2048000, // ~2 MB
+		tamanio_bytes: 2048000, // ~2 MB
 		created_at: new Date('2026-02-20'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 19
@@ -412,7 +412,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía del acto de entrega de mochilas a los estudiantes',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_entrega_mochilas_alumnos.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 2457600, // ~2.4 MB
+		tamanio_bytes: 2457600, // ~2.4 MB
 		created_at: new Date('2026-02-25'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 19
@@ -425,7 +425,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Factura de compra de 50 sets de útiles escolares completos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffactura_compra_utiles_50.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 358400, // ~350 KB
+		tamanio_bytes: 358400, // ~350 KB
 		created_at: new Date('2026-02-10'),
 		usuario_id: 7, // Colaborador - Carlos Rodríguez
 		evidencia_id: 20
@@ -435,7 +435,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de los 50 sets de útiles escolares (embalados por tipo)',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_utiles_embalados.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1945600, // ~1.9 MB
+		tamanio_bytes: 1945600, // ~1.9 MB
 		created_at: new Date('2026-02-10'),
 		usuario_id: 7, // Colaborador - Carlos Rodríguez
 		evidencia_id: 20
@@ -445,7 +445,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Detalle del contenido de cada set de útiles escolares',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Fdetalle_contenido_set_utiles.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 204800, // ~200 KB
+		tamanio_bytes: 204800, // ~200 KB
 		created_at: new Date('2026-02-10'),
 		usuario_id: 7, // Colaborador - Carlos Rodríguez
 		evidencia_id: 20
@@ -458,7 +458,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Acta de recepción de los 50 sets de útiles en la escuela',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Facta_recepcion_utiles.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 281600, // ~275 KB
+		tamanio_bytes: 281600, // ~275 KB
 		created_at: new Date('2026-02-22'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 21
@@ -468,7 +468,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de los sets de útiles organizados para entrega',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_utiles_organizados.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 1740800, // ~1.7 MB
+		tamanio_bytes: 1740800, // ~1.7 MB
 		created_at: new Date('2026-02-22'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 21
@@ -478,7 +478,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Fotografía de niños recibiendo sus kits escolares completos',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Ffoto_ninos_recibiendo_kits.jpg?alt=media',
 		tipo_mime: 'image/jpeg',
-		tamaño: 2252800, // ~2.2 MB
+		tamanio_bytes: 2252800, // ~2.2 MB
 		created_at: new Date('2026-02-28'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 21
@@ -488,7 +488,7 @@ export const mockArchivos: Archivo[] = [
 		descripcion: 'Listado de estudiantes beneficiarios con firma de padres',
 		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto15%2Flistado_beneficiarios_firmas.pdf?alt=media',
 		tipo_mime: 'application/pdf',
-		tamaño: 409600, // ~400 KB
+		tamanio_bytes: 409600, // ~400 KB
 		created_at: new Date('2026-02-28'),
 		usuario_id: 2, // Escuela Esperanza - institución
 		evidencia_id: 21

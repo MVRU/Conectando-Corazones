@@ -108,9 +108,9 @@
 				</span>
 				<span>•</span>
 				<span>{obtenerExtension(archivo.tipo_mime, archivo.url)}</span>
-				{#if archivo.tamaño}
+				{#if archivo.tamanio_bytes}
 					<span>•</span>
-					<span>{formatearTamaño(archivo.tamaño)}</span>
+					<span>{formatearTamaño(archivo.tamanio_bytes)}</span>
 				{/if}
 			</div>
 

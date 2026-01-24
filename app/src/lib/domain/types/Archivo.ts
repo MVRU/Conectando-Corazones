@@ -1,9 +1,10 @@
 export interface Archivo {
 	id_archivo?: number;
+	nombre_original?: string;
 	url: string;
 	descripcion?: string;
 	tipo_mime?: string;
-	tamaño?: number; // Tamaño en bytes (opcional)
+	tamanio_bytes?: number; // Tamaño en bytes (opcional)
 	created_at?: Date;
 	fecha_vencimiento?: Date;
 

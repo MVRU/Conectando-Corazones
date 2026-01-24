@@ -3,9 +3,12 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '$env/dynamic/private';
 
-const connectionString = process.env.DATABASE_URL || env.DATABASE_URL;
+const connectionString = process.env.DB_POOLER_URL || process.env.DATABASE_URL || env.DATABASE_URL;
 
-const pool = new Pool({ connectionString });
+const pool = new Pool({
+	connectionString,
+	ssl: { rejectUnauthorized: false }
+});
 const adapter = new PrismaPg(pool);
 
 // Prevent multiple instances of Prisma Client in development

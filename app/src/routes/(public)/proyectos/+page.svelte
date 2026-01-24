@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Proyectos from '$lib/components/feature/proyectos/Proyectos.svelte';
+	// @ts-ignore
+	export let data;
 </script>
 
 <svelte:head>
@@ -11,5 +13,5 @@
 </svelte:head>
 
 <main class="relative min-h-screen w-full bg-gray-50">
-	<Proyectos />
+	<Proyectos proyectos={data.proyectos} provinciasDisponibles={data.provincias} />
 </main>

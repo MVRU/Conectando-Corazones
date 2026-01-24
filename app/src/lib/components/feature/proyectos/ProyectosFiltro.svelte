@@ -28,6 +28,42 @@
 
 	const dispatch = createEventDispatcher();
 
+	let localidadesCache: Record<string, string[]> = {};
+
+	async function cargarLocalidades(prov: string) {
+		if (prov === 'Todas') {
+			localidadesDisponibles = [];
+			return;
+		}
+
+		if (localidadesCache[prov]) {
+			localidadesDisponibles = localidadesCache[prov];
+			return;
+		}
+
+		try {
+			const resProv = await fetch('/api/ubicaciones/provincias');
+			if (resProv.ok) {
+				const provinciasData = await resProv.json();
+				const provinciaEncontrada = provinciasData.find((p: any) => p.nombre === prov);
+
+				if (provinciaEncontrada) {
+					const resLoc = await fetch(
+						`/api/ubicaciones/provincias/${provinciaEncontrada.id_provincia}/localidades`
+					);
+					if (resLoc.ok) {
+						const locs = await resLoc.json();
+						const nombresLocs = locs.map((l: any) => l.nombre).sort();
+						localidadesCache[prov] = ['Todas', ...nombresLocs];
+						localidadesDisponibles = localidadesCache[prov];
+					}
+				}
+			}
+		} catch (e) {
+			console.error('Error cargando localidades', e);
+		}
+	}
+
 	function alternarFiltros() {
 		dispatch('toggle');
 	}
@@ -393,6 +429,8 @@
 												on:click={() => {
 													provincia = prov;
 													provinciaDropdownOpen = false;
+													localidad = 'Todas'; // Reset localidad
+													cargarLocalidades(prov);
 												}}
 											>
 												{prov}

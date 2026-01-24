@@ -1,17 +1,14 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
 import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 import {
-	obtenerLocalidadesDisponibles,
-	getProvinciaFromLocalidad,
-	filtrarPorLocalidad
-} from '$lib/utils/util-ubicaciones';
-import { writable, derived, type Writable } from 'svelte/store';
-import { ESTADO_LABELS } from '$lib/domain/types/Estado';
-import {
 	filtrarProyectos,
 	filtrarPorTipoUbicacion,
-	filtrarPorRangoFechas
+	filtrarPorRangoFechas,
+	obtenerLocalidadesDisponibles,
+	filtrarPorLocalidad
 } from '$lib/utils/util-proyectos';
+import { writable, derived, type Writable } from 'svelte/store';
+import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 
 /**
@@ -112,24 +109,10 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 
 	const categoriasDisponibles = ['Todas', ...mockCategorias.map((c) => c.descripcion)].sort();
 
-	const provinciasDisponibles = derived(proyectos, ($proyectos) => {
-		return [
-			'Todas',
-			...Array.from(
-				new Set(
-					$proyectos
-						.map((p) => {
-							const primeraUbicacion = p.ubicaciones?.[0]?.ubicacion;
-							if (primeraUbicacion?.modalidad === 'presencial') {
-								return getProvinciaFromLocalidad(primeraUbicacion.localidad)?.nombre ?? '';
-							}
-							return '';
-						})
-						.filter((s) => s !== '')
-				)
-			).sort()
-		];
-	});
+	const provinciasDisponibles = writable<string[]>(['Todas']);
+
+	// Nota: estadosDisponibles y tiposParticipacionDisponibles se mantienen como derivados
+	// ya que dependen de los proyectos actuales, pero provincias se cargan de la DB.
 
 	const estadosDisponibles = derived(proyectos, ($proyectos) => {
 		const estadosSet = new Set<string>();

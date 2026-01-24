@@ -4,26 +4,56 @@
  -->
 
 <script lang="ts">
-	import { provincias } from '\$lib/domain/types/static-data/provincias';
-	// import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
-	import {
-		TIPO_UBICACION,
-		MODALIDAD_UBICACION
-		// type TipoUbicacion,
-		// type ModalidadUbicacion
-	} from '$lib/domain/types/Ubicacion';
+	import { onMount } from 'svelte';
+	import type { Provincia } from '$lib/domain/entities/Provincia';
+	import type { Localidad } from '$lib/domain/entities/Localidad';
+	import { TIPO_UBICACION, MODALIDAD_UBICACION } from '$lib/domain/types/Ubicacion';
 	import type {
 		UbicacionFormulario,
 		DireccionPresencialFormulario
 	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import { obtenerDescripcionTipo } from '$lib/utils/util-proyecto-form';
-	import { obtenerLocalidadesPorProvincia } from '$lib/utils/util-ubicaciones';
 
 	export let ubicaciones: UbicacionFormulario[] = [];
 	export let errores: Record<string, string> = {};
 
 	// Modo edición
 	export let modoEdicion = false;
+
+	// Estados locales para datos
+	let provinciasData: Provincia[] = [];
+	let localidadesCache: Record<string, Localidad[]> = {};
+	let cargandoProvincias = false;
+
+	onMount(async () => {
+		try {
+			cargandoProvincias = true;
+			const res = await fetch('/api/ubicaciones/provincias');
+			if (res.ok) {
+				provinciasData = await res.json();
+			}
+		} catch (e) {
+			console.error('Error cargando provincias:', e);
+		} finally {
+			cargandoProvincias = false;
+		}
+	});
+
+	async function cargarLocalidades(provinciaNombre: string) {
+		if (!provinciaNombre || localidadesCache[provinciaNombre]) return;
+
+		const prov = provinciasData.find((p) => p.nombre === provinciaNombre);
+		if (!prov) return;
+
+		try {
+			const res = await fetch(`/api/ubicaciones/provincias/${prov.id_provincia}/localidades`);
+			if (res.ok) {
+				localidadesCache[provinciaNombre] = await res.json();
+			}
+		} catch (e) {
+			console.error('Error cargando localidades:', e);
+		}
+	}
 
 	function limpiarError(campo: string) {
 		const { [campo]: _, ...resto } = errores;
@@ -168,6 +198,9 @@
 		if (campo === 'provincia') {
 			ubicaciones[index].direccion_presencial!.localidad_nombre = '';
 			ubicaciones[index].direccion_presencial!.localidad_id = undefined;
+			if (typeof valor === 'string' && valor) {
+				cargarLocalidades(valor);
+			}
 		}
 	}
 
@@ -353,7 +386,7 @@
 								class:text-gray-600={esOriginal}
 							>
 								<option value="">Seleccionar provincia</option>
-								{#each provincias as provincia (provincia.id_provincia)}
+								{#each provinciasData as provincia (provincia.id_provincia)}
 									<option value={provincia.nombre}>{provincia.nombre}</option>
 								{/each}
 							</select>
@@ -372,9 +405,10 @@
 									const localidadId = e.currentTarget.value
 										? parseInt(e.currentTarget.value)
 										: undefined;
-									const localidad = obtenerLocalidadesPorProvincia(
-										ubicacion.direccion_presencial?.provincia || ''
-									).find((l) => l.id_localidad === localidadId);
+									const pNombre = ubicacion.direccion_presencial?.provincia || '';
+									const locs = localidadesCache[pNombre] || [];
+									const localidad = locs.find((l) => l.id_localidad === localidadId);
+
 									ubicaciones[index] = {
 										...ubicaciones[index],
 										direccion_presencial: {
@@ -393,7 +427,7 @@
 								class:text-gray-600={esOriginal}
 							>
 								<option value="">Seleccionar localidad</option>
-								{#each obtenerLocalidadesPorProvincia(ubicacion.direccion_presencial?.provincia || '') as localidad (localidad.id_localidad)}
+								{#each localidadesCache[ubicacion.direccion_presencial?.provincia || ''] || [] as localidad (localidad.id_localidad)}
 									<option value={localidad.id_localidad}>{localidad.nombre}</option>
 								{/each}
 							</select>
