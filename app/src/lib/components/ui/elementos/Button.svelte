@@ -1,29 +1,49 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 	import { goto } from '$app/navigation';
-	import { createEventDispatcher } from 'svelte';
 	import { isSafeHref } from '$lib/utils/sanitize';
-	export let label: string = 'Hacé clic!';
-	export let disabled = false;
-	export let loading = false;
-	export let loadingLabel: string | null = null;
-	export let href: string | null = null;
-	export let target: '_blank' | '_self' | string = '_blank';
-	export let external = false;
-	export let variant: 'primary' | 'secondary' | 'ghost' | 'danger' = 'primary';
-	export let size: 'md' | 'sm' = 'md';
-	export let customClass = '';
-	export let customAriaLabel: string | null = null;
-	export let type: 'button' | 'submit' | 'reset' = 'submit';
-	export let ariaDisabled: boolean | undefined = undefined;
-	$: ariaLabel = customAriaLabel ?? (href ? `Ir a ${href}` : undefined);
-	$: isDisabled = disabled || loading;
-	$: busyLabel = loadingLabel ?? label;
-	$: computedAriaDisabled = ariaDisabled ?? isDisabled;
-	const dispatch = createEventDispatcher();
+
+	let { 
+		label = 'Hacé clic!',
+		disabled = false,
+		loading = false,
+		loadingLabel = null,
+		href = null,
+		target = '_blank',
+		external = false,
+		variant = 'primary',
+		size = 'md',
+		customClass = '',
+		customAriaLabel = null,
+		type = 'button' as 'submit' | 'button' | 'reset',
+		ariaDisabled = undefined,
+		onclick = undefined,
+		...restProps
+	} = $props<{
+		label?: string;
+		disabled?: boolean;
+		loading?: boolean;
+		loadingLabel?: string | null;
+		href?: string | null;
+		target?: string;
+		external?: boolean;
+		variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+		size?: 'md' | 'sm';
+		customClass?: string;
+		customAriaLabel?: string | null;
+		type?: 'submit' | 'button' | 'reset';
+		ariaDisabled?: boolean;
+		onclick?: (event: MouseEvent) => void;
+		[key: string]: any;
+	}>();
+
+	let ariaLabel = $derived(customAriaLabel ?? (href ? `Ir a ${href}` : undefined));
+	let isDisabled = $derived(disabled || loading);
+	let busyLabel = $derived(loadingLabel ?? label);
+	let computedAriaDisabled = $derived(ariaDisabled ?? isDisabled);
 
 	function handleClick(event: MouseEvent) {
-		dispatch('click', event);
+		if (onclick) onclick(event);
 
 		if (href && !isDisabled && isSafeHref(href)) {
 			if (external) {
@@ -34,12 +54,12 @@
 		}
 	}
 
-	const rootSize = {
+	const rootSize: Record<string, string> = {
 		md: 'h-12 md:h-14 min-w-[140px] px-6 py-3',
 		sm: 'h-9  md:h-10 min-w-[100px] px-4 py-2'
 	};
-	const textSize = { md: 'text-[18px]', sm: 'text-[15px]' };
-	const iconSize = { md: 'w-5 h-5', sm: 'w-4 h-4' };
+	const textSize: Record<string, string> = { md: 'text-[18px]', sm: 'text-[15px]' };
+	const iconSize: Record<string, string> = { md: 'w-5 h-5', sm: 'w-4 h-4' };
 	const rootBase =
 		'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300';
 </script>
@@ -47,7 +67,7 @@
 <!-- ! Variante Primary -->
 {#if variant === 'primary'}
 	<button
-		on:click={handleClick}
+		onclick={handleClick}
 		class={clsx(
 			rootBase,
 			rootSize[size],
@@ -62,7 +82,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
-		{...$$restProps}
+		{...restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -117,7 +137,7 @@
 	<!-- ! Variante Secondary -->
 {:else if variant === 'secondary'}
 	<button
-		on:click={handleClick}
+		onclick={handleClick}
 		class={clsx(
 			rootBase,
 			rootSize[size],
@@ -186,7 +206,7 @@
 	<!-- ! Variante Danger -->
 {:else if variant === 'danger'}
 	<button
-		on:click={handleClick}
+		onclick={handleClick}
 		class={clsx(
 			rootBase,
 			rootSize[size],
@@ -201,7 +221,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={isDisabled}
 		disabled={isDisabled}
-		{...$$restProps}
+		{...restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -256,7 +276,7 @@
 	<!-- ! Variante Ghost -->
 {:else}
 	<button
-		on:click={handleClick}
+		onclick={handleClick}
 		class={clsx(
 			rootBase,
 			'cta-minimal-shine-btn inline-flex border border-blue-400 bg-white/5 font-semibold text-blue-400 shadow-none outline-none focus:ring-2 focus:ring-blue-300',
@@ -273,7 +293,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
-		{...$$restProps}
+		{...restProps}
 	>
 		{#if loading}
 			<svg

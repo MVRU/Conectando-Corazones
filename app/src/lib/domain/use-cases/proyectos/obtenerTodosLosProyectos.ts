@@ -1,19 +1,12 @@
-// TODO: corregir todo esto
-
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
 
 /**
  * Caso de uso: Obtener todos los proyectos
  *
  * @returns Lista de todos los proyectos
- *
- * TODO: Reemplazar mockProyectos con llamada real a Supabase
  */
 export async function obtenerTodosLosProyectos(): Promise<Proyecto[]> {
-	// TODO: Reemplazar con repositorio real
-	// const repository = new ProyectoRepository();
-	// return await repository.findAll();
-
-	return mockProyectos;
+	const repository = new MockProyectoRepository();
+	return (await repository.findAll()) ?? [];
 }

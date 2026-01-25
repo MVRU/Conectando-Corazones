@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
-	import { mockProyectos as proyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+
+	export let proyectos: Proyecto[] = [];
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -27,7 +29,7 @@
 		transition:all .85s cubic-bezier(.45,0,.2,1);
 	"
 >
-	<!-- *Background con degradé -->
+	<!-- *Background con degradado -->
 	<span
 		class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br
 		       from-sky-50 via-white to-white"
@@ -52,7 +54,6 @@
 			>
 				Historias reales
 			</span>
-			<!-- -*- <br> visible solo en <508px, oculto si >=508px -->
 			<br class="block min-[508px]:hidden" />
 			<span class="inline min-[508px]:inline"> de impacto social </span>
 		</h2>

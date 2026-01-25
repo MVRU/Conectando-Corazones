@@ -1,37 +1,6 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import type { ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
-import type { Institucion } from '$lib/domain/types/Usuario';
-import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
-import { mockProyectoCategorias } from '$lib/infrastructure/mocks/mock-proyecto-categorias';
-import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
-import { mockProyectoUbicaciones } from '$lib/infrastructure/mocks/mock-proyecto-ubicaciones';
 
-// ---------- Helpers ----------
-// TODO: considerar pasarlos a utils
-
-const isDefined = <T>(x: T | null | undefined): x is T => x != null;
-
-const elementosPorId = <T, K extends keyof T>(ids: number[] = [], elementos: T[], clave: K): T[] =>
-	ids.map((id) => elementos.find((e) => e[clave] === id)).filter(isDefined);
-
-const categoriasPorProyecto = (id: number) =>
-	mockProyectoCategorias
-		.filter((pc) => pc.proyecto_id === id)
-		.map((pc) => pc.categoria)
-		.filter(isDefined);
-
-const colaboracionesPorId = (ids: number[] = []) =>
-	elementosPorId(ids, mockColaboraciones, 'id_colaboracion');
-
-const ubicacionesPorProyecto = (id: number): ProyectoUbicacion[] =>
-	mockProyectoUbicaciones.filter((u) => u.proyecto_id === id);
-
-// ! Guard para asegurar que el objeto cumple con Institucion
-const esInstitucion = (x: unknown): x is Institucion => {
-	return !!x && typeof x === 'object' && 'nombre_legal' in x && 'tipo_institucion' in x;
-};
-
-const proyectosBase: Proyecto[] = [
+export const mockProyectos: Proyecto[] = [
 	{
 		id_proyecto: 1,
 		titulo: 'Un libro, un sueño',
@@ -83,14 +52,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-06-25'),
 		fecha_fin_tentativa: new Date('2025-10-10'),
 		id_chat_firebase: 1002,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [3, 4, 5],
 		colaboracion_ids: [3],
 		institucion_id: 11,
 		solicitud_finalizacion_ids: [2],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 1,
+				id_participacion_permitida: 3,
 				id_proyecto: 2,
 				id_tipo_participacion: 1,
 				unidad_medida: 'personas',
@@ -99,7 +68,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			},
 			{
-				id_participacion_permitida: 2,
+				id_participacion_permitida: 4,
 				id_proyecto: 2,
 				id_tipo_participacion: 2,
 				unidad_medida: 'kg',
@@ -109,7 +78,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 3,
+				id_participacion_permitida: 5,
 				id_proyecto: 2,
 				id_tipo_participacion: 3,
 				unidad_medida: 'docenas',
@@ -131,14 +100,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-02-20'),
 		fecha_fin_tentativa: new Date('2025-04-20'),
 		id_chat_firebase: 1003,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [6],
 		colaboracion_ids: [4, 25],
 		institucion_id: 3,
 		solicitud_finalizacion_ids: [3],
 		estado: 'en_revision',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 3,
+				id_participacion_permitida: 6,
 				id_proyecto: 3,
 				id_tipo_participacion: 1,
 				unidad_medida: 'personas',
@@ -158,14 +127,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-10-01'),
 		fecha_fin_tentativa: new Date('2026-02-01'),
 		id_chat_firebase: 1004,
-		participacion_permitida_ids: [1, 3],
+		participacion_permitida_ids: [7],
 		colaboracion_ids: [5],
 		institucion_id: 9,
 		solicitud_finalizacion_ids: [4],
 		estado: 'en_auditoria',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 4,
+				id_participacion_permitida: 7,
 				id_proyecto: 4,
 				id_tipo_participacion: 1,
 				unidad_medida: 'ARS',
@@ -186,14 +155,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-04-15'),
 		fecha_fin_tentativa: new Date('2025-06-15'),
 		id_chat_firebase: 1005,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [8],
 		colaboracion_ids: [6],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [5],
 		estado: 'cancelado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 5,
+				id_participacion_permitida: 8,
 				id_proyecto: 5,
 				id_tipo_participacion: 1,
 				unidad_medida: 'personas',
@@ -213,14 +182,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-03-25'),
 		fecha_fin_tentativa: new Date('2025-05-25'),
 		id_chat_firebase: 1006,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [9],
 		colaboracion_ids: [7],
 		institucion_id: 11,
 		solicitud_finalizacion_ids: [6],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 6,
+				id_participacion_permitida: 9,
 				id_proyecto: 6,
 				id_tipo_participacion: 1,
 				unidad_medida: 'personas',
@@ -242,14 +211,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-06-01'),
 		fecha_fin_tentativa: new Date('2025-08-01'),
 		id_chat_firebase: 1007,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [10],
 		colaboracion_ids: [8],
 		institucion_id: 14,
 		solicitud_finalizacion_ids: [7],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 7,
+				id_participacion_permitida: 10,
 				id_proyecto: 7,
 				id_tipo_participacion: 1,
 				unidad_medida: 'unidades',
@@ -271,14 +240,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
 		fecha_fin_tentativa: new Date('2025-07-10'),
 		id_chat_firebase: 1008,
-		participacion_permitida_ids: [1, 3],
+		participacion_permitida_ids: [11],
 		colaboracion_ids: [9],
 		institucion_id: 15,
 		solicitud_finalizacion_ids: [8],
 		estado: 'completado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 8,
+				id_participacion_permitida: 11,
 				id_proyecto: 8,
 				id_tipo_participacion: 1,
 				unidad_medida: 'personas',
@@ -298,14 +267,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2024-09-15'),
 		fecha_fin_tentativa: new Date('2024-12-15'),
 		id_chat_firebase: 1009,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [12, 13],
 		colaboracion_ids: [10],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [9],
 		estado: 'completado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 9,
+				id_participacion_permitida: 12,
 				id_proyecto: 9,
 				id_tipo_participacion: 1,
 				unidad_medida: 'libros',
@@ -314,7 +283,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 10,
+				id_participacion_permitida: 13,
 				id_proyecto: 9,
 				id_tipo_participacion: 2,
 				unidad_medida: 'ARS',
@@ -336,14 +305,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-09-01'),
 		fecha_fin_tentativa: new Date('2026-03-01'),
 		id_chat_firebase: 1010,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [14, 15, 16],
 		colaboracion_ids: [],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_revision',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 11,
+				id_participacion_permitida: 14,
 				id_proyecto: 10,
 				id_tipo_participacion: 1,
 				unidad_medida: 'palas',
@@ -352,7 +321,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 12,
+				id_participacion_permitida: 15,
 				id_proyecto: 10,
 				id_tipo_participacion: 1,
 				unidad_medida: 'semillas (paquetes)',
@@ -361,7 +330,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 24,
+				id_participacion_permitida: 16,
 				id_proyecto: 10,
 				id_tipo_participacion: 1,
 				unidad_medida: 'tutores voluntarios',
@@ -383,14 +352,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-05-15'),
 		fecha_fin_tentativa: new Date('2025-07-30'),
 		id_chat_firebase: 1011,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [17, 18],
 		colaboracion_ids: [],
 		institucion_id: 6,
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 13,
+				id_participacion_permitida: 17,
 				id_proyecto: 11,
 				id_tipo_participacion: 1,
 				unidad_medida: 'mantas',
@@ -399,7 +368,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 25,
+				id_participacion_permitida: 18,
 				id_proyecto: 11,
 				id_tipo_participacion: 1,
 				unidad_medida: 'voluntarios clasificación',
@@ -421,14 +390,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-02-01'),
 		fecha_fin_tentativa: new Date('2026-06-01'),
 		id_chat_firebase: 1012,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [19, 20],
 		colaboracion_ids: [],
 		institucion_id: 13,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 14,
+				id_participacion_permitida: 19,
 				id_proyecto: 12,
 				id_tipo_participacion: 1,
 				unidad_medida: 'voluntarios',
@@ -437,7 +406,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			},
 			{
-				id_participacion_permitida: 26,
+				id_participacion_permitida: 20,
 				id_proyecto: 12,
 				id_tipo_participacion: 1,
 				unidad_medida: 'notebooks usadas',
@@ -459,14 +428,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-10-10'),
 		fecha_fin_tentativa: new Date('2025-12-20'),
 		id_chat_firebase: 1013,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [21, 22],
 		colaboracion_ids: [],
 		institucion_id: 17,
 		solicitud_finalizacion_ids: [],
 		estado: 'cancelado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 15,
+				id_participacion_permitida: 21,
 				id_proyecto: 13,
 				id_tipo_participacion: 1,
 				unidad_medida: 'voluntarios',
@@ -475,7 +444,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			},
 			{
-				id_participacion_permitida: 27,
+				id_participacion_permitida: 22,
 				id_proyecto: 13,
 				id_tipo_participacion: 1,
 				unidad_medida: 'contenedores plásticos',
@@ -497,14 +466,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-12-01'),
 		fecha_fin_tentativa: new Date('2026-04-01'),
 		id_chat_firebase: 1014,
-		participacion_permitida_ids: [1, 3],
+		participacion_permitida_ids: [23, 24, 25],
 		colaboracion_ids: [],
 		institucion_id: 16,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 16,
+				id_participacion_permitida: 23,
 				id_proyecto: 14,
 				id_tipo_participacion: 2,
 				unidad_medida: 'ladrillos',
@@ -513,7 +482,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 17,
+				id_participacion_permitida: 24,
 				id_proyecto: 14,
 				id_tipo_participacion: 1,
 				unidad_medida: 'ARS',
@@ -522,7 +491,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 2, descripcion: 'Monetaria' }
 			},
 			{
-				id_participacion_permitida: 28,
+				id_participacion_permitida: 25,
 				id_proyecto: 14,
 				id_tipo_participacion: 1,
 				unidad_medida: 'kg alimento balanceado',
@@ -544,14 +513,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-02-15'),
 		fecha_fin_tentativa: new Date('2026-03-10'),
 		id_chat_firebase: 1015,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [26, 27],
 		colaboracion_ids: [],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 18,
+				id_participacion_permitida: 26,
 				id_proyecto: 15,
 				id_tipo_participacion: 1,
 				unidad_medida: 'mochilas',
@@ -560,7 +529,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 29,
+				id_participacion_permitida: 27,
 				id_proyecto: 15,
 				id_tipo_participacion: 1,
 				unidad_medida: 'sets de útiles escolares',
@@ -582,14 +551,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-08-20'),
 		fecha_fin_tentativa: new Date('2025-11-20'),
 		id_chat_firebase: 1016,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [28, 29],
 		colaboracion_ids: [],
 		institucion_id: 17,
 		solicitud_finalizacion_ids: [],
 		estado: 'completado',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 19,
+				id_participacion_permitida: 28,
 				id_proyecto: 16,
 				id_tipo_participacion: 1,
 				unidad_medida: 'árboles',
@@ -598,7 +567,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 30,
+				id_participacion_permitida: 29,
 				id_proyecto: 16,
 				id_tipo_participacion: 1,
 				unidad_medida: 'ARS',
@@ -620,14 +589,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-11-05'),
 		fecha_fin_tentativa: new Date('2026-05-05'),
 		id_chat_firebase: 1017,
-		participacion_permitida_ids: [1, 2],
+		participacion_permitida_ids: [30, 31, 32],
 		colaboracion_ids: [],
 		institucion_id: 13,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 20,
+				id_participacion_permitida: 30,
 				id_proyecto: 17,
 				id_tipo_participacion: 1,
 				unidad_medida: 'máquinas de coser',
@@ -636,7 +605,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 21,
+				id_participacion_permitida: 31,
 				id_proyecto: 17,
 				id_tipo_participacion: 1,
 				unidad_medida: 'telas (metros)',
@@ -645,7 +614,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 31,
+				id_participacion_permitida: 32,
 				id_proyecto: 17,
 				id_tipo_participacion: 1,
 				unidad_medida: 'hilos (bobinas)',
@@ -667,14 +636,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-02-28'),
 		fecha_fin_tentativa: new Date('2026-12-01'),
 		id_chat_firebase: 1018,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [33, 34],
 		colaboracion_ids: [],
 		institucion_id: 18,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 22,
+				id_participacion_permitida: 33,
 				id_proyecto: 18,
 				id_tipo_participacion: 1,
 				unidad_medida: 'libros infantiles',
@@ -683,7 +652,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 32,
+				id_participacion_permitida: 34,
 				id_proyecto: 18,
 				id_tipo_participacion: 1,
 				unidad_medida: 'BRL',
@@ -705,14 +674,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-01-30'),
 		fecha_fin_tentativa: new Date('2026-06-30'),
 		id_chat_firebase: 1019,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [35, 36],
 		colaboracion_ids: [],
 		institucion_id: 11,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 23,
+				id_participacion_permitida: 35,
 				id_proyecto: 19,
 				id_tipo_participacion: 1,
 				unidad_medida: 'juguetes',
@@ -721,7 +690,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 			},
 			{
-				id_participacion_permitida: 33,
+				id_participacion_permitida: 36,
 				id_proyecto: 19,
 				id_tipo_participacion: 1,
 				unidad_medida: 'juegos de mesa',
@@ -742,14 +711,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-03-01'),
 		fecha_fin_tentativa: new Date('2026-08-01'),
 		id_chat_firebase: 1020,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [37],
 		colaboracion_ids: [],
 		institucion_id: 11,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 34,
+				id_participacion_permitida: 37,
 				id_proyecto: 20,
 				id_tipo_participacion: 1,
 				unidad_medida: 'viandas',
@@ -770,14 +739,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2026-03-15'),
 		fecha_fin_tentativa: new Date('2026-09-15'),
 		id_chat_firebase: 1021,
-		participacion_permitida_ids: [1],
+		participacion_permitida_ids: [38],
 		colaboracion_ids: [],
 		institucion_id: 11,
 		solicitud_finalizacion_ids: [],
 		estado: 'en_curso',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 35,
+				id_participacion_permitida: 38,
 				id_proyecto: 21,
 				id_tipo_participacion: 1,
 				unidad_medida: 'voluntarios capacitadores',
@@ -801,14 +770,14 @@ const proyectosBase: Proyecto[] = [
 		fecha_cierre_postulaciones: new Date('2025-10-15'),
 		fecha_fin_tentativa: new Date('2025-12-30'),
 		id_chat_firebase: 1022,
-		participacion_permitida_ids: [36, 37],
+		participacion_permitida_ids: [39, 40],
 		colaboracion_ids: [],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [10, 11, 12],
 		estado: 'pendiente_solicitud_cierre',
 		participacion_permitida: [
 			{
-				id_participacion_permitida: 36,
+				id_participacion_permitida: 39,
 				id_proyecto: 22,
 				id_tipo_participacion: 1,
 				unidad_medida: 'docentes voluntarios',
@@ -817,7 +786,7 @@ const proyectosBase: Proyecto[] = [
 				tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 			},
 			{
-				id_participacion_permitida: 37,
+				id_participacion_permitida: 40,
 				id_proyecto: 22,
 				id_tipo_participacion: 1,
 				unidad_medida: 'unidades',
@@ -829,22 +798,3 @@ const proyectosBase: Proyecto[] = [
 		]
 	}
 ];
-
-export const mockProyectos: Proyecto[] = proyectosBase.map((proyecto) => {
-	const posibleInstitucion = Object.values(mockUsuarios).find(
-		(u) => u.id_usuario === proyecto.institucion_id
-	);
-
-	// ! Solo asignamos si realmente es una Institución; si no, queda undefined
-	const institucion: Institucion | undefined = esInstitucion(posibleInstitucion)
-		? posibleInstitucion
-		: undefined;
-
-	return {
-		...proyecto,
-		categorias: categoriasPorProyecto(proyecto.id_proyecto ?? 0),
-		colaboraciones: colaboracionesPorId(proyecto.colaboracion_ids ?? []),
-		ubicaciones: ubicacionesPorProyecto(proyecto.id_proyecto ?? 0),
-		institucion
-	};
-});

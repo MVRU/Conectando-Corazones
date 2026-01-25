@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
-	import { mockProyectos as defaultProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import TodosProyectos from './TodosProyectos.svelte';
 	import MisProyectos from './MisProyectos.svelte';
 	import { usuario } from '$lib/stores/auth';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 
-	export let proyectos: Proyecto[] = defaultProyectos;
+	export let proyectos: Proyecto[];
 	export let provinciasDisponibles: string[] = [];
 
 	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';

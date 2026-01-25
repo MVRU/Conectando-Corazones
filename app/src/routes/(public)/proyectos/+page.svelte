@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import Proyectos from '$lib/components/feature/proyectos/Proyectos.svelte';
 	// @ts-ignore
 	export let data;

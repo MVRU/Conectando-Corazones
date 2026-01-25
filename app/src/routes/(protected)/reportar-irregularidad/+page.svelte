@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Reporte } from '$lib/domain/types/Reporte';
+	import { type Reporte, MotivoReporte } from '$lib/domain/types/Reporte';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { Button } from '$lib';
 
@@ -16,8 +16,12 @@
 	$: idObjeto = parseInt(queryParams.get('id') || '0');
 	$: nombreObjeto = queryParams.get('name') || '';
 
-	async function handleFormSubmit(event: CustomEvent) {
-		const { motivo, motivoOtro, descripcion } = event.detail;
+	async function handleFormSubmit(detail: {
+		motivo: string;
+		motivoOtro?: string;
+		descripcion: string;
+	}) {
+		const { motivo, motivoOtro, descripcion } = detail;
 		errorEnvio = '';
 		enviandoFormulario = true;
 
@@ -30,18 +34,18 @@
 		const nuevoReporte: Reporte = {
 			tipo_objeto: tipoObjeto,
 			id_objeto: idObjeto,
-			motivo,
+			motivo: motivo as MotivoReporte,
 			descripcion:
 				motivo === 'Otro'
-					? `Motivo: ${motivoOtro.trim()}\n\n${descripcion.trim()}`
+					? `Motivo: ${motivoOtro?.trim()}\n\n${descripcion.trim()}`
 					: descripcion.trim(),
 			id_reporte: undefined,
 			created_at: new Date(),
 			estado: 'pendiente',
 			fecha_resolucion: null,
 			comentario_resolucion: null,
-			reportante_id: $usuario.id_usuario,
-			admin_id: null
+			admin_id: null,
+			reportante_id: $usuario.id_usuario
 		};
 
 		try {
@@ -121,7 +125,7 @@
 						isLoading={enviandoFormulario}
 						{nombreObjeto}
 						{tipoObjeto}
-						on:submit={handleFormSubmit}
+						onsubmit={handleFormSubmit}
 					/>
 				{/if}
 			{:else}

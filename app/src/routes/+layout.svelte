@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import type { LayoutData } from './$types';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
@@ -13,6 +14,8 @@
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 	import { goto } from '$app/navigation';
+
+	export let data: LayoutData;
 
 	/**
 	 * ! DECISIÓN DE DISEÑO
@@ -57,7 +60,7 @@
 	}
 </script>
 
-<Header />
+<Header proyectos={data.proyectos} verificaciones={data.verificaciones} />
 <ToastHost />
 
 {#if showBreadcrumbs}

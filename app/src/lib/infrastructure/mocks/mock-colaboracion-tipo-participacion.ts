@@ -22,7 +22,7 @@ export const mockColaboracionTipoParticipacion: ColaboracionTipoParticipacion[] 
 	{
 		id_colaboracion_tipo_participacion: 3,
 		colaboracion_id: 3,
-		participacion_permitida_id: 1, // voluntarios
+		participacion_permitida_id: 3, // voluntarios
 		cantidad: 10
 	}
 ];

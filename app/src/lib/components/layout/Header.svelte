@@ -13,9 +13,11 @@
 		isColaborador
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
+	import type { Proyecto } from '$lib/domain/types/Proyecto';
+	import type { Verificacion } from '$lib/domain/types/Verificacion';
 
-	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+	export let proyectos: Proyecto[] = [];
+	export let verificaciones: Verificacion[] = [];
 
 	let menuAbierto = false;
 	let visible = false;
@@ -43,11 +45,10 @@
 
 	$: verificacionAprobada =
 		$usuarioStore &&
-		mockVerificaciones.find((v) => v.usuario_id === $usuarioStore?.id_usuario)?.estado ===
-			'aprobada';
+		verificaciones.find((v) => v.usuario_id === $usuarioStore?.id_usuario)?.estado === 'aprobada';
 
 	$: proyectosEnCursoCount = $usuarioStore
-		? mockProyectos.filter(
+		? proyectos.filter(
 				(p) => p.institucion_id === $usuarioStore?.id_usuario && p.estado === 'en_curso'
 			).length
 		: 0;

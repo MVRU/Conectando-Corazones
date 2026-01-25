@@ -173,8 +173,8 @@
 		mostrarModalReporte = true;
 	}
 
-	function handleConfirmarReporte(event: CustomEvent) {
-		console.log('Reporte generado:', event.detail);
+	function handleConfirmarReporte(detail: { reporte: any }) {
+		console.log('Reporte generado:', detail);
 	}
 
 	// Determinar estado de verificación del usuario
@@ -312,7 +312,7 @@
 		tipo_objeto="Usuario"
 		id_objeto={perfilUsuario.id_usuario ?? 0}
 		nombre_objeto={perfilUsuario.username}
-		on:close={() => (mostrarModalReporte = false)}
-		on:success={handleConfirmarReporte}
+		onclose={() => (mostrarModalReporte = false)}
+		onsuccess={handleConfirmarReporte}
 	/>
 {/if}
