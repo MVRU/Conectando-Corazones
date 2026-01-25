@@ -8,11 +8,11 @@ export class ObtenerLocalidades {
 
 	async porProvincia(idProvincia: number | undefined): Promise<Localidad[]> {
 		if (idProvincia === undefined) return [];
-		return this.localidadRepository.findByProvincia(idProvincia);
+		return this.localidadRepository.findByProvinciaId(idProvincia);
 	}
 
-	async porId(idLocalidad: number | undefined): Promise<Localidad | undefined> {
-		if (!idLocalidad) return undefined;
+	async porId(idLocalidad: number | undefined): Promise<Localidad | null> {
+		if (!idLocalidad) return null;
 		return this.localidadRepository.findById(idLocalidad);
 	}
 }

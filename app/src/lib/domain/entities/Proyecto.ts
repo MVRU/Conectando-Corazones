@@ -24,7 +24,7 @@ export class Proyecto {
 
 	// Relaciones
 	estado_id?: number;
-	institucion_id: number;
+	institucion_id: number | null;
 	participacion_permitida_ids?: number[];
 	categoria_ids?: number[];
 	colaboracion_ids?: number[];

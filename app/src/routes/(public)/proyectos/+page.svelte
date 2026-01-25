@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Proyectos from '$lib/components/feature/proyectos/Proyectos.svelte';
-
-	export let data: PageData;
+	// @ts-ignore
+	export let data;
 </script>
 
 <svelte:head>
@@ -14,5 +14,5 @@
 </svelte:head>
 
 <main class="relative min-h-screen w-full bg-gray-50">
-	<Proyectos proyectos={data.proyectos} />
+	<Proyectos proyectos={data.proyectos} provinciasDisponibles={data.provincias} />
 </main>

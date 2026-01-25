@@ -14,7 +14,8 @@
 		esUbicacionVirtual,
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
-	} from '$lib/utils/util-ubicaciones';
+	} from '$lib/utils/util-proyectos';
+	import { error } from '@sveltejs/kit';
 	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';

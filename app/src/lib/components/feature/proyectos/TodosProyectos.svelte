@@ -6,7 +6,8 @@
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 
-	export let proyectos: Proyecto[] = [];
+	export let proyectos: Proyecto[] = defaultProyectos;
+	export let provinciasDisponibles: string[] = [];
 
 	const filtros = createProyectosFiltros();
 	const {
@@ -24,7 +25,7 @@
 		criterioOrden,
 		consultaBusqueda,
 		categoriasDisponibles,
-		provinciasDisponibles,
+		provinciasDisponibles: provinciasDisponiblesStore,
 		estadosDisponibles,
 		tiposParticipacionDisponibles,
 		calcularLocalidadesDisponibles,
@@ -34,6 +35,9 @@
 	useProyectosFiltrosUrl(filtros);
 
 	$: proyectosStore.set(proyectos);
+	$: if (provinciasDisponibles.length > 0) {
+		provinciasDisponiblesStore.set(provinciasDisponibles);
+	}
 
 	export function cambiarTab(tab: string) {
 		// Implementar lógica de cambio de tab si es necesario
@@ -60,7 +64,9 @@
 		{criterioOrden}
 		{consultaBusqueda}
 		{categoriasDisponibles}
-		provinciasDisponibles={$provinciasDisponibles}
+		provinciasDisponibles={provinciasDisponibles.length > 0
+			? provinciasDisponibles
+			: $provinciasDisponiblesStore}
 		estadosDisponibles={$estadosDisponibles}
 		tiposParticipacionDisponibles={$tiposParticipacionDisponibles}
 		{calcularLocalidadesDisponibles}

@@ -6,7 +6,8 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 
-	export let proyectos: Proyecto[] = [];
+	export let proyectos: Proyecto[] = defaultProyectos;
+	export let provinciasDisponibles: string[] = [];
 
 	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';
 
@@ -73,7 +74,11 @@
 
 	{#if activeTab === 'todos'}
 		<div in:fade={{ duration: 200 }}>
-			<TodosProyectos {proyectos} on:cambiarTab={(e) => handleTabChange(e.detail)} />
+			<TodosProyectos
+				{proyectos}
+				{provinciasDisponibles}
+				on:cambiarTab={(e) => handleTabChange(e.detail)}
+			/>
 		</div>
 	{:else if activeTab === 'auditoria' && esAdministrador}
 		<div in:fade={{ duration: 200 }}>

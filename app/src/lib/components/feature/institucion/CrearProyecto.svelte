@@ -11,14 +11,12 @@
 		UbicacionFormulario
 	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import type { TipoUbicacion, ModalidadUbicacion } from '$lib/domain/types/Ubicacion';
-	import { provincias } from '\$lib/domain/types/static-data/provincias';
+
 	import {
 		MENSAJES_ERROR,
 		validarUrl,
 		validarCalle,
 		validarNumeroCalle,
-		validarCiudadEnProvincia,
-		validarProvincia,
 		esFechaFutura
 	} from '$lib/utils/validaciones';
 	import {
@@ -189,19 +187,9 @@
 				}
 				if (!direccion.provincia) {
 					errores[prefix + '_provincia'] = MENSAJES_ERROR.obligatorio;
-				} else if (!validarProvincia(direccion.provincia)) {
-					errores[prefix + '_provincia'] = MENSAJES_ERROR.provinciaInvalida;
 				}
 				if (!direccion.localidad_id) {
 					errores[prefix + '_localidad'] = MENSAJES_ERROR.obligatorio;
-				} else {
-					const provincia = provincias.find((p) => p.nombre === direccion.provincia);
-					if (
-						provincia &&
-						!validarCiudadEnProvincia(direccion.localidad_id, provincia.id_provincia)
-					) {
-						errores[prefix + '_localidad'] = MENSAJES_ERROR.ciudadNoPerteneceProvincia;
-					}
 				}
 				if (!direccion.calle) {
 					errores[prefix + '_calle'] = MENSAJES_ERROR.obligatorio;
