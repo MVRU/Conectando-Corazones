@@ -7,7 +7,6 @@ export class ParametroRepoPrisma implements ParametroRepository {
     async findAll(filtro?: string): Promise<Parametro[]> {
         const where = filtro ? {
             OR: [
-                { id_parametro: { contains: filtro, mode: 'insensitive' as const } },
                 { nombre: { contains: filtro, mode: 'insensitive' as const } },
                 { descripcion: { contains: filtro, mode: 'insensitive' as const } }
             ]
@@ -20,7 +19,7 @@ export class ParametroRepoPrisma implements ParametroRepository {
         return data.map(mapParametroToDomain);
     }
 
-    async findById(id: string): Promise<Parametro | null> {
+    async findById(id: number): Promise<Parametro | null> {
         const data = await prisma.parametro.findUnique({ where: { id_parametro: id } });
         return data ? mapParametroToDomain(data) : null;
     }
@@ -30,7 +29,7 @@ export class ParametroRepoPrisma implements ParametroRepository {
         return data ? mapParametroToDomain(data) : null;
     }
 
-    async updateValor(id: string, nuevoValor: string): Promise<Parametro> {
+    async updateValor(id: number, nuevoValor: string): Promise<Parametro> {
         const data = await prisma.parametro.update({
             where: { id_parametro: id },
             data: { valor: nuevoValor }

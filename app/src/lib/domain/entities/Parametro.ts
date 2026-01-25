@@ -1,14 +1,13 @@
 export type TipoParametro = 'string' | 'integer' | 'float' | 'boolean' | 'json';
 
 export class Parametro {
-    id_parametro: string;
+    id_parametro?: number;
     nombre: string;
     valor: string;
     tipo: TipoParametro;
     descripcion: string;
 
     constructor(data: Partial<Parametro>) {
-        if (!data.id_parametro) throw new Error('El ID del parámetro es requerido');
         if (!data.nombre) throw new Error('El nombre es requerido');
         if (data.valor === undefined || data.valor === null) throw new Error('El valor es requerido');
 

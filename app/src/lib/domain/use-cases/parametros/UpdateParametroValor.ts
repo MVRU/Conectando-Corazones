@@ -4,8 +4,7 @@ import type { Parametro, TipoParametro } from '../../entities/Parametro';
 export class UpdateParametroValor {
     constructor(private repo: ParametroRepository) { }
 
-    async execute(id: string, nuevoValor: string): Promise<Parametro> {
-        if (!id) throw new Error('ID requerido');
+    async execute(id: number, nuevoValor: string): Promise<Parametro> {
         if (nuevoValor === undefined || nuevoValor === null) throw new Error('Valor requerido');
         if (nuevoValor.trim() === '') throw new Error('El valor no puede estar vacío');
 
