@@ -4,8 +4,10 @@
 	import BurbujaMensaje from '$lib/components/feature/chat/BurbujaMensaje.svelte';
 	import InputMensaje from '$lib/components/feature/chat/InputMensaje.svelte';
 	import SeparadorFecha from '$lib/components/feature/chat/SeparadorFecha.svelte';
-	import { afterUpdate } from 'svelte';
+	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
+	import { afterUpdate, onDestroy } from 'svelte';
 	import { usuario } from '$lib/stores/auth';
+	import { chatStore } from '$lib/stores/chatStore';
 	import type { Mensaje, Chat } from '$lib/domain/types/Chat';
 	import { ObtenerChatPorProyecto } from '$lib/domain/use-cases/chat/ObtenerChatPorProyecto';
 	import { EnviarMensaje } from '$lib/domain/use-cases/chat/EnviarMensaje';
@@ -21,10 +23,17 @@
 
 	// Cargar chat y proyecto
 	let chat: Chat | null | undefined;
+	let previousChatId: number | null = null;
 
 	$: if (proyectoId) {
 		obtenerChatPorProyecto.ejecutar(proyectoId).then((c) => {
 			chat = c;
+			if (c) {
+				if (previousChatId !== null && previousChatId !== c.id_chat) {
+				}
+				previousChatId = c.id_chat;
+				chatStore.setCurrentChat(c.id_chat);
+			}
 		});
 	}
 
@@ -37,7 +46,7 @@
 	// Validar estado del proyecto para escritura
 	$: canWrite =
 		proyecto?.estado &&
-		!['auditoria', 'cancelado', 'completado'].includes(proyecto.estado) &&
+		!['en_auditoria', 'cancelado', 'completado'].includes(proyecto.estado) &&
 		hasAccess;
 
 	// Agrupar mensajes por fecha
@@ -97,6 +106,11 @@
 					updated_at: new Date()
 				};
 			}
+
+			// Limpiar borrador después de enviar
+			if (chat) {
+				chatStore.clearDraft(chat.id_chat);
+			}
 		} catch (error) {
 			console.error('Error al enviar mensaje:', error);
 		}
@@ -108,30 +122,6 @@
 		showMobileMenu = !showMobileMenu;
 	}
 
-	// Función para obtener colores del estado
-	function getStatusColors(estado: string | undefined) {
-		if (!estado) return { bg: 'bg-gray-100', text: 'text-gray-800', dot: 'bg-gray-600' };
-
-		switch (estado) {
-			case 'activo':
-				return { bg: 'bg-green-100', text: 'text-green-800', dot: 'bg-green-600' };
-			case 'en_progreso':
-				return { bg: 'bg-blue-100', text: 'text-blue-800', dot: 'bg-blue-600' };
-			case 'pendiente':
-				return { bg: 'bg-yellow-100', text: 'text-yellow-800', dot: 'bg-yellow-600' };
-			case 'completado':
-				return { bg: 'bg-purple-100', text: 'text-purple-800', dot: 'bg-purple-600' };
-			case 'auditoria':
-				return { bg: 'bg-orange-100', text: 'text-orange-800', dot: 'bg-orange-600' };
-			case 'cancelado':
-				return { bg: 'bg-red-100', text: 'text-red-800', dot: 'bg-red-600' };
-			default:
-				return { bg: 'bg-gray-100', text: 'text-gray-800', dot: 'bg-gray-600' };
-		}
-	}
-
-	$: statusColors = getStatusColors(proyecto?.estado);
-
 	// Enlace de evidencias según rol
 	$: evidenciasLink =
 		$usuario?.rol === 'institucion'
@@ -140,7 +130,7 @@
 </script>
 
 {#if !chat}
-	<div class="flex h-full items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+	<div class="flex h-full items-center justify-center bg-gray-50">
 		<div class="text-center">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -161,7 +151,7 @@
 		</div>
 	</div>
 {:else if !hasAccess}
-	<div class="flex h-full items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+	<div class="flex h-full items-center justify-center bg-red-50">
 		<div class="text-center">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -209,23 +199,22 @@
 				<!-- Título y estado -->
 				<div class="min-w-0 flex-1">
 					<h1 class="truncate text-lg font-bold text-gray-900 md:text-xl">{chat.titulo}</h1>
-					<p class="text-xs text-gray-500 md:text-sm">
-						<span
-							class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium {statusColors.bg} {statusColors.text}"
-						>
-							<span class="h-1.5 w-1.5 rounded-full {statusColors.dot}"></span>
-							{proyecto?.estado
-								? proyecto.estado.replace('_', ' ').toUpperCase()
-								: 'Estado desconocido'}
+					<div class="mt-1 flex items-center gap-2">
+						{#if proyecto?.estado}
+							<EstadoProyectoBadge estado={proyecto.estado} />
+						{/if}
+						<span class="text-xs text-gray-500">
+							{chat.mensajes.length}
+							{chat.mensajes.length === 1 ? 'mensaje' : 'mensajes'}
 						</span>
-					</p>
+					</div>
 				</div>
 
 				<!-- Botones de acción -->
 				<div class="flex flex-shrink-0 gap-2">
 					<a
 						href="/proyectos/{proyectoId}"
-						class="hidden items-center gap-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-md md:flex"
+						class="hidden items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md md:flex"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -340,10 +329,7 @@
 		</header>
 
 		<!-- Área de mensajes -->
-		<div
-			class="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white p-4 md:p-6"
-			bind:this={chatContainer}
-		>
+		<div class="no-scrollbar flex-1 overflow-y-auto bg-white p-4 md:p-6" bind:this={chatContainer}>
 			{#each messageGroups as group}
 				<SeparadorFecha fecha={group.date} />
 				{#each group.messages as mensaje}
@@ -352,6 +338,6 @@
 			{/each}
 		</div>
 
-		<InputMensaje deshabilitado={!canWrite} on:send={handleSend} />
+		<InputMensaje deshabilitado={!canWrite} chatId={chat.id_chat} on:send={handleSend} />
 	</div>
 {/if}

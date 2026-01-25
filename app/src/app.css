@@ -156,3 +156,13 @@ html.reduced-motion *::after {
 .animate-fade-up {
 	animation: fade-up 0.6s ease-out forwards;
 }
+
+/* Utilidad para ocultar scrollbars manteniendo funcionalidad */
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
+.no-scrollbar {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}

@@ -1,12 +1,41 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
+	import { chatStore } from '$lib/stores/chatStore';
 
 	export let deshabilitado: boolean = false;
 	export let placeholder: string = 'Escribe un mensaje...';
+	export let chatId: number | undefined = undefined;
 
 	let mensaje = '';
 	let textareaElement: HTMLTextAreaElement;
 	const dispatch = createEventDispatcher();
+
+	// Cargar borrador al montar si existe
+	onMount(() => {
+		if (chatId !== undefined) {
+			const draft = $chatStore.draftMessages.get(chatId);
+			if (draft) {
+				mensaje = draft;
+				setTimeout(autoExpand, 0);
+			}
+		}
+	});
+
+	// Guardar borrador al desmontar si hay contenido
+	onDestroy(() => {
+		if (chatId !== undefined && mensaje.trim()) {
+			chatStore.saveDraft(chatId, mensaje);
+		}
+	});
+
+	// Guardar borrador cuando cambia el chatId
+	$: if (chatId !== undefined) {
+		const draft = $chatStore.draftMessages.get(chatId);
+		if (draft !== undefined && draft !== mensaje) {
+			mensaje = draft;
+			setTimeout(autoExpand, 0);
+		}
+	}
 
 	function enviar() {
 		if (!mensaje.trim() || deshabilitado) return;
@@ -14,6 +43,10 @@
 		mensaje = '';
 		if (textareaElement) {
 			textareaElement.style.height = 'auto';
+		}
+		// Limpiar borrador después de enviar
+		if (chatId !== undefined) {
+			chatStore.clearDraft(chatId);
 		}
 	}
 
@@ -47,7 +80,7 @@
 			disabled={deshabilitado}
 			{placeholder}
 			rows="1"
-			class="flex-1 resize-none overflow-y-auto rounded-xl border-2 border-gray-200 bg-gray-50 p-3 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 md:text-base"
+			class="no-scrollbar flex-1 resize-none overflow-y-auto rounded-xl border-2 border-gray-200 bg-gray-50 p-3 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 md:text-base"
 			style="min-height: 44px; max-height: 200px;"
 		></textarea>
 		<button

@@ -34,11 +34,16 @@
 <div class="mb-3 flex flex-col {esPropio ? 'items-end' : 'items-start'}">
 	<div
 		class="group relative max-w-[85%] rounded-2xl px-3 py-2 shadow-sm transition-all hover:shadow-md md:max-w-[70%] md:px-4 md:py-2.5 {esPropio
-			? 'rounded-br-sm bg-gradient-to-br from-blue-600 to-blue-700 text-white'
+			? 'rounded-br-sm bg-blue-600 text-white'
 			: 'rounded-bl-sm border border-gray-200 bg-white text-gray-800'}"
 	>
 		{#if !esPropio}
-			<span class="mb-1 block text-xs font-bold text-blue-600">{nombreMostrar}</span>
+			<a
+				href="/perfil/{remitente?.username || mensaje.remitente_id}"
+				class="mb-1 block text-xs font-bold text-blue-600 transition-colors hover:text-blue-700 hover:underline"
+			>
+				{nombreMostrar}
+			</a>
 		{/if}
 		<p class="text-sm leading-relaxed break-words whitespace-pre-wrap">{mensaje.contenido}</p>
 		<span
@@ -52,7 +57,7 @@
 		</span>
 		{#if esPropio}
 			<div
-				class="absolute right-0 -bottom-0 h-3 w-3 bg-gradient-to-br from-blue-600 to-blue-700"
+				class="absolute right-0 -bottom-0 h-3 w-3 bg-blue-600"
 				style="clip-path: polygon(100% 0, 0 100%, 100% 100%);"
 			></div>
 		{:else}
