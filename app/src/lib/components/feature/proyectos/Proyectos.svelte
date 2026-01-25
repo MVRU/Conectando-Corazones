@@ -6,7 +6,7 @@
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 
-	export let proyectos: Proyecto[] = defaultProyectos;
+	export let proyectos: Proyecto[];
 	export let provinciasDisponibles: string[] = [];
 
 	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';

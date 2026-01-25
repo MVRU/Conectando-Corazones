@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { GetAllProvincias } from '$lib/domain/use-cases/ubicacion/GetAllProvincias';
 import { ProvinciaRepoPrisma } from '$lib/infrastructure/supabase/postgres/provincia.repo';
-import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
 
 export const load: PageServerLoad = async () => {
 	try {
@@ -57,8 +57,11 @@ export const load: PageServerLoad = async () => {
 		})) as unknown as Proyecto[];
 		*/
 
+		const proyectoRepo = new MockProyectoRepository();
+		const proyectos = await proyectoRepo.findAll();
+
 		return {
-			proyectos: mockProyectos,
+			proyectos,
 			provincias: provincias.map((p) => p.nombre)
 		};
 	} catch (e) {

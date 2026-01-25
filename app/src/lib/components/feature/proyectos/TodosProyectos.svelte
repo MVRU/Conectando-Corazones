@@ -6,7 +6,7 @@
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 
-	export let proyectos: Proyecto[] = defaultProyectos;
+	export let proyectos: Proyecto[] = [];
 	export let provinciasDisponibles: string[] = [];
 
 	const filtros = createProyectosFiltros();

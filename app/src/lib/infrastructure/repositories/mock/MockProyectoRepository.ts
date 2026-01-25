@@ -48,7 +48,9 @@ const hydrateProyecto = (proyectoBase: Proyecto): Proyecto => {
 	const colaboraciones = findColaboracionesByProyectoId(projectId);
 	const categorias = findCategoriasByProyectoId(projectId);
 	const ubicaciones = findUbicacionesByProyectoId(projectId);
-	const institucion = findInstitucionById(proyectoBase.institucion_id);
+	const institucion = proyectoBase.institucion_id
+		? findInstitucionById(proyectoBase.institucion_id)
+		: undefined;
 
 	return {
 		...proyectoBase,

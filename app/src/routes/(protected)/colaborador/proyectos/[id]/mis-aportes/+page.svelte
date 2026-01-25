@@ -4,27 +4,19 @@
 	import {
 		ChevronLeft,
 		Plus,
-		ExternalLink,
-		History,
-		FileText,
 		ArrowUpRight,
 		ChevronDown,
 		ChevronUp,
-		ImageIcon,
 		Pencil,
-		Download,
-		CheckCircle,
 		X,
 		Upload,
 		FileStack,
-		Target,
-		Info
+		FileText
 	} from 'lucide-svelte';
+	import ArchivoCard from '$lib/components/ui/cards/ArchivoCard.svelte';
+	import { obtenerIconoArchivo, formatearBytes } from '$lib/utils/archivos';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-
-	import { usuario } from '$lib/stores/auth';
 	import { fade, slide } from 'svelte/transition';
-	import { onMount } from 'svelte';
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
 	import { fly } from 'svelte/transition';
@@ -43,19 +35,6 @@
 		data.proyecto?.estado === 'en_curso' || data.proyecto?.estado === 'pendiente_solicitud_cierre'
 	);
 
-	let historialRecent = $derived(
-		misAportes.length > 0
-			? [
-					{
-						id: 1,
-						accion: 'Aporte registrado',
-						fecha: new Date().toLocaleDateString('es-AR'),
-						detalle: 'Subiste un comprobante de transferencia'
-					}
-				]
-			: []
-	);
-
 	function irANuevoAporte() {
 		goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes/nuevo`);
 	}
@@ -70,10 +49,6 @@
 			minimumFractionDigits: 0,
 			maximumFractionDigits: 0
 		}).format(valor);
-	}
-
-	function getIconForFile(tipo: string | undefined) {
-		return tipo?.includes('pdf') ? FileText : ImageIcon;
 	}
 
 	let showEditModal = $state(false);
@@ -158,25 +133,6 @@
 							size="md"
 							customClass="shadow-lg shadow-blue-200"
 						/>
-					</div>
-				{:else}
-					<div
-						class="mt-8 flex items-start gap-4 rounded-2xl border border-blue-100 bg-blue-50 p-4 shadow-sm md:p-5"
-					>
-						<div class="shrink-0 rounded-lg bg-blue-100 p-2 text-blue-600">
-							<Info size={24} />
-						</div>
-						<div class="text-left">
-							<h3 class="text-sm font-bold text-blue-900 md:text-base">
-								Recepción de aportes finalizada
-							</h3>
-							<p class="mt-1 text-sm leading-relaxed text-blue-700/80">
-								El proyecto ya no acepta nuevos aportes ni modificaciones en las evidencias
-								existentes debido a su estado actual (<span class="font-italic font-bold"
-									>{data.proyecto?.estado}</span
-								>).
-							</p>
-						</div>
 					</div>
 				{/if}
 			</div>
@@ -286,55 +242,11 @@
 												<div class="space-y-2">
 													{#if inputEvidences.length > 0}
 														{#each inputEvidences as file}
-															{@const Icon = getIconForFile(file.tipo_mime)}
-															<div
-																class="group flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-all hover:border-blue-300"
-															>
-																<div class="flex items-center gap-3 overflow-hidden">
-																	<div class="shrink-0 rounded-lg bg-blue-50 p-2 text-blue-500">
-																		<Icon size={18} />
-																	</div>
-																	<div class="min-w-0">
-																		<p class="truncate text-sm font-bold text-slate-800">
-																			{file.descripcion || file.nombre_original}
-																		</p>
-																		<div
-																			class="mt-0.5 flex items-center gap-2 text-[10px] text-slate-500"
-																		>
-																			<span
-																				>{((file.tamanio_bytes || 0) / (1024 * 1024)).toFixed(2)} MB</span
-																			>
-																			<span>•</span>
-																			<span
-																				>{new Date(
-																					file.created_at || new Date()
-																				).toLocaleDateString('es-AR')}</span
-																			>
-																		</div>
-																	</div>
-																</div>
-																<div class="flex items-center gap-1">
-																	{#if esEstadoPermitido}
-																		<button
-																			class="rounded-lg p-2 text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600"
-																			title="Editar"
-																			onclick={() => editarEvidencia(file)}
-																		>
-																			<Pencil size={16} />
-																		</button>
-																	{/if}
-																	{#if file.url}
-																		<a
-																			href={file.url}
-																			target="_blank"
-																			class="rounded-lg p-2 text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600"
-																			title="Ver"
-																		>
-																			<ExternalLink size={16} />
-																		</a>
-																	{/if}
-																</div>
-															</div>
+															<ArchivoCard
+																archivo={file}
+																editable={esEstadoPermitido}
+																onedit={() => editarEvidencia(file)}
+															/>
 														{/each}
 													{:else}
 														<p class="pl-3 text-xs text-slate-400 italic">
@@ -355,54 +267,11 @@
 												<div class="space-y-2">
 													{#if outputEvidences.length > 0}
 														{#each outputEvidences as file}
-															{@const Icon = getIconForFile(file.tipo_mime)}
-															<div
-																class="group flex items-center justify-between rounded-xl border border-emerald-100 bg-emerald-50/30 p-3 shadow-sm transition-all hover:border-emerald-300"
-															>
-																<div class="flex items-center gap-3 overflow-hidden">
-																	<div
-																		class="shrink-0 rounded-lg border border-emerald-50 bg-white p-2 text-emerald-500 shadow-sm"
-																	>
-																		<Icon size={18} />
-																	</div>
-																	<div class="min-w-0">
-																		<p class="truncate text-sm font-bold text-slate-800">
-																			{file.descripcion || file.nombre_original}
-																		</p>
-																		<div
-																			class="mt-0.5 flex items-center gap-2 text-[10px] text-emerald-700"
-																		>
-																			<span>Institución</span>
-																			<span>•</span>
-																			<span
-																				>{new Date(
-																					file.created_at || new Date()
-																				).toLocaleDateString('es-AR')}</span
-																			>
-																		</div>
-																	</div>
-																</div>
-																<div class="flex items-center gap-1">
-																	{#if file.url}
-																		<a
-																			href={file.url}
-																			target="_blank"
-																			class="rounded-lg p-2 text-emerald-400 transition-all hover:bg-emerald-100 hover:text-emerald-700"
-																			title="Ver"
-																		>
-																			<ExternalLink size={16} />
-																		</a>
-																		<a
-																			href={file.url}
-																			download
-																			class="hidden rounded-lg p-2 text-emerald-400 transition-all hover:bg-emerald-100 hover:text-emerald-700 sm:block"
-																			title="Descargar"
-																		>
-																			<Download size={16} />
-																		</a>
-																	{/if}
-																</div>
-															</div>
+															<ArchivoCard
+																archivo={file}
+																customClass="border-emerald-100 bg-emerald-50/30 hover:border-emerald-300"
+																showUploader={true}
+															/>
 														{/each}
 													{:else}
 														<div
@@ -464,7 +333,6 @@
 					>
 						<FileStack size={24} strokeWidth={2.5} />
 					</div>
-
 					<div class="min-w-0 flex-1 text-left">
 						<h3
 							id="modal-edit-title"
@@ -509,7 +377,7 @@
 								<div class="min-w-0">
 									<p class="truncate text-sm font-bold text-slate-800">{newFile.name}</p>
 									<p class="text-[10px] font-bold tracking-wider text-slate-500 uppercase">
-										{(newFile.size / (1024 * 1024)).toFixed(2)} MB • Nuevo
+										{formatearBytes(newFile.size)} • Nuevo
 									</p>
 								</div>
 							</div>
@@ -527,7 +395,7 @@
 							<div class="flex items-center gap-3 overflow-hidden">
 								<div class="shrink-0 rounded-xl bg-white p-2.5 text-slate-400 shadow-sm">
 									{#if currentEditingFile}
-										{@const Icon = getIconForFile(currentEditingFile.tipo_mime)}
+										{@const Icon = obtenerIconoArchivo(currentEditingFile.tipo_mime)}
 										<Icon size={20} />
 									{:else}
 										<FileText size={20} />
@@ -543,7 +411,6 @@
 								</div>
 							</div>
 						</div>
-
 						<label class="group block w-full cursor-pointer">
 							<div
 								class="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 p-6 text-center transition-all group-hover:border-blue-300 group-hover:bg-blue-50/30"
