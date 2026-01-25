@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 
-	export let disabled: boolean = false;
+	export let deshabilitado: boolean = false;
 	export let placeholder: string = 'Escribe un mensaje...';
 
 	let mensaje = '';
@@ -9,7 +9,7 @@
 	const dispatch = createEventDispatcher();
 
 	function enviar() {
-		if (!mensaje.trim() || disabled) return;
+		if (!mensaje.trim() || deshabilitado) return;
 		dispatch('send', { contenido: mensaje });
 		mensaje = '';
 		if (textareaElement) {
@@ -44,7 +44,7 @@
 			bind:value={mensaje}
 			on:keydown={handleKeydown}
 			on:input={autoExpand}
-			{disabled}
+			disabled={deshabilitado}
 			{placeholder}
 			rows="1"
 			class="flex-1 resize-none overflow-y-auto rounded-xl border-2 border-gray-200 bg-gray-50 p-3 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 md:text-base"
@@ -52,7 +52,7 @@
 		></textarea>
 		<button
 			on:click={enviar}
-			disabled={!mensaje.trim() || disabled}
+			disabled={!mensaje.trim() || deshabilitado}
 			class="flex items-center justify-center self-end rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none md:px-5"
 			style="min-height: 44px;"
 		>
@@ -73,7 +73,7 @@
 			<span class="hidden md:inline">Enviar</span>
 		</button>
 	</div>
-	{#if disabled}
+	{#if deshabilitado}
 		<p class="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-amber-600">
 			<svg
 				xmlns="http://www.w3.org/2000/svg"

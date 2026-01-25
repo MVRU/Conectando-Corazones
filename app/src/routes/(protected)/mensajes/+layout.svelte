@@ -1,18 +1,21 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mockChats } from '$lib/infrastructure/mocks/mock-chats';
 	import type { Chat } from '$lib/domain/types/Chat';
 	import { usuario } from '$lib/stores/auth';
+	import { ObtenerChatsPorUsuario } from '$lib/domain/use-cases/chat/ObtenerChatsPorUsuario';
+	import { MockChatRepository } from '$lib/infrastructure/repositories/mock/MockChatRepository';
 
 	// Filtrar chats donde el usuario es participante
-	let userChats: Chat[] = [];
+	let chatsUsuario: Chat[] = [];
+	const chatRepository = new MockChatRepository();
+	const obtenerChatsPorUsuario = new ObtenerChatsPorUsuario(chatRepository);
 
 	$: if ($usuario?.id_usuario) {
-		userChats = mockChats.filter((chat) => chat.participantes_ids.includes($usuario!.id_usuario!));
-		// Ordenar por fecha de actualización (más reciente primero)
-		userChats.sort((a, b) => b.updated_at.getTime() - a.updated_at.getTime());
+		obtenerChatsPorUsuario.ejecutar($usuario.id_usuario).then((chats) => {
+			chatsUsuario = chats;
+		});
 	} else {
-		userChats = [];
+		chatsUsuario = [];
 	}
 
 	// Determinar si estamos en la vista de chat (mobile)
@@ -52,7 +55,7 @@
 			</div>
 		</div>
 		<div class="flex-1 overflow-y-auto bg-gray-50">
-			{#if userChats.length === 0}
+			{#if chatsUsuario.length === 0}
 				<div class="p-6 text-center">
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +76,7 @@
 				</div>
 			{:else}
 				<ul class="divide-y divide-gray-100">
-					{#each userChats as chat}
+					{#each chatsUsuario as chat}
 						<li>
 							<a
 								href="/mensajes/{chat.proyecto_id}"

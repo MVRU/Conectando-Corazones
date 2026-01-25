@@ -1,19 +1,33 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mockChats } from '$lib/infrastructure/mocks/mock-chats';
 	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-	import MessageBubble from '$lib/components/feature/chat/MessageBubble.svelte';
-	import MessageInput from '$lib/components/feature/chat/MessageInput.svelte';
-	import DateSeparator from '$lib/components/feature/chat/DateSeparator.svelte';
+	import BurbujaMensaje from '$lib/components/feature/chat/BurbujaMensaje.svelte';
+	import InputMensaje from '$lib/components/feature/chat/InputMensaje.svelte';
+	import SeparadorFecha from '$lib/components/feature/chat/SeparadorFecha.svelte';
 	import { afterUpdate } from 'svelte';
 	import { usuario } from '$lib/stores/auth';
-	import type { Mensaje } from '$lib/domain/types/Chat';
+	import type { Mensaje, Chat } from '$lib/domain/types/Chat';
+	import { ObtenerChatPorProyecto } from '$lib/domain/use-cases/chat/ObtenerChatPorProyecto';
+	import { EnviarMensaje } from '$lib/domain/use-cases/chat/EnviarMensaje';
+	import { MockChatRepository } from '$lib/infrastructure/repositories/mock/MockChatRepository';
 
 	// Obtener ID del proyecto desde la URL
 	$: proyectoId = Number($page.params.proyecto_id);
 
+	// Inicializar repositorio y casos de uso
+	const chatRepository = new MockChatRepository();
+	const obtenerChatPorProyecto = new ObtenerChatPorProyecto(chatRepository);
+	const enviarMensaje = new EnviarMensaje(chatRepository);
+
 	// Cargar chat y proyecto
-	$: chat = mockChats.find((c) => c.proyecto_id === proyectoId);
+	let chat: Chat | null | undefined;
+
+	$: if (proyectoId) {
+		obtenerChatPorProyecto.ejecutar(proyectoId).then((c) => {
+			chat = c;
+		});
+	}
+
 	$: proyecto = mockProyectos.find((p) => p.id_proyecto === proyectoId);
 
 	// Validar acceso
@@ -49,38 +63,43 @@
 					} else {
 						groups.push({ date: dateOnly, messages: [mensaje] });
 					}
-
 					return groups;
 				}, [])
 			: [];
 
-	// Scroll al fondo
+	// Referencia al contenedor de mensajes para scroll
 	let chatContainer: HTMLElement;
 
-	const scrollToBottom = () => {
+	function scrollToBottom() {
 		if (chatContainer) {
 			chatContainer.scrollTop = chatContainer.scrollHeight;
 		}
-	};
+	}
 
+	// Scroll automático al cargar y al recibir mensajes
 	afterUpdate(() => {
 		scrollToBottom();
 	});
 
-	// Manejar envío de mensaje (simulado localmente)
-	function handleSend(event: CustomEvent) {
-		if (!chat || !$usuario?.id_usuario) return;
+	// Manejar envío de mensajes
+	async function handleSend(event: CustomEvent<{ contenido: string }>) {
+		const mensaje = event.detail.contenido;
+		if (!mensaje.trim() || !chat || !$usuario || !$usuario.id_usuario) return;
 
-		const nuevoMensaje = {
-			id_mensaje: Date.now(),
-			chat_id: chat.id_chat,
-			remitente_id: $usuario.id_usuario,
-			contenido: event.detail.contenido,
-			created_at: new Date()
-		};
+		try {
+			const nuevoMensaje = await enviarMensaje.ejecutar(chat.id_chat, $usuario.id_usuario, mensaje);
 
-		chat.mensajes = [...chat.mensajes, nuevoMensaje];
-		chat.updated_at = new Date();
+			// Actualizar array de mensajes (reactividad Svelte)
+			if (chat) {
+				chat = {
+					...chat,
+					mensajes: [...chat.mensajes, nuevoMensaje],
+					updated_at: new Date()
+				};
+			}
+		} catch (error) {
+			console.error('Error al enviar mensaje:', error);
+		}
 	}
 
 	// Mobile menu
@@ -284,7 +303,7 @@
 								viewBox="0 0 24 24"
 								stroke-width="1.5"
 								stroke="currentColor"
-								class="h-5 w-5 text-gray-400"
+								class="h-4 w-4 text-gray-400"
 							>
 								<path
 									stroke-linecap="round"
@@ -305,7 +324,7 @@
 								viewBox="0 0 24 24"
 								stroke-width="1.5"
 								stroke="currentColor"
-								class="h-5 w-5 text-gray-400"
+								class="h-4 w-4 text-gray-400"
 							>
 								<path
 									stroke-linecap="round"
@@ -313,26 +332,26 @@
 									d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
 								/>
 							</svg>
-							{$usuario?.rol === 'institucion' ? 'Ver evidencias' : 'Mis aportes'}
+							{$usuario?.rol === 'institucion' ? 'Evidencias' : 'Mis aportes'}
 						</a>
 					</div>
 				</div>
 			{/if}
 		</header>
 
+		<!-- Área de mensajes -->
 		<div
 			class="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50 to-white p-4 md:p-6"
 			bind:this={chatContainer}
-			style="scroll-behavior: smooth;"
 		>
-			{#each messageGroups as group (group.date.getTime())}
-				<DateSeparator date={group.date} />
-				{#each group.messages as mensaje (mensaje.id_mensaje)}
-					<MessageBubble {mensaje} isOwn={mensaje.remitente_id === $usuario?.id_usuario} />
+			{#each messageGroups as group}
+				<SeparadorFecha fecha={group.date} />
+				{#each group.messages as mensaje}
+					<BurbujaMensaje {mensaje} esPropio={mensaje.remitente_id === $usuario?.id_usuario} />
 				{/each}
 			{/each}
 		</div>
 
-		<MessageInput disabled={!canWrite} on:send={handleSend} />
+		<InputMensaje deshabilitado={!canWrite} on:send={handleSend} />
 	</div>
 {/if}
