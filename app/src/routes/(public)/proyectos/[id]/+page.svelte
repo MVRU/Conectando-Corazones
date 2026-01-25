@@ -587,6 +587,7 @@
 											<button
 												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 												role="menuitem"
+												onclick={() => goto(`/mensajes/${proyecto.id_proyecto}`)}
 											>
 												<Icon src={ChatBubbleLeftRight} class="h-4 w-4 text-gray-500" />
 												Ir al chat
