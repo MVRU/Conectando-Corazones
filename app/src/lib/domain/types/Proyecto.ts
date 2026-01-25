@@ -10,9 +10,9 @@ export interface Proyecto {
 	id_proyecto?: number;
 	titulo: string;
 	descripcion: string;
-	resumen?: string;
-	aprendizajes?: string;
-	url_portada?: string;
+	resumen?: string | null;
+	aprendizajes?: string | null;
+	url_portada?: string | null;
 	created_at?: Date | string | null;
 	updated_at?: Date | string | null;
 	fecha_cierre_postulaciones?: Date | string | null;
@@ -24,7 +24,7 @@ export interface Proyecto {
 
 	// -*- FKS para create/update
 	estado_id?: number;
-	institucion_id: number;
+	institucion_id: number | null;
 	participacion_permitida_ids?: number[];
 	categoria_ids?: number[];
 	colaboracion_ids?: number[];

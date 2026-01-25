@@ -1,20 +1,24 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
-	import { validarCiudadEnProvincia, MENSAJES_ERROR } from '$lib/utils/validaciones';
+	import { MENSAJES_ERROR } from '$lib/utils/validaciones';
 	import {
 		construirUrlsVistaPreviaGoogleMaps,
 		type UrlsVistaPreviaGoogleMaps
 	} from '$lib/utils/googleMaps';
 
-	import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
-	import { provincias } from '\$lib/domain/types/static-data/provincias';
-	import type { Provincia } from '$lib/domain/types/Provincia';
-	import type { Localidad } from '$lib/domain/types/Localidad';
+	import type { Provincia } from '$lib/domain/entities/Provincia';
+	import type { Localidad } from '$lib/domain/entities/Localidad';
 	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
+
+	// Estado para datos cargados desde API
+	let provincias: Provincia[] = [];
+	let cargandoProvincias = true;
+	let cargandoLocalidades = false;
 
 	type DireccionPayload = {
 		provinciaId: number | null;
@@ -60,9 +64,42 @@
 
 	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
 
-	$: localidadesProvincia = provincia
-		? mockLocalidades.filter((l) => l.id_provincia === provincia.id_provincia)
-		: [];
+	// Cargar provincias
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/ubicaciones/provincias');
+			if (response.ok) {
+				provincias = await response.json();
+			}
+		} catch (e) {
+			console.error('Error cargando provincias:', e);
+		} finally {
+			cargandoProvincias = false;
+		}
+	});
+
+	// Cargar localidades cuando cambia la provincia
+	async function cargarLocalidades(idProv: number) {
+		cargandoLocalidades = true;
+		localidadesProvincia = [];
+		try {
+			const response = await fetch(`/api/ubicaciones/provincias/${idProv}/localidades`);
+			if (response.ok) {
+				localidadesProvincia = await response.json();
+			}
+		} catch (e) {
+			console.error('Error cargando localidades:', e);
+		} finally {
+			cargandoLocalidades = false;
+		}
+	}
+
+	// Reactivo: cargar localidades cuando cambia la provincia
+	$: if (provincia?.id_provincia) {
+		cargarLocalidades(provincia.id_provincia);
+	} else {
+		localidadesProvincia = [];
+	}
 
 	$: if (
 		provincia &&
@@ -80,7 +117,7 @@
 			urlGoogleMaps = '';
 			googleMapsPreview = null;
 			editandoUrlMapaGoogle = false;
-		} else if (validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)) {
+		} else if (localidad?.id_provincia === provincia?.id_provincia) {
 			googleMapsPreview = construirUrlsVistaPreviaGoogleMaps({
 				localidad: localidad?.nombre,
 				provincia: provincia?.nombre
@@ -95,9 +132,10 @@
 
 	$: errores = {
 		provincia: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
-		localidad: validarCiudadEnProvincia(localidad?.id_localidad, provincia?.id_provincia)
-			? ''
-			: MENSAJES_ERROR.ciudadNoPerteneceProvincia
+		localidad:
+			localidad?.id_provincia === provincia?.id_provincia
+				? ''
+				: MENSAJES_ERROR.ciudadNoPerteneceProvincia
 	};
 
 	$: tieneErrores = Object.values(errores).some((mensajeError) => mensajeError !== '');
@@ -155,7 +193,8 @@
 			<Select
 				id="provincia"
 				required={true}
-				placeholder="Seleccioná una provincia"
+				placeholder={cargandoProvincias ? 'Cargando...' : 'Seleccioná una provincia'}
+				disabled={cargandoProvincias}
 				options={provincias
 					.filter((p) => p.id_provincia != null)
 					.map((p) => ({ value: String(p.id_provincia), label: p.nombre }))}
@@ -173,12 +212,12 @@
 			<Select
 				id="localidad"
 				required={true}
-				placeholder="Seleccioná una localidad"
+				placeholder={cargandoLocalidades ? 'Cargando...' : 'Seleccioná una localidad'}
 				options={localidadesProvincia
 					.filter((c) => c.id_localidad != null)
 					.map((c) => ({ value: String(c.id_localidad), label: c.nombre }))}
 				bind:value={idLocalidad}
-				disabled={!provincia}
+				disabled={!provincia || cargandoLocalidades}
 				error={intentoEnvio ? errores.localidad : ''}
 				ariaDescribedBy="localidad-helper"
 			/>

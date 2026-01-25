@@ -8,11 +8,12 @@ datasource db {
 
 model Archivo {
   id_archivo        Int       @id @default(autoincrement())
+  nombre_original   String?
   url               String
   descripcion       String?
   tipo_mime         String?
-  tamano            Int?      @map("tamaño") // tamaño in TS
-  created_at        DateTime? @default(now())
+  tamanio_bytes     Int?
+  created_at        DateTime  @default(now())
   fecha_vencimiento DateTime?
 
   usuario_id   Int?
@@ -66,7 +67,7 @@ model Colaboracion {
 }
 
 model ColaboracionTipoParticipacion {
-  id_colaboracion_tipo_participacion Int @id @default(autoincrement())
+  id_colaboracion_tipo_participacion Int  @id @default(autoincrement())
   colaboracion_id                    Int?
   participacion_permitida_id         Int?
   cantidad                           Int
@@ -103,7 +104,9 @@ model Contacto {
 
 model Estado {
   id_estado   Int    @id @default(autoincrement())
-  descripcion String
+  descripcion String @unique
+
+  proyectos Proyecto[]
 
   @@map("estados")
 }
@@ -123,15 +126,15 @@ model Evaluacion {
 }
 
 model Evidencia {
-  id_evidencia               Int       @id @default(autoincrement())
-  tipo_evidencia             String // entrada, salida
-  created_at                 DateTime? @default(now())
+  id_evidencia               Int      @id @default(autoincrement())
+  tipo_evidencia             String
+  created_at                 DateTime @default(now())
   id_participacion_permitida Int
 
   participacion_permitida ParticipacionPermitida @relation(fields: [id_participacion_permitida], references: [id_participacion_permitida])
 
-  archivos               Archivo[]
-  solicitud_evidencias   SolicitudFinalizacionEvidencia[]
+  archivos             Archivo[]
+  solicitud_evidencias SolicitudFinalizacionEvidencia[]
 
   @@map("evidencias")
 }
@@ -146,7 +149,7 @@ model HistorialDeCambios {
   valor_nuevo       String
   justificacion     String?
   created_at        DateTime? @default(now())
-  usuario_id        Int?
+  usuario_id        Int? // nullable
 
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
 
@@ -159,8 +162,9 @@ model Localidad {
   nombre        String
   id_provincia  Int?
 
-  provincia     Provincia? @relation(fields: [id_provincia], references: [id_provincia])
-  ubicaciones   Ubicacion[]
+  provincia   Provincia?  @relation(fields: [id_provincia], references: [id_provincia])
+  ubicaciones Ubicacion[]
+  usuarios    Usuario[]
 
   @@map("localidades")
 }
@@ -209,16 +213,19 @@ model Proyecto {
   titulo                     String
   descripcion                String
   resumen                    String?
+  aprendizajes               String?
   url_portada                String?
-  created_at                 DateTime? @default(now())
+  created_at                 DateTime  @default(now())
   updated_at                 DateTime? @updatedAt
   fecha_cierre_postulaciones DateTime?
   fecha_fin_tentativa        DateTime?
   beneficiarios              Int?
-  estado                     String // en_curso, etc.
-  institucion_id             Int?
+  id_chat_firebase           String?
+  estado_id                  Int?
+  institucion_id             Int
 
-  institucion Usuario? @relation(fields: [institucion_id], references: [id_usuario])
+  estado      Estado? @relation(fields: [estado_id], references: [id_estado])
+  institucion Usuario @relation(fields: [institucion_id], references: [id_usuario])
 
   archivos                 Archivo[]
   colaboraciones           Colaboracion[]
@@ -273,7 +280,7 @@ model Reporte {
 }
 
 model Resena {
-  id_resena   Int     @id @default(autoincrement())
+  id_resena   Int      @id @default(autoincrement())
   tipo_objeto String?
   id_objeto   Int?
   contenido   String
@@ -302,9 +309,9 @@ model SolicitudFinalizacion {
 model SolicitudFinalizacionEvidencia {
   id_solicitud_finalizacion_evidencia Int @id @default(autoincrement())
   evidencia_id                        Int @unique
-  solicitud_finalizacion_id           Int @unique // Note: Types say UNIQUE, checking validity logic
+  solicitud_finalizacion_id           Int
 
-  evidencia             Evidencia             @relation(fields: [evidencia_id], references: [id_evidencia])
+  evidencia              Evidencia             @relation(fields: [evidencia_id], references: [id_evidencia])
   solicitud_finalizacion SolicitudFinalizacion @relation(fields: [solicitud_finalizacion_id], references: [id_solicitud])
 
   @@map("solicitud_finalizacion_evidencias")
@@ -352,22 +359,26 @@ model Ubicacion {
 }
 
 model Usuario {
-  id_usuario       Int       @id @default(autoincrement())
-  username         String    @unique
-  nombre           String?
-  apellido         String?
-  url_foto         String?
-  rol              String    @default("colaborador")
-  email            String?   @unique // Assuming email is unique if present
-  telefono         String?
-  fecha_nacimiento DateTime?
-  biografia        String?
-  nombre_legal     String? // Institucion
-  tipo_institucion String? // Institucion
-  cuit             String? // Institucion
-  direccion        String? // Institucion (simple field or relation?)
-  sitio_web        String? // Institucion
+  id_usuario          Int       @id @default(autoincrement())
+  username            String    @unique
+  password            String?
+  nombre              String
+  apellido            String
+  fecha_nacimiento    DateTime?
+  estado              String
+  created_at          DateTime? @default(now())
+  rol                 String    @default("colaborador")
+  url_foto            String
+  estado_verificacion String?
+  descripcion         String?
+  nombre_legal        String? // Institucion
+  tipo_institucion    String? // Institucion
+  tipo_colaborador    String? // Colaborador
+  razon_social        String? // Colaborador (Organización)
+  con_fines_de_lucro  Boolean? // Colaborador (Organización)
+  localidad_id        Int?
 
+  localidad                      Localidad?                     @relation(fields: [localidad_id], references: [id_localidad])
   archivos                       Archivo[]
   categorias_preferidas          CategoriasPreferidas[]
   colaboraciones                 Colaboracion[]

@@ -1,6 +1,3 @@
-import { provincias } from '$lib/domain/types/static-data/provincias';
-import { mockLocalidades } from '$lib/infrastructure/mocks/mock-localidades';
-
 /**
  * ! Mensajes de error comunes para validaciones
  */
@@ -89,25 +86,6 @@ export function validarNumeroCalle(numero: string): boolean {
 	const trim = numero.trim();
 	// Permitir números (1-5 dígitos) o texto corto alfanumérico como "S/N"
 	return trim.length > 0 && trim.length <= 10 && /^[a-zA-Z0-9\s/.-]+$/.test(trim);
-}
-
-export function validarProvincia(provincia: string): boolean {
-	return provincias.some((p) => p.nombre === provincia);
-}
-
-/**
- * -!- Valida si una ciudad pertenece a una provincia específica usando IDs.
- */
-export function validarCiudadEnProvincia(
-	idLocalidad?: number | string,
-	idProvincia?: number | string
-): boolean {
-	const locId = Number(idLocalidad);
-	const provId = Number(idProvincia);
-	if (!locId || !provId) return false;
-
-	const localidad = mockLocalidades.find((l) => l.id_localidad === locId);
-	return localidad?.id_provincia === provId;
 }
 
 /**

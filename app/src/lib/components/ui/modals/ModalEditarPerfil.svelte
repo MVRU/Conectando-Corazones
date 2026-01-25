@@ -1,11 +1,16 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import type { Writable, Readable } from 'svelte/store';
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
-	import type { Localidad } from '$lib/domain/types/Localidad';
-	import { provincias } from '\$lib/domain/types/static-data/provincias';
-	import MetodosContactoForm from '\$lib/components/ui/forms/MetodosContactoForm.svelte';
+	import type { Localidad } from '$lib/domain/entities/Localidad';
+	import type { Provincia } from '$lib/domain/entities/Provincia';
+	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+
+	// Estado para provincias cargadas desde API
+	let provincias: Provincia[] = [];
+	let cargandoProvincias = true;
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
@@ -30,6 +35,20 @@
 	function handleCerrar() {
 		dispatch('cerrar');
 	}
+
+	// Cargar provincias desde API
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/ubicaciones/provincias');
+			if (response.ok) {
+				provincias = await response.json();
+			}
+		} catch (e) {
+			console.error('Error cargando provincias:', e);
+		} finally {
+			cargandoProvincias = false;
+		}
+	});
 
 	function handleCambioProvinciaLocal() {
 		onCambiarProvincia($provinciaSeleccionada);
@@ -99,7 +118,7 @@
 				<button
 					on:click={handleCerrar}
 					aria-label="Cerrar modal"
-					class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+					class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-200"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -114,7 +133,7 @@
 
 			<div class="grid flex-1 grid-cols-1 overflow-hidden bg-white md:grid-cols-12">
 				<div
-					class="col-span-1 flex flex-col items-center overflow-y-auto border-b border-gray-100 bg-gray-50 p-6 text-center md:col-span-3 md:border-r md:border-b-0"
+					class="col-span-1 flex flex-col items-center overflow-y-auto border-b border-gray-100 bg-gray-50 p-6 text-center md:col-span-3 md:border-b-0 md:border-r"
 				>
 					<div class="group relative mb-4">
 						<div
@@ -129,7 +148,7 @@
 
 						<button
 							type="button"
-							class="absolute right-1 bottom-1 cursor-pointer rounded-full bg-blue-600 p-2.5 text-white shadow-md transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+							class="absolute bottom-1 right-1 cursor-pointer rounded-full bg-blue-600 p-2.5 text-white shadow-md transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 							aria-label="Cambiar foto de perfil"
 							on:click={() => document.getElementById('file-upload')?.click()}
 						>
@@ -158,7 +177,7 @@
 					</div>
 
 					<h4 class="mb-1 text-lg font-bold text-gray-900">{nombreUsuario}</h4>
-					<p class="mb-6 text-sm text-gray-500 capitalize">{perfilUsuario.rol}</p>
+					<p class="mb-6 text-sm capitalize text-gray-500">{perfilUsuario.rol}</p>
 				</div>
 
 				<div class="col-span-1 space-y-8 overflow-y-auto p-6 md:col-span-9 md:p-8">
@@ -240,9 +259,12 @@
 									id="provincia"
 									bind:value={$provinciaSeleccionada}
 									on:change={handleCambioProvinciaLocal}
-									class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+									disabled={cargandoProvincias}
+									class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 sm:text-sm"
 								>
-									<option value={undefined}>Seleccioná una provincia</option>
+									<option value={undefined}>
+										{cargandoProvincias ? 'Cargando...' : 'Seleccioná una provincia'}
+									</option>
 									{#each provincias as prov}
 										<option value={prov.id_provincia}>{prov.nombre}</option>
 									{/each}

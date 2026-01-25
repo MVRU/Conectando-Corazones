@@ -1,4 +1,4 @@
-import { writable, derived, get } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 import type {
 	Usuario,
@@ -7,10 +7,8 @@ import type {
 	Unipersonal,
 	Administrador
 } from '$lib/domain/types/Usuario';
-import type { Localidad } from '$lib/domain/types/Localidad';
+import type { Localidad } from '$lib/domain/entities/Localidad';
 import { validarDescripcionProyecto } from '$lib/utils/util-proyecto-form';
-import { obtenerLocalidadesPorProvincia } from '$lib/domain/use-cases/localidades/obtenerLocalidadesPorProvincia';
-import { obtenerLocalidadPorId } from '$lib/domain/use-cases/localidades/obtenerLocalidadPorId';
 
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
@@ -28,9 +26,30 @@ export function usePerfilEdicion() {
 
 	const provinciaSeleccionada = writable<number | undefined>(undefined);
 
-	const localidadesFiltradas = derived(provinciaSeleccionada, ($provinciaSeleccionada) =>
-		obtenerLocalidadesPorProvincia($provinciaSeleccionada)
-	);
+	// Store para localidades cargadas desde API
+	const localidadesFiltradas = writable<Localidad[]>([]);
+	const cargandoLocalidades = writable<boolean>(false);
+
+	// Función para cargar localidades desde API
+	async function cargarLocalidades(idProvincia: number | undefined): Promise<void> {
+		if (!idProvincia) {
+			localidadesFiltradas.set([]);
+			return;
+		}
+		cargandoLocalidades.set(true);
+		try {
+			const response = await fetch(`/api/ubicaciones/provincias/${idProvincia}/localidades`);
+			if (response.ok) {
+				const data = await response.json();
+				localidadesFiltradas.set(data);
+			}
+		} catch (e) {
+			console.error('Error cargando localidades:', e);
+			localidadesFiltradas.set([]);
+		} finally {
+			cargandoLocalidades.set(false);
+		}
+	}
 
 	function inicializar(perfilUsuario: UsuarioCompleto): void {
 		datosEdicion.set({
@@ -44,9 +63,12 @@ export function usePerfilEdicion() {
 
 		// Inicializar provincia seleccionada si existe localidad
 		if (perfilUsuario.localidad?.id_provincia !== undefined) {
-			provinciaSeleccionada.set(perfilUsuario.localidad.id_provincia);
+			const idProv = perfilUsuario.localidad.id_provincia;
+			provinciaSeleccionada.set(idProv);
+			cargarLocalidades(idProv);
 		} else {
 			provinciaSeleccionada.set(undefined);
+			localidadesFiltradas.set([]);
 		}
 
 		errorDescripcion.set(null);
@@ -69,6 +91,8 @@ export function usePerfilEdicion() {
 		provinciaSeleccionada.set(idProvincia);
 		// Resetear localidad al cambiar provincia
 		datosEdicion.update((d) => ({ ...d, localidad_id: undefined }));
+		// Cargar localidades desde API
+		cargarLocalidades(idProvincia);
 	}
 
 	function cambiarFoto(event: Event): boolean {
@@ -95,11 +119,11 @@ export function usePerfilEdicion() {
 		return true;
 	}
 
-	function prepararDatosParaGuardar(): {
+	async function prepararDatosParaGuardar(): Promise<{
 		valido: boolean;
 		datos?: EditarPerfilForm & { localidad?: Localidad };
 		error?: string;
-	} {
+	}> {
 		const datos = get(datosEdicion);
 
 		// Validar descripción antes de guardar
@@ -111,8 +135,19 @@ export function usePerfilEdicion() {
 			}
 		}
 
-		// Buscar localidad expandida si existe localidad_id
-		const localidadExpandida = obtenerLocalidadPorId(datos.localidad_id);
+		// Buscar localidad expandida desde API si existe localidad_id
+		let localidadExpandida: Localidad | undefined;
+		if (datos.localidad_id) {
+			try {
+				const response = await fetch(`/api/ubicaciones/provincias/${get(provinciaSeleccionada)}/localidades`);
+				if (response.ok) {
+					const localidades: Localidad[] = await response.json();
+					localidadExpandida = localidades.find(l => l.id_localidad === datos.localidad_id);
+				}
+			} catch (e) {
+				console.error('Error buscando localidad:', e);
+			}
+		}
 
 		// Retornar datos validados y preparados
 		return {
@@ -137,6 +172,7 @@ export function usePerfilEdicion() {
 		});
 		errorDescripcion.set(null);
 		provinciaSeleccionada.set(undefined);
+		localidadesFiltradas.set([]);
 	}
 
 	return {
