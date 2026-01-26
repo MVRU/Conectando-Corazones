@@ -3,18 +3,18 @@ import { ParametroRepoPrisma } from '$lib/infrastructure/supabase/postgres/param
 import { GetAllParametros } from '$lib/domain/use-cases/parametros/GetAllParametros';
 
 export async function load({ locals, url }) {
-    if (!locals.usuario || locals.usuario.rol !== 'administrador') {
-        throw error(403, 'Acceso denegado');
-    }
+	if (!locals.usuario || locals.usuario.rol !== 'administrador') {
+		throw error(403, 'Acceso denegado');
+	}
 
-    const q = url.searchParams.get('q') || undefined;
-    const repo = new ParametroRepoPrisma();
-    const useCase = new GetAllParametros(repo);
+	const q = url.searchParams.get('q') || undefined;
+	const repo = new ParametroRepoPrisma();
+	const useCase = new GetAllParametros(repo);
 
-    const parametros = await useCase.execute(q);
+	const parametros = await useCase.execute(q);
 
-    return {
-        parametros: JSON.parse(JSON.stringify(parametros)),
-        filtro: q
-    };
+	return {
+		parametros: JSON.parse(JSON.stringify(parametros)),
+		filtro: q
+	};
 }
