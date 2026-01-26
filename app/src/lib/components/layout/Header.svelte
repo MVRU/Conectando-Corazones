@@ -15,6 +15,19 @@
 	import { layoutStore } from '$lib/stores/layout';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Verificacion } from '$lib/domain/types/Verificacion';
+	import {
+		MessageCircle,
+		ChevronDown,
+		LayoutDashboard,
+		PlusCircle,
+		User,
+		FileText,
+		Settings,
+		LogOut,
+		Menu,
+		X,
+		FileWarning
+	} from 'lucide-svelte';
 
 	export let proyectos: Proyecto[] = [];
 	export let verificaciones: Verificacion[] = [];
@@ -55,35 +68,9 @@
 
 	$: limiteProyectosAlcanzado = proyectosEnCursoCount >= 5;
 
-	interface DropdownItem {
-		label: string;
-		href: string;
-		disabled?: boolean;
-		disabledReason?: string;
-	}
-
-	$: dropdownItems = [
-		...($isInstitucion
-			? [
-					{
-						label: 'Crear proyecto',
-						href: '/proyectos/crear',
-						disabled: !verificacionAprobada || limiteProyectosAlcanzado,
-						disabledReason: !verificacionAprobada
-							? 'Debés tener la verificación de institución aprobada para crear proyectos'
-							: 'Ya tenés 5 proyectos en curso (límite máximo alcanzado)'
-					}
-				]
-			: []),
-		{ label: 'Mi perfil', href: '/perfil' },
-		{ label: $isAdmin ? 'Panel de administración' : 'Panel de control', href: '/mi-panel' },
-		...($isAdmin ? [{ label: 'Reportes', href: '/reportes' }] : []),
-		...($isInstitucion || $isColaborador ? [{ label: 'Mis reportes', href: '/reportes' }] : []),
-		...($isColaborador
-			? [{ label: 'Solicitudes de colaboración', href: '/colaborador/solicitudes-colaboracion' }]
-			: []),
-		{ label: 'Configuración', href: '/configuracion' }
-	] as DropdownItem[];
+	$: emailUsuario =
+		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
+			?.valor || 'Sin email';
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -96,12 +83,8 @@
 		}
 	}
 
-	/**
-	 * * Desplaza suavemente a una sección interna, ajustando el offset por la altura del header
-	 */
 	function handleNavClick(event: MouseEvent, href: string) {
-		menuAbierto = false; // cierra menú móvil
-
+		menuAbierto = false;
 		if (href.startsWith('#')) {
 			event.preventDefault();
 			const id = href.slice(1);
@@ -147,28 +130,26 @@
 	});
 </script>
 
-<!-- Fondo semitransparente para menú móvil -->
 {#if menuAbierto}
 	<div
-		class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ease-out"
+		class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
 		aria-hidden="true"
 		on:click={() => (menuAbierto = false)}
 	></div>
 {/if}
 
-<!-- Header principal -->
 <header
 	bind:this={headerRef}
-	class="sticky top-0 z-50 w-full bg-[rgb(var(--base-color))] text-white shadow-[0_2px_6px_rgba(0,0,0,.22)] transition-transform duration-500"
+	class="sticky top-0 z-50 w-full bg-[#0f1029] text-white shadow-lg transition-transform duration-500"
 	style="transform:translateY({mostrarHeader ? 0 : -110}%);"
 >
-	<div class="mx-auto flex max-w-7xl items-center justify-between gap-8 px-5 py-4 md:px-8">
+	<div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
 		<!-- Logo -->
-		<div class="header-logo" style="animation:fadePop .8s .06s both; opacity:{visible ? 1 : 0};">
+		<div class="header-logo shrink-0" style="opacity:{visible ? 1 : 0};">
 			<Image
 				src="/logo-1.png"
 				alt="Logo de Conectando Corazones"
-				width="50px"
+				width="45px"
 				animate="heartbeat"
 				href="/"
 			/>
@@ -176,14 +157,14 @@
 
 		<!-- Navegación Desktop -->
 		<nav
-			class="hidden items-center gap-8 md:flex"
+			class="hidden items-center gap-6 md:flex"
 			style="opacity:{visible ? 1 : 0}; transform:translateY({visible ? 0 : '12px'});"
 		>
 			{#each navLinks as { label, href }, i (i)}
 				<a
 					{href}
-					class="group relative px-1 py-2 text-base font-medium text-blue-100 transition-colors duration-200 hover:text-white"
-					style="transition-delay:{i * 60}ms"
+					class="group relative px-1 py-1 text-sm font-medium text-blue-100 transition-colors duration-200 hover:text-white"
+					style="transition-delay:{i * 50}ms"
 					on:click={(e) => handleNavClick(e, href)}
 				>
 					{label}
@@ -196,69 +177,159 @@
 
 		<!-- Acciones -->
 		<div
-			class="flex items-center gap-3"
+			class="flex items-center gap-4"
 			style="opacity:{visible ? 1 : 0}; transform:translateX({visible ? 0 : '16px'});"
 		>
 			{#if $isAuthenticated}
+				<!-- Mis mensajes (Desktop) -->
+				<div class="hidden md:block">
+					<a
+						href="/mensajes"
+						class="group flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:bg-blue-500/20 hover:text-white"
+						title="Mis chats"
+					>
+						<MessageCircle class="h-4 w-4" />
+						<span>Mis chats</span>
+					</a>
+				</div>
+
 				<!-- Dropdown Auth -->
-				<div class="user-menu-container relative">
+				<div class="user-menu-container relative hidden md:block">
 					<button
-						aria-label="Abrir menú de usuario"
+						aria-label="Menú de usuario"
 						aria-haspopup="true"
 						aria-expanded={mostrarDropdown}
 						on:click={toggleDropdown}
-						class="h-10 w-10 overflow-hidden rounded-full border-2 border-blue-400/60 transition-all duration-200 hover:scale-105 focus:ring-2 focus:ring-blue-400/50 focus:outline-none"
+						class="flex items-center gap-2 rounded-full border border-transparent bg-transparent p-1 pr-3 pl-2 transition-all hover:bg-blue-500/10 focus:ring-2 focus:ring-blue-400/50 focus:outline-none active:scale-95 {mostrarDropdown
+							? 'bg-blue-500/10 ring-2 ring-blue-400/50'
+							: ''}"
 					>
-						<img
-							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
-							alt="Foto de perfil"
-							class="h-full w-full cursor-pointer object-cover"
+						<div class="h-8 w-8 overflow-hidden rounded-full border-2 border-blue-400/60">
+							<img
+								src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+								alt="Avatar"
+								class="h-full w-full object-cover"
+							/>
+						</div>
+						<div class="hidden flex-col items-start leading-none md:flex">
+							<span class="text-sm font-semibold text-white"
+								>{$usuarioStore?.nombre || 'Usuario'}</span
+							>
+						</div>
+						<ChevronDown
+							class="h-4 w-4 text-blue-200 transition-transform duration-200 {mostrarDropdown
+								? 'rotate-180'
+								: ''}"
 						/>
 					</button>
 
 					{#if mostrarDropdown}
-						<ul
-							class="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-blue-500/20 bg-[#0f1029] text-white shadow-2xl"
-							style="animation:scaleIn .3s cubic-bezier(0.16, 1, 0.3, 1) forwards;"
+						<div
+							class="absolute right-0 z-50 mt-2 w-64 origin-top-right overflow-hidden rounded-xl border border-blue-500/20 bg-[#161b33] shadow-2xl ring-1 ring-black/5"
+							style="animation: scaleIn .2s ease-out forwards;"
 						>
-							<li
-								class="border-b border-blue-500/20 px-4 py-2.5 text-xs font-semibold tracking-wider text-blue-300 uppercase"
-							>
-								Mi cuenta
-							</li>
+							<!-- Header del menú -->
+							<div class="border-b border-blue-500/10 bg-blue-500/5 px-4 py-3">
+								<p class="text-sm font-medium text-white">
+									{$usuarioStore?.nombre}
+									{$usuarioStore?.apellido}
+								</p>
+								<p class="truncate text-xs text-blue-300">{emailUsuario}</p>
+							</div>
 
-							<!-- Items del menú dinámicos según rol -->
-
-							{#each dropdownItems as item, i (i)}
-								<li>
-									{#if item.disabled}
-										<span
-											class="block cursor-not-allowed px-4 py-3 text-sm font-medium text-gray-500"
-											title={item.disabledReason}
-										>
-											{item.label}
-										</span>
-									{:else}
+							<!-- Acciones Principales -->
+							<div class="p-1">
+								{#if $isInstitucion}
+									{#if verificacionAprobada && !limiteProyectosAlcanzado}
 										<a
-											href={item.href}
-											class="block px-4 py-3 text-sm font-medium transition-colors duration-200 hover:bg-blue-500/10 hover:text-blue-200"
-											on:click={() => ((menuAbierto = false), (mostrarDropdown = false))}
+											href="/proyectos/crear"
+											class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+											on:click={() => (mostrarDropdown = false)}
 										>
-											{item.label}
+											<PlusCircle class="h-4 w-4 text-blue-400 group-hover:text-blue-300" />
+											Crear proyecto
 										</a>
+									{:else}
+										<div
+											class="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 opacity-60"
+											title={!verificacionAprobada
+												? 'Debés tener la verificación aprobada'
+												: 'Límite de proyectos alcanzado'}
+										>
+											<PlusCircle class="h-4 w-4" />
+											Crear proyecto
+										</div>
 									{/if}
-								</li>
-							{/each}
+								{/if}
 
-							<li class="border-t border-blue-500/20">
+								<a
+									href="/mi-panel"
+									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+									on:click={() => (mostrarDropdown = false)}
+								>
+									<LayoutDashboard class="h-4 w-4 text-blue-400 group-hover:text-blue-300" />
+									{$isAdmin ? 'Panel de admin' : 'Panel de control'}
+								</a>
+							</div>
+
+							<div class="my-1 h-px bg-blue-500/10"></div>
+
+							<!-- Navegación Personal -->
+							<div class="p-1">
+								<a
+									href="/perfil"
+									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+									on:click={() => (mostrarDropdown = false)}
+								>
+									<User class="h-4 w-4 text-gray-400 group-hover:text-white" />
+									Mi perfil
+								</a>
+
+								{#if $isAdmin}
+									<a
+										href="/reportes"
+										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+										on:click={() => (mostrarDropdown = false)}
+									>
+										<FileWarning class="h-4 w-4 text-gray-400 group-hover:text-white" />
+										Reportes
+									</a>
+								{/if}
+
+								{#if $isInstitucion || $isColaborador}
+									<a
+										href="/reportes"
+										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+										on:click={() => (mostrarDropdown = false)}
+									>
+										<FileText class="h-4 w-4 text-gray-400 group-hover:text-white" />
+										Mis reportes
+									</a>
+								{/if}
+
+								<a
+									href="/configuracion"
+									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+									on:click={() => (mostrarDropdown = false)}
+								>
+									<Settings class="h-4 w-4 text-gray-400 group-hover:text-white" />
+									Configuración
+								</a>
+							</div>
+
+							<div class="my-1 h-px bg-blue-500/10"></div>
+
+							<!-- Cerrar Sesión -->
+							<div class="p-1">
 								<button
 									on:click={handleLogout}
-									class="w-full cursor-pointer px-4 py-3 text-left text-sm font-medium text-red-400 transition-colors duration-200 hover:bg-red-500/10 hover:text-red-300"
+									class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300"
 								>
+									<LogOut class="h-4 w-4" />
 									Cerrar sesión
 								</button>
-							</li>
-						</ul>
+							</div>
+						</div>
 					{/if}
 				</div>
 			{:else}
@@ -268,62 +339,121 @@
 				</div>
 			{/if}
 
-			<!-- Hamburguesa -->
+			<!-- Menu Toggle Mobile -->
 			<button
 				aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
-				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/20 text-blue-100 transition-all duration-300 hover:bg-blue-600/30 focus:ring-2 focus:ring-blue-400/50 focus:outline-none md:hidden"
+				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/10 text-blue-100 transition-colors hover:bg-blue-600/20 md:hidden"
 				on:click={() => (menuAbierto = !menuAbierto)}
 			>
-				<svg
-					class="h-6 w-6 transition-transform duration-300"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					style="transform:rotate({menuAbierto ? 180 : 0}deg)"
-				>
-					{#if menuAbierto}
-						<path d="M6 6l12 12M6 18L18 6" />
-					{:else}
-						<path d="M3 6h18M3 12h18M3 18h18" />
-					{/if}
-				</svg>
+				{#if menuAbierto}
+					<X class="h-6 w-6" />
+				{:else}
+					<Menu class="h-6 w-6" />
+				{/if}
 			</button>
 		</div>
 	</div>
 
-	<!-- Menú Mobile -->
+	<!-- Menú Mobile Expandido -->
 	{#if menuAbierto}
 		<nav
-			class="absolute top-full right-0 left-0 z-50 border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
-			style="animation:slideUp .4s cubic-bezier(0.22, 1, 0.36, 1) forwards;"
+			class="absolute top-full right-0 left-0 z-50 overflow-y-auto border-t border-blue-500/20 bg-[#0f1029] shadow-2xl md:hidden"
+			style="max-height: calc(100vh - 80px); animation:slideUp .3s ease-out forwards;"
 		>
-			<div class="flex flex-col gap-1 px-5 py-4">
-				{#if !$isAuthenticated}
-					<a
-						href="/iniciar-sesion"
-						class="mb-2 rounded-lg px-4 py-3 text-base font-medium text-blue-300 transition-colors duration-200 hover:bg-blue-500/10 hover:text-white"
-						on:click={() => (menuAbierto = false)}
-					>
-						Iniciá sesión
-					</a>
+			<div class="flex flex-col p-4">
+				{#if $isAuthenticated}
+					<!-- Perfil Mobile -->
+					<div class="mb-4 flex items-center gap-3 rounded-xl bg-blue-500/5 p-3">
+						<img
+							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+							alt="Avatar"
+							class="h-10 w-10 rounded-full object-cover"
+						/>
+						<div class="flex flex-col">
+							<span class="font-medium text-white">{$usuarioStore?.nombre}</span>
+							<span class="text-xs text-blue-300">{emailUsuario}</span>
+						</div>
+					</div>
+
+					<!-- Enlaces rápidos de usuario -->
+					<div class="mb-4 grid grid-cols-2 gap-2">
+						<a
+							href="/mensajes"
+							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
+							on:click={() => (menuAbierto = false)}
+						>
+							<MessageCircle class="h-5 w-5 text-blue-400" />
+							<span class="text-xs font-medium text-blue-100">Mis chats</span>
+						</a>
+						<a
+							href="/mi-panel"
+							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
+							on:click={() => (menuAbierto = false)}
+						>
+							<LayoutDashboard class="h-5 w-5 text-blue-400" />
+							<span class="text-xs font-medium text-blue-100">Panel</span>
+						</a>
+					</div>
+				{:else}
+					<div class="mb-4">
+						<a
+							href="/iniciar-sesion"
+							class="flex w-full items-center justify-center rounded-lg bg-blue-600 py-3 font-semibold text-white shadow-lg transition-transform active:scale-95"
+							on:click={() => (menuAbierto = false)}
+						>
+							Iniciar sesión
+						</a>
+					</div>
 				{/if}
 
-				{#each navLinks as { label, href }, i (i)}
-					<a
-						{href}
-						class="group flex items-center rounded-lg px-4 py-3 text-base font-medium text-blue-100 transition-colors duration-200 hover:bg-blue-500/10 hover:text-white"
-						style="transition-delay:{i * 60}ms"
-						on:click={(e) => handleNavClick(e, href)}
-					>
-						<span>{label}</span>
-						<span class="ml-auto opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-							→
-						</span>
-					</a>
-				{/each}
+				<!-- Links de navegación generales -->
+				<div class="space-y-1">
+					{#each navLinks as { label, href }}
+						<a
+							{href}
+							class="block rounded-lg px-4 py-3 text-base font-medium text-blue-100 transition-colors hover:bg-blue-500/10 hover:text-white"
+							on:click={(e) => handleNavClick(e, href)}
+						>
+							{label}
+						</a>
+					{/each}
+				</div>
+
+				{#if $isAuthenticated}
+					<div class="my-4 border-t border-blue-500/20"></div>
+					<!-- Botones extra del menú de usuario mobile -->
+					<div class="space-y-1">
+						{#if $isInstitucion}
+							<a
+								href="/proyectos/crear"
+								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+								on:click={() => (menuAbierto = false)}
+							>
+								<PlusCircle class="h-4 w-4" /> Crear proyecto
+							</a>
+						{/if}
+						<a
+							href="/perfil"
+							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+							on:click={() => (menuAbierto = false)}
+						>
+							<User class="h-4 w-4" /> Mi perfil
+						</a>
+						<a
+							href="/configuracion"
+							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+							on:click={() => (menuAbierto = false)}
+						>
+							<Settings class="h-4 w-4" /> Configuración
+						</a>
+						<button
+							on:click={handleLogout}
+							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300"
+						>
+							<LogOut class="h-4 w-4" /> Cerrar sesión
+						</button>
+					</div>
+				{/if}
 			</div>
 		</nav>
 	{/if}
