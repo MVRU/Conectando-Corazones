@@ -142,6 +142,10 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: clasesChipEstado = clasesEstado(estadoCodigo);
+	$: resumenTexto = (proyecto?.resumen || '').trim();
+	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
+	$: tieneResumenIA = Boolean(resumenTexto || aprendizajesTexto);
+	$: puedeVerResumenIA = (esCreador || esColaboradorAprobado) && estadoCodigo === 'completado';
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -250,6 +254,7 @@
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
+	let mostrarModalResumen = false;
 	let mostrarDropdownAdmin = false;
 	let solicitudRecienEnviada = false;
 	let mostrarDropdownGestionarProyecto = false;
@@ -482,6 +487,36 @@
 							{:else}
 								<p class="text-gray-500">Aún no registraste aportes específicos.</p>
 							{/if}
+						</section>
+					{/if}
+
+					{#if puedeVerResumenIA}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-resumen-ia"
+						>
+							<div class="flex flex-wrap items-center justify-between gap-4">
+								<div>
+									<h2 id="titulo-resumen-ia" class="text-xl font-semibold sm:text-2xl">
+										Resumen y aprendizajes
+									</h2>
+									<p class="mt-2 text-sm text-gray-600">
+										{#if tieneResumenIA}
+											Informe generado por la IA disponible para este proyecto.
+										{:else}
+											El resumen y aprendizajes de este proyecto aún no están disponibles.
+										{/if}
+									</p>
+								</div>
+								<button
+									type="button"
+									onclick={() => (mostrarModalResumen = true)}
+									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+								>
+									<Icon src={ClipboardDocumentCheck} class="h-4 w-4" />
+									Ver informe generado por la IA
+								</button>
+							</div>
 						</section>
 					{/if}
 
@@ -1380,6 +1415,87 @@
 					type="button"
 					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
 					onclick={() => (mostrarModalPendiente = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+{#if mostrarModalResumen}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={() => (mostrarModalResumen = false)}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de resumen y aprendizajes -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-2xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-resumen-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') mostrarModalResumen = false;
+			}}
+		>
+			<div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+				<div class="flex items-center gap-3">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100">
+						<Icon src={ClipboardDocumentCheck} class="h-5 w-5 text-sky-600" aria-hidden="true" />
+					</span>
+					<h3 id="modal-resumen-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
+						Informe generado por la IA
+					</h3>
+				</div>
+				<button
+					type="button"
+					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
+					onclick={() => (mostrarModalResumen = false)}
+					aria-label="Cerrar modal"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<div class="space-y-6 px-6 py-5">
+				{#if tieneResumenIA}
+					<div class="rounded-xl bg-slate-50 p-4">
+						<h4 class="text-sm font-semibold text-gray-900">Resumen ejecutivo</h4>
+						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+							{resumenTexto || 'Resumen no disponible.'}
+						</p>
+					</div>
+					<div class="rounded-xl bg-amber-50 p-4">
+						<h4 class="text-sm font-semibold text-gray-900">Aprendizajes</h4>
+						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+							{aprendizajesTexto || 'Aprendizajes no disponibles.'}
+						</p>
+					</div>
+				{:else}
+					<div class="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+						El resumen y aprendizajes de este proyecto aún no están disponibles.
+					</div>
+				{/if}
+			</div>
+
+			<div class="flex items-center justify-end border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-300 focus:outline-none"
+					onclick={() => (mostrarModalResumen = false)}
 				>
 					Cerrar
 				</button>
