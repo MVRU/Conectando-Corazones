@@ -3,6 +3,7 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
+	import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { page } from '$app/stores';
@@ -22,6 +23,8 @@
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
+	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
+	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
@@ -30,6 +33,7 @@
 	import { usuario } from '$lib/stores/auth';
 	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
+	import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
@@ -67,6 +71,13 @@
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 	let misAportes: ColaboracionTipoParticipacion[] = [];
+	let resenasLocal: Resena[] = [...mockResenas];
+	let resenaEnEdicion: Resena | null = null;
+	let resenaAEliminar: Resena | null = null;
+	let mostrarModalResena = false;
+	let mostrarConfirmarEliminar = false;
+	let modoResena: 'crear' | 'editar' = 'crear';
+	const maxCaracteresResena = 500;
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -96,8 +107,14 @@
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
+	$: puedeVerResenas = Boolean(esCreador || esColaboradorAprobado);
 
 	$: proyecto = data.proyecto;
+	$: resenasProyecto = resenasLocal.filter(
+		(r) => r.tipo_objeto === 'proyecto' && r.id_objeto === proyecto?.id_proyecto
+	);
+	$: resenaUsuarioActual = resenasProyecto.find((r) => r.username === $usuario?.username);
+	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
 
 	$: if (proyecto) {
 		setBreadcrumbs([
@@ -142,6 +159,10 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: clasesChipEstado = clasesEstado(estadoCodigo);
+	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
+	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
+	$: mensajeResenaBloqueada =
+		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -287,6 +308,99 @@
 		} else if (esColaboradorAprobado && proyecto?.id_proyecto) {
 			goto(`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes`);
 		}
+	}
+
+	function abrirModalResena() {
+		if (!puedeRedactarResena) {
+			toastStore.show({
+				variant: 'warning',
+				message: mensajeResenaBloqueada
+			});
+			return;
+		}
+		if (resenaUsuarioActual) {
+			editarResena(resenaUsuarioActual);
+			return;
+		}
+		modoResena = 'crear';
+		resenaEnEdicion = null;
+		mostrarModalResena = true;
+	}
+
+	function editarResena(resena: Resena) {
+		if (!puedeRedactarResena) {
+			toastStore.show({
+				variant: 'warning',
+				message: mensajeResenaBloqueada
+			});
+			return;
+		}
+		modoResena = 'editar';
+		resenaEnEdicion = resena;
+		mostrarModalResena = true;
+	}
+
+	function solicitarEliminarResena(resena: Resena) {
+		resenaAEliminar = resena;
+		mostrarConfirmarEliminar = true;
+	}
+
+	function confirmarEliminarResena() {
+		if (resenaAEliminar?.id_resena) {
+			resenasLocal = resenasLocal.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
+			toastStore.show({
+				variant: 'success',
+				message: 'La reseña fue eliminada.'
+			});
+		}
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
+
+	function cancelarEliminarResena() {
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
+
+	function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+		if (!proyecto?.id_proyecto || !$usuario) return;
+
+		if (modoResena === 'crear' && tieneResenaUsuario) {
+			toastStore.show({
+				variant: 'warning',
+				message: 'Ya dejaste una reseña. Podés editarla si necesitás cambiar algo.'
+			});
+			return;
+		}
+
+		if (modoResena === 'editar' && resenaEnEdicion?.id_resena) {
+			resenasLocal = resenasLocal.map((r) =>
+				r.id_resena === resenaEnEdicion?.id_resena
+					? { ...r, contenido: event.detail.contenido, puntaje: event.detail.puntaje }
+					: r
+			);
+			toastStore.show({
+				variant: 'success',
+				message: 'Reseña actualizada correctamente.'
+			});
+			return;
+		}
+
+		const nuevaResena: Resena = {
+			id_resena: Date.now(),
+			tipo_objeto: 'proyecto',
+			id_objeto: proyecto.id_proyecto,
+			contenido: event.detail.contenido,
+			puntaje: event.detail.puntaje,
+			username: $usuario.username,
+			rol: $usuario.rol,
+			aprobado: true
+		};
+		resenasLocal = [nuevaResena, ...resenasLocal];
+		toastStore.show({
+			variant: 'success',
+			message: 'Reseña publicada correctamente.'
+		});
 	}
 
 	onMount(() => {
@@ -491,6 +605,65 @@
 					>
 						<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
 					</section>
+
+					{#if puedeVerResenas}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-resenas-proyecto"
+						>
+							<div class="flex flex-wrap items-start justify-between gap-4">
+								<div>
+									<h2 id="titulo-resenas-proyecto" class="text-xl font-semibold sm:text-2xl">
+										Reseñas
+									</h2>
+									<p class="mt-2 text-sm text-gray-600">
+										{#if puedeRedactarResena && !tieneResenaUsuario}
+											Compartí tu experiencia y ayudá a mejorar futuros proyectos.
+										{:else if tieneResenaUsuario}
+											Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
+										{:else}
+											{mensajeResenaBloqueada}
+										{/if}
+									</p>
+								</div>
+								<button
+									type="button"
+									onclick={abrirModalResena}
+									disabled={!puedeCrearResena}
+									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+								>
+									<Icon src={Star} class="h-4 w-4" />
+									{tieneResenaUsuario ? 'Reseña publicada' : 'Redactar reseña'}
+								</button>
+							</div>
+
+							{#if resenasProyecto.length}
+								<div class="mt-6 grid gap-5 md:grid-cols-2">
+									{#each resenasProyecto as resena (resena.id_resena || resena.contenido)}
+										<div class="flex h-full flex-col gap-3">
+											<ResenaCard
+												{resena}
+												onEditar={
+													resena.username && resena.username === $usuario?.username
+														? () => editarResena(resena)
+														: null
+												}
+												onEliminar={
+													resena.username && resena.username === $usuario?.username
+														? () => solicitarEliminarResena(resena)
+														: null
+												}
+											/>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<div class="mt-6 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+									Todavía no hay reseñas para este proyecto.
+								</div>
+							{/if}
+						</section>
+					{/if}
 				</div>
 
 				<!-- Columna lateral -->
@@ -1173,6 +1346,7 @@
 								{:else if esColaboradorAprobado}
 									<button
 										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+										onclick={abrirModalResena}
 									>
 										<Icon src={Star} class="h-5 w-5 text-gray-500" />
 										Escribir reseña
@@ -1389,6 +1563,152 @@
 	</div>
 {/if}
 
+<<<<<<< HEAD
+=======
+{#if mostrarModalResumen}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={() => (mostrarModalResumen = false)}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de resumen y aprendizajes -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-2xl rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60 backdrop-blur-xl"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-resumen-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') mostrarModalResumen = false;
+			}}
+		>
+			<div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+				<div class="flex items-center gap-3">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100">
+						<Icon src={ClipboardDocumentCheck} class="h-5 w-5 text-sky-600" aria-hidden="true" />
+					</span>
+					<h3 id="modal-resumen-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
+						Informe generado por la IA
+					</h3>
+				</div>
+				<button
+					type="button"
+					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:outline-none"
+					onclick={() => (mostrarModalResumen = false)}
+					aria-label="Cerrar modal"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M6 18L18 6M6 6l12 12"
+						/>
+					</svg>
+				</button>
+			</div>
+
+			<div class="space-y-6 px-6 py-5">
+				{#if tieneResumenIA}
+					<div class="rounded-xl bg-slate-50 p-4">
+						<h4 class="text-sm font-semibold text-gray-900">Resumen ejecutivo</h4>
+						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+							{resumenTexto || 'Resumen no disponible.'}
+						</p>
+					</div>
+					<div class="rounded-xl bg-amber-50 p-4">
+						<h4 class="text-sm font-semibold text-gray-900">Aprendizajes</h4>
+						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+							{aprendizajesTexto || 'Aprendizajes no disponibles.'}
+						</p>
+					</div>
+				{:else}
+					<div class="rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+						El resumen y aprendizajes de este proyecto aún no están disponibles.
+					</div>
+				{/if}
+			</div>
+
+			<div class="flex items-center justify-end border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-300 focus:outline-none"
+					onclick={() => (mostrarModalResumen = false)}
+				>
+					Cerrar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<ResenaProyectoModal
+	mostrar={mostrarModalResena}
+	modo={modoResena}
+	resenaInicial={resenaEnEdicion}
+	maxCaracteres={maxCaracteresResena}
+	on:guardar={guardarResena}
+	on:cerrar={() => (mostrarModalResena = false)}
+/>
+
+{#if mostrarConfirmarEliminar}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={cancelarEliminarResena}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de confirmación de eliminación -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-eliminar-resena-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') cancelarEliminarResena();
+			}}
+		>
+			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
+				<h3
+					id="modal-eliminar-resena-titulo"
+					class="text-base font-semibold text-gray-900 sm:text-lg"
+				>
+					¿Eliminar reseña?
+				</h3>
+				<p class="text-sm text-gray-500">
+					Esta acción no se puede deshacer.
+				</p>
+			</div>
+
+			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					onclick={cancelarEliminarResena}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
+					onclick={confirmarEliminarResena}
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+>>>>>>> aeb5e2e (feat: reseÃ±as de proyecto)
 <style>
 	@keyframes fade-up {
 		from {
