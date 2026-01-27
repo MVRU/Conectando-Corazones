@@ -170,7 +170,7 @@ model Localidad {
 }
 
 model Parametro {
-  id_parametro String @id
+  id_parametro Int    @id @default(autoincrement())
   nombre       String
   valor        String
   tipo         String
