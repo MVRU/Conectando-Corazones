@@ -60,5 +60,15 @@ export const mockResenas: Resena[] = [
 			'Se logró incorporar verduras al comedor y los chicos se involucraron mucho. Como mejora, sería útil medir resultados con un registro simple por semana.',
 		username: 'biblioteca_popular',
 		aprobado: true
+	},
+	{
+		id_resena: 203,
+		tipo_objeto: 'proyecto',
+		id_objeto: 11, // Abrigo para la Puna (completado)
+		puntaje: 5,
+		contenido:
+			'La campaña llegó a tiempo a las familias y el equipo organizó todo con mucha claridad. Recomiendo mantener el registro de talles para optimizar futuras entregas.',
+		username: 'fundacion_manos',
+		aprobado: true
 	}
 ];
