@@ -107,7 +107,7 @@
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
-	$: puedeVerResenas = Boolean(esCreador || esColaboradorAprobado);
+	$: puedeVerResenas = true;
 
 	$: proyecto = data.proyecto;
 	$: resenasProyecto = resenasLocal.filter(
@@ -621,8 +621,10 @@
 											Compartí tu experiencia y ayudá a mejorar futuros proyectos.
 										{:else if tieneResenaUsuario}
 											Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
-										{:else}
+										{:else if esCreador || esColaboradorAprobado}
 											{mensajeResenaBloqueada}
+										{:else}
+											Las reseñas son públicas para toda la comunidad.
 										{/if}
 									</p>
 								</div>
