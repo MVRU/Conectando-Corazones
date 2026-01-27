@@ -1627,7 +1627,6 @@
 	</div>
 {/if}
 
->>>>>>> aeb5e2e (feat: reseÃ±as de proyecto)
 <style>
 	@keyframes fade-up {
 		from {
