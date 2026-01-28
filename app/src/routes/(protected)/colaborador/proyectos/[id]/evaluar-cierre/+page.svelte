@@ -32,6 +32,9 @@
 	let loading = false;
 	let declarationChecked = false;
 	let objetivosExpandidos: Record<number, boolean> = {};
+	let justificacionRechazo = '';
+
+	const MIN_CARACTERES_JUSTIFICACION = 20;
 
 	function handleReportSuccess() {
 		toastStore.show({
@@ -331,6 +334,7 @@
 									await update();
 									loading = false;
 									showRejectModal = false;
+									justificacionRechazo = '';
 								};
 							}}
 						>
@@ -358,9 +362,19 @@
 										name="justificacion"
 										rows="4"
 										required
+										bind:value={justificacionRechazo}
 										class="w-full rounded-xl border-slate-300 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
 										placeholder="Ej: Faltan evidencias de la entrega de donaciones..."
 									></textarea>
+									<p
+										class="mt-1.5 text-xs transition-colors duration-200 {justificacionRechazo.trim()
+											.length < MIN_CARACTERES_JUSTIFICACION
+											? 'text-amber-600'
+											: 'text-slate-500'}"
+									>
+										Mínimo {MIN_CARACTERES_JUSTIFICACION} caracteres • Caracteres: {justificacionRechazo.trim()
+											.length}
+									</p>
 								</div>
 							</div>
 
@@ -374,7 +388,8 @@
 								</button>
 								<button
 									type="submit"
-									class="rounded-lg bg-red-600 px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-red-700"
+									disabled={justificacionRechazo.trim().length < MIN_CARACTERES_JUSTIFICACION}
+									class="rounded-lg bg-red-600 px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
 								>
 									Confirmar rechazo
 								</button>
