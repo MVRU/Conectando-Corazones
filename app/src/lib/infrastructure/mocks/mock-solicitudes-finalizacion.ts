@@ -24,7 +24,7 @@ export const mockSolicitudesFinalizacion: SolicitudFinalizacion[] = [
 		estado: 'pendiente',
 		created_at: new Date('2025-12-28'),
 		proyecto_id: 3,
-		evidencia_ids: [3]
+		evidencia_ids: [28]
 	},
 	{
 		id_solicitud: 4,
@@ -89,5 +89,12 @@ export const mockSolicitudesFinalizacion: SolicitudFinalizacion[] = [
 		created_at: new Date('2026-01-03'),
 		proyecto_id: 22,
 		evidencia_ids: []
+	},
+	{
+		id_solicitud: 13,
+		estado: 'pendiente',
+		created_at: new Date('2026-02-01'),
+		proyecto_id: 10,
+		evidencia_ids: [29]
 	}
 ];

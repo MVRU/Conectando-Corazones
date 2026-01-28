@@ -18,7 +18,7 @@ export const mockProyectos: Proyecto[] = [
 		colaboracion_ids: [1, 2, 25],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [1],
-		estado: 'en_curso',
+		estado: 'en_revision',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 1,

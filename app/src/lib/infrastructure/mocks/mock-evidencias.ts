@@ -614,6 +614,32 @@ export const mockArchivos: Archivo[] = [
 		created_at: new Date('2025-05-20'),
 		usuario_id: 14, // Fundacion Calor - institución
 		evidencia_id: 27
+	},
+
+	// --- PROYECTO 3: "Hogar de sonrisas" ---
+	{
+		id_archivo: 51,
+		nombre_original: 'foto_festejo_cierre.jpg',
+		descripcion: 'Fotografía del festejo de cierre en el Hogar',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto3%2Ffestejo_cierre.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamanio_bytes: 2000000,
+		created_at: new Date('2025-04-01'),
+		usuario_id: 3, // Institución Hogar de sonrisas
+		evidencia_id: 28
+	},
+
+	// --- PROYECTO 10: "Huerta Escolar Rosario" ---
+	{
+		id_archivo: 52,
+		nombre_original: 'primera_cosecha.jpg',
+		descripcion: 'Fotografía de la primera cosecha de la huerta',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto10%2Fprimera_cosecha.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamanio_bytes: 2200000,
+		created_at: new Date('2026-01-15'),
+		usuario_id: 2, // Institución Escuela Esperanza
+		evidencia_id: 29
 	}
 ];
 
@@ -1150,6 +1176,68 @@ export const mockEvidencias: Evidencia[] = [
 			especie: 'abrigo',
 			objetivo: 50,
 			actual: 50,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+
+	// --- PROYECTO 3: "Hogar de sonrisas" ---
+	{
+		id_evidencia: 28,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2025-04-01'),
+		archivos_ids: [51],
+		id_participacion_permitida: 3, // Stub ID for P3 participation
+		archivos: [
+			{
+				id_archivo: 51,
+				nombre_original: 'foto_festejo_cierre.jpg',
+				descripcion: 'Fotografía del festejo de cierre en el Hogar',
+				url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto3%2Ffestejo_cierre.jpg?alt=media',
+				tipo_mime: 'image/jpeg',
+				tamanio_bytes: 2000000,
+				created_at: new Date('2025-04-01'),
+				usuario_id: 3,
+				evidencia_id: 28
+			}
+		],
+		participacion_permitida: {
+			id_participacion_permitida: 3,
+			id_proyecto: 3,
+			id_tipo_participacion: 1,
+			unidad_medida: 'eventos',
+			objetivo: 1,
+			actual: 1,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+		}
+	},
+
+	// --- PROYECTO 10: "Huerta Escolar Rosario" ---
+	{
+		id_evidencia: 29,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-01-15'),
+		archivos_ids: [52],
+		id_participacion_permitida: 10, // Stub ID for P10
+		archivos: [
+			{
+				id_archivo: 52,
+				nombre_original: 'primera_cosecha.jpg',
+				descripcion: 'Fotografía de la primera cosecha de la huerta',
+				url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto10%2Fprimera_cosecha.jpg?alt=media',
+				tipo_mime: 'image/jpeg',
+				tamanio_bytes: 2200000,
+				created_at: new Date('2026-01-15'),
+				usuario_id: 2,
+				evidencia_id: 29
+			}
+		],
+		participacion_permitida: {
+			id_participacion_permitida: 10,
+			id_proyecto: 10,
+			id_tipo_participacion: 1,
+			unidad_medida: 'kilos',
+			objetivo: 50,
+			actual: 60,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
 		}
 	}
