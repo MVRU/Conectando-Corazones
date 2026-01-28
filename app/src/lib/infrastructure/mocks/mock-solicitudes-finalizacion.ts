@@ -123,7 +123,7 @@ export const mockSolicitudesFinalizacion: SolicitudFinalizacion[] = [
 		estado: 'pendiente',
 		created_at: new Date('2026-02-15'),
 		proyecto_id: 22,
-		evidencia_ids: [2, 3, 32],
+		evidencia_ids: [13, 14, 15, 16, 32],
 		votos: [4]
 	}
 ];

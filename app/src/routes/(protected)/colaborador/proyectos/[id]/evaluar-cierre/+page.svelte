@@ -16,6 +16,8 @@
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
+	import { agruparEvidenciasPorObjetivo } from '$lib/utils/util-evidencias';
+	import { formatearFecha } from '$lib/utils/validaciones';
 
 	export let data: PageData;
 
@@ -39,36 +41,11 @@
 		showReportModal = false;
 	}
 
-	// Helper para formatear fechas
-	const formatDate = (date: Date | string | undefined) => {
-		if (!date) return 'Sin fecha';
-		return new Date(date).toLocaleDateString('es-AR', {
-			day: '2-digit',
-			month: 'long',
-			year: 'numeric'
-		});
-	};
-
 	// Agrupar evidencias por objetivo
-	$: evidenciasPorObjetivo =
-		data.proyecto.participacion_permitida?.map((objetivo) => {
-			const evidenciasObjetivo =
-				data.solicitud?.evidencias?.filter(
-					(e) => e.id_participacion_permitida === objetivo.id_participacion_permitida
-				) || [];
-
-			// Separar evidencias de entrada y salida
-			const evidenciasEntrada = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'entrada');
-			const evidenciasSalida = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'salida');
-
-			return {
-				objetivo,
-				evidencias: evidenciasObjetivo,
-				evidenciasEntrada,
-				evidenciasSalida,
-				totalArchivos: evidenciasObjetivo.reduce((sum, ev) => sum + (ev.archivos?.length || 0), 0)
-			};
-		}) || [];
+	$: evidenciasPorObjetivo = agruparEvidenciasPorObjetivo(
+		data.proyecto.participacion_permitida ?? [],
+		data.solicitud?.evidencias ?? []
+	);
 </script>
 
 <svelte:head>
@@ -165,7 +142,7 @@
 									<div>
 										<p class="text-sm font-medium text-slate-500">Fecha de solicitud</p>
 										<p class="text-xl font-bold text-slate-900">
-											{formatDate(solicitud.created_at)}
+											{formatearFecha(solicitud.created_at, 'long')}
 										</p>
 									</div>
 								</div>
