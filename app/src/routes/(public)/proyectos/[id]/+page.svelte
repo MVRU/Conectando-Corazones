@@ -58,7 +58,8 @@
 		Star,
 		Flag,
 		Plus,
-		ClipboardDocumentCheck
+		ClipboardDocumentCheck,
+		XMark
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
@@ -511,7 +512,8 @@
 								<button
 									type="button"
 									onclick={() => (mostrarModalResumen = true)}
-									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+									disabled={!tieneResumenIA}
+									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
 								>
 									<Icon src={ClipboardDocumentCheck} class="h-4 w-4" />
 									Ver informe generado por la IA
@@ -1446,7 +1448,9 @@
 		>
 			<div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
 				<div class="flex items-center gap-3">
-					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100">
+					<span
+						class="flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
+					>
 						<Icon src={ClipboardDocumentCheck} class="h-5 w-5 text-sky-600" aria-hidden="true" />
 					</span>
 					<h3 id="modal-resumen-titulo" class="text-base font-semibold text-gray-900 sm:text-lg">
@@ -1459,14 +1463,7 @@
 					onclick={() => (mostrarModalResumen = false)}
 					aria-label="Cerrar modal"
 				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<Icon src={XMark} class="h-5 w-5" aria-hidden="true" />
 				</button>
 			</div>
 
@@ -1474,13 +1471,13 @@
 				{#if tieneResumenIA}
 					<div class="rounded-xl bg-slate-50 p-4">
 						<h4 class="text-sm font-semibold text-gray-900">Resumen ejecutivo</h4>
-						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+						<p class="mt-2 text-sm whitespace-pre-line text-gray-700">
 							{resumenTexto || 'Resumen no disponible.'}
 						</p>
 					</div>
 					<div class="rounded-xl bg-amber-50 p-4">
 						<h4 class="text-sm font-semibold text-gray-900">Aprendizajes</h4>
-						<p class="mt-2 text-sm text-gray-700 whitespace-pre-line">
+						<p class="mt-2 text-sm whitespace-pre-line text-gray-700">
 							{aprendizajesTexto || 'Aprendizajes no disponibles.'}
 						</p>
 					</div>
@@ -1494,7 +1491,7 @@
 			<div class="flex items-center justify-end border-t border-gray-100 px-6 py-4">
 				<button
 					type="button"
-					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-gray-300 focus:outline-none"
+					class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300"
 					onclick={() => (mostrarModalResumen = false)}
 				>
 					Cerrar
