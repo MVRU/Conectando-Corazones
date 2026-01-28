@@ -106,7 +106,7 @@ export function validarUrl(url: string): boolean {
 /*
 Funciones de formateo de fechas
  */
-export function formatearFecha(fecha?: Date | string): string {
+export function formatearFecha(fecha?: Date | string, formato: 'short' | 'long' = 'short'): string {
 	if (!fecha) return 'No especificada';
 
 	try {
@@ -118,7 +118,7 @@ export function formatearFecha(fecha?: Date | string): string {
 
 		return fechaObj.toLocaleDateString('es-AR', {
 			day: '2-digit',
-			month: '2-digit',
+			month: formato === 'long' ? 'long' : '2-digit',
 			year: 'numeric'
 		});
 	} catch {

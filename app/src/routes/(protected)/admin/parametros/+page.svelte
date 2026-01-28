@@ -84,7 +84,6 @@
 										bind:value={editValue}
 										class="rounded-md border border-gray-300 px-2 py-1 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
 										disabled={saving}
-										autofocus
 									/>
 								</form>
 							{:else}

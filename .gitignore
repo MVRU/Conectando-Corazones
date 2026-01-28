@@ -8,7 +8,10 @@ build/
 .output/
 .next/
 .svelte-kit/
+.vite/
 .cache/
+.pnpm-store/
+.pnpm-debug.log*
 .storybook-static/
 .yarn/
 .pnp.*
@@ -32,6 +35,15 @@ bower_components/
 .env.local
 .env.*.local
 serviceAccountKey.json
+*.pem
+*.crt
+*.cert
+*.pfx
+*.p12
+*.jks
+*.keystore
+.agent
+.gemini/
 
 # ----------------------------------------
 # Logs & debug files
@@ -58,10 +70,13 @@ playwright/.cache/
 # ----------------------------------------
 .vscode/
 .idea/
+.history/
 *.swp
 *.swo
 *.bak
 *.tmp
+*.temp
+.db-explorer/
 
 # ----------------------------------------
 # OS-specific files

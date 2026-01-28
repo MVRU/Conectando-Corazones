@@ -5,7 +5,7 @@ export interface Evaluacion {
 	id_evaluacion?: number;
 	voto: 'aprobado' | 'rechazado' | null;
 	created_at?: Date;
-	justificacion: string | null;
+	justificacion?: string | null; // motivo por el que rechaza la solicitud de cierre
 
 	// * Relaciones
 	// -*- FKs para create/update
