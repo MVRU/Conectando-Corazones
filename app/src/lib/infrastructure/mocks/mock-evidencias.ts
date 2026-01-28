@@ -640,6 +640,40 @@ export const mockArchivos: Archivo[] = [
 		created_at: new Date('2026-01-15'),
 		usuario_id: 2, // Institución Escuela Esperanza
 		evidencia_id: 29
+	},
+	{
+		id_archivo: 53,
+		nombre_original: 'foto_herramientas_compradas.jpg',
+		descripcion: 'Kit de herramientas de mano adquiridas para los alumnos',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto10%2Fherramientas.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamanio_bytes: 1543200,
+		created_at: new Date('2026-01-10'),
+		usuario_id: 2,
+		evidencia_id: 30
+	},
+	{
+		id_archivo: 54,
+		nombre_original: 'taller_siembra.jpg',
+		descripcion: 'Estudiantes participando en el taller de siembra directa',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto10%2Ftaller_siembra.jpg?alt=media',
+		tipo_mime: 'image/jpeg',
+		tamanio_bytes: 1843200,
+		created_at: new Date('2026-01-12'),
+		usuario_id: 2,
+		evidencia_id: 31
+	},
+	// --- PROYECTO 22 EXTRA ---
+	{
+		id_archivo: 55,
+		nombre_original: 'boletines_mejora.pdf',
+		descripcion: 'Informe de mejora en el rendimiento académico de los participantes',
+		url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto22%2Finforme_final.pdf?alt=media',
+		tipo_mime: 'application/pdf',
+		tamanio_bytes: 512000,
+		created_at: new Date('2026-02-14'),
+		usuario_id: 2,
+		evidencia_id: 32
 	}
 ];
 
@@ -1211,34 +1245,74 @@ export const mockEvidencias: Evidencia[] = [
 		}
 	},
 
-	// --- PROYECTO 10: "Huerta Escolar Rosario" ---
 	{
 		id_evidencia: 29,
 		tipo_evidencia: 'salida',
 		created_at: new Date('2026-01-15'),
 		archivos_ids: [52],
-		id_participacion_permitida: 10, // Stub ID for P10
-		archivos: [
-			{
-				id_archivo: 52,
-				nombre_original: 'primera_cosecha.jpg',
-				descripcion: 'Fotografía de la primera cosecha de la huerta',
-				url: 'https://firebasestorage.googleapis.com/v0/b/conectando-corazones.appspot.com/o/evidencias%2Fproyecto10%2Fprimera_cosecha.jpg?alt=media',
-				tipo_mime: 'image/jpeg',
-				tamanio_bytes: 2200000,
-				created_at: new Date('2026-01-15'),
-				usuario_id: 2,
-				evidencia_id: 29
-			}
-		],
+		id_participacion_permitida: 22, // Semillas
+		archivos: [mockArchivos.find((a) => a.id_archivo === 52)!],
 		participacion_permitida: {
-			id_participacion_permitida: 10,
+			id_participacion_permitida: 22,
 			id_proyecto: 10,
 			id_tipo_participacion: 1,
 			unidad_medida: 'kilos',
+			especie: 'Semillas',
 			objetivo: 50,
 			actual: 60,
 			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+	{
+		id_evidencia: 30,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-01-10'),
+		archivos_ids: [53],
+		id_participacion_permitida: 21, // Herramientas
+		archivos: [mockArchivos.find((a) => a.id_archivo === 53)!],
+		participacion_permitida: {
+			id_participacion_permitida: 21,
+			id_proyecto: 10,
+			id_tipo_participacion: 1,
+			unidad_medida: 'unidades',
+			especie: 'Herramientas',
+			objetivo: 20,
+			actual: 25,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Especie' }
+		}
+	},
+	{
+		id_evidencia: 31,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-01-12'),
+		archivos_ids: [54],
+		id_participacion_permitida: 23, // Talleres
+		archivos: [mockArchivos.find((a) => a.id_archivo === 54)!],
+		participacion_permitida: {
+			id_participacion_permitida: 23,
+			id_proyecto: 10,
+			id_tipo_participacion: 1,
+			unidad_medida: 'talleres',
+			objetivo: 4,
+			actual: 4,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
+		}
+	},
+	{
+		id_evidencia: 32,
+		tipo_evidencia: 'salida',
+		created_at: new Date('2026-02-14'),
+		archivos_ids: [55],
+		id_participacion_permitida: 39, // Docentes (para P22)
+		archivos: [mockArchivos.find((a) => a.id_archivo === 55)!],
+		participacion_permitida: {
+			id_participacion_permitida: 39,
+			id_proyecto: 22,
+			id_tipo_participacion: 1,
+			unidad_medida: 'docentes',
+			objetivo: 10,
+			actual: 12,
+			tipo_participacion: { id_tipo_participacion: 1, descripcion: 'Voluntariado' }
 		}
 	}
 ];

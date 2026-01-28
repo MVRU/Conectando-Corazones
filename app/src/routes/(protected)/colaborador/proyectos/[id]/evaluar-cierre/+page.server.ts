@@ -49,13 +49,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let evaluacion = null;
 	let yaVote = false;
 
+	let totalColaboradores = 0;
+	let votosRealizados = 0;
+
 	if (solicitud) {
 		const evidencias = mockEvidencias.filter(
 			(e) => e.id_evidencia && solicitud.evidencia_ids.includes(e.id_evidencia)
 		);
 		solicitudConEvidencias = { ...solicitud, evidencias };
 
-		// 4. Verificar si ya votó
+		// 4. Verificar si ya votó y contar votos
 		const solicitudId = solicitud.id_solicitud;
 		if (solicitudId) {
 			evaluacion = await evaluacionRepo.findBySolicitudAndColaborador(
@@ -63,6 +66,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				ensureId(user.id_usuario)
 			);
 			yaVote = evaluacion !== null && evaluacion.voto !== null;
+
+			// Conteo para el indicador visual
+			const todasEvaluaciones = await evaluacionRepo.findBySolicitudId(solicitudId);
+			votosRealizados = todasEvaluaciones.length;
+			const todasColaboraciones = await colaboracionRepo.findByProyectoId(proyectoId);
+			totalColaboradores = todasColaboraciones.filter((c) => c.estado === 'aprobada').length;
 		}
 	}
 
@@ -71,6 +80,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		solicitud: solicitudConEvidencias,
 		evaluacion,
 		yaVote,
+		totalColaboradores,
+		votosRealizados,
 		isEnRevision: proyecto.estado === 'en_revision'
 	};
 };
@@ -114,7 +125,6 @@ export const actions: Actions = {
 			if (todosAprobaron) {
 				await solicitudRepo.updateEstado(solicitudId, 'aprobada');
 				await proyectoRepo.update(proyectoId, {
-					// @ts-ignore
 					estado: 'completado'
 				});
 				return {
@@ -170,7 +180,6 @@ export const actions: Actions = {
 
 			if (count >= 3) {
 				await proyectoRepo.update(proyectoId, {
-					// @ts-ignore
 					estado: 'en_auditoria'
 				});
 			} else {

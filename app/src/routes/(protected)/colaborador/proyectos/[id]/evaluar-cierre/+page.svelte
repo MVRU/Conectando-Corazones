@@ -119,13 +119,23 @@
 					Revisá las evidencias y confirmá que el proyecto se ha completado satisfactoriamente. Solo
 					podrás aprobar si verificás el cumplimiento de objetivos.
 				</p>
-				<div class="flex justify-center">
+				<div class="flex flex-wrap justify-center gap-3">
 					<div
 						class="inline-flex items-center space-x-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-sm font-medium text-amber-700"
 					>
 						<AlertTriangle class="h-4 w-4" />
 						<span>Solicitud pendiente de aprobación</span>
 					</div>
+
+					{#if data.totalColaboradores > 0}
+						<div
+							class="inline-flex items-center space-x-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-700"
+							title="Votos de colaboradores aprobados"
+						>
+							<Users class="h-4 w-4" />
+							<span>Votos registrados: {data.votosRealizados} / {data.totalColaboradores}</span>
+						</div>
+					{/if}
 				</div>
 			</header>
 
