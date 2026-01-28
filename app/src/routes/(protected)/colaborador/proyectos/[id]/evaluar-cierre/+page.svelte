@@ -14,13 +14,30 @@
 		ClipboardCheck
 	} from 'lucide-svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
+	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	export let data: PageData;
+
+	$: proyecto = data.proyecto;
+	$: solicitud = data.solicitud;
+	$: evaluacion = data.evaluacion;
+	$: yaVote = data.yaVote;
+
+	let showReportModal = false;
 
 	let showRejectModal = false;
 	let loading = false;
 	let declarationChecked = false;
 	let objetivosExpandidos: Record<number, boolean> = {};
+
+	function handleReportSuccess() {
+		toastStore.show({
+			message: 'Reporte enviado correctamente. El equipo de administración lo revisará.',
+			variant: 'success'
+		});
+		showReportModal = false;
+	}
 
 	// Helper para formatear fechas
 	const formatDate = (date: Date | string | undefined) => {
@@ -191,64 +208,102 @@
 							Lista de verificación
 						</h3>
 
-						<div class="mb-8 space-y-4">
-							<label
-								class="flex cursor-pointer items-start rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50"
+						{#if data.yaVote}
+							<div
+								class="mb-6 rounded-xl border border-blue-100 bg-blue-50 p-4 text-center"
+								in:fade
 							>
-								<div class="flex h-6 items-center">
-									<input
-										type="checkbox"
-										bind:checked={declarationChecked}
-										class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
-									/>
+								<div class="mb-2 flex justify-center text-blue-600">
+									<CheckCircle class="h-8 w-8" />
 								</div>
-								<div class="ml-3 text-sm leading-6">
-									<span class="font-medium text-slate-900"
-										>Declaro que la evidencia asociada a cada objetivo es legítima y cumple con los
-										objetivos del proyecto.</span
-									>
-								</div>
-							</label>
-						</div>
-
-						<div class="space-y-4">
-							<form
-								method="POST"
-								action="?/aprobar"
-								use:enhance={() => {
-									loading = true;
-									return async ({ update }) => {
-										await update();
-										loading = false;
-									};
-								}}
-							>
-								<input type="hidden" name="solicitud_id" value={solicitud.id_solicitud} />
-								<button
-									type="submit"
-									disabled={loading || !declarationChecked}
-									class="flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl focus:ring-4 focus:ring-blue-100 disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0 disabled:hover:bg-blue-600"
+								<h4 class="font-bold text-blue-900">Ya enviaste tu evaluación</h4>
+								<p class="text-xs text-blue-700">
+									Tu voto ha sido registrado correctamente para esta solicitud.
+								</p>
+							</div>
+						{:else}
+							<div class="mb-8 space-y-4">
+								<label
+									class="flex cursor-pointer items-start rounded-xl border border-slate-200 p-4 transition-colors hover:bg-slate-50"
 								>
-									{#if loading}
-										<div
-											class="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"
-										></div>
-										Procesando...
-									{:else}
-										<CheckCircle class="mr-2 h-5 w-5" />
-										Aprobar cierre
-									{/if}
-								</button>
-							</form>
+									<div class="flex h-6 items-center">
+										<input
+											type="checkbox"
+											bind:checked={declarationChecked}
+											class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+										/>
+									</div>
+									<div class="ml-3 text-sm leading-6">
+										<span class="font-medium text-slate-900"
+											>Declaro que la evidencia asociada a cada objetivo es legítima y cumple con
+											los objetivos del proyecto.</span
+										>
+									</div>
+								</label>
+							</div>
 
+							<div class="space-y-4">
+								<form
+									method="POST"
+									action="?/aprobar"
+									use:enhance={() => {
+										loading = true;
+										return async ({ result, update }) => {
+											if (result.type === 'success' && result.data?.message) {
+												toastStore.show({
+													message: String(result.data.message),
+													variant: 'success'
+												});
+											} else if (result.type === 'failure' && result.data?.error) {
+												toastStore.show({
+													message: String(result.data.error),
+													variant: 'error'
+												});
+											}
+											await update();
+											loading = false;
+										};
+									}}
+								>
+									<input type="hidden" name="solicitud_id" value={solicitud.id_solicitud} />
+									<button
+										type="submit"
+										disabled={loading || !declarationChecked}
+										class="flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-xl focus:ring-4 focus:ring-blue-100 disabled:opacity-50 disabled:shadow-none disabled:hover:translate-y-0 disabled:hover:bg-blue-600"
+									>
+										{#if loading}
+											<div
+												class="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"
+											></div>
+											Procesando...
+										{:else}
+											<CheckCircle class="mr-2 h-5 w-5" />
+											Aprobar cierre
+										{/if}
+									</button>
+								</form>
+
+								<button
+									type="button"
+									disabled={loading}
+									on:click={() => (showRejectModal = true)}
+									class="flex w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-6 py-4 font-bold text-slate-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:ring-4 focus:ring-red-50"
+								>
+									<XCircle class="mr-2 h-5 w-5" />
+									Rechazar solicitud
+								</button>
+							</div>
+						{/if}
+
+						<!-- Botón Reportar (siempre visible o según lógica) -->
+						<div class="mt-4 border-t border-slate-100 pt-4">
 							<button
 								type="button"
-								disabled={loading}
-								on:click={() => (showRejectModal = true)}
-								class="flex w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-6 py-4 font-bold text-slate-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:ring-4 focus:ring-red-50"
+								class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-red-600"
+								on:click={() => (showReportModal = true)}
 							>
-								<XCircle class="mr-2 h-5 w-5" />
-								Rechazar solicitud
+								<AlertTriangle class="mr-2 h-4 w-4" />
+								Reportar irregularidad
 							</button>
 						</div>
 
@@ -274,7 +329,18 @@
 							action="?/rechazar"
 							use:enhance={() => {
 								loading = true;
-								return async ({ update }) => {
+								return async ({ result, update }) => {
+									if (result.type === 'success' && result.data?.message) {
+										toastStore.show({
+											message: String(result.data.message),
+											variant: 'success'
+										});
+									} else if (result.type === 'failure' && result.data?.error) {
+										toastStore.show({
+											message: String(result.data.error),
+											variant: 'error'
+										});
+									}
 									await update();
 									loading = false;
 									showRejectModal = false;
@@ -332,4 +398,13 @@
 			{/if}
 		{/if}
 	</div>
+
+	<!-- Modal de Reporte -->
+	<ModalReportarIrregularidad
+		bind:open={showReportModal}
+		tipo_objeto="Proyecto"
+		id_objeto={proyecto.id_proyecto || 0}
+		nombre_objeto={proyecto.titulo}
+		onsuccess={handleReportSuccess}
+	/>
 </div>
