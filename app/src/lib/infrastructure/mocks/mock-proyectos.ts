@@ -233,8 +233,10 @@ export const mockProyectos: Proyecto[] = [
 		id_proyecto: 8,
 		titulo: 'Cuidadores de Adultos Mayores',
 		descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
-		resumen: 'Capacitamos cuidadores de adultos mayores y articulamos redes.',
-		aprendizajes: 'Profundizamos en el cuidado domiciliario y la comunicación con las familias.',
+		resumen:
+			'Capacitamos a cuidadores de adultos mayores a través de talleres presenciales y guías prácticas, articulando una red de apoyo entre instituciones y familias. Se trabajó en protocolos de cuidado domiciliario, prevención de riesgos y contención emocional. Además, se generaron espacios de seguimiento para compartir avances y necesidades emergentes.',
+		aprendizajes:
+			'Mejorar la planificación de turnos y la coordinación con las familias para evitar superposiciones. Incorporar más prácticas supervisadas en terreno y sumar material audiovisual para reforzar contenidos clave.',
 		url_portada: '/img/proyectos-8.webp',
 		created_at: new Date('2025-04-10'),
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
@@ -264,6 +266,10 @@ export const mockProyectos: Proyecto[] = [
 			'Proyecto completado de creación de una biblioteca digital con acceso libre para la comunidad educativa.',
 		url_portada: '/img/proyectos-9.webp',
 		created_at: new Date('2024-08-15'),
+		resumen:
+			'Se creó una biblioteca digital abierta con materiales educativos para estudiantes y docentes, digitalizando y organizando recursos en una plataforma accesible. Participaron voluntarios y donantes, lo que permitió ampliar el catálogo y mejorar los tiempos de carga y búsqueda. Se realizaron instancias de capacitación para el uso de la biblioteca y se difundió el acceso en la comunidad educativa.',
+		aprendizajes:
+			'Proponer una mejor estandarización de los metadatos para agilizar la catalogación. Fortalecer la comunicación con escuelas para detectar contenidos prioritarios y sumar instancias de formación para docentes sobre el uso de la plataforma.',
 		fecha_cierre_postulaciones: new Date('2024-09-15'),
 		fecha_fin_tentativa: new Date('2024-12-15'),
 		id_chat_firebase: 1009,
@@ -346,7 +352,8 @@ export const mockProyectos: Proyecto[] = [
 		descripcion:
 			'Recolección de ropa de invierno y mantas para comunidades de la Puna Jujeña. Las temperaturas bajan de 0 grados y muchas familias no tienen calefacción.',
 		resumen: 'Llevamos abrigo a zonas de alta montaña.',
-		aprendizajes: 'La logística es clave para llegar a los parajes más aislados.',
+		aprendizajes:
+			'Mejorar la planificación logística con rutas consolidadas y puntos de entrega alternativos. Incluir un registro anticipado de talles y necesidades para optimizar el armado de kits.',
 		url_portada: '/img/proyectos-11.jpg',
 		created_at: new Date('2025-04-01'),
 		fecha_cierre_postulaciones: new Date('2025-05-15'),
@@ -545,7 +552,8 @@ export const mockProyectos: Proyecto[] = [
 		descripcion:
 			'Plantación de árboles nativos en zonas afectadas por incendios en las sierras. Restauramos el ecosistema con tabaquillos y maitenes.',
 		resumen: 'Recuperamos el bosque nativo local.',
-		aprendizajes: 'La naturaleza tiene sus tiempos y debemos respetarlos.',
+		aprendizajes:
+			'Mejorar el seguimiento post-plantación con visitas periódicas y riego de apoyo. Involucrar más a escuelas locales para ampliar el cuidado comunitario.',
 		url_portada: '/img/proyectos-16.jpg',
 		created_at: new Date('2025-07-20'),
 		fecha_cierre_postulaciones: new Date('2025-08-20'),
