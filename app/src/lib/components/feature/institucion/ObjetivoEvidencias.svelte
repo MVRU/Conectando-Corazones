@@ -166,9 +166,11 @@
 								{#each evidenciasEntrada as evidencia}
 									<div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
 										<div class="mb-2 flex items-start justify-between">
-											<span class="text-xs font-medium text-gray-500">
-												{formatearFecha(evidencia.created_at)}
-											</span>
+											<div class="flex flex-col">
+												<span class="text-[10px] text-gray-500">
+													{formatearFecha(evidencia.created_at)}
+												</span>
+											</div>
 										</div>
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}
@@ -213,9 +215,11 @@
 								{#each evidenciasSalida as evidencia}
 									<div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
 										<div class="mb-2 flex items-start justify-between">
-											<span class="text-xs font-medium text-gray-500">
-												{formatearFecha(evidencia.created_at)}
-											</span>
+											<div class="flex flex-col">
+												<span class="text-[10px] text-gray-500">
+													{formatearFecha(evidencia.created_at)}
+												</span>
+											</div>
 										</div>
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}

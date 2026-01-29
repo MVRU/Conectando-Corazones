@@ -623,9 +623,7 @@
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
 													onclick={() =>
-														goto(
-															`/colaborador/evaluar-finalizacion?proyecto=${proyecto.id_proyecto}`
-														)}
+														goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)}
 												>
 													<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
 													Evaluar finalización

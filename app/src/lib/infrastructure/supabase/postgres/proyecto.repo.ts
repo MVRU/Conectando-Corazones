@@ -42,4 +42,20 @@ export class ProyectoRepoSupabase implements ProyectoRepository {
 
 		return data as Proyecto;
 	}
+
+	async update(id: number, proyecto: Partial<Proyecto>): Promise<Proyecto> {
+		const { data, error } = await supabase
+			.from('proyectos')
+			.update(proyecto)
+			.eq('id_proyecto', id)
+			.select()
+			.single();
+
+		if (error) {
+			console.error(`Error updating proyecto ${id}:`, error);
+			throw new Error(error.message);
+		}
+
+		return data as Proyecto;
+	}
 }

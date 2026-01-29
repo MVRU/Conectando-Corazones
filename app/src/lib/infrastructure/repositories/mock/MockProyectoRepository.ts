@@ -83,4 +83,17 @@ export class MockProyectoRepository implements ProyectoRepository {
 		mockProyectos.push(newProyecto);
 		return newProyecto;
 	}
+	async update(id: number, proyecto: Partial<Proyecto>): Promise<Proyecto> {
+		const index = mockProyectos.findIndex((p) => p.id_proyecto === id);
+		if (index === -1) {
+			throw new Error('Proyecto no encontrado');
+		}
+
+		mockProyectos[index] = {
+			...mockProyectos[index],
+			...proyecto
+		};
+
+		return hydrateProyecto(mockProyectos[index]);
+	}
 }

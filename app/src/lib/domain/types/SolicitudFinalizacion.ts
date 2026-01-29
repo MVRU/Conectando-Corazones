@@ -9,6 +9,7 @@ export interface SolicitudFinalizacion {
 	// -*- FKs para create/update
 	proyecto_id: number;
 	evidencia_ids: number[];
+	votos?: number[]; // IDs de usuarios que ya votaron (aprobaron)
 
 	// -*- Objetos expandidos para read
 	proyecto?: Proyecto;

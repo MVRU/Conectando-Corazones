@@ -15,10 +15,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2026-01-10'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
-		colaboracion_ids: [1, 2, 25],
+		colaboracion_ids: [1, 2, 25, 35],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [1],
-		estado: 'en_curso',
+
+		estado: 'en_revision',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 1,
@@ -514,10 +515,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2026-03-10'),
 		id_chat_firebase: 1015,
 		participacion_permitida_ids: [26, 27],
-		colaboracion_ids: [],
+		colaboracion_ids: [33, 34],
 		institucion_id: 2,
-		solicitud_finalizacion_ids: [],
+		solicitud_finalizacion_ids: [14],
 		estado: 'pendiente_solicitud_cierre',
+
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 26,
@@ -771,10 +773,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2025-12-30'),
 		id_chat_firebase: 1022,
 		participacion_permitida_ids: [39, 40],
-		colaboracion_ids: [],
+		colaboracion_ids: [30, 31, 32],
 		institucion_id: 2,
-		solicitud_finalizacion_ids: [10, 11, 12],
-		estado: 'pendiente_solicitud_cierre',
+		solicitud_finalizacion_ids: [10, 11, 12, 15],
+		estado: 'en_revision',
+
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 39,
