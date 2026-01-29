@@ -8,6 +8,9 @@
 
 	export let proyectos: Proyecto[];
 	export let provinciasDisponibles: string[] = [];
+	export let estadosDisponibles: string[] = [];
+	export let categoriasDisponibles: string[] = [];
+	export let tiposParticipacionDisponibles: string[] = [];
 
 	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';
 
@@ -77,6 +80,9 @@
 			<TodosProyectos
 				{proyectos}
 				{provinciasDisponibles}
+				{estadosDisponibles}
+				{categoriasDisponibles}
+				{tiposParticipacionDisponibles}
 				on:cambiarTab={(e) => handleTabChange(e.detail)}
 			/>
 		</div>
@@ -89,7 +95,14 @@
 		</div>
 	{:else if activeTab === 'mis-proyectos' && $usuario && !esAdministrador}
 		<div in:fade={{ duration: 200 }}>
-			<MisProyectos usuario={$usuario} {proyectos} />
+			<MisProyectos
+				usuario={$usuario}
+				{proyectos}
+				{provinciasDisponibles}
+				{estadosDisponibles}
+				{categoriasDisponibles}
+				{tiposParticipacionDisponibles}
+			/>
 		</div>
 	{/if}
 </section>

@@ -16,6 +16,7 @@
 		validarAumentoObjetivo
 	} from '$lib/utils/util-proyecto-form';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+	import type { TipoParticipacion } from '$lib/domain/entities/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/domain/types/forms/CrearProyectoForm';
 	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
@@ -190,6 +191,12 @@
 		}
 	};
 
+	export let tiposParticipacion: TipoParticipacion[] = [];
+
+	$: tiposDisponibles = tiposParticipacion.filter(
+		(t) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+	);
+
 	const unidadesPorTipo = {
 		Voluntariado: ['personas', 'horas', 'días'],
 		Monetaria: ['ARS', 'USD', 'EUR'],
@@ -220,10 +227,12 @@
 		{/if}
 	</p>
 
-	{#if Object.entries(tiposParticipacionInfo).filter(([tipo]) => !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)).length > 0}
+	{#if tiposDisponibles.length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-			{#each Object.entries(tiposParticipacionInfo) as [tipo, info] (tipo)}
-				{#if !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)}
+			{#each tiposDisponibles as tipoObj (tipoObj.id_tipo_participacion)}
+				{@const tipo = tipoObj.descripcion}
+				{@const info = tiposParticipacionInfo[tipo]}
+				{#if info}
 					{@const clases = obtenerClasesColor(info.color, false)}
 					<button
 						type="button"

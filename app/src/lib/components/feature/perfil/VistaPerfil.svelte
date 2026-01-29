@@ -33,13 +33,13 @@
 		obtenerVerificacionesUsuario
 	} from '$lib/utils/util-verificacion';
 	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
-	import { perfilAdapter } from '$lib/adapters/perfil.adapter';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 
 	export let perfilUsuario: UsuarioCompleto;
 	export let esMiPerfil: boolean;
+	export let proyectos: Proyecto[] = [];
+	export let resenas: Resena[] = [];
 
 	// Si es mi perfil, sincronizar con el store para que los cambios se reflejen
 	$: if (esMiPerfil && $usuarioStore) {
@@ -47,21 +47,17 @@
 	}
 
 	// Verificar si el usuario actual puede ver los contactos del perfil
-	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, mockProyectos);
+	// Usamos los proyectos cargados del servidor
+	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, proyectos);
 
 	// Verificar si el usuario actual puede dejar Reseña
-	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, mockProyectos);
+	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, proyectos);
 
-	// Proyectos del usuario
-	let proyectosUsuario: Proyecto[] = [];
-	$: {
-		perfilAdapter
-			.obtenerProyectosUsuario(perfilUsuario.id_usuario, perfilUsuario.rol)
-			.then((p) => (proyectosUsuario = p));
-	}
+	// Proyectos del usuario (ya vienen cargados)
+	$: proyectosUsuario = proyectos;
 
 	// Reseñas del usuario - usando writable store local
-	const resenasStore = writable<Resena[]>([]);
+	const resenasStore = writable<Resena[]>(resenas);
 
 	$: yaResenoUsuario =
 		$usuarioStore && !esMiPerfil
@@ -223,11 +219,11 @@
 
 		<!-- Reportar perfil -->
 		{#if !esMiPerfil && $isAuthenticated}
-			<div class="mt-12 border-t border-gray-200 pb-4 pt-8 text-center">
+			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
 				{#if $isAdmin}
 					<div class="mb-4 text-center">
 						<span
-							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10"
+							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
 						>
 							ID: {perfilUsuario.id_usuario}
 						</span>

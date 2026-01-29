@@ -1,32 +1,48 @@
-import type { RequestHandler } from '@sveltejs/kit';
 import { json } from '@sveltejs/kit';
-import { dev } from '$app/environment';
-import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+import type { RequestHandler } from './$types';
+import { AutenticarUsuario } from '$lib/domain/use-cases/auth/AutenticarUsuario';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'secret-key-conectando-corazones';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
-	const { identificador, password, rememberMe } = await request.json();
+	try {
+		const { identificador, password, rememberMe } = await request.json();
 
-	const usuario = Object.values(mockUsuarios).find((u) => {
-		const email = u.contactos?.find(
-			(c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal'
-		)?.valor;
-		return u.username === identificador || email === identificador;
-	});
+		if (!identificador || !password) {
+			return json({ error: 'Credenciales incompletas' }, { status: 400 });
+		}
 
-	if (!usuario || usuario.password !== password) {
-		return json({ error: 'Credenciales inválidas' }, { status: 401 });
+		const repo = new PostgresUsuarioRepository();
+		const useCase = new AutenticarUsuario(repo);
+		const usuario = await useCase.execute(identificador, password);
+
+		if (!usuario) {
+			return json({ error: 'Credenciales inválidas' }, { status: 401 });
+		}
+
+		// Generar JWT
+		const token = jwt.sign(
+			{ id: usuario.id_usuario, username: usuario.username, rol: usuario.rol },
+			JWT_SECRET,
+			{ expiresIn: rememberMe ? '30d' : '1d' }
+		);
+
+		cookies.set('auth_token', token, {
+			path: '/',
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			maxAge: rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24
+		});
+
+		// Strip sensitive data
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { password: _, ...usuarioSafe } = usuario;
+
+		return json({ usuario: usuarioSafe });
+	} catch (error) {
+		console.error('Error logging in:', error);
+		return json({ error: 'Error interno del servidor' }, { status: 500 });
 	}
-
-	cookies.set('auth_token', `mock-token-${usuario.username}`, {
-		path: '/',
-		httpOnly: true,
-		sameSite: 'strict',
-		secure: !dev,
-		maxAge: rememberMe ? 60 * 60 * 24 * 7 : undefined
-	});
-
-	// ! Se omite la contraseña para no exponer credenciales en la respuesta
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { password: _pw, ...safeUsuario } = usuario;
-	return json({ usuario: safeUsuario });
 };

@@ -2,70 +2,69 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { GetAllProvincias } from '$lib/domain/use-cases/ubicacion/GetAllProvincias';
 import { ProvinciaRepoPrisma } from '$lib/infrastructure/supabase/postgres/provincia.repo';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresEstadoRepository } from '$lib/infrastructure/supabase/postgres/estado.repo';
+import { ListarEstados } from '$lib/domain/use-cases/maestros/ListarEstados';
+import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
+import { ListarCategorias } from '$lib/domain/use-cases/maestros/ListarCategorias';
+import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
+import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
 
 export const load: PageServerLoad = async () => {
 	try {
 		const provinciaRepo = new ProvinciaRepoPrisma();
 		const getAllProvincias = new GetAllProvincias(provinciaRepo);
-		const provincias = await getAllProvincias.execute();
 
-		// TODO: cambiar a DB cuando esté listo
-		/*
-		const proyectos = await prisma.proyecto.findMany({
-			where: {
-				NOT: {
-					estado: 'cancelado' // Optionally filter out cancelled, or keep them
-				}
-			},
-			include: {
-				institucion: true,
-				proyecto_categorias: {
-					include: {
-						categoria: true
-					}
-				},
-				proyecto_ubicaciones: {
-					include: {
-						ubicacion: {
-							include: {
-								localidad: {
-									include: {
-										provincia: true
-									}
-								}
-							}
-						}
-					}
-				},
-				participacion_permitida: {
-					include: {
-						tipo_participacion: true
-					}
-				}
-			},
-			orderBy: { created_at: 'desc' }
-		});
+		const estadoRepo = new PostgresEstadoRepository();
+		const listarEstados = new ListarEstados(estadoRepo);
 
-		// Transform projects to match the expected frontend type
-		const proyectosTransformados = (proyectos as any[]).map((p) => ({
-			...p,
-			categorias: p.proyecto_categorias?.map((pc: any) => pc.categoria) || [],
-			ubicaciones: p.proyecto_ubicaciones || [],
-			institucion_id: p.institucion_id,
-			estado: p.estado as EstadoDescripcion
-		})) as unknown as Proyecto[];
-		*/
+		const categoriaRepo = new PostgresCategoriaRepository();
+		const listarCategorias = new ListarCategorias(categoriaRepo);
 
-		const proyectoRepo = new MockProyectoRepository();
-		const proyectos = await proyectoRepo.findAll();
+		const tipoParticipacionRepo = new PostgresTipoParticipacionRepository();
+		const listarTiposParticipacion = new ListarTiposParticipacion(tipoParticipacionRepo);
+
+		const proyectoRepo = new PostgresProyectoRepository();
+
+		// Ejecutamos con catch individual para que no explote todo si falta una tabla maestra
+		const [provincias, estados, categorias, tiposParticipacion, proyectos] = await Promise.all([
+			getAllProvincias.execute().catch((err) => {
+				console.error('Error fetching provincias:', err);
+				return [];
+			}),
+			listarEstados.execute().catch((err) => {
+				console.error('Error fetching estados:', err);
+				return [];
+			}),
+			listarCategorias.execute().catch((err) => {
+				console.error('Error fetching categorias:', err);
+				return [];
+			}),
+			listarTiposParticipacion.execute().catch((err) => {
+				console.error('Error fetching tipos:', err);
+				return [];
+			}),
+			proyectoRepo.findAll().catch((err) => {
+				console.error('Error fetching projects:', err);
+				return [];
+			})
+		]);
 
 		return {
-			proyectos,
-			provincias: provincias.map((p) => p.nombre)
+			proyectos: JSON.parse(JSON.stringify(proyectos)),
+			provincias: provincias.map((p) => p.nombre),
+			estados: estados.map((e) => e.descripcion),
+			categorias: categorias.map((c) => c.descripcion),
+			tiposParticipacion: tiposParticipacion.map((t) => t.descripcion)
 		};
 	} catch (e) {
-		console.error('Error loading projects:', e);
-		throw error(500, 'Error al cargar los proyectos');
+		console.error('Unexpected error loading projects page:', e);
+		return {
+			proyectos: [],
+			provincias: [],
+			estados: [],
+			categorias: [],
+			tiposParticipacion: []
+		};
 	}
 };

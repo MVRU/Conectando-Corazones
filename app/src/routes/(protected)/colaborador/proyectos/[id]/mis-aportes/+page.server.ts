@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { MockColaboracionRepository } from '$lib/infrastructure/repositories/mock/MockColaboracionRepository';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { ObtenerMisAportes } from '$lib/domain/use-cases/colaboraciones/ObtenerMisAportes';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -14,8 +14,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const userId = usuario.id_usuario;
 	const projectId = Number(params.id);
 
-	const colaboracionRepo = new MockColaboracionRepository();
-	const proyectoRepo = new MockProyectoRepository();
+	const colaboracionRepo = new PostgresColaboracionRepository();
+	const proyectoRepo = new PostgresProyectoRepository();
 	const obtenerMisAportes = new ObtenerMisAportes(colaboracionRepo, proyectoRepo);
 
 	try {

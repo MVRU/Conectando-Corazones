@@ -1,8 +1,10 @@
-import type { Proyecto } from '$lib/domain/types/Proyecto'; // TODO: reemplazar por la interface real de Proyecto
+import type { Proyecto } from '../entities/Proyecto';
+import type { EstadoDescripcion } from '../types/Estado';
 
 export interface ProyectoRepository {
 	findAll(): Promise<Proyecto[]>;
 	findById(id: number): Promise<Proyecto | null>;
-	create(proyecto: Partial<Proyecto>): Promise<Proyecto>;
-	// TODO: agregar update, delete, etc. segun sea necesario
+	create(proyecto: Proyecto): Promise<Proyecto>;
+	update(proyecto: Proyecto): Promise<Proyecto>;
+	updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto>;
 }

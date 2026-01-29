@@ -1,8 +1,9 @@
+import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { ParametroRepoPrisma } from '$lib/infrastructure/supabase/postgres/parametro.repo';
 import { GetAllParametros } from '$lib/domain/use-cases/parametros/GetAllParametros';
 
-export async function load({ locals, url }) {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.usuario || locals.usuario.rol !== 'administrador') {
 		throw error(403, 'Acceso denegado');
 	}
@@ -17,4 +18,4 @@ export async function load({ locals, url }) {
 		parametros: JSON.parse(JSON.stringify(parametros)),
 		filtro: q
 	};
-}
+};

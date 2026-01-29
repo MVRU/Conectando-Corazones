@@ -1,7 +1,7 @@
 // TODO: corregir todo esto
 
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
-import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Proyecto } from '$lib/domain/entities/Proyecto';
 
 export class ObtenerProyectosPerfil {
 	constructor(private proyectoRepository: ProyectoRepository) {}

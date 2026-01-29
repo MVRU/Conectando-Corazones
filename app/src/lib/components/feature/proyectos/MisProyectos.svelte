@@ -13,6 +13,10 @@
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = [];
+	export let provinciasDisponibles: string[] = [];
+	export let estadosDisponibles: string[] = [];
+	export let categoriasDisponibles: string[] = [];
+	export let tiposParticipacionDisponibles: string[] = [];
 
 	// Inicializar composable de filtros
 	const filtros = createProyectosFiltros();
@@ -31,13 +35,26 @@
 		estadoSeleccionado,
 		criterioOrden,
 		consultaBusqueda,
-		categoriasDisponibles,
-		provinciasDisponibles,
-		estadosDisponibles,
-		tiposParticipacionDisponibles,
+		categoriasDisponibles: categoriasDisponiblesStore,
+		provinciasDisponibles: provinciasDisponiblesStore,
+		estadosDisponibles: estadosDisponiblesStore,
+		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
 		restablecerFiltros
 	} = filtros;
+
+	$: if (provinciasDisponibles.length > 0) {
+		provinciasDisponiblesStore.set(provinciasDisponibles);
+	}
+	$: if (estadosDisponibles.length > 0) {
+		estadosDisponiblesStore.set(estadosDisponibles);
+	}
+	$: if (categoriasDisponibles.length > 0) {
+		categoriasDisponiblesStore.set(categoriasDisponibles);
+	}
+	$: if (tiposParticipacionDisponibles.length > 0) {
+		tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
+	}
 
 	// Sincronizar filtros con URL
 	useProyectosFiltrosUrl(filtros);
@@ -128,9 +145,9 @@
 		{criterioOrden}
 		{consultaBusqueda}
 		{categoriasDisponibles}
-		provinciasDisponibles={$provinciasDisponibles}
-		estadosDisponibles={$estadosDisponibles}
-		tiposParticipacionDisponibles={$tiposParticipacionDisponibles}
+		provinciasDisponibles={$provinciasDisponiblesStore}
+		estadosDisponibles={$estadosDisponiblesStore}
+		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
 	>

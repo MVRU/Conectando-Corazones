@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 
 /**
  * Caso de uso: Obtener un proyecto por su ID
@@ -14,6 +14,6 @@ export async function obtenerProyectoPorId(id: string | number): Promise<Proyect
 		return undefined;
 	}
 
-	const repository = new MockProyectoRepository();
+	const repository = new PostgresProyectoRepository();
 	return (await repository.findById(proyectoId)) ?? undefined;
 }

@@ -20,7 +20,7 @@ export class ObtenerAportesProyecto {
 			colaboraciones.map(async (colab) => {
 				if (!colab.colaborador_id) return null;
 
-				const user = await this.usuarioRepo.getById(colab.colaborador_id);
+				const user = await this.usuarioRepo.findById(colab.colaborador_id);
 				if (!user) return null;
 
 				const participations = (await this.colaboracionRepo.getAportesPorColaboracion(

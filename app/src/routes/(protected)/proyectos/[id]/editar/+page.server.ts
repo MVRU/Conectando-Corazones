@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 import type { PageServerLoad } from './$types';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 import type {
@@ -7,7 +6,12 @@ import type {
 	UbicacionFormulario
 } from '$lib/domain/types/forms/CrearProyectoForm';
 import type { UbicacionPresencial } from '$lib/domain/types/Ubicacion';
-import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Proyecto } from '$lib/domain/entities/Proyecto';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
+import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
+import { ListarCategorias } from '$lib/domain/use-cases/maestros/ListarCategorias';
+import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
 
 function formatearFechaParaInput(fechaIso: Date | string | null | undefined): string {
 	if (!fechaIso) return '';
@@ -21,7 +25,7 @@ function mapearUbicaciones(proyectoOriginal: Proyecto): UbicacionFormulario[] {
 		.map((u) => {
 			const real = u.ubicacion!;
 			const esPresencial = real.modalidad === 'presencial';
-			const presencialData = esPresencial ? (real as UbicacionPresencial) : undefined;
+			const presencialData = esPresencial ? (real as unknown as UbicacionPresencial) : undefined;
 
 			const ubForm: UbicacionFormulario = {
 				id_proyecto_ubicacion: u.id_proyecto_ubicacion,
@@ -94,7 +98,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(400, 'ID de proyecto inválido');
 	}
 
-	const proyectoOriginal = mockProyectos.find((p) => p.id_proyecto === idProyecto);
+	// Instanciar repos
+	const proyectoRepo = new PostgresProyectoRepository();
+	const categoriaRepo = new PostgresCategoriaRepository();
+	const tipoRepo = new PostgresTipoParticipacionRepository();
+
+	const proyectoOriginal = await proyectoRepo.findById(idProyecto);
 
 	if (!proyectoOriginal) {
 		throw error(404, 'Proyecto no encontrado');
@@ -112,6 +121,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 	}
 
+	// Cargar listas maestras para el formulario
+	const listarCategorias = new ListarCategorias(categoriaRepo);
+	const listarTipos = new ListarTiposParticipacion(tipoRepo);
+
+	const [categorias, tiposParticipacion] = await Promise.all([
+		listarCategorias.execute(),
+		listarTipos.execute()
+	]);
+
 	const fechaFinTentativa = formatearFechaParaInput(proyectoOriginal.fecha_fin_tentativa);
 	const ubicaciones = mapearUbicaciones(proyectoOriginal);
 	const { seleccionados: tiposParticipacionSeleccionados, permitidas: participacionesPermitidas } =
@@ -120,6 +138,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		? Number(proyectoOriginal.beneficiarios)
 		: undefined;
 
+	// TODO: Las categorías en proyectoOriginal vienen como objetos (proyectoOriginal.categorias),
+	// pero el formulario espera IDs en categoriasSeleccionadas.
+	// Asumimos que proyectoOriginal.categorias está poblado por el repo/mapper.
+	const categoriasSeleccionadas =
+		proyectoOriginal.categorias?.map((c) => c.id_categoria!).filter(Boolean) || [];
+
 	return {
 		form: {
 			titulo: proyectoOriginal.titulo || '',
@@ -127,10 +151,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			urlPortada: proyectoOriginal.url_portada || '',
 			fechaFinTentativa,
 			beneficiarios,
-			categoriasSeleccionadas:
-				proyectoOriginal.categoria_ids ||
-				proyectoOriginal.categorias?.map((c) => c.id_categoria!).filter(Boolean) ||
-				[],
+			categoriasSeleccionadas,
 			categoriaOtraDescripcion: '',
 			ubicaciones,
 			tiposParticipacionSeleccionados,
@@ -139,7 +160,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		originales: {
 			fechaFin: fechaFinTentativa,
 			beneficiarios,
-			participacionesOriginales: proyectoOriginal.participacion_permitida || []
-		}
+			participacionesOriginales: proyectoOriginal.participacion_permitida
+				? proyectoOriginal.participacion_permitida.map((p) => ({ ...p, proyecto: undefined }))
+				: []
+		},
+		categorias: categorias.map((c) => ({ ...c })),
+		tiposParticipacion: tiposParticipacion.map((t) => ({ ...t }))
 	};
 };

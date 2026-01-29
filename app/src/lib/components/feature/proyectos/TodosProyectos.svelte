@@ -8,6 +8,9 @@
 
 	export let proyectos: Proyecto[] = [];
 	export let provinciasDisponibles: string[] = [];
+	export let estadosDisponibles: string[] = [];
+	export let categoriasDisponibles: string[] = [];
+	export let tiposParticipacionDisponibles: string[] = [];
 
 	const filtros = createProyectosFiltros();
 	const {
@@ -24,10 +27,10 @@
 		estadoSeleccionado,
 		criterioOrden,
 		consultaBusqueda,
-		categoriasDisponibles,
+		categoriasDisponibles: categoriasDisponiblesStore,
 		provinciasDisponibles: provinciasDisponiblesStore,
-		estadosDisponibles,
-		tiposParticipacionDisponibles,
+		estadosDisponibles: estadosDisponiblesStore,
+		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
 		restablecerFiltros
 	} = filtros;
@@ -37,6 +40,15 @@
 	$: proyectosStore.set(proyectos);
 	$: if (provinciasDisponibles.length > 0) {
 		provinciasDisponiblesStore.set(provinciasDisponibles);
+	}
+	$: if (estadosDisponibles.length > 0) {
+		estadosDisponiblesStore.set(estadosDisponibles);
+	}
+	$: if (categoriasDisponibles.length > 0) {
+		categoriasDisponiblesStore.set(categoriasDisponibles);
+	}
+	$: if (tiposParticipacionDisponibles.length > 0) {
+		tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
 	}
 
 	export function cambiarTab(tab: string) {
@@ -67,8 +79,8 @@
 		provinciasDisponibles={provinciasDisponibles.length > 0
 			? provinciasDisponibles
 			: $provinciasDisponiblesStore}
-		estadosDisponibles={$estadosDisponibles}
-		tiposParticipacionDisponibles={$tiposParticipacionDisponibles}
+		estadosDisponibles={$estadosDisponiblesStore}
+		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
 	>

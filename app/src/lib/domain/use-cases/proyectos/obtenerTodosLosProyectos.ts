@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 
 /**
  * Caso de uso: Obtener todos los proyectos
@@ -7,6 +7,6 @@ import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/Mo
  * @returns Lista de todos los proyectos
  */
 export async function obtenerTodosLosProyectos(): Promise<Proyecto[]> {
-	const repository = new MockProyectoRepository();
+	const repository = new PostgresProyectoRepository();
 	return (await repository.findAll()) ?? [];
 }

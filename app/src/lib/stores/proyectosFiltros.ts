@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+
 import {
 	filtrarProyectos,
 	filtrarPorTipoUbicacion,
@@ -107,32 +107,10 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		}
 	);
 
-	const categoriasDisponibles = ['Todas', ...mockCategorias.map((c) => c.descripcion)].sort();
-
+	const categoriasDisponibles = writable<string[]>(['Todas']);
 	const provinciasDisponibles = writable<string[]>(['Todas']);
-
-	// Nota: estadosDisponibles y tiposParticipacionDisponibles se mantienen como derivados
-	// ya que dependen de los proyectos actuales, pero provincias se cargan de la DB.
-
-	const estadosDisponibles = derived(proyectos, ($proyectos) => {
-		const estadosSet = new Set<string>();
-		$proyectos.forEach((p) => {
-			if (p.estado) estadosSet.add(ESTADO_LABELS[p.estado]);
-		});
-		return ['Todos', ...Array.from(estadosSet)];
-	});
-
-	const tiposParticipacionDisponibles = derived(proyectos, ($proyectos) => {
-		const tiposSet = new Set<string>();
-		$proyectos.forEach((p) => {
-			p.participacion_permitida?.forEach((pp) => {
-				if (pp.tipo_participacion?.descripcion) {
-					tiposSet.add(pp.tipo_participacion.descripcion);
-				}
-			});
-		});
-		return ['Todos', ...Array.from(tiposSet)];
-	});
+	const estadosDisponibles = writable<string[]>(['Todos']);
+	const tiposParticipacionDisponibles = writable<string[]>(['Todos']);
 
 	/**
 	 * Calcula las localidades disponibles basadas en los proyectos y provincia seleccionada

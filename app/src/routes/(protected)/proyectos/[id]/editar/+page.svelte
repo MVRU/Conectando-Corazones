@@ -9,6 +9,8 @@
 	import ProyectoParticipaciones from '$lib/components/feature/institucion/ProyectoParticipaciones.svelte';
 	import ProyectoUbicaciones from '$lib/components/feature/institucion/ProyectoUbicaciones.svelte';
 	import type { PageData } from './$types';
+	import type { Categoria } from '$lib/domain/entities/Categoria';
+	import type { TipoParticipacion } from '$lib/domain/entities/TipoParticipacion';
 
 	import { MENSAJES_ERROR, esFechaFutura } from '$lib/utils/validaciones';
 	import {
@@ -26,9 +28,12 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { ShieldExclamation } from '@steeze-ui/heroicons';
 
-	export let data: PageData;
+	export let data: PageData & {
+		categorias: Categoria[];
+		tiposParticipacion: TipoParticipacion[];
+	};
 
-	const { form, originales } = data;
+	const { form, originales, categorias, tiposParticipacion } = data;
 	const idProyecto = Number($page.params.id);
 
 	let titulo = form.titulo;
@@ -232,6 +237,7 @@
 				modoEdicion={true}
 				{esAdmin}
 				beneficiariosOriginales={originales.beneficiarios}
+				{categorias}
 			/>
 
 			<ProyectoParticipaciones
@@ -242,6 +248,7 @@
 				modoEdicion={true}
 				{esAdmin}
 				participacionesOriginales={originales.participacionesOriginales}
+				{tiposParticipacion}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} modoEdicion={true} />

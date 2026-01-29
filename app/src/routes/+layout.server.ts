@@ -1,13 +1,22 @@
 import type { LayoutServerLoad } from './$types';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 
 export const load: LayoutServerLoad = async () => {
-	const repo = new MockProyectoRepository();
-	const proyectos = await repo.findAll();
+	try {
+		const repo = new PostgresProyectoRepository();
+		const proyectos = await repo.findAll();
 
-	return {
-		proyectos,
-		verificaciones: mockVerificaciones
-	};
+		return {
+			proyectos,
+			verificaciones: mockVerificaciones
+		};
+	} catch (error) {
+		console.error('Error en LayoutServerLoad:', error);
+		return {
+			proyectos: [],
+			verificaciones: mockVerificaciones,
+			error: 'No se pudieron cargar algunos datos globales.'
+		};
+	}
 };

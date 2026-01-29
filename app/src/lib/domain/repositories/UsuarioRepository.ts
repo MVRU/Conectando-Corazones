@@ -1,9 +1,9 @@
-import type { Usuario } from '$lib/domain/types/Usuario';
+import type { Usuario } from '../entities/Usuario';
 
 export interface UsuarioRepository {
-	getById(id: number): Promise<Usuario | null>;
-	getByEmail(email: string): Promise<Usuario | null>;
-	create(usuario: Partial<Usuario>): Promise<Usuario>;
-	update(id: number, usuario: Partial<Usuario>): Promise<Usuario>;
-	// TODO: agregar update, delete, etc. segun sea necesario
+	create(usuario: Usuario): Promise<Usuario>;
+	findById(id: number): Promise<Usuario | null>;
+	findByUsername(username: string): Promise<Usuario | null>;
+	// findByEmail(email: string): Promise<Usuario | null>; // TODO: implementar este método para que obtenga de relación con Contacto
+	update(usuario: Usuario): Promise<Usuario>;
 }

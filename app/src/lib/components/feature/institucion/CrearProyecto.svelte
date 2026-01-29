@@ -30,13 +30,16 @@
 		validarPiso,
 		crearValidadorCategoria
 	} from '$lib/utils/util-proyecto-form';
-	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+	import type { Categoria } from '$lib/domain/entities/Categoria';
+	import type { TipoParticipacion } from '$lib/domain/entities/TipoParticipacion';
 	import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/domain/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 
 	export let limiteProyectosAlcanzado: boolean = false;
+	export let categorias: Categoria[] = [];
+	export let tiposParticipacion: TipoParticipacion[] = [];
 
 	let titulo = '';
 	let descripcion = '';
@@ -70,11 +73,11 @@
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
-	const { validarCategoriaOtraDescripcion } = crearValidadorCategoria(
-		mockCategorias.map((c) => c.descripcion || '')
-	);
+	$: descripcionesCategorias = categorias.map((c) => c.descripcion || '');
 
-	const idCategoriaOtra = mockCategorias.find(
+	$: validadorCategoria = crearValidadorCategoria(descripcionesCategorias);
+
+	$: idCategoriaOtra = categorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 	)?.id_categoria;
 
@@ -82,7 +85,7 @@
 		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1);
 
 	$: if (seleccionoOtra) {
-		const err = validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+		const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
 		if (err) {
 			errores.categoria_otra = err;
 			errores = { ...errores };
@@ -138,7 +141,7 @@
 			errores.categorias = 'Debe seleccionar al menos una categoría.';
 
 		const errCatOtra = categoriaOtraDescripcion
-			? validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
+			? validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion)
 			: null;
 		if (errCatOtra) errores.categoria_otra = errCatOtra;
 
@@ -334,9 +337,6 @@
 
 		enviando = true;
 
-		// Simulación de envío al backend
-		await new Promise((resolve) => setTimeout(resolve, 2000));
-
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
 			tipo_participacion: (p.tipo_participacion?.descripcion ||
 				'Voluntariado') as TipoParticipacionDescripcion,
@@ -381,14 +381,36 @@
 			ubicaciones: ubicacionesCargadas
 		};
 
-		console.log('Payload listo', payload);
-		enviando = false;
-		toastStore.show({
-			variant: 'success',
-			title: '¡Proyecto creado!',
-			message: 'El proyecto se ha creado exitosamente. Ahora podés verlo en tu panel.'
-		});
-		goto('/proyectos');
+		// Envío al backend
+		try {
+			const response = await fetch('/api/proyectos', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
+			});
+
+			const result = await response.json();
+
+			if (!response.ok || !result.success) {
+				throw new Error(result.error || 'No se pudo crear el proyecto.');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				title: '¡Proyecto creado!',
+				message: 'El proyecto se ha creado exitosamente. Ahora podés verlo en tu panel.'
+			});
+			goto('/proyectos');
+		} catch (error: any) {
+			console.error('Error al enviar formulario:', error);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error al crear proyecto',
+				message: error.message || 'Ocurrió un error inesperado. Por favor, intentá nuevamente.'
+			});
+		} finally {
+			enviando = false;
+		}
 	}
 </script>
 
@@ -426,6 +448,7 @@
 				bind:categoriaOtraDescripcion
 				{errores}
 				{limpiarError}
+				{categorias}
 			/>
 
 			<ProyectoParticipaciones
@@ -433,6 +456,7 @@
 				bind:participacionesPermitidas
 				bind:errores
 				{limpiarError}
+				{tiposParticipacion}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} />

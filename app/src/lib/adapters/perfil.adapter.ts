@@ -1,20 +1,20 @@
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { LocalidadRepoPrisma } from '$lib/infrastructure/supabase/postgres/localidad.repo';
 import { MockResenaRepository } from '$lib/infrastructure/repositories/mock/MockResenaRepository';
-import { MockLocalidadRepository } from '$lib/infrastructure/repositories/mock/MockLocalidadRepository';
 
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { ObtenerResenasPerfil } from '$lib/domain/use-cases/perfil/ObtenerResenasPerfil';
 import { ObtenerLocalidades } from '$lib/domain/use-cases/ubicacion/ObtenerLocalidades';
 
-import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { Resena } from '$lib/domain/types/Resena';
 import type { Localidad } from '$lib/domain/types/Localidad';
 import { writable } from 'svelte/store';
 
 // Inyeccion de dependencias manual
-const proyectoRepo = new MockProyectoRepository();
+const proyectoRepo = new PostgresProyectoRepository();
 const resenaRepo = new MockResenaRepository();
-const localidadRepo = new MockLocalidadRepository();
+const localidadRepo = new LocalidadRepoPrisma();
 
 const obtenerProyectosUC = new ObtenerProyectosPerfil(proyectoRepo);
 const obtenerResenasUC = new ObtenerResenasPerfil(resenaRepo);

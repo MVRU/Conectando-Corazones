@@ -1,6 +1,6 @@
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
-import { MockUsuarioRepository } from '$lib/infrastructure/repositories/mock/MockUsuarioRepository';
-import { MockColaboracionRepository } from '$lib/infrastructure/repositories/mock/MockColaboracionRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { ObtenerDetalleAportesColaborador } from '$lib/domain/use-cases/colaboraciones/ObtenerDetalleAportesColaborador';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
@@ -9,9 +9,9 @@ export const load: PageServerLoad = async ({ params }) => {
 	const projectId = Number(params.id);
 	const collaboratorId = Number(params.colaboradorId);
 
-	const proyectoRepo = new MockProyectoRepository();
-	const usuarioRepo = new MockUsuarioRepository();
-	const colaboracionRepo = new MockColaboracionRepository();
+	const proyectoRepo = new PostgresProyectoRepository();
+	const usuarioRepo = new PostgresUsuarioRepository();
+	const colaboracionRepo = new PostgresColaboracionRepository();
 
 	const obtenerDetalle = new ObtenerDetalleAportesColaborador(
 		colaboracionRepo,

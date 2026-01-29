@@ -323,7 +323,8 @@
 	$effect(() => {
 		if (selectedTipoParticipacion) {
 			if (filteredParticipaciones.length === 1) {
-				selectedParticipacionPermitidaId = filteredParticipaciones[0].id_participacion_permitida;
+				selectedParticipacionPermitidaId =
+					filteredParticipaciones[0].id_participacion_permitida ?? null;
 			} else {
 				selectedParticipacionPermitidaId = null;
 			}
