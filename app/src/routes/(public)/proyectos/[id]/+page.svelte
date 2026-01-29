@@ -633,9 +633,7 @@
 														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 														role="menuitem"
 														onclick={() =>
-															goto(
-																`/colaborador/evaluar-finalizacion?proyecto=${proyecto.id_proyecto}`
-															)}
+															goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)}
 													>
 														<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
 														Evaluar finalización
@@ -1007,10 +1005,9 @@
 								<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
 							{/if}
 						</section>
-
 						{#if $usuario}
 							<section
-								class="hidden rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6 lg:block"
+								class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
 								aria-label="Reportar irregularidad"
 							>
 								<div class="flex flex-col gap-3">
@@ -1031,217 +1028,193 @@
 						{/if}
 					</div>
 				</div>
+				<!-- Modal de reporte interceptado (Shallow Routing) -->
+				<ModalReportarIrregularidad
+					open={!!$page.state.showReportModal}
+					tipo_objeto="Proyecto"
+					id_objeto={proyecto.id_proyecto ?? 0}
+					nombre_objeto={proyecto.titulo}
+					onclose={() => history.back()}
+					onsuccess={handleReportSuccess}
+				/>
+				<slot />
 
-				{#if $usuario}
-					<div class="order-3 lg:hidden">
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-							aria-label="Reportar irregularidad"
-						>
-							<div class="flex flex-col gap-3">
-								<p class="text-center text-sm font-medium text-gray-700">
-									¿Hay algún problema con este proyecto?
-								</p>
+				<div
+					class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
+				>
+					<div class="flex gap-3">
+						{#if esAdministrador}
+							<!-- Dropdown móvil -->
+							<div class="relative flex-1">
 								<button
 									type="button"
-									disabled={yaReporto}
-									onclick={() => pushState('', { showReportModal: true })}
-									class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+									onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+									class="flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
 								>
-									<Icon src={Flag} class="h-4 w-4" />
-									{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+									Gestionar proyecto
+									<Icon
+										src={ChevronDown}
+										class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+											? 'rotate-180'
+											: ''}"
+									/>
 								</button>
-							</div>
-						</section>
-					</div>
-				{/if}
-			</div>
-			<!-- Modal de reporte interceptado (Shallow Routing) -->
-			<ModalReportarIrregularidad
-				open={!!$page.state.showReportModal}
-				tipo_objeto="Proyecto"
-				id_objeto={proyecto.id_proyecto ?? 0}
-				nombre_objeto={proyecto.titulo}
-				onclose={() => history.back()}
-				onsuccess={handleReportSuccess}
-			/>
-			<slot />
 
-			<div
-				class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
-			>
-				<div class="flex gap-3">
-					{#if esAdministrador}
-						<!-- Dropdown móvil -->
-						<div class="relative flex-1">
-							<button
-								type="button"
-								onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-								class="flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
-							>
-								Gestionar proyecto
-								<Icon
-									src={ChevronDown}
-									class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
-										? 'rotate-180'
-										: ''}"
-								/>
-							</button>
-
-							{#if mostrarDropdownAdmin}
-								<!-- Dropdown menu popup -->
-								<div
-									class="animate-in slide-in-from-bottom-5 absolute right-0 bottom-full left-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
-								>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-										onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+								{#if mostrarDropdownAdmin}
+									<!-- Dropdown menu popup -->
+									<div
+										class="animate-in slide-in-from-bottom-5 absolute right-0 bottom-full left-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
 									>
-										<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
-										Editar proyecto
-									</button>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-									>
-										<Icon src={ShieldCheck} class="h-5 w-5 text-gray-500" />
-										Auditar proyecto
-									</button>
-									<div class="my-1 border-t border-gray-100"></div>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
-									>
-										<Icon src={Trash} class="h-5 w-5 text-red-500" />
-										Eliminar proyecto
-									</button>
-								</div>
-
-								<!-- Backdrop -->
-								<div
-									class="fixed inset-0 z-[-1] bg-black/50"
-									onclick={() => (mostrarDropdownAdmin = false)}
-									aria-hidden="true"
-								></div>
-							{/if}
-						</div>
-					{:else if esCreador || esColaboradorAprobado}
-						<div class="relative flex-1">
-							<button
-								type="button"
-								onclick={() =>
-									(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-								class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
-							>
-								<span>Gestionar proyecto</span>
-								<Icon
-									src={ChevronDown}
-									class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
-										? 'rotate-180'
-										: ''}"
-								/>
-							</button>
-
-							{#if mostrarDropdownGestionarProyecto}
-								<!-- Dropdown menu popup mobile -->
-								<div
-									class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl ring-1 ring-black/5 duration-200"
-								>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-									>
-										<Icon src={ChatBubbleLeftRight} class="h-5 w-5 text-gray-500" />
-										Ir al chat
-									</button>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-										onclick={() =>
-											goto(
-												esCreador
-													? `/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-													: `/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-											)}
-									>
-										<Icon src={ClipboardDocumentList} class="h-5 w-5 text-gray-500" />
-										{esCreador ? 'Ver solicitudes' : 'Ver solicitud'}
-									</button>
-									<button
-										class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-										onclick={irAAportes}
-									>
-										<Icon src={Photo} class="h-5 w-5 text-gray-500" />
-										Ver aportes y evidencias
-									</button>
-
-									<div class="my-1 border-t border-gray-100"></div>
-
-									{#if esCreador}
 										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium transition-colors {estadoCodigo ===
-											'pendiente_solicitud_cierre'
-												? 'text-red-600 active:bg-red-50'
-												: 'cursor-not-allowed text-gray-400 opacity-50'}"
-											disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-											onclick={() =>
-												goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
+											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+											onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
 										>
-											<Icon
-												src={LockClosed}
-												class="h-5 w-5 {estadoCodigo === 'pendiente_solicitud_cierre'
-													? 'text-red-500'
-													: 'text-gray-400'}"
-											/>
-											Cerrar proyecto
+											<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
+											Editar proyecto
 										</button>
-									{:else if esColaboradorAprobado}
 										<button
 											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
 										>
-											<Icon src={Star} class="h-5 w-5 text-gray-500" />
-											Escribir reseña
+											<Icon src={ShieldCheck} class="h-5 w-5 text-gray-500" />
+											Auditar proyecto
 										</button>
+										<div class="my-1 border-t border-gray-100"></div>
 										<button
 											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
 										>
-											<Icon src={Flag} class="h-5 w-5 text-red-500" />
-											Reportar irregularidad
+											<Icon src={Trash} class="h-5 w-5 text-red-500" />
+											Eliminar proyecto
 										</button>
-									{/if}
-								</div>
+									</div>
 
-								<!-- Backdrop -->
-								<div
-									class="fixed inset-0 z-[-1] bg-black/50"
-									onclick={() => (mostrarDropdownGestionarProyecto = false)}
-									aria-hidden="true"
-								></div>
-							{/if}
-						</div>
-					{:else if esSolicitudRechazada}
+									<!-- Backdrop -->
+									<div
+										class="fixed inset-0 z-[-1] bg-black/50"
+										onclick={() => (mostrarDropdownAdmin = false)}
+										aria-hidden="true"
+									></div>
+								{/if}
+							</div>
+						{:else if esCreador || esColaboradorAprobado}
+							<div class="relative flex-1">
+								<button
+									type="button"
+									onclick={() =>
+										(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
+									class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
+								>
+									<span>Gestionar proyecto</span>
+									<Icon
+										src={ChevronDown}
+										class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
+											? 'rotate-180'
+											: ''}"
+									/>
+								</button>
+
+								{#if mostrarDropdownGestionarProyecto}
+									<!-- Dropdown menu popup mobile -->
+									<div
+										class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl ring-1 ring-black/5 duration-200"
+									>
+										<button
+											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+										>
+											<Icon src={ChatBubbleLeftRight} class="h-5 w-5 text-gray-500" />
+											Ir al chat
+										</button>
+										<button
+											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+											onclick={() =>
+												goto(
+													esCreador
+														? `/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
+														: `/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
+												)}
+										>
+											<Icon src={ClipboardDocumentList} class="h-5 w-5 text-gray-500" />
+											{esCreador ? 'Ver solicitudes' : 'Ver solicitud'}
+										</button>
+										<button
+											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+											onclick={irAAportes}
+										>
+											<Icon src={Photo} class="h-5 w-5 text-gray-500" />
+											Ver aportes y evidencias
+										</button>
+
+										<div class="my-1 border-t border-gray-100"></div>
+
+										{#if esCreador}
+											<button
+												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium transition-colors {estadoCodigo ===
+												'pendiente_solicitud_cierre'
+													? 'text-red-600 active:bg-red-50'
+													: 'cursor-not-allowed text-gray-400 opacity-50'}"
+												disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
+												onclick={() =>
+													goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
+											>
+												<Icon
+													src={LockClosed}
+													class="h-5 w-5 {estadoCodigo === 'pendiente_solicitud_cierre'
+														? 'text-red-500'
+														: 'text-gray-400'}"
+												/>
+												Cerrar proyecto
+											</button>
+										{:else if esColaboradorAprobado}
+											<button
+												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
+											>
+												<Icon src={Star} class="h-5 w-5 text-gray-500" />
+												Escribir reseña
+											</button>
+											<button
+												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
+											>
+												<Icon src={Flag} class="h-5 w-5 text-red-500" />
+												Reportar irregularidad
+											</button>
+										{/if}
+									</div>
+
+									<!-- Backdrop -->
+									<div
+										class="fixed inset-0 z-[-1] bg-black/50"
+										onclick={() => (mostrarDropdownGestionarProyecto = false)}
+										aria-hidden="true"
+									></div>
+								{/if}
+							</div>
+						{:else if esSolicitudRechazada}
+							<button
+								type="button"
+								onclick={() => (mostrarModalJustificacion = true)}
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-sm transition active:scale-[0.98]"
+							>
+								<Icon src={XCircle} class="h-5 w-5" />
+								Solicitud rechazada
+							</button>
+						{:else if !esInstitucion}
+							<button
+								type="button"
+								onclick={manejarClickSolicitud}
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+							>
+								<Icon src={Heart} class="h-5 w-5" />
+								Colaborar ahora
+							</button>
+						{/if}
 						<button
 							type="button"
-							onclick={() => (mostrarModalJustificacion = true)}
-							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-sm transition active:scale-[0.98]"
+							onclick={compartirProyecto}
+							class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+							aria-label="Compartir"
 						>
-							<Icon src={XCircle} class="h-5 w-5" />
-							Solicitud rechazada
+							<Icon src={Share} class="h-5 w-5" />
 						</button>
-					{:else if !esInstitucion}
-						<button
-							type="button"
-							onclick={manejarClickSolicitud}
-							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
-						>
-							<Icon src={Heart} class="h-5 w-5" />
-							Colaborar ahora
-						</button>
-					{/if}
-					<button
-						type="button"
-						onclick={compartirProyecto}
-						class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
-						aria-label="Compartir"
-					>
-						<Icon src={Share} class="h-5 w-5" />
-					</button>
+					</div>
 				</div>
 			</div>
 		</main>

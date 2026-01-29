@@ -88,4 +88,8 @@ export class MockColaboracionRepository implements ColaboracionRepository {
 			.filter((c) => c.proyecto_id === proyectoId && c.estado === 'aprobada')
 			.map((c) => new Colaboracion(c));
 	}
+
+	async findByProyectoId(proyectoId: number): Promise<Colaboracion[]> {
+		return this.getColaboracionesPorProyecto(proyectoId);
+	}
 }

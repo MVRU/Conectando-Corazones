@@ -262,5 +262,54 @@ export const mockColaboraciones: Colaboracion[] = [
 		proyecto_id: 10,
 		colaborador_id: 4,
 		colaborador: getColaborador(4) // maria_g
+	},
+	// Nuevas colaboraciones para pruebas de cierre
+	{
+		id_colaboracion: 30,
+		estado: 'aprobada',
+		created_at: new Date('2025-10-01'),
+		proyecto_id: 22,
+		colaborador_id: 4,
+		colaborador: getColaborador(4)
+	},
+	{
+		id_colaboracion: 31,
+		estado: 'aprobada',
+		created_at: new Date('2025-10-02'),
+		proyecto_id: 22,
+		colaborador_id: 5,
+		colaborador: getColaborador(5)
+	},
+	{
+		id_colaboracion: 32,
+		estado: 'aprobada',
+		created_at: new Date('2025-10-03'),
+		proyecto_id: 22,
+		colaborador_id: 6,
+		colaborador: getColaborador(6)
+	},
+	{
+		id_colaboracion: 33,
+		estado: 'aprobada',
+		created_at: new Date('2026-01-20'),
+		proyecto_id: 15,
+		colaborador_id: 7,
+		colaborador: getColaborador(7)
+	},
+	{
+		id_colaboracion: 34,
+		estado: 'aprobada',
+		created_at: new Date('2026-01-21'),
+		proyecto_id: 15,
+		colaborador_id: 8,
+		colaborador: getColaborador(8)
+	},
+	{
+		id_colaboracion: 35,
+		estado: 'aprobada',
+		created_at: new Date('2025-05-01'),
+		proyecto_id: 1,
+		colaborador_id: 8,
+		colaborador: getColaborador(8)
 	}
 ];
