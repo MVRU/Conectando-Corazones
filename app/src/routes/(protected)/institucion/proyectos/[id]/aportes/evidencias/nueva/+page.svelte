@@ -10,8 +10,6 @@
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import type { Archivo } from '$lib/domain/types/Archivo';
-	import { mockEvidencias } from '$lib/infrastructure/mocks/mock-evidencias';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import { toastStore } from '$lib/stores/toast';
 
 	let { data } = $props();
@@ -39,7 +37,7 @@
 
 	// Filtrar participaciones por tipo seleccionado
 	let filteredParticipaciones = $derived(
-		data.participacionesPermitidas.filter((p) => {
+		data.participacionesPermitidas.filter((p: any) => {
 			if (!selectedTipoParticipacion) return false;
 			return p.tipo_participacion?.descripcion === selectedTipoParticipacion;
 		})
@@ -53,23 +51,12 @@
 	// Función para obtener el nombre del colaborador
 	// TODO: considerar centralizar esta función ya que se usa en varios lugares
 	function getNombreColaborador(usuarioId: number): string {
-		const usuario = Object.values(mockUsuarios).find((u) => u.id_usuario === usuarioId);
-		if (!usuario) return 'Colaborador';
-
-		if ('razon_social' in usuario && usuario.razon_social) {
-			return usuario.razon_social;
-		}
-
-		if (usuario.nombre && usuario.apellido) {
-			return `${usuario.nombre} ${usuario.apellido}`;
-		}
-
-		return usuario.username || 'Colaborador';
+		return 'Colaborador';
 	}
 
 	let evidenciasEntrada = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? mockEvidencias
+			? (data.evidencias as any[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -91,7 +78,7 @@
 
 	let evidenciasSalidaExistentes = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? mockEvidencias
+			? (data.evidencias as any[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&

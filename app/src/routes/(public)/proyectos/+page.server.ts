@@ -44,7 +44,8 @@ export const load: PageServerLoad = async () => {
 				console.error('Error fetching tipos:', err);
 				return [];
 			}),
-			proyectoRepo.findAll().catch((err) => {
+			// Usar findAllSummary() para listado de proyectos
+			proyectoRepo.findAllSummary().catch((err) => {
 				console.error('Error fetching projects:', err);
 				return [];
 			})

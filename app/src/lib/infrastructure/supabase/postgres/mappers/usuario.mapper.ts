@@ -60,7 +60,8 @@ export class UsuarioMapper {
 						descripcion: tp.tipo_participacion.descripcion as any
 					})
 			),
-			consentimientos: prismaUsuario.consentimientos as any // TODO: Mapear ConsentimientoEntity
+			consentimientos: prismaUsuario.consentimientos as any, // TODO: Mapear ConsentimientoEntity
+			verificaciones: (prismaUsuario as any).verificaciones // Se asume que viene el objeto plano de Prisma
 		});
 	}
 }

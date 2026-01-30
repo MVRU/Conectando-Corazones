@@ -1,4 +1,4 @@
-// TODO: completar métodos de dominio
+import type { Verificacion } from '../types/Verificacion';
 import type { Categoria } from '../types/Categoria';
 import type { TipoParticipacion } from '../types/TipoParticipacion';
 import type { Localidad } from '../types/Localidad';
@@ -26,6 +26,7 @@ export class Usuario {
 	categorias_preferidas?: Categoria[];
 	tipos_participacion_preferidas?: TipoParticipacion[];
 	consentimientos?: Consentimiento[];
+	verificaciones?: Verificacion[];
 
 	// Propiedades específicas de Institucion/Colaborador (flattened)
 	nombre_legal: string;
@@ -65,6 +66,7 @@ export class Usuario {
 		if (data.tipos_participacion_preferidas)
 			this.tipos_participacion_preferidas = data.tipos_participacion_preferidas;
 		if (data.consentimientos) this.consentimientos = data.consentimientos;
+		if (data.verificaciones) this.verificaciones = data.verificaciones;
 	}
 
 	esInstitucion(): boolean {

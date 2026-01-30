@@ -16,7 +16,8 @@ export const handle: Handle = async ({ event, resolve }) => {
 			};
 
 			const usuarioRepo = new PostgresUsuarioRepository();
-			const usuario = await usuarioRepo.findByUsername(decoded.username);
+			// Usar findByUsernameBasic() para cargar solo datos esenciales en la sesión
+			const usuario = await usuarioRepo.findByUsernameBasic(decoded.username);
 
 			if (usuario) {
 				event.locals.usuario = usuario;

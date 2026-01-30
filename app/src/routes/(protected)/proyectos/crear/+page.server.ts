@@ -41,7 +41,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		categorias: categorias.map((c) => ({ ...c })),
 		tiposParticipacion: tiposParticipacion.map((t) => ({ ...t })),
-		estaVerificado: !!verificacion,
+		estaVerificado: !!verificacion || usuario.estado_verificacion === 'aprobada',
 		limiteProyectosAlcanzado: proyectosEnCurso >= 5
 	};
 };

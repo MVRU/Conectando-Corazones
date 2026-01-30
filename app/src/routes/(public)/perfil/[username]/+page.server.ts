@@ -1,8 +1,6 @@
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
-import { MockResenaRepository } from '$lib/infrastructure/repositories/mock/MockResenaRepository';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
-import { ObtenerResenasPerfil } from '$lib/domain/use-cases/perfil/ObtenerResenasPerfil';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -16,7 +14,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		const usuarioRepo = new PostgresUsuarioRepository();
 		const proyectoRepo = new PostgresProyectoRepository();
-		const resenaRepo = new MockResenaRepository();
 
 		// 1. Obtener Usuario
 		const perfilUsuario = await usuarioRepo.findByUsername(username);
@@ -28,9 +25,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const obtenerProyectos = new ObtenerProyectosPerfil(proyectoRepo);
 		const proyectos = await obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol);
 
-		// 3. Obtener Reseñas
-		const obtenerResenas = new ObtenerResenasPerfil(resenaRepo);
-		const resenas = await obtenerResenas.execute(perfilUsuario.id_usuario);
+		// 3. Obtener Reseñas (Backend no implementado aún)
+		const resenas: any[] = [];
 
 		// 4. Verificar si es mi perfil
 		const esMiPerfil = locals.usuario?.id_usuario === perfilUsuario.id_usuario;
@@ -46,7 +42,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.error('Error loading profile:', err);
 
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
+		if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
 			throw err;
 		}
 

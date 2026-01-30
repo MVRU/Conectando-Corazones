@@ -13,7 +13,7 @@
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
-	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
 	export let proyecto: Proyecto;
@@ -22,12 +22,9 @@
 	export let variante: 'default' | 'mis-proyectos' = 'default';
 	export let esInstitucion: boolean = false;
 
-	// Obtener colaboración del usuario desde el mock global
-	$: colaboracionUsuario =
-		usuario &&
-		mockColaboraciones.find(
-			(c) => c.proyecto_id === proyecto.id_proyecto && c.colaborador_id === usuario.id_usuario
-		);
+	// Obtener colaboración del usuario
+	// TODO: Reemplazar con datos reales (pasar como prop o desde store)
+	$: colaboracionUsuario = null as any;
 
 	// Detectar roles
 	$: esCreador = usuario?.id_usuario === proyecto.institucion_id;

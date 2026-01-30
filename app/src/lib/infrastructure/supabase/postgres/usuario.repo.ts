@@ -9,7 +9,8 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		contactos: true,
 		categorias_preferidas: { include: { categoria: true } },
 		tipos_participacion_preferidos: { include: { tipo_participacion: true } },
-		consentimientos: true
+		consentimientos: true,
+		verificaciones: true
 	};
 
 	async findById(id: number): Promise<Usuario | null> {
@@ -30,6 +31,41 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 
 		if (!usuario) return null;
 		return UsuarioMapper.toDomain(usuario);
+	}
+
+	/**
+	 * Versión optimizada para autenticación - solo carga datos esenciales
+	 * Reduce el tiempo de carga en hooks.server.ts
+	 */
+	async findByUsernameBasic(username: string): Promise<Usuario | null> {
+		const usuario = await prisma.usuario.findUnique({
+			where: { username },
+			select: {
+				id_usuario: true,
+				username: true,
+				password: true,
+				nombre: true,
+				apellido: true,
+				fecha_nacimiento: true,
+				estado: true,
+				rol: true,
+				url_foto: true,
+				estado_verificacion: true,
+				descripcion: true,
+				localidad_id: true,
+				nombre_legal: true,
+				tipo_institucion: true,
+				tipo_colaborador: true,
+				razon_social: true,
+				con_fines_de_lucro: true,
+				// Solo relaciones mínimas necesarias para la sesión
+				contactos: true,
+				verificaciones: true
+			}
+		});
+
+		if (!usuario) return null;
+		return UsuarioMapper.toDomain(usuario as any);
 	}
 
 	async create(usuario: Usuario): Promise<Usuario> {

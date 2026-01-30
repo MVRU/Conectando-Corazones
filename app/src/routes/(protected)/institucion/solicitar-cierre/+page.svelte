@@ -3,16 +3,16 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-	import { mockEvidencias } from '$lib/infrastructure/mocks/mock-evidencias';
-	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
-	import { mockSolicitudesFinalizacion } from '$lib/infrastructure/mocks/mock-solicitudes-finalizacion';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
+	import type { PageData } from './$types';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
+
+	// Props
+	export let data: PageData;
 
 	// Estado derivado de la URL
 	$: proyectoSeleccionado = $page.url.searchParams.get('proyecto') || '';
@@ -42,7 +42,7 @@
 			accesoDenegado = true;
 			mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';
 		} else {
-			const verificacion = mockVerificaciones.find((v) => v.usuario_id == $usuario!.id_usuario);
+			const verificacion = data.verificacion;
 
 			if (!verificacion) {
 				accesoDenegado = true;
@@ -69,34 +69,20 @@
 	};
 
 	// Proyectos PENDIENTES DE CIERRE de la institución actual y VERIFICADA
-	$: proyectosDisponibles =
-		$usuario && !accesoDenegado
-			? mockProyectos
-					.filter(
-						(p) =>
-							p.institucion_id == $usuario!.id_usuario && p.estado === 'pendiente_solicitud_cierre'
-					)
-					.map((p) => ({
-						value: String(p.id_proyecto),
-						label: p.titulo
-					}))
-			: [];
+	$: proyectosDisponibles = data.proyectosDisponibles.map((p: any) => ({
+		value: String(p.id_proyecto),
+		label: p.titulo
+	}));
 
 	// Validar si tiene proyectos disponibles para mostrar alerta específica
 	$: sinProyectosPendientes =
 		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0;
 
 	// Obtener proyecto completo seleccionado
-	$: proyectoActual = proyectoSeleccionado
-		? mockProyectos.find((p) => p.id_proyecto === Number(proyectoSeleccionado))
-		: null;
+	$: proyectoActual = data.proyectoActual;
 
-	// Verificar si ya existe una solicitud de finalización pendiente para el proyecto seleccionado
-	$: solicitudPendienteExistente = proyectoSeleccionado
-		? mockSolicitudesFinalizacion.find(
-				(s) => s.proyecto_id === Number(proyectoSeleccionado) && s.estado === 'pendiente'
-			)
-		: null;
+	// Verificar si ya existe una solicitud de finalización pendiente
+	$: solicitudPendienteExistente = data.solicitudPendiente;
 
 	// Variable booleana derivada para validaciones
 	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
@@ -106,21 +92,17 @@
 		? proyectoActual.institucion_id === $usuario?.id_usuario
 		: false;
 
-	// Contar solicitudes rechazadas del proyecto seleccionado
-	$: solicitudesRechazadas = proyectoSeleccionado
-		? mockSolicitudesFinalizacion.filter(
-				(s) => s.proyecto_id === Number(proyectoSeleccionado) && s.estado === 'rechazada'
-			)
-		: [];
+	// Contar solicitudes rechazadas calculadas en server
+	$: solicitudesRechazadas = data.solicitudesRechazadas;
 
 	// Validar si tiene 3 o más solicitudes rechazadas
 	$: tieneTresSolicitudesRechazadas = solicitudesRechazadas.length >= 3;
 
 	// Evidencias del proyecto seleccionado agrupadas por objetivo
 	$: evidenciasPorObjetivo = proyectoActual
-		? proyectoActual.participacion_permitida?.map((objetivo) => {
-				const evidenciasObjetivo = mockEvidencias.filter(
-					(e) => e.id_participacion_permitida === objetivo.id_participacion_permitida
+		? proyectoActual.participacion_permitida?.map((objetivo: any) => {
+				const evidenciasObjetivo = (data.evidencias || []).filter(
+					(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
 				);
 				// Separar evidencias de entrada y salida
 				const evidenciasEntrada = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'entrada');
@@ -136,9 +118,8 @@
 			}) || []
 		: [];
 
-	// Validar que todos los objetivos tengan al menos una evidencia
 	$: todosLosObjetivosTienenEvidencias = evidenciasPorObjetivo.every(
-		(item) => item.evidencias.length > 0
+		(item: any) => item.evidencias.length > 0
 	);
 
 	// Validar que todos los checks estén marcados

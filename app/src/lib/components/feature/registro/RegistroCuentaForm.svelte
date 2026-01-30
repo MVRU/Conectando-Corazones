@@ -55,7 +55,7 @@
 		REGISTRO_STORAGE_VERSION
 	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;
@@ -763,14 +763,20 @@
 		return {
 			username: !usernameNormalizado
 				? MENSAJES_ERROR.obligatorio
+				: /*
 				: !validarUsername(usernameNormalizado)
 					? MENSAJES_ERROR.usuarioInvalido
 					: // TODO: Reemplazar validación contra mockUsuarios por llamada a API real
 						Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
 						? `El nombre de usuario "${usernameNormalizado}" ya está en uso`
 						: '',
+				*/
+					!validarUsername(usernameNormalizado)
+					? MENSAJES_ERROR.usuarioInvalido
+					: '',
 			email: !emailNormalizado
 				? MENSAJES_ERROR.obligatorio
+				: /*
 				: !validarCorreo(emailNormalizado)
 					? MENSAJES_ERROR.correoInvalido
 					: Object.values(mockUsuarios).some((u) =>
@@ -780,6 +786,10 @@
 						  )
 						? `El correo electrónico "${emailNormalizado}" ya está en uso`
 						: '',
+				*/
+					!validarCorreo(emailNormalizado)
+					? MENSAJES_ERROR.correoInvalido
+					: '',
 			password: !password
 				? MENSAJES_ERROR.obligatorio
 				: !validarContrasena(password)
@@ -833,14 +843,7 @@
 						? MENSAJES_ERROR.obligatorio
 						: razonSocialNormalizada.length < 3
 							? MENSAJES_ERROR.nombreCorto
-							: Object.values(mockUsuarios).some(
-										(u) =>
-											u.rol === 'colaborador' &&
-											'razon_social' in u &&
-											u.razon_social?.toLowerCase() === razonSocialNormalizada.toLowerCase()
-								  )
-								? MENSAJES_ERROR.razonSocialDuplicada
-								: ''
+							: ''
 					: '',
 			con_fines_de_lucro:
 				datos.tipoColaborador === 'organizacion' && conFines === ''
@@ -864,14 +867,7 @@
 				? MENSAJES_ERROR.obligatorio
 				: nombreLegalNormalizado.length < 3
 					? MENSAJES_ERROR.nombreCorto
-					: Object.values(mockUsuarios).some(
-								(u) =>
-									u.rol === 'institucion' &&
-									'nombre_legal' in u &&
-									u.nombre_legal?.toLowerCase() === nombreLegalNormalizado.toLowerCase()
-						  )
-						? MENSAJES_ERROR.nombreLegalDuplicado
-						: '',
+					: '',
 			tipo_institucion:
 				seleccion === 'otro' ? (personalizado ? '' : MENSAJES_ERROR.tipoInstitucionObligatorio) : ''
 		};

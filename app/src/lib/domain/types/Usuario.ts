@@ -28,6 +28,7 @@ export interface Usuario {
 	categorias_preferidas?: Categoria[];
 	tipos_participacion_preferidas?: TipoParticipacion[];
 	consentimientos?: Consentimiento[];
+	verificaciones?: any[]; // TODO: Importar tipo Verificacion
 }
 export interface Institucion extends Usuario {
 	nombre_legal: string;

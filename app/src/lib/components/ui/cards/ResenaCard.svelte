@@ -7,7 +7,7 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
 	export let resena: Resena;
@@ -16,15 +16,7 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
-	let autor: UsuarioCompleto | undefined;
-
-	$: {
-		if (resena.username) {
-			autor = Object.values(mockUsuarios).find(
-				(u) => u.username.toLowerCase() === resena.username?.toLowerCase()
-			) as UsuarioCompleto | undefined;
-		}
-	}
+	export let autor: UsuarioCompleto | undefined = undefined;
 
 	function obtenerNombreAutor(usuario: UsuarioCompleto): string {
 		if (usuario.rol === 'institucion') {

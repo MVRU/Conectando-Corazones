@@ -1,6 +1,5 @@
-import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-import { mockEvidencias } from '$lib/infrastructure/mocks/mock-evidencias';
-import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
@@ -12,7 +11,10 @@ export const load: PageServerLoad = async ({ params }) => {
 			throw error(404, 'Proyecto no encontrado');
 		}
 
-		const project = mockProyectos.find((p) => p.id_proyecto === projectId);
+		const proyectoRepo = new PostgresProyectoRepository();
+		const usuarioRepo = new PostgresUsuarioRepository();
+
+		const project = await proyectoRepo.findById(projectId);
 
 		if (!project) throw error(404, 'Proyecto no encontrado');
 
@@ -22,7 +24,9 @@ export const load: PageServerLoad = async ({ params }) => {
 		).filter(Boolean) as string[];
 
 		// Obtener todos los proyectos disponibles (en curso o pendiente de cierre)
-		const proyectosDisponibles = mockProyectos
+		// Usar findAllSummary() para reducir datos transferidos
+		const allProjects = await proyectoRepo.findAllSummary();
+		const proyectosDisponibles = allProjects
 			.filter((p) => p.estado === 'en_curso' || p.estado === 'pendiente_solicitud_cierre')
 			.map((p) => ({
 				id_proyecto: p.id_proyecto,
@@ -31,30 +35,33 @@ export const load: PageServerLoad = async ({ params }) => {
 			}));
 
 		// Obtener datos de la institución
-		const institucion = Object.values(mockUsuarios).find(
-			(u) => u.id_usuario === project.institucion_id
-		);
-		const nombreInstitucion =
-			institucion && 'nombre_legal' in institucion
-				? (institucion as any).nombre_legal
-				: 'Institución';
+		let nombreInstitucion = 'Institución';
+		if (project.institucion_id) {
+			const institucion = await usuarioRepo.findById(project.institucion_id);
+			if (institucion && institucion.nombre_legal) {
+				nombreInstitucion = institucion.nombre_legal;
+			}
+		}
 
 		return {
-			proyecto: {
-				id_proyecto: project.id_proyecto,
-				titulo: project.titulo,
-				descripcion: project.descripcion,
-				estado: project.estado,
-				nombreInstitucion
-			},
-			proyectosDisponibles,
+			proyecto: JSON.parse(
+				JSON.stringify({
+					id_proyecto: project.id_proyecto,
+					titulo: project.titulo,
+					descripcion: project.descripcion,
+					estado: project.estado,
+					nombreInstitucion
+				})
+			),
+			proyectosDisponibles: JSON.parse(JSON.stringify(proyectosDisponibles)),
 			tiposParticipacion: tiposUnicos,
-			participacionesPermitidas: project.participacion_permitida || []
+			participacionesPermitidas: JSON.parse(JSON.stringify(project.participacion_permitida || [])),
+			evidencias: []
 		};
 	} catch (err) {
 		console.error('Error loading evidencias page:', err);
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
+		if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
 			throw err;
 		}
 		// Para otros errores, retornamos datos vacíos en lugar de 500

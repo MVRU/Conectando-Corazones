@@ -32,7 +32,7 @@
 		determinarEstadoVerificacion,
 		obtenerVerificacionesUsuario
 	} from '$lib/utils/util-verificacion';
-	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	// import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 
@@ -174,11 +174,8 @@
 	}
 
 	// Determinar estado de verificación del usuario
-	$: verificacionesUsuario = obtenerVerificacionesUsuario(
-		perfilUsuario.id_usuario,
-		mockVerificaciones
-	);
-	$: estadoVerificacion = determinarEstadoVerificacion(verificacionesUsuario);
+	$: verificacionesUsuario = (perfilUsuario as any).verificaciones || [];
+	$: estadoVerificacion = determinarEstadoVerificacion(verificacionesUsuario, perfilUsuario);
 </script>
 
 <main class="min-h-screen bg-gray-50">

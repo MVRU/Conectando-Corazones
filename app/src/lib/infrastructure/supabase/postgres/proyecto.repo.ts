@@ -57,6 +57,59 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			.filter((p): p is Proyecto => p !== null);
 	}
 
+	/**
+	 * Versión optimizada para listados - solo carga datos esenciales
+	 * Reduce significativamente el tiempo de carga al evitar relaciones profundas
+	 */
+	async findAllSummary(): Promise<Proyecto[]> {
+		const proyectos = await prisma.proyecto.findMany({
+			select: {
+				id_proyecto: true,
+				titulo: true,
+				resumen: true,
+				url_portada: true,
+				beneficiarios: true,
+				created_at: true,
+				fecha_fin_tentativa: true,
+				institucion_id: true,
+				estado: {
+					select: {
+						id_estado: true,
+						descripcion: true
+					}
+				},
+				institucion: {
+					select: {
+						id_usuario: true,
+						nombre_legal: true,
+						url_foto: true
+					}
+				},
+				proyecto_categorias: {
+					select: {
+						categoria: {
+							select: {
+								id_categoria: true,
+								descripcion: true
+							}
+						}
+					}
+				}
+			}
+		});
+
+		return proyectos
+			.map((p) => {
+				try {
+					return ProyectoMapper.toDomain(p as any);
+				} catch (err) {
+					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					return null;
+				}
+			})
+			.filter((p): p is Proyecto => p !== null);
+	}
+
 	async findById(id: number): Promise<Proyecto | null> {
 		const proyecto = await prisma.proyecto.findUnique({
 			where: { id_proyecto: id },

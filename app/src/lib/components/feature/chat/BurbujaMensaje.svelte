@@ -1,15 +1,17 @@
 <script lang="ts">
 	import type { Mensaje } from '$lib/domain/types/Chat';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 	export let mensaje: Mensaje;
 	export let esPropio: boolean;
 
 	// Obtener datos del remitente
-	const remitente = Object.values(mockUsuarios).find((u) => u.id_usuario === mensaje.remitente_id);
+	// TODO: Obtener nombre real del remitente (store o prop)
+	// const remitente = Object.values(mockUsuarios).find((u) => u.id_usuario === mensaje.remitente_id);
 
 	// Determinar nombre a mostrar según rol
-	let nombreMostrar = 'Usuario desconocido';
+	let nombreMostrar = `Usuario #${mensaje.remitente_id}`;
+	/*
 	if (remitente) {
 		if (remitente.rol === 'institucion') {
 			nombreMostrar = (remitente as any).nombre_legal || remitente.username;
@@ -23,6 +25,7 @@
 			nombreMostrar = remitente.username;
 		}
 	}
+	*/
 
 	// Formatear hora
 	const hora = mensaje.created_at.toLocaleTimeString('es-AR', {
@@ -39,7 +42,7 @@
 	>
 		{#if !esPropio}
 			<a
-				href="/perfil/{remitente?.username || mensaje.remitente_id}"
+				href="/perfil/{mensaje.remitente_id}"
 				class="mb-1 block text-xs font-bold text-blue-600 transition-colors hover:text-blue-700 hover:underline"
 			>
 				{nombreMostrar}

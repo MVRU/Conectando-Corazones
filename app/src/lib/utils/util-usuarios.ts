@@ -1,4 +1,4 @@
-import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
+// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
 
 /**
@@ -7,18 +7,10 @@ import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
  * @returns Nombre completo del usuario o 'Usuario desconocido' si no existe
  */
 export function obtenerNombreUsuario(usuarioId: number): string {
-	const usuarios = Object.values(mockUsuarios);
-	const user = usuarios.find((u) => u.id_usuario === usuarioId);
-
-	if (!user) return 'Usuario desconocido';
-
-	// Si es institución, retornar el nombre legal (nombre oficial de la institución)
-	if ('nombre_legal' in user) {
-		return (user as Institucion).nombre_legal;
-	}
-
-	// Si es usuario individual (colaborador/admin), retornar nombre y apellido
-	return `${user.nombre} ${user.apellido}`;
+	// TODO: Esta función dependía de un mock global.
+	// Debería ser reemplazada por `obtenerNombreCompleto` pasando el objeto usuario,
+	// o obteniendo el usuario desde el backend/store donde sea necesario.
+	return `Usuario #${usuarioId}`;
 }
 
 /**

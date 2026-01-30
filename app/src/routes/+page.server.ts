@@ -4,7 +4,8 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 export const load: PageServerLoad = async () => {
 	try {
 		const repo = new PostgresProyectoRepository();
-		const proyectos = await repo.findAll();
+		// Usar findAllSummary() para cargar solo datos esenciales
+		const proyectos = await repo.findAllSummary();
 
 		return {
 			proyectosDestacados: JSON.parse(JSON.stringify(proyectos.slice(0, 3)))
