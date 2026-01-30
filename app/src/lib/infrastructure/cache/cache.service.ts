@@ -65,7 +65,9 @@ export class CacheService {
 	 * @param pattern Patrón de búsqueda (ej: 'proyectos:*')
 	 */
 	invalidatePattern(pattern: string): void {
-		const regex = new RegExp(pattern.replace('*', '.*'));
+		const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		const regexPattern = escapedPattern.replace(/\\\*/g, '.*');
+		const regex = new RegExp(regexPattern);
 		for (const key of this.cache.keys()) {
 			if (regex.test(key)) {
 				this.cache.delete(key);

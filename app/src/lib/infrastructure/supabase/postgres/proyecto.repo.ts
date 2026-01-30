@@ -66,6 +66,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			select: {
 				id_proyecto: true,
 				titulo: true,
+				descripcion: true,
 				resumen: true,
 				url_portada: true,
 				beneficiarios: true,
@@ -91,6 +92,60 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 							select: {
 								id_categoria: true,
 								descripcion: true
+							}
+						}
+					}
+				},
+				participacion_permitida: {
+					select: {
+						id_participacion_permitida: true,
+						id_proyecto: true,
+						id_tipo_participacion: true,
+						objetivo: true,
+						actual: true,
+						unidad_medida: true,
+						especie: true,
+						tipo_participacion: {
+							select: {
+								id_tipo_participacion: true,
+								descripcion: true
+							}
+						}
+					}
+				},
+				proyecto_ubicaciones: {
+					select: {
+						id_proyecto_ubicacion: true,
+						proyecto_id: true,
+						ubicacion_id: true,
+						ubicacion: {
+							select: {
+								id_ubicacion: true,
+								tipo_ubicacion: true,
+								modalidad: true,
+								calle: true,
+								numero: true,
+								piso: true,
+								departamento: true,
+								referencia: true,
+								url_google_maps: true,
+								url_virtual: true,
+								localidad_id: true,
+								localidad: {
+									select: {
+										id_localidad: true,
+										nombre: true,
+										codigo_postal: true,
+										provincia: {
+											select: {
+												id_provincia: true,
+												nombre: true,
+												nombre_corto: true,
+												codigo_iso: true
+											}
+										}
+									}
+								}
 							}
 						}
 					}
