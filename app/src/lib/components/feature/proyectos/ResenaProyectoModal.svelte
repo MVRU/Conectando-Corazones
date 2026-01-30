@@ -2,6 +2,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { Star, X } from 'lucide-svelte';
 
 	export let mostrar = false;
 	export let modo: 'crear' | 'editar' = 'crear';
@@ -56,14 +57,7 @@
 					aria-label="Cerrar modal"
 					class="absolute top-3 right-3 rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white"
 				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M6 18L18 6M6 6l12 12"
-						/>
-					</svg>
+					<X class="h-5 w-5" />
 				</button>
 				<p class="text-xs font-semibold uppercase tracking-wide text-white/80">Reseñas del proyecto</p>
 				<h3 class="mt-1 text-xl font-semibold">{titulo}</h3>
@@ -95,11 +89,11 @@
 										: 'text-gray-300'} transition-colors hover:text-amber-400"
 									aria-label="Puntaje {i + 1} de 5"
 								>
-									<svg fill="currentColor" viewBox="0 0 20 20">
-										<path
-											d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.955a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.955c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.197-1.54-1.118l1.287-3.955a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.955z"
-										/>
-									</svg>
+									<Star
+										class="h-5 w-5"
+										fill={i < puntaje ? 'currentColor' : 'none'}
+										stroke="currentColor"
+									/>
 								</button>
 							{/each}
 						</div>
@@ -133,7 +127,7 @@
 						variant="secondary"
 						size="md"
 						type="button"
-						on:click={cerrar}
+						onclick={cerrar}
 						customClass="w-full md:w-auto"
 					/>
 					<Button

@@ -58,7 +58,7 @@ export const mockResenas: Resena[] = [
 		puntaje: 5,
 		contenido:
 			'Se logró incorporar verduras al comedor y los chicos se involucraron mucho. Como mejora, sería útil medir resultados con un registro simple por semana.',
-		username: 'biblioteca_popular',
+		username: 'escuela_esperanza',
 		aprobado: true
 	},
 	{
