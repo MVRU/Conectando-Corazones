@@ -84,15 +84,11 @@
 								<button
 									type="button"
 									on:click={() => (puntaje = i + 1)}
-									class="h-8 w-8 {i < puntaje
-										? 'text-amber-400'
-										: 'text-gray-300'} transition-colors hover:text-amber-400"
+									class="h-8 w-8 transition-colors hover:text-amber-400"
 									aria-label="Puntaje {i + 1} de 5"
 								>
 									<Star
-										class="h-5 w-5"
-										fill={i < puntaje ? 'currentColor' : 'none'}
-										stroke="currentColor"
+										class={`h-5 w-5 ${i < puntaje ? 'fill-current text-amber-400' : 'text-gray-300'}`}
 									/>
 								</button>
 							{/each}
