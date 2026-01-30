@@ -234,9 +234,9 @@ export const mockProyectos: Proyecto[] = [
 		titulo: 'Cuidadores de Adultos Mayores',
 		descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
 		resumen:
-			'Capacitamos a cuidadores de adultos mayores a través de talleres presenciales y guías prácticas, articulando una red de apoyo entre instituciones y familias. Se trabajó en protocolos de cuidado domiciliario, prevención de riesgos y contención emocional. Además, se generaron espacios de seguimiento para compartir avances y necesidades emergentes.',
+			'Capacitamos a cuidadores de adultos mayores mediante talleres presenciales y guías prácticas, articulando una red de apoyo entre instituciones y familias. Se trabajó en protocolos de cuidado domiciliario, prevención de riesgos y contención emocional, con seguimiento quincenal para acompañar casos complejos. El proyecto alcanzó a 10 cuidadores activos y benefició a 35 adultos mayores con mejoras en la calidad de atención.',
 		aprendizajes:
-			'Mejorar la planificación de turnos y la coordinación con las familias para evitar superposiciones. Incorporar más prácticas supervisadas en terreno y sumar material audiovisual para reforzar contenidos clave.',
+			'Mejorar la planificación de turnos y la coordinación con las familias para evitar superposiciones. Incorporar más prácticas supervisadas en terreno y sumar material audiovisual para reforzar contenidos clave. La experiencia mostró que un canal único de comunicación reduce la ansiedad de las familias y mejora la continuidad del cuidado.',
 		url_portada: '/img/proyectos-8.webp',
 		created_at: new Date('2025-04-10'),
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
@@ -267,9 +267,9 @@ export const mockProyectos: Proyecto[] = [
 		url_portada: '/img/proyectos-9.webp',
 		created_at: new Date('2024-08-15'),
 		resumen:
-			'Se creó una biblioteca digital abierta con materiales educativos para estudiantes y docentes, digitalizando y organizando recursos en una plataforma accesible. Participaron voluntarios y donantes, lo que permitió ampliar el catálogo y mejorar los tiempos de carga y búsqueda. Se realizaron instancias de capacitación para el uso de la biblioteca y se difundió el acceso en la comunidad educativa.',
+			'Se creó una biblioteca digital abierta con materiales educativos para estudiantes y docentes, digitalizando y organizando más de 500 recursos en una plataforma accesible. Participaron voluntarios y donantes, lo que permitió ampliar el catálogo, mejorar los tiempos de carga y optimizar la búsqueda por nivel educativo. El proyecto alcanzó a 12 escuelas, con una participación activa de 18 voluntarios y un promedio de satisfacción destacado por la comunidad.',
 		aprendizajes:
-			'Proponer una mejor estandarización de los metadatos para agilizar la catalogación. Fortalecer la comunicación con escuelas para detectar contenidos prioritarios y sumar instancias de formación para docentes sobre el uso de la plataforma.',
+			'Proponer una mejor estandarización de metadatos para agilizar la catalogación y evitar duplicados. Fortalecer la comunicación con escuelas para detectar contenidos prioritarios y sumar instancias de formación para docentes sobre el uso de la plataforma. La experiencia mostró que el acompañamiento inicial mejora la adopción y el uso sostenido.',
 		fecha_cierre_postulaciones: new Date('2024-09-15'),
 		fecha_fin_tentativa: new Date('2024-12-15'),
 		id_chat_firebase: 1009,
@@ -353,7 +353,7 @@ export const mockProyectos: Proyecto[] = [
 			'Recolección de ropa de invierno y mantas para comunidades de la Puna Jujeña. Las temperaturas bajan de 0 grados y muchas familias no tienen calefacción.',
 		resumen: 'Llevamos abrigo a zonas de alta montaña.',
 		aprendizajes:
-			'Mejorar la planificación logística con rutas consolidadas y puntos de entrega alternativos. Incluir un registro anticipado de talles y necesidades para optimizar el armado de kits.',
+			'Mejorar la planificación logística con rutas consolidadas y puntos de entrega alternativos. Incluir un registro anticipado de talles y necesidades para optimizar el armado de kits. La coordinación con referentes locales fue clave para asegurar entregas completas.',
 		url_portada: '/img/proyectos-11.jpg',
 		created_at: new Date('2025-04-01'),
 		fecha_cierre_postulaciones: new Date('2025-05-15'),
@@ -553,7 +553,7 @@ export const mockProyectos: Proyecto[] = [
 			'Plantación de árboles nativos en zonas afectadas por incendios en las sierras. Restauramos el ecosistema con tabaquillos y maitenes.',
 		resumen: 'Recuperamos el bosque nativo local.',
 		aprendizajes:
-			'Mejorar el seguimiento post-plantación con visitas periódicas y riego de apoyo. Involucrar más a escuelas locales para ampliar el cuidado comunitario.',
+			'Mejorar el seguimiento post-plantación con visitas periódicas y riego de apoyo. Involucrar más a escuelas locales para ampliar el cuidado comunitario. La combinación de voluntariado local y asesoramiento técnico mejoró la supervivencia de los plantines.',
 		url_portada: '/img/proyectos-16.jpg',
 		created_at: new Date('2025-07-20'),
 		fecha_cierre_postulaciones: new Date('2025-08-20'),
