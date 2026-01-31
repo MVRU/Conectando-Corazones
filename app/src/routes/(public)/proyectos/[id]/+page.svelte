@@ -16,7 +16,6 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { error } from '@sveltejs/kit';
 	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
@@ -39,6 +38,7 @@
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
+	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb } from 'lucide-svelte';
 
 	import {
 		CheckCircle,
@@ -163,6 +163,13 @@
 	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
 	$: mensajeResenaBloqueada =
 		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	$: resumenTexto = (proyecto?.resumen || '').trim();
+	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
+	$: tieneResumenIA = Boolean(resumenTexto);
+	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
+	$: mostrarSeccionResumenIA =
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
+	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -271,6 +278,8 @@
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
+	let mostrarResumenIA = false;
+	let mostrarAprendizajesIA = false;
 	let mostrarDropdownAdmin = false;
 	let solicitudRecienEnviada = false;
 	let mostrarDropdownGestionarProyecto = false;
@@ -599,6 +608,75 @@
 						</section>
 					{/if}
 
+					{#if mostrarSeccionResumenIA}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-resumen-ia"
+						>
+							<div class="mb-4">
+								<h2 id="titulo-resumen-ia" class="text-xl font-semibold sm:text-2xl">
+									Resumen y aprendizajes
+								</h2>
+								<p class="mt-2 text-sm text-gray-600">
+									El resumen es público. Los aprendizajes solo están disponibles para quienes
+									participaron del proyecto.
+								</p>
+							</div>
+
+							<div class="space-y-3">
+								<div class="overflow-hidden rounded-xl border border-gray-200">
+									<button
+										type="button"
+										class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+										aria-expanded={mostrarResumenIA}
+										onclick={() => (mostrarResumenIA = !mostrarResumenIA)}
+									>
+										<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+											<FileText class="h-4 w-4 text-sky-600" />
+											Resumen ejecutivo
+										</span>
+										<ChevronDownIcon
+											class="h-4 w-4 text-gray-400 transition-transform {mostrarResumenIA
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
+									{#if mostrarResumenIA}
+										<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
+											{resumenTexto || 'El resumen aún no está disponible.'}
+										</div>
+									{/if}
+								</div>
+
+								{#if puedeVerAprendizajesIA}
+									<div class="overflow-hidden rounded-xl border border-gray-200">
+										<button
+											type="button"
+											class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+											aria-expanded={mostrarAprendizajesIA}
+											onclick={() => (mostrarAprendizajesIA = !mostrarAprendizajesIA)}
+										>
+											<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+												<Lightbulb class="h-4 w-4 text-amber-500" />
+												Aprendizajes
+											</span>
+											<ChevronDownIcon
+												class="h-4 w-4 text-gray-400 transition-transform {mostrarAprendizajesIA
+													? 'rotate-180'
+													: ''}"
+											/>
+										</button>
+										{#if mostrarAprendizajesIA}
+											<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
+												{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
+											</div>
+										{/if}
+									</div>
+								{/if}
+							</div>
+						</section>
+					{/if}
+
 					<section
 						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 						aria-label="Detalles del proyecto"
@@ -798,9 +876,7 @@
 													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 													role="menuitem"
 													onclick={() =>
-														goto(
-															`/colaborador/evaluar-finalizacion?proyecto=${proyecto.id_proyecto}`
-														)}
+														goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)}
 												>
 													<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
 													Evaluar finalización

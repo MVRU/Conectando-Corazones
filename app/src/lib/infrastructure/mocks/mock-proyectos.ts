@@ -15,10 +15,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2026-01-10'),
 		id_chat_firebase: 1001,
 		participacion_permitida_ids: [1, 2],
-		colaboracion_ids: [1, 2, 25],
+		colaboracion_ids: [1, 2, 25, 35],
 		institucion_id: 2,
 		solicitud_finalizacion_ids: [1],
-		estado: 'en_curso',
+
+		estado: 'en_revision',
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 1,
@@ -233,8 +234,10 @@ export const mockProyectos: Proyecto[] = [
 		id_proyecto: 8,
 		titulo: 'Cuidadores de Adultos Mayores',
 		descripcion: 'Capacitación y acompañamiento a cuidadores de adultos mayores.',
-		resumen: 'Capacitamos cuidadores de adultos mayores y articulamos redes.',
-		aprendizajes: 'Profundizamos en el cuidado domiciliario y la comunicación con las familias.',
+		resumen:
+			'Capacitamos a cuidadores de adultos mayores mediante talleres presenciales y guías prácticas, articulando una red de apoyo entre instituciones y familias. Se trabajó en protocolos de cuidado domiciliario, prevención de riesgos y contención emocional, con seguimiento quincenal para acompañar casos complejos. El proyecto alcanzó a 10 cuidadores activos y benefició a 35 adultos mayores con mejoras en la calidad de atención.',
+		aprendizajes:
+			'Mejorar la planificación de turnos y la coordinación con las familias para evitar superposiciones. Incorporar más prácticas supervisadas en terreno y sumar material audiovisual para reforzar contenidos clave. La experiencia mostró que un canal único de comunicación reduce la ansiedad de las familias y mejora la continuidad del cuidado.',
 		url_portada: '/img/proyectos-8.webp',
 		created_at: new Date('2025-04-10'),
 		fecha_cierre_postulaciones: new Date('2025-05-10'),
@@ -264,6 +267,10 @@ export const mockProyectos: Proyecto[] = [
 			'Proyecto completado de creación de una biblioteca digital con acceso libre para la comunidad educativa.',
 		url_portada: '/img/proyectos-9.webp',
 		created_at: new Date('2024-08-15'),
+		resumen:
+			'Se creó una biblioteca digital abierta con materiales educativos para estudiantes y docentes, digitalizando y organizando más de 500 recursos en una plataforma accesible. Participaron voluntarios y donantes, lo que permitió ampliar el catálogo, mejorar los tiempos de carga y optimizar la búsqueda por nivel educativo. El proyecto alcanzó a 12 escuelas, con una participación activa de 18 voluntarios y un promedio de satisfacción destacado por la comunidad.',
+		aprendizajes:
+			'Proponer una mejor estandarización de metadatos para agilizar la catalogación y evitar duplicados. Fortalecer la comunicación con escuelas para detectar contenidos prioritarios y sumar instancias de formación para docentes sobre el uso de la plataforma. La experiencia mostró que el acompañamiento inicial mejora la adopción y el uso sostenido.',
 		fecha_cierre_postulaciones: new Date('2024-09-15'),
 		fecha_fin_tentativa: new Date('2024-12-15'),
 		id_chat_firebase: 1009,
@@ -346,7 +353,8 @@ export const mockProyectos: Proyecto[] = [
 		descripcion:
 			'Recolección de ropa de invierno y mantas para comunidades de la Puna Jujeña. Las temperaturas bajan de 0 grados y muchas familias no tienen calefacción.',
 		resumen: 'Llevamos abrigo a zonas de alta montaña.',
-		aprendizajes: 'La logística es clave para llegar a los parajes más aislados.',
+		aprendizajes:
+			'Mejorar la planificación logística con rutas consolidadas y puntos de entrega alternativos. Incluir un registro anticipado de talles y necesidades para optimizar el armado de kits. La coordinación con referentes locales fue clave para asegurar entregas completas.',
 		url_portada: '/img/proyectos-11.jpg',
 		created_at: new Date('2025-04-01'),
 		fecha_cierre_postulaciones: new Date('2025-05-15'),
@@ -514,10 +522,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2026-03-10'),
 		id_chat_firebase: 1015,
 		participacion_permitida_ids: [26, 27],
-		colaboracion_ids: [],
+		colaboracion_ids: [33, 34],
 		institucion_id: 2,
-		solicitud_finalizacion_ids: [],
+		solicitud_finalizacion_ids: [14],
 		estado: 'pendiente_solicitud_cierre',
+
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 26,
@@ -545,7 +554,8 @@ export const mockProyectos: Proyecto[] = [
 		descripcion:
 			'Plantación de árboles nativos en zonas afectadas por incendios en las sierras. Restauramos el ecosistema con tabaquillos y maitenes.',
 		resumen: 'Recuperamos el bosque nativo local.',
-		aprendizajes: 'La naturaleza tiene sus tiempos y debemos respetarlos.',
+		aprendizajes:
+			'Mejorar el seguimiento post-plantación con visitas periódicas y riego de apoyo. Involucrar más a escuelas locales para ampliar el cuidado comunitario. La combinación de voluntariado local y asesoramiento técnico mejoró la supervivencia de los plantines.',
 		url_portada: '/img/proyectos-16.jpg',
 		created_at: new Date('2025-07-20'),
 		fecha_cierre_postulaciones: new Date('2025-08-20'),
@@ -771,10 +781,11 @@ export const mockProyectos: Proyecto[] = [
 		fecha_fin_tentativa: new Date('2025-12-30'),
 		id_chat_firebase: 1022,
 		participacion_permitida_ids: [39, 40],
-		colaboracion_ids: [],
+		colaboracion_ids: [30, 31, 32],
 		institucion_id: 2,
-		solicitud_finalizacion_ids: [10, 11, 12],
-		estado: 'pendiente_solicitud_cierre',
+		solicitud_finalizacion_ids: [10, 11, 12, 15],
+		estado: 'en_revision',
+
 		participacion_permitida: [
 			{
 				id_participacion_permitida: 39,
