@@ -14,7 +14,7 @@
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = [];
 	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: string[] = [];
+	export let estadosDisponibles: { value: string; label: string }[] = [];
 	export let categoriasDisponibles: string[] = [];
 	export let tiposParticipacionDisponibles: string[] = [];
 

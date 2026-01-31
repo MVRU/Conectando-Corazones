@@ -54,7 +54,7 @@ export const load: PageServerLoad = async () => {
 		return {
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			provincias: provincias.map((p) => p.nombre),
-			estados: estados.map((e) => e.descripcion),
+			estados: estados.map((e) => ({ value: e.descripcion, label: e.label })),
 			categorias: categorias.map((c) => c.descripcion),
 			tiposParticipacion: tiposParticipacion.map((t) => t.descripcion)
 		};
