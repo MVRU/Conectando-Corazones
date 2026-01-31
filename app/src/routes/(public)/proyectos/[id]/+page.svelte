@@ -3,7 +3,7 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
-	import type { Resena } from '$lib/domain/types/Resena';
+	// import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { page } from '$app/stores';
@@ -24,17 +24,17 @@
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
-	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
+	// import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
+	// import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
-	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
-	import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
-	import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
+	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	// import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
+	// import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
@@ -72,13 +72,14 @@
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 	let misAportes: ColaboracionTipoParticipacion[] = [];
-	let resenasLocal: Resena[] = [...mockResenas];
-	let resenaEnEdicion: Resena | null = null;
-	let resenaAEliminar: Resena | null = null;
-	let mostrarModalResena = false;
-	let mostrarConfirmarEliminar = false;
-	let modoResena: 'crear' | 'editar' = 'crear';
-	const maxCaracteresResena = 500;
+	// TODO: Falta implementar endpoint para obtener reseñas desde la DB
+	// let resenasLocal: Resena[] = [...mockResenas];
+	// let resenaEnEdicion: Resena | null = null;
+	// let resenaAEliminar: Resena | null = null;
+	// let mostrarModalResena = false;
+	// let mostrarConfirmarEliminar = false;
+	// let modoResena: 'crear' | 'editar' = 'crear';
+	// const maxCaracteresResena = 500;
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -97,14 +98,14 @@
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
-	$: puedeVerResenas = true;
+	// $: puedeVerResenas = true;
 
 	$: proyecto = data.proyecto;
-	$: resenasProyecto = resenasLocal.filter(
-		(r) => r.tipo_objeto === 'proyecto' && r.id_objeto === proyecto?.id_proyecto
-	);
-	$: resenaUsuarioActual = resenasProyecto.find((r) => r.username === $usuario?.username);
-	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
+	// $: resenasProyecto = resenasLocal.filter(
+	// 	(r) => r.tipo_objeto === 'proyecto' && r.id_objeto === proyecto?.id_proyecto
+	// );
+	// $: resenaUsuarioActual = resenasProyecto.find((r) => r.username === $usuario?.username);
+	// $: tieneResenaUsuario = Boolean(resenaUsuarioActual);
 
 	$: if (proyecto) {
 		setBreadcrumbs([
@@ -149,10 +150,10 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: clasesChipEstado = clasesEstado(estadoCodigo);
-	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
-	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	$: mensajeResenaBloqueada =
-		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	// $: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
+	// $: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
+	// $: mensajeResenaBloqueada =
+	// 	'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 	$: resumenTexto = (proyecto?.resumen || '').trim();
 	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
 	$: tieneResumenIA = Boolean(resumenTexto);
@@ -309,98 +310,98 @@
 		}
 	}
 
-	function abrirModalResena() {
-		if (!puedeRedactarResena) {
-			toastStore.show({
-				variant: 'warning',
-				message: mensajeResenaBloqueada
-			});
-			return;
-		}
-		if (resenaUsuarioActual) {
-			editarResena(resenaUsuarioActual);
-			return;
-		}
-		modoResena = 'crear';
-		resenaEnEdicion = null;
-		mostrarModalResena = true;
-	}
+	// function abrirModalResena() {
+	// 	if (!puedeRedactarResena) {
+	// 		toastStore.show({
+	// 			variant: 'warning',
+	// 			message: mensajeResenaBloqueada
+	// 		});
+	// 		return;
+	// 	}
+	// 	if (resenaUsuarioActual) {
+	// 		editarResena(resenaUsuarioActual);
+	// 		return;
+	// 	}
+	// 	modoResena = 'crear';
+	// 	resenaEnEdicion = null;
+	// 	mostrarModalResena = true;
+	// }
 
-	function editarResena(resena: Resena) {
-		if (!puedeRedactarResena) {
-			toastStore.show({
-				variant: 'warning',
-				message: mensajeResenaBloqueada
-			});
-			return;
-		}
-		modoResena = 'editar';
-		resenaEnEdicion = resena;
-		mostrarModalResena = true;
-	}
+	// function editarResena(resena: Resena) {
+	// 	if (!puedeRedactarResena) {
+	// 		toastStore.show({
+	// 			variant: 'warning',
+	// 			message: mensajeResenaBloqueada
+	// 		});
+	// 		return;
+	// 	}
+	// 	modoResena = 'editar';
+	// 	resenaEnEdicion = resena;
+	// 	mostrarModalResena = true;
+	// }
 
-	function solicitarEliminarResena(resena: Resena) {
-		resenaAEliminar = resena;
-		mostrarConfirmarEliminar = true;
-	}
+	// function solicitarEliminarResena(resena: Resena) {
+	// 	resenaAEliminar = resena;
+	// 	mostrarConfirmarEliminar = true;
+	// }
 
-	function confirmarEliminarResena() {
-		if (resenaAEliminar?.id_resena) {
-			resenasLocal = resenasLocal.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
-			toastStore.show({
-				variant: 'success',
-				message: 'La reseña fue eliminada.'
-			});
-		}
-		resenaAEliminar = null;
-		mostrarConfirmarEliminar = false;
-	}
+	// function confirmarEliminarResena() {
+	// 	if (resenaAEliminar?.id_resena) {
+	// 		resenasLocal = resenasLocal.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
+	// 		toastStore.show({
+	// 			variant: 'success',
+	// 			message: 'La reseña fue eliminada.'
+	// 		});
+	// 	}
+	// 	resenaAEliminar = null;
+	// 	mostrarConfirmarEliminar = false;
+	// }
 
-	function cancelarEliminarResena() {
-		resenaAEliminar = null;
-		mostrarConfirmarEliminar = false;
-	}
+	// function cancelarEliminarResena() {
+	// 	resenaAEliminar = null;
+	// 	mostrarConfirmarEliminar = false;
+	// }
 
-	function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
-		if (!proyecto?.id_proyecto || !$usuario) return;
+	// function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	// 	if (!proyecto?.id_proyecto || !$usuario) return;
 
-		if (modoResena === 'crear' && tieneResenaUsuario) {
-			toastStore.show({
-				variant: 'warning',
-				message: 'Ya dejaste una reseña. Podés editarla si necesitás cambiar algo.'
-			});
-			return;
-		}
+	// 	if (modoResena === 'crear' && tieneResenaUsuario) {
+	// 		toastStore.show({
+	// 			variant: 'warning',
+	// 			message: 'Ya dejaste una reseña. Podés editarla si necesitás cambiar algo.'
+	// 		});
+	// 		return;
+	// 	}
 
-		if (modoResena === 'editar' && resenaEnEdicion?.id_resena) {
-			resenasLocal = resenasLocal.map((r) =>
-				r.id_resena === resenaEnEdicion?.id_resena
-					? { ...r, contenido: event.detail.contenido, puntaje: event.detail.puntaje }
-					: r
-			);
-			toastStore.show({
-				variant: 'success',
-				message: 'Reseña actualizada correctamente.'
-			});
-			return;
-		}
+	// 	if (modoResena === 'editar' && resenaEnEdicion?.id_resena) {
+	// 		resenasLocal = resenasLocal.map((r) =>
+	// 			r.id_resena === resenaEnEdicion?.id_resena
+	// 				? { ...r, contenido: event.detail.contenido, puntaje: event.detail.puntaje }
+	// 				: r
+	// 		);
+	// 		toastStore.show({
+	// 			variant: 'success',
+	// 			message: 'Reseña actualizada correctamente.'
+	// 		});
+	// 		return;
+	// 	}
 
-		const nuevaResena: Resena = {
-			id_resena: Date.now(),
-			tipo_objeto: 'proyecto',
-			id_objeto: proyecto.id_proyecto,
-			contenido: event.detail.contenido,
-			puntaje: event.detail.puntaje,
-			username: $usuario.username,
-			rol: $usuario.rol,
-			aprobado: true
-		};
-		resenasLocal = [nuevaResena, ...resenasLocal];
-		toastStore.show({
-			variant: 'success',
-			message: 'Reseña publicada correctamente.'
-		});
-	}
+	// 	const nuevaResena: Resena = {
+	// 		id_resena: Date.now(),
+	// 		tipo_objeto: 'proyecto',
+	// 		id_objeto: proyecto.id_proyecto,
+	// 		contenido: event.detail.contenido,
+	// 		puntaje: event.detail.puntaje,
+	// 		username: $usuario.username,
+	// 		rol: $usuario.rol,
+	// 		aprobado: true
+	// 	};
+	// 	resenasLocal = [nuevaResena, ...resenasLocal];
+	// 	toastStore.show({
+	// 		variant: 'success',
+	// 		message: 'Reseña publicada correctamente.'
+	// 	});
+	// }
 
 	onMount(() => {
 		layoutStore.showStickyBottomBar();
@@ -626,229 +627,140 @@
 						>
 							<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
 						</section>
-					{/if}
 
-					{#if mostrarSeccionResumenIA}
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
-							aria-labelledby="titulo-resumen-ia"
-						>
-							<div class="mb-4">
-								<h2 id="titulo-resumen-ia" class="text-xl font-semibold sm:text-2xl">
-									Resumen y aprendizajes
-								</h2>
-								<p class="mt-2 text-sm text-gray-600">
-									El resumen es público. Los aprendizajes solo están disponibles para quienes
-									participaron del proyecto.
-								</p>
-							</div>
-
-							<div class="space-y-3">
-								<div class="overflow-hidden rounded-xl border border-gray-200">
-									<button
-										type="button"
-										class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
-										aria-expanded={mostrarResumenIA}
-										onclick={() => (mostrarResumenIA = !mostrarResumenIA)}
-									>
-										<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-											<FileText class="h-4 w-4 text-sky-600" />
-											Resumen ejecutivo
-										</span>
-										<ChevronDownIcon
-											class="h-4 w-4 text-gray-400 transition-transform {mostrarResumenIA
-												? 'rotate-180'
-												: ''}"
-										/>
-									</button>
-									{#if mostrarResumenIA}
-										<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
-											{resumenTexto || 'El resumen aún no está disponible.'}
-										</div>
-									{/if}
+						{#if mostrarSeccionResumenIA}
+							<section
+								class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+								aria-labelledby="titulo-resumen-ia"
+							>
+								<div class="mb-4">
+									<h2 id="titulo-resumen-ia" class="text-xl font-semibold sm:text-2xl">
+										Resumen y aprendizajes
+									</h2>
+									<p class="mt-2 text-sm text-gray-600">
+										El resumen es público. Los aprendizajes solo están disponibles para quienes
+										participaron del proyecto.
+									</p>
 								</div>
 
-								{#if puedeVerAprendizajesIA}
+								<div class="space-y-3">
 									<div class="overflow-hidden rounded-xl border border-gray-200">
 										<button
 											type="button"
 											class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
-											aria-expanded={mostrarAprendizajesIA}
-											onclick={() => (mostrarAprendizajesIA = !mostrarAprendizajesIA)}
+											aria-expanded={mostrarResumenIA}
+											onclick={() => (mostrarResumenIA = !mostrarResumenIA)}
 										>
 											<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-												<Lightbulb class="h-4 w-4 text-amber-500" />
-												Aprendizajes
+												<FileText class="h-4 w-4 text-sky-600" />
+												Resumen ejecutivo
 											</span>
 											<ChevronDownIcon
-												class="h-4 w-4 text-gray-400 transition-transform {mostrarAprendizajesIA
+												class="h-4 w-4 text-gray-400 transition-transform {mostrarResumenIA
 													? 'rotate-180'
 													: ''}"
 											/>
 										</button>
-										{#if mostrarAprendizajesIA}
+										{#if mostrarResumenIA}
 											<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
-												{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
+												{resumenTexto || 'El resumen aún no está disponible.'}
 											</div>
 										{/if}
 									</div>
-								{/if}
-							</div>
-						</section>
-					{/if}
 
-					<section
-						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
-						aria-label="Detalles del proyecto"
-					>
-						<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
-					</section>
-
-					{#if puedeVerResenas}
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
-							aria-labelledby="titulo-resenas-proyecto"
-						>
-							<div class="flex flex-wrap items-start justify-between gap-4">
-								<div>
-									<h2 id="titulo-resenas-proyecto" class="text-xl font-semibold sm:text-2xl">
-										Reseñas
-									</h2>
-									<p class="mt-2 text-sm text-gray-600">
-										{#if puedeRedactarResena && !tieneResenaUsuario}
-											Compartí tu experiencia y ayudá a mejorar futuros proyectos.
-										{:else if tieneResenaUsuario}
-											Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
-										{:else if esCreador || esColaboradorAprobado}
-											{mensajeResenaBloqueada}
-										{:else}
-											Las reseñas son públicas para toda la comunidad.
-										{/if}
-									</p>
-								</div>
-								<button
-									type="button"
-									onclick={abrirModalResena}
-									disabled={!puedeCrearResena}
-									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
-								>
-									<Icon src={Star} class="h-4 w-4" />
-									{tieneResenaUsuario ? 'Reseña publicada' : 'Redactar reseña'}
-								</button>
-							</div>
-
-							{#if resenasProyecto.length}
-								<div class="mt-6 grid gap-5 md:grid-cols-2">
-									{#each resenasProyecto as resena (resena.id_resena || resena.contenido)}
-										<div class="flex h-full flex-col gap-3">
-											<ResenaCard
-												{resena}
-												onEditar={
-													resena.username && resena.username === $usuario?.username
-														? () => editarResena(resena)
-														: null
-												}
-												onEliminar={
-													resena.username && resena.username === $usuario?.username
-														? () => solicitarEliminarResena(resena)
-														: null
-												}
-											/>
+									{#if puedeVerAprendizajesIA}
+										<div class="overflow-hidden rounded-xl border border-gray-200">
+											<button
+												type="button"
+												class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+												aria-expanded={mostrarAprendizajesIA}
+												onclick={() => (mostrarAprendizajesIA = !mostrarAprendizajesIA)}
+											>
+												<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+													<Lightbulb class="h-4 w-4 text-amber-500" />
+													Aprendizajes
+												</span>
+												<ChevronDownIcon
+													class="h-4 w-4 text-gray-400 transition-transform {mostrarAprendizajesIA
+														? 'rotate-180'
+														: ''}"
+												/>
+											</button>
+											{#if mostrarAprendizajesIA}
+												<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
+													{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
+												</div>
+											{/if}
 										</div>
-									{/each}
-								</div>
-							{:else}
-								<div class="mt-6 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
-									Todavía no hay reseñas para este proyecto.
-								</div>
-							{/if}
-						</section>
-					{/if}
-				</div>
-
-				<!-- Columna lateral -->
-				<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
-					<div
-						class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
-						role="group"
-						aria-label="Acciones principales del proyecto"
-					>
-						<div class="flex gap-3">
-							{#if esAdministrador}
-								<div class="relative flex-1">
-									<button
-										type="button"
-										onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-										aria-expanded={mostrarDropdownAdmin}
-										aria-haspopup="true"
-									>
-										Gestionar proyecto
-										<Icon
-											src={ChevronDown}
-											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
-												? 'rotate-180'
-												: ''}"
-										/>
-									</button>
-
-									{#if mostrarDropdownAdmin}
-										<!-- Dropdown menu -->
-										<div
-											class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-											role="menu"
-											tabindex="-1"
-										>
-											<button
-												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-												role="menuitem"
-												onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
-											>
-												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
-												Editar proyecto
-											</button>
-											<button
-												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-												role="menuitem"
-											>
-												<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
-												Auditar proyecto
-											</button>
-											<div class="my-1 border-t border-gray-100"></div>
-											<button
-												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
-												role="menuitem"
-											>
-												<Icon src={Trash} class="h-4 w-4 text-red-500" />
-												Eliminar proyecto
-											</button>
-										</div>
-
-										<div
-											class="fixed inset-0 z-[-1]"
-											onclick={() => (mostrarDropdownAdmin = false)}
-											aria-hidden="true"
-										></div>
 									{/if}
 								</div>
-							{:else if esCreador || esColaboradorAprobado}
-								<div class="relative flex-1">
+							</section>
+						{/if}
+
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-label="Detalles del proyecto"
+						>
+							<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
+						</section>
+
+						<!-- {#if puedeVerResenas}
+							<section
+								class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+								aria-labelledby="titulo-resenas-proyecto"
+							>
+								<div class="flex flex-wrap items-start justify-between gap-4">
+									<div>
+										<h2 id="titulo-resenas-proyecto" class="text-xl font-semibold sm:text-2xl">
+											Reseñas
+										</h2>
+										<p class="mt-2 text-sm text-gray-600">
+											{#if puedeRedactarResena && !tieneResenaUsuario}
+												Compartí tu experiencia y ayudá a mejorar futuros proyectos.
+											{:else if tieneResenaUsuario}
+												Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
+											{:else if esCreador || esColaboradorAprobado}
+												{mensajeResenaBloqueada}
+											{:else}
+												Las reseñas son públicas para toda la comunidad.
+											{/if}
+										</p>
+									</div>
 									<button
 										type="button"
-										onclick={() =>
-											(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-										aria-expanded={mostrarDropdownGestionarProyecto}
-										aria-haspopup="true"
+										onclick={abrirModalResena}
+										disabled={!puedeCrearResena}
+										class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
 									>
-										<span>Gestionar proyecto</span>
-										<Icon
-											src={ChevronDown}
-											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
-												? 'rotate-180'
-												: ''}"
-										/>
+										<Icon src={Star} class="h-4 w-4" />
+										{tieneResenaUsuario ? 'Reseña publicada' : 'Redactar reseña'}
 									</button>
+								</div>
+
+								{#if resenasProyecto.length}
+									<div class="mt-6 grid gap-5 md:grid-cols-2">
+										{#each resenasProyecto as resena (resena.id_resena || resena.contenido)}
+											<div class="flex h-full flex-col gap-3">
+												<ResenaCard
+													{resena}
+													onEditar={resena.username && resena.username === $usuario?.username
+														? () => editarResena(resena)
+														: null}
+													onEliminar={resena.username && resena.username === $usuario?.username
+														? () => solicitarEliminarResena(resena)
+														: null}
+												/>
+											</div>
+										{/each}
+									</div>
+								{:else}
+									<div class="mt-6 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+										Todavía no hay reseñas para este proyecto.
+									</div>
+								{/if}
+							</section>
+						{/if} -->
+					</div>
 
 					<!-- Columna lateral -->
 					<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
@@ -933,72 +845,46 @@
 													: ''}"
 											/>
 										</button>
+									</div>
+								{/if}
+							</div>
 
-										{#if mostrarDropdownGestionarProyecto}
-											<!-- Dropdown menu -->
-											<div
-												class="animate-in fade-in zoom-in-95 absolute top-full left-0 z-10 mt-2 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-												role="menu"
-												tabindex="-1"
-											>
+							<!-- Columna lateral -->
+							<div
+								class="animate-fade-up order-1 space-y-6 lg:order-2"
+								style="animation-delay: 100ms"
+							>
+								<div
+									class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
+									role="group"
+									aria-label="Acciones principales del proyecto"
+								>
+									<div class="flex gap-3">
+										{#if esAdministrador}
+											<div class="relative flex-1">
 												<button
-													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-													role="menuitem"
-													onclick={() => goto(`/mensajes/${proyecto.id_proyecto}`)}
+													type="button"
+													onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+													class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+													aria-expanded={mostrarDropdownAdmin}
+													aria-haspopup="true"
 												>
-													<Icon src={ChatBubbleLeftRight} class="h-4 w-4 text-gray-500" />
-													Ir al chat
-												</button>
-												{#if esCreador}
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-														role="menuitem"
-														onclick={() =>
-															goto(
-																`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-															)}
-													>
-														<Icon src={ClipboardDocumentList} class="h-4 w-4 text-gray-500" />
-														Ver solicitudes
-													</button>
-												{/if}
-												{#if esColaboradorAprobado && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-														role="menuitem"
-														onclick={() =>
-															goto(
-																`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes/nuevo`
-															)}
-													>
-														<Icon src={Plus} class="h-4 w-4 text-gray-500" />
-														Agregar aporte
-													</button>
-												{/if}
-												{#if esColaboradorAprobado && estadoCodigo === 'en_revision'}
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-														role="menuitem"
-														onclick={() =>
-															goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)}
-													>
-														<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
-														Evaluar finalización
-													</button>
-												{/if}
-												<button
-													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-													role="menuitem"
-													onclick={irAAportes}
-												>
-													<Icon src={Photo} class="h-4 w-4 text-gray-500" />
-													Ver aportes y evidencias
+													Gestionar proyecto
+													<Icon
+														src={ChevronDown}
+														class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+															? 'rotate-180'
+															: ''}"
+													/>
 												</button>
 
-												<div class="my-1 border-t border-gray-100"></div>
-
-												{#if esCreador}
-													{#if estadoCodigo === 'en_curso'}
+												{#if mostrarDropdownAdmin}
+													<!-- Dropdown menu -->
+													<div
+														class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+														role="menu"
+														tabindex="-1"
+													>
 														<button
 															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
 															role="menuitem"
@@ -1007,372 +893,500 @@
 															<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
 															Editar proyecto
 														</button>
-													{/if}
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors {estadoCodigo ===
-														'pendiente_solicitud_cierre'
-															? 'text-red-600 hover:bg-red-50 active:bg-red-100'
-															: 'cursor-not-allowed text-gray-400 opacity-50'}"
-														role="menuitem"
-														disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-														onclick={() =>
-															goto(
-																`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`
-															)}
-													>
-														<Icon
-															src={LockClosed}
-															class="h-4 w-4 {estadoCodigo === 'pendiente_solicitud_cierre'
-																? 'text-red-500'
-																: 'text-gray-400'}"
-														/>
-														Cerrar proyecto
-													</button>
-												{:else if esColaboradorAprobado}
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-														role="menuitem"
-													>
-														<Icon src={Star} class="h-4 w-4 text-gray-500" />
-														Escribir reseña
-													</button>
-													<button
-														class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
-														role="menuitem"
-													>
-														<Icon src={Flag} class="h-4 w-4 text-red-500" />
-														Reportar irregularidad
-													</button>
-												{/if}
-											</div>
-
-											<div
-												class="fixed inset-0 z-[-1]"
-												onclick={() => (mostrarDropdownGestionarProyecto = false)}
-												aria-hidden="true"
-											></div>
-										{/if}
-									</div>
-								{:else if !esInstitucion}
-									<!-- Botón de acción principal -->
-									{#if esSolicitudRechazada}
-										<button
-											type="button"
-											onclick={() => (mostrarModalJustificacion = true)}
-											class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-											aria-label="Ver motivo del rechazo"
-										>
-											Solicitud rechazada
-										</button>
-									{:else}
-										<button
-											type="button"
-											onclick={manejarClickSolicitud}
-											disabled={(estadoCodigo !== 'en_curso' &&
-												estadoCodigo !== 'pendiente_solicitud_cierre') ||
-												solicitudRecienEnviada}
-											class={tieneSolicitudPendiente
-												? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
-												: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
-											aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
-												? 'Ver estado de solicitud'
-												: 'Colaborar ahora en este proyecto'}
-										>
-											{#if tieneSolicitudPendiente || solicitudRecienEnviada}
-												<Icon src={Clock} class="h-4 w-4" aria-hidden="true" />
-												Solicitud enviada
-											{:else}
-												<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
-												Colaborar ahora
-											{/if}
-										</button>
-									{/if}
-								{/if}
-
-								<button
-									type="button"
-									onclick={compartirProyecto}
-									class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-									aria-label="Compartir este proyecto"
-								>
-									<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
-									Compartir
-								</button>
-							</div>
-
-							<p class="px-1 pt-2 text-center text-xs text-gray-500">
-								Tu ayuda se refleja en tiempo real en el progreso del proyecto.
-							</p>
-						</div>
-
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-							aria-label="Información del proyecto"
-						>
-							<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
-
-							<div class="space-y-4">
-								<div class="flex items-center justify-between border-b border-gray-100 pb-3">
-									<span class="text-sm text-gray-600">Estado actual del proyecto</span>
-									<span
-										class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
-										aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
-									>
-										<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
-										{estadoLabel(estadoCodigo)}
-									</span>
-								</div>
-
-								<div class="flex items-center justify-between">
-									{#if obtenerUrlPerfil(proyecto.institucion)}
-										<a
-											href={obtenerUrlPerfil(proyecto.institucion)}
-											class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
-										>
-											<div
-												class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-												aria-label="Identidad visual de la institución"
-											>
-												{#if proyecto.institucion?.url_foto}
-													<img
-														src={proyecto.institucion.url_foto}
-														alt="Logo o foto de la institución"
-														class="h-full w-full object-cover"
-														loading="lazy"
-													/>
-												{:else}
-													<span class="text-[11px] font-semibold text-gray-600"
-														>{iniciales(proyecto.institucion?.nombre_legal)}</span
-													>
-												{/if}
-											</div>
-
-											<div class="min-w-0 flex-1">
-												<span
-													class="block truncate text-sm font-medium text-gray-900 hover:text-blue-600"
-													title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-													aria-label="Institución organizadora"
-												>
-													{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-												</span>
-												<div class="mt-1">
-													<span
-														class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
-													>
-														{proyecto.institucion?.tipo_institucion || 'Institución'}
-													</span>
-												</div>
-											</div>
-										</a>
-									{:else}
-										<div class="flex min-w-0 items-center gap-3">
-											<div
-												class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-												aria-label="Identidad visual de la institución"
-											>
-												{#if proyecto.institucion?.url_foto}
-													<img
-														src={proyecto.institucion.url_foto}
-														alt="Logo o foto de la institución"
-														class="h-full w-full object-cover"
-														loading="lazy"
-													/>
-												{:else}
-													<span class="text-[11px] font-semibold text-gray-600"
-														>{iniciales(proyecto.institucion?.nombre_legal)}</span
-													>
-												{/if}
-											</div>
-
-											<div class="min-w-0 flex-1">
-												<span
-													class="block truncate text-sm font-medium text-gray-900"
-													title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-													aria-label="Institución organizadora"
-												>
-													{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-												</span>
-												<div class="mt-1">
-													<span
-														class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
-													>
-														{proyecto.institucion?.tipo_institucion || 'Institución'}
-													</span>
-												</div>
-											</div>
-										</div>
-									{/if}
-								</div>
-							</div>
-						</section>
-
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-							aria-label="Ubicaciones del proyecto"
-						>
-							<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
-
-							{#if ubicacionesOrdenadas.length}
-								<ul class="rounded-lg">
-									{#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
-										<li class="border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0">
-											<div class="flex items-start gap-3">
-												{#if esUbicacionPresencial(pu.ubicacion)}
-													<span
-														class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
-													>
-														<Icon src={MapPin} class="h-4 w-4 text-sky-700" aria-hidden="true" />
-													</span>
-												{:else if esUbicacionVirtual(pu.ubicacion)}
-													<span
-														class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
-													>
-														<Icon
-															src={GlobeAlt}
-															class="h-4 w-4 text-violet-700"
-															aria-hidden="true"
-														/>
-													</span>
-												{/if}
-
-												<div class="min-w-0 flex-1">
-													<div class="flex flex-wrap items-center gap-2">
-														<span
-															class="truncate text-sm font-semibold text-gray-900"
-															title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+														<button
+															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+															role="menuitem"
 														>
-															{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
-														</span>
+															<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
+															Auditar proyecto
+														</button>
+														<div class="my-1 border-t border-gray-100"></div>
+														<button
+															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+															role="menuitem"
+														>
+															<Icon src={Trash} class="h-4 w-4 text-red-500" />
+															Eliminar proyecto
+														</button>
+													</div>
 
-														{#if esUbicacionPresencial(pu.ubicacion)}
-															<span
-																class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
+													<div
+														class="fixed inset-0 z-[-1]"
+														onclick={() => (mostrarDropdownAdmin = false)}
+														aria-hidden="true"
+													></div>
+												{/if}
+											</div>
+										{:else if esCreador || esColaboradorAprobado}
+											<div class="relative flex-1">
+												<button
+													type="button"
+													onclick={() =>
+														(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
+													class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+													aria-expanded={mostrarDropdownGestionarProyecto}
+													aria-haspopup="true"
+												>
+													<span>Gestionar proyecto</span>
+													<Icon
+														src={ChevronDown}
+														class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
+															? 'rotate-180'
+															: ''}"
+													/>
+												</button>
+
+												{#if mostrarDropdownGestionarProyecto}
+													<!-- Dropdown menu -->
+													<div
+														class="animate-in fade-in zoom-in-95 absolute top-full left-0 z-10 mt-2 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+														role="menu"
+														tabindex="-1"
+													>
+														<button
+															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+															role="menuitem"
+															onclick={() => goto(`/mensajes/${proyecto.id_proyecto}`)}
+														>
+															<Icon src={ChatBubbleLeftRight} class="h-4 w-4 text-gray-500" />
+															Ir al chat
+														</button>
+														{#if esCreador}
+															<button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+																role="menuitem"
+																onclick={() =>
+																	goto(
+																		`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
+																	)}
 															>
-																Presencial
-															</span>
-														{:else if esUbicacionVirtual(pu.ubicacion)}
-															<span
-																class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
+																<Icon src={ClipboardDocumentList} class="h-4 w-4 text-gray-500" />
+																Ver solicitudes
+															</button>
+														{/if}
+														{#if esColaboradorAprobado && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
+															<button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+																role="menuitem"
+																onclick={() =>
+																	goto(
+																		`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes/nuevo`
+																	)}
 															>
-																Virtual
-															</span>
+																<Icon src={Plus} class="h-4 w-4 text-gray-500" />
+																Agregar aporte
+															</button>
+														{/if}
+														{#if esColaboradorAprobado && estadoCodigo === 'en_revision'}
+															<button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+																role="menuitem"
+																onclick={() =>
+																	goto(
+																		`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`
+																	)}
+															>
+																<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
+																Evaluar finalización
+															</button>
+														{/if}
+														<button
+															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+															role="menuitem"
+															onclick={irAAportes}
+														>
+															<Icon src={Photo} class="h-4 w-4 text-gray-500" />
+															Ver aportes y evidencias
+														</button>
+
+														<div class="my-1 border-t border-gray-100"></div>
+
+														{#if esCreador}
+															{#if estadoCodigo === 'en_curso'}
+																<button
+																	class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+																	role="menuitem"
+																	onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+																>
+																	<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
+																	Editar proyecto
+																</button>
+															{/if}
+															<button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors {estadoCodigo ===
+																'pendiente_solicitud_cierre'
+																	? 'text-red-600 hover:bg-red-50 active:bg-red-100'
+																	: 'cursor-not-allowed text-gray-400 opacity-50'}"
+																role="menuitem"
+																disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
+																onclick={() =>
+																	goto(
+																		`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`
+																	)}
+															>
+																<Icon
+																	src={LockClosed}
+																	class="h-4 w-4 {estadoCodigo === 'pendiente_solicitud_cierre'
+																		? 'text-red-500'
+																		: 'text-gray-400'}"
+																/>
+																Cerrar proyecto
+															</button>
+														{:else if esColaboradorAprobado}
+															<!-- <button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+																role="menuitem"
+															>
+																<Icon src={Star} class="h-4 w-4 text-gray-500" />
+																Escribir reseña
+															</button> -->
+															<button
+																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+																role="menuitem"
+															>
+																<Icon src={Flag} class="h-4 w-4 text-red-500" />
+																Reportar irregularidad
+															</button>
 														{/if}
 													</div>
 
-													{#if esUbicacionPresencial(pu.ubicacion)}
-														{@const dir = construirDireccionCompleta(pu.ubicacion)}
-														<p class="mt-1 text-sm text-gray-700">
-															{dir || 'Dirección no disponible'}
-														</p>
-
-														{#if generarUrlGoogleMaps(pu.ubicacion)}
-															<a
-																class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
-																href={generarUrlGoogleMaps(pu.ubicacion)!}
-																target="_blank"
-																rel="noopener noreferrer"
-																aria-label="Ver en Google Maps"
-															>
-																<Icon src={Link} class="h-4 w-4" />
-																Ver en Google Maps
-															</a>
-														{/if}
-													{:else if esUbicacionVirtual(pu.ubicacion)}
-														{#if pu.ubicacion.url_virtual}
-															<a
-																class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
-																href={pu.ubicacion.url_virtual}
-																target="_blank"
-																rel="noopener noreferrer"
-																aria-label="Abrir enlace virtual"
-															>
-																<Icon src={Link} class="h-4 w-4" />
-																Abrir enlace
-															</a>
-														{:else}
-															<p class="mt-1 text-sm text-gray-500">
-																Enlace virtual no especificado
-															</p>
-														{/if}
-													{:else}
-														<p class="mt-1 text-sm text-gray-500">
-															Información de la ubicación no disponible
-														</p>
-													{/if}
-												</div>
+													<div
+														class="fixed inset-0 z-[-1]"
+														onclick={() => (mostrarDropdownGestionarProyecto = false)}
+														aria-hidden="true"
+													></div>
+												{/if}
 											</div>
-										</li>
-									{/each}
-								</ul>
-							{:else}
-								<p class="text-sm text-gray-500">
-									Este proyecto aún no tiene ubicaciones cargadas.
-								</p>
-							{/if}
-						</section>
-
-						<section
-							class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
-							aria-label="Colaboradores aprobados"
-						>
-							<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
-
-							{#if colaboradoresAprobados.length}
-								<ul class="space-y-3">
-									{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
-										<li
-											class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
-										>
-											{#if obtenerUrlPerfil(colab.colaborador)}
-												<a
-													href={obtenerUrlPerfil(colab.colaborador)}
-													class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
-													title={obtenerNombreColaborador(colab.colaborador)}
+										{:else if !esInstitucion}
+											<!-- Botón de acción principal -->
+											{#if esSolicitudRechazada}
+												<button
+													type="button"
+													onclick={() => (mostrarModalJustificacion = true)}
+													class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+													aria-label="Ver motivo del rechazo"
 												>
-													{obtenerNombreColaborador(colab.colaborador)}
+													Solicitud rechazada
+												</button>
+											{:else}
+												<button
+													type="button"
+													onclick={manejarClickSolicitud}
+													disabled={(estadoCodigo !== 'en_curso' &&
+														estadoCodigo !== 'pendiente_solicitud_cierre') ||
+														solicitudRecienEnviada}
+													class={tieneSolicitudPendiente
+														? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
+														: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+													aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
+														? 'Ver estado de solicitud'
+														: 'Colaborar ahora en este proyecto'}
+												>
+													{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+														<Icon src={Clock} class="h-4 w-4" aria-hidden="true" />
+														Solicitud enviada
+													{:else}
+														<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
+														Colaborar ahora
+													{/if}
+												</button>
+											{/if}
+										{/if}
+
+										<button
+											type="button"
+											onclick={compartirProyecto}
+											class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+											aria-label="Compartir este proyecto"
+										>
+											<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
+											Compartir
+										</button>
+									</div>
+
+									<p class="px-1 pt-2 text-center text-xs text-gray-500">
+										Tu ayuda se refleja en tiempo real en el progreso del proyecto.
+									</p>
+								</div>
+
+								<section
+									class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+									aria-label="Información del proyecto"
+								>
+									<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
+
+									<div class="space-y-4">
+										<div class="flex items-center justify-between border-b border-gray-100 pb-3">
+											<span class="text-sm text-gray-600">Estado actual del proyecto</span>
+											<span
+												class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
+												aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
+											>
+												<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
+												{estadoLabel(estadoCodigo)}
+											</span>
+										</div>
+
+										<div class="flex items-center justify-between">
+											{#if obtenerUrlPerfil(proyecto.institucion)}
+												<a
+													href={obtenerUrlPerfil(proyecto.institucion)}
+													class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
+												>
+													<div
+														class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+														aria-label="Identidad visual de la institución"
+													>
+														{#if proyecto.institucion?.url_foto}
+															<img
+																src={proyecto.institucion.url_foto}
+																alt="Logo o foto de la institución"
+																class="h-full w-full object-cover"
+																loading="lazy"
+															/>
+														{:else}
+															<span class="text-[11px] font-semibold text-gray-600"
+																>{iniciales(proyecto.institucion?.nombre_legal)}</span
+															>
+														{/if}
+													</div>
+
+													<div class="min-w-0 flex-1">
+														<span
+															class="block truncate text-sm font-medium text-gray-900 hover:text-blue-600"
+															title={proyecto.institucion?.nombre_legal ||
+																'Institución organizadora'}
+															aria-label="Institución organizadora"
+														>
+															{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+														</span>
+														<div class="mt-1">
+															<span
+																class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+															>
+																{proyecto.institucion?.tipo_institucion || 'Institución'}
+															</span>
+														</div>
+													</div>
 												</a>
 											{:else}
-												<span
-													class="block flex-1 truncate text-sm text-gray-700"
-													title={obtenerNombreColaborador(colab.colaborador)}
-												>
-													{obtenerNombreColaborador(colab.colaborador)}
-												</span>
+												<div class="flex min-w-0 items-center gap-3">
+													<div
+														class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+														aria-label="Identidad visual de la institución"
+													>
+														{#if proyecto.institucion?.url_foto}
+															<img
+																src={proyecto.institucion.url_foto}
+																alt="Logo o foto de la institución"
+																class="h-full w-full object-cover"
+																loading="lazy"
+															/>
+														{:else}
+															<span class="text-[11px] font-semibold text-gray-600"
+																>{iniciales(proyecto.institucion?.nombre_legal)}</span
+															>
+														{/if}
+													</div>
+
+													<div class="min-w-0 flex-1">
+														<span
+															class="block truncate text-sm font-medium text-gray-900"
+															title={proyecto.institucion?.nombre_legal ||
+																'Institución organizadora'}
+															aria-label="Institución organizadora"
+														>
+															{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+														</span>
+														<div class="mt-1">
+															<span
+																class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+															>
+																{proyecto.institucion?.tipo_institucion || 'Institución'}
+															</span>
+														</div>
+													</div>
+												</div>
 											{/if}
-											<span
-												class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
-												aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
-											>
-												{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
-											</span>
-										</li>
-									{/each}
-								</ul>
-							{:else}
-								<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
-							{/if}
-						</section>
-						{#if $usuario}
-							<section
-								class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-								aria-label="Reportar irregularidad"
-							>
-								<div class="flex flex-col gap-3">
-									<p class="text-center text-sm font-medium text-gray-700">
-										¿Hay algún problema con este proyecto?
-									</p>
-									<button
-										type="button"
-										disabled={yaReporto}
-										onclick={() => pushState('', { showReportModal: true })}
-										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+										</div>
+									</div>
+								</section>
+
+								<section
+									class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+									aria-label="Ubicaciones del proyecto"
+								>
+									<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
+
+									{#if ubicacionesOrdenadas.length}
+										<ul class="rounded-lg">
+											{#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
+												<li
+													class="border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0"
+												>
+													<div class="flex items-start gap-3">
+														{#if esUbicacionPresencial(pu.ubicacion)}
+															<span
+																class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
+															>
+																<Icon
+																	src={MapPin}
+																	class="h-4 w-4 text-sky-700"
+																	aria-hidden="true"
+																/>
+															</span>
+														{:else if esUbicacionVirtual(pu.ubicacion)}
+															<span
+																class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
+															>
+																<Icon
+																	src={GlobeAlt}
+																	class="h-4 w-4 text-violet-700"
+																	aria-hidden="true"
+																/>
+															</span>
+														{/if}
+
+														<div class="min-w-0 flex-1">
+															<div class="flex flex-wrap items-center gap-2">
+																<span
+																	class="truncate text-sm font-semibold text-gray-900"
+																	title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+																>
+																	{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+																</span>
+
+																{#if esUbicacionPresencial(pu.ubicacion)}
+																	<span
+																		class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
+																	>
+																		Presencial
+																	</span>
+																{:else if esUbicacionVirtual(pu.ubicacion)}
+																	<span
+																		class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
+																	>
+																		Virtual
+																	</span>
+																{/if}
+															</div>
+
+															{#if esUbicacionPresencial(pu.ubicacion)}
+																{@const dir = construirDireccionCompleta(pu.ubicacion)}
+																<p class="mt-1 text-sm text-gray-700">
+																	{dir || 'Dirección no disponible'}
+																</p>
+
+																{#if generarUrlGoogleMaps(pu.ubicacion)}
+																	<a
+																		class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
+																		href={generarUrlGoogleMaps(pu.ubicacion)!}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		aria-label="Ver en Google Maps"
+																	>
+																		<Icon src={Link} class="h-4 w-4" />
+																		Ver en Google Maps
+																	</a>
+																{/if}
+															{:else if esUbicacionVirtual(pu.ubicacion)}
+																{#if pu.ubicacion.url_virtual}
+																	<a
+																		class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
+																		href={pu.ubicacion.url_virtual}
+																		target="_blank"
+																		rel="noopener noreferrer"
+																		aria-label="Abrir enlace virtual"
+																	>
+																		<Icon src={Link} class="h-4 w-4" />
+																		Abrir enlace
+																	</a>
+																{:else}
+																	<p class="mt-1 text-sm text-gray-500">
+																		Enlace virtual no especificado
+																	</p>
+																{/if}
+															{:else}
+																<p class="mt-1 text-sm text-gray-500">
+																	Información de la ubicación no disponible
+																</p>
+															{/if}
+														</div>
+													</div>
+												</li>
+											{/each}
+										</ul>
+									{:else}
+										<p class="text-sm text-gray-500">
+											Este proyecto aún no tiene ubicaciones cargadas.
+										</p>
+									{/if}
+								</section>
+
+								<section
+									class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
+									aria-label="Colaboradores aprobados"
+								>
+									<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
+
+									{#if colaboradoresAprobados.length}
+										<ul class="space-y-3">
+											{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
+												<li
+													class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
+												>
+													{#if obtenerUrlPerfil(colab.colaborador)}
+														<a
+															href={obtenerUrlPerfil(colab.colaborador)}
+															class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
+															title={obtenerNombreColaborador(colab.colaborador)}
+														>
+															{obtenerNombreColaborador(colab.colaborador)}
+														</a>
+													{:else}
+														<span
+															class="block flex-1 truncate text-sm text-gray-700"
+															title={obtenerNombreColaborador(colab.colaborador)}
+														>
+															{obtenerNombreColaborador(colab.colaborador)}
+														</span>
+													{/if}
+													<span
+														class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
+														aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
+													>
+														{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
+													</span>
+												</li>
+											{/each}
+										</ul>
+									{:else}
+										<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
+									{/if}
+								</section>
+								{#if $usuario}
+									<section
+										class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+										aria-label="Reportar irregularidad"
 									>
-										<Icon src={Flag} class="h-4 w-4" />
-										{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
-									</button>
-								</div>
-							</section>
-						{/if}
+										<div class="flex flex-col gap-3">
+											<p class="text-center text-sm font-medium text-gray-700">
+												¿Hay algún problema con este proyecto?
+											</p>
+											<button
+												type="button"
+												disabled={yaReporto}
+												onclick={() => pushState('', { showReportModal: true })}
+												class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+											>
+												<Icon src={Flag} class="h-4 w-4" />
+												{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+											</button>
+										</div>
+									</section>
+								{/if}
+							</div>
+						</div>
 					</div>
 				</div>
 				<!-- Modal de reporte interceptado (Shallow Routing) -->
@@ -1511,12 +1525,12 @@
 												Cerrar proyecto
 											</button>
 										{:else if esColaboradorAprobado}
-											<button
+											<!-- <button
 												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
 											>
 												<Icon src={Star} class="h-5 w-5 text-gray-500" />
 												Escribir reseña
-											</button>
+											</button> -->
 											<button
 												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
 											>
@@ -1731,7 +1745,7 @@
 	{/if}
 {/if}
 
-<ResenaProyectoModal
+<!-- <ResenaProyectoModal
 	mostrar={mostrarModalResena}
 	modo={modoResena}
 	resenaInicial={resenaEnEdicion}
@@ -1741,14 +1755,14 @@
 />
 
 {#if mostrarConfirmarEliminar}
-	<!-- Overlay -->
+	
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
 		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
-	<!-- Modal de confirmación de eliminación -->
+	
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
@@ -1768,9 +1782,7 @@
 				>
 					¿Eliminar reseña?
 				</h3>
-				<p class="text-sm text-gray-500">
-					Esta acción no se puede deshacer.
-				</p>
+				<p class="text-sm text-gray-500">Esta acción no se puede deshacer.</p>
 			</div>
 
 			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
@@ -1791,7 +1803,7 @@
 			</div>
 		</div>
 	</div>
-{/if}
+{/if} -->
 
 <style>
 	@keyframes fade-up {
