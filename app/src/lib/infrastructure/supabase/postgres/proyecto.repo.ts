@@ -183,6 +183,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				institucion: {
 					select: {
 						id_usuario: true,
+						username: true,
+						rol: true,
 						nombre_legal: true,
 						url_foto: true
 					}
@@ -237,6 +239,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 										id_localidad: true,
 										nombre: true,
 										codigo_postal: true,
+										id_provincia: true,
 										provincia: {
 											select: {
 												id_provincia: true,

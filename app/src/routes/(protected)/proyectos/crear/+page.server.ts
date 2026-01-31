@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
-import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { redirect } from '@sveltejs/kit';
 
@@ -20,12 +20,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	// 3. Instanciar casos de uso
 	const getAllCategorias = new GetAllCategorias(categoriaRepo);
-	const listarTipos = new ListarTiposParticipacion(tipoRepo);
+	const getAllTipos = new GetAllTiposParticipacion(tipoRepo);
 
 	// 4. Ejecutar consultas en paralelo
 	const [categorias, tiposParticipacion, verificacion, proyectosEnCurso] = await Promise.all([
 		getAllCategorias.execute(),
-		listarTipos.execute(),
+		getAllTipos.execute(),
 		prisma.verificacion.findFirst({
 			where: { usuario_id: usuario.id_usuario, estado: 'aprobada' },
 			orderBy: { created_at: 'desc' }

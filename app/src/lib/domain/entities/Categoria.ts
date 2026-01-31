@@ -5,10 +5,12 @@ export class Categoria implements ICategoria {
 	descripcion: string;
 
 	constructor(data: ICategoria) {
-		if (!data.descripcion || data.descripcion.trim().length === 0) {
+		// Si tiene ID, se asume que existe y no es obligatorio tener la descripción cargada en este objeto
+		const esExistente = !!data.id_categoria;
+		if (!esExistente && (!data.descripcion || data.descripcion.trim().length === 0)) {
 			throw new Error('La descripción de la categoría no puede estar vacía');
 		}
 		this.id_categoria = data.id_categoria;
-		this.descripcion = data.descripcion;
+		this.descripcion = data.descripcion || '';
 	}
 }

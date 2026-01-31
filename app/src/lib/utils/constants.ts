@@ -1,5 +1,8 @@
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
-import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+import {
+	TIPO_PARTICIPACION_LABELS,
+	type TipoParticipacionDescripcion
+} from '$lib/domain/types/TipoParticipacion';
 import type { TipoUbicacion } from '$lib/domain/types/Ubicacion';
 import {
 	CurrencyDollar,
@@ -116,29 +119,23 @@ export const COLORES_CATEGORIA: Record<string, string> = {
 
 // --- PARTICIPACION ---
 
-export const TIPO_PARTICIPACION_LABELS: Record<TipoParticipacionDescripcion, string> = {
-	Voluntariado: 'Voluntariado',
-	Monetaria: 'Donación monetaria',
-	Especie: 'Donación en especie'
-};
-
 export type ParticipacionVisualColor = 'green' | 'purple' | 'blue' | 'orange';
 
 export const INFO_TIPOS_PARTICIPACION = {
 	Voluntariado: {
-		titulo: 'Voluntariado',
+		titulo: TIPO_PARTICIPACION_LABELS.Voluntariado,
 		descripcion: 'Necesitás personas que dediquen su tiempo',
 		icon: Users,
 		color: 'blue' as ParticipacionVisualColor
 	},
 	Monetaria: {
-		titulo: 'Aporte Monetario',
+		titulo: TIPO_PARTICIPACION_LABELS.Monetaria,
 		descripcion: 'Necesitás donaciones económicas',
 		icon: CurrencyDollar,
 		color: 'green' as ParticipacionVisualColor
 	},
 	Especie: {
-		titulo: 'En Especie',
+		titulo: TIPO_PARTICIPACION_LABELS.Especie,
 		descripcion: 'Necesitás materiales o productos específicos',
 		icon: Cube,
 		color: 'orange' as ParticipacionVisualColor

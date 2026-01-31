@@ -8,7 +8,7 @@ import { ListarEstados } from '$lib/domain/use-cases/maestros/ListarEstados';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
-import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 
 export const load: PageServerLoad = async () => {
 	try {
@@ -22,7 +22,7 @@ export const load: PageServerLoad = async () => {
 		const getAllCategorias = new GetAllCategorias(categoriaRepo);
 
 		const tipoParticipacionRepo = new PostgresTipoParticipacionRepository();
-		const listarTiposParticipacion = new ListarTiposParticipacion(tipoParticipacionRepo);
+		const getAllTiposParticipacion = new GetAllTiposParticipacion(tipoParticipacionRepo);
 
 		const proyectoRepo = new PostgresProyectoRepository();
 
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async () => {
 				console.error('Error fetching categorias:', err);
 				return [];
 			}),
-			listarTiposParticipacion.execute().catch((err) => {
+			getAllTiposParticipacion.execute().catch((err) => {
 				console.error('Error fetching tipos:', err);
 				return [];
 			}),

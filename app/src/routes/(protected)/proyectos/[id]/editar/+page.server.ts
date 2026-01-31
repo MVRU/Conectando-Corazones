@@ -11,7 +11,7 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
-import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 
 function formatearFechaParaInput(fechaIso: Date | string | null | undefined): string {
 	if (!fechaIso) return '';
@@ -123,11 +123,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// Cargar listas maestras para el formulario
 	const getAllCategorias = new GetAllCategorias(categoriaRepo);
-	const listarTipos = new ListarTiposParticipacion(tipoRepo);
+	const getAllTipos = new GetAllTiposParticipacion(tipoRepo);
 
 	const [categorias, tiposParticipacion] = await Promise.all([
 		getAllCategorias.execute(),
-		listarTipos.execute()
+		getAllTipos.execute()
 	]);
 
 	const fechaFinTentativa = formatearFechaParaInput(proyectoOriginal.fecha_fin_tentativa);
