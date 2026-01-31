@@ -13,6 +13,8 @@
 	export let resena: Resena;
 	export let mostrarAutor: boolean = true;
 	export let variante: 'default' | 'compacta' = 'default';
+	export let onEditar: (() => void) | null = null;
+	export let onEliminar: (() => void) | null = null;
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
@@ -103,6 +105,29 @@
 				>
 					{roleLabel}
 				</span>
+			{/if}
+		</div>
+	{/if}
+
+	{#if onEditar || onEliminar}
+		<div class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 pt-4">
+			{#if onEditar}
+				<button
+					type="button"
+					class="text-sm font-medium text-sky-600 hover:text-sky-700"
+					on:click={onEditar}
+				>
+					Editar
+				</button>
+			{/if}
+			{#if onEliminar}
+				<button
+					type="button"
+					class="text-sm font-medium text-red-600 hover:text-red-700"
+					on:click={onEliminar}
+				>
+					Eliminar
+				</button>
 			{/if}
 		</div>
 	{/if}
