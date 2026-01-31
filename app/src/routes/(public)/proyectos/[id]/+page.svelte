@@ -15,7 +15,6 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { error } from '@sveltejs/kit';
 	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
@@ -148,7 +147,7 @@
 	$: tieneResumenIA = Boolean(resumenTexto);
 	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
 	$: mostrarSeccionResumenIA =
-		estadoCodigo === 'completado' || tieneResumenIA || tieneAprendizajesIA;
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
 	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
@@ -529,7 +528,7 @@
 										/>
 									</button>
 									{#if mostrarResumenIA}
-										<div class="px-4 pb-4 text-sm text-gray-700 whitespace-pre-line">
+										<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
 											{resumenTexto || 'El resumen aún no está disponible.'}
 										</div>
 									{/if}
@@ -554,7 +553,7 @@
 											/>
 										</button>
 										{#if mostrarAprendizajesIA}
-											<div class="px-4 pb-4 text-sm text-gray-700 whitespace-pre-line">
+											<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
 												{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
 											</div>
 										{/if}
