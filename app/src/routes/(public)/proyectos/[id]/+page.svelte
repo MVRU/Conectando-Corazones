@@ -3,6 +3,7 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
+	import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import { page } from '$app/stores';
@@ -15,7 +16,6 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { error } from '@sveltejs/kit';
 	import { goto, pushState } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
@@ -24,17 +24,23 @@
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
+	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
+	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
+	import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
+	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb } from 'lucide-svelte';
 
 	import {
 		CheckCircle,
@@ -66,6 +72,13 @@
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 	let misAportes: ColaboracionTipoParticipacion[] = [];
+	let resenasLocal: Resena[] = [...mockResenas];
+	let resenaEnEdicion: Resena | null = null;
+	let resenaAEliminar: Resena | null = null;
+	let mostrarModalResena = false;
+	let mostrarConfirmarEliminar = false;
+	let modoResena: 'crear' | 'editar' = 'crear';
+	const maxCaracteresResena = 500;
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -84,8 +97,14 @@
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
+	$: puedeVerResenas = true;
 
 	$: proyecto = data.proyecto;
+	$: resenasProyecto = resenasLocal.filter(
+		(r) => r.tipo_objeto === 'proyecto' && r.id_objeto === proyecto?.id_proyecto
+	);
+	$: resenaUsuarioActual = resenasProyecto.find((r) => r.username === $usuario?.username);
+	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
 
 	$: if (proyecto) {
 		setBreadcrumbs([
@@ -130,6 +149,17 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: clasesChipEstado = clasesEstado(estadoCodigo);
+	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
+	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
+	$: mensajeResenaBloqueada =
+		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	$: resumenTexto = (proyecto?.resumen || '').trim();
+	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
+	$: tieneResumenIA = Boolean(resumenTexto);
+	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
+	$: mostrarSeccionResumenIA =
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
+	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -238,6 +268,8 @@
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
+	let mostrarResumenIA = false;
+	let mostrarAprendizajesIA = false;
 	let mostrarDropdownAdmin = false;
 	let solicitudRecienEnviada = false;
 	let mostrarDropdownGestionarProyecto = false;
@@ -275,6 +307,99 @@
 		} else if (esColaboradorAprobado && proyecto?.id_proyecto) {
 			goto(`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes`);
 		}
+	}
+
+	function abrirModalResena() {
+		if (!puedeRedactarResena) {
+			toastStore.show({
+				variant: 'warning',
+				message: mensajeResenaBloqueada
+			});
+			return;
+		}
+		if (resenaUsuarioActual) {
+			editarResena(resenaUsuarioActual);
+			return;
+		}
+		modoResena = 'crear';
+		resenaEnEdicion = null;
+		mostrarModalResena = true;
+	}
+
+	function editarResena(resena: Resena) {
+		if (!puedeRedactarResena) {
+			toastStore.show({
+				variant: 'warning',
+				message: mensajeResenaBloqueada
+			});
+			return;
+		}
+		modoResena = 'editar';
+		resenaEnEdicion = resena;
+		mostrarModalResena = true;
+	}
+
+	function solicitarEliminarResena(resena: Resena) {
+		resenaAEliminar = resena;
+		mostrarConfirmarEliminar = true;
+	}
+
+	function confirmarEliminarResena() {
+		if (resenaAEliminar?.id_resena) {
+			resenasLocal = resenasLocal.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
+			toastStore.show({
+				variant: 'success',
+				message: 'La reseña fue eliminada.'
+			});
+		}
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
+
+	function cancelarEliminarResena() {
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
+
+	function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+		if (!proyecto?.id_proyecto || !$usuario) return;
+
+		if (modoResena === 'crear' && tieneResenaUsuario) {
+			toastStore.show({
+				variant: 'warning',
+				message: 'Ya dejaste una reseña. Podés editarla si necesitás cambiar algo.'
+			});
+			return;
+		}
+
+		if (modoResena === 'editar' && resenaEnEdicion?.id_resena) {
+			resenasLocal = resenasLocal.map((r) =>
+				r.id_resena === resenaEnEdicion?.id_resena
+					? { ...r, contenido: event.detail.contenido, puntaje: event.detail.puntaje }
+					: r
+			);
+			toastStore.show({
+				variant: 'success',
+				message: 'Reseña actualizada correctamente.'
+			});
+			return;
+		}
+
+		const nuevaResena: Resena = {
+			id_resena: Date.now(),
+			tipo_objeto: 'proyecto',
+			id_objeto: proyecto.id_proyecto,
+			contenido: event.detail.contenido,
+			puntaje: event.detail.puntaje,
+			username: $usuario.username,
+			rol: $usuario.rol,
+			aprobado: true
+		};
+		resenasLocal = [nuevaResena, ...resenasLocal];
+		toastStore.show({
+			variant: 'success',
+			message: 'Reseña publicada correctamente.'
+		});
 	}
 
 	onMount(() => {
@@ -501,7 +626,229 @@
 						>
 							<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
 						</section>
-					</div>
+					{/if}
+
+					{#if mostrarSeccionResumenIA}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-resumen-ia"
+						>
+							<div class="mb-4">
+								<h2 id="titulo-resumen-ia" class="text-xl font-semibold sm:text-2xl">
+									Resumen y aprendizajes
+								</h2>
+								<p class="mt-2 text-sm text-gray-600">
+									El resumen es público. Los aprendizajes solo están disponibles para quienes
+									participaron del proyecto.
+								</p>
+							</div>
+
+							<div class="space-y-3">
+								<div class="overflow-hidden rounded-xl border border-gray-200">
+									<button
+										type="button"
+										class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+										aria-expanded={mostrarResumenIA}
+										onclick={() => (mostrarResumenIA = !mostrarResumenIA)}
+									>
+										<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+											<FileText class="h-4 w-4 text-sky-600" />
+											Resumen ejecutivo
+										</span>
+										<ChevronDownIcon
+											class="h-4 w-4 text-gray-400 transition-transform {mostrarResumenIA
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
+									{#if mostrarResumenIA}
+										<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
+											{resumenTexto || 'El resumen aún no está disponible.'}
+										</div>
+									{/if}
+								</div>
+
+								{#if puedeVerAprendizajesIA}
+									<div class="overflow-hidden rounded-xl border border-gray-200">
+										<button
+											type="button"
+											class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+											aria-expanded={mostrarAprendizajesIA}
+											onclick={() => (mostrarAprendizajesIA = !mostrarAprendizajesIA)}
+										>
+											<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
+												<Lightbulb class="h-4 w-4 text-amber-500" />
+												Aprendizajes
+											</span>
+											<ChevronDownIcon
+												class="h-4 w-4 text-gray-400 transition-transform {mostrarAprendizajesIA
+													? 'rotate-180'
+													: ''}"
+											/>
+										</button>
+										{#if mostrarAprendizajesIA}
+											<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
+												{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
+											</div>
+										{/if}
+									</div>
+								{/if}
+							</div>
+						</section>
+					{/if}
+
+					<section
+						class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+						aria-label="Detalles del proyecto"
+					>
+						<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
+					</section>
+
+					{#if puedeVerResenas}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
+							aria-labelledby="titulo-resenas-proyecto"
+						>
+							<div class="flex flex-wrap items-start justify-between gap-4">
+								<div>
+									<h2 id="titulo-resenas-proyecto" class="text-xl font-semibold sm:text-2xl">
+										Reseñas
+									</h2>
+									<p class="mt-2 text-sm text-gray-600">
+										{#if puedeRedactarResena && !tieneResenaUsuario}
+											Compartí tu experiencia y ayudá a mejorar futuros proyectos.
+										{:else if tieneResenaUsuario}
+											Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
+										{:else if esCreador || esColaboradorAprobado}
+											{mensajeResenaBloqueada}
+										{:else}
+											Las reseñas son públicas para toda la comunidad.
+										{/if}
+									</p>
+								</div>
+								<button
+									type="button"
+									onclick={abrirModalResena}
+									disabled={!puedeCrearResena}
+									class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+								>
+									<Icon src={Star} class="h-4 w-4" />
+									{tieneResenaUsuario ? 'Reseña publicada' : 'Redactar reseña'}
+								</button>
+							</div>
+
+							{#if resenasProyecto.length}
+								<div class="mt-6 grid gap-5 md:grid-cols-2">
+									{#each resenasProyecto as resena (resena.id_resena || resena.contenido)}
+										<div class="flex h-full flex-col gap-3">
+											<ResenaCard
+												{resena}
+												onEditar={
+													resena.username && resena.username === $usuario?.username
+														? () => editarResena(resena)
+														: null
+												}
+												onEliminar={
+													resena.username && resena.username === $usuario?.username
+														? () => solicitarEliminarResena(resena)
+														: null
+												}
+											/>
+										</div>
+									{/each}
+								</div>
+							{:else}
+								<div class="mt-6 rounded-xl bg-gray-50 p-4 text-sm text-gray-600">
+									Todavía no hay reseñas para este proyecto.
+								</div>
+							{/if}
+						</section>
+					{/if}
+				</div>
+
+				<!-- Columna lateral -->
+				<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
+					<div
+						class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
+						role="group"
+						aria-label="Acciones principales del proyecto"
+					>
+						<div class="flex gap-3">
+							{#if esAdministrador}
+								<div class="relative flex-1">
+									<button
+										type="button"
+										onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+										aria-expanded={mostrarDropdownAdmin}
+										aria-haspopup="true"
+									>
+										Gestionar proyecto
+										<Icon
+											src={ChevronDown}
+											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
+
+									{#if mostrarDropdownAdmin}
+										<!-- Dropdown menu -->
+										<div
+											class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+											role="menu"
+											tabindex="-1"
+										>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+												onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
+											>
+												<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
+												Editar proyecto
+											</button>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
+												role="menuitem"
+											>
+												<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
+												Auditar proyecto
+											</button>
+											<div class="my-1 border-t border-gray-100"></div>
+											<button
+												class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
+												role="menuitem"
+											>
+												<Icon src={Trash} class="h-4 w-4 text-red-500" />
+												Eliminar proyecto
+											</button>
+										</div>
+
+										<div
+											class="fixed inset-0 z-[-1]"
+											onclick={() => (mostrarDropdownAdmin = false)}
+											aria-hidden="true"
+										></div>
+									{/if}
+								</div>
+							{:else if esCreador || esColaboradorAprobado}
+								<div class="relative flex-1">
+									<button
+										type="button"
+										onclick={() =>
+											(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
+										class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+										aria-expanded={mostrarDropdownGestionarProyecto}
+										aria-haspopup="true"
+									>
+										<span>Gestionar proyecto</span>
+										<Icon
+											src={ChevronDown}
+											class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
+												? 'rotate-180'
+												: ''}"
+										/>
+									</button>
 
 					<!-- Columna lateral -->
 					<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
@@ -1382,6 +1729,68 @@
 			</div>
 		</div>
 	{/if}
+{/if}
+
+<ResenaProyectoModal
+	mostrar={mostrarModalResena}
+	modo={modoResena}
+	resenaInicial={resenaEnEdicion}
+	maxCaracteres={maxCaracteresResena}
+	on:guardar={guardarResena}
+	on:cerrar={() => (mostrarModalResena = false)}
+/>
+
+{#if mostrarConfirmarEliminar}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={cancelarEliminarResena}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de confirmación de eliminación -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-eliminar-resena-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') cancelarEliminarResena();
+			}}
+		>
+			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
+				<h3
+					id="modal-eliminar-resena-titulo"
+					class="text-base font-semibold text-gray-900 sm:text-lg"
+				>
+					¿Eliminar reseña?
+				</h3>
+				<p class="text-sm text-gray-500">
+					Esta acción no se puede deshacer.
+				</p>
+			</div>
+
+			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					onclick={cancelarEliminarResena}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
+					onclick={confirmarEliminarResena}
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
 {/if}
 
 <style>
