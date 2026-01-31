@@ -621,13 +621,6 @@
 							</section>
 						{/if}
 
-						<section
-							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
-							aria-label="Detalles del proyecto"
-						>
-							<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
-						</section>
-
 						{#if mostrarSeccionResumenIA}
 							<section
 								class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
@@ -696,7 +689,6 @@
 								</div>
 							</section>
 						{/if}
-
 						<section
 							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 							aria-label="Detalles del proyecto"
