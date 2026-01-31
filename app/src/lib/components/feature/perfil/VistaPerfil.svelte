@@ -40,6 +40,7 @@
 	export let esMiPerfil: boolean;
 	export let proyectos: Proyecto[] = [];
 	export let resenas: Resena[] = [];
+	export let categorias: Categoria[] = [];
 
 	// Si es mi perfil, sincronizar con el store para que los cambios se reflejen
 	$: if (esMiPerfil && $usuarioStore) {
@@ -283,6 +284,7 @@
 	<EditarCategoriasModal
 		mostrar={$modales.categorias}
 		categoriasSeleccionadas={perfilUsuario.categorias_preferidas || []}
+		{categorias}
 		on:guardar={handleGuardarCategorias}
 		on:cerrar={() => modales.cerrar('categorias')}
 	/>

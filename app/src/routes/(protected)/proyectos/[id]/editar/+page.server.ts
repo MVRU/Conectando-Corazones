@@ -10,7 +10,7 @@ import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
-import { ListarCategorias } from '$lib/domain/use-cases/maestros/ListarCategorias';
+import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
 
 function formatearFechaParaInput(fechaIso: Date | string | null | undefined): string {
@@ -122,11 +122,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	// Cargar listas maestras para el formulario
-	const listarCategorias = new ListarCategorias(categoriaRepo);
+	const getAllCategorias = new GetAllCategorias(categoriaRepo);
 	const listarTipos = new ListarTiposParticipacion(tipoRepo);
 
 	const [categorias, tiposParticipacion] = await Promise.all([
-		listarCategorias.execute(),
+		getAllCategorias.execute(),
 		listarTipos.execute()
 	]);
 

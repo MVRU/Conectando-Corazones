@@ -271,9 +271,116 @@
 	let mostrarModalPendiente = false;
 	let mostrarResumenIA = false;
 	let mostrarAprendizajesIA = false;
-	let mostrarDropdownAdmin = false;
+	let mostrarMenuGestion = false;
 	let solicitudRecienEnviada = false;
-	let mostrarDropdownGestionarProyecto = false;
+
+	$: accionesMenu = (() => {
+		const acc: {
+			label: string;
+			icon: any;
+			onclick: () => void;
+			variant?: 'danger' | 'default';
+			disabled?: boolean;
+			divider?: boolean;
+		}[] = [];
+		if (!proyecto || !$usuario) return acc;
+
+		if (esAdministrador) {
+			acc.push({
+				label: 'Editar proyecto',
+				icon: Pencil,
+				onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`)
+			});
+			acc.push({
+				label: 'Auditar proyecto',
+				icon: ShieldCheck,
+				onclick: () => {}
+			});
+			acc.push({ divider: true } as any);
+			acc.push({
+				label: 'Eliminar proyecto',
+				icon: Trash,
+				onclick: () => {},
+				variant: 'danger'
+			});
+			return acc;
+		}
+
+		if (esCreador || esColaboradorAprobado) {
+			acc.push({
+				label: 'Ir al chat',
+				icon: ChatBubbleLeftRight,
+				onclick: () => goto(`/chat?proyecto=${proyecto.id_proyecto}`)
+			});
+
+			if (esCreador) {
+				acc.push({
+					label: 'Ver solicitudes',
+					icon: ClipboardDocumentList,
+					onclick: () =>
+						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+				});
+			} else {
+				acc.push({
+					label: 'Ver solicitud',
+					icon: ClipboardDocumentList,
+					onclick: () =>
+						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+				});
+			}
+
+			if (esColaboradorAprobado) {
+				if (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre') {
+					acc.push({
+						label: 'Agregar aporte',
+						icon: Plus,
+						onclick: () => goto(`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes/nuevo`)
+					});
+				}
+				if (estadoCodigo === 'en_revision') {
+					acc.push({
+						label: 'Evaluar finalización',
+						icon: ClipboardDocumentCheck,
+						onclick: () => goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)
+					});
+				}
+			}
+
+			acc.push({
+				label: 'Ver aportes y evidencias',
+				icon: Photo,
+				onclick: irAAportes
+			});
+
+			acc.push({ divider: true } as any);
+
+			if (esCreador) {
+				if (estadoCodigo === 'en_curso') {
+					acc.push({
+						label: 'Editar proyecto',
+						icon: Pencil,
+						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`)
+					});
+				}
+				acc.push({
+					label: 'Cerrar proyecto',
+					icon: LockClosed,
+					onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`),
+					variant: 'danger',
+					disabled: estadoCodigo !== 'pendiente_solicitud_cierre'
+				});
+			} else if (esColaboradorAprobado) {
+				acc.push({
+					label: 'Reportar irregularidad',
+					icon: Flag,
+					onclick: () => pushState('', { showReportModal: true }),
+					variant: 'danger'
+				});
+			}
+		}
+
+		return acc;
+	})();
 
 	function manejarClickSolicitud() {
 		if (tieneSolicitudPendiente) {
@@ -438,6 +545,83 @@
 	</div>
 {:else}
 	{#if proyecto}
+		{#snippet MenuGestion(isMobile = false)}
+			{#if accionesMenu.length > 0}
+				<div class="relative flex-1">
+					<button
+						type="button"
+						onclick={() => (mostrarMenuGestion = !mostrarMenuGestion)}
+						class={esAdministrador
+							? isMobile
+								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
+								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
+							: isMobile
+								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
+								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'}
+						aria-expanded={mostrarMenuGestion}
+						aria-haspopup="true"
+					>
+						<span>Gestionar proyecto</span>
+						<Icon
+							src={ChevronDown}
+							class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarMenuGestion
+								? 'rotate-180'
+								: ''}"
+						/>
+					</button>
+
+					{#if mostrarMenuGestion}
+						<div
+							class="animate-in {isMobile
+								? 'slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full text-left'
+								: 'fade-in zoom-in-95 absolute top-full right-0 left-0 z-10 mt-2 flex'} flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
+							role="menu"
+							tabindex="-1"
+						>
+							{#each accionesMenu as accion}
+								{#if accion.divider}
+									<div class="my-1 border-t border-gray-100"></div>
+								{:else}
+									<button
+										class="flex w-full items-center gap-3 px-4 py-2.5 {isMobile
+											? 'text-base'
+											: 'text-sm'} font-medium transition-colors {accion.variant === 'danger'
+											? accion.disabled
+												? 'cursor-not-allowed text-gray-400 opacity-50'
+												: 'text-red-600 hover:bg-red-50'
+											: 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'} {accion.disabled
+											? 'cursor-not-allowed opacity-50'
+											: ''}"
+										role="menuitem"
+										disabled={accion.disabled}
+										onclick={() => {
+											accion.onclick();
+											mostrarMenuGestion = false;
+										}}
+									>
+										<Icon
+											src={accion.icon}
+											class="{isMobile ? 'h-5 w-5' : 'h-4 w-4'} {accion.variant === 'danger'
+												? accion.disabled
+													? 'text-gray-400'
+													: 'text-red-500'
+												: 'text-gray-500'}"
+										/>
+										{accion.label}
+									</button>
+								{/if}
+							{/each}
+						</div>
+
+						<div
+							class="fixed inset-0 z-[-1] {isMobile ? 'bg-black/50' : ''}"
+							onclick={() => (mostrarMenuGestion = false)}
+							aria-hidden="true"
+						></div>
+					{/if}
+				</div>
+			{/if}
+		{/snippet}
 		<main
 			class="min-h-screen pt-6 pb-24 text-gray-800 sm:pt-10 {esAdministrador
 				? 'bg-slate-50'
@@ -761,813 +945,366 @@
 							role="group"
 							aria-label="Acciones principales del proyecto"
 						>
-							<div class="flex gap-3">
-								{#if esAdministrador}
-									<div class="relative flex-1">
-										<button
-											type="button"
-											onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-											class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-											aria-expanded={mostrarDropdownAdmin}
-											aria-haspopup="true"
-										>
-											Gestionar proyecto
-											<Icon
-												src={ChevronDown}
-												class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
-													? 'rotate-180'
-													: ''}"
-											/>
-										</button>
-
-										{#if mostrarDropdownAdmin}
-											<!-- Dropdown menu -->
-											<div
-												class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-												role="menu"
-												tabindex="-1"
+							<div class="flex flex-col gap-3 p-3">
+								<div class="flex gap-3">
+									{#if esAdministrador || esCreador || esColaboradorAprobado}
+										{@render MenuGestion(false)}
+									{:else if !esInstitucion}
+										{#if esSolicitudRechazada}
+											<button
+												type="button"
+												onclick={() => (mostrarModalJustificacion = true)}
+												class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+												aria-label="Ver motivo del rechazo"
 											>
-												<button
-													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-													role="menuitem"
-													onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
-												>
-													<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
-													Editar proyecto
-												</button>
-												<button
-													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-													role="menuitem"
-												>
-													<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
-													Auditar proyecto
-												</button>
-												<div class="my-1 border-t border-gray-100"></div>
-												<button
-													class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
-													role="menuitem"
-												>
-													<Icon src={Trash} class="h-4 w-4 text-red-500" />
-													Eliminar proyecto
-												</button>
-											</div>
-
-											<div
-												class="fixed inset-0 z-[-1]"
-												onclick={() => (mostrarDropdownAdmin = false)}
-												aria-hidden="true"
-											></div>
-										{/if}
-									</div>
-								{:else if esCreador || esColaboradorAprobado}
-									<div class="relative flex-1">
-										<button
-											type="button"
-											onclick={() =>
-												(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-											class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-											aria-expanded={mostrarDropdownGestionarProyecto}
-											aria-haspopup="true"
-										>
-											<span>Gestionar proyecto</span>
-											<Icon
-												src={ChevronDown}
-												class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
-													? 'rotate-180'
-													: ''}"
-											/>
-										</button>
-									</div>
-								{/if}
-							</div>
-
-							<!-- Columna lateral -->
-							<div
-								class="animate-fade-up order-1 space-y-6 lg:order-2"
-								style="animation-delay: 100ms"
-							>
-								<div
-									class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
-									role="group"
-									aria-label="Acciones principales del proyecto"
-								>
-									<div class="flex gap-3">
-										{#if esAdministrador}
-											<div class="relative flex-1">
-												<button
-													type="button"
-													onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-													class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-													aria-expanded={mostrarDropdownAdmin}
-													aria-haspopup="true"
-												>
-													Gestionar proyecto
-													<Icon
-														src={ChevronDown}
-														class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
-															? 'rotate-180'
-															: ''}"
-													/>
-												</button>
-
-												{#if mostrarDropdownAdmin}
-													<!-- Dropdown menu -->
-													<div
-														class="animate-in fade-in zoom-in-95 absolute top-full right-0 left-0 mt-2 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-														role="menu"
-														tabindex="-1"
-													>
-														<button
-															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-															role="menuitem"
-															onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
-														>
-															<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
-															Editar proyecto
-														</button>
-														<button
-															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-															role="menuitem"
-														>
-															<Icon src={ShieldCheck} class="h-4 w-4 text-gray-500" />
-															Auditar proyecto
-														</button>
-														<div class="my-1 border-t border-gray-100"></div>
-														<button
-															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
-															role="menuitem"
-														>
-															<Icon src={Trash} class="h-4 w-4 text-red-500" />
-															Eliminar proyecto
-														</button>
-													</div>
-
-													<div
-														class="fixed inset-0 z-[-1]"
-														onclick={() => (mostrarDropdownAdmin = false)}
-														aria-hidden="true"
-													></div>
+												Solicitud rechazada
+											</button>
+										{:else}
+											<button
+												type="button"
+												onclick={manejarClickSolicitud}
+												disabled={(estadoCodigo !== 'en_curso' &&
+													estadoCodigo !== 'pendiente_solicitud_cierre') ||
+													solicitudRecienEnviada}
+												class={tieneSolicitudPendiente
+													? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
+													: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+												aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
+													? 'Ver estado de solicitud'
+													: 'Colaborar ahora en este proyecto'}
+											>
+												{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+													<Icon src={Clock} class="h-4 w-4" aria-hidden="true" />
+													Solicitud enviada
+												{:else}
+													<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
+													Colaborar ahora
 												{/if}
-											</div>
-										{:else if esCreador || esColaboradorAprobado}
-											<div class="relative flex-1">
-												<button
-													type="button"
-													onclick={() =>
-														(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-													class="inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-													aria-expanded={mostrarDropdownGestionarProyecto}
-													aria-haspopup="true"
-												>
-													<span>Gestionar proyecto</span>
-													<Icon
-														src={ChevronDown}
-														class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
-															? 'rotate-180'
-															: ''}"
-													/>
-												</button>
-
-												{#if mostrarDropdownGestionarProyecto}
-													<!-- Dropdown menu -->
-													<div
-														class="animate-in fade-in zoom-in-95 absolute top-full left-0 z-10 mt-2 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-														role="menu"
-														tabindex="-1"
-													>
-														<button
-															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-															role="menuitem"
-															onclick={() => goto(`/mensajes/${proyecto.id_proyecto}`)}
-														>
-															<Icon src={ChatBubbleLeftRight} class="h-4 w-4 text-gray-500" />
-															Ir al chat
-														</button>
-														{#if esCreador}
-															<button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-																role="menuitem"
-																onclick={() =>
-																	goto(
-																		`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-																	)}
-															>
-																<Icon src={ClipboardDocumentList} class="h-4 w-4 text-gray-500" />
-																Ver solicitudes
-															</button>
-														{/if}
-														{#if esColaboradorAprobado && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
-															<button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-																role="menuitem"
-																onclick={() =>
-																	goto(
-																		`/colaborador/proyectos/${proyecto.id_proyecto}/mis-aportes/nuevo`
-																	)}
-															>
-																<Icon src={Plus} class="h-4 w-4 text-gray-500" />
-																Agregar aporte
-															</button>
-														{/if}
-														{#if esColaboradorAprobado && estadoCodigo === 'en_revision'}
-															<button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-																role="menuitem"
-																onclick={() =>
-																	goto(
-																		`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`
-																	)}
-															>
-																<Icon src={ClipboardDocumentCheck} class="h-4 w-4 text-gray-500" />
-																Evaluar finalización
-															</button>
-														{/if}
-														<button
-															class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-															role="menuitem"
-															onclick={irAAportes}
-														>
-															<Icon src={Photo} class="h-4 w-4 text-gray-500" />
-															Ver aportes y evidencias
-														</button>
-
-														<div class="my-1 border-t border-gray-100"></div>
-
-														{#if esCreador}
-															{#if estadoCodigo === 'en_curso'}
-																<button
-																	class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-																	role="menuitem"
-																	onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
-																>
-																	<Icon src={Pencil} class="h-4 w-4 text-gray-500" />
-																	Editar proyecto
-																</button>
-															{/if}
-															<button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors {estadoCodigo ===
-																'pendiente_solicitud_cierre'
-																	? 'text-red-600 hover:bg-red-50 active:bg-red-100'
-																	: 'cursor-not-allowed text-gray-400 opacity-50'}"
-																role="menuitem"
-																disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-																onclick={() =>
-																	goto(
-																		`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`
-																	)}
-															>
-																<Icon
-																	src={LockClosed}
-																	class="h-4 w-4 {estadoCodigo === 'pendiente_solicitud_cierre'
-																		? 'text-red-500'
-																		: 'text-gray-400'}"
-																/>
-																Cerrar proyecto
-															</button>
-														{:else if esColaboradorAprobado}
-															<!-- <button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100"
-																role="menuitem"
-															>
-																<Icon src={Star} class="h-4 w-4 text-gray-500" />
-																Escribir reseña
-															</button> -->
-															<button
-																class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 active:bg-red-100"
-																role="menuitem"
-															>
-																<Icon src={Flag} class="h-4 w-4 text-red-500" />
-																Reportar irregularidad
-															</button>
-														{/if}
-													</div>
-
-													<div
-														class="fixed inset-0 z-[-1]"
-														onclick={() => (mostrarDropdownGestionarProyecto = false)}
-														aria-hidden="true"
-													></div>
-												{/if}
-											</div>
-										{:else if !esInstitucion}
-											<!-- Botón de acción principal -->
-											{#if esSolicitudRechazada}
-												<button
-													type="button"
-													onclick={() => (mostrarModalJustificacion = true)}
-													class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-													aria-label="Ver motivo del rechazo"
-												>
-													Solicitud rechazada
-												</button>
-											{:else}
-												<button
-													type="button"
-													onclick={manejarClickSolicitud}
-													disabled={(estadoCodigo !== 'en_curso' &&
-														estadoCodigo !== 'pendiente_solicitud_cierre') ||
-														solicitudRecienEnviada}
-													class={tieneSolicitudPendiente
-														? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
-														: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
-													aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
-														? 'Ver estado de solicitud'
-														: 'Colaborar ahora en este proyecto'}
-												>
-													{#if tieneSolicitudPendiente || solicitudRecienEnviada}
-														<Icon src={Clock} class="h-4 w-4" aria-hidden="true" />
-														Solicitud enviada
-													{:else}
-														<Icon src={Heart} class="h-4 w-4" aria-hidden="true" />
-														Colaborar ahora
-													{/if}
-												</button>
-											{/if}
+											</button>
 										{/if}
+									{/if}
 
-										<button
-											type="button"
-											onclick={compartirProyecto}
-											class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
-											aria-label="Compartir este proyecto"
-										>
-											<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
-											Compartir
-										</button>
-									</div>
-
-									<p class="px-1 pt-2 text-center text-xs text-gray-500">
-										Tu ayuda se refleja en tiempo real en el progreso del proyecto.
-									</p>
+									<button
+										type="button"
+										onclick={compartirProyecto}
+										class="inline-flex h-11 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+										aria-label="Compartir este proyecto"
+									>
+										<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
+									</button>
 								</div>
 
-								<section
-									class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-									aria-label="Información del proyecto"
-								>
-									<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
+								<p class="pt-1 text-center text-xs text-gray-500">
+									Tu ayuda se refleja en tiempo real en el progreso del proyecto.
+								</p>
+							</div>
+						</div>
 
-									<div class="space-y-4">
-										<div class="flex items-center justify-between border-b border-gray-100 pb-3">
-											<span class="text-sm text-gray-600">Estado actual del proyecto</span>
-											<span
-												class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
-												aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+							aria-label="Información del proyecto"
+						>
+							<h3 class="mb-5 text-lg font-semibold text-gray-900">Información básica</h3>
+
+							<div class="space-y-4">
+								<div class="flex items-center justify-between border-b border-gray-100 pb-3">
+									<span class="text-sm text-gray-600">Estado actual del proyecto</span>
+									<span
+										class={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${clasesChipEstado}`}
+										aria-label={`Estado: ${estadoLabel(estadoCodigo)}`}
+									>
+										<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
+										{estadoLabel(estadoCodigo)}
+									</span>
+								</div>
+
+								<div class="flex items-center justify-between">
+									{#if obtenerUrlPerfil(proyecto.institucion)}
+										<a
+											href={obtenerUrlPerfil(proyecto.institucion)}
+											class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
+										>
+											<div
+												class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+												aria-label="Identidad visual de la institución"
 											>
-												<Icon src={EllipsisHorizontalCircle} class="h-3.5 w-3.5" />
-												{estadoLabel(estadoCodigo)}
-											</span>
-										</div>
+												{#if proyecto.institucion?.url_foto}
+													<img
+														src={proyecto.institucion.url_foto}
+														alt="Logo o foto de la institución"
+														class="h-full w-full object-cover"
+														loading="lazy"
+													/>
+												{:else}
+													<span class="text-[11px] font-semibold text-gray-600"
+														>{iniciales(proyecto.institucion?.nombre_legal)}</span
+													>
+												{/if}
+											</div>
 
-										<div class="flex items-center justify-between">
-											{#if obtenerUrlPerfil(proyecto.institucion)}
-												<a
-													href={obtenerUrlPerfil(proyecto.institucion)}
-													class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
+											<div class="min-w-0 flex-1">
+												<span
+													class="block truncate text-sm font-medium text-gray-900 hover:text-blue-600"
+													title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+													aria-label="Institución organizadora"
 												>
-													<div
-														class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-														aria-label="Identidad visual de la institución"
+													{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+												</span>
+												<div class="mt-1">
+													<span
+														class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
 													>
-														{#if proyecto.institucion?.url_foto}
-															<img
-																src={proyecto.institucion.url_foto}
-																alt="Logo o foto de la institución"
-																class="h-full w-full object-cover"
-																loading="lazy"
-															/>
-														{:else}
-															<span class="text-[11px] font-semibold text-gray-600"
-																>{iniciales(proyecto.institucion?.nombre_legal)}</span
-															>
-														{/if}
-													</div>
-
-													<div class="min-w-0 flex-1">
-														<span
-															class="block truncate text-sm font-medium text-gray-900 hover:text-blue-600"
-															title={proyecto.institucion?.nombre_legal ||
-																'Institución organizadora'}
-															aria-label="Institución organizadora"
-														>
-															{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-														</span>
-														<div class="mt-1">
-															<span
-																class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
-															>
-																{proyecto.institucion?.tipo_institucion || 'Institución'}
-															</span>
-														</div>
-													</div>
-												</a>
-											{:else}
-												<div class="flex min-w-0 items-center gap-3">
-													<div
-														class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
-														aria-label="Identidad visual de la institución"
-													>
-														{#if proyecto.institucion?.url_foto}
-															<img
-																src={proyecto.institucion.url_foto}
-																alt="Logo o foto de la institución"
-																class="h-full w-full object-cover"
-																loading="lazy"
-															/>
-														{:else}
-															<span class="text-[11px] font-semibold text-gray-600"
-																>{iniciales(proyecto.institucion?.nombre_legal)}</span
-															>
-														{/if}
-													</div>
-
-													<div class="min-w-0 flex-1">
-														<span
-															class="block truncate text-sm font-medium text-gray-900"
-															title={proyecto.institucion?.nombre_legal ||
-																'Institución organizadora'}
-															aria-label="Institución organizadora"
-														>
-															{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
-														</span>
-														<div class="mt-1">
-															<span
-																class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
-															>
-																{proyecto.institucion?.tipo_institucion || 'Institución'}
-															</span>
-														</div>
-													</div>
+														{proyecto.institucion?.tipo_institucion || 'Institución'}
+													</span>
 												</div>
-											{/if}
-										</div>
-									</div>
-								</section>
+											</div>
+										</a>
+									{:else}
+										<div class="flex min-w-0 items-center gap-3">
+											<div
+												class="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gray-100 ring-1 ring-gray-200"
+												aria-label="Identidad visual de la institución"
+											>
+												{#if proyecto.institucion?.url_foto}
+													<img
+														src={proyecto.institucion.url_foto}
+														alt="Logo o foto de la institución"
+														class="h-full w-full object-cover"
+														loading="lazy"
+													/>
+												{:else}
+													<span class="text-[11px] font-semibold text-gray-600"
+														>{iniciales(proyecto.institucion?.nombre_legal)}</span
+													>
+												{/if}
+											</div>
 
-								<section
-									class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-									aria-label="Ubicaciones del proyecto"
-								>
-									<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
-
-									{#if ubicacionesOrdenadas.length}
-										<ul class="rounded-lg">
-											{#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
-												<li
-													class="border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0"
+											<div class="min-w-0 flex-1">
+												<span
+													class="block truncate text-sm font-medium text-gray-900"
+													title={proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+													aria-label="Institución organizadora"
 												>
-													<div class="flex items-start gap-3">
+													{proyecto.institucion?.nombre_legal || 'Institución organizadora'}
+												</span>
+												<div class="mt-1">
+													<span
+														class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-100"
+													>
+														{proyecto.institucion?.tipo_institucion || 'Institución'}
+													</span>
+												</div>
+											</div>
+										</div>
+									{/if}
+								</div>
+							</div>
+						</section>
+
+						<section
+							class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+							aria-label="Ubicaciones del proyecto"
+						>
+							<h3 class="mb-5 text-lg font-semibold text-gray-900">Ubicaciones</h3>
+
+							{#if ubicacionesOrdenadas.length}
+								<ul class="rounded-lg">
+									{#each ubicacionesOrdenadas as pu (pu.id_proyecto_ubicacion)}
+										<li class="border-b border-gray-100 py-3 first:pt-0 last:border-b-0 last:pb-0">
+											<div class="flex items-start gap-3">
+												{#if esUbicacionPresencial(pu.ubicacion)}
+													<span
+														class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
+													>
+														<Icon src={MapPin} class="h-4 w-4 text-sky-700" aria-hidden="true" />
+													</span>
+												{:else if esUbicacionVirtual(pu.ubicacion)}
+													<span
+														class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
+													>
+														<Icon
+															src={GlobeAlt}
+															class="h-4 w-4 text-violet-700"
+															aria-hidden="true"
+														/>
+													</span>
+												{/if}
+
+												<div class="min-w-0 flex-1">
+													<div class="flex flex-wrap items-center gap-2">
+														<span
+															class="truncate text-sm font-semibold text-gray-900"
+															title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+														>
+															{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
+														</span>
+
 														{#if esUbicacionPresencial(pu.ubicacion)}
 															<span
-																class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100"
+																class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
 															>
-																<Icon
-																	src={MapPin}
-																	class="h-4 w-4 text-sky-700"
-																	aria-hidden="true"
-																/>
+																Presencial
 															</span>
 														{:else if esUbicacionVirtual(pu.ubicacion)}
 															<span
-																class="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-100"
+																class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
 															>
-																<Icon
-																	src={GlobeAlt}
-																	class="h-4 w-4 text-violet-700"
-																	aria-hidden="true"
-																/>
+																Virtual
 															</span>
 														{/if}
-
-														<div class="min-w-0 flex-1">
-															<div class="flex flex-wrap items-center gap-2">
-																<span
-																	class="truncate text-sm font-semibold text-gray-900"
-																	title={capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
-																>
-																	{capitalizar(pu.ubicacion?.tipo_ubicacion || 'Ubicación')}
-																</span>
-
-																{#if esUbicacionPresencial(pu.ubicacion)}
-																	<span
-																		class="inline-flex shrink-0 items-center rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-medium text-sky-700 ring-1 ring-sky-100"
-																	>
-																		Presencial
-																	</span>
-																{:else if esUbicacionVirtual(pu.ubicacion)}
-																	<span
-																		class="inline-flex shrink-0 items-center rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700 ring-1 ring-violet-100"
-																	>
-																		Virtual
-																	</span>
-																{/if}
-															</div>
-
-															{#if esUbicacionPresencial(pu.ubicacion)}
-																{@const dir = construirDireccionCompleta(pu.ubicacion)}
-																<p class="mt-1 text-sm text-gray-700">
-																	{dir || 'Dirección no disponible'}
-																</p>
-
-																{#if generarUrlGoogleMaps(pu.ubicacion)}
-																	<a
-																		class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
-																		href={generarUrlGoogleMaps(pu.ubicacion)!}
-																		target="_blank"
-																		rel="noopener noreferrer"
-																		aria-label="Ver en Google Maps"
-																	>
-																		<Icon src={Link} class="h-4 w-4" />
-																		Ver en Google Maps
-																	</a>
-																{/if}
-															{:else if esUbicacionVirtual(pu.ubicacion)}
-																{#if pu.ubicacion.url_virtual}
-																	<a
-																		class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
-																		href={pu.ubicacion.url_virtual}
-																		target="_blank"
-																		rel="noopener noreferrer"
-																		aria-label="Abrir enlace virtual"
-																	>
-																		<Icon src={Link} class="h-4 w-4" />
-																		Abrir enlace
-																	</a>
-																{:else}
-																	<p class="mt-1 text-sm text-gray-500">
-																		Enlace virtual no especificado
-																	</p>
-																{/if}
-															{:else}
-																<p class="mt-1 text-sm text-gray-500">
-																	Información de la ubicación no disponible
-																</p>
-															{/if}
-														</div>
 													</div>
-												</li>
-											{/each}
-										</ul>
-									{:else}
-										<p class="text-sm text-gray-500">
-											Este proyecto aún no tiene ubicaciones cargadas.
-										</p>
-									{/if}
-								</section>
 
-								<section
-									class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
-									aria-label="Colaboradores aprobados"
-								>
-									<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
+													{#if esUbicacionPresencial(pu.ubicacion)}
+														{@const dir = construirDireccionCompleta(pu.ubicacion)}
+														<p class="mt-1 text-sm text-gray-700">
+															{dir || 'Dirección no disponible'}
+														</p>
 
-									{#if colaboradoresAprobados.length}
-										<ul class="space-y-3">
-											{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
-												<li
-													class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
-												>
-													{#if obtenerUrlPerfil(colab.colaborador)}
-														<a
-															href={obtenerUrlPerfil(colab.colaborador)}
-															class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
-															title={obtenerNombreColaborador(colab.colaborador)}
-														>
-															{obtenerNombreColaborador(colab.colaborador)}
-														</a>
+														{#if generarUrlGoogleMaps(pu.ubicacion)}
+															<a
+																class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-sky-700 hover:underline"
+																href={generarUrlGoogleMaps(pu.ubicacion)!}
+																target="_blank"
+																rel="noopener noreferrer"
+																aria-label="Ver en Google Maps"
+															>
+																<Icon src={Link} class="h-4 w-4" />
+																Ver en Google Maps
+															</a>
+														{/if}
+													{:else if esUbicacionVirtual(pu.ubicacion)}
+														{#if pu.ubicacion.url_virtual}
+															<a
+																class="mt-1 inline-flex items-center gap-1 text-sm font-medium text-violet-700 hover:underline"
+																href={pu.ubicacion.url_virtual}
+																target="_blank"
+																rel="noopener noreferrer"
+																aria-label="Abrir enlace virtual"
+															>
+																<Icon src={Link} class="h-4 w-4" />
+																Abrir enlace
+															</a>
+														{:else}
+															<p class="mt-1 text-sm text-gray-500">
+																Enlace virtual no especificado
+															</p>
+														{/if}
 													{:else}
-														<span
-															class="block flex-1 truncate text-sm text-gray-700"
-															title={obtenerNombreColaborador(colab.colaborador)}
-														>
-															{obtenerNombreColaborador(colab.colaborador)}
-														</span>
+														<p class="mt-1 text-sm text-gray-500">
+															Información de la ubicación no disponible
+														</p>
 													{/if}
-													<span
-														class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
-														aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
-													>
-														{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
-													</span>
-												</li>
-											{/each}
-										</ul>
-									{:else}
-										<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
-									{/if}
-								</section>
-								{#if $usuario}
-									<section
-										class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
-										aria-label="Reportar irregularidad"
-									>
-										<div class="flex flex-col gap-3">
-											<p class="text-center text-sm font-medium text-gray-700">
-												¿Hay algún problema con este proyecto?
-											</p>
-											<button
-												type="button"
-												disabled={yaReporto}
-												onclick={() => pushState('', { showReportModal: true })}
-												class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+												</div>
+											</div>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="text-sm text-gray-500">
+									Este proyecto aún no tiene ubicaciones cargadas.
+								</p>
+							{/if}
+						</section>
+
+						<section
+							class="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-gray-100 sm:p-6"
+							aria-label="Colaboradores aprobados"
+						>
+							<h3 class="mb-5 text-lg font-semibold text-gray-900">Colaboradores aprobados</h3>
+
+							{#if colaboradoresAprobados.length}
+								<ul class="space-y-3">
+									{#each colaboradoresAprobados as colab (colab.id_colaboracion)}
+										<li
+											class="flex items-center justify-between gap-3 border-b border-gray-100 pb-2 last:border-b-0"
+										>
+											{#if obtenerUrlPerfil(colab.colaborador)}
+												<a
+													href={obtenerUrlPerfil(colab.colaborador)}
+													class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
+													title={obtenerNombreColaborador(colab.colaborador)}
+												>
+													{obtenerNombreColaborador(colab.colaborador)}
+												</a>
+											{:else}
+												<span
+													class="block flex-1 truncate text-sm text-gray-700"
+													title={obtenerNombreColaborador(colab.colaborador)}
+												>
+													{obtenerNombreColaborador(colab.colaborador)}
+												</span>
+											{/if}
+											<span
+												class={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${clasesChipColaborador(colab.colaborador?.tipo_colaborador)}`}
+												aria-label={`Tipo de colaborador: ${etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}`}
 											>
-												<Icon src={Flag} class="h-4 w-4" />
-												{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
-											</button>
-										</div>
-									</section>
-								{/if}
-							</div>
-						</div>
+												{etiquetaTipoColaborador(colab.colaborador?.tipo_colaborador)}
+											</span>
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="text-sm text-gray-500">No hay colaboradores aprobados.</p>
+							{/if}
+						</section>
+						{#if $usuario}
+							<section
+								class="rounded-xl border border-gray-200 bg-white p-4 shadow sm:p-6"
+								aria-label="Reportar irregularidad"
+							>
+								<div class="flex flex-col gap-3">
+									<p class="text-center text-sm font-medium text-gray-700">
+										¿Hay algún problema con este proyecto?
+									</p>
+									<button
+										type="button"
+										disabled={yaReporto}
+										onclick={() => pushState('', { showReportModal: true })}
+										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+									>
+										<Icon src={Flag} class="h-4 w-4" />
+										{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+									</button>
+								</div>
+							</section>
+						{/if}
 					</div>
 				</div>
-				<!-- Modal de reporte interceptado (Shallow Routing) -->
-				<ModalReportarIrregularidad
-					open={!!$page.state.showReportModal}
-					tipo_objeto="Proyecto"
-					id_objeto={proyecto.id_proyecto ?? 0}
-					nombre_objeto={proyecto.titulo}
-					onclose={() => history.back()}
-					onsuccess={handleReportSuccess}
-				/>
-				<slot />
+			</div>
+			<!-- Modal de reporte interceptado (Shallow Routing) -->
+			<ModalReportarIrregularidad
+				open={!!$page.state.showReportModal}
+				tipo_objeto="Proyecto"
+				id_objeto={proyecto.id_proyecto ?? 0}
+				nombre_objeto={proyecto.titulo}
+				onclose={() => history.back()}
+				onsuccess={handleReportSuccess}
+			/>
 
-				<div
-					class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
-				>
-					<div class="flex gap-3">
-						{#if esAdministrador}
-							<!-- Dropdown móvil -->
-							<div class="relative flex-1">
-								<button
-									type="button"
-									onclick={() => (mostrarDropdownAdmin = !mostrarDropdownAdmin)}
-									class="flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
-								>
-									Gestionar proyecto
-									<Icon
-										src={ChevronDown}
-										class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownAdmin
-											? 'rotate-180'
-											: ''}"
-									/>
-								</button>
-
-								{#if mostrarDropdownAdmin}
-									<!-- Dropdown menu popup -->
-									<div
-										class="animate-in slide-in-from-bottom-5 absolute right-0 bottom-full left-0 mb-3 flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-200"
-									>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-											onclick={() => goto(`/proyectos/${proyecto.id_proyecto}/editar`)}
-										>
-											<Icon src={Pencil} class="h-5 w-5 text-gray-500" />
-											Editar proyecto
-										</button>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-										>
-											<Icon src={ShieldCheck} class="h-5 w-5 text-gray-500" />
-											Auditar proyecto
-										</button>
-										<div class="my-1 border-t border-gray-100"></div>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
-										>
-											<Icon src={Trash} class="h-5 w-5 text-red-500" />
-											Eliminar proyecto
-										</button>
-									</div>
-
-									<!-- Backdrop -->
-									<div
-										class="fixed inset-0 z-[-1] bg-black/50"
-										onclick={() => (mostrarDropdownAdmin = false)}
-										aria-hidden="true"
-									></div>
-								{/if}
-							</div>
-						{:else if esCreador || esColaboradorAprobado}
-							<div class="relative flex-1">
-								<button
-									type="button"
-									onclick={() =>
-										(mostrarDropdownGestionarProyecto = !mostrarDropdownGestionarProyecto)}
-									class="flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]"
-								>
-									<span>Gestionar proyecto</span>
-									<Icon
-										src={ChevronDown}
-										class="h-5 w-5 shrink-0 transition-transform duration-200 {mostrarDropdownGestionarProyecto
-											? 'rotate-180'
-											: ''}"
-									/>
-								</button>
-
-								{#if mostrarDropdownGestionarProyecto}
-									<!-- Dropdown menu popup mobile -->
-									<div
-										class="animate-in slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 text-left shadow-xl ring-1 ring-black/5 duration-200"
-									>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-										>
-											<Icon src={ChatBubbleLeftRight} class="h-5 w-5 text-gray-500" />
-											Ir al chat
-										</button>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-											onclick={() =>
-												goto(
-													esCreador
-														? `/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-														: `/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`
-												)}
-										>
-											<Icon src={ClipboardDocumentList} class="h-5 w-5 text-gray-500" />
-											{esCreador ? 'Ver solicitudes' : 'Ver solicitud'}
-										</button>
-										<button
-											class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-											onclick={irAAportes}
-										>
-											<Icon src={Photo} class="h-5 w-5 text-gray-500" />
-											Ver aportes y evidencias
-										</button>
-
-										<div class="my-1 border-t border-gray-100"></div>
-
-										{#if esCreador}
-											<button
-												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium transition-colors {estadoCodigo ===
-												'pendiente_solicitud_cierre'
-													? 'text-red-600 active:bg-red-50'
-													: 'cursor-not-allowed text-gray-400 opacity-50'}"
-												disabled={estadoCodigo !== 'pendiente_solicitud_cierre'}
-												onclick={() =>
-													goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
-											>
-												<Icon
-													src={LockClosed}
-													class="h-5 w-5 {estadoCodigo === 'pendiente_solicitud_cierre'
-														? 'text-red-500'
-														: 'text-gray-400'}"
-												/>
-												Cerrar proyecto
-											</button>
-										{:else if esColaboradorAprobado}
-											<!-- <button
-												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-gray-700 active:bg-gray-100"
-											>
-												<Icon src={Star} class="h-5 w-5 text-gray-500" />
-												Escribir reseña
-											</button> -->
-											<button
-												class="flex w-full items-center gap-3 px-5 py-3.5 text-base font-medium text-red-600 active:bg-red-50"
-											>
-												<Icon src={Flag} class="h-5 w-5 text-red-500" />
-												Reportar irregularidad
-											</button>
-										{/if}
-									</div>
-
-									<!-- Backdrop -->
-									<div
-										class="fixed inset-0 z-[-1] bg-black/50"
-										onclick={() => (mostrarDropdownGestionarProyecto = false)}
-										aria-hidden="true"
-									></div>
-								{/if}
-							</div>
-						{:else if esSolicitudRechazada}
-							<button
-								type="button"
-								onclick={() => (mostrarModalJustificacion = true)}
-								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-sm transition active:scale-[0.98]"
-							>
-								<Icon src={XCircle} class="h-5 w-5" />
-								Solicitud rechazada
-							</button>
-						{:else if !esInstitucion}
-							<button
-								type="button"
-								onclick={manejarClickSolicitud}
-								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
-							>
-								<Icon src={Heart} class="h-5 w-5" />
-								Colaborar ahora
-							</button>
-						{/if}
+			<div
+				class="fixed bottom-0 left-0 z-30 w-full border-t border-gray-200 bg-white p-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] supports-[padding-bottom:env(safe-area-inset-bottom)]:pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden"
+			>
+				<div class="flex gap-3">
+					{#if esAdministrador || esCreador || esColaboradorAprobado}
+						{@render MenuGestion(true)}
+					{:else if !esInstitucion}
 						<button
 							type="button"
-							onclick={compartirProyecto}
-							class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
-							aria-label="Compartir"
+							onclick={manejarClickSolicitud}
+							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
 						>
-							<Icon src={Share} class="h-5 w-5" />
+							<Icon src={Heart} class="h-5 w-5" />
+							Colaborar ahora
 						</button>
-					</div>
+					{/if}
+					<button
+						type="button"
+						onclick={compartirProyecto}
+						class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+						aria-label="Compartir"
+					>
+						<Icon src={Share} class="h-5 w-5" />
+					</button>
 				</div>
 			</div>
 		</main>

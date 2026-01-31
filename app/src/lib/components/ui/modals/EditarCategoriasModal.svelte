@@ -159,7 +159,7 @@
 			on:click|stopPropagation
 		>
 			<div class="mb-6 flex items-center justify-between">
-				<h3 class="text-xl font-semibold text-gray-900">Editar Categorías Favoritas</h3>
+				<h3 class="text-xl font-semibold text-gray-900">Editar categorías favoritas</h3>
 				<button
 					on:click={cerrar}
 					aria-label="Cerrar modal"
