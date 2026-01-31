@@ -6,7 +6,7 @@ import type {
 } from '@prisma/client';
 import { mapLocalidadToDomain } from './localidad.mapper';
 
-type PrismaUbicacionWithLocalidad = PrismaUbicacion & {
+export type PrismaUbicacionWithLocalidad = PrismaUbicacion & {
 	localidad?: (PrismaLocalidad & { provincia?: PrismaProvincia | null }) | null;
 };
 
