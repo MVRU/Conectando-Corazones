@@ -17,7 +17,7 @@
 	// Filtro de Estado
 	export let mostrarEstado: boolean = false;
 	export let estado: string[] = [];
-	export let estadosDisponibles: string[] = [];
+	export let estadosDisponibles: { value: string; label: string }[] = [];
 
 	export let provinciasDisponibles: string[] = [];
 	export let localidadesDisponibles: string[] = [];
@@ -523,7 +523,9 @@
 									{#if estado.length === 0 || estado.includes('Todos')}
 										Todos
 									{:else if estado.length <= 2}
-										{estado.join(', ')}
+										{estado
+											.map((e) => estadosDisponibles.find((ed) => ed.value === e)?.label || e)
+											.join(', ')}
 									{:else}
 										{estado.length} seleccionados
 									{/if}
@@ -566,24 +568,24 @@
 
 									<!-- Lista de Estados -->
 									<div class="space-y-0.5">
-										{#each estadosDisponibles.filter((e) => e !== 'Todos') as est (est)}
+										{#each estadosDisponibles.filter((e) => e.value !== 'Todos') as est (est.value)}
 											<label
 												class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
 											>
 												<input
 													type="checkbox"
 													class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-													checked={estado.includes(est)}
+													checked={estado.includes(est.value)}
 													on:change={() => {
-														if (estado.includes(est)) {
-															estado = estado.filter((e) => e !== est);
+														if (estado.includes(est.value)) {
+															estado = estado.filter((e) => e !== est.value);
 														} else {
 															const clean = estado.filter((e) => e !== 'Todos');
-															estado = [...clean, est];
+															estado = [...clean, est.value];
 														}
 													}}
 												/>
-												<span>{est}</span>
+												<span>{est.label}</span>
 											</label>
 										{/each}
 									</div>

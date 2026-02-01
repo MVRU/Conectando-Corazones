@@ -1,5 +1,5 @@
 import type { EstadoDescripcion, Estado as IEstado } from '../types/Estado';
-import { ESTADOS } from '../types/Estado';
+import { ESTADOS, ESTADO_LABELS } from '../types/Estado';
 
 export class Estado implements IEstado {
 	id_estado?: number;
@@ -19,5 +19,9 @@ export class Estado implements IEstado {
 
 	esTerminal(): boolean {
 		return ['completado', 'cancelado'].includes(this.descripcion);
+	}
+
+	get label(): string {
+		return ESTADO_LABELS[this.descripcion];
 	}
 }

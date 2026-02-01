@@ -170,7 +170,7 @@ TODO:
 						</div>
 						<p class="mt-1 text-xs text-gray-500">
 							Todos los usuarios de prueba usan la contraseña: <code
-								class="rounded bg-gray-100 px-1">123456</code
+								class="rounded bg-gray-100 px-1">password123</code
 							>
 						</p>
 					</div>

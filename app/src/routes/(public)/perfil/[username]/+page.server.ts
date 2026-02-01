@@ -1,6 +1,8 @@
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
+import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
+import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -14,6 +16,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		const usuarioRepo = new PostgresUsuarioRepository();
 		const proyectoRepo = new PostgresProyectoRepository();
+		const categoriaRepo = new PostgresCategoriaRepository();
 
 		// 1. Obtener Usuario
 		const perfilUsuario = await usuarioRepo.findByUsername(username);
@@ -23,7 +26,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// 2. Obtener Proyectos
 		const obtenerProyectos = new ObtenerProyectosPerfil(proyectoRepo);
-		const proyectos = await obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol);
+		const getAllCategorias = new GetAllCategorias(categoriaRepo);
+
+		const [proyectos, categorias] = await Promise.all([
+			obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol),
+			getAllCategorias.execute()
+		]);
 
 		// 3. Obtener Reseñas (Backend no implementado aún)
 		const resenas: any[] = [];
@@ -36,6 +44,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			perfilUsuario: JSON.parse(JSON.stringify(perfilUsuario)),
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			resenas: JSON.parse(JSON.stringify(resenas)),
+			categorias: categorias.map((c) => ({ ...c })),
 			esMiPerfil
 		};
 	} catch (err) {

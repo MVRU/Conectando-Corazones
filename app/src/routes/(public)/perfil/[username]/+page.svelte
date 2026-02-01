@@ -9,7 +9,7 @@
 
 	export let data: PageData;
 
-	$: ({ perfilUsuario, proyectos, resenas, esMiPerfil } = data);
+	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
 
 	onMount(() => {
 		// Si no hay usuario autenticado y están viendo un perfil específico, permitir verlo
@@ -31,7 +31,7 @@
 </svelte:head>
 
 {#if perfilUsuario}
-	<VistaPerfil {perfilUsuario} {esMiPerfil} {proyectos} {resenas} />
+	<VistaPerfil {perfilUsuario} {esMiPerfil} {proyectos} {resenas} {categorias} />
 {:else}
 	<div class="flex min-h-screen items-center justify-center bg-gray-50">
 		<div class="text-center">

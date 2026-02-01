@@ -6,9 +6,9 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresEstadoRepository } from '$lib/infrastructure/supabase/postgres/estado.repo';
 import { ListarEstados } from '$lib/domain/use-cases/maestros/ListarEstados';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
-import { ListarCategorias } from '$lib/domain/use-cases/maestros/ListarCategorias';
+import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
-import { ListarTiposParticipacion } from '$lib/domain/use-cases/maestros/ListarTiposParticipacion';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 
 export const load: PageServerLoad = async () => {
 	try {
@@ -19,10 +19,10 @@ export const load: PageServerLoad = async () => {
 		const listarEstados = new ListarEstados(estadoRepo);
 
 		const categoriaRepo = new PostgresCategoriaRepository();
-		const listarCategorias = new ListarCategorias(categoriaRepo);
+		const getAllCategorias = new GetAllCategorias(categoriaRepo);
 
 		const tipoParticipacionRepo = new PostgresTipoParticipacionRepository();
-		const listarTiposParticipacion = new ListarTiposParticipacion(tipoParticipacionRepo);
+		const getAllTiposParticipacion = new GetAllTiposParticipacion(tipoParticipacionRepo);
 
 		const proyectoRepo = new PostgresProyectoRepository();
 
@@ -36,11 +36,11 @@ export const load: PageServerLoad = async () => {
 				console.error('Error fetching estados:', err);
 				return [];
 			}),
-			listarCategorias.execute().catch((err) => {
+			getAllCategorias.execute().catch((err) => {
 				console.error('Error fetching categorias:', err);
 				return [];
 			}),
-			listarTiposParticipacion.execute().catch((err) => {
+			getAllTiposParticipacion.execute().catch((err) => {
 				console.error('Error fetching tipos:', err);
 				return [];
 			}),
@@ -54,7 +54,7 @@ export const load: PageServerLoad = async () => {
 		return {
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			provincias: provincias.map((p) => p.nombre),
-			estados: estados.map((e) => e.descripcion),
+			estados: estados.map((e) => ({ value: e.descripcion, label: e.label })),
 			categorias: categorias.map((c) => c.descripcion),
 			tiposParticipacion: tiposParticipacion.map((t) => t.descripcion)
 		};

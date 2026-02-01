@@ -57,12 +57,9 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			.filter((p): p is Proyecto => p !== null);
 	}
 
-	/**
-	 * Versión optimizada para listados - solo carga datos esenciales
-	 * Reduce significativamente el tiempo de carga al evitar relaciones profundas
-	 */
-	async findAllSummary(): Promise<Proyecto[]> {
+	async findByInstitucionId(institucionId: number): Promise<Proyecto[]> {
 		const proyectos = await prisma.proyecto.findMany({
+			where: { institucion_id: institucionId },
 			select: {
 				id_proyecto: true,
 				titulo: true,
@@ -136,6 +133,113 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 										id_localidad: true,
 										nombre: true,
 										codigo_postal: true,
+										provincia: {
+											select: {
+												id_provincia: true,
+												nombre: true,
+												nombre_corto: true,
+												codigo_iso: true
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+
+		return proyectos
+			.map((p) => {
+				try {
+					return ProyectoMapper.toDomain(p as any);
+				} catch (err) {
+					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					return null;
+				}
+			})
+			.filter((p): p is Proyecto => p !== null);
+	}
+
+	async findAllSummary(): Promise<Proyecto[]> {
+		const proyectos = await prisma.proyecto.findMany({
+			select: {
+				id_proyecto: true,
+				titulo: true,
+				descripcion: true,
+				resumen: true,
+				url_portada: true,
+				beneficiarios: true,
+				created_at: true,
+				fecha_fin_tentativa: true,
+				institucion_id: true,
+				estado: {
+					select: {
+						id_estado: true,
+						descripcion: true
+					}
+				},
+				institucion: {
+					select: {
+						id_usuario: true,
+						username: true,
+						rol: true,
+						nombre_legal: true,
+						url_foto: true
+					}
+				},
+				proyecto_categorias: {
+					select: {
+						categoria: {
+							select: {
+								id_categoria: true,
+								descripcion: true
+							}
+						}
+					}
+				},
+				participacion_permitida: {
+					select: {
+						id_participacion_permitida: true,
+						id_proyecto: true,
+						id_tipo_participacion: true,
+						objetivo: true,
+						actual: true,
+						unidad_medida: true,
+						especie: true,
+						tipo_participacion: {
+							select: {
+								id_tipo_participacion: true,
+								descripcion: true
+							}
+						}
+					}
+				},
+				proyecto_ubicaciones: {
+					select: {
+						id_proyecto_ubicacion: true,
+						proyecto_id: true,
+						ubicacion_id: true,
+						ubicacion: {
+							select: {
+								id_ubicacion: true,
+								tipo_ubicacion: true,
+								modalidad: true,
+								calle: true,
+								numero: true,
+								piso: true,
+								departamento: true,
+								referencia: true,
+								url_google_maps: true,
+								url_virtual: true,
+								localidad_id: true,
+								localidad: {
+									select: {
+										id_localidad: true,
+										nombre: true,
+										codigo_postal: true,
+										id_provincia: true,
 										provincia: {
 											select: {
 												id_provincia: true,

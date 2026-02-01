@@ -8,7 +8,7 @@
 
 	export let proyectos: Proyecto[] = [];
 	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: string[] = [];
+	export let estadosDisponibles: Array<{ value: string; label: string }> = [];
 	export let categoriasDisponibles: string[] = [];
 	export let tiposParticipacionDisponibles: string[] = [];
 

@@ -4,6 +4,7 @@ import type { EstadoDescripcion } from '../types/Estado';
 export interface ProyectoRepository {
 	findAll(): Promise<Proyecto[]>;
 	findAllSummary(): Promise<Proyecto[]>; // Versión optimizada para listados
+	findByInstitucionId(id: number): Promise<Proyecto[]>; // Proyectos de una institución específica
 	findById(id: number): Promise<Proyecto | null>;
 	create(proyecto: Proyecto): Promise<Proyecto>;
 	update(proyecto: Proyecto): Promise<Proyecto>;

@@ -12,8 +12,8 @@ export interface TipoParticipacion {
 // * Mapa de labels para UI
 export const TIPO_PARTICIPACION_LABELS: Record<TipoParticipacionDescripcion, string> = {
 	Voluntariado: 'Voluntariado',
-	Especie: 'Especie',
-	Monetaria: 'Monetaria'
+	Especie: 'Donación en especie',
+	Monetaria: 'Aporte monetario'
 };
 
 // * Guards canónicos

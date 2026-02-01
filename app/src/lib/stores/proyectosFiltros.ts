@@ -109,7 +109,9 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 
 	const categoriasDisponibles = writable<string[]>(['Todas']);
 	const provinciasDisponibles = writable<string[]>(['Todas']);
-	const estadosDisponibles = writable<string[]>(['Todos']);
+	const estadosDisponibles = writable<{ value: string; label: string }[]>([
+		{ value: 'Todos', label: 'Todos' }
+	]);
 	const tiposParticipacionDisponibles = writable<string[]>(['Todos']);
 
 	/**

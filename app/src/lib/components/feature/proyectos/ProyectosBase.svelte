@@ -36,7 +36,7 @@
 	// Datos derivados
 	export let categoriasDisponibles: string[] = [];
 	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: string[] = [];
+	export let estadosDisponibles: { value: string; label: string }[] = [];
 	export let tiposParticipacionDisponibles: string[] = [];
 
 	// Funciones
