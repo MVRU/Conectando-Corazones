@@ -41,6 +41,7 @@ import type { IconSource } from '@steeze-ui/svelte-icon';
 // --- ESTADOS ---
 
 export const ESTADO_LABELS: Record<EstadoDescripcion, string> = {
+	borrador: 'Borrador',
 	en_curso: 'En curso',
 	pendiente_solicitud_cierre: 'Pendiente de cierre',
 	en_revision: 'En revisión',
@@ -50,6 +51,7 @@ export const ESTADO_LABELS: Record<EstadoDescripcion, string> = {
 };
 
 export const ESTADO_PRIORIDAD: Record<EstadoDescripcion, number> = {
+	borrador: -1,
 	en_curso: 0,
 	pendiente_solicitud_cierre: 1,
 	en_revision: 2,

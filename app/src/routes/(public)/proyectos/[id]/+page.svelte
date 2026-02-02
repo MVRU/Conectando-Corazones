@@ -138,6 +138,7 @@
 	function clasesEstado(estado: EstadoDescripcion) {
 		return (
 			{
+				borrador: 'text-slate-600 bg-slate-100',
 				en_curso: 'text-green-600 bg-green-100',
 				pendiente_solicitud_cierre: 'text-orange-600 bg-orange-100',
 				en_revision: 'text-gray-600 bg-gray-100',
@@ -391,11 +392,14 @@
 			acc.push({ divider: true } as any);
 
 			if (esCreador) {
+				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+
 				if (estadoCodigo === 'en_curso') {
 					acc.push({
 						label: 'Editar proyecto',
 						icon: Pencil,
-						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`)
+						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
+						disabled: !esEditable
 					});
 				}
 
@@ -1004,9 +1008,7 @@
 											<button
 												type="button"
 												onclick={manejarClickSolicitud}
-												disabled={(estadoCodigo !== 'en_curso' &&
-													estadoCodigo !== 'pendiente_solicitud_cierre') ||
-													solicitudRecienEnviada}
+												disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
 												class={tieneSolicitudPendiente
 													? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
 													: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
@@ -1332,10 +1334,16 @@
 						<button
 							type="button"
 							onclick={manejarClickSolicitud}
-							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98]"
+							disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
+							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
 						>
-							<Icon src={Heart} class="h-5 w-5" />
-							Colaborar ahora
+							{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+								<Icon src={Clock} class="h-5 w-5" aria-hidden="true" />
+								Solicitud enviada
+							{:else}
+								<Icon src={Heart} class="h-5 w-5" aria-hidden="true" />
+								Colaborar ahora
+							{/if}
 						</button>
 					{/if}
 					<button

@@ -36,6 +36,8 @@
 	export let modoEdicion = false;
 	export let participacionesOriginales: ParticipacionPermitida[] = [];
 	export let esAdmin = false;
+	export let estaPublicado = false;
+	export let tieneColaboradoresAprobados = false;
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -49,6 +51,14 @@
 
 	function toggleTipoParticipacion(tipo: TipoParticipacionDescripcion) {
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
+			// No se puede quitar un tipo que ya existe en el proyecto original en modo edición
+			const esOriginal = participacionesOriginales.some(
+				(p) => p.tipo_participacion?.descripcion === tipo
+			);
+			if (modoEdicion && esOriginal && !esAdmin) {
+				return;
+			}
+
 			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
 			participacionesPermitidas = participacionesPermitidas.filter(
 				(p) => p.tipo_participacion?.descripcion !== tipo
@@ -139,8 +149,9 @@
 	}
 
 	function eliminarParticipacion(index: number) {
-		// En modo edición, no permitir eliminar participaciones originales
-		if (modoEdicion && participacionesPermitidas[index].id_participacion_permitida && !esAdmin) {
+		// En modo edición no se pueden eliminar participaciones que ya existían
+		const esExistente = !!participacionesPermitidas[index].id_participacion_permitida;
+		if (modoEdicion && esExistente && !esAdmin) {
 			return;
 		}
 
@@ -211,7 +222,11 @@
 					<button
 						type="button"
 						on:click={() => toggleTipoParticipacion(tipo)}
-						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
+						disabled={estaPublicado && tieneColaboradoresAprobados && !esAdmin}
+						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover} disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
+						title={estaPublicado && tieneColaboradoresAprobados && !esAdmin
+							? 'No se pueden añadir tipos si ya hay colaboradores aprobados'
+							: 'Seleccionar'}
 					>
 						<div class="mb-3 text-3xl {clases.iconColor}">
 							<Icon src={info.icon} class="h-8 w-8" />
@@ -251,12 +266,12 @@
 				<button
 					type="button"
 					on:click={() => eliminarParticipacion(index)}
-					disabled={esOriginal && !esAdmin}
+					disabled={esOriginal && modoEdicion && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
-					class:opacity-50={esOriginal && !esAdmin}
-					class:cursor-not-allowed={esOriginal && !esAdmin}
-					title={esOriginal && !esAdmin
-						? 'No se pueden eliminar participaciones existentes'
+					class:opacity-50={esOriginal && modoEdicion && !esAdmin}
+					class:cursor-not-allowed={esOriginal && modoEdicion && !esAdmin}
+					title={esOriginal && modoEdicion && !esAdmin
+						? 'No se pueden eliminar participaciones existentes durante la edición'
 						: 'Eliminar'}
 					aria-label="Eliminar participación"
 				>
@@ -328,12 +343,12 @@
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
 							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
-							disabled={esOriginal && !esAdmin}
+							disabled={estaPublicado && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-							class:border-gray-300={!esOriginal || esAdmin}
-							class:cursor-not-allowed={esOriginal && !esAdmin}
-							class:bg-gray-50={esOriginal && !esAdmin}
-							class:text-gray-600={esOriginal && !esAdmin}
+							class:border-gray-300={!estaPublicado || esAdmin}
+							class:cursor-not-allowed={estaPublicado && !esAdmin}
+							class:bg-gray-50={estaPublicado && !esAdmin}
+							class:text-gray-600={estaPublicado && !esAdmin}
 						>
 							{#each [...UNIDADES_POR_TIPO[(participacion.tipo_participacion?.descripcion as TipoParticipacionDescripcion) || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>

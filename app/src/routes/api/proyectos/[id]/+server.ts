@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { CancelarProyecto } from '$lib/domain/use-cases/proyectos/CancelarProyecto';
+import { EditarProyecto } from '$lib/domain/use-cases/proyectos/EditarProyecto';
 import { Proyecto } from '$lib/domain/entities/Proyecto';
 
 const repo = new PostgresProyectoRepository();
@@ -24,24 +25,13 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 	if (!usuario) return json({ error: 'No autenticado' }, { status: 401 });
 
 	try {
-		const proyectoActual = await repo.findById(id);
-		if (!proyectoActual) return json({ error: 'Proyecto no encontrado' }, { status: 404 });
-
-		// Solo la institución dueña o un admin pueden editar
-		if (proyectoActual.institucion_id !== usuario.id_usuario && usuario.rol !== 'administrador') {
-			return json({ error: 'No autorizado para editar este proyecto' }, { status: 403 });
-		}
-
 		const data = await request.json();
-		const proyectoData = new Proyecto({
-			...proyectoActual,
-			...data,
-			id_proyecto: id
-		});
+		const useCase = new EditarProyecto(repo);
 
-		const updated = await repo.update(proyectoData);
+		const updated = await useCase.execute(id, data, usuario.id_usuario!);
 		return json(updated);
 	} catch (error: any) {
+		console.error('Error al editar el proyecto:', error);
 		return json({ error: error.message }, { status: 400 });
 	}
 };

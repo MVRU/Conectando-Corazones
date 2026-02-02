@@ -19,6 +19,7 @@
 
 	// Modo edición
 	export let modoEdicion = false;
+	export let esAdmin = false;
 
 	// Estados locales para datos
 	let provinciasData: Provincia[] = [];
@@ -96,8 +97,8 @@
 	function eliminarUbicacion(index: number) {
 		if (index === 0) return;
 
-		// En modo edición, no permitir eliminar ubicaciones originales
-		if (modoEdicion && ubicaciones[index].id_proyecto_ubicacion) {
+		// En modo edición, no permitir eliminar ubicaciones originales (excepto admin)
+		if (modoEdicion && ubicaciones[index].id_proyecto_ubicacion && !esAdmin) {
 			return;
 		}
 
@@ -244,7 +245,7 @@
 					<button
 						type="button"
 						on:click={() => eliminarUbicacion(index)}
-						disabled={esOriginal}
+						disabled={esOriginal && !esAdmin}
 						class="text-sm font-medium text-red-600 hover:text-red-800"
 						class:opacity-50={esOriginal}
 						class:cursor-not-allowed={esOriginal}
@@ -266,7 +267,7 @@
 							id="tipo_{index}"
 							value={ubicacion.tipo_ubicacion}
 							on:change={(e) => manejarCambioTipo(index, e.currentTarget.value)}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_tipo`] && !esOriginal}
@@ -282,8 +283,15 @@
 								<option value="personalizado">Otro...</option>
 							{/if}
 						</select>
+					{:else if esOriginal}
+						<!-- Mostrar tipo personalizado como texto si es original y no está en la lista -->
+						<div
+							class="w-full rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+						>
+							{ubicacion.tipo_ubicacion}
+						</div>
 					{:else if !esOriginal}
-						<!-- Input para tipos personalizados (solo en modo crear proyecto) -->
+						<!-- Input para tipos personalizados (solo en modo crear o nuevas ubicaciones) -->
 						<div class="flex gap-2">
 							<input
 								id="tipo_{index}"
@@ -320,7 +328,7 @@
 						id="modalidad_{index}"
 						value={ubicacion.modalidad}
 						on:change={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
-						disabled={esOriginal}
+						disabled={esOriginal && !esAdmin}
 						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						class:border-gray-300={!esOriginal}
 						class:border-red-300={errores[`ubicacion_${index}_modalidad`] && !esOriginal}
@@ -352,7 +360,7 @@
 							on:input={(e) => {
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
 							}}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_url_virtual`] && !esOriginal}
@@ -377,7 +385,7 @@
 								id="provincia_{index}"
 								value={ubicacion.direccion_presencial?.provincia}
 								on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_provincia`] && !esOriginal}
@@ -447,7 +455,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.calle}
 								on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
@@ -469,7 +477,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.numero}
 								on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
@@ -494,7 +502,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.piso || ''}
 								on:input={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_piso`] && !esOriginal}
@@ -519,7 +527,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.departamento || ''}
 								on:input={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:cursor-not-allowed={esOriginal}

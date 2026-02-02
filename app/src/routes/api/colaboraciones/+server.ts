@@ -2,12 +2,14 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { ListarColaboracionesPorProyecto } from '$lib/domain/use-cases/colaboraciones/ListarColaboracionesPorProyecto';
 import { ListarColaboracionesPorColaborador } from '$lib/domain/use-cases/colaboraciones/ListarColaboracionesPorColaborador';
 import { CrearColaboracion } from '$lib/domain/use-cases/colaboraciones/CrearColaboracion';
 
 const repo = new PostgresColaboracionRepository();
 const proyectoRepo = new PostgresProyectoRepository();
+const usuarioRepo = new PostgresUsuarioRepository();
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
@@ -38,8 +40,8 @@ export const GET: RequestHandler = async ({ url }) => {
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	const usuario = locals.usuario;
-	if (!usuario || usuario.rol !== 'colaborador') {
-		return json({ error: 'Solo los colaboradores pueden enviar solicitudes.' }, { status: 403 });
+	if (!usuario) {
+		return json({ error: 'Debés iniciar sesión para enviar una solicitud.' }, { status: 401 });
 	}
 
 	try {
@@ -49,7 +51,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Se requiere proyecto_id' }, { status: 400 });
 		}
 
-		const useCase = new CrearColaboracion(repo, proyectoRepo);
+		const useCase = new CrearColaboracion(repo, proyectoRepo, usuarioRepo);
 		const colaboracion = await useCase.execute({
 			proyecto_id: data.proyecto_id,
 			colaborador_id: usuario.id_usuario!,

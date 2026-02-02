@@ -5,13 +5,18 @@
 		Clock,
 		ExclamationCircle,
 		DocumentCheck,
-		XCircle
+		XCircle,
+		Pencil
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
 	export let estado: EstadoDescripcion | undefined = 'en_curso';
 
 	const CONFIG = {
+		borrador: {
+			color: 'bg-slate-100 text-slate-700 border-slate-200',
+			icon: Pencil
+		},
 		en_curso: {
 			color: 'bg-emerald-100 text-emerald-700 border-emerald-200',
 			icon: Clock

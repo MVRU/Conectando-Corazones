@@ -54,7 +54,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -161,7 +161,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -270,7 +270,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -282,7 +282,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			where: { id_proyecto: id },
 			include: this.includeOptions
 		});
-		return proyecto ? ProyectoMapper.toDomain(proyecto as any) : null;
+		try {
+			return proyecto ? ProyectoMapper.toDomain(proyecto as any) : null;
+		} catch (error) {
+			console.error(`Error al procesar el proyecto ID: ${id}:`, error);
+			return null;
+		}
 	}
 
 	async findByUsuarioId(id: number): Promise<Proyecto[]> {
@@ -332,12 +337,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	async create(proyecto: Proyecto): Promise<Proyecto> {
 		const result = await prisma.$transaction(
 			async (tx) => {
-				// 1. Obtener el ID del estado inicial 'en_curso'
-				const estadoActivo = await tx.estado.findUnique({
-					where: { descripcion: 'en_curso' }
+				// 1. Obtener el ID del estado solicitado (borrador o en_curso)
+				const estadoDoc = await tx.estado.findUnique({
+					where: { descripcion: proyecto.estado || 'en_curso' }
 				});
 
-				if (!estadoActivo) throw new Error('Estado "en_curso" no encontrado en la base de datos');
+				if (!estadoDoc)
+					throw new Error(
+						`Estado "${proyecto.estado || 'en_curso'}" no encontrado en la base de datos`
+					);
 
 				// 2. Crear el proyecto base
 				const created = await tx.proyecto.create({
@@ -349,7 +357,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						url_portada: proyecto.url_portada,
 						institucion_id: proyecto.institucion_id!,
 						created_at: new Date(),
-						estado_id: estadoActivo.id_estado,
+						estado_id: estadoDoc.id_estado,
 						beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
 						fecha_fin_tentativa: proyecto.fecha_fin_tentativa
 							? new Date(proyecto.fecha_fin_tentativa)
@@ -454,27 +462,141 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(result as any);
 	}
 
-	// Método incompleto de ejemplo, la actualización de grafos es compleja // TODO: completar método
 	async update(proyecto: Proyecto): Promise<Proyecto> {
 		if (!proyecto.id_proyecto) throw new Error('ID de proyecto requerido para actualizar');
 
-		const updated = await prisma.proyecto.update({
-			where: { id_proyecto: proyecto.id_proyecto },
-			data: {
-				titulo: proyecto.titulo,
-				descripcion: proyecto.descripcion,
-				resumen: proyecto.resumen,
-				aprendizajes: proyecto.aprendizajes,
-				url_portada: proyecto.url_portada,
-				fecha_fin_tentativa: proyecto.fecha_fin_tentativa
-					? new Date(proyecto.fecha_fin_tentativa)
-					: null,
-				beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
-				updated_at: new Date()
+		const result = await prisma.$transaction(
+			async (tx) => {
+				// 1. Actualizar datos básicos del proyecto
+				await tx.proyecto.update({
+					where: { id_proyecto: proyecto.id_proyecto },
+					data: {
+						titulo: proyecto.titulo,
+						descripcion: proyecto.descripcion,
+						resumen: proyecto.resumen,
+						aprendizajes: proyecto.aprendizajes,
+						url_portada: proyecto.url_portada,
+						fecha_fin_tentativa: proyecto.fecha_fin_tentativa
+							? new Date(proyecto.fecha_fin_tentativa)
+							: null,
+						beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
+						updated_at: new Date()
+					}
+				});
+
+				// 2. Sincronizar categorías
+				// Eliminar relaciones actuales
+				await tx.proyectoCategoria.deleteMany({
+					where: { proyecto_id: proyecto.id_proyecto }
+				});
+
+				// Crear nuevas relaciones
+				if (proyecto.categorias && proyecto.categorias.length > 0) {
+					await tx.proyectoCategoria.createMany({
+						data: proyecto.categorias.map((c) => ({
+							proyecto_id: proyecto.id_proyecto!,
+							categoria_id: c.id_categoria!
+						}))
+					});
+				}
+
+				// 3. Sincronizar participaciones permitidas
+				// Eliminar existentes
+				await tx.participacionPermitida.deleteMany({
+					where: { id_proyecto: proyecto.id_proyecto }
+				});
+
+				// Crear nuevas
+				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
+					for (const p of proyecto.participacion_permitida) {
+						let tipoId = p.id_tipo_participacion;
+
+						// Si no tiene ID pero sí descripción, buscarlo (caso de creación/edición rápida)
+						if (!tipoId && p.tipo_participacion?.descripcion) {
+							const tipos = await tx.tipoParticipacion.findMany({
+								where: { descripcion: p.tipo_participacion.descripcion }
+							});
+							tipoId = tipos[0]?.id_tipo_participacion;
+						}
+
+						if (tipoId) {
+							await tx.participacionPermitida.create({
+								data: {
+									id_proyecto: proyecto.id_proyecto!,
+									id_tipo_participacion: tipoId,
+									objetivo: p.objetivo,
+									actual: p.actual || 0,
+									unidad_medida: p.unidad_medida,
+									especie: p.especie
+								}
+							});
+						}
+					}
+				}
+
+				// 4. Sincronizar ubicaciones
+				// Primero obtenemos las ubicaciones actuales del proyecto
+				const ubicacionesActuales = await tx.proyectoUbicacion.findMany({
+					where: { proyecto_id: proyecto.id_proyecto },
+					select: { ubicacion_id: true }
+				});
+
+				const ubicacionIds = ubicacionesActuales.map((u) => u.ubicacion_id);
+
+				// Borramos las relaciones
+				await tx.proyectoUbicacion.deleteMany({
+					where: { proyecto_id: proyecto.id_proyecto }
+				});
+
+				// Borramos las ubicaciones huérfanas
+				if (ubicacionIds.length > 0) {
+					await tx.ubicacion.deleteMany({
+						where: { id_ubicacion: { in: ubicacionIds } }
+					});
+				}
+
+				// Creamos las nuevas ubicaciones
+				if (proyecto.ubicaciones && proyecto.ubicaciones.length > 0) {
+					for (const pu of proyecto.ubicaciones) {
+						if (pu.ubicacion) {
+							const u = pu.ubicacion as any;
+							const ubicacionCreada = await tx.ubicacion.create({
+								data: {
+									tipo_ubicacion: u.tipo_ubicacion,
+									modalidad: u.modalidad,
+									calle: u.calle || null,
+									numero: u.numero || null,
+									piso: u.piso || null,
+									departamento: u.departamento || null,
+									referencia: u.referencia || null,
+									url_google_maps: u.url_google_maps || null,
+									url_virtual: u.url_virtual || null,
+									localidad_id: u.localidad_id || null
+								}
+							});
+
+							await tx.proyectoUbicacion.create({
+								data: {
+									proyecto_id: proyecto.id_proyecto!,
+									ubicacion_id: ubicacionCreada.id_ubicacion
+								}
+							});
+						}
+					}
+				}
+
+				// Retornar el proyecto completo actualizado
+				const finalProject = await tx.proyecto.findUnique({
+					where: { id_proyecto: proyecto.id_proyecto },
+					include: this.includeOptions
+				});
+
+				return finalProject;
 			},
-			include: this.includeOptions
-		});
-		return ProyectoMapper.toDomain(updated as any);
+			{ timeout: 30000 }
+		);
+
+		return ProyectoMapper.toDomain(result as any);
 	}
 
 	async updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto> {
