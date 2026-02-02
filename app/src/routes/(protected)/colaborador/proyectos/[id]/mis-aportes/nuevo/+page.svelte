@@ -201,7 +201,7 @@
 		evidenciasNuevas = [...evidenciasNuevas];
 	}
 
-	function guardarAporte() {
+	async function guardarAporte() {
 		if (!cantidadAporte || cantidadAporte <= 0) {
 			toastStore.show({
 				variant: 'error',
@@ -211,10 +211,34 @@
 			return;
 		}
 
+		if (!selectedParticipacionPermitidaId) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: 'Debés seleccionar un tipo de participación.'
+			});
+			return;
+		}
+
 		estaGuardando = true;
 
-		// Simular guardado
-		setTimeout(() => {
+		try {
+			const response = await fetch('/api/aportes', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					colaboracion_id: data.colaboracionId,
+					participacion_permitida_id: selectedParticipacionPermitidaId,
+					cantidad: cantidadAporte
+				})
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.message || 'Error al registrar aporte');
+			}
+
 			toastStore.show({
 				variant: 'success',
 				title: 'Aporte registrado',
@@ -222,7 +246,16 @@
 				duration: 5000
 			});
 			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
-		}, 500);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Error desconocido';
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message
+			});
+		} finally {
+			estaGuardando = false;
+		}
 	}
 </script>
 
