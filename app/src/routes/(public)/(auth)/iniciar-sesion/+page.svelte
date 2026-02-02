@@ -153,7 +153,7 @@ TODO:
 								bind:value={password}
 								type={mostrarPassword ? 'text' : 'password'}
 								required
-								placeholder="123456"
+								placeholder="password123"
 								customClass="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							/>
 							<button

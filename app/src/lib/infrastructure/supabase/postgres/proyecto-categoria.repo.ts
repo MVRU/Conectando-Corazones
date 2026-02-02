@@ -5,49 +5,38 @@ import { mapProyectoCategoriasToDomain } from './mappers/proyecto-categoria.mapp
 import type { Prisma } from '@prisma/client';
 
 export class ProyectoCategoriaRepoPrisma implements ProyectoCategoriaRepository {
+	async findByProyectoId(proyectoId: number): Promise<ProyectoCategoria[]> {
+		const data = await prisma.proyectoCategoria.findMany({
+			where: { proyecto_id: proyectoId },
+			include: { categoria: true }
+		});
+		return mapProyectoCategoriasToDomain(data);
+	}
 
-    async findByProyectoId(proyectoId: number): Promise<ProyectoCategoria[]> {
-        const data = await prisma.proyectoCategoria.findMany({
-            where: { proyecto_id: proyectoId },
-            include: { categoria: true }
-        });
-        return mapProyectoCategoriasToDomain(data);
-    }
+	async createMany(
+		proyectoId: number,
+		categoriaIds: number[],
+		tx?: Prisma.TransactionClient
+	): Promise<ProyectoCategoria[]> {
+		const client = tx || prisma;
 
-    async createMany(
-        proyectoId: number,
-        categoriaIds: number[],
-        tx?: Prisma.TransactionClient
-    ): Promise<ProyectoCategoria[]> {
-        const client = tx || prisma;
+		await client.proyectoCategoria.createMany({
+			data: categoriaIds.map((catId) => ({
+				proyecto_id: proyectoId,
+				categoria_id: catId
+			})),
+			skipDuplicates: true
+		});
 
-        await client.proyectoCategoria.createMany({
-            data: categoriaIds.map(catId => ({
-                proyecto_id: proyectoId,
-                categoria_id: catId
-            })),
-            skipDuplicates: true
-        });
+		// Retornam solo las categorías que se solicitaron crear
+		const data = await client.proyectoCategoria.findMany({
+			where: {
+				proyecto_id: proyectoId,
+				categoria_id: { in: categoriaIds }
+			},
+			include: { categoria: true }
+		});
 
-        // Retornam solo las categorías que se solicitaron crear
-        const data = await client.proyectoCategoria.findMany({
-            where: {
-                proyecto_id: proyectoId,
-                categoria_id: { in: categoriaIds }
-            },
-            include: { categoria: true }
-        });
-
-        return mapProyectoCategoriasToDomain(data);
-    }
-
-    async categoriasExisten(categoriaIds: number[]): Promise<boolean> {
-        if (categoriaIds.length === 0) return true;
-
-        const count = await prisma.categoria.count({
-            where: { id_categoria: { in: categoriaIds } }
-        });
-
-        return count === categoriaIds.length;
-    }
+		return mapProyectoCategoriasToDomain(data);
+	}
 }

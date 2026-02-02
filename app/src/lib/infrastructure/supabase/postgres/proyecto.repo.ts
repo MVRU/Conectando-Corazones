@@ -5,7 +5,9 @@ import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoPartici
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
 import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
+import { PostgresCategoriaRepository } from './categoria.repo';
 import { RegistrarCategoriasDeProyecto } from '$lib/domain/use-cases/proyecto-categoria/RegistrarCategoriasDeProyecto';
+import type { ProyectoSearchCriteria } from '$lib/domain/types/dto/ProyectoSearchCriteria';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
 	private includeOptions = {
@@ -279,6 +281,50 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return proyecto ? ProyectoMapper.toDomain(proyecto as any) : null;
 	}
 
+	async findByUsuarioId(id: number): Promise<Proyecto[]> {
+		const proyectos = await prisma.proyecto.findMany({
+			where: {
+				OR: [{ institucion_id: id }, { colaboraciones: { some: { colaborador_id: id } } }]
+			},
+			include: this.includeOptions
+		});
+		return proyectos.map((p) => ProyectoMapper.toDomain(p as any));
+	}
+
+	async search(criteria: ProyectoSearchCriteria): Promise<Proyecto[]> {
+		const where: any = {};
+
+		if (criteria.query) {
+			where.OR = [
+				{ titulo: { contains: criteria.query, mode: 'insensitive' } },
+				{ descripcion: { contains: criteria.query, mode: 'insensitive' } }
+			];
+		}
+
+		if (criteria.estado) {
+			where.estado = {
+				descripcion: criteria.estado
+			};
+		}
+
+		if (criteria.categoriaIds && criteria.categoriaIds.length > 0) {
+			where.proyecto_categorias = {
+				some: {
+					categoria_id: { in: criteria.categoriaIds }
+				}
+			};
+		}
+
+		const proyectos = await prisma.proyecto.findMany({
+			where,
+			include: this.includeOptions,
+			skip: criteria.offset,
+			take: criteria.limit
+		});
+
+		return proyectos.map((p) => ProyectoMapper.toDomain(p as any));
+	}
+
 	async create(proyecto: Proyecto): Promise<Proyecto> {
 		const result = await prisma.$transaction(
 			async (tx) => {
@@ -308,12 +354,19 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				});
 				// 3. Registrar categorías
 				const proyectoCategoriaRepo = new ProyectoCategoriaRepoPrisma();
-				const registrarCategorias = new RegistrarCategoriasDeProyecto(proyectoCategoriaRepo);
+				const categoriaRepo = new PostgresCategoriaRepository();
+				const registrarCategorias = new RegistrarCategoriasDeProyecto(
+					proyectoCategoriaRepo,
+					categoriaRepo
+				);
 
-				await registrarCategorias.execute({
-					proyectoId: created.id_proyecto,
-					categoriaIds: (proyecto.categorias || []).map(c => c.id_categoria!)
-				}, tx);
+				await registrarCategorias.execute(
+					{
+						proyectoId: created.id_proyecto,
+						categoriaIds: (proyecto.categorias || []).map((c) => c.id_categoria!)
+					},
+					tx
+				);
 
 				// 4. Crear participaciones permitidas
 				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
@@ -399,12 +452,21 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 
 	// Método incompleto de ejemplo, la actualización de grafos es compleja // TODO: completar método
 	async update(proyecto: Proyecto): Promise<Proyecto> {
+		if (!proyecto.id_proyecto) throw new Error('ID de proyecto requerido para actualizar');
+
 		const updated = await prisma.proyecto.update({
 			where: { id_proyecto: proyecto.id_proyecto },
 			data: {
 				titulo: proyecto.titulo,
-				descripcion: proyecto.descripcion
-				// ... otros compos
+				descripcion: proyecto.descripcion,
+				resumen: proyecto.resumen,
+				aprendizajes: proyecto.aprendizajes,
+				url_portada: proyecto.url_portada,
+				fecha_fin_tentativa: proyecto.fecha_fin_tentativa
+					? new Date(proyecto.fecha_fin_tentativa)
+					: null,
+				beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null
+				// No actualizamos categorías ni estado aquí
 			},
 			include: this.includeOptions
 		});
@@ -426,7 +488,45 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			},
 			include: this.includeOptions
 		});
-
 		return ProyectoMapper.toDomain(updated as any);
+	}
+
+	async cancel(id: number, justificacion?: string): Promise<void> {
+		const estadoCancelado = await prisma.estado.findUnique({
+			where: { descripcion: 'cancelado' }
+		});
+
+		if (!estadoCancelado) throw new Error('Estado "cancelado" no encontrado');
+
+		const proyectoAnterior = await prisma.proyecto.findUnique({
+			where: { id_proyecto: id },
+			include: { estado: true }
+		});
+
+		if (!proyectoAnterior) throw new Error('Proyecto no encontrado');
+
+		await prisma.$transaction(async (tx) => {
+			// 1. Actualizar el estado del proyecto
+			await tx.proyecto.update({
+				where: { id_proyecto: id },
+				data: {
+					estado_id: estadoCancelado.id_estado
+				}
+			});
+
+			// 2. Registrar en el historial de cambios
+			await tx.historialDeCambios.create({
+				data: {
+					tipo_objeto: 'proyecto',
+					id_objeto: id,
+					accion: 'cancelacion',
+					atributo_afectado: 'estado',
+					valor_anterior: proyectoAnterior.estado?.descripcion || 'desconocido',
+					valor_nuevo: 'cancelado',
+					justificacion: justificacion || 'Cancelación manual por la institución',
+					usuario_id: proyectoAnterior.institucion_id // Atribuimos el cambio a la institución dueña
+				}
+			});
+		});
 	}
 }

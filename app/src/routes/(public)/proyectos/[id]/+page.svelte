@@ -235,12 +235,41 @@
 		}).format(valor);
 	}
 
-	function irAColaborar() {
-		if (!$usuario) {
-			goto('/iniciar-sesion');
-			return;
+	let mostrarModalColaborar = false;
+	let mostrarModalCancelar = false;
+	let justificacionCancelacion = '';
+	let cancelando = false;
+
+	async function confirmarCancelacion() {
+		if (cancelando) return;
+		cancelando = true;
+		try {
+			const res = await fetch(`/api/proyectos/${proyecto.id_proyecto}/cancelar`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ justificacion: justificacionCancelacion })
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.message || 'Error al cancelar el proyecto');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				message: 'Proyecto cancelado exitosamente'
+			});
+
+			goto('/mi-panel');
+		} catch (err: any) {
+			toastStore.show({
+				variant: 'error',
+				message: err.message
+			});
+		} finally {
+			cancelando = false;
+			mostrarModalCancelar = false;
 		}
-		mostrarModalColaborar = true;
 	}
 
 	async function compartirProyecto() {
@@ -265,7 +294,14 @@
 			.join('');
 	}
 
-	let mostrarModalColaborar = false;
+	function irAColaborar() {
+		if (!$usuario) {
+			goto('/iniciar-sesion');
+			return;
+		}
+		mostrarModalColaborar = true;
+	}
+
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
@@ -362,12 +398,17 @@
 						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`)
 					});
 				}
+
+				const esCancelable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+
 				acc.push({
-					label: 'Cerrar proyecto',
-					icon: LockClosed,
-					onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`),
+					label: esCancelable ? 'Cancelar proyecto' : 'Cerrar proyecto',
+					icon: esCancelable ? XCircle : LockClosed,
+					onclick: esCancelable
+						? () => (mostrarModalCancelar = true)
+						: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`),
 					variant: 'danger',
-					disabled: estadoCodigo !== 'pendiente_solicitud_cierre'
+					disabled: !esCancelable && estadoCodigo !== 'pendiente_solicitud_cierre'
 				});
 			} else if (esColaboradorAprobado) {
 				acc.push({
@@ -1468,6 +1509,78 @@
 					>
 						Cerrar
 					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if mostrarModalCancelar}
+		<!-- Overlay -->
+		<div
+			class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+			onclick={() => (mostrarModalCancelar = false)}
+			aria-hidden="true"
+		></div>
+
+		<!-- Modal de Cancelación -->
+		<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+			<div
+				class="animate-fade-up pointer-events-auto relative mx-auto w-full max-w-md scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 transition-all duration-300"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-cancelar-titulo"
+				tabindex="-1"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => {
+					if (e.key === 'Escape') mostrarModalCancelar = false;
+				}}
+			>
+				<div class="p-6">
+					<div class="mb-4 flex items-center justify-center">
+						<div
+							class="flex h-12 w-12 items-center justify-center rounded-full bg-red-50 ring-1 ring-red-100"
+						>
+							<Icon src={XCircle} class="h-6 w-6 text-red-600" aria-hidden="true" />
+						</div>
+					</div>
+					<h3 id="modal-cancelar-titulo" class="mb-2 text-center text-xl font-bold text-gray-900">
+						¿Cancelar proyecto?
+					</h3>
+					<p class="mb-6 text-center text-sm text-gray-600">
+						Esta acción cancelará el proyecto de forma permanente. Solo podés hacerlo porque aún no
+						hay colaboradores aprobados.
+					</p>
+
+					<div class="mb-6">
+						<label for="justificacion-cancel" class="mb-2 block text-sm font-medium text-gray-700">
+							Justificación (opcional)
+						</label>
+						<textarea
+							id="justificacion-cancel"
+							bind:value={justificacionCancelacion}
+							placeholder="Explicá brevemente el motivo de la cancelación..."
+							class="w-full rounded-xl border border-gray-200 p-3 text-sm transition-all outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+							rows="3"
+						></textarea>
+					</div>
+
+					<div class="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
+						<button
+							type="button"
+							class="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 sm:flex-none"
+							onclick={() => (mostrarModalCancelar = false)}
+						>
+							No, mantener
+						</button>
+						<button
+							type="button"
+							disabled={cancelando}
+							class="flex-1 rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50 sm:flex-none"
+							onclick={confirmarCancelacion}
+						>
+							{cancelando ? 'Cancelando...' : 'Sí, cancelar proyecto'}
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -29,4 +29,12 @@ export class PostgresCategoriaRepository implements CategoriaRepository {
 		});
 		return categoria ? CategoriaMapper.toDomain(categoria) : null;
 	}
+
+	async findByIds(ids: number[]): Promise<Categoria[]> {
+		if (ids.length === 0) return [];
+		const categorias = await prisma.categoria.findMany({
+			where: { id_categoria: { in: ids } }
+		});
+		return categorias.map((c) => CategoriaMapper.toDomain(c));
+	}
 }
