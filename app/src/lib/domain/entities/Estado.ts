@@ -6,15 +6,39 @@ export class Estado implements IEstado {
 	descripcion: EstadoDescripcion;
 
 	constructor(data: IEstado) {
-		if (!this.esDescripcionValida(data.descripcion)) {
-			throw new Error(`Descripción de estado inválida: ${data.descripcion}`);
+		if (!data) {
+			throw new Error('Los datos del estado son obligatorios');
 		}
+
+		if (
+			data.id_estado !== undefined &&
+			(typeof data.id_estado !== 'number' || data.id_estado <= 0)
+		) {
+			throw new Error('El ID de estado debe ser un número positivo válido');
+		}
+
+		if (!this.esDescripcionValida(data.descripcion)) {
+			throw new Error(`La descripción de estado proporcionada no es válida: ${data.descripcion}`);
+		}
+
 		this.id_estado = data.id_estado;
 		this.descripcion = data.descripcion;
 	}
 
 	private esDescripcionValida(descripcion: string): boolean {
 		return ESTADOS.includes(descripcion as EstadoDescripcion);
+	}
+
+	esEnCurso(): boolean {
+		return this.descripcion === 'en_curso';
+	}
+
+	esEnRevision(): boolean {
+		return this.descripcion === 'en_revision';
+	}
+
+	esEnAuditoria(): boolean {
+		return this.descripcion === 'en_auditoria';
 	}
 
 	esTerminal(): boolean {

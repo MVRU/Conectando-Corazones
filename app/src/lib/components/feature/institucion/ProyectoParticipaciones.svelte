@@ -19,7 +19,7 @@
 		TIPO_PARTICIPACION_LABELS,
 		type TipoParticipacionDescripcion
 	} from '$lib/domain/types/TipoParticipacion';
-	import type { TipoParticipacion } from '$lib/domain/entities/TipoParticipacion';
+	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/domain/types/forms/CrearProyectoForm';
 	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';

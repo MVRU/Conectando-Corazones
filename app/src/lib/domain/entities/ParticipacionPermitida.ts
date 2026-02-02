@@ -1,7 +1,7 @@
 import type { ParticipacionPermitida as IParticipacionPermitida } from '../types/ParticipacionPermitida';
 import type { Proyecto as ProyectoType } from '../types/Proyecto';
 import { Proyecto } from './Proyecto';
-import type { TipoParticipacion } from './TipoParticipacion';
+import { TipoParticipacion } from './TipoParticipacion';
 
 export class ParticipacionPermitida implements IParticipacionPermitida {
 	id_participacion_permitida?: number;
@@ -25,8 +25,9 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 		this.unidad_medida = data.unidad_medida;
 		this.especie = data.especie;
 		this.proyecto = data.proyecto ? new Proyecto(data.proyecto) : undefined;
-		// this.tipo_participacion = data.tipo_participacion ? new TipoParticipacion(data.tipo_participacion) : undefined; // Si TipoParticipacion fuera entidad
-		this.tipo_participacion = data.tipo_participacion;
+		this.tipo_participacion = data.tipo_participacion
+			? new TipoParticipacion(data.tipo_participacion)
+			: undefined;
 
 		this.validar();
 	}

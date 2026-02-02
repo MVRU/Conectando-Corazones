@@ -3,7 +3,7 @@
  * -!- Sección de información básica y categorías del form de proyecto.
  -->
 <script lang="ts">
-	import type { Categoria } from '$lib/domain/entities/Categoria';
+	import type { Categoria } from '$lib/domain/types/Categoria';
 	import {
 		MAX_BENEFICIARIOS,
 		formatearFechaLarga,

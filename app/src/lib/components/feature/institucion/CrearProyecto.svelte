@@ -30,8 +30,8 @@
 		validarPiso,
 		crearValidadorCategoria
 	} from '$lib/utils/util-proyecto-form';
-	import type { Categoria } from '$lib/domain/entities/Categoria';
-	import type { TipoParticipacion } from '$lib/domain/entities/TipoParticipacion';
+	import type { Categoria } from '$lib/domain/types/Categoria';
+	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/domain/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
