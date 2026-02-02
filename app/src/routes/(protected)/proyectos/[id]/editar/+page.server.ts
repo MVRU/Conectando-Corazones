@@ -144,27 +144,38 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const categoriasSeleccionadas =
 		proyectoOriginal.categorias?.map((c) => c.id_categoria!).filter(Boolean) || [];
 
-	return {
-		form: {
-			titulo: proyectoOriginal.titulo || '',
-			descripcion: proyectoOriginal.descripcion || '',
-			urlPortada: proyectoOriginal.url_portada || '',
-			fechaFinTentativa,
-			beneficiarios,
-			categoriasSeleccionadas,
-			categoriaOtraDescripcion: '',
-			ubicaciones,
-			tiposParticipacionSeleccionados,
-			participacionesPermitidas
-		},
-		originales: {
-			fechaFin: fechaFinTentativa,
-			beneficiarios,
-			participacionesOriginales: proyectoOriginal.participacion_permitida
-				? proyectoOriginal.participacion_permitida.map((p) => ({ ...p, proyecto: undefined }))
-				: []
-		},
-		categorias: categorias.map((c) => ({ ...c })),
-		tiposParticipacion: tiposParticipacion.map((t) => ({ ...t }))
-	};
+	// Asegurar que el proyecto sea editable
+	if (!proyectoOriginal.esEditable()) {
+		throw error(
+			400,
+			'El proyecto no puede ser editado: debe estar "en curso" y no tener colaboradores aprobados.'
+		);
+	}
+
+	return JSON.parse(
+		JSON.stringify({
+			form: {
+				titulo: proyectoOriginal.titulo || '',
+				descripcion: proyectoOriginal.descripcion || '',
+				urlPortada: proyectoOriginal.url_portada || '',
+				fechaFinTentativa,
+				beneficiarios,
+				categoriasSeleccionadas,
+				categoriaOtraDescripcion: '',
+				ubicaciones,
+				tiposParticipacionSeleccionados,
+				participacionesPermitidas
+			},
+			originales: {
+				fechaFin: fechaFinTentativa,
+				beneficiarios,
+				participacionesOriginales: proyectoOriginal.participacion_permitida
+					? proyectoOriginal.participacion_permitida.map((p) => ({ ...p, proyecto: undefined }))
+					: []
+			},
+			categorias,
+			tiposParticipacion,
+			proyectoId: idProyecto
+		})
+	);
 };

@@ -288,8 +288,11 @@
 				bind:value={categoriaOtraDescripcion}
 				maxlength="60"
 				on:blur={normalizarCategoriaOtra}
+				disabled={modoEdicion && !esAdmin}
 				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.categoria_otra}
+				class:cursor-not-allowed={modoEdicion && !esAdmin}
+				class:bg-gray-50={modoEdicion && !esAdmin}
 				placeholder="Ejemplo: Personas mayores, Acceso al agua, Inclusión digital…"
 				aria-invalid={!!errores.categoria_otra}
 			/>

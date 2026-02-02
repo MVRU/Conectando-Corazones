@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { usuario } from '$lib/stores/auth';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
@@ -40,17 +42,23 @@
 	export let limiteProyectosAlcanzado: boolean = false;
 	export let categorias: Categoria[] = [];
 	export let tiposParticipacion: TipoParticipacion[] = [];
+	export let estaVerificado: boolean = false;
 
-	let titulo = '';
-	let descripcion = '';
-	let urlPortada = '';
-	let fechaFinTentativa = '';
-	let beneficiarios: number | undefined = undefined;
+	// Props para edición
+	export let edicion: boolean = false;
+	export let proyectoId: number | undefined = undefined;
+	export let initialData: any = null;
 
-	let categoriasSeleccionadas: number[] = [];
-	let categoriaOtraDescripcion = '';
+	let titulo = initialData?.titulo || '';
+	let descripcion = initialData?.descripcion || '';
+	let urlPortada = initialData?.urlPortada || '';
+	let fechaFinTentativa = initialData?.fechaFinTentativa || '';
+	let beneficiarios: number | undefined = initialData?.beneficiarios;
 
-	let ubicaciones: UbicacionFormulario[] = [
+	let categoriasSeleccionadas: number[] = initialData?.categoriasSeleccionadas || [];
+	let categoriaOtraDescripcion = initialData?.categoriaOtraDescripcion || '';
+
+	let ubicaciones: UbicacionFormulario[] = initialData?.ubicaciones || [
 		{
 			tipo_ubicacion: 'principal',
 			modalidad: '',
@@ -66,10 +74,13 @@
 		}
 	];
 
-	let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
-	let participacionesPermitidas: ParticipacionForm[] = [];
+	let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] =
+		initialData?.tiposParticipacionSeleccionados || [];
+	let participacionesPermitidas: ParticipacionForm[] = initialData?.participacionesPermitidas || [];
 
 	let errores: Record<string, string> = {};
+
+	$: esAdmin = $usuario?.rol === 'administrador';
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
@@ -107,11 +118,86 @@
 	$: if (validarDescripcionProyecto(descripcion) === null) limpiarError('descripcion');
 	$: if (urlPortada && validarUrl(urlPortada) && !validarUrlImagen(urlPortada))
 		limpiarError('urlPortada');
-	$: if (fechaFinTentativa && esFechaFutura(fechaFinTentativa)) limpiarError('fechaFinTentativa');
+	$: if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
+		limpiarError('fechaFinTentativa');
 	$: if (beneficiarios && beneficiarios > 0) limpiarError('beneficiarios');
 	$: if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
 	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
 	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
+
+	// --- Lógica de Borradores Locales ---
+	const DRAFT_KEY = `proyecto_borrador_local`;
+
+	function guardarBorradorLocal() {
+		try {
+			const data = {
+				titulo,
+				descripcion,
+				urlPortada,
+				fechaFinTentativa,
+				beneficiarios,
+				categoriasSeleccionadas,
+				categoriaOtraDescripcion,
+				ubicaciones,
+				tiposParticipacionSeleccionados,
+				participacionesPermitidas,
+				timestamp: new Date().toISOString()
+			};
+			localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+			toastStore.show({
+				variant: 'success',
+				title: 'Borrador guardado localmente',
+				message:
+					'Tu progreso se guardó en este navegador. No se ha generado un registro en la base de datos.'
+			});
+		} catch (e) {
+			console.error('Error al guardar borrador local:', e);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error al guardar borrador',
+				message: 'No pudimos guardar el borrador en tu navegador.'
+			});
+		}
+	}
+
+	function cargarBorradorLocal() {
+		const saved = localStorage.getItem(DRAFT_KEY);
+		if (!saved) return;
+		try {
+			const data = JSON.parse(saved);
+			titulo = data.titulo || '';
+			descripcion = data.descripcion || '';
+			urlPortada = data.urlPortada || '';
+			fechaFinTentativa = data.fechaFinTentativa || '';
+			beneficiarios = data.beneficiarios;
+			categoriasSeleccionadas = data.categoriasSeleccionadas || [];
+			categoriaOtraDescripcion = data.categoriaOtraDescripcion || '';
+			ubicaciones = data.ubicaciones || [];
+			tiposParticipacionSeleccionados = data.tiposParticipacionSeleccionados || [];
+			participacionesPermitidas = data.participacionesPermitidas || [];
+
+			toastStore.show({
+				variant: 'info',
+				title: 'Borrador recuperado',
+				message: 'Se cargaron los datos guardados en tu navegador.'
+			});
+		} catch (e) {
+			console.error('Error al cargar borrador local:', e);
+		}
+	}
+
+	onMount(() => {
+		if (edicion || initialData) return;
+
+		const saved = localStorage.getItem(DRAFT_KEY);
+		if (saved && !titulo && !descripcion) {
+			cargarBorradorLocal();
+		}
+	});
+
+	function eliminarBorradorLocal() {
+		localStorage.removeItem(DRAFT_KEY);
+	}
 
 	function validarFormulario(): boolean {
 		errores = {};
@@ -130,7 +216,8 @@
 		}
 		if (!fechaFinTentativa) {
 			errores.fechaFinTentativa = 'La fecha de fin tentativa es obligatoria.';
-		} else if (!esFechaFutura(fechaFinTentativa)) {
+		} else if (!edicion && !esFechaFutura(fechaFinTentativa)) {
+			// En edición permitimos la fecha original aunque ya no sea futura si no se cambió
 			errores.fechaFinTentativa = 'La fecha de fin debe ser al menos a partir de mañana.';
 		} else if (esFechaDemasiadoLejana(fechaFinTentativa)) {
 			errores.fechaFinTentativa = 'La fecha es demasiado lejana (máximo 2 años).';
@@ -214,6 +301,15 @@
 				}
 			}
 		});
+
+		if (ubicaciones.length === 0) {
+			errores.ubicaciones = 'Debe definir al menos una ubicación.';
+			toastStore.show({
+				variant: 'error',
+				title: 'Faltan datos',
+				message: 'Debe definir al menos una ubicación para el proyecto.'
+			});
+		}
 
 		const principalCount = ubicaciones.filter(
 			(u) => (u.tipo_ubicacion || '').trim() === 'principal'
@@ -327,8 +423,8 @@
 
 	let enviando = false;
 
-	async function enviarFormulario() {
-		if (limiteProyectosAlcanzado) return;
+	async function enviarFormulario(estado: 'borrador' | 'en_curso' = 'en_curso') {
+		if (limiteProyectosAlcanzado && !edicion && estado === 'en_curso') return;
 
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
@@ -341,6 +437,7 @@
 			tipo_participacion: (p.tipo_participacion?.descripcion ||
 				'Voluntariado') as TipoParticipacionDescripcion,
 			objetivo: Number(p.objetivo) || 0,
+			actual: Number(p.actual) || 0,
 			unidad_medida: p.unidad_medida === 'Otra' ? p.unidad_medida_otra || '' : p.unidad_medida,
 			especie: p.tipo_participacion?.descripcion === 'Especie' ? p.especie || '' : undefined
 		}));
@@ -375,37 +472,56 @@
 			descripcion,
 			url_portada: urlPortada || undefined,
 			fecha_fin_tentativa: new Date(fechaFinTentativa),
-			beneficiarios,
+			beneficiarios: beneficiarios ? Number(beneficiarios) : undefined,
+			institucion_id: 0, // Se inyecta en el servidor
 			categoria_ids: categoriasSeleccionadas.filter((id) => Number.isFinite(id) && id > 0),
-			participaciones,
-			ubicaciones: ubicacionesCargadas
+			participaciones: participaciones,
+			ubicaciones: ubicacionesCargadas,
+			estado: edicion ? undefined : estado
 		};
+
+		// --- Manejo de Borrador Local vs Publicación ---
+		// Un proyecto en edición no debe guardarse como borrador local.
+		if (estado === 'borrador' && !edicion) {
+			guardarBorradorLocal();
+			enviando = false;
+			goto('/proyectos?tab=mis-proyectos');
+			return;
+		}
 
 		// Envío al backend
 		try {
-			const response = await fetch('/api/proyectos', {
-				method: 'POST',
+			const url = edicion ? `/api/proyectos/${proyectoId}` : '/api/proyectos';
+			const method = edicion ? 'PUT' : 'POST';
+
+			const response = await fetch(url, {
+				method,
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload)
 			});
 
 			const result = await response.json();
 
-			if (!response.ok || !result.success) {
-				throw new Error(result.error || 'No se pudo crear el proyecto.');
+			if (!response.ok) {
+				throw new Error(result.error || `No se pudo ${edicion ? 'editar' : 'crear'} el proyecto.`);
 			}
+
+			// Si se publicó con éxito, eliminamos el borrador local
+			eliminarBorradorLocal();
 
 			toastStore.show({
 				variant: 'success',
-				title: '¡Proyecto creado!',
-				message: 'El proyecto se ha creado exitosamente. Ahora podés verlo en tu panel.'
+				title: edicion ? '¡Proyecto actualizado!' : '¡Proyecto creado!',
+				message: edicion
+					? 'Los cambios se han guardado exitosamente.'
+					: 'El proyecto se ha publicado exitosamente. Ahora es visible para todos.'
 			});
-			goto('/proyectos');
+			goto('/proyectos?tab=mis-proyectos');
 		} catch (error: any) {
 			console.error('Error al enviar formulario:', error);
 			toastStore.show({
 				variant: 'error',
-				title: 'Error al crear proyecto',
+				title: `Error al ${edicion ? 'editar' : 'crear'} proyecto`,
 				message: error.message || 'Ocurrió un error inesperado. Por favor, intentá nuevamente.'
 			});
 		} finally {
@@ -422,21 +538,40 @@
 <main class="min-h-screen bg-gray-50">
 	<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">Crear nuevo proyecto</h1>
-			<p class="mt-2 text-gray-600">Completá la información para crear tu proyecto</p>
+			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">
+				{edicion ? 'Editar proyecto' : 'Crear nuevo proyecto'}
+			</h1>
+			<p class="mt-2 text-gray-600">
+				{edicion
+					? 'Actualizá la información de tu proyecto'
+					: 'Completá la información para crear tu proyecto'}
+			</p>
 		</div>
 
-		{#if limiteProyectosAlcanzado}
+		{#if limiteProyectosAlcanzado && !edicion}
 			<div class="mb-6">
 				<Alert
 					variant="warning"
 					title="Límite de proyectos alcanzado"
-					message="Ya superaste la cantidad máxima de proyectos en curso (5). No podés crear un nuevo proyecto hasta que finalices o interrumpas alguno de los actuales."
+					message="Ya superaste la cantidad máxima de proyectos en curso (5). No podés publicar un nuevo proyecto hasta que finalices o interrumpas alguno de los actuales."
 				/>
 			</div>
 		{/if}
 
-		<form on:submit|preventDefault={enviarFormulario} class="space-y-8">
+		{#if !estaVerificado && !edicion}
+			<div class="mb-6">
+				<Alert
+					variant="info"
+					title="Institución no verificada"
+					message="Tu institución aún no ha sido verificada. Podés guardar el proyecto como Borrador, pero solo podrás publicarlo (En curso) una vez que tu identidad sea aprobada."
+				/>
+			</div>
+		{/if}
+
+		<form
+			on:submit|preventDefault={() => enviarFormulario(estaVerificado ? 'en_curso' : 'borrador')}
+			class="space-y-8"
+		>
 			<ProyectoInfoBasica
 				bind:titulo
 				bind:descripcion
@@ -449,6 +584,8 @@
 				{errores}
 				{limpiarError}
 				{categorias}
+				modoEdicion={edicion}
+				{esAdmin}
 			/>
 
 			<ProyectoParticipaciones
@@ -457,17 +594,33 @@
 				bind:errores
 				{limpiarError}
 				{tiposParticipacion}
+				modoEdicion={edicion}
+				{esAdmin}
 			/>
 
-			<ProyectoUbicaciones bind:ubicaciones {errores} />
+			<ProyectoUbicaciones bind:ubicaciones {errores} modoEdicion={edicion} {esAdmin} />
 
-			<div class="flex justify-end">
+			<div class="flex flex-col justify-end gap-4 border-t border-gray-200 pt-6 sm:flex-row">
+				{#if !edicion}
+					<Button
+						type="button"
+						variant="secondary"
+						label="Guardar como Borrador"
+						loading={enviando}
+						disabled={enviando}
+						onclick={() => enviarFormulario('borrador')}
+					/>
+				{/if}
+
 				<Button
 					type="submit"
-					label="Crear proyecto"
+					label={edicion ? 'Guardar cambios' : 'Publicar proyecto'}
 					loading={enviando}
-					loadingLabel="Creando..."
-					disabled={limiteProyectosAlcanzado}
+					loadingLabel={edicion ? 'Guardando...' : 'Publicando...'}
+					disabled={enviando ||
+						(limiteProyectosAlcanzado && !edicion) ||
+						(!estaVerificado && !edicion)}
+					title={!estaVerificado && !edicion ? 'Debés estar verificado para publicar' : ''}
 				/>
 			</div>
 		</form>

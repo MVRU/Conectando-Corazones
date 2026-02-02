@@ -8,6 +8,12 @@
 		EstadoDescripcion,
 		{ dotColor: string; bgColor: string; textColor: string; borderColor: string }
 	> = {
+		borrador: {
+			dotColor: 'bg-slate-400',
+			bgColor: 'bg-slate-50',
+			textColor: 'text-slate-600',
+			borderColor: 'border-slate-200'
+		},
 		en_curso: {
 			dotColor: 'bg-green-500',
 			bgColor: 'bg-green-50',

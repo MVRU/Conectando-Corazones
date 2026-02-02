@@ -87,10 +87,27 @@ export class Proyecto {
 		if (!this.descripcion || this.descripcion.trim().length < 20) {
 			throw new Error('La descripción debe ser más detallada (mínimo 20 caracteres).');
 		}
+
+		if (!this.fecha_fin_tentativa) {
+			throw new Error('La fecha de fin tentativa es obligatoria.');
+		}
+
+		if (!this.categorias || this.categorias.length === 0) {
+			throw new Error('Debe seleccionar al menos una categoría.');
+		}
+
+		if (!this.participacion_permitida || this.participacion_permitida.length === 0) {
+			throw new Error('Debe definir al menos un tipo de participación.');
+		}
+
+		if (!this.ubicaciones || this.ubicaciones.length === 0) {
+			throw new Error('Debe definir al menos una ubicación.');
+		}
+
 		if (this.fecha_fin_tentativa) {
 			const fin = new Date(this.fecha_fin_tentativa);
-			if (fin < new Date()) {
-				throw new Error('La fecha de fin tentativa no puede ser en el pasado.');
+			if (isNaN(fin.getTime())) {
+				throw new Error('La fecha de fin tentativa no es válida.');
 			}
 		}
 		if (!this.institucion_id && !this.institucion) {
@@ -109,11 +126,18 @@ export class Proyecto {
 	}
 
 	objetivosAlcanzados(): boolean {
-		// Validar si todas las participaciones permitidas han alcanzado su objetivo
 		if (!this.participacion_permitida || this.participacion_permitida.length === 0) {
-			return false; // Sin participaciones no hay objetivos que cumplir (o true? Depende negocio)
+			return false;
 		}
 		return this.participacion_permitida.every((p) => p.estaCompleto());
+	}
+
+	tieneColaboradoresAprobados(): boolean {
+		return this.colaboraciones?.some((c) => c.estado === 'aprobada') ?? false;
+	}
+
+	esEditable(): boolean {
+		return this.estaActivo() && !this.tieneColaboradoresAprobados();
 	}
 
 	// Máquina de Estados

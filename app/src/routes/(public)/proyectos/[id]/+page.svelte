@@ -138,6 +138,7 @@
 	function clasesEstado(estado: EstadoDescripcion) {
 		return (
 			{
+				borrador: 'text-slate-600 bg-slate-100',
 				en_curso: 'text-green-600 bg-green-100',
 				pendiente_solicitud_cierre: 'text-orange-600 bg-orange-100',
 				en_revision: 'text-gray-600 bg-gray-100',
@@ -391,11 +392,14 @@
 			acc.push({ divider: true } as any);
 
 			if (esCreador) {
+				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+
 				if (estadoCodigo === 'en_curso') {
 					acc.push({
 						label: 'Editar proyecto',
 						icon: Pencil,
-						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`)
+						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
+						disabled: !esEditable
 					});
 				}
 
