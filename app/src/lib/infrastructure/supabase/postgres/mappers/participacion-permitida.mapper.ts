@@ -12,7 +12,7 @@ export class ParticipacionPermitidaMapper {
 			id_participacion_permitida: prismaParticipacion.id_participacion_permitida,
 			id_proyecto: prismaParticipacion.id_proyecto ?? undefined,
 			id_tipo_participacion: prismaParticipacion.id_tipo_participacion ?? undefined,
-			objetivo: prismaParticipacion.objetivo, // Prisma Int -> number
+			objetivo: prismaParticipacion.objetivo,
 			actual: prismaParticipacion.actual ?? 0,
 			unidad_medida: prismaParticipacion.unidad_medida ?? undefined,
 			especie: prismaParticipacion.especie ?? undefined,
@@ -20,5 +20,16 @@ export class ParticipacionPermitidaMapper {
 				? TipoParticipacionMapper.toDomain(prismaParticipacion.tipo_participacion)
 				: undefined
 		});
+	}
+
+	static toPrisma(domain: ParticipacionPermitida) {
+		return {
+			id_proyecto: domain.id_proyecto,
+			id_tipo_participacion: domain.id_tipo_participacion,
+			objetivo: domain.objetivo,
+			actual: domain.actual || 0,
+			unidad_medida: domain.unidad_medida,
+			especie: domain.especie
+		};
 	}
 }

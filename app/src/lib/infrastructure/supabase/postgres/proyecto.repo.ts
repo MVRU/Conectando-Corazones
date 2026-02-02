@@ -469,8 +469,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				fecha_fin_tentativa: proyecto.fecha_fin_tentativa
 					? new Date(proyecto.fecha_fin_tentativa)
 					: null,
-				beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null
-				// No actualizamos categorías ni estado aquí
+				beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
+				updated_at: new Date()
 			},
 			include: this.includeOptions
 		});

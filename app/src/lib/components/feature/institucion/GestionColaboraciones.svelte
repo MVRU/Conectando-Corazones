@@ -46,15 +46,32 @@
 		}
 	}
 
-	function aceptarColaboracion(colaboracionId: number) {
-		// Actualizar estado en el proyecto seleccionado
-		if (proyectoSeleccionado.colaboraciones) {
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
-				c.id_colaboracion === colaboracionId ? { ...c, estado: 'aprobada' as const } : c
-			);
-		}
+	async function aceptarColaboracion(colaboracionId: number) {
+		try {
+			const res = await fetch(`/api/colaboraciones/${colaboracionId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ estado: 'aprobada' })
+			});
 
-		console.log(`Colaboración ${colaboracionId} aprobada`);
+			const result = await res.json();
+
+			if (!res.ok) {
+				throw new Error(result.error || 'Error al aprobar la colaboración');
+			}
+
+			// Actualizar estado en el proyecto seleccionado
+			if (proyectoSeleccionado.colaboraciones) {
+				proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+					c.id_colaboracion === colaboracionId ? result : c
+				);
+			}
+
+			console.log(`Colaboración ${colaboracionId} aprobada`);
+		} catch (error: any) {
+			console.error('Error al aprobar:', error);
+			// Acá se podría usar un Toast quizás
+		}
 	}
 
 	function mostrarModalParaRechazar(colaboracionId: number) {
@@ -69,19 +86,36 @@
 		justificacionRechazo = '';
 	}
 
-	function confirmarRechazo() {
-		if (colaboracionARechazar && proyectoSeleccionado.colaboraciones) {
-			const justificacion = justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
+	async function confirmarRechazo() {
+		if (colaboracionARechazar) {
+			try {
+				const justificacion =
+					justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
 
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
-				c.id_colaboracion === colaboracionARechazar
-					? { ...c, estado: 'rechazada' as const, justificacion }
-					: c
-			);
+				const res = await fetch(`/api/colaboraciones/${colaboracionARechazar}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ estado: 'rechazada', justificacion })
+				});
 
-			console.log(
-				`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`
-			);
+				const result = await res.json();
+
+				if (!res.ok) {
+					throw new Error(result.error || 'Error al rechazar la colaboración');
+				}
+
+				if (proyectoSeleccionado.colaboraciones) {
+					proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+						c.id_colaboracion === colaboracionARechazar ? result : c
+					);
+				}
+
+				console.log(
+					`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`
+				);
+			} catch (error: any) {
+				console.error('Error al rechazar:', error);
+			}
 		}
 
 		cerrarModalRechazo();

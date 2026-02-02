@@ -9,6 +9,16 @@ export class CrearProyecto {
 	constructor(private proyectoRepo: ProyectoRepository) {}
 
 	async execute(data: ProyectoCreate): Promise<Proyecto> {
+		if (!data.institucion_id) {
+			throw new Error('El ID de la institución es requerido.');
+		}
+		const proyectosExistentes = await this.proyectoRepo.findByInstitucionId(data.institucion_id);
+		const enCurso = proyectosExistentes.filter((p) => p.estado === 'en_curso');
+
+		if (enCurso.length >= 5) {
+			throw new Error('No podés tener más de 5 proyectos activos al mismo tiempo.');
+		}
+
 		const proyecto = new Proyecto({
 			titulo: data.titulo,
 			descripcion: data.descripcion,

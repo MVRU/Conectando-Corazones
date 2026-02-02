@@ -23,6 +23,20 @@ export class Colaboracion {
 		this.proyecto_id = data.proyecto_id;
 		this.colaborador_id = data.colaborador_id;
 		this.colaborador = data.colaborador;
+
+		this.validar();
+	}
+
+	private validar(): void {
+		if (!this.proyecto_id) {
+			throw new Error('El ID del proyecto es requerido para la colaboración.');
+		}
+		if (!this.colaborador_id) {
+			throw new Error('El ID del colaborador es requerido.');
+		}
+		if (this.mensaje && this.mensaje.length > 500) {
+			throw new Error('El mensaje no puede superar los 500 caracteres.');
+		}
 	}
 
 	// Lógica de negocio

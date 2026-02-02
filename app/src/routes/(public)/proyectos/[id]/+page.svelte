@@ -1359,10 +1359,44 @@
 
 	<ModalColaboracion
 		bind:open={mostrarModalColaborar}
-		onsubmit={() => {
-			mostrarModalColaborar = false;
-			mostrarModalExito = true;
-			solicitudRecienEnviada = true;
+		onsubmit={async ({ mensaje }) => {
+			try {
+				const res = await fetch('/api/colaboraciones', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						proyecto_id: proyecto.id_proyecto,
+						mensaje
+					})
+				});
+
+				const result = await res.json();
+
+				if (!res.ok) {
+					throw new Error(result.error || 'Error al enviar la solicitud');
+				}
+
+				mostrarModalColaborar = false;
+				mostrarModalExito = true;
+				solicitudRecienEnviada = true;
+
+				// Actualizar el estado local para reflejar la solicitud pendiente
+				if (proyecto.colaboraciones) {
+					proyecto.colaboraciones = [...proyecto.colaboraciones, result];
+				} else {
+					proyecto.colaboraciones = [result];
+				}
+
+				toastStore.show({
+					variant: 'success',
+					message: '¡Tu solicitud fue enviada correctamente!'
+				});
+			} catch (err: any) {
+				toastStore.show({
+					variant: 'error',
+					message: err.message
+				});
+			}
 		}}
 	/>
 

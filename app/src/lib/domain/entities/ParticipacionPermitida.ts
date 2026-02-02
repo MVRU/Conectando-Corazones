@@ -33,11 +33,14 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 	}
 
 	private validar(): void {
-		if (this.objetivo < 0) {
-			throw new Error('El objetivo no puede ser negativo.');
+		if (this.objetivo <= 0) {
+			throw new Error('El objetivo debe ser mayor a cero.');
 		}
 		if (this.actual && this.actual < 0) {
 			throw new Error('La cantidad actual no puede ser negativa.');
+		}
+		if (this.id_tipo_participacion && this.id_tipo_participacion <= 0) {
+			throw new Error('El ID de tipo de participación no es válido.');
 		}
 	}
 

@@ -39,7 +39,7 @@ export class Proyecto {
 		this.id_proyecto = data.id_proyecto;
 		this.titulo = data.titulo || '';
 		this.descripcion = data.descripcion || '';
-		this.institucion_id = data.institucion_id || 0;
+		this.institucion_id = data.institucion_id || null;
 		this.resumen = data.resumen || undefined;
 		this.aprendizajes = data.aprendizajes || undefined;
 		this.url_portada = data.url_portada || undefined;
@@ -75,6 +75,26 @@ export class Proyecto {
 		}
 		if (data.colaboraciones) {
 			this.colaboraciones = data.colaboraciones;
+		}
+
+		this.validar();
+	}
+
+	private validar(): void {
+		if (!this.titulo || this.titulo.trim().length < 5) {
+			throw new Error('El título del proyecto debe tener al menos 5 caracteres.');
+		}
+		if (!this.descripcion || this.descripcion.trim().length < 20) {
+			throw new Error('La descripción debe ser más detallada (mínimo 20 caracteres).');
+		}
+		if (this.fecha_fin_tentativa) {
+			const fin = new Date(this.fecha_fin_tentativa);
+			if (fin < new Date()) {
+				throw new Error('La fecha de fin tentativa no puede ser en el pasado.');
+			}
+		}
+		if (!this.institucion_id && !this.institucion) {
+			throw new Error('El proyecto debe estar asociado a una institución.');
 		}
 	}
 
