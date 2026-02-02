@@ -89,7 +89,7 @@ export function filtrarProyectos(
 	}
 
 	if (estado.length > 0 && !estado.includes('Todos')) {
-		resultado = resultado.filter((p) => estado.includes(ESTADO_LABELS[p.estado ?? 'en_curso']));
+		resultado = resultado.filter((p) => p.estado && estado.includes(p.estado));
 	}
 
 	if (provincia !== 'Todas') {

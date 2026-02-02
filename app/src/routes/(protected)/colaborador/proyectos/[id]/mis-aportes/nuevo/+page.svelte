@@ -33,7 +33,7 @@
 
 	let selectedParticipacion = $derived(
 		data.participacionesPermitidas.find(
-			(p) => p.id_participacion_permitida === selectedParticipacionPermitidaId
+			(p: any) => p.id_participacion_permitida === selectedParticipacionPermitidaId
 		)
 	);
 

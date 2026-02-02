@@ -16,7 +16,7 @@ export class ObtenerDetalleAportesColaborador {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
-		const colaborador = await this.usuarioRepo.getById(colaboradorId);
+		const colaborador = await this.usuarioRepo.findById(colaboradorId);
 		if (!colaborador) throw new Error('Colaborador no encontrado');
 
 		const colaboracion = await this.colaboracionRepo.getColaboracion(proyectoId, colaboradorId);
@@ -98,7 +98,7 @@ export class ObtenerDetalleAportesColaborador {
 
 		const colaboradoresList = await Promise.all(
 			uniqueCollaboratorIds.map(async (userId: number) => {
-				const user = await this.usuarioRepo.getById(userId);
+				const user = await this.usuarioRepo.findById(userId);
 				if (!user) return null;
 
 				const userColabs = approvedCollaborations.filter(

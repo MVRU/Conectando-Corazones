@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import BurbujaMensaje from '$lib/components/feature/chat/BurbujaMensaje.svelte';
 	import InputMensaje from '$lib/components/feature/chat/InputMensaje.svelte';
 	import SeparadorFecha from '$lib/components/feature/chat/SeparadorFecha.svelte';
@@ -9,35 +8,18 @@
 	import { usuario } from '$lib/stores/auth';
 	import { chatStore } from '$lib/stores/chatStore';
 	import type { Mensaje, Chat } from '$lib/domain/types/Chat';
-	import { ObtenerChatPorProyecto } from '$lib/domain/use-cases/chat/ObtenerChatPorProyecto';
-	import { EnviarMensaje } from '$lib/domain/use-cases/chat/EnviarMensaje';
-	import { MockChatRepository } from '$lib/infrastructure/repositories/mock/MockChatRepository';
+	import type { PageData } from './$types';
 
 	// Obtener ID del proyecto desde la URL
 	$: proyectoId = Number($page.params.proyecto_id);
 
-	// Inicializar repositorio y casos de uso
-	const chatRepository = new MockChatRepository();
-	const obtenerChatPorProyecto = new ObtenerChatPorProyecto(chatRepository);
-	const enviarMensaje = new EnviarMensaje(chatRepository);
+	// Props
+	export let data: PageData;
 
-	// Cargar chat y proyecto
-	let chat: Chat | null | undefined;
-	let previousChatId: number | null = null;
+	// Chat no disponible
+	let chat: any = null;
 
-	$: if (proyectoId) {
-		obtenerChatPorProyecto.ejecutar(proyectoId).then((c) => {
-			chat = c;
-			if (c) {
-				if (previousChatId !== null && previousChatId !== c.id_chat) {
-				}
-				previousChatId = c.id_chat;
-				chatStore.setCurrentChat(c.id_chat);
-			}
-		});
-	}
-
-	$: proyecto = mockProyectos.find((p) => p.id_proyecto === proyectoId);
+	$: proyecto = data.proyecto;
 
 	// Validar acceso
 	$: hasAccess =
@@ -57,7 +39,7 @@
 
 	$: messageGroups =
 		chat && chat.mensajes
-			? chat.mensajes.reduce((groups: MessageGroup[], mensaje) => {
+			? chat.mensajes.reduce((groups: MessageGroup[], mensaje: Mensaje) => {
 					const messageDate = new Date(mensaje.created_at);
 					const dateOnly = new Date(
 						messageDate.getFullYear(),
@@ -91,29 +73,10 @@
 	});
 
 	// Manejar envío de mensajes
+	// Manejar envío de mensajes
 	async function handleSend(event: CustomEvent<{ contenido: string }>) {
-		const mensaje = event.detail.contenido;
-		if (!mensaje.trim() || !chat || !$usuario || !$usuario.id_usuario) return;
-
-		try {
-			const nuevoMensaje = await enviarMensaje.ejecutar(chat.id_chat, $usuario.id_usuario, mensaje);
-
-			// Actualizar array de mensajes (reactividad Svelte)
-			if (chat) {
-				chat = {
-					...chat,
-					mensajes: [...chat.mensajes, nuevoMensaje],
-					updated_at: new Date()
-				};
-			}
-
-			// Limpiar borrador después de enviar
-			if (chat) {
-				chatStore.clearDraft(chat.id_chat);
-			}
-		} catch (error) {
-			console.error('Error al enviar mensaje:', error);
-		}
+		// Backend no implementado
+		console.log('Enviar mensaje:', event.detail.contenido);
 	}
 
 	// Mobile menu

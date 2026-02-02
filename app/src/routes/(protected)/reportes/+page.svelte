@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { usuario as user, isAdmin, isInstitucion, isColaborador } from '$lib/stores/auth';
-	import { mockReportes } from '$lib/infrastructure/mocks/mock-reportes';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import type { Reporte } from '$lib/domain/types/Reporte';
 	import { fly } from 'svelte/transition';
 	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';
@@ -32,12 +29,12 @@
 
 	// Filtra reportes reactivamente cuando cambia el usuario o los filtros
 	$: {
-		let result = [];
+		let result: any[] = [];
 		if ($user) {
 			if ($isAdmin) {
-				result = [...mockReportes];
+				result = [];
 			} else {
-				result = mockReportes.filter((r) => r.reportante_id === $user?.id_usuario);
+				result = [];
 			}
 
 			// Filtrar por estado
@@ -109,14 +106,12 @@
 
 	function getNombreUsuario(id: number | null | undefined): string {
 		if (!id) return 'Desconocido';
-		const usuario = Object.values(mockUsuarios).find((u) => u.id_usuario === id);
-		return usuario ? usuario.username : `ID ${id}`;
+		return `ID ${id}`;
 	}
 
 	function getTituloObjeto(tipo: string, id: number): string {
 		if (tipo === 'Proyecto') {
-			const proyecto = mockProyectos.find((p) => p.id_proyecto === id);
-			return proyecto ? proyecto.titulo : `Proyecto ID ${id}`;
+			return `Proyecto ID ${id}`;
 		} else if (tipo === 'Usuario') {
 			return getNombreUsuario(id);
 		}
@@ -143,28 +138,10 @@
 			return;
 		}
 
-		const index = mockReportes.findIndex((r) => r.id_reporte === reporteSeleccionado?.id_reporte);
-		if (index !== -1) {
-			const reporteActualizado = {
-				...mockReportes[index],
-				estado: resolucionEstado,
-				fecha_resolucion: new Date(),
-				admin_id: $user?.id_usuario || 1,
-				comentario_resolucion: resolucionComentario
-			};
-			mockReportes[index] = reporteActualizado;
-
-			if ($isAdmin) {
-				filteredReportes = [...mockReportes];
-			}
-
-			reporteSeleccionado = reporteActualizado;
-
-			toastStore.show({
-				message: `El reporte ha sido ${resolucionEstado === 'resuelto' ? 'resuelto' : 'rechazado'} correctamente.`,
-				variant: 'success'
-			});
-		}
+		toastStore.show({
+			message: 'Funcionalidad no disponible (Backend pendiente).',
+			variant: 'info'
+		});
 
 		cerrarModalResolucion();
 	}
@@ -183,17 +160,12 @@
 	function confirmarRetiro() {
 		if (!reporteARetirar) return;
 
-		const index = mockReportes.findIndex((r) => r.id_reporte === reporteARetirar?.id_reporte);
-		if (index !== -1) {
-			mockReportes.splice(index, 1);
-			filteredReportes = filteredReportes.filter(
-				(r) => r.id_reporte !== reporteARetirar?.id_reporte
-			);
-			toastStore.show({
-				message: 'El reporte ha sido retirado correctamente.',
-				variant: 'success'
-			});
-		}
+		// Mock logic removed
+		toastStore.show({
+			message: 'Funcionalidad no disponible (Backend pendiente).',
+			variant: 'info'
+		});
+
 		cerrarModalRetiro();
 	}
 

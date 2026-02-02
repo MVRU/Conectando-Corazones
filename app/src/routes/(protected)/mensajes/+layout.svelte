@@ -2,42 +2,26 @@
 	import { page } from '$app/stores';
 	import type { Chat } from '$lib/domain/types/Chat';
 	import { usuario } from '$lib/stores/auth';
-	import { ObtenerChatsPorUsuario } from '$lib/domain/use-cases/chat/ObtenerChatsPorUsuario';
-	import { MockChatRepository } from '$lib/infrastructure/repositories/mock/MockChatRepository';
 	import { chatStore } from '$lib/stores/chatStore';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-
 	// Filtrar chats donde el usuario es participante
 	let chatsUsuario: Chat[] = [];
-	const chatRepository = new MockChatRepository();
-	const obtenerChatsPorUsuario = new ObtenerChatsPorUsuario(chatRepository);
 
+	// Backend de chat no implementado
 	$: if ($usuario?.id_usuario) {
-		obtenerChatsPorUsuario.ejecutar($usuario.id_usuario).then((chats) => {
-			chatsUsuario = chats;
-		});
-	} else {
 		chatsUsuario = [];
 	}
 
 	// Separar chats activos y archivados
-	$: activeChats = chatsUsuario.filter((chat) => {
-		const proyecto = mockProyectos.find((p) => p.id_proyecto === chat.proyecto_id);
-		return proyecto && !['completado', 'cancelado'].includes(proyecto.estado || '');
-	});
-
-	$: archivedChats = chatsUsuario.filter((chat) => {
-		const proyecto = mockProyectos.find((p) => p.id_proyecto === chat.proyecto_id);
-		return proyecto && ['completado', 'cancelado'].includes(proyecto.estado || '');
-	});
+	$: activeChats = [] as Chat[];
+	$: archivedChats = [] as Chat[];
 
 	// Determinar si estamos en la vista de chat (mobile)
 	$: isInChat = !!$page.params.proyecto_id;
 
 	// Función helper para obtener proyecto
-	function getProyecto(proyectoId: number) {
-		return mockProyectos.find((p) => p.id_proyecto === proyectoId);
+	function getProyecto(proyectoId: number): any {
+		return undefined;
 	}
 </script>
 

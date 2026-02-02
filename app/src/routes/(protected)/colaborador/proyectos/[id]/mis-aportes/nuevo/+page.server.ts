@@ -1,10 +1,12 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const projectId = Number(params.id);
-	const proyecto = mockProyectos.find((p) => p.id_proyecto === projectId);
+	const repo = new PostgresProyectoRepository();
+	// @ts-ignore
+	const proyecto = await repo.findById(projectId);
 
 	if (!proyecto) {
 		throw error(404, 'Proyecto no encontrado');
@@ -16,7 +18,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	return {
-		proyecto,
-		participacionesPermitidas: proyecto.participacion_permitida || []
+		proyecto: JSON.parse(JSON.stringify(proyecto)),
+		participacionesPermitidas: JSON.parse(JSON.stringify(proyecto.participacion_permitida || []))
 	};
 };

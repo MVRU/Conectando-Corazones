@@ -15,14 +15,18 @@
 		validarEspecie,
 		validarAumentoObjetivo
 	} from '$lib/utils/util-proyecto-form';
-	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
+	import {
+		TIPO_PARTICIPACION_LABELS,
+		type TipoParticipacionDescripcion
+	} from '$lib/domain/types/TipoParticipacion';
+	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/domain/types/forms/CrearProyectoForm';
 	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus } from 'lucide-svelte';
-
+	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
 	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
 	export let participacionesPermitidas: ParticipacionForm[] = [];
 	export let errores: Record<string, string> = {};
@@ -38,7 +42,8 @@
 		texto: string
 	): boolean {
 		const key = toKey(texto);
-		const lista = unidadesPorTipo[(tipo ?? 'Voluntariado') as keyof typeof unidadesPorTipo] ?? [];
+		const lista =
+			UNIDADES_POR_TIPO[(tipo ?? 'Voluntariado') as keyof typeof UNIDADES_POR_TIPO] ?? [];
 		return lista.map(toKey).includes(key);
 	}
 
@@ -166,35 +171,11 @@
 		];
 	}
 
-	const tiposParticipacionInfo: Record<
-		string,
-		{ titulo: string; descripcion: string; icon: IconSource; color: string }
-	> = {
-		Voluntariado: {
-			titulo: 'Voluntariado',
-			descripcion: 'Necesitas personas que dediquen su tiempo',
-			icon: Users,
-			color: 'blue'
-		},
-		Monetaria: {
-			titulo: 'Aporte Monetario',
-			descripcion: 'Necesitas donaciones económicas',
-			icon: CurrencyDollar,
-			color: 'green'
-		},
-		Especie: {
-			titulo: 'En Especie',
-			descripcion: 'Necesitas materiales o productos específicos',
-			icon: Cube,
-			color: 'orange'
-		}
-	};
+	export let tiposParticipacion: TipoParticipacion[] = [];
 
-	const unidadesPorTipo = {
-		Voluntariado: ['personas', 'horas', 'días'],
-		Monetaria: ['ARS', 'USD', 'EUR'],
-		Especie: ['unidades', 'kilogramos', 'mililitros', 'litros', 'centímetros', 'metros']
-	} as const;
+	$: tiposDisponibles = tiposParticipacion.filter(
+		(t) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+	);
 
 	$: cantidadDonacionesEspecie = participacionesPermitidas.filter(
 		(p) => p.tipo_participacion?.descripcion === 'Especie'
@@ -220,14 +201,16 @@
 		{/if}
 	</p>
 
-	{#if Object.entries(tiposParticipacionInfo).filter(([tipo]) => !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)).length > 0}
+	{#if tiposDisponibles.length > 0}
 		<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-			{#each Object.entries(tiposParticipacionInfo) as [tipo, info] (tipo)}
-				{#if !tiposParticipacionSeleccionados.includes(tipo as TipoParticipacionDescripcion)}
+			{#each tiposDisponibles as tipoObj (tipoObj.id_tipo_participacion)}
+				{@const tipo = tipoObj.descripcion as TipoParticipacionDescripcion}
+				{@const info = INFO_TIPOS_PARTICIPACION[tipo]}
+				{#if info}
 					{@const clases = obtenerClasesColor(info.color, false)}
 					<button
 						type="button"
-						on:click={() => toggleTipoParticipacion(tipo as TipoParticipacionDescripcion)}
+						on:click={() => toggleTipoParticipacion(tipo)}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 					>
 						<div class="mb-3 text-3xl {clases.iconColor}">
@@ -246,8 +229,8 @@
 	{/if}
 
 	{#each participacionesPermitidas as participacion, index (index)}
-		{@const tipoInfo =
-			tiposParticipacionInfo[participacion.tipo_participacion?.descripcion || 'Voluntariado']}
+		{@const tipo = participacion.tipo_participacion?.descripcion || 'Voluntariado'}
+		{@const tipoInfo = INFO_TIPOS_PARTICIPACION[tipo as TipoParticipacionDescripcion]}
 		{@const clases = obtenerClasesColor(tipoInfo.color, true)}
 		{@const esOriginal = modoEdicion && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
@@ -261,7 +244,9 @@
 					<span class="text-xl {clases.iconColor}">
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
-					{participacion.tipo_participacion?.descripcion}
+					{TIPO_PARTICIPACION_LABELS[
+						participacion.tipo_participacion?.descripcion || 'Voluntariado'
+					]}
 				</h4>
 				<button
 					type="button"
@@ -350,7 +335,7 @@
 							class:bg-gray-50={esOriginal && !esAdmin}
 							class:text-gray-600={esOriginal && !esAdmin}
 						>
-							{#each [...unidadesPorTipo[participacion.tipo_participacion?.descripcion || 'Voluntariado'], 'Otra'] as unidad (unidad)}
+							{#each [...UNIDADES_POR_TIPO[(participacion.tipo_participacion?.descripcion as TipoParticipacionDescripcion) || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>
 							{/each}
 						</select>
@@ -370,7 +355,7 @@
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
 									placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'
 										? 'Ejemplo: GPB, Bitcoin'
-										: 'Ejemplo: toneladas, docentes, metros'}
+										: 'Ejemplo: toneladas, docenas, metros'}
 									maxlength="40"
 								/>
 								{#if errores[`participacion_${index}_unidad_otra`]}
@@ -397,7 +382,7 @@
 				class="mt-4 flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-800"
 			>
 				<TriangleAlert class="h-5 w-5" />
-				Has alcanzado el límite máximo de 10 tipos de donaciones en especie por proyecto.
+				Llegaste al límite máximo de 10 tipos de donaciones en especie por proyecto.
 			</div>
 		{:else}
 			<div class="mt-4 flex justify-center">

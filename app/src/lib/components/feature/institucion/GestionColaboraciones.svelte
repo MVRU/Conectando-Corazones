@@ -8,8 +8,8 @@
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import { formatearFecha } from '$lib/utils/validaciones';
 	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-	import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	// import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
+	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { InboxArrowDown, CheckCircle, XCircle, ChartBar, HandRaised } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
@@ -22,16 +22,16 @@
 		calcularDiasActivo
 	} from '$lib/utils/util-colaboraciones';
 
-	// Filtro en_curso
-	let proyectos: Proyecto[] = mockProyectos.filter((p) => p.estado === 'en_curso');
+	// Prop recibida desde el padre
+	export let proyectos: Proyecto[] = [];
 
-	proyectos = proyectos.map((proyecto) => ({
-		...proyecto,
-		colaboraciones: mockColaboraciones.filter((c) => c.proyecto_id === proyecto.id_proyecto)
-	}));
+	let proyectoSeleccionado: Proyecto;
+	let proyectoSeleccionadoId: number | undefined;
 
-	let proyectoSeleccionado: Proyecto = proyectos[0] || mockProyectos[0];
-	let proyectoSeleccionadoId: number = proyectoSeleccionado?.id_proyecto || 0;
+	$: if (proyectos.length > 0 && !proyectoSeleccionado) {
+		proyectoSeleccionado = proyectos[0];
+		proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
+	}
 
 	// Variables para el modal de rechazo
 	let mostrarModalRechazo = false;

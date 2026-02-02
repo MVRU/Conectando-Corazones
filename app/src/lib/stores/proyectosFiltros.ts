@@ -1,5 +1,5 @@
 import type { Proyecto } from '$lib/domain/types/Proyecto';
-import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+
 import {
 	filtrarProyectos,
 	filtrarPorTipoUbicacion,
@@ -94,6 +94,15 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		[proyectosFiltrados, criterioOrden],
 		([$proyectos, $criterio]) => {
 			return [...$proyectos].sort((a, b) => {
+				// 1. Ordenar por ID de estado (ascendente)
+				const estadoA = Number(a.estado_id || 0);
+				const estadoB = Number(b.estado_id || 0);
+
+				if (estadoA !== estadoB) {
+					return estadoA - estadoB;
+				}
+
+				// 2. Ordenar por el criterio seleccionado (fecha o progreso)
 				if ($criterio === 'recientes' || $criterio === 'antiguos') {
 					const fechaA = new Date(a.created_at || '').getTime();
 					const fechaB = new Date(b.created_at || '').getTime();
@@ -107,32 +116,12 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		}
 	);
 
-	const categoriasDisponibles = ['Todas', ...mockCategorias.map((c) => c.descripcion)].sort();
-
+	const categoriasDisponibles = writable<string[]>(['Todas']);
 	const provinciasDisponibles = writable<string[]>(['Todas']);
-
-	// Nota: estadosDisponibles y tiposParticipacionDisponibles se mantienen como derivados
-	// ya que dependen de los proyectos actuales, pero provincias se cargan de la DB.
-
-	const estadosDisponibles = derived(proyectos, ($proyectos) => {
-		const estadosSet = new Set<string>();
-		$proyectos.forEach((p) => {
-			if (p.estado) estadosSet.add(ESTADO_LABELS[p.estado]);
-		});
-		return ['Todos', ...Array.from(estadosSet)];
-	});
-
-	const tiposParticipacionDisponibles = derived(proyectos, ($proyectos) => {
-		const tiposSet = new Set<string>();
-		$proyectos.forEach((p) => {
-			p.participacion_permitida?.forEach((pp) => {
-				if (pp.tipo_participacion?.descripcion) {
-					tiposSet.add(pp.tipo_participacion.descripcion);
-				}
-			});
-		});
-		return ['Todos', ...Array.from(tiposSet)];
-	});
+	const estadosDisponibles = writable<{ value: string; label: string }[]>([
+		{ value: 'Todos', label: 'Todos' }
+	]);
+	const tiposParticipacionDisponibles = writable<string[]>(['Todos']);
 
 	/**
 	 * Calcula las localidades disponibles basadas en los proyectos y provincia seleccionada

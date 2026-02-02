@@ -9,16 +9,18 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
-	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+	import { usuario as currentUser } from '$lib/stores/auth';
 	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
+	import type { PageData } from './$types';
 	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { toastStore } from '$lib/stores/toast';
 
 	// Usamos un usuario real de los mocks
-	let usuario: Usuario | Institucion | Organizacion | Unipersonal | Administrador =
-		mockUsuarios.maria_gonzalez;
+	export let data: PageData;
+
+	// Usamos el usuario del store
+	$: usuario = $currentUser!;
 
 	// --- Información personal ---
 	let nombre = `${usuario.nombre} ${usuario.apellido}`;
@@ -70,9 +72,9 @@
 		console.log('Preferencias de categorías:', preferencias);
 		console.log(
 			'Categorías seleccionadas:',
-			mockCategorias
-				.filter((cat) => preferencias.includes(cat.id_categoria!))
-				.map((cat) => cat.descripcion)
+			data.categorias
+				.filter((cat: any) => preferencias.includes(cat.id_categoria!))
+				.map((cat: any) => cat.descripcion)
 		);
 
 		// Simular persistencia
@@ -234,7 +236,7 @@
 				Preferencias de categorías de proyecto
 			</h2>
 			<div class="mb-6 flex flex-wrap gap-4">
-				{#each mockCategorias as categoria, i (i)}
+				{#each data.categorias as categoria, i (i)}
 					<label class="flex cursor-pointer items-center gap-2 select-none">
 						<input
 							type="checkbox"
@@ -260,11 +262,11 @@
 			<div class="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
 				<div
 					class="h-full rounded-full bg-gradient-to-r from-[#68b4ff] to-[#007fff] transition-all duration-300"
-					style="width: {Math.round((preferencias.length / mockCategorias.length) * 100)}%;"
+					style="width: {Math.round((preferencias.length / data.categorias.length) * 100)}%;"
 				></div>
 			</div>
 			<p class="text-sm text-gray-500">
-				{preferencias.length} de {mockCategorias.length} categorías seleccionadas
+				{preferencias.length} de {data.categorias.length} categorías seleccionadas
 			</p>
 		</section>
 	{/if}

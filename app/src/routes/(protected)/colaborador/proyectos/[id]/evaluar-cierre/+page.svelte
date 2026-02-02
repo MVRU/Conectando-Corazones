@@ -22,7 +22,7 @@
 	export let data: PageData;
 
 	$: proyecto = data.proyecto;
-	$: solicitud = data.solicitud;
+	$: solicitud = data.solicitud as any;
 	$: evaluacion = data.evaluacion;
 	$: yaVote = data.yaVote;
 
@@ -47,7 +47,7 @@
 	// Agrupar evidencias por objetivo
 	$: evidenciasPorObjetivo = agruparEvidenciasPorObjetivo(
 		data.proyecto.participacion_permitida ?? [],
-		data.solicitud?.evidencias ?? []
+		(data.solicitud as any)?.evidencias ?? []
 	);
 </script>
 
@@ -91,8 +91,6 @@
 				</div>
 			</div>
 		{:else}
-			{@const solicitud = data.solicitud}
-
 			<header class="mb-10 space-y-4 text-center">
 				<h1 class="text-3xl font-bold tracking-tight text-slate-900">Evaluación de cierre</h1>
 				<p class="mx-auto max-w-2xl text-lg text-slate-600">

@@ -3,7 +3,7 @@
  * -!- Sección de información básica y categorías del form de proyecto.
  -->
 <script lang="ts">
-	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+	import type { Categoria } from '$lib/domain/types/Categoria';
 	import {
 		MAX_BENEFICIARIOS,
 		formatearFechaLarga,
@@ -25,6 +25,7 @@
 	export let categoriaOtraDescripcion = '';
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
+	export let categorias: Categoria[] = [];
 
 	// Modo edición
 	export let modoEdicion = false;
@@ -72,7 +73,7 @@
 		categoriaOtraDescripcion = capitalizarPrimera(categoriaOtraDescripcion);
 	}
 
-	const idCategoriaOtra = mockCategorias.find(
+	$: idCategoriaOtra = categorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 	)?.id_categoria;
 
@@ -217,7 +218,7 @@
 	</h2>
 
 	<div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-		{#each mockCategorias as categoria (categoria.id_categoria)}
+		{#each categorias as categoria (categoria.id_categoria)}
 			{@const seleccionado = categoriasSeleccionadas.includes(categoria.id_categoria ?? -1)}
 			{@const color = obtenerColorCategoria(categoria.descripcion || '')}
 			{@const clases = obtenerClasesColor(color, seleccionado)}

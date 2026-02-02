@@ -1,11 +1,19 @@
 import type { PageServerLoad } from './$types';
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 
 export const load: PageServerLoad = async () => {
-	const repo = new MockProyectoRepository();
-	const proyectos = await repo.findAll();
+	try {
+		const repo = new PostgresProyectoRepository();
+		// Usar findAllSummary() para cargar solo datos esenciales
+		const proyectos = await repo.findAllSummary();
 
-	return {
-		proyectosDestacados: proyectos.slice(0, 3)
-	};
+		return {
+			proyectosDestacados: JSON.parse(JSON.stringify(proyectos.slice(0, 3)))
+		};
+	} catch (error) {
+		console.error('Error loading home page:', error);
+		return {
+			proyectosDestacados: []
+		};
+	}
 };

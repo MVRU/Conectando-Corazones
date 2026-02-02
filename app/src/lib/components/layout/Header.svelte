@@ -10,7 +10,8 @@
 		authActions,
 		isAdmin,
 		isInstitucion,
-		isColaborador
+		isColaborador,
+		isInstitucionVerificada
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
@@ -30,7 +31,6 @@
 	} from 'lucide-svelte';
 
 	export let proyectos: Proyecto[] = [];
-	export let verificaciones: Verificacion[] = [];
 
 	let menuAbierto = false;
 	let visible = false;
@@ -56,9 +56,7 @@
 		goto('/');
 	}
 
-	$: verificacionAprobada =
-		$usuarioStore &&
-		verificaciones.find((v) => v.usuario_id === $usuarioStore?.id_usuario)?.estado === 'aprobada';
+	$: verificacionAprobada = $isInstitucionVerificada;
 
 	$: proyectosEnCursoCount = $usuarioStore
 		? proyectos.filter(

@@ -7,7 +7,10 @@ const connectionString = process.env.DB_POOLER_URL || process.env.DATABASE_URL |
 
 const pool = new Pool({
 	connectionString,
-	ssl: { rejectUnauthorized: false }
+	ssl: { rejectUnauthorized: false },
+	max: 5, // Máximo 5 conexiones concurrentes (plan gratuito de Supabase)
+	idleTimeoutMillis: 30000, // Cerrar conexiones idle después de 30s
+	connectionTimeoutMillis: 10000 // Timeout de conexión 10s
 });
 const adapter = new PrismaPg(pool);
 

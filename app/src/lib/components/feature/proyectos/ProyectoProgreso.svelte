@@ -75,7 +75,7 @@
 	> = {
 		Monetaria: { color: 'green', icon: () => CurrencyDollar },
 		Voluntariado: { color: 'purple', icon: () => HandRaised },
-		Materiales: { color: 'blue', icon: (u?: string) => getEmojiEspecie(u) }
+		Especie: { color: 'blue', icon: (u?: string) => getEmojiEspecie(u) }
 	};
 
 	const defaultVisual = { color: 'blue' as const, icon: () => Users };

@@ -1,4 +1,5 @@
 import { writable, derived, get } from 'svelte/store';
+import { esInstitucionVerificada } from '$lib/utils/util-verificacion';
 import type {
 	Usuario,
 	Institucion,
@@ -9,7 +10,6 @@ import type {
 } from '$lib/domain/types/Usuario';
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
-import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 /**
  * * DECISIÓN DE DISEÑO:
@@ -106,6 +106,9 @@ export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol ==
 
 // Store derivado para verificar estado
 export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
+export const isInstitucionVerificada = derived(authStore, ($auth) =>
+	esInstitucionVerificada($auth.usuario)
+);
 
 // Funciones para manejar la autenticación
 export const authActions = {
@@ -372,9 +375,12 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un correo electrónico válido.');
 	}
 
+	/*
 	const emailExistente = Object.values(mockUsuarios).some((u) =>
 		u.contactos?.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)
 	);
+	*/
+	const emailExistente = false; // Validación se realiza en backend
 
 	if (emailExistente) {
 		throw new Error(`El correo electrónico "${input.email}" ya está en uso`);
@@ -388,9 +394,12 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un nombre de usuario válido.');
 	}
 
+	/*
 	const usuarioExistente = Object.values(mockUsuarios).some(
 		(u) => u.username === input.perfil.username
 	);
+	*/
+	const usuarioExistente = false; // Validación se realiza en backend
 
 	if (usuarioExistente) {
 		throw new Error(`El nombre de usuario "${input.perfil.username}" ya está en uso`);

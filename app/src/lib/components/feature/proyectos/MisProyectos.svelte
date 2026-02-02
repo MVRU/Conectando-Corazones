@@ -9,10 +9,14 @@
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
+	// import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = [];
+	export let provinciasDisponibles: string[] = [];
+	export let estadosDisponibles: { value: string; label: string }[] = [];
+	export let categoriasDisponibles: string[] = [];
+	export let tiposParticipacionDisponibles: string[] = [];
 
 	// Inicializar composable de filtros
 	const filtros = createProyectosFiltros();
@@ -31,13 +35,26 @@
 		estadoSeleccionado,
 		criterioOrden,
 		consultaBusqueda,
-		categoriasDisponibles,
-		provinciasDisponibles,
-		estadosDisponibles,
-		tiposParticipacionDisponibles,
+		categoriasDisponibles: categoriasDisponiblesStore,
+		provinciasDisponibles: provinciasDisponiblesStore,
+		estadosDisponibles: estadosDisponiblesStore,
+		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
 		restablecerFiltros
 	} = filtros;
+
+	$: if (provinciasDisponibles.length > 0) {
+		provinciasDisponiblesStore.set(provinciasDisponibles);
+	}
+	$: if (estadosDisponibles.length > 0) {
+		estadosDisponiblesStore.set(estadosDisponibles);
+	}
+	$: if (categoriasDisponibles.length > 0) {
+		categoriasDisponiblesStore.set(categoriasDisponibles);
+	}
+	$: if (tiposParticipacionDisponibles.length > 0) {
+		tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
+	}
 
 	// Sincronizar filtros con URL
 	useProyectosFiltrosUrl(filtros);
@@ -76,8 +93,8 @@
 				: 'Mis proyectos completados';
 
 	// Verificar estado de la institución
-	$: verificacion = usuario && mockVerificaciones.find((v) => v.usuario_id === usuario.id_usuario);
-	$: verificationAprobada = verificacion?.estado === 'aprobada';
+	// TODO: Usar dato real de verificación. Por ahora asume 'activo' = verificado.
+	$: verificationAprobada = usuario?.estado === 'activo';
 	$: esInstitucion = usuario?.rol === 'institucion';
 
 	$: tituloVacio =
@@ -128,9 +145,9 @@
 		{criterioOrden}
 		{consultaBusqueda}
 		{categoriasDisponibles}
-		provinciasDisponibles={$provinciasDisponibles}
-		estadosDisponibles={$estadosDisponibles}
-		tiposParticipacionDisponibles={$tiposParticipacionDisponibles}
+		provinciasDisponibles={$provinciasDisponiblesStore}
+		estadosDisponibles={$estadosDisponiblesStore}
+		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
 	>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/domain/types/Categoria';
-	import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
+	// import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
 	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -9,6 +9,7 @@
 
 	export let mostrar: boolean = false;
 	export let categoriasSeleccionadas: Categoria[] = [];
+	export let categorias: Categoria[] = [];
 
 	const dispatch = createEventDispatcher<{
 		guardar: Categoria[];
@@ -21,11 +22,11 @@
 	let categoriaOtraTouched = false;
 	let guardando = false;
 
-	const { validarCategoriaOtraDescripcion } = crearValidadorCategoria(
-		mockCategorias.map((c) => c.descripcion || '')
-	);
+	$: ({ validarCategoriaOtraDescripcion } = crearValidadorCategoria(
+		categorias.map((c) => c.descripcion || '')
+	));
 
-	const idCategoriaOtra = mockCategorias.find(
+	$: idCategoriaOtra = categorias.find(
 		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 	)?.id_categoria;
 
@@ -93,7 +94,7 @@
 		guardando = true;
 
 		setTimeout(() => {
-			let categoriasFinales = mockCategorias.filter(
+			let categoriasFinales = categorias.filter(
 				(cat) =>
 					cat.id_categoria !== undefined &&
 					categoriasMarcadas.has(cat.id_categoria) &&
@@ -158,7 +159,7 @@
 			on:click|stopPropagation
 		>
 			<div class="mb-6 flex items-center justify-between">
-				<h3 class="text-xl font-semibold text-gray-900">Editar Categorías Favoritas</h3>
+				<h3 class="text-xl font-semibold text-gray-900">Editar categorías favoritas</h3>
 				<button
 					on:click={cerrar}
 					aria-label="Cerrar modal"
@@ -183,7 +184,7 @@
 			<!-- Lista de categorías -->
 			<div class="mb-6 max-h-[400px] overflow-y-auto">
 				<div class="grid gap-3 sm:grid-cols-2">
-					{#each mockCategorias as categoria}
+					{#each categorias as categoria}
 						{@const seleccionada =
 							categoria.id_categoria !== undefined &&
 							categoriasMarcadas.has(categoria.id_categoria)}

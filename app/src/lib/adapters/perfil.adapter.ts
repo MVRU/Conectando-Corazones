@@ -1,20 +1,38 @@
-import { MockProyectoRepository } from '$lib/infrastructure/repositories/mock/MockProyectoRepository';
-import { MockResenaRepository } from '$lib/infrastructure/repositories/mock/MockResenaRepository';
-import { MockLocalidadRepository } from '$lib/infrastructure/repositories/mock/MockLocalidadRepository';
-
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { LocalidadRepoPrisma } from '$lib/infrastructure/supabase/postgres/localidad.repo';
+// import { MockResenaRepository } from '$lib/infrastructure/repositories/mock/MockResenaRepository';
+import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { ObtenerResenasPerfil } from '$lib/domain/use-cases/perfil/ObtenerResenasPerfil';
 import { ObtenerLocalidades } from '$lib/domain/use-cases/ubicacion/ObtenerLocalidades';
 
-import type { Proyecto } from '$lib/domain/types/Proyecto';
+import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { Resena } from '$lib/domain/types/Resena';
 import type { Localidad } from '$lib/domain/types/Localidad';
 import { writable } from 'svelte/store';
 
+class StubResenaRepository implements ResenaRepository {
+	async findAll(): Promise<Resena[]> {
+		return [];
+	}
+	async findByUsuario(id: number): Promise<Resena[]> {
+		return [];
+	}
+	async save(resena: Resena): Promise<Resena> {
+		return resena;
+	}
+	async findById(id: number): Promise<Resena | null> {
+		return null;
+	}
+	async delete(id: number): Promise<void> {
+		return;
+	}
+}
+
 // Inyeccion de dependencias manual
-const proyectoRepo = new MockProyectoRepository();
-const resenaRepo = new MockResenaRepository();
-const localidadRepo = new MockLocalidadRepository();
+const proyectoRepo = new PostgresProyectoRepository();
+const resenaRepo = new StubResenaRepository();
+const localidadRepo = new LocalidadRepoPrisma();
 
 const obtenerProyectosUC = new ObtenerProyectosPerfil(proyectoRepo);
 const obtenerResenasUC = new ObtenerResenasPerfil(resenaRepo);

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { goto } from '$app/navigation';
+	import type { PageData } from './$types';
 
-	$: id = $page.params.id;
-	$: proyecto = mockProyectos.find((p) => p.id_proyecto?.toString() === id);
+	export let data: PageData;
+	$: proyecto = data.proyecto;
 
 	function handleClose() {
 		if (proyecto) {

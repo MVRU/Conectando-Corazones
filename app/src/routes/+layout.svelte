@@ -60,7 +60,7 @@
 	}
 </script>
 
-<Header proyectos={data.proyectos} verificaciones={data.verificaciones} />
+<Header proyectos={data.proyectos} />
 <ToastHost />
 
 {#if showBreadcrumbs}

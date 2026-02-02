@@ -96,7 +96,7 @@
 			<div class="mt-1 flex flex-wrap gap-2" aria-label="Lista de categorías">
 				{#each categorias as categoria}
 					<a
-						href="/proyectos?tab=todos&categoria={encodeURIComponent(categoria)}"
+						href="/proyectos?tab=todos&categorias={encodeURIComponent(categoria)}&filtros=true"
 						class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-700 transition hover:bg-gray-100"
 					>
 						{categoria}

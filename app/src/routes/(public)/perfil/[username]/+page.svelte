@@ -4,36 +4,12 @@
 	import { onMount } from 'svelte';
 	import { error } from '@sveltejs/kit';
 	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
-	import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
-	import type {
-		Usuario,
-		Institucion,
-		Organizacion,
-		Unipersonal,
-		Administrador
-	} from '$lib/domain/types/Usuario';
+	import type { PageData } from './$types';
 
-	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
+	export let data: PageData;
 
-	let perfilUsuario: UsuarioCompleto | undefined = undefined;
-	let esMiPerfil = false;
-
-	$: {
-		const usernameParam = $page.params.username;
-		if (usernameParam) {
-			const usuarioEncontrado = Object.values(mockUsuarios).find(
-				(u) => u.username.toLowerCase() === usernameParam.toLowerCase()
-			);
-
-			if (!usuarioEncontrado) {
-				throw error(404, 'Usuario no encontrado');
-			}
-			const { password: _pw, ...usuarioSinPassword } = usuarioEncontrado;
-			perfilUsuario = usuarioSinPassword as UsuarioCompleto;
-			esMiPerfil = $usuarioStore?.username.toLowerCase() === usernameParam.toLowerCase();
-		}
-	}
+	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
 
 	onMount(() => {
 		// Si no hay usuario autenticado y están viendo un perfil específico, permitir verlo
@@ -55,7 +31,7 @@
 </svelte:head>
 
 {#if perfilUsuario}
-	<VistaPerfil {perfilUsuario} {esMiPerfil} />
+	<VistaPerfil {perfilUsuario} {esMiPerfil} {proyectos} {resenas} {categorias} />
 {:else}
 	<div class="flex min-h-screen items-center justify-center bg-gray-50">
 		<div class="text-center">

@@ -14,5 +14,11 @@
 </svelte:head>
 
 <main class="relative min-h-screen w-full bg-gray-50">
-	<Proyectos proyectos={data.proyectos} provinciasDisponibles={data.provincias} />
+	<Proyectos
+		proyectos={data.proyectos}
+		provinciasDisponibles={data.provincias}
+		estadosDisponibles={data.estados}
+		categoriasDisponibles={data.categorias}
+		tiposParticipacionDisponibles={data.tiposParticipacion}
+	/>
 </main>

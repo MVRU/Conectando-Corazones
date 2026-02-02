@@ -153,7 +153,7 @@ TODO:
 								bind:value={password}
 								type={mostrarPassword ? 'text' : 'password'}
 								required
-								placeholder="123456"
+								placeholder="password123"
 								customClass="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[rgb(var(--color-primary))]"
 							/>
 							<button
@@ -170,7 +170,7 @@ TODO:
 						</div>
 						<p class="mt-1 text-xs text-gray-500">
 							Todos los usuarios de prueba usan la contraseña: <code
-								class="rounded bg-gray-100 px-1">123456</code
+								class="rounded bg-gray-100 px-1">password123</code
 							>
 						</p>
 					</div>
