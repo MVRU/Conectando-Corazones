@@ -27,7 +27,50 @@ export class EditarProyecto {
 			);
 		}
 
-		// 3. Mapear datos del DTO a la estructura de la entidad
+		// 3. Validar cambios en participaciones permitidas
+		if (data.participaciones) {
+			const nuevasParticipaciones = data.participaciones;
+			const originales = proyectoExistente.participacion_permitida || [];
+
+			// Bloqueo de eliminación si está publicado o tiene interacciones
+			const IDsNuevos = nuevasParticipaciones
+				.map((p: any) => p.id_participacion_permitida)
+				.filter(Boolean);
+
+			const huboEliminacion = originales.some(
+				(orig) => !IDsNuevos.includes(orig.id_participacion_permitida)
+			);
+
+			if (
+				huboEliminacion &&
+				(proyectoExistente.estaPublicado() || proyectoExistente.tieneInteracciones())
+			) {
+				throw new Error(
+					'No se pueden eliminar tipos de participación si el proyecto ya está publicado o tiene colaboraciones.'
+				);
+			}
+
+			// Prohibición de cambiar la naturaleza (tipo) una vez publicado
+			if (proyectoExistente.estaPublicado()) {
+				for (const pNueva of nuevasParticipaciones) {
+					if (pNueva.id_participacion_permitida) {
+						const original = originales.find(
+							(o) => o.id_participacion_permitida === pNueva.id_participacion_permitida
+						);
+						if (
+							original &&
+							original.tipo_participacion?.descripcion !== pNueva.tipo_participacion
+						) {
+							throw new Error(
+								`No podés cambiar el tipo de ayuda de una participación existente una vez publicado el proyecto (${original.tipo_participacion?.descripcion} -> ${pNueva.tipo_participacion}).`
+							);
+						}
+					}
+				}
+			}
+		}
+
+		// 4. Mapear datos del DTO a la estructura de la entidad
 		const updateProps: any = { ...data };
 
 		// Mapeo de Categorías (si vienen IDs)

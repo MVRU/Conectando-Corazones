@@ -10,20 +10,36 @@
 	} = $props<{
 		open: boolean;
 		onclose?: () => void;
-		onsubmit?: (detail: { mensaje: string }) => void;
+		onsubmit?: (detail: { mensaje: string }) => Promise<void> | void;
 	}>();
 
 	let mensajeColaboracion = $state('');
 	let textarea = $state<HTMLTextAreaElement>();
+	let enviando = $state(false);
 
 	function cerrar() {
+		if (enviando) return;
 		open = false;
 		if (onclose) onclose();
 	}
 
-	function enviar() {
-		if (onsubmit) onsubmit({ mensaje: mensajeColaboracion });
-		mensajeColaboracion = '';
+	async function enviar() {
+		if (!mensajeColaboracion.trim() && mensajeColaboracion.length === 0) {
+		}
+
+		if (mensajeColaboracion.length > 500) return;
+
+		enviando = true;
+		try {
+			if (onsubmit) {
+				await onsubmit({ mensaje: mensajeColaboracion });
+			}
+			mensajeColaboracion = '';
+			cerrar();
+		} catch (error) {
+		} finally {
+			enviando = false;
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -35,6 +51,8 @@
 			setTimeout(() => textarea?.focus(), 100);
 		}
 	});
+
+	let caracteresRestantes = $derived(500 - mensajeColaboracion.length);
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -62,8 +80,9 @@
 			>
 				<button
 					type="button"
-					class="absolute top-4 right-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:ring-2 focus:ring-sky-200 focus:outline-none"
+					class="absolute top-4 right-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:ring-2 focus:ring-sky-200 focus:outline-none disabled:opacity-50"
 					onclick={cerrar}
+					disabled={enviando}
 					aria-label="Cerrar modal"
 				>
 					<Icon src={XMark} class="h-5 w-5" />
@@ -85,14 +104,25 @@
 				</p>
 
 				<div>
-					<label for="mensaje-colaboracion" class="mb-1.5 block text-xs font-semibold text-gray-700"
-						>Tu mensaje (opcional pero recomendado)</label
-					>
+					<div class="mb-1.5 flex items-center justify-between">
+						<label for="mensaje-colaboracion" class="block text-xs font-semibold text-gray-700"
+							>Tu mensaje (opcional pero recomendado)</label
+						>
+						<span
+							class="text-[10px] font-medium {caracteresRestantes < 50
+								? 'text-red-500'
+								: 'text-gray-400'}"
+						>
+							{caracteresRestantes} caracteres
+						</span>
+					</div>
 					<textarea
 						id="mensaje-colaboracion"
 						bind:this={textarea}
-						class="min-h-[120px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 focus:outline-none"
+						class="min-h-[120px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 focus:outline-none disabled:opacity-50"
 						bind:value={mensajeColaboracion}
+						maxlength="500"
+						disabled={enviando}
 						placeholder="Ej.: Me gustaría sumarme como voluntario los fines de semana..."
 					></textarea>
 				</div>
@@ -104,18 +134,31 @@
 			>
 				<button
 					type="button"
-					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:outline-none sm:w-auto"
+					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:outline-none disabled:opacity-50 sm:w-auto"
 					onclick={cerrar}
+					disabled={enviando}
 				>
 					Cancelar
 				</button>
 				<button
 					type="button"
-					class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:outline-none active:translate-y-[1px] sm:w-auto"
+					class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:outline-none active:translate-y-[1px] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
 					onclick={enviar}
+					disabled={enviando || mensajeColaboracion.length > 500}
 				>
-					<Icon src={PaperAirplane} class="h-4 w-4" aria-hidden="true" />
-					Enviar mi solicitud
+					{#if enviando}
+						<div
+							class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+						></div>
+						Enviando...
+					{:else}
+						<Icon
+							src={PaperAirplane}
+							class="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+							aria-hidden="true"
+						/>
+						Enviar mi solicitud
+					{/if}
 				</button>
 			</div>
 		</div>

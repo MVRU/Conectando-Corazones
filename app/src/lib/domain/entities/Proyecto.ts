@@ -116,9 +116,16 @@ export class Proyecto {
 	}
 
 	// * Lógica de Negocio y Estados * //
-
 	estaActivo(): boolean {
 		return this.estado === 'en_curso';
+	}
+
+	esBorrador(): boolean {
+		return this.estado === 'borrador';
+	}
+
+	estaPublicado(): boolean {
+		return this.estado !== 'borrador' && this.estado !== undefined;
 	}
 
 	esCreadoPor(usuarioId: number): boolean {
@@ -136,8 +143,12 @@ export class Proyecto {
 		return this.colaboraciones?.some((c) => c.estado === 'aprobada') ?? false;
 	}
 
+	tieneInteracciones(): boolean {
+		return (this.colaboraciones && this.colaboraciones.length > 0) || false;
+	}
+
 	esEditable(): boolean {
-		return this.estaActivo() && !this.tieneColaboradoresAprobados();
+		return this.esBorrador() || (this.estaActivo() && !this.tieneColaboradoresAprobados());
 	}
 
 	// Máquina de Estados

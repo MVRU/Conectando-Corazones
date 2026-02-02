@@ -434,6 +434,7 @@
 		enviando = true;
 
 		const participaciones: ParticipacionPermitidaCreate[] = participacionesPermitidas.map((p) => ({
+			id_participacion_permitida: p.id_participacion_permitida,
 			tipo_participacion: (p.tipo_participacion?.descripcion ||
 				'Voluntariado') as TipoParticipacionDescripcion,
 			objetivo: Number(p.objetivo) || 0,
@@ -596,6 +597,11 @@
 				{tiposParticipacion}
 				modoEdicion={edicion}
 				{esAdmin}
+				participacionesOriginales={initialData?.participacion_permitida || []}
+				estaPublicado={initialData?.estado !== 'borrador' && initialData?.estado != null}
+				tieneColaboradoresAprobados={initialData?.colaboraciones?.some(
+					(c: any) => c.estado === 'aprobada'
+				) || false}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} modoEdicion={edicion} {esAdmin} />
