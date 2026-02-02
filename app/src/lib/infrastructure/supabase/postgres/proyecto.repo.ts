@@ -74,6 +74,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				created_at: true,
 				fecha_fin_tentativa: true,
 				institucion_id: true,
+				estado_id: true,
 				estado: {
 					select: {
 						id_estado: true,
@@ -151,7 +152,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						}
 					}
 				}
-			}
+			},
+			orderBy: [{ estado_id: 'asc' }, { created_at: 'desc' }]
 		});
 
 		return proyectos
@@ -178,6 +180,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				created_at: true,
 				fecha_fin_tentativa: true,
 				institucion_id: true,
+				estado_id: true,
 				estado: {
 					select: {
 						id_estado: true,
@@ -258,7 +261,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						}
 					}
 				}
-			}
+			},
+			orderBy: [{ estado_id: 'asc' }, { created_at: 'desc' }]
 		});
 
 		return proyectos

@@ -94,6 +94,15 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		[proyectosFiltrados, criterioOrden],
 		([$proyectos, $criterio]) => {
 			return [...$proyectos].sort((a, b) => {
+				// 1. Ordenar por ID de estado (ascendente)
+				const estadoA = Number(a.estado_id || 0);
+				const estadoB = Number(b.estado_id || 0);
+
+				if (estadoA !== estadoB) {
+					return estadoA - estadoB;
+				}
+
+				// 2. Ordenar por el criterio seleccionado (fecha o progreso)
 				if ($criterio === 'recientes' || $criterio === 'antiguos') {
 					const fechaA = new Date(a.created_at || '').getTime();
 					const fechaB = new Date(b.created_at || '').getTime();
