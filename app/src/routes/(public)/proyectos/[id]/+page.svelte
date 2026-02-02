@@ -1534,6 +1534,68 @@
 	</div>
 {/if} -->
 
+<ResenaProyectoModal
+	mostrar={mostrarModalResena}
+	modo={modoResena}
+	resenaInicial={resenaEnEdicion}
+	maxCaracteres={maxCaracteresResena}
+	on:guardar={guardarResena}
+	on:cerrar={() => (mostrarModalResena = false)}
+/>
+
+{#if mostrarConfirmarEliminar}
+	<!-- Overlay -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={cancelarEliminarResena}
+		aria-hidden="true"
+	></div>
+
+	<!-- Modal de confirmación de eliminación -->
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-eliminar-resena-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape') cancelarEliminarResena();
+			}}
+		>
+			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
+				<h3
+					id="modal-eliminar-resena-titulo"
+					class="text-base font-semibold text-gray-900 sm:text-lg"
+				>
+					¿Eliminar reseña?
+				</h3>
+				<p class="text-sm text-gray-500">
+					Esta acción no se puede deshacer.
+				</p>
+			</div>
+
+			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					onclick={cancelarEliminarResena}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
+					onclick={confirmarEliminarResena}
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
 <style>
 	@keyframes fade-up {
 		from {
