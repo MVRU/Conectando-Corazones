@@ -4,6 +4,8 @@ import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
+import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
+import { RegistrarCategoriasDeProyecto } from '$lib/domain/use-cases/proyecto-categoria/RegistrarCategoriasDeProyecto';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
 	private includeOptions = {
@@ -304,16 +306,14 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 							: null
 					}
 				});
+				// 3. Registrar categorías
+				const proyectoCategoriaRepo = new ProyectoCategoriaRepoPrisma();
+				const registrarCategorias = new RegistrarCategoriasDeProyecto(proyectoCategoriaRepo);
 
-				// 3. Crear relaciones con categorías
-				if (proyecto.categorias && proyecto.categorias.length > 0) {
-					await tx.proyectoCategoria.createMany({
-						data: proyecto.categorias.map((c) => ({
-							proyecto_id: created.id_proyecto,
-							categoria_id: c.id_categoria!
-						}))
-					});
-				}
+				await registrarCategorias.execute({
+					proyectoId: created.id_proyecto,
+					categoriaIds: (proyecto.categorias || []).map(c => c.id_categoria!)
+				}, tx);
 
 				// 4. Crear participaciones permitidas
 				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {

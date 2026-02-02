@@ -27,7 +27,6 @@
 	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
-
 	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
 	export let participacionesPermitidas: ParticipacionForm[] = [];
 	export let errores: Record<string, string> = {};
@@ -212,6 +211,7 @@
 					<button
 						type="button"
 						on:click={() => toggleTipoParticipacion(tipo)}
+						on:click={() => toggleTipoParticipacion(tipo)}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 					>
 						<div class="mb-3 text-3xl {clases.iconColor}">
@@ -245,6 +245,9 @@
 					<span class="text-xl {clases.iconColor}">
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
+					{TIPO_PARTICIPACION_LABELS[
+						participacion.tipo_participacion?.descripcion || 'Voluntariado'
+					]}
 					{TIPO_PARTICIPACION_LABELS[
 						participacion.tipo_participacion?.descripcion || 'Voluntariado'
 					]}
@@ -383,7 +386,8 @@
 				class="mt-4 flex items-center justify-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-center text-sm text-yellow-800"
 			>
 				<TriangleAlert class="h-5 w-5" />
-				Llegaste al límite máximo de 10 tipos de donaciones en especie por proyecto.
+				Llegaste al límite máximo de 10 tipos de donaciones en especie por proyecto. Llegaste al límite
+				máximo de 10 tipos de donaciones en especie por proyecto.
 			</div>
 		{:else}
 			<div class="mt-4 flex justify-center">
