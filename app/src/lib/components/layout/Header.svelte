@@ -261,7 +261,7 @@
 								{/if}
 
 								<a
-									href="/mi-panel"
+									href={$isInstitucion ? '/institucion/mi-panel' : '/mi-panel'}
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
 									on:click={() => (mostrarDropdown = false)}
 								>
@@ -384,7 +384,7 @@
 							<span class="text-xs font-medium text-blue-100">Mis chats</span>
 						</a>
 						<a
-							href="/mi-panel"
+							href={$isInstitucion ? '/institucion/mi-panel' : '/mi-panel'}
 							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							on:click={() => (menuAbierto = false)}
 						>

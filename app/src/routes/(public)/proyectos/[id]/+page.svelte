@@ -96,6 +96,7 @@
 	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
 	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
 	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
+	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
 	// $: puedeVerResenas = true;
@@ -322,6 +323,45 @@
 			.join('');
 	}
 
+	async function anularSolicitud() {
+		mostrarModalAnular = true;
+	}
+
+	async function confirmarAnulacion() {
+		if (!colaboracionUsuario?.id_colaboracion) return;
+
+		anulando = true;
+		try {
+			const res = await fetch(`/api/colaboraciones/${colaboracionUsuario.id_colaboracion}`, {
+				method: 'DELETE'
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.message || 'Error al anular la solicitud');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				message: 'Solicitud anulada exitosamente'
+			});
+
+			// Actualizar estado reactivo
+			if (colaboracionUsuario) {
+				colaboracionUsuario.estado = 'anulada';
+			}
+
+			mostrarModalAnular = false;
+		} catch (err: any) {
+			toastStore.show({
+				variant: 'error',
+				message: err.message
+			});
+		} finally {
+			anulando = false;
+		}
+	}
+
 	function irAColaborar() {
 		if (!$usuario) {
 			goto('/iniciar-sesion');
@@ -330,9 +370,23 @@
 		mostrarModalColaborar = true;
 	}
 
+	function manejarClickSolicitud() {
+		if (tieneSolicitudPendiente || solicitudRecienEnviada) {
+			mostrarModalPendiente = true;
+			return;
+		}
+		if (esSolicitudRechazada) {
+			mostrarModalJustificacion = true;
+			return;
+		}
+		irAColaborar();
+	}
+
 	let mostrarModalExito = false;
 	let mostrarModalJustificacion = false;
 	let mostrarModalPendiente = false;
+	let mostrarModalAnular = false;
+	let anulando = false;
 	let mostrarResumenIA = false;
 	let mostrarAprendizajesIA = false;
 	let mostrarMenuGestion = false;
@@ -362,11 +416,12 @@
 			});
 			acc.push({ divider: true } as any);
 			acc.push({
-				label: 'Eliminar proyecto',
-				icon: Trash,
-				onclick: () => {},
+				label: 'Cancelar proyecto',
+				icon: XCircle,
+				onclick: () => (mostrarModalCancelar = true),
 				variant: 'danger'
 			});
+
 			return acc;
 		}
 
@@ -451,16 +506,17 @@
 			}
 		}
 
+		if (tieneSolicitudPendiente) {
+			acc.push({
+				label: 'Anular solicitud',
+				icon: XCircle,
+				onclick: anularSolicitud,
+				variant: 'danger'
+			});
+		}
+
 		return acc;
 	})();
-
-	function manejarClickSolicitud() {
-		if (tieneSolicitudPendiente) {
-			mostrarModalPendiente = true;
-		} else {
-			irAColaborar();
-		}
-	}
 
 	let yaReporto = false;
 
@@ -1029,14 +1085,25 @@
 												class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
 												aria-label="Ver motivo del rechazo"
 											>
+												<Icon src={XCircle} class="h-4 w-4" aria-hidden="true" />
 												Solicitud rechazada
+											</button>
+										{:else if tieneColaboracionAnulada}
+											<button
+												type="button"
+												disabled
+												class="inline-flex h-11 flex-1 cursor-wait items-center justify-center gap-2 rounded-xl bg-orange-100 font-semibold text-orange-700 decoration-inherit opacity-80 shadow-sm focus-visible:outline-none active:translate-y-[1px]"
+												aria-label="Solicitud anulada"
+											>
+												<Icon src={XCircle} class="h-4 w-4" aria-hidden="true" />
+												Solicitud anulada
 											</button>
 										{:else}
 											<button
 												type="button"
 												onclick={manejarClickSolicitud}
 												disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
-												class={tieneSolicitudPendiente
+												class={tieneSolicitudPendiente || solicitudRecienEnviada
 													? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
 													: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
 												aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
@@ -1051,6 +1118,18 @@
 													Colaborar ahora
 												{/if}
 											</button>
+
+											{#if tieneSolicitudPendiente && !solicitudRecienEnviada}
+												<button
+													type="button"
+													onclick={anularSolicitud}
+													class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:translate-y-[1px]"
+													title="Anular solicitud"
+													aria-label="Anular solicitud"
+												>
+													<Icon src={XCircle} class="h-5 w-5" />
+												</button>
+											{/if}
 										{/if}
 									{/if}
 
@@ -1358,20 +1437,51 @@
 					{#if esAdministrador || esCreador || esColaboradorAprobado}
 						{@render MenuGestion(true)}
 					{:else if !esInstitucion}
-						<button
-							type="button"
-							onclick={manejarClickSolicitud}
-							disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
-							class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
-						>
-							{#if tieneSolicitudPendiente || solicitudRecienEnviada}
-								<Icon src={Clock} class="h-5 w-5" aria-hidden="true" />
-								Solicitud enviada
-							{:else}
-								<Icon src={Heart} class="h-5 w-5" aria-hidden="true" />
-								Colaborar ahora
+						{#if esSolicitudRechazada}
+							<button
+								type="button"
+								onclick={() => (mostrarModalJustificacion = true)}
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-lg transition active:scale-[0.98]"
+							>
+								<Icon src={XCircle} class="h-5 w-5" aria-hidden="true" />
+								Solicitud rechazada
+							</button>
+						{:else if tieneColaboracionAnulada}
+							<button
+								type="button"
+								disabled
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-100 px-4 py-3 font-bold text-orange-700 opacity-80 shadow-lg"
+							>
+								<Icon src={XCircle} class="h-5 w-5" aria-hidden="true" />
+								Solicitud anulada
+							</button>
+						{:else}
+							<button
+								type="button"
+								onclick={manejarClickSolicitud}
+								disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
+							>
+								{#if tieneSolicitudPendiente || solicitudRecienEnviada}
+									<Icon src={Clock} class="h-5 w-5" aria-hidden="true" />
+									Solicitud enviada
+								{:else}
+									<Icon src={Heart} class="h-5 w-5" aria-hidden="true" />
+									Colaborar ahora
+								{/if}
+							</button>
+
+							{#if tieneSolicitudPendiente && !solicitudRecienEnviada}
+								<button
+									type="button"
+									onclick={anularSolicitud}
+									class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:scale-[0.98]"
+									aria-label="Anular solicitud"
+								>
+									<Icon src={XCircle} class="h-6 w-6" />
+								</button>
 							{/if}
-						</button>
+						{/if}
 					{/if}
 					<button
 						type="button"
@@ -1616,8 +1726,13 @@
 						¿Cancelar proyecto?
 					</h3>
 					<p class="mb-6 text-center text-sm text-gray-600">
-						Esta acción cancelará el proyecto de forma permanente. Solo podés hacerlo porque aún no
-						hay colaboradores aprobados.
+						{#if esAdministrador}
+							Estás por cancelar este proyecto como administrador. Esta acción es permanente y
+							notificará a las partes involucradas.
+						{:else}
+							Esta acción cancelará el proyecto de forma permanente. Solo podés hacerlo porque aún
+							no hay colaboradores aprobados.
+						{/if}
 					</p>
 
 					<div class="mb-6">
@@ -1654,6 +1769,90 @@
 			</div>
 		</div>
 	{/if}
+{/if}
+
+<!-- Modal de Anulación de Solicitud -->
+{#if mostrarModalAnular}
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		onclick={() => !anulando && (mostrarModalAnular = false)}
+		aria-hidden="true"
+	></div>
+
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-anular-titulo"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
+				if (e.key === 'Escape' && !anulando) mostrarModalAnular = false;
+			}}
+		>
+			<div class="flex flex-col gap-4 px-6 pt-6 pb-4">
+				<div class="flex justify-center">
+					<div
+						class="flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 ring-8 ring-yellow-50"
+					>
+						<Icon src={Flag} class="h-8 w-8 text-yellow-600" aria-hidden="true" />
+					</div>
+				</div>
+				<h3 id="modal-anular-titulo" class="text-center text-xl font-bold text-gray-900">
+					¿Anular tu solicitud?
+				</h3>
+				<p class="text-center text-sm text-gray-600">
+					Esta acción no se puede deshacer y <strong>no podrás volver a colaborar</strong> en este proyecto.
+				</p>
+
+				<div class="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
+					<button
+						type="button"
+						disabled={anulando}
+						class="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+						onclick={() => (mostrarModalAnular = false)}
+					>
+						Cancelar
+					</button>
+					<button
+						type="button"
+						disabled={anulando}
+						class="flex-1 rounded-xl bg-yellow-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-yellow-700 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
+						onclick={confirmarAnulacion}
+					>
+						{#if anulando}
+							<span class="flex items-center justify-center gap-2">
+								<svg
+									class="h-4 w-4 animate-spin"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+								Anulando...
+							</span>
+						{:else}
+							Confirmar anulación
+						{/if}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {/if}
 
 <!-- <ResenaProyectoModal

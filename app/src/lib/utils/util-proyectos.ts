@@ -50,7 +50,9 @@ export function filtrarProyectosPorUsuario(
 	if (usuario.rol === 'colaborador') {
 		return proyectos.filter((p) =>
 			p.colaboraciones?.some(
-				(c) => c.colaborador_id === usuario.id_usuario && c.estado === 'aprobada'
+				(c) =>
+					c.colaborador_id === usuario.id_usuario &&
+					['aprobada', 'pendiente', 'rechazada'].includes(c.estado)
 			)
 		);
 	}

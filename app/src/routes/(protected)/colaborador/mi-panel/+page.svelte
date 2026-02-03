@@ -1,9 +1,3 @@
-<!--
-* Página: Dashboard Principal
-	-*- Descripción: selector de diferentes tipos de dashboards con KPIs importantes
-	-*- Funcionalidad: permite alternar entre 3 vistas diferentes de dashboard
--->
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
@@ -21,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<title>Mi Panel - Conectando Corazones</title>
+	<title>Panel de Colaborador - Conectando Corazones</title>
 </svelte:head>
 
 <!-- Fondo decorativo -->
@@ -39,7 +33,7 @@
 			<Badge text="Panel de Colaborador" />
 		</div>
 		<h1 class="mb-4 text-4xl font-bold text-gray-900">
-			Tu <span class="text-blue-600">Impacto</span> solidario
+			Mis <span class="text-blue-600">Colaboraciones</span>
 		</h1>
 	</div>
 
@@ -52,15 +46,15 @@
 	>
 		<DashboardColaborador
 			colaboradorInfo={{
-				nombre: (usuario as any).nombre_legal || usuario.nombre || 'Colaborador',
+				nombre: usuario.nombre || '',
 				apellido: usuario.apellido || '',
 				tipoColaborador: (usuario as any).tipo_colaborador || 'unipersonal',
-				proyectosColaborando: data.stats?.proyectosColaborando || 0,
-				aportesRealizados: data.stats?.aportesRealizados || 0,
-				evaluacionesPendientes: data.stats?.evaluacionesPendientes || 0
+				proyectosColaborando: data.stats.proyectosColaborando,
+				aportesRealizados: data.stats.aportesRealizados,
+				evaluacionesPendientes: data.stats.evaluacionesPendientes
 			}}
-			proyectosActivos={(data as any).proyectos || []}
-			evaluacionesPendientes={data.stats?.evaluacionesPendientes || 0}
+			proyectosActivos={data.proyectos}
+			evaluacionesPendientes={data.stats.evaluacionesPendientes}
 		/>
 	</div>
 </main>

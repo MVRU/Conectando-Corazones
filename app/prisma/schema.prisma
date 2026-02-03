@@ -62,7 +62,7 @@ model Colaboracion {
   colaborador Usuario?  @relation(fields: [colaborador_id], references: [id_usuario])
 
   colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
-
+  @@unique([proyecto_id, colaborador_id])
   @@map("colaboraciones")
 }
 

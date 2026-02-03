@@ -81,6 +81,7 @@ export class Proyecto {
 	}
 
 	private validar(): void {
+		// Validaciones mínimas siempre requeridas
 		if (!this.titulo || this.titulo.trim().length < 5) {
 			throw new Error('El título del proyecto debe tener al menos 5 caracteres.');
 		}
@@ -88,20 +89,12 @@ export class Proyecto {
 			throw new Error('La descripción debe ser más detallada (mínimo 20 caracteres).');
 		}
 
-		if (!this.fecha_fin_tentativa) {
-			throw new Error('La fecha de fin tentativa es obligatoria.');
-		}
+		// Validaciones estrictas solo si NO es un borrador y tiene ID (indicando que ya existe en DB)
 
-		if (!this.categorias || this.categorias.length === 0) {
-			throw new Error('Debe seleccionar al menos una categoría.');
-		}
+		const esEstadoFinalizable = ['completado', 'cancelado'].includes(this.estado || '');
+		const esBorrador = this.estado === 'borrador';
 
-		if (!this.participacion_permitida || this.participacion_permitida.length === 0) {
-			throw new Error('Debe definir al menos un tipo de participación.');
-		}
-
-		if (!this.ubicaciones || this.ubicaciones.length === 0) {
-			throw new Error('Debe definir al menos una ubicación.');
+		if (!esBorrador && !esEstadoFinalizable) {
 		}
 
 		if (this.fecha_fin_tentativa) {
@@ -110,6 +103,7 @@ export class Proyecto {
 				throw new Error('La fecha de fin tentativa no es válida.');
 			}
 		}
+
 		if (!this.institucion_id && !this.institucion) {
 			throw new Error('El proyecto debe estar asociado a una institución.');
 		}

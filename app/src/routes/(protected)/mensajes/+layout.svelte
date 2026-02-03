@@ -5,21 +5,20 @@
 	import { chatStore } from '$lib/stores/chatStore';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
 	// Filtrar chats donde el usuario es participante
-	let chatsUsuario: Chat[] = [];
+	export let data: any;
 
-	// Backend de chat no implementado
-	$: if ($usuario?.id_usuario) {
-		chatsUsuario = [];
-	}
+	// Backend de chat derivado de colaboraciones aprobadas
+	$: chatsUsuario = data.chats || [];
 
-	// Separar chats activos y archivados
-	$: activeChats = [] as Chat[];
+	$: activeChats = chatsUsuario.filter((c: Chat) => {
+		const p = c as any;
+		return true;
+	});
 	$: archivedChats = [] as Chat[];
 
 	// Determinar si estamos en la vista de chat (mobile)
 	$: isInChat = !!$page.params.proyecto_id;
 
-	// Función helper para obtener proyecto
 	function getProyecto(proyectoId: number): any {
 		return undefined;
 	}

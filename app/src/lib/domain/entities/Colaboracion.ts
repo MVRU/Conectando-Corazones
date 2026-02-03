@@ -80,8 +80,8 @@ export class Colaboracion {
 	}
 
 	anular(): void {
-		if (this.estado === 'anulada') {
-			throw new Error('La colaboración ya está anulada');
+		if (this.estado !== 'pendiente') {
+			throw new Error('Solo se pueden anular colaboraciones en estado pendiente');
 		}
 		this.estado = 'anulada';
 	}

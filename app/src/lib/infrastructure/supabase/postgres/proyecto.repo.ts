@@ -30,7 +30,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: {
 				colaborador: {
 					include: {
-						localidad: { include: { provincia: true } }
+						localidad: { include: { provincia: true } },
+						contactos: true
 					}
 				},
 				colaboraciones_tipo_participacion: {
@@ -64,95 +65,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	async findByInstitucionId(institucionId: number): Promise<Proyecto[]> {
 		const proyectos = await prisma.proyecto.findMany({
 			where: { institucion_id: institucionId },
-			select: {
-				id_proyecto: true,
-				titulo: true,
-				descripcion: true,
-				resumen: true,
-				url_portada: true,
-				beneficiarios: true,
-				created_at: true,
-				fecha_fin_tentativa: true,
-				institucion_id: true,
-				estado_id: true,
-				estado: {
-					select: {
-						id_estado: true,
-						descripcion: true
-					}
-				},
-				institucion: {
-					select: {
-						id_usuario: true,
-						nombre_legal: true,
-						url_foto: true
-					}
-				},
-				proyecto_categorias: {
-					select: {
-						categoria: {
-							select: {
-								id_categoria: true,
-								descripcion: true
-							}
-						}
-					}
-				},
-				participacion_permitida: {
-					select: {
-						id_participacion_permitida: true,
-						id_proyecto: true,
-						id_tipo_participacion: true,
-						objetivo: true,
-						actual: true,
-						unidad_medida: true,
-						especie: true,
-						tipo_participacion: {
-							select: {
-								id_tipo_participacion: true,
-								descripcion: true
-							}
-						}
-					}
-				},
-				proyecto_ubicaciones: {
-					select: {
-						id_proyecto_ubicacion: true,
-						proyecto_id: true,
-						ubicacion_id: true,
-						ubicacion: {
-							select: {
-								id_ubicacion: true,
-								tipo_ubicacion: true,
-								modalidad: true,
-								calle: true,
-								numero: true,
-								piso: true,
-								departamento: true,
-								referencia: true,
-								url_google_maps: true,
-								url_virtual: true,
-								localidad_id: true,
-								localidad: {
-									select: {
-										id_localidad: true,
-										nombre: true,
-										codigo_postal: true,
-										provincia: {
-											select: {
-												id_provincia: true,
-												nombre: true,
-												nombre_corto: true,
-												codigo_iso: true
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			},
+			include: this.includeOptions,
 			orderBy: [{ estado_id: 'asc' }, { created_at: 'desc' }]
 		});
 
@@ -259,6 +172,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 								}
 							}
 						}
+					}
+				},
+				colaboraciones: {
+					select: {
+						id_colaboracion: true,
+						proyecto_id: true,
+						colaborador_id: true,
+						estado: true,
+						justificacion: true
 					}
 				}
 			},
@@ -642,7 +564,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
-	async cancel(id: number, justificacion?: string): Promise<void> {
+	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string): Promise<void> {
 		const estadoCancelado = await prisma.estado.findUnique({
 			where: { descripcion: 'cancelado' }
 		});
@@ -674,8 +596,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					atributo_afectado: 'estado',
 					valor_anterior: proyectoAnterior.estado?.descripcion || 'desconocido',
 					valor_nuevo: 'cancelado',
-					justificacion: justificacion || 'Cancelación manual por la institución',
-					usuario_id: proyectoAnterior.institucion_id // Atribuimos el cambio a la institución dueña
+					justificacion:
+						justificacion ||
+						(usuarioEjecutorId === proyectoAnterior.institucion_id
+							? 'Cancelación manual por la institución'
+							: 'Cancelación administrativa por irregularidad'),
+					usuario_id: usuarioEjecutorId
 				}
 			});
 		});

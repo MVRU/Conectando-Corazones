@@ -59,6 +59,7 @@ export const DELETE: RequestHandler = async ({ params, request, locals }) => {
 		await useCase.execute({
 			proyectoId: id,
 			usuarioId: usuario.id_usuario!,
+			rol: usuario.rol,
 			justificacion
 		});
 		return new Response(null, { status: 204 });

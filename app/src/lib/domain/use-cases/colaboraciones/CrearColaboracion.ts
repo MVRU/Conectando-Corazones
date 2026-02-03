@@ -41,7 +41,12 @@ export class CrearColaboracion {
 			data.colaborador_id
 		);
 
-		if (existente && existente.estado !== 'anulada') {
+		if (existente) {
+			if (existente.estado === 'anulada') {
+				throw new Error(
+					'No podés volver a colaborar en este proyecto porque anulaste tu solicitud previa.'
+				);
+			}
 			throw new Error('Ya tenés una solicitud activa para este proyecto.');
 		}
 
