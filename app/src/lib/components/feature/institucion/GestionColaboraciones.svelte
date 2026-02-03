@@ -89,8 +89,7 @@
 	async function confirmarRechazo() {
 		if (colaboracionARechazar) {
 			try {
-				const justificacion =
-					justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
+				const justificacion = justificacionRechazo.trim();
 
 				const res = await fetch(`/api/colaboraciones/${colaboracionARechazar}`, {
 					method: 'PUT',
@@ -500,7 +499,8 @@
 			<div class="mb-4">
 				<h3 class="text-lg font-semibold text-gray-900">Rechazar solicitud de colaboración</h3>
 				<p class="mt-2 text-sm text-gray-600">
-					Escribí el motivo por el cual rechazás la solicitud de colaboración (opcional)
+					Escribí el motivo por el cual rechazás la solicitud de colaboración
+					<span class="font-medium text-red-500">(obligatorio)</span>
 				</p>
 			</div>
 
@@ -532,7 +532,8 @@
 					size="sm"
 					type="button"
 					on:click={confirmarRechazo}
-					customClass="!bg-red-600 hover:!bg-red-700 !text-white"
+					disabled={!justificacionRechazo.trim()}
+					customClass="!bg-red-600 hover:!bg-red-700 !text-white disabled:!bg-gray-400 disabled:!cursor-not-allowed"
 				/>
 			</div>
 		</div>
