@@ -11,6 +11,8 @@ export interface UbicacionPresencialCreate {
 }
 
 export interface UbicacionCreate {
+	id_proyecto_ubicacion?: number;
+	id_ubicacion?: number;
 	tipo_ubicacion: TipoUbicacion;
 	modalidad: ModalidadUbicacion;
 	direccion_presencial?: UbicacionPresencialCreate;

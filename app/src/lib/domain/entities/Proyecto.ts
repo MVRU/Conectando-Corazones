@@ -128,6 +128,18 @@ export class Proyecto {
 		return this.estado !== 'borrador' && this.estado !== undefined;
 	}
 
+	estaEnAuditoria(): boolean {
+		return this.estado === 'en_auditoria';
+	}
+
+	estaFinalizado(): boolean {
+		return this.estado === 'completado' || this.estado === 'cancelado';
+	}
+
+	esEdicionRestringida(): boolean {
+		return this.estaPublicado();
+	}
+
 	esCreadoPor(usuarioId: number): boolean {
 		return this.institucion?.id_usuario === usuarioId;
 	}

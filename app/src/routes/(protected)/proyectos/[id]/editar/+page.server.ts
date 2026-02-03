@@ -155,12 +155,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const categoriasSeleccionadas =
 		proyectoOriginal.categorias?.map((c) => c.id_categoria!).filter(Boolean) || [];
 
-	// Asegurar que el proyecto sea editable
-	if (!proyectoOriginal.esEditable()) {
-		throw error(
-			400,
-			'El proyecto no puede ser editado: debe estar "en curso" y no tener colaboradores aprobados.'
-		);
+	const esEdicionRestringida = proyectoOriginal.esEdicionRestringida();
+
+	if (proyectoOriginal.estaEnAuditoria()) {
+		throw error(400, 'El proyecto está en auditoría y no permite modificaciones.');
+	}
+
+	if (proyectoOriginal.estaFinalizado()) {
+		throw error(400, 'No se pueden editar proyectos completados o cancelados.');
+	}
+
+	// El proyecto es editable si es borrador O si está activo pero con restricciones
+	const esEditable = proyectoOriginal.esBorrador() || proyectoOriginal.estaActivo();
+	if (!esEditable) {
+		throw error(400, 'El proyecto no puede ser editado en su estado actual.');
 	}
 
 	return JSON.parse(
@@ -177,6 +185,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				tiposParticipacionSeleccionados,
 				participacionesPermitidas
 			},
+			esEdicionRestringida,
+			esAdmin,
 			originales: {
 				fechaFin: fechaFinTentativa,
 				beneficiarios,

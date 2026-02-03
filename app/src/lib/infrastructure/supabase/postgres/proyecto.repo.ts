@@ -535,53 +535,78 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				}
 
 				// 4. Sincronizar ubicaciones
-				// Primero obtenemos las ubicaciones actuales del proyecto
-				const ubicacionesActuales = await tx.proyectoUbicacion.findMany({
+				const ubicacionesEnPayload = proyecto.ubicaciones || [];
+				const idsUbicacionNuevos = ubicacionesEnPayload
+					.map((u) => u.id_proyecto_ubicacion)
+					.filter(Boolean) as number[];
+
+				// a. Obtener relaciones actuales
+				const relacionesActuales = await tx.proyectoUbicacion.findMany({
 					where: { proyecto_id: proyecto.id_proyecto },
-					select: { ubicacion_id: true }
+					select: { id_proyecto_ubicacion: true, ubicacion_id: true }
 				});
 
-				const ubicacionIds = ubicacionesActuales.map((u) => u.ubicacion_id);
+				// b. Identificar relaciones a eliminar (las que no están en el payload)
+				const relacionesAEliminar = relacionesActuales.filter(
+					(rel) => !idsUbicacionNuevos.includes(rel.id_proyecto_ubicacion!)
+				);
 
-				// Borramos las relaciones
-				await tx.proyectoUbicacion.deleteMany({
-					where: { proyecto_id: proyecto.id_proyecto }
-				});
+				if (relacionesAEliminar.length > 0) {
+					const idsRelEliminar = relacionesAEliminar.map((r) => r.id_proyecto_ubicacion!);
+					const idsUbiEliminar = relacionesAEliminar.map((r) => r.ubicacion_id);
 
-				// Borramos las ubicaciones huérfanas
-				if (ubicacionIds.length > 0) {
+					// Borrar relaciones
+					await tx.proyectoUbicacion.deleteMany({
+						where: { id_proyecto_ubicacion: { in: idsRelEliminar } }
+					});
+
+					// Borrar las ubicaciones físicas asociadas
 					await tx.ubicacion.deleteMany({
-						where: { id_ubicacion: { in: ubicacionIds } }
+						where: { id_ubicacion: { in: idsUbiEliminar } }
 					});
 				}
 
-				// Creamos las nuevas ubicaciones
-				if (proyecto.ubicaciones && proyecto.ubicaciones.length > 0) {
-					for (const pu of proyecto.ubicaciones) {
-						if (pu.ubicacion) {
-							const u = pu.ubicacion as any;
-							const ubicacionCreada = await tx.ubicacion.create({
-								data: {
-									tipo_ubicacion: u.tipo_ubicacion,
-									modalidad: u.modalidad,
-									calle: u.calle || null,
-									numero: u.numero || null,
-									piso: u.piso || null,
-									departamento: u.departamento || null,
-									referencia: u.referencia || null,
-									url_google_maps: u.url_google_maps || null,
-									url_virtual: u.url_virtual || null,
-									localidad_id: u.localidad_id || null
-								}
-							});
+				// c. Procesar cada ubicación del payload (Update o Create)
+				for (const pu of ubicacionesEnPayload) {
+					const uData = pu.ubicacion as any;
+					if (!uData) continue;
 
-							await tx.proyectoUbicacion.create({
-								data: {
-									proyecto_id: proyecto.id_proyecto!,
-									ubicacion_id: ubicacionCreada.id_ubicacion
-								}
+					const mappingData = {
+						tipo_ubicacion: uData.tipo_ubicacion,
+						modalidad: uData.modalidad,
+						calle: uData.calle || null,
+						numero: uData.numero || null,
+						piso: uData.piso || null,
+						departamento: uData.departamento || null,
+						referencia: uData.referencia || null,
+						url_google_maps: uData.url_google_maps || null,
+						url_virtual: uData.url_virtual || null,
+						localidad_id: uData.localidad_id || null
+					};
+
+					if (pu.id_proyecto_ubicacion) {
+						// Es una actualización
+						const relacionExistente = relacionesActuales.find(
+							(r) => r.id_proyecto_ubicacion === pu.id_proyecto_ubicacion
+						);
+						if (relacionExistente) {
+							await tx.ubicacion.update({
+								where: { id_ubicacion: relacionExistente.ubicacion_id },
+								data: mappingData
 							});
 						}
+					} else {
+						// Es una creación nueva
+						const nuevaUbicacion = await tx.ubicacion.create({
+							data: mappingData
+						});
+
+						await tx.proyectoUbicacion.create({
+							data: {
+								proyecto_id: proyecto.id_proyecto!,
+								ubicacion_id: nuevaUbicacion.id_ubicacion
+							}
+						});
 					}
 				}
 

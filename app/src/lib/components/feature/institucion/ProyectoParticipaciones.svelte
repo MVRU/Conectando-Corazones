@@ -25,7 +25,7 @@
 	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { IconSource } from '@steeze-ui/svelte-icon';
-	import { TriangleAlert, Trash2, Plus } from 'lucide-svelte';
+	import { TriangleAlert, Trash2, Plus, Lock } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
 	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
 	export let participacionesPermitidas: ParticipacionForm[] = [];
@@ -33,10 +33,9 @@
 	export let limpiarError: (campo: string) => void;
 
 	// Modo edición
-	export let modoEdicion = false;
+	export let esEdicionRestringida = false;
 	export let participacionesOriginales: ParticipacionPermitida[] = [];
 	export let esAdmin = false;
-	export let estaPublicado = false;
 	export let tieneColaboradoresAprobados = false;
 
 	function esUnidadRepetida(
@@ -55,7 +54,7 @@
 			const esOriginal = participacionesOriginales.some(
 				(p) => p.tipo_participacion?.descripcion === tipo
 			);
-			if (modoEdicion && esOriginal && !esAdmin) {
+			if (esEdicionRestringida && esOriginal && !esAdmin) {
 				return;
 			}
 
@@ -151,7 +150,7 @@
 	function eliminarParticipacion(index: number) {
 		// En modo edición no se pueden eliminar participaciones que ya existían
 		const esExistente = !!participacionesPermitidas[index].id_participacion_permitida;
-		if (modoEdicion && esExistente && !esAdmin) {
+		if (esEdicionRestringida && esExistente && !esAdmin) {
 			return;
 		}
 
@@ -196,14 +195,14 @@
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
 	<h2 class="mb-2 text-xl font-semibold text-gray-900">
-		{#if modoEdicion}
+		{#if esEdicionRestringida}
 			Objetivos del proyecto
 		{:else}
 			Tipos de participación *
 		{/if}
 	</h2>
 	<p class="mb-6 text-gray-600">
-		{#if modoEdicion && !esAdmin}
+		{#if esEdicionRestringida && !esAdmin}
 			Los objetivos solo pueden aumentar. Podés agregar nuevos tipos de participación.
 		{:else if esAdmin}
 			Como administrador tenés control total sobre los objetivos y tipos de participación.
@@ -222,9 +221,9 @@
 					<button
 						type="button"
 						on:click={() => toggleTipoParticipacion(tipo)}
-						disabled={estaPublicado && tieneColaboradoresAprobados && !esAdmin}
+						disabled={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover} disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
-						title={estaPublicado && tieneColaboradoresAprobados && !esAdmin
+						title={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin
 							? 'No se pueden añadir tipos si ya hay colaboradores aprobados'
 							: 'Seleccionar'}
 					>
@@ -247,7 +246,7 @@
 		{@const tipo = participacion.tipo_participacion?.descripcion || 'Voluntariado'}
 		{@const tipoInfo = INFO_TIPOS_PARTICIPACION[tipo as TipoParticipacionDescripcion]}
 		{@const clases = obtenerClasesColor(tipoInfo.color, true)}
-		{@const esOriginal = modoEdicion && !!participacion.id_participacion_permitida}
+		{@const esOriginal = esEdicionRestringida && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
 			? participacionesOriginales.find(
 					(p) => p.id_participacion_permitida === participacion.id_participacion_permitida
@@ -262,15 +261,23 @@
 					{TIPO_PARTICIPACION_LABELS[
 						participacion.tipo_participacion?.descripcion || 'Voluntariado'
 					]}
+					{#if esOriginal && esEdicionRestringida && !esAdmin}
+						<span
+							class="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-600"
+						>
+							<Lock class="h-2.5 w-2.5" />
+							Protegido
+						</span>
+					{/if}
 				</h4>
 				<button
 					type="button"
 					on:click={() => eliminarParticipacion(index)}
-					disabled={esOriginal && modoEdicion && !esAdmin}
+					disabled={esOriginal && esEdicionRestringida && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
-					class:opacity-50={esOriginal && modoEdicion && !esAdmin}
-					class:cursor-not-allowed={esOriginal && modoEdicion && !esAdmin}
-					title={esOriginal && modoEdicion && !esAdmin
+					class:opacity-50={esOriginal && esEdicionRestringida && !esAdmin}
+					class:cursor-not-allowed={esOriginal && esEdicionRestringida && !esAdmin}
+					title={esOriginal && esEdicionRestringida && !esAdmin
 						? 'No se pueden eliminar participaciones existentes durante la edición'
 						: 'Eliminar'}
 					aria-label="Eliminar participación"
@@ -307,10 +314,16 @@
 
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 					<div>
-						<label for="objetivo_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+						<label
+							for="objetivo_{index}"
+							class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+						>
 							Objetivo *
 							{#if esOriginal && original}
-								<span class="ml-2 text-xs text-gray-500">(Min: {original.objetivo})</span>
+								<span class="text-xs text-gray-500">(Min: {original.objetivo})</span>
+								{#if esEdicionRestringida && !esAdmin}
+									<Lock class="h-3 w-3 text-amber-500" />
+								{/if}
 							{/if}
 						</label>
 						<input
@@ -323,8 +336,9 @@
 							}}
 							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							placeholder="100"
+							disabled={esOriginal && esEdicionRestringida && !esAdmin}
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
@@ -336,19 +350,25 @@
 						{/if}
 					</div>
 					<div>
-						<label for="unidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+						<label
+							for="unidad_{index}"
+							class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+						>
 							Unidad de medida
+							{#if esEdicionRestringida && !esAdmin && esOriginal}
+								<Lock class="h-3 w-3 text-amber-500" />
+							{/if}
 						</label>
 						<select
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
 							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
-							disabled={estaPublicado && !esAdmin}
+							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-							class:border-gray-300={!estaPublicado || esAdmin}
-							class:cursor-not-allowed={estaPublicado && !esAdmin}
-							class:bg-gray-50={estaPublicado && !esAdmin}
-							class:text-gray-600={estaPublicado && !esAdmin}
+							class:border-gray-300={!esEdicionRestringida || esAdmin}
+							class:cursor-not-allowed={esEdicionRestringida && !esAdmin}
+							class:bg-gray-50={esEdicionRestringida && !esAdmin}
+							class:text-gray-600={esEdicionRestringida && !esAdmin}
 						>
 							{#each [...UNIDADES_POR_TIPO[(participacion.tipo_participacion?.descripcion as TipoParticipacionDescripcion) || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>

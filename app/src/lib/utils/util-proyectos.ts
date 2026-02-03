@@ -301,11 +301,19 @@ export function filtrarPorRangoFechas(
 export function formatearFechaBadge(date: Date | string | null | undefined): string {
 	if (!date) return '-';
 	const d = new Date(date);
-	const partes = new Intl.DateTimeFormat('es-AR', {
+
+	const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
+	const options: Intl.DateTimeFormatOptions = {
 		day: 'numeric',
 		month: 'short',
 		year: 'numeric'
-	}).formatToParts(d);
+	};
+
+	if (esMedianocheUTC) {
+		options.timeZone = 'UTC';
+	}
+
+	const partes = new Intl.DateTimeFormat('es-AR', options).formatToParts(d);
 
 	const dia = partes.find((p) => p.type === 'day')?.value;
 	const mes = partes.find((p) => p.type === 'month')?.value;
@@ -325,11 +333,19 @@ export function formatearFechaBadge(date: Date | string | null | undefined): str
 export function formatearFecha(date: Date | string | null | undefined): string {
 	if (!date) return '-';
 	const d = new Date(date);
-	return new Intl.DateTimeFormat('es-AR', {
+
+	const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
+	const options: Intl.DateTimeFormatOptions = {
 		day: '2-digit',
 		month: 'short',
 		year: 'numeric'
-	}).format(d);
+	};
+
+	if (esMedianocheUTC) {
+		options.timeZone = 'UTC';
+	}
+
+	return new Intl.DateTimeFormat('es-AR', options).format(d);
 }
 
 //**

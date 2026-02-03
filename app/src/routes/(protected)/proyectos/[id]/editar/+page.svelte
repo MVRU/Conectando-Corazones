@@ -25,5 +25,7 @@
 		initialData={data.form}
 		categorias={data.categorias}
 		tiposParticipacion={data.tiposParticipacion}
+		esEdicionRestringida={data.esEdicionRestringida}
+		esAdmin={data.esAdmin}
 	/>
 {/if}

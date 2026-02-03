@@ -4,8 +4,10 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { CancelarProyecto } from '$lib/domain/use-cases/proyectos/CancelarProyecto';
 import { EditarProyecto } from '$lib/domain/use-cases/proyectos/EditarProyecto';
 import { Proyecto } from '$lib/domain/entities/Proyecto';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
 
 const repo = new PostgresProyectoRepository();
+const historialDeCambiosRepo = new PostgresHistorialDeCambiosRepository();
 
 export const GET: RequestHandler = async ({ params }) => {
 	const id = parseInt(params.id);
@@ -26,7 +28,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 
 	try {
 		const data = await request.json();
-		const useCase = new EditarProyecto(repo);
+		const useCase = new EditarProyecto(repo, historialDeCambiosRepo);
 
 		const updated = await useCase.execute(id, data, usuario.id_usuario!);
 		return json(updated);

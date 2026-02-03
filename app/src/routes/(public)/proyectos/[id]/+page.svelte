@@ -124,15 +124,42 @@
 	function diasRestantes(fechaFin: string | Date | undefined | null): number {
 		const fin = aFecha(fechaFin);
 		if (!fin) return 0;
+
 		const hoy = new Date();
-		return Math.max(Math.ceil((fin.getTime() - hoy.getTime()) / 86_400_000), 0);
+		// Normalizamos "hoy" a medianoche local para comparar solo días
+		const baseHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
+
+		// Si fin es a medianoche UTC, es una fecha de calendario pura. La tomamos como tal.
+		let baseFin: number;
+		if (fin.getUTCHours() === 0 && fin.getUTCMinutes() === 0) {
+			baseFin = new Date(fin.getUTCFullYear(), fin.getUTCMonth(), fin.getUTCDate()).getTime();
+		} else {
+			baseFin = new Date(fin.getFullYear(), fin.getMonth(), fin.getDate()).getTime();
+		}
+
+		const diff = Math.ceil((baseFin - baseHoy) / 86_400_000);
+		return Math.max(diff, 0);
 	}
 
 	function formatearFechaLocal(fecha: string | Date | undefined | null): string {
+		if (!fecha) return 'Fecha no disponible';
 		const d = aFecha(fecha);
-		return d
-			? d.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })
-			: 'Fecha no disponible';
+		if (!d) return 'Fecha no disponible';
+
+		// Si es una fecha a medianoche (ej: 2026-02-15T00:00:00.000Z),
+		// la formateamos en UTC para evitar el desfase por zona horaria (ej: Argentina -3h).
+		const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
+
+		if (esMedianocheUTC) {
+			return d.toLocaleDateString('es-AR', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+				timeZone: 'UTC'
+			});
+		}
+
+		return d.toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' });
 	}
 
 	function clasesEstado(estado: EstadoDescripcion) {

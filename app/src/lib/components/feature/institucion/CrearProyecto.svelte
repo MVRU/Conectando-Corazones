@@ -46,8 +46,10 @@
 
 	// Props para edición
 	export let edicion: boolean = false;
+	export let esEdicionRestringida: boolean = false;
 	export let proyectoId: number | undefined = undefined;
 	export let initialData: any = null;
+	export let esAdmin: boolean = initialData?.esAdmin || false;
 
 	let titulo = initialData?.titulo || '';
 	let descripcion = initialData?.descripcion || '';
@@ -79,8 +81,6 @@
 	let participacionesPermitidas: ParticipacionForm[] = initialData?.participacionesPermitidas || [];
 
 	let errores: Record<string, string> = {};
-
-	$: esAdmin = $usuario?.rol === 'administrador';
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
@@ -448,7 +448,12 @@
 			.map((u) => {
 				const tipo = u.tipo_ubicacion as TipoUbicacion;
 				const modalidad = (u.modalidad || 'presencial') as ModalidadUbicacion;
-				const carga: UbicacionCreate = { tipo_ubicacion: tipo, modalidad };
+				const carga: UbicacionCreate = {
+					id_proyecto_ubicacion: u.id_proyecto_ubicacion,
+					id_ubicacion: u.id_ubicacion,
+					tipo_ubicacion: tipo,
+					modalidad
+				};
 
 				if (modalidad === 'presencial' && u.direccion_presencial) {
 					const d = u.direccion_presencial;
@@ -585,8 +590,9 @@
 				{errores}
 				{limpiarError}
 				{categorias}
-				modoEdicion={edicion}
+				{esEdicionRestringida}
 				{esAdmin}
+				originales={initialData?.originales}
 			/>
 
 			<ProyectoParticipaciones
@@ -595,16 +601,15 @@
 				bind:errores
 				{limpiarError}
 				{tiposParticipacion}
-				modoEdicion={edicion}
+				{esEdicionRestringida}
 				{esAdmin}
-				participacionesOriginales={initialData?.participacion_permitida || []}
-				estaPublicado={initialData?.estado !== 'borrador' && initialData?.estado != null}
+				participacionesOriginales={initialData?.originales?.participacionesOriginales || []}
 				tieneColaboradoresAprobados={initialData?.colaboraciones?.some(
 					(c: any) => c.estado === 'aprobada'
 				) || false}
 			/>
 
-			<ProyectoUbicaciones bind:ubicaciones {errores} modoEdicion={edicion} {esAdmin} />
+			<ProyectoUbicaciones bind:ubicaciones {errores} {esEdicionRestringida} {esAdmin} />
 
 			<div class="flex flex-col justify-end gap-4 border-t border-gray-200 pt-6 sm:flex-row">
 				{#if !edicion}
