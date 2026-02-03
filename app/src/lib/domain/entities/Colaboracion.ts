@@ -83,6 +83,9 @@ export class Colaboracion {
 		if (this.estado === 'anulada') {
 			throw new Error('La colaboración ya está anulada');
 		}
+		if (this.estado !== 'pendiente') {
+			throw new Error('Solo se pueden cancelar postulaciones en estado pendiente');
+		}
 		this.estado = 'anulada';
 	}
 }
