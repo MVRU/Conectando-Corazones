@@ -167,10 +167,10 @@
 </svelte:head>
 
 <main class="min-h-screen bg-gray-50">
-	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+	<div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-[rgb(var(--base-color))]">
+			<h1 class="text-2xl font-bold text-[rgb(var(--base-color))] sm:text-3xl">
 				Solicitudes de colaboración recibidas
 			</h1>
 			<p class="mt-2 text-gray-600">Gestioná las solicitudes de colaboración para tus proyectos</p>
@@ -198,7 +198,7 @@
 						<select
 							id="project-select"
 							bind:value={proyectoSeleccionadoId}
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-3 text-base transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:py-2 sm:text-sm"
 						>
 							{#each proyectos as proyecto}
 								<option value={proyecto.id_proyecto}>
@@ -208,23 +208,9 @@
 						</select>
 					</div>
 
-					<!-- Información del proyecto seleccionado -->
 					<div class="rounded-lg bg-gray-50 p-4">
-						<div class="mb-3 flex items-start justify-between">
-							<div class="flex-1">
-								<h3 class="mb-1 font-medium text-gray-900">
-									{proyectoSeleccionado.titulo}
-								</h3>
-								{#if proyectoSeleccionado.descripcion}
-									<p class="line-clamp-2 text-sm text-gray-600">
-										{proyectoSeleccionado.descripcion}
-									</p>
-								{/if}
-							</div>
-						</div>
-
 						<!-- Estadísticas rápidas -->
-						<div class="grid grid-cols-4 gap-3">
+						<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
 							<div class="rounded-lg border border-gray-200 bg-white p-3">
 								<div class="flex items-center">
 									<div class="mr-2 text-orange-500">
@@ -308,9 +294,12 @@
 			<div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 				<div class="border-b border-gray-200 px-6 py-4">
 					<div class="flex items-center justify-between">
-						<h2 class="text-lg font-semibold text-gray-900">Solicitudes de colaboración</h2>
+						<h2 class="truncate text-lg font-semibold text-gray-900">
+							<span class="sm:hidden">Solicitudes</span>
+							<span class="hidden sm:inline">Solicitudes de colaboración</span>
+						</h2>
 						<span
-							class="inline-flex items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium text-orange-800"
+							class="inline-flex shrink-0 items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-orange-800"
 						>
 							{pendientes.length} pendiente{pendientes.length !== 1 ? 's' : ''}
 						</span>
@@ -331,22 +320,49 @@
 						</div>
 					{:else}
 						{#each pendientes as colaboracion (colaboracion.id_colaboracion)}
-							<div class="px-6 py-4 transition-colors hover:bg-gray-50">
-								<div class="flex items-start justify-between">
-									<div class="flex-1">
-										<div class="mb-2 flex items-center gap-3">
-											<span class="text-2xl">
-												<Icon src={getTipoIcon(colaboracion)} class="h-8 w-8" />
-											</span>
-											<div>
-												<h3 class="text-base font-medium text-gray-900">
-													{obtenerNombreColaborador(colaboracion.colaborador)}
-												</h3>
-												<p class="text-sm text-gray-500">
-													{getTipoLabel(colaboracion)} • Postulado el {formatearFecha(
-														colaboracion.created_at
-													)}
-												</p>
+							<div class="px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6">
+								<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+									<div class="w-full min-w-0 flex-1">
+										<div class="mb-3 flex items-start gap-3 sm:mb-4 sm:gap-4">
+											<!-- Avatar Clickeable -->
+											<a
+												href="/perfil/{colaboracion.colaborador?.username}"
+												class="group flex-shrink-0"
+											>
+												{#if colaboracion.colaborador?.url_foto}
+													<img
+														src={colaboracion.colaborador.url_foto}
+														alt={colaboracion.colaborador.username}
+														class="h-12 w-12 rounded-full border-2 border-white object-cover shadow-sm transition-transform group-hover:scale-105"
+													/>
+												{:else}
+													<div
+														class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-lg font-bold text-gray-500 shadow-sm transition-transform group-hover:scale-105"
+													>
+														{colaboracion.colaborador?.username?.charAt(0).toUpperCase()}
+													</div>
+												{/if}
+											</a>
+
+											<div class="min-w-0 flex-1">
+												<!-- Nombre y Link -->
+												<a
+													href="/perfil/{colaboracion.colaborador?.username}"
+													class="hover:underline"
+												>
+													<h3 class="truncate text-base font-semibold text-gray-900">
+														{obtenerNombreColaborador(colaboracion.colaborador)}
+													</h3>
+												</a>
+
+												<!-- Info de Participación -->
+												<div
+													class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500"
+												>
+													<Icon src={getTipoIcon(colaboracion)} class="h-4 w-4 text-gray-400" />
+													<span>{getTipoLabel(colaboracion)}</span>
+													<span>• Postulado el {formatearFecha(colaboracion.created_at)}</span>
+												</div>
 											</div>
 										</div>
 
@@ -387,7 +403,9 @@
 										{/if}
 									</div>
 
-									<div class="ml-6 flex flex-col gap-2">
+									<div
+										class="mt-2 flex w-full gap-3 sm:mt-0 sm:ml-6 sm:w-auto sm:flex-col sm:gap-2"
+									>
 										<Button
 											label={loadingAprobacion === colaboracion.id_colaboracion
 												? 'Aprobando...'
@@ -398,7 +416,7 @@
 											onclick={() => aceptarColaboracion(colaboracion.id_colaboracion || 0)}
 											disabled={loadingAprobacion !== null}
 											loading={loadingAprobacion === colaboracion.id_colaboracion}
-											customClass="!bg-green-600 hover:!bg-green-700 !min-w-[90px] transition-all duration-200"
+											customClass="flex-1 !min-w-0 sm:flex-none !bg-green-600 hover:!bg-green-700 sm:!min-w-[90px] transition-all duration-200"
 										/>
 										<Button
 											label="Rechazar"
@@ -407,7 +425,7 @@
 											type="button"
 											onclick={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
 											disabled={loadingAprobacion !== null}
-											customClass="!bg-red-600 hover:!bg-red-700 !text-white !min-w-[90px] transition-all duration-200"
+											customClass="flex-1 !min-w-0 sm:flex-none !bg-red-600 hover:!bg-red-700 !text-white sm:!min-w-[90px] transition-all duration-200"
 										/>
 									</div>
 								</div>
@@ -420,10 +438,13 @@
 			<!-- Colaboradores activos (aprobadas) -->
 			<div class="rounded-lg border border-gray-200 bg-white shadow-sm">
 				<div class="border-b border-gray-200 px-6 py-4">
-					<div class="flex items-center justify-between">
-						<h2 class="text-lg font-semibold text-gray-900">Colaboradores activos</h2>
+					<div class="flex items-center justify-between gap-2">
+						<h2 class="truncate text-lg font-semibold text-gray-900">
+							<span class="sm:hidden">Activos</span>
+							<span class="hidden sm:inline">Colaboradores activos</span>
+						</h2>
 						<span
-							class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800"
+							class="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-green-800"
 						>
 							{aprobadas.length} activo{aprobadas.length !== 1 ? 's' : ''}
 						</span>
@@ -444,29 +465,58 @@
 						</div>
 					{:else}
 						{#each aprobadas as colaboracion (colaboracion.id_colaboracion)}
-							<div class="px-6 py-4">
-								<div class="flex items-start justify-between">
-									<div class="flex items-center gap-3">
-										<span class="text-2xl">
-											<Icon src={getTipoIcon(colaboracion)} class="h-8 w-8" />
-										</span>
-										<div>
-											<h3 class="text-base font-medium text-gray-900">
-												{obtenerNombreColaborador(colaboracion.colaborador)}
-											</h3>
-											<p class="text-sm text-gray-500">
-												{getTipoLabel(colaboracion)}
-											</p>
-											{#if colaboracion.created_at}
-												<p class="mt-1 text-xs text-gray-400">
-													Colaborando desde el {formatearFecha(colaboracion.created_at)}
-													({calcularDiasActivo(colaboracion.created_at)} días)
-												</p>
+							<div class="px-4 py-4 sm:px-6">
+								<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+									<div class="flex w-full min-w-0 flex-1 items-center gap-3 sm:gap-4">
+										<!-- Avatar Clickeable -->
+										<a
+											href="/perfil/{colaboracion.colaborador?.username}"
+											class="group flex-shrink-0"
+										>
+											{#if colaboracion.colaborador?.url_foto}
+												<img
+													src={colaboracion.colaborador.url_foto}
+													alt={colaboracion.colaborador.username}
+													class="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm transition-transform group-hover:scale-105"
+												/>
+											{:else}
+												<div
+													class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-base font-bold text-gray-500 shadow-sm transition-transform group-hover:scale-105"
+												>
+													{colaboracion.colaborador?.username?.charAt(0).toUpperCase()}
+												</div>
 											{/if}
+										</a>
+
+										<div class="min-w-0 flex-1">
+											<a
+												href="/perfil/{colaboracion.colaborador?.username}"
+												class="hover:underline"
+											>
+												<h3 class="truncate text-sm font-semibold text-gray-900">
+													{obtenerNombreColaborador(colaboracion.colaborador)}
+												</h3>
+											</a>
+
+											<div
+												class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500"
+											>
+												<div class="flex items-center gap-1">
+													<Icon src={getTipoIcon(colaboracion)} class="h-3.5 w-3.5 text-gray-400" />
+													<span>{getTipoLabel(colaboracion)}</span>
+												</div>
+
+												{#if colaboracion.created_at}
+													<span class="text-gray-400">
+														• Desde {formatearFecha(colaboracion.created_at)}
+														({calcularDiasActivo(colaboracion.created_at)} d)
+													</span>
+												{/if}
+											</div>
 										</div>
 									</div>
 
-									<div class="flex items-center gap-2">
+									<div class="mt-2 flex items-center justify-start gap-2 sm:mt-0 sm:justify-end">
 										<span
 											class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
 										>
