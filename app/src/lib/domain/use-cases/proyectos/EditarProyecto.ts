@@ -13,7 +13,12 @@ export class EditarProyecto {
 		private historialDeCambiosRepo: HistorialDeCambiosRepository
 	) {}
 
-	async execute(id_proyecto: number, data: any, usuarioId: number): Promise<Proyecto> {
+	async execute(
+		id_proyecto: number,
+		data: any,
+		usuarioId: number,
+		usuarioRol?: string
+	): Promise<Proyecto> {
 		const proyectoExistente = await this.proyectoRepo.findById(id_proyecto);
 
 		if (!proyectoExistente) {
@@ -21,7 +26,7 @@ export class EditarProyecto {
 		}
 
 		// 1. Bloqueo por auditoría
-		if (proyectoExistente.estaEnAuditoria()) {
+		if (proyectoExistente.estaEnAuditoria() && usuarioRol !== 'administrador') {
 			throw new Error('El proyecto está en auditoría y no permite modificaciones.');
 		}
 
@@ -30,13 +35,13 @@ export class EditarProyecto {
 			throw new Error('No se pueden editar proyectos completados o cancelados.');
 		}
 
-		// 3. Validar que el usuario sea el dueño del proyecto
-		if (proyectoExistente.institucion_id !== usuarioId) {
+		// 3. Validar que el usuario sea el dueño del proyecto o administrador
+		if (proyectoExistente.institucion_id !== usuarioId && usuarioRol !== 'administrador') {
 			throw new Error('No tenés permisos para editar este proyecto.');
 		}
 
 		// 4. Restricción de campos prohibidos una vez publicado
-		if (proyectoExistente.estaPublicado()) {
+		if (proyectoExistente.estaPublicado() && usuarioRol !== 'administrador') {
 			if (data.titulo && data.titulo !== proyectoExistente.titulo) {
 				throw new Error('No podés cambiar el título de un proyecto ya publicado.');
 			}
@@ -91,7 +96,8 @@ export class EditarProyecto {
 
 			if (
 				huboEliminacion &&
-				(proyectoExistente.estaPublicado() || proyectoExistente.tieneInteracciones())
+				(proyectoExistente.estaPublicado() || proyectoExistente.tieneInteracciones()) &&
+				usuarioRol !== 'administrador'
 			) {
 				throw new Error(
 					'No se pueden eliminar tipos de participación si el proyecto ya está publicado o tiene colaboraciones.'
@@ -99,7 +105,7 @@ export class EditarProyecto {
 			}
 
 			// Prohibición de cambiar la naturaleza (tipo) una vez publicado
-			if (proyectoExistente.estaPublicado()) {
+			if (proyectoExistente.estaPublicado() && usuarioRol !== 'administrador') {
 				for (const pNueva of nuevasParticipaciones) {
 					if (pNueva.id_participacion_permitida) {
 						const original = originales.find(
@@ -155,7 +161,11 @@ export class EditarProyecto {
 				(orig) => !idsNuevos.includes(Number(orig.id_proyecto_ubicacion))
 			);
 
-			if (ubicacionEliminada && proyectoExistente.estaPublicado()) {
+			if (
+				ubicacionEliminada &&
+				proyectoExistente.estaPublicado() &&
+				usuarioRol !== 'administrador'
+			) {
 				throw new Error('No se pueden eliminar ubicaciones existentes de un proyecto publicado.');
 			}
 

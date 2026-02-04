@@ -34,6 +34,14 @@
 	}
 
 	$: proyectosEnAuditoria = proyectos.filter((p) => p.estado === 'en_auditoria');
+
+	$: proyectosPublicos = proyectos.filter(
+		(p) => p.estado !== 'cancelado' && p.estado !== 'en_auditoria'
+	);
+
+	$: estadosPublicos = estadosDisponibles.filter(
+		(e) => e.value !== 'cancelado' && e.value !== 'en_auditoria'
+	);
 </script>
 
 <section class="min-h-screen w-full bg-gray-50 pt-8">
@@ -78,9 +86,9 @@
 	{#if activeTab === 'todos'}
 		<div in:fade={{ duration: 200 }}>
 			<TodosProyectos
-				{proyectos}
+				proyectos={proyectosPublicos}
 				{provinciasDisponibles}
-				{estadosDisponibles}
+				estadosDisponibles={estadosPublicos}
 				{categoriasDisponibles}
 				{tiposParticipacionDisponibles}
 				on:cambiarTab={(e) => handleTabChange(e.detail)}
