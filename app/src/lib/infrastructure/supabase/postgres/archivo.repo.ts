@@ -17,7 +17,25 @@ export class PostgresArchivoRepository implements ArchivoRepository {
 			}
 		});
 
-		return new Archivo(nuevoArchivo);
+		return new Archivo({
+			...nuevoArchivo,
+			nombre_original: nuevoArchivo.nombre_original ?? undefined
+		});
+	}
+
+	async update(id: number, data: Partial<Archivo>): Promise<Archivo> {
+		const actualizado = await prisma.archivo.update({
+			where: { id_archivo: id },
+			data: {
+				nombre_original: data.nombre_original,
+				descripcion: data.descripcion,
+				url: data.url
+			}
+		});
+		return new Archivo({
+			...actualizado,
+			nombre_original: actualizado.nombre_original ?? undefined
+		});
 	}
 
 	async delete(id: number): Promise<void> {
@@ -31,6 +49,10 @@ export class PostgresArchivoRepository implements ArchivoRepository {
 			where: { id_archivo: id }
 		});
 
-		return archivo ? new Archivo(archivo) : null;
+		if (!archivo) return null;
+		return new Archivo({
+			...archivo,
+			nombre_original: archivo.nombre_original ?? undefined
+		});
 	}
 }

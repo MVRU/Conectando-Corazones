@@ -15,6 +15,7 @@ export class SubirEvidencia {
 
 	async execute(
 		usuarioId: number,
+		usuarioRol: string,
 		idParticipacionPermitida: number,
 		tipoEvidencia: 'entrada' | 'salida',
 		archivos: Archivo[]
@@ -37,7 +38,7 @@ export class SubirEvidencia {
 		}
 
 		// Validar estado del proyecto (Regla de negocio)
-		const estadoDescripcion = proyecto.estado?.descripcion;
+		const estadoDescripcion = proyecto.estado;
 
 		if (!estadoDescripcion) {
 			throw new Error('El proyecto no tiene un estado válido asignado.');
@@ -54,7 +55,11 @@ export class SubirEvidencia {
 
 		// 3. Validar permisos según tipo de evidencia
 		if (tipoEvidencia === 'entrada') {
-			// Evidencia de COLABORADOR
+			// RN 44 / Evidencia de COLABORADOR
+			if (usuarioRol !== 'colaborador') {
+				throw new Error('Solo los colaboradores pueden subir evidencias de entrada.');
+			}
+
 			// Verificar que el usuario tenga una colaboración APROBADA en este proyecto
 			const colaboracion = await this.colaboracionRepo.findByProyectoAndColaborador(
 				proyectoId,
@@ -70,29 +75,55 @@ export class SubirEvidencia {
 				throw new Error('Tu colaboración debe estar aprobada para subir evidencias.');
 			}
 		} else if (tipoEvidencia === 'salida') {
-			// Evidencia de INSTITUCIÓN
+			// RN 14 / Evidencia de INSTITUCIÓN
+			if (usuarioRol !== 'institucion') {
+				throw new Error('Solo las instituciones pueden subir evidencias de salida.');
+			}
+
 			// Verificar que el usuario sea el creador del proyecto.
-			if (proyecto.usuario_id !== usuarioId) {
+			if (proyecto.institucion_id !== usuarioId) {
 				throw new Error(
 					'Solo la institución responsable del proyecto puede subir evidencias de salida.'
 				);
 			}
 		}
 
-		// 4. Crear la entidad Evidencia
+		// 4. Preparar archivos
 		// Aseguramos que los archivos tengan el ID de proyecto correcto
 		const archivosConProyecto = archivos.map((a) => {
 			a.proyecto_id = proyectoId;
 			return a;
 		});
 
-		const nuevaEvidencia = new Evidencia({
-			tipo_evidencia: tipoEvidencia,
-			id_participacion_permitida: idParticipacionPermitida,
-			archivos: archivosConProyecto
-		});
+		// 5. Verificar si ya existe evidencia para esta participación y tipo
+		const evidenciaExistente = await this.evidenciaRepo.findByParticipacionAndTipo(
+			idParticipacionPermitida,
+			tipoEvidencia
+		);
 
-		// 5. Persistir
-		return await this.evidenciaRepo.create(nuevaEvidencia);
+		if (evidenciaExistente) {
+			// Si existe, agregamos los archivos a esa evidencia
+			if (!evidenciaExistente.id_evidencia) {
+				throw new Error('Error de integridad: La evidencia existente no tiene ID.');
+			}
+
+			const nuevosArchivos = await this.evidenciaRepo.addArchivos(
+				evidenciaExistente.id_evidencia,
+				archivosConProyecto
+			);
+
+			// Retornamos la evidencia existente actualizada con los nuevos archivos (en memoria para response)
+			evidenciaExistente.archivos = [...(evidenciaExistente.archivos || []), ...nuevosArchivos];
+			return evidenciaExistente;
+		} else {
+			// Si no existe, creamos el "contenedor" de evidencia y sus primeros archivos
+			const nuevaEvidencia = new Evidencia({
+				tipo_evidencia: tipoEvidencia,
+				id_participacion_permitida: idParticipacionPermitida,
+				archivos: archivosConProyecto
+			});
+
+			return await this.evidenciaRepo.create(nuevaEvidencia);
+		}
 	}
 }

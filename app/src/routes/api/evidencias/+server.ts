@@ -4,7 +4,37 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresParticipacionPermitidaRepository } from '$lib/infrastructure/supabase/postgres/participacion-permitida.repo';
 import { SubirEvidencia } from '$lib/domain/use-cases/SubirEvidencia';
+import { ListarEvidencias } from '$lib/domain/use-cases/ListarEvidencias';
 import { Archivo } from '$lib/domain/entities/Archivo';
+
+export const GET: RequestHandler = async ({ url, locals }) => {
+	if (!locals.usuario || !locals.usuario.id_usuario) {
+		return json({ error: 'No autorizado' }, { status: 401 });
+	}
+
+	const id_proyecto = url.searchParams.get('id_proyecto');
+	if (!id_proyecto) {
+		return json({ error: 'Debe especificar el id_proyecto' }, { status: 400 });
+	}
+
+	try {
+		const evidenciaRepo = new PostgresEvidenciaRepository();
+		const proyectoRepo = new PostgresProyectoRepository();
+		const colaboracionRepo = new PostgresColaboracionRepository();
+
+		const listarUseCase = new ListarEvidencias(evidenciaRepo, proyectoRepo, colaboracionRepo);
+
+		const evidencias = await listarUseCase.execute(
+			Number(id_proyecto),
+			locals.usuario.id_usuario,
+			locals.usuario.rol
+		);
+
+		return json(evidencias);
+	} catch (error: any) {
+		return json({ error: error.message || 'Internal server error' }, { status: 500 });
+	}
+};
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.usuario || !locals.usuario.id_usuario) {
@@ -45,7 +75,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		const nuevaEvidencia = await subirEvidenciaUseCase.execute(
-			locals.usuario.id_usuario.toString(), // TODO: Ajustar UseCase para recibir number
+			locals.usuario.id_usuario,
+			locals.usuario.rol,
 			id_participacion_permitida,
 			tipo_evidencia,
 			entidadArchivos

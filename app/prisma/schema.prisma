@@ -139,6 +139,7 @@ model Evidencia {
   archivos             Archivo[]
   solicitud_evidencias SolicitudFinalizacionEvidencia[]
 
+  @@unique([id_participacion_permitida, tipo_evidencia]) // Garantiza una única carpeta/registro de evidencia por tipo para una participación
   @@map("evidencias")
 }
 

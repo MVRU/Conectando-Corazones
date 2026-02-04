@@ -33,7 +33,12 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 						proyecto_id: archivo.proyecto_id
 					}
 				});
-				archivosCreados.push(new Archivo(nuevoArchivo));
+				archivosCreados.push(
+					new Archivo({
+						...nuevoArchivo,
+						nombre_original: nuevoArchivo.nombre_original ?? undefined
+					})
+				);
 			}
 
 			// Retornamos la entidad de dominio completa
@@ -47,6 +52,61 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 		});
 
 		return nuevaEvidencia;
+	}
+
+	async findByParticipacionAndTipo(
+		idParticipacion: number,
+		tipo: string
+	): Promise<Evidencia | null> {
+		const ev = await prisma.evidencia.findUnique({
+			where: {
+				id_participacion_permitida_tipo_evidencia: {
+					id_participacion_permitida: idParticipacion,
+					tipo_evidencia: tipo
+				}
+			},
+			include: { archivos: true }
+		});
+
+		if (!ev) return null;
+
+		return new Evidencia({
+			id_evidencia: ev.id_evidencia,
+			tipo_evidencia: ev.tipo_evidencia as 'entrada' | 'salida',
+			created_at: ev.created_at,
+			id_participacion_permitida: ev.id_participacion_permitida,
+			archivos: ev.archivos.map(
+				(a) => new Archivo({ ...a, nombre_original: a.nombre_original ?? undefined })
+			)
+		});
+	}
+
+	async addArchivos(idEvidencia: number, archivos: Archivo[]): Promise<Archivo[]> {
+		const result = await prisma.$transaction(async (tx) => {
+			const creados = [];
+			for (const archivo of archivos) {
+				const nuevoArchivo = await tx.archivo.create({
+					data: {
+						nombre_original: archivo.nombre_original,
+						url: archivo.url,
+						descripcion: archivo.descripcion,
+						tipo_mime: archivo.tipo_mime,
+						tamanio_bytes: archivo.tamanio_bytes,
+						usuario_id: archivo.usuario_id,
+						evidencia_id: idEvidencia,
+						proyecto_id: archivo.proyecto_id
+					}
+				});
+				creados.push(
+					new Archivo({
+						...nuevoArchivo,
+						nombre_original: nuevoArchivo.nombre_original ?? undefined
+					})
+				);
+			}
+			return creados;
+		});
+		return result;
 	}
 
 	async findAllByProyecto(proyectoId: number): Promise<Evidencia[]> {

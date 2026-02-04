@@ -1,23 +1,30 @@
 import type { ArchivoRepository } from '../repositories/ArchivoRepository';
 import type { ProyectoRepository } from '../repositories/ProyectoRepository';
+import type { Archivo } from '../entities/Archivo';
 
-export class EliminarArchivo {
+export class ActualizarArchivo {
 	constructor(
 		private archivoRepo: ArchivoRepository,
 		private proyectoRepo: ProyectoRepository
 	) {}
 
-	async execute(archivoId: number, usuarioSolicitanteId: number): Promise<void> {
+	async execute(
+		archivoId: number,
+		usuarioSolicitanteId: number,
+		nuevosDatos: Partial<Archivo>
+	): Promise<void> {
 		const archivo = await this.archivoRepo.findById(archivoId);
 
 		if (!archivo) {
 			throw new Error('El archivo no existe.');
 		}
 
+		// Validar propiedad
 		if (archivo.usuario_id !== usuarioSolicitanteId) {
-			throw new Error('No tenés permisos para eliminar este archivo. Solo el dueño puede hacerlo.');
+			throw new Error('No tenés permisos para editar este archivo. Solo el dueño puede hacerlo.');
 		}
 
+		// RN 16: Validar estado del proyecto
 		if (!archivo.proyecto_id) {
 			throw new Error('El archivo no está vinculado a ningún proyecto.');
 		}
@@ -30,16 +37,10 @@ export class EliminarArchivo {
 		const estado = proyecto.estado;
 		if (estado === 'completado' || estado === 'cancelado' || estado === 'en_auditoria') {
 			throw new Error(
-				`No se puede eliminar el archivo porque el proyecto está en estado: ${estado}.`
+				`No se puede editar el archivo porque el proyecto está en estado: ${estado}.`
 			);
 		}
 
-		// TODO: acá debería ir la lógica para borrar de Supabase Storage también,
-		// pero como el contrato dice que el backend maneja los metadatos,
-		// asumimos que quien llama a esto (controller) orquestará o este método deberá extenderse
-		// con un StorageService en infraestructura.
-		// Por ahora cumplimos la regla de negocio de la DB.
-
-		await this.archivoRepo.delete(archivoId);
+		await this.archivoRepo.update(archivoId, nuevosDatos);
 	}
 }
