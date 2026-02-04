@@ -87,7 +87,7 @@
 				evidenciasNuevas = [];
 				cantidadAporte = undefined;
 				descripcionAporte = '';
-				goto(navigation.to?.url.pathname || `/colaborador/mis-aportes`);
+				goto(navigation.to?.url.pathname || `/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		}
@@ -99,11 +99,11 @@
 				evidenciasNuevas = [];
 				cantidadAporte = undefined;
 				descripcionAporte = '';
-				goto(`/colaborador/mis-aportes`);
+				goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		} else {
-			goto(`/colaborador/mis-aportes`);
+			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
 		}
 	}
 
@@ -245,7 +245,14 @@
 				message: 'Tu aporte ha sido registrado exitosamente.',
 				duration: 5000
 			});
-			goto(`/colaborador/mis-aportes`);
+
+			// Limpiar estado para que hayaCambios sea falso y no dispare el modal de confirmación
+			evidenciasNuevas = [];
+			cantidadAporte = undefined;
+			descripcionAporte = '';
+			selectedParticipacionPermitidaId = null;
+
+			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'Error desconocido';
 			toastStore.show({
@@ -304,7 +311,8 @@
 					<select
 						id="participacion"
 						bind:value={selectedParticipacionPermitidaId}
-						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+						disabled={estaGuardando}
+						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<option value={null} disabled>Seleccioná una opción...</option>
 						{#each data.participacionesPermitidas as p}
@@ -334,13 +342,14 @@
 								min="0.01"
 								step="any"
 								bind:value={cantidadAporte}
+								disabled={estaGuardando}
 								placeholder="0"
-								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 							<div
 								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-400"
 							>
-								{selectedParticipacion.unidad_medida}
+								{selectedParticipacion?.unidad_medida}
 							</div>
 						</div>
 					</div>
@@ -445,6 +454,7 @@
 			<Button
 				label="Registrar aporte"
 				disabled={!selectedParticipacion}
+				loading={estaGuardando}
 				size="md"
 				onclick={guardarAporte}
 				customClass="shadow-lg shadow-blue-200"
