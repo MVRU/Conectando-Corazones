@@ -5,6 +5,12 @@
 
 <script lang="ts">
 	import GestionColaboraciones from '$lib/components/feature/institucion/GestionColaboraciones.svelte';
+	import type { PageData } from './$types';
+	import { fly } from 'svelte/transition';
+
+	export let data: PageData;
 </script>
 
-<GestionColaboraciones />
+<div in:fly={{ y: 20, duration: 400, delay: 100 }}>
+	<GestionColaboraciones proyectos={data.proyectos} />
+</div>

@@ -25,11 +25,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			throw error(404, 'Colaboración no encontrada');
 		}
 
-		return {
-			proyecto,
-			colaboracion,
-			aportes
-		};
+		return JSON.parse(
+			JSON.stringify({
+				proyecto,
+				colaboracion,
+				aportes
+			})
+		);
 	} catch (e) {
 		console.error(e);
 		throw error(404, 'Proyecto no encontrado o error cargando aportes');

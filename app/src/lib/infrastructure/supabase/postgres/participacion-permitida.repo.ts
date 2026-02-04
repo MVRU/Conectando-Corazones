@@ -4,45 +4,40 @@ import { prisma } from '$lib/infrastructure/prisma/client';
 import { ParticipacionPermitidaMapper } from './mappers/participacion-permitida.mapper';
 
 export class PostgresParticipacionPermitidaRepository implements ParticipacionPermitidaRepository {
-	async findByProyectoId(proyectoId: number): Promise<ParticipacionPermitida[]> {
+	async findAllByProyecto(id_proyecto: number): Promise<ParticipacionPermitida[]> {
 		const participaciones = await prisma.participacionPermitida.findMany({
-			where: { id_proyecto: proyectoId },
-			include: { tipo_participacion: true } // Para mapear descripcion
+			where: { id_proyecto },
+			include: { tipo_participacion: true }
 		});
 		return participaciones.map((p) => ParticipacionPermitidaMapper.toDomain(p));
 	}
 
-	async create(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida> {
+	async findById(id: number): Promise<ParticipacionPermitida | null> {
+		const participacion = await prisma.participacionPermitida.findUnique({
+			where: { id_participacion_permitida: id },
+			include: { tipo_participacion: true }
+		});
+		if (!participacion) return null;
+		return ParticipacionPermitidaMapper.toDomain(participacion);
+	}
+
+	async save(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida> {
+		const data = ParticipacionPermitidaMapper.toPrisma(participacion);
+
+		if (participacion.id_participacion_permitida) {
+			const updated = await prisma.participacionPermitida.update({
+				where: { id_participacion_permitida: participacion.id_participacion_permitida },
+				data,
+				include: { tipo_participacion: true }
+			});
+			return ParticipacionPermitidaMapper.toDomain(updated);
+		}
+
 		const created = await prisma.participacionPermitida.create({
-			data: {
-				id_proyecto: participacion.id_proyecto,
-				id_tipo_participacion: participacion.id_tipo_participacion,
-				objetivo: participacion.objetivo,
-				actual: participacion.actual,
-				unidad_medida: participacion.unidad_medida,
-				especie: participacion.especie
-			},
+			data,
 			include: { tipo_participacion: true }
 		});
 		return ParticipacionPermitidaMapper.toDomain(created);
-	}
-
-	async update(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida> {
-		if (!participacion.id_participacion_permitida) {
-			throw new Error('No se puede actualizar una participación sin ID');
-		}
-
-		const updated = await prisma.participacionPermitida.update({
-			where: { id_participacion_permitida: participacion.id_participacion_permitida },
-			data: {
-				objetivo: participacion.objetivo,
-				actual: participacion.actual,
-				unidad_medida: participacion.unidad_medida,
-				especie: participacion.especie
-			},
-			include: { tipo_participacion: true }
-		});
-		return ParticipacionPermitidaMapper.toDomain(updated);
 	}
 
 	async delete(id: number): Promise<void> {

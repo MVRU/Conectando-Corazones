@@ -7,11 +7,10 @@
 	export let data;
 
 	$: if (!$isLoading) {
-		if ($usuario?.rol !== 'institucion' || !data.estaVerificado) {
+		if ($usuario?.rol !== 'institucion') {
 			toastStore.show({
 				title: 'Acceso restringido',
-				message:
-					'Para crear un proyecto, tenés que verificar la identidad de la institución exitosamente antes de continuar.',
+				message: 'Solo las instituciones pueden crear proyectos.',
 				variant: 'error'
 			});
 			goto('/');
@@ -19,10 +18,11 @@
 	}
 </script>
 
-{#if !$isLoading && $usuario?.rol === 'institucion' && data.estaVerificado}
+{#if !$isLoading && $usuario?.rol === 'institucion'}
 	<CrearProyecto
 		limiteProyectosAlcanzado={data.limiteProyectosAlcanzado}
 		categorias={data.categorias}
 		tiposParticipacion={data.tiposParticipacion}
+		estaVerificado={data.estaVerificado}
 	/>
 {/if}

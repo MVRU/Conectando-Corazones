@@ -31,16 +31,18 @@ export class ObtenerMisAportes {
 
 				const todasEvidencias = (await this.colaboracionRepo.getEvidencias(
 					aporte.participacion_permitida_id!
-				)) as Evidencia[];
+				)) as (Evidencia & {
+					participacion_permitida?: { colaboraciones_tipo_participacion?: any[] };
+				})[];
 
 				const evidenciasEntrada = todasEvidencias
 					.filter((e) => e.tipo_evidencia === 'entrada')
-					.flatMap((e) => e.archivos || [])
-					.filter((a) => a.usuario_id === usuarioId);
+					// Filtramos evidencias que pertenezcan a las colaboraciones del usuario
+					.filter((e) => {
+						return e.archivos?.some((a) => a.usuario_id === usuarioId);
+					});
 
-				const evidenciasSalida = todasEvidencias
-					.filter((e) => e.tipo_evidencia === 'salida')
-					.flatMap((e) => e.archivos || []);
+				const evidenciasSalida = todasEvidencias.filter((e) => e.tipo_evidencia === 'salida');
 
 				return {
 					...aporte,

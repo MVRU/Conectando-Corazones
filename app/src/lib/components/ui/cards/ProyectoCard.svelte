@@ -13,7 +13,6 @@
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
-	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
 	export let proyecto: Proyecto;
@@ -23,8 +22,10 @@
 	export let esInstitucion: boolean = false;
 
 	// Obtener colaboración del usuario
-	// TODO: Reemplazar con datos reales (pasar como prop o desde store)
-	$: colaboracionUsuario = null as any;
+	$: colaboracionUsuario =
+		usuario && proyecto?.colaboraciones
+			? proyecto.colaboraciones.find((c) => c.colaborador_id === usuario?.id_usuario)
+			: null;
 
 	// Detectar roles
 	$: esCreador = usuario?.id_usuario === proyecto.institucion_id;
@@ -44,6 +45,7 @@
 		!!colaboracionUsuario;
 
 	$: esRechazada = colaboracionUsuario?.estado === 'rechazada';
+	$: esAnulada = colaboracionUsuario?.estado === 'anulada';
 
 	$: esAdmin = usuario?.rol === 'administrador';
 
@@ -57,7 +59,7 @@
 		}
 	}
 
-	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro;
+	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro || esAnulada;
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
 	$: esVirtual = ubicacionCorta === 'Virtual';
 	$: estaInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
@@ -276,25 +278,29 @@
 					/>
 					{#if usuario?.rol === 'colaborador'}
 						<Button
-							label={esRechazada
-								? 'Solicitud rechazada'
-								: yaColaboro
-									? 'Solicitud enviada'
-									: 'Colaborar ahora'}
+							label={esAnulada
+								? 'Solicitud anulada'
+								: esRechazada
+									? 'Solicitud rechazada'
+									: yaColaboro
+										? 'Solicitud enviada'
+										: 'Colaborar ahora'}
 							href={esRechazada ? undefined : `/proyectos/${proyecto.id_proyecto}#colaborar`}
 							size="sm"
-							variant={esRechazada
+							variant={esAnulada || esRechazada
 								? 'danger'
 								: botonColaborarDeshabilitado
 									? 'secondary'
 									: 'primary'}
-							disabled={esRechazada ? false : botonColaborarDeshabilitado}
+							disabled={esAnulada || (esRechazada ? false : botonColaborarDeshabilitado)}
 							customClass="flex-1 cursor-pointer"
-							customAriaLabel={esRechazada
-								? 'Ver justificación del rechazo'
-								: yaColaboro
-									? 'Solicitud de colaboración enviada'
-									: 'Colaborar en este proyecto'}
+							customAriaLabel={esAnulada
+								? 'No podés volver a colaborar en este proyecto'
+								: esRechazada
+									? 'Ver justificación del rechazo'
+									: yaColaboro
+										? 'Solicitud de colaboración enviada'
+										: 'Colaborar en este proyecto'}
 							on:click={manejarClickColaborar}
 						/>
 					{/if}

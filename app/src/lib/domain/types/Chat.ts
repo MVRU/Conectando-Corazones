@@ -1,3 +1,5 @@
+import type { EstadoDescripcion } from './Estado';
+
 export interface Mensaje {
 	id_mensaje: number;
 	chat_id: number;
@@ -14,4 +16,5 @@ export interface Chat {
 	mensajes: Mensaje[];
 	updated_at: Date; // Para ordenar en la sidebar
 	created_at: Date;
+	estado_proyecto?: EstadoDescripcion;
 }

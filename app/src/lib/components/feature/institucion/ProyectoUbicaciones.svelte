@@ -13,12 +13,15 @@
 		DireccionPresencialFormulario
 	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import { obtenerDescripcionTipo } from '$lib/utils/util-proyecto-form';
+	import { Icon } from '@steeze-ui/svelte-icon';
+	import { Lock } from 'lucide-svelte';
 
 	export let ubicaciones: UbicacionFormulario[] = [];
 	export let errores: Record<string, string> = {};
 
 	// Modo edición
-	export let modoEdicion = false;
+	export let esEdicionRestringida = false;
+	export let esAdmin = false;
 
 	// Estados locales para datos
 	let provinciasData: Provincia[] = [];
@@ -96,8 +99,8 @@
 	function eliminarUbicacion(index: number) {
 		if (index === 0) return;
 
-		// En modo edición, no permitir eliminar ubicaciones originales
-		if (modoEdicion && ubicaciones[index].id_proyecto_ubicacion) {
+		// En modo edición, no permitir eliminar ubicaciones originales (excepto admin)
+		if (esEdicionRestringida && ubicaciones[index].id_proyecto_ubicacion && !esAdmin) {
 			return;
 		}
 
@@ -234,21 +237,31 @@
 	{/if}
 
 	{#each ubicaciones as ubicacion, index (index)}
-		{@const esOriginal = modoEdicion && !!ubicacion.id_proyecto_ubicacion}
+		{@const esOriginal = esEdicionRestringida && !!ubicacion.id_proyecto_ubicacion}
 		<div class="mb-4 rounded-lg border border-gray-100 bg-gray-50 p-4">
 			<div class="mb-4 flex items-center justify-between">
-				<h3 class="font-medium text-gray-900">
+				<h3 class="flex items-center gap-2 font-medium text-gray-900">
 					Ubicación {index + 1}
+					{#if esOriginal && !esAdmin}
+						<span
+							class="inline-flex items-center gap-1 rounded-full border border-amber-100 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-600"
+						>
+							<Lock class="h-2.5 w-2.5" />
+							Protegido
+						</span>
+					{/if}
 				</h3>
 				{#if ubicaciones.length > 1 && index > 0}
 					<button
 						type="button"
 						on:click={() => eliminarUbicacion(index)}
-						disabled={esOriginal}
+						disabled={esOriginal && !esAdmin}
 						class="text-sm font-medium text-red-600 hover:text-red-800"
-						class:opacity-50={esOriginal}
-						class:cursor-not-allowed={esOriginal}
-						title={esOriginal ? 'No se pueden eliminar ubicaciones existentes' : 'Eliminar'}
+						class:opacity-50={esOriginal && !esAdmin}
+						class:cursor-not-allowed={esOriginal && !esAdmin}
+						title={esOriginal && !esAdmin
+							? 'No se pueden eliminar ubicaciones existentes'
+							: 'Eliminar'}
 					>
 						Eliminar
 					</button>
@@ -266,13 +279,13 @@
 							id="tipo_{index}"
 							value={ubicacion.tipo_ubicacion}
 							on:change={(e) => manejarCambioTipo(index, e.currentTarget.value)}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-							class:border-gray-300={!esOriginal}
-							class:border-red-300={errores[`ubicacion_${index}_tipo`] && !esOriginal}
-							class:cursor-not-allowed={esOriginal}
-							class:bg-gray-50={esOriginal}
-							class:text-gray-600={esOriginal}
+							class:border-gray-300={!esOriginal || esAdmin}
+							class:border-red-300={errores[`ubicacion_${index}_tipo`] && (!esOriginal || esAdmin)}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 						>
 							<option value="">Seleccionar tipo</option>
 							{#each obtenerTiposDisponibles(index) as tipo (tipo)}
@@ -282,8 +295,15 @@
 								<option value="personalizado">Otro...</option>
 							{/if}
 						</select>
+					{:else if esOriginal}
+						<!-- Mostrar tipo personalizado como texto si es original y no está en la lista -->
+						<div
+							class="w-full rounded-lg border border-gray-100 bg-gray-50 px-3 py-2 text-sm text-gray-600"
+						>
+							{ubicacion.tipo_ubicacion}
+						</div>
 					{:else if !esOriginal}
-						<!-- Input para tipos personalizados (solo en modo crear proyecto) -->
+						<!-- Input para tipos personalizados (solo en modo crear o nuevas ubicaciones) -->
 						<div class="flex gap-2">
 							<input
 								id="tipo_{index}"
@@ -320,13 +340,14 @@
 						id="modalidad_{index}"
 						value={ubicacion.modalidad}
 						on:change={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
-						disabled={esOriginal}
+						disabled={esOriginal && !esAdmin}
 						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-						class:border-gray-300={!esOriginal}
-						class:border-red-300={errores[`ubicacion_${index}_modalidad`] && !esOriginal}
-						class:cursor-not-allowed={esOriginal}
-						class:bg-gray-50={esOriginal}
-						class:text-gray-600={esOriginal}
+						class:border-gray-300={!esOriginal || esAdmin}
+						class:border-red-300={errores[`ubicacion_${index}_modalidad`] &&
+							(!esOriginal || esAdmin)}
+						class:cursor-not-allowed={esOriginal && !esAdmin}
+						class:bg-gray-50={esOriginal && !esAdmin}
+						class:text-gray-600={esOriginal && !esAdmin}
 					>
 						<option value="">Seleccionar modalidad</option>
 						{#each MODALIDAD_UBICACION as modalidad (modalidad)}
@@ -352,7 +373,7 @@
 							on:input={(e) => {
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
 							}}
-							disabled={esOriginal}
+							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_url_virtual`] && !esOriginal}
@@ -370,14 +391,20 @@
 				{#if ubicacion.modalidad === 'presencial'}
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label for="provincia_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							<label
+								for="provincia_{index}"
+								class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+							>
 								Provincia *
+								{#if esOriginal && !esAdmin}
+									<Lock class="h-3 w-3 text-amber-500" />
+								{/if}
 							</label>
 							<select
 								id="provincia_{index}"
 								value={ubicacion.direccion_presencial?.provincia}
 								on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_provincia`] && !esOriginal}
@@ -395,8 +422,14 @@
 							{/if}
 						</div>
 						<div>
-							<label for="localidad_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							<label
+								for="localidad_{index}"
+								class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+							>
 								Localidad *
+								{#if esOriginal && !esAdmin}
+									<Lock class="h-3 w-3 text-amber-500" />
+								{/if}
 							</label>
 							<select
 								id="localidad_{index}"
@@ -418,7 +451,7 @@
 										}
 									};
 								}}
-								disabled={esOriginal || !ubicacion.direccion_presencial?.provincia}
+								disabled={(esOriginal && !esAdmin) || !ubicacion.direccion_presencial?.provincia}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_localidad`] && !esOriginal}
@@ -439,15 +472,21 @@
 
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div class="md:col-span-2">
-							<label for="calle_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							<label
+								for="calle_{index}"
+								class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+							>
 								Calle *
+								{#if esOriginal && !esAdmin}
+									<Lock class="h-3 w-3 text-amber-500" />
+								{/if}
 							</label>
 							<input
 								id="calle_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.calle}
 								on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
@@ -461,15 +500,21 @@
 							{/if}
 						</div>
 						<div>
-							<label for="numero_{index}" class="mb-2 block text-sm font-medium text-gray-700">
+							<label
+								for="numero_{index}"
+								class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+							>
 								Número *
+								{#if esOriginal && !esAdmin}
+									<Lock class="h-3 w-3 text-amber-500" />
+								{/if}
 							</label>
 							<input
 								id="numero_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.numero}
 								on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
@@ -494,7 +539,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.piso || ''}
 								on:input={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_piso`] && !esOriginal}
@@ -519,7 +564,7 @@
 								type="text"
 								value={ubicacion.direccion_presencial?.departamento || ''}
 								on:input={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
-								disabled={esOriginal}
+								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
 								class:cursor-not-allowed={esOriginal}

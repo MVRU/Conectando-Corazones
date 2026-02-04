@@ -45,6 +45,7 @@ model CategoriasPreferidas {
   usuario   Usuario   @relation(fields: [usuario_id], references: [id_usuario])
   categoria Categoria @relation(fields: [categoria_id], references: [id_categoria])
 
+  @@unique([usuario_id, categoria_id]) // Garantiza que la preferencia sea única por usuario
   @@map("categorias_preferidas")
 }
 
@@ -62,7 +63,7 @@ model Colaboracion {
   colaborador Usuario?  @relation(fields: [colaborador_id], references: [id_usuario])
 
   colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
-
+  @@unique([proyecto_id, colaborador_id]) // Un colaborador no puede enviar más de una solicitud de colaboración al mismo proyecto
   @@map("colaboraciones")
 }
 
@@ -73,8 +74,9 @@ model ColaboracionTipoParticipacion {
   cantidad                           Int
 
   colaboracion            Colaboracion?           @relation(fields: [colaboracion_id], references: [id_colaboracion])
-  participacion_permitida ParticipacionPermitida? @relation(fields: [participacion_permitida_id], references: [id_participacion_permitida])
+  participacion_permitida ParticipacionPermitida? @relation(fields: [participacion_permitida_id], references: [id_participacion_permitida], onDelete: Restrict)
 
+  @@unique([colaboracion_id, participacion_permitida_id]) // Evita que una misma colaboración tenga dos filas distintas para el mismo tipo de participación permitida
   @@map("colaboraciones_tipo_participacion")
 }
 
@@ -122,6 +124,7 @@ model Evaluacion {
   solicitud   SolicitudFinalizacion? @relation(fields: [solicitud_id], references: [id_solicitud])
   colaborador Usuario?               @relation(fields: [colaborador_id], references: [id_usuario])
 
+  @@unique([solicitud_id, colaborador_id]) // Evita fraude o duplicidad de votos en el proceso de cierre
   @@map("evaluaciones")
 }
 
@@ -184,7 +187,7 @@ model ParticipacionPermitida {
   id_proyecto                Int?
   id_tipo_participacion      Int?
   objetivo                   Int
-  actual                     Int?    @default(0)
+  // actual                     Int?    @default(0)
   unidad_medida              String?
   especie                    String?
 
@@ -193,6 +196,7 @@ model ParticipacionPermitida {
 
   colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
   evidencias                        Evidencia[]
+
 
   @@map("participaciones_permitidas")
 }
@@ -245,6 +249,7 @@ model ProyectoCategoria {
   categoria Categoria @relation(fields: [categoria_id], references: [id_categoria])
   proyecto  Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
 
+  @@unique([proyecto_id, categoria_id]) // Evita duplicidad en la categorización del proyecto
   @@map("proyecto_categorias")
 }
 
@@ -256,6 +261,7 @@ model ProyectoUbicacion {
   proyecto  Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
   ubicacion Ubicacion @relation(fields: [ubicacion_id], references: [id_ubicacion])
 
+  @@unique([proyecto_id, ubicacion_id]) // Evita duplicidad en la ubicación del proyecto
   @@map("proyecto_ubicaciones")
 }
 
@@ -276,6 +282,7 @@ model Reporte {
   reportante Usuario  @relation("Reportante", fields: [reportante_id], references: [id_usuario])
   admin      Usuario? @relation("AdminResolutor", fields: [admin_id], references: [id_usuario])
 
+  @@unique([reportante_id, tipo_objeto, id_objeto]) // Un usuario solo debería reportar una vez por entidad
   @@map("reportes")
 }
 
@@ -289,6 +296,7 @@ model Resena {
   rol         String?
   username    String?
 
+  @@unique([username, tipo_objeto, id_objeto]) // Un usuario solo debería opinar una vez por entidad
   @@map("resenas")
 }
 
@@ -335,6 +343,7 @@ model TiposParticipacionPreferidos {
   usuario            Usuario           @relation(fields: [usuario_id], references: [id_usuario])
   tipo_participacion TipoParticipacion @relation(fields: [tipo_participacion_id], references: [id_tipo_participacion])
 
+  @@unique([usuario_id, tipo_participacion_id]) // Garantiza que la preferencia sea única por usuario
   @@map("tipos_participacion_preferidos")
 }
 

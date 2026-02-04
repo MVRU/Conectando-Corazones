@@ -39,7 +39,7 @@ export class Proyecto {
 		this.id_proyecto = data.id_proyecto;
 		this.titulo = data.titulo || '';
 		this.descripcion = data.descripcion || '';
-		this.institucion_id = data.institucion_id || 0;
+		this.institucion_id = data.institucion_id || null;
 		this.resumen = data.resumen || undefined;
 		this.aprendizajes = data.aprendizajes || undefined;
 		this.url_portada = data.url_portada || undefined;
@@ -76,12 +76,62 @@ export class Proyecto {
 		if (data.colaboraciones) {
 			this.colaboraciones = data.colaboraciones;
 		}
+
+		this.validar();
+	}
+
+	private validar(): void {
+		// Validaciones mínimas siempre requeridas
+		if (!this.titulo || this.titulo.trim().length < 5) {
+			throw new Error('El título del proyecto debe tener al menos 5 caracteres.');
+		}
+		if (!this.descripcion || this.descripcion.trim().length < 20) {
+			throw new Error('La descripción debe ser más detallada (mínimo 20 caracteres).');
+		}
+
+		// Validaciones estrictas solo si NO es un borrador y tiene ID (indicando que ya existe en DB)
+
+		const esEstadoFinalizable = ['completado', 'cancelado'].includes(this.estado || '');
+		const esBorrador = this.estado === 'borrador';
+
+		if (!esBorrador && !esEstadoFinalizable) {
+		}
+
+		if (this.fecha_fin_tentativa) {
+			const fin = new Date(this.fecha_fin_tentativa);
+			if (isNaN(fin.getTime())) {
+				throw new Error('La fecha de fin tentativa no es válida.');
+			}
+		}
+
+		if (!this.institucion_id && !this.institucion) {
+			throw new Error('El proyecto debe estar asociado a una institución.');
+		}
 	}
 
 	// * Lógica de Negocio y Estados * //
-
 	estaActivo(): boolean {
 		return this.estado === 'en_curso';
+	}
+
+	esBorrador(): boolean {
+		return this.estado === 'borrador';
+	}
+
+	estaPublicado(): boolean {
+		return this.estado !== 'borrador' && this.estado !== undefined;
+	}
+
+	estaEnAuditoria(): boolean {
+		return this.estado === 'en_auditoria';
+	}
+
+	estaFinalizado(): boolean {
+		return this.estado === 'completado' || this.estado === 'cancelado';
+	}
+
+	esEdicionRestringida(): boolean {
+		return this.estaPublicado();
 	}
 
 	esCreadoPor(usuarioId: number): boolean {
@@ -89,11 +139,22 @@ export class Proyecto {
 	}
 
 	objetivosAlcanzados(): boolean {
-		// Validar si todas las participaciones permitidas han alcanzado su objetivo
 		if (!this.participacion_permitida || this.participacion_permitida.length === 0) {
-			return false; // Sin participaciones no hay objetivos que cumplir (o true? Depende negocio)
+			return false;
 		}
 		return this.participacion_permitida.every((p) => p.estaCompleto());
+	}
+
+	tieneColaboradoresAprobados(): boolean {
+		return this.colaboraciones?.some((c) => c.estado === 'aprobada') ?? false;
+	}
+
+	tieneInteracciones(): boolean {
+		return (this.colaboraciones && this.colaboraciones.length > 0) || false;
+	}
+
+	esEditable(): boolean {
+		return this.esBorrador() || (this.estaActivo() && !this.tieneColaboradoresAprobados());
 	}
 
 	// Máquina de Estados

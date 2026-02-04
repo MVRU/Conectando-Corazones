@@ -5,23 +5,26 @@
 	import { chatStore } from '$lib/stores/chatStore';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
 	// Filtrar chats donde el usuario es participante
-	let chatsUsuario: Chat[] = [];
+	export let data: any;
 
-	// Backend de chat no implementado
-	$: if ($usuario?.id_usuario) {
-		chatsUsuario = [];
-	}
+	// Backend de chat derivado de colaboraciones aprobadas
+	$: chatsUsuario = data.chats || [];
 
-	// Separar chats activos y archivados
-	$: activeChats = [] as Chat[];
-	$: archivedChats = [] as Chat[];
+	$: activeChats = chatsUsuario.filter((c: Chat) => {
+		const estado = c.estado_proyecto || 'en_curso';
+		return !['completado', 'cancelado'].includes(estado);
+	});
+	$: archivedChats = chatsUsuario.filter((c: Chat) => {
+		const estado = c.estado_proyecto || 'en_curso';
+		return ['completado', 'cancelado'].includes(estado);
+	});
 
 	// Determinar si estamos en la vista de chat (mobile)
 	$: isInChat = !!$page.params.proyecto_id;
 
-	// Función helper para obtener proyecto
 	function getProyecto(proyectoId: number): any {
-		return undefined;
+		const chat = chatsUsuario.find((c: Chat) => c.proyecto_id === proyectoId);
+		return chat ? { id_proyecto: chat.proyecto_id, estado: chat.estado_proyecto } : undefined;
 	}
 </script>
 
@@ -174,7 +177,7 @@
 								<div class="mb-2 flex items-start justify-between gap-2">
 									<h3 class="truncate font-semibold text-gray-900">{chat.titulo}</h3>
 									<span class="text-xs whitespace-nowrap text-gray-400">
-										{chat.updated_at.toLocaleDateString('es-AR', {
+										{new Date(chat.updated_at).toLocaleDateString('es-AR', {
 											day: 'numeric',
 											month: 'short'
 										})}

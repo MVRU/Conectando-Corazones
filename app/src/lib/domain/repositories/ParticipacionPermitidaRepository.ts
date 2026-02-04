@@ -1,8 +1,8 @@
 import type { ParticipacionPermitida } from '../entities/ParticipacionPermitida';
 
 export interface ParticipacionPermitidaRepository {
-	findByProyectoId(proyectoId: number): Promise<ParticipacionPermitida[]>;
-	create(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida>;
-	update(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida>;
+	findAllByProyecto(id_proyecto: number): Promise<ParticipacionPermitida[]>;
+	findById(id: number): Promise<ParticipacionPermitida | null>;
+	save(participacion: ParticipacionPermitida): Promise<ParticipacionPermitida>;
 	delete(id: number): Promise<void>;
 }

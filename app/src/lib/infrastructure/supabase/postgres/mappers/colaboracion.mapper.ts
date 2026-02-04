@@ -1,6 +1,7 @@
 import type { Colaboracion as PrismaColaboracion } from '@prisma/client';
 import { Colaboracion } from '$lib/domain/entities/Colaboracion';
 import { UsuarioMapper } from './usuario.mapper';
+import { ColaboracionTipoParticipacionMapper } from './colaboracion-tipo-participacion.mapper';
 
 export class ColaboracionMapper {
 	static toDomain(
@@ -19,7 +20,12 @@ export class ColaboracionMapper {
 			colaborador_id: prismaColaboracion.colaborador_id ?? undefined,
 			colaborador: prismaColaboracion.colaborador
 				? UsuarioMapper.toDomain(prismaColaboracion.colaborador)
-				: undefined
+				: undefined,
+			colaboraciones_tipo_participacion: prismaColaboracion.colaboraciones_tipo_participacion
+				? prismaColaboracion.colaboraciones_tipo_participacion.map((ctp) =>
+						ColaboracionTipoParticipacionMapper.toDomain(ctp)
+					)
+				: []
 		});
 	}
 

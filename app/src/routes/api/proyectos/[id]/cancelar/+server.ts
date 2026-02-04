@@ -24,6 +24,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		await useCase.execute({
 			proyectoId: id,
 			usuarioId: session.id_usuario!,
+			rol: session.rol,
 			justificacion
 		});
 

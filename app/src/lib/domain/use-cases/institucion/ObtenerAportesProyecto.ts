@@ -1,13 +1,18 @@
 import type { ColaboracionRepository } from '../../repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '../../repositories/ProyectoRepository';
 import type { UsuarioRepository } from '../../repositories/UsuarioRepository';
+import type { EvidenciaRepository } from '../../repositories/EvidenciaRepository';
 import type { ColaboracionTipoParticipacion } from '../../types/ColaboracionTipoParticipacion';
+import type { Archivo } from '../../entities/Archivo';
+import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+import type { Usuario } from '../../types/Usuario';
 
 export class ObtenerAportesProyecto {
 	constructor(
 		private colaboracionRepo: ColaboracionRepository,
 		private proyectoRepo: ProyectoRepository,
-		private usuarioRepo: UsuarioRepository
+		private usuarioRepo: UsuarioRepository,
+		private evidenciaRepo: EvidenciaRepository
 	) {}
 
 	async execute(proyectoId: number) {
@@ -15,6 +20,13 @@ export class ObtenerAportesProyecto {
 		if (!project) throw new Error('Proyecto no encontrado');
 
 		const colaboraciones = await this.colaboracionRepo.getColaboracionesPorProyecto(proyectoId);
+		const evidencias = await this.evidenciaRepo.findAllByProyecto(proyectoId);
+
+		// Extraer todos los archivos de las evidencias
+		const archivos: Archivo[] = evidencias.flatMap((e) => e.archivos || []);
+
+		// Filtrar las evidencias institucionales (subidas por el dueño del proyecto)
+		const evidenciasInstitucion = archivos.filter((a) => a.usuario_id === project.institucion_id);
 
 		const colaboradoresList = await Promise.all(
 			colaboraciones.map(async (colab) => {
@@ -23,13 +35,13 @@ export class ObtenerAportesProyecto {
 				const user = await this.usuarioRepo.findById(colab.colaborador_id);
 				if (!user) return null;
 
-				const participations = (await this.colaboracionRepo.getAportesPorColaboracion(
+				const participaciones = (await this.colaboracionRepo.getAportesPorColaboracion(
 					colab.id_colaboracion!
 				)) as ColaboracionTipoParticipacion[];
 
-				let aportes: { cosa: string; cantidad: string }[] = [];
+				let aportes: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
 
-				participations.forEach((p) => {
+				participaciones.forEach((p) => {
 					const permitida = project.participacion_permitida?.find(
 						(pp) => pp.id_participacion_permitida === p.participacion_permitida_id
 					);
@@ -56,12 +68,12 @@ export class ObtenerAportesProyecto {
 							cantidad = `${p.cantidad} ${unidad}`;
 						}
 
-						aportes.push({ cosa, cantidad });
+						const unidad_medida = permitida.unidad_medida || '';
+						aportes.push({ cosa, cantidad, unidad_medida });
 					}
 				});
 
-				const nombre =
-					user.nombre && user.apellido ? `${user.nombre} ${user.apellido}` : user.username;
+				const displayName = obtenerNombreCompleto(user as unknown as Usuario);
 
 				let tipoLabel = 'Colaborador';
 				if ('tipo_colaborador' in user) {
@@ -70,22 +82,28 @@ export class ObtenerAportesProyecto {
 					else tipoLabel = 'Colaborador - Voluntario/a';
 				}
 
-				const displayName = (
-					'nombre_legal' in user ? (user as any).nombre_legal : nombre
-				) as string;
+				if (colab.estado !== 'aprobada') {
+					tipoLabel += ' (Pendiente)';
+				}
+
+				// Buscar evidencias subidas por este colaborador
+				const evidenciasColaborador = archivos.filter((a) => a.usuario_id === user.id_usuario);
 
 				return {
 					id_usuario: user.id_usuario!,
+					usuario: user as unknown as Usuario,
 					nombre: displayName,
 					tipo_colaborador: tipoLabel,
-					aportes
+					aportes,
+					evidencias: evidenciasColaborador
 				};
 			})
 		);
 
 		return {
 			proyecto: project,
-			colaboradores: colaboradoresList.filter((x): x is NonNullable<typeof x> => x !== null)
+			colaboradores: colaboradoresList.filter((x): x is NonNullable<typeof x> => x !== null),
+			evidenciasInstitucion
 		};
 	}
 }

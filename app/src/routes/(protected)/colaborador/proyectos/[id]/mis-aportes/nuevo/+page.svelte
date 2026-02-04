@@ -47,6 +47,14 @@
 	let archivosTemporales: (Archivo & { file: File })[] = $state([]);
 	let evidenciasNuevas: EvidenciaEntradaNueva[] = $state([]);
 
+	let contribucionExistente = $derived(
+		data.existingContributions?.find(
+			(c: any) => c.participacion_permitida_id === selectedParticipacionPermitidaId
+		)
+	);
+
+	let totalResultante = $derived((contribucionExistente?.cantidad || 0) + (cantidadAporte || 0));
+
 	let hayaCambios = $derived(
 		evidenciasNuevas.length > 0 ||
 			archivosTemporales.length > 0 ||
@@ -201,7 +209,7 @@
 		evidenciasNuevas = [...evidenciasNuevas];
 	}
 
-	function guardarAporte() {
+	async function guardarAporte() {
 		if (!cantidadAporte || cantidadAporte <= 0) {
 			toastStore.show({
 				variant: 'error',
@@ -211,18 +219,58 @@
 			return;
 		}
 
+		if (!selectedParticipacionPermitidaId) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: 'Debés seleccionar un tipo de participación.'
+			});
+			return;
+		}
+
 		estaGuardando = true;
 
-		// Simular guardado
-		setTimeout(() => {
+		try {
+			const response = await fetch('/api/aportes', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					colaboracion_id: data.colaboracionId,
+					participacion_permitida_id: selectedParticipacionPermitidaId,
+					cantidad: cantidadAporte
+				})
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.message || 'Error al registrar aporte');
+			}
+
 			toastStore.show({
 				variant: 'success',
 				title: 'Aporte registrado',
 				message: 'Tu aporte ha sido registrado exitosamente.',
 				duration: 5000
 			});
+
+			// Limpiar estado para que hayaCambios sea falso y no dispare el modal de confirmación
+			evidenciasNuevas = [];
+			cantidadAporte = undefined;
+			descripcionAporte = '';
+			selectedParticipacionPermitidaId = null;
+
 			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
-		}, 500);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Error desconocido';
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message
+			});
+		} finally {
+			estaGuardando = false;
+		}
 	}
 </script>
 
@@ -271,7 +319,8 @@
 					<select
 						id="participacion"
 						bind:value={selectedParticipacionPermitidaId}
-						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+						disabled={estaGuardando}
+						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<option value={null} disabled>Seleccioná una opción...</option>
 						{#each data.participacionesPermitidas as p}
@@ -301,13 +350,43 @@
 								min="0.01"
 								step="any"
 								bind:value={cantidadAporte}
+								disabled={estaGuardando}
 								placeholder="0"
-								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 							<div
 								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-400"
 							>
-								{selectedParticipacion.unidad_medida}
+								{selectedParticipacion?.unidad_medida}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				{#if contribucionExistente}
+					<div
+						class="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800"
+						transition:slide
+					>
+						<div class="flex items-start gap-3">
+							<AlertCircle size={20} class="shrink-0 text-blue-600" />
+							<div class="space-y-1">
+								<p class="font-bold text-blue-900">Ya tenés un aporte registrado</p>
+								<p>
+									Actualmente tu aporte es de: <strong class="text-blue-900"
+										>{contribucionExistente.cantidad} {selectedParticipacion?.unidad_medida}</strong
+									>
+								</p>
+								<p class="text-xs text-blue-600">
+									El valor que ingreses arriba se <span class="font-bold uppercase">sumará</span> a lo
+									que ya aportaste.
+								</p>
+								{#if cantidadAporte && cantidadAporte > 0}
+									<div class="mt-3 border-t border-blue-200 pt-2 font-bold text-blue-900">
+										Total resultante: {totalResultante}
+										{selectedParticipacion?.unidad_medida}
+									</div>
+								{/if}
 							</div>
 						</div>
 					</div>
@@ -412,6 +491,7 @@
 			<Button
 				label="Registrar aporte"
 				disabled={!selectedParticipacion}
+				loading={estaGuardando}
 				size="md"
 				onclick={guardarAporte}
 				customClass="shadow-lg shadow-blue-200"

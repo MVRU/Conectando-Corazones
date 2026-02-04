@@ -8,8 +8,7 @@
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import { formatearFecha } from '$lib/utils/validaciones';
 	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
-	// import { mockProyectos } from '$lib/infrastructure/mocks/mock-proyectos';
-	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
+	import { toastStore } from '$lib/stores/toast';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { InboxArrowDown, CheckCircle, XCircle, ChartBar, HandRaised } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
@@ -38,6 +37,10 @@
 	let colaboracionARechazar: number | null = null;
 	let justificacionRechazo = '';
 
+	// Estados de loading
+	let loadingAprobacion: number | null = null;
+	let loadingRechazo = false;
+
 	// cuando cambia el ID seleccionado, actualiza el proyecto
 	$: if (proyectoSeleccionadoId) {
 		const proyecto = proyectos.find((p) => p.id_proyecto === proyectoSeleccionadoId);
@@ -46,15 +49,40 @@
 		}
 	}
 
-	function aceptarColaboracion(colaboracionId: number) {
-		// Actualizar estado en el proyecto seleccionado
-		if (proyectoSeleccionado.colaboraciones) {
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
-				c.id_colaboracion === colaboracionId ? { ...c, estado: 'aprobada' as const } : c
-			);
-		}
+	async function aceptarColaboracion(colaboracionId: number) {
+		loadingAprobacion = colaboracionId;
+		try {
+			const res = await fetch(`/api/colaboraciones/${colaboracionId}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ estado: 'aprobada' })
+			});
 
-		console.log(`Colaboración ${colaboracionId} aprobada`);
+			const result = await res.json();
+
+			if (!res.ok) {
+				throw new Error(result.error || 'Error al aprobar la colaboración');
+			}
+
+			// Actualizar estado en el proyecto seleccionado
+			if (proyectoSeleccionado.colaboraciones) {
+				proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+					c.id_colaboracion === colaboracionId ? result : c
+				);
+			}
+
+			toastStore.show({
+				message: 'Colaboración aprobada exitosamente',
+				variant: 'success'
+			});
+		} catch (error: any) {
+			toastStore.show({
+				message: error.message || 'Error al aprobar la colaboración',
+				variant: 'error'
+			});
+		} finally {
+			loadingAprobacion = null;
+		}
 	}
 
 	function mostrarModalParaRechazar(colaboracionId: number) {
@@ -69,19 +97,45 @@
 		justificacionRechazo = '';
 	}
 
-	function confirmarRechazo() {
-		if (colaboracionARechazar && proyectoSeleccionado.colaboraciones) {
-			const justificacion = justificacionRechazo.trim() || 'Solicitud rechazada por la institución';
+	async function confirmarRechazo() {
+		if (colaboracionARechazar) {
+			loadingRechazo = true;
+			try {
+				const justificacion = justificacionRechazo.trim();
+				if (!justificacion) {
+					return;
+				}
 
-			proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
-				c.id_colaboracion === colaboracionARechazar
-					? { ...c, estado: 'rechazada' as const, justificacion }
-					: c
-			);
+				const res = await fetch(`/api/colaboraciones/${colaboracionARechazar}`, {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ estado: 'rechazada', justificacion })
+				});
 
-			console.log(
-				`Colaboración ${colaboracionARechazar} rechazada con justificación: ${justificacion}`
-			);
+				const result = await res.json();
+
+				if (!res.ok) {
+					throw new Error(result.error || 'Error al rechazar la colaboración');
+				}
+
+				if (proyectoSeleccionado.colaboraciones) {
+					proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+						c.id_colaboracion === colaboracionARechazar ? result : c
+					);
+				}
+
+				toastStore.show({
+					message: 'Colaboración rechazada',
+					variant: 'success'
+				});
+			} catch (error: any) {
+				toastStore.show({
+					message: error.message || 'Error al rechazar la colaboración',
+					variant: 'error'
+				});
+			} finally {
+				loadingRechazo = false;
+			}
 		}
 
 		cerrarModalRechazo();
@@ -335,20 +389,25 @@
 
 									<div class="ml-6 flex flex-col gap-2">
 										<Button
-											label="• Aceptar"
+											label={loadingAprobacion === colaboracion.id_colaboracion
+												? 'Aprobando...'
+												: 'Aprobar'}
 											variant="primary"
 											size="sm"
 											type="button"
-											on:click={() => aceptarColaboracion(colaboracion.id_colaboracion || 0)}
-											customClass="!bg-green-600 hover:!bg-green-700 !min-w-[90px]"
+											onclick={() => aceptarColaboracion(colaboracion.id_colaboracion || 0)}
+											disabled={loadingAprobacion !== null}
+											loading={loadingAprobacion === colaboracion.id_colaboracion}
+											customClass="!bg-green-600 hover:!bg-green-700 !min-w-[90px] transition-all duration-200"
 										/>
 										<Button
-											label="• Rechazar"
+											label="Rechazar"
 											variant="secondary"
 											size="sm"
 											type="button"
-											on:click={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
-											customClass="!bg-red-600 hover:!bg-red-700 !text-white !min-w-[90px]"
+											onclick={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
+											disabled={loadingAprobacion !== null}
+											customClass="!bg-red-600 hover:!bg-red-700 !text-white !min-w-[90px] transition-all duration-200"
 										/>
 									</div>
 								</div>
@@ -411,7 +470,7 @@
 										<span
 											class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
 										>
-											• Activo
+											Activo
 										</span>
 									</div>
 								</div>
@@ -452,54 +511,79 @@
 	</div>
 </main>
 
-<!-- Modal de rechazo Marca error de accesibilidad, pero funciona bien con esos comentarios, pss no borrarlos -->
+<!-- Modal de rechazo con animaciones mejoradas -->
 {#if mostrarModalRechazo}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
-	<div class="fixed inset-0 z-50 flex items-center justify-center" on:click={cerrarModalRechazo}>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div
+		class="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm duration-200"
+		on:click={cerrarModalRechazo}
+		on:keydown={(e) => e.key === 'Escape' && cerrarModalRechazo()}
+		role="button"
+		tabindex="-1"
+		aria-label="Cerrar modal"
+	>
 		<div
-			class="mx-4 w-full max-w-md rounded-lg border border-gray-200 bg-white p-6 shadow-2xl"
+			class="animate-in zoom-in-95 slide-in-from-bottom-4 mx-4 w-full max-w-md transform rounded-2xl border border-red-100 bg-white shadow-2xl duration-300"
 			on:click|stopPropagation
+			role="none"
 		>
-			<div class="mb-4">
-				<h3 class="text-lg font-semibold text-gray-900">Rechazar solicitud de colaboración</h3>
-				<p class="mt-2 text-sm text-gray-600">
-					Escribí el motivo por el cual rechazás la solicitud de colaboración (opcional)
-				</p>
+			<!-- Header con ícono -->
+			<div class="border-b border-gray-200 px-6 py-5">
+				<div class="flex items-start">
+					<div
+						class="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100"
+					>
+						<Icon src={XCircle} class="h-6 w-6 text-red-600" id="modal-title-icon" />
+					</div>
+					<div class="flex-1">
+						<h3 class="text-xl font-semibold text-gray-900" id="modal-title">Rechazar solicitud</h3>
+						<p class="mt-1 text-sm text-gray-500">
+							Esta acción es irreversible. El colaborador será notificado.
+						</p>
+					</div>
+				</div>
 			</div>
 
-			<div class="mb-6">
-				<label for="justificacion-rechazo" class="mb-2 block text-sm font-medium text-gray-700">
-					Justificación del rechazo:
+			<!-- Body -->
+			<div class="px-6 py-5">
+				<label for="justificacion-rechazo" class="mb-2 block text-sm font-medium text-gray-900">
+					Justificación del rechazo <span class="text-red-500">*</span>
 				</label>
 				<textarea
 					id="justificacion-rechazo"
 					bind:value={justificacionRechazo}
 					rows="4"
-					class="w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none"
-					placeholder="Ejemplo: No cumple con los requisitos específicos del proyecto..."
+					disabled={loadingRechazo}
+					class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
+					placeholder="Explicá el motivo del rechazo. Ejemplo: El perfil no cumple con los requisitos específicos del proyecto..."
 				></textarea>
+				<p class="mt-2 text-xs text-gray-500">
+					{justificacionRechazo.trim().length} caracteres
+				</p>
 			</div>
 
-			<div class="flex justify-end space-x-3">
-				<Button
-					label="Cancelar"
-					variant="secondary"
-					size="sm"
-					type="button"
-					on:click={cerrarModalRechazo}
-					customClass="!bg-gray-100 !text-gray-700 hover:!bg-gray-200"
-				/>
-				<Button
-					label="Confirmar rechazo"
-					variant="secondary"
-					size="sm"
-					type="button"
-					on:click={confirmarRechazo}
-					customClass="!bg-red-600 hover:!bg-red-700 !text-white"
-				/>
+			<!-- Footer con botones -->
+			<div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
+				<div class="flex justify-end space-x-3">
+					<Button
+						label="Cancelar"
+						variant="secondary"
+						size="sm"
+						type="button"
+						onclick={cerrarModalRechazo}
+						disabled={loadingRechazo}
+						customClass="!bg-white !text-gray-700 hover:!bg-gray-100 !border !border-gray-300"
+					/>
+					<Button
+						label={loadingRechazo ? 'Rechazando...' : 'Confirmar rechazo'}
+						variant="danger"
+						size="sm"
+						type="button"
+						onclick={confirmarRechazo}
+						disabled={!justificacionRechazo.trim() || loadingRechazo}
+						loading={loadingRechazo}
+						customClass="!min-w-[140px]"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>

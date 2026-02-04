@@ -1,5 +1,6 @@
 // * Códigos canónicos
 export const ESTADOS = [
+	'borrador',
 	'en_curso',
 	'pendiente_solicitud_cierre',
 	'en_revision',
@@ -18,6 +19,7 @@ export interface Estado {
 
 // * Mapa de labels para UI
 export const ESTADO_LABELS: Record<EstadoDescripcion, string> = {
+	borrador: 'Borrador',
 	en_curso: 'En curso',
 	pendiente_solicitud_cierre: 'Pendiente de cierre',
 	en_revision: 'En revisión',

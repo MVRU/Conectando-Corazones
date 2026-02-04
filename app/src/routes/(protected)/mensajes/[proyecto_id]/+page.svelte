@@ -16,9 +16,7 @@
 	// Props
 	export let data: PageData;
 
-	// Chat no disponible
-	let chat: any = null;
-
+	$: chat = data.chat;
 	$: proyecto = data.proyecto;
 
 	// Validar acceso

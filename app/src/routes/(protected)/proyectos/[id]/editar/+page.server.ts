@@ -12,6 +12,7 @@ import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgr
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
+import { UNIDADES_POR_TIPO } from '$lib/utils/constants';
 
 function formatearFechaParaInput(fechaIso: Date | string | null | undefined): string {
 	if (!fechaIso) return '';
@@ -75,15 +76,25 @@ function mapearParticipaciones(proyectoOriginal: Proyecto): {
 		.map((p) => p.tipo_participacion?.descripcion as TipoParticipacionDescripcion)
 		.filter((t): t is TipoParticipacionDescripcion => !!t);
 
-	const permitidas = (proyectoOriginal.participacion_permitida || []).map((p) => ({
-		id_participacion_permitida: p.id_participacion_permitida,
-		tipo_participacion: p.tipo_participacion,
-		objetivo: p.objetivo,
-		actual: p.actual || 0,
-		unidad_medida: p.unidad_medida || 'unidades',
-		especie: p.especie,
-		unidad_medida_otra: undefined
-	}));
+	const permitidas = (proyectoOriginal.participacion_permitida || []).map((p) => {
+		const tipoDesc = p.tipo_participacion?.descripcion as TipoParticipacionDescripcion;
+		const standardUnits = (UNIDADES_POR_TIPO[tipoDesc] as unknown as string[]) || [];
+		const isStandard = standardUnits.includes(p.unidad_medida as any);
+
+		return {
+			id_participacion_permitida: p.id_participacion_permitida,
+			tipo_participacion: p.tipo_participacion,
+			objetivo: p.objetivo,
+			actual: p.actual || 0,
+			unidad_medida: isStandard
+				? p.unidad_medida
+				: p.unidad_medida
+					? 'Otra'
+					: standardUnits[0] || 'unidades',
+			especie: p.especie,
+			unidad_medida_otra: isStandard ? undefined : p.unidad_medida
+		};
+	});
 
 	return { seleccionados, permitidas };
 }
@@ -144,27 +155,48 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const categoriasSeleccionadas =
 		proyectoOriginal.categorias?.map((c) => c.id_categoria!).filter(Boolean) || [];
 
-	return {
-		form: {
-			titulo: proyectoOriginal.titulo || '',
-			descripcion: proyectoOriginal.descripcion || '',
-			urlPortada: proyectoOriginal.url_portada || '',
-			fechaFinTentativa,
-			beneficiarios,
-			categoriasSeleccionadas,
-			categoriaOtraDescripcion: '',
-			ubicaciones,
-			tiposParticipacionSeleccionados,
-			participacionesPermitidas
-		},
-		originales: {
-			fechaFin: fechaFinTentativa,
-			beneficiarios,
-			participacionesOriginales: proyectoOriginal.participacion_permitida
-				? proyectoOriginal.participacion_permitida.map((p) => ({ ...p, proyecto: undefined }))
-				: []
-		},
-		categorias: categorias.map((c) => ({ ...c })),
-		tiposParticipacion: tiposParticipacion.map((t) => ({ ...t }))
-	};
+	const esEdicionRestringida = proyectoOriginal.esEdicionRestringida();
+
+	if (proyectoOriginal.estaEnAuditoria()) {
+		throw error(400, 'El proyecto está en auditoría y no permite modificaciones.');
+	}
+
+	if (proyectoOriginal.estaFinalizado()) {
+		throw error(400, 'No se pueden editar proyectos completados o cancelados.');
+	}
+
+	// El proyecto es editable si es borrador O si está activo pero con restricciones
+	const esEditable = proyectoOriginal.esBorrador() || proyectoOriginal.estaActivo();
+	if (!esEditable) {
+		throw error(400, 'El proyecto no puede ser editado en su estado actual.');
+	}
+
+	return JSON.parse(
+		JSON.stringify({
+			form: {
+				titulo: proyectoOriginal.titulo || '',
+				descripcion: proyectoOriginal.descripcion || '',
+				urlPortada: proyectoOriginal.url_portada || '',
+				fechaFinTentativa,
+				beneficiarios,
+				categoriasSeleccionadas,
+				categoriaOtraDescripcion: '',
+				ubicaciones,
+				tiposParticipacionSeleccionados,
+				participacionesPermitidas
+			},
+			esEdicionRestringida,
+			esAdmin,
+			originales: {
+				fechaFin: fechaFinTentativa,
+				beneficiarios,
+				participacionesOriginales: proyectoOriginal.participacion_permitida
+					? proyectoOriginal.participacion_permitida.map((p) => ({ ...p, proyecto: undefined }))
+					: []
+			},
+			categorias,
+			tiposParticipacion,
+			proyectoId: idProyecto
+		})
+	);
 };

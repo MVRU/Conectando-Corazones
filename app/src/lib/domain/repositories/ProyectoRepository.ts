@@ -12,5 +12,5 @@ export interface ProyectoRepository {
 	create(proyecto: Proyecto): Promise<Proyecto>;
 	update(proyecto: Proyecto): Promise<Proyecto>;
 	updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto>;
-	cancel(id: number, justificacion?: string): Promise<void>;
+	cancel(id: number, usuarioEjecutorId: number, justificacion?: string): Promise<void>;
 }

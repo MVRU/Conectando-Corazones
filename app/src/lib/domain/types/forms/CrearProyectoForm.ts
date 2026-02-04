@@ -5,6 +5,7 @@ import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPerm
 
 export interface UbicacionFormulario {
 	id_proyecto_ubicacion?: number; // Presente si la ubicación existe (modo edición)
+	id_ubicacion?: number; // ID de la ubicación base
 	tipo_ubicacion: TipoUbicacion | '';
 	modalidad: ModalidadUbicacion | '';
 	direccion_presencial?: DireccionPresencialFormulario;

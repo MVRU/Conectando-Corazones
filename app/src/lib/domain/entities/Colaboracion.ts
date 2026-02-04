@@ -1,4 +1,5 @@
 import type { ColaboradorDisyuncion } from '../types/Usuario';
+import type { ColaboracionTipoParticipacion } from '../types/ColaboracionTipoParticipacion';
 
 export class Colaboracion {
 	id_colaboracion?: number;
@@ -13,6 +14,7 @@ export class Colaboracion {
 
 	// Relaciones
 	colaborador?: ColaboradorDisyuncion;
+	colaboraciones_tipo_participacion?: ColaboracionTipoParticipacion[];
 
 	constructor(data: Partial<Colaboracion>) {
 		this.id_colaboracion = data.id_colaboracion;
@@ -23,6 +25,21 @@ export class Colaboracion {
 		this.proyecto_id = data.proyecto_id;
 		this.colaborador_id = data.colaborador_id;
 		this.colaborador = data.colaborador;
+		this.colaboraciones_tipo_participacion = data.colaboraciones_tipo_participacion;
+
+		this.validar();
+	}
+
+	private validar(): void {
+		if (!this.proyecto_id) {
+			throw new Error('El ID del proyecto es requerido para la colaboración.');
+		}
+		if (!this.colaborador_id) {
+			throw new Error('El ID del colaborador es requerido.');
+		}
+		if (this.mensaje && this.mensaje.length > 500) {
+			throw new Error('El mensaje no puede superar los 500 caracteres.');
+		}
 	}
 
 	// Lógica de negocio
@@ -66,8 +83,11 @@ export class Colaboracion {
 	}
 
 	anular(): void {
-		if (this.estado === 'anulada') {
-			throw new Error('La colaboración ya está anulada');
+		if (this.estado !== 'pendiente') {
+			throw new Error('Solo se pueden anular colaboraciones en estado pendiente');
+		}
+		if (this.estado !== 'pendiente') {
+			throw new Error('Solo se pueden cancelar postulaciones en estado pendiente');
 		}
 		this.estado = 'anulada';
 	}

@@ -1,5 +1,6 @@
 import type { ParticipacionPermitidaCreate } from './ParticipacionPermitidaCreate';
 import type { UbicacionCreate } from './UbicacionCreate';
+import type { EstadoDescripcion } from '../Estado';
 
 export interface ProyectoCreate {
 	titulo: string;
@@ -11,4 +12,5 @@ export interface ProyectoCreate {
 	categoria_ids: number[];
 	participaciones: ParticipacionPermitidaCreate[];
 	ubicaciones: UbicacionCreate[];
+	estado?: EstadoDescripcion;
 }

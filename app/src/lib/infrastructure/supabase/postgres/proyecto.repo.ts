@@ -16,7 +16,10 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: { categoria: true }
 		},
 		participacion_permitida: {
-			include: { tipo_participacion: true }
+			include: {
+				tipo_participacion: true,
+				colaboraciones_tipo_participacion: true
+			}
 		},
 		proyecto_ubicaciones: {
 			include: { ubicacion: { include: { localidad: { include: { provincia: true } } } } }
@@ -30,7 +33,8 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: {
 				colaborador: {
 					include: {
-						localidad: { include: { provincia: true } }
+						localidad: { include: { provincia: true } },
+						contactos: true
 					}
 				},
 				colaboraciones_tipo_participacion: {
@@ -54,7 +58,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -64,95 +68,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	async findByInstitucionId(institucionId: number): Promise<Proyecto[]> {
 		const proyectos = await prisma.proyecto.findMany({
 			where: { institucion_id: institucionId },
-			select: {
-				id_proyecto: true,
-				titulo: true,
-				descripcion: true,
-				resumen: true,
-				url_portada: true,
-				beneficiarios: true,
-				created_at: true,
-				fecha_fin_tentativa: true,
-				institucion_id: true,
-				estado_id: true,
-				estado: {
-					select: {
-						id_estado: true,
-						descripcion: true
-					}
-				},
-				institucion: {
-					select: {
-						id_usuario: true,
-						nombre_legal: true,
-						url_foto: true
-					}
-				},
-				proyecto_categorias: {
-					select: {
-						categoria: {
-							select: {
-								id_categoria: true,
-								descripcion: true
-							}
-						}
-					}
-				},
-				participacion_permitida: {
-					select: {
-						id_participacion_permitida: true,
-						id_proyecto: true,
-						id_tipo_participacion: true,
-						objetivo: true,
-						actual: true,
-						unidad_medida: true,
-						especie: true,
-						tipo_participacion: {
-							select: {
-								id_tipo_participacion: true,
-								descripcion: true
-							}
-						}
-					}
-				},
-				proyecto_ubicaciones: {
-					select: {
-						id_proyecto_ubicacion: true,
-						proyecto_id: true,
-						ubicacion_id: true,
-						ubicacion: {
-							select: {
-								id_ubicacion: true,
-								tipo_ubicacion: true,
-								modalidad: true,
-								calle: true,
-								numero: true,
-								piso: true,
-								departamento: true,
-								referencia: true,
-								url_google_maps: true,
-								url_virtual: true,
-								localidad_id: true,
-								localidad: {
-									select: {
-										id_localidad: true,
-										nombre: true,
-										codigo_postal: true,
-										provincia: {
-											select: {
-												id_provincia: true,
-												nombre: true,
-												nombre_corto: true,
-												codigo_iso: true
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			},
+			include: this.includeOptions,
 			orderBy: [{ estado_id: 'asc' }, { created_at: 'desc' }]
 		});
 
@@ -161,7 +77,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -212,9 +128,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						id_proyecto: true,
 						id_tipo_participacion: true,
 						objetivo: true,
-						actual: true,
 						unidad_medida: true,
 						especie: true,
+						colaboraciones_tipo_participacion: {
+							select: {
+								cantidad: true
+							}
+						},
 						tipo_participacion: {
 							select: {
 								id_tipo_participacion: true,
@@ -260,6 +180,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 							}
 						}
 					}
+				},
+				colaboraciones: {
+					select: {
+						id_colaboracion: true,
+						proyecto_id: true,
+						colaborador_id: true,
+						estado: true,
+						justificacion: true
+					}
 				}
 			},
 			orderBy: [{ estado_id: 'asc' }, { created_at: 'desc' }]
@@ -270,7 +199,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				try {
 					return ProyectoMapper.toDomain(p as any);
 				} catch (err) {
-					console.error(`Error mapping project ${p.id_proyecto}:`, err);
+					console.error(`Error al procesar el proyecto ID: ${p.id_proyecto}:`, err);
 					return null;
 				}
 			})
@@ -282,7 +211,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			where: { id_proyecto: id },
 			include: this.includeOptions
 		});
-		return proyecto ? ProyectoMapper.toDomain(proyecto as any) : null;
+		try {
+			return proyecto ? ProyectoMapper.toDomain(proyecto as any) : null;
+		} catch (error) {
+			console.error(`Error al procesar el proyecto ID: ${id}:`, error);
+			return null;
+		}
 	}
 
 	async findByUsuarioId(id: number): Promise<Proyecto[]> {
@@ -332,12 +266,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	async create(proyecto: Proyecto): Promise<Proyecto> {
 		const result = await prisma.$transaction(
 			async (tx) => {
-				// 1. Obtener el ID del estado inicial 'en_curso'
-				const estadoActivo = await tx.estado.findUnique({
-					where: { descripcion: 'en_curso' }
+				// 1. Obtener el ID del estado solicitado (borrador o en_curso)
+				const estadoDoc = await tx.estado.findUnique({
+					where: { descripcion: proyecto.estado || 'en_curso' }
 				});
 
-				if (!estadoActivo) throw new Error('Estado "en_curso" no encontrado en la base de datos');
+				if (!estadoDoc)
+					throw new Error(
+						`Estado "${proyecto.estado || 'en_curso'}" no encontrado en la base de datos`
+					);
 
 				// 2. Crear el proyecto base
 				const created = await tx.proyecto.create({
@@ -349,7 +286,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						url_portada: proyecto.url_portada,
 						institucion_id: proyecto.institucion_id!,
 						created_at: new Date(),
-						estado_id: estadoActivo.id_estado,
+						estado_id: estadoDoc.id_estado,
 						beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
 						fecha_fin_tentativa: proyecto.fecha_fin_tentativa
 							? new Date(proyecto.fecha_fin_tentativa)
@@ -398,7 +335,6 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 									id_proyecto: created.id_proyecto,
 									id_tipo_participacion: tipoId,
 									objetivo: p.objetivo,
-									actual: 0,
 									unidad_medida: p.unidad_medida,
 									especie: p.especie
 								}
@@ -454,27 +390,165 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(result as any);
 	}
 
-	// Método incompleto de ejemplo, la actualización de grafos es compleja // TODO: completar método
 	async update(proyecto: Proyecto): Promise<Proyecto> {
 		if (!proyecto.id_proyecto) throw new Error('ID de proyecto requerido para actualizar');
 
-		const updated = await prisma.proyecto.update({
-			where: { id_proyecto: proyecto.id_proyecto },
-			data: {
-				titulo: proyecto.titulo,
-				descripcion: proyecto.descripcion,
-				resumen: proyecto.resumen,
-				aprendizajes: proyecto.aprendizajes,
-				url_portada: proyecto.url_portada,
-				fecha_fin_tentativa: proyecto.fecha_fin_tentativa
-					? new Date(proyecto.fecha_fin_tentativa)
-					: null,
-				beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null
-				// No actualizamos categorías ni estado aquí
+		const result = await prisma.$transaction(
+			async (tx) => {
+				// 1. Actualizar datos básicos del proyecto
+				await tx.proyecto.update({
+					where: { id_proyecto: proyecto.id_proyecto },
+					data: {
+						titulo: proyecto.titulo,
+						descripcion: proyecto.descripcion,
+						resumen: proyecto.resumen,
+						aprendizajes: proyecto.aprendizajes,
+						url_portada: proyecto.url_portada,
+						fecha_fin_tentativa: proyecto.fecha_fin_tentativa
+							? new Date(proyecto.fecha_fin_tentativa)
+							: null,
+						beneficiarios: proyecto.beneficiarios ? Number(proyecto.beneficiarios) : null,
+						updated_at: new Date()
+					}
+				});
+
+				// 2. Sincronizar categorías
+				// Eliminar relaciones actuales
+				await tx.proyectoCategoria.deleteMany({
+					where: { proyecto_id: proyecto.id_proyecto }
+				});
+
+				// Crear nuevas relaciones
+				if (proyecto.categorias && proyecto.categorias.length > 0) {
+					await tx.proyectoCategoria.createMany({
+						data: proyecto.categorias.map((c) => ({
+							proyecto_id: proyecto.id_proyecto!,
+							categoria_id: c.id_categoria!
+						}))
+					});
+				}
+
+				// 3. Sincronizar participaciones permitidas
+				// Eliminar existentes
+				await tx.participacionPermitida.deleteMany({
+					where: { id_proyecto: proyecto.id_proyecto }
+				});
+
+				// Crear nuevas
+				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
+					for (const p of proyecto.participacion_permitida) {
+						let tipoId = p.id_tipo_participacion;
+
+						// Si no tiene ID pero sí descripción, buscarlo (caso de creación/edición rápida)
+						if (!tipoId && p.tipo_participacion?.descripcion) {
+							const tipos = await tx.tipoParticipacion.findMany({
+								where: { descripcion: p.tipo_participacion.descripcion }
+							});
+							tipoId = tipos[0]?.id_tipo_participacion;
+						}
+
+						if (tipoId) {
+							await tx.participacionPermitida.create({
+								data: {
+									id_proyecto: proyecto.id_proyecto!,
+									id_tipo_participacion: tipoId,
+									objetivo: p.objetivo,
+									unidad_medida: p.unidad_medida,
+									especie: p.especie
+								}
+							});
+						}
+					}
+				}
+
+				// 4. Sincronizar ubicaciones
+				const ubicacionesEnPayload = proyecto.ubicaciones || [];
+				const idsUbicacionNuevos = ubicacionesEnPayload
+					.map((u) => u.id_proyecto_ubicacion)
+					.filter(Boolean) as number[];
+
+				// a. Obtener relaciones actuales
+				const relacionesActuales = await tx.proyectoUbicacion.findMany({
+					where: { proyecto_id: proyecto.id_proyecto },
+					select: { id_proyecto_ubicacion: true, ubicacion_id: true }
+				});
+
+				// b. Identificar relaciones a eliminar (las que no están en el payload)
+				const relacionesAEliminar = relacionesActuales.filter(
+					(rel) => !idsUbicacionNuevos.includes(rel.id_proyecto_ubicacion!)
+				);
+
+				if (relacionesAEliminar.length > 0) {
+					const idsRelEliminar = relacionesAEliminar.map((r) => r.id_proyecto_ubicacion!);
+					const idsUbiEliminar = relacionesAEliminar.map((r) => r.ubicacion_id);
+
+					// Borrar relaciones
+					await tx.proyectoUbicacion.deleteMany({
+						where: { id_proyecto_ubicacion: { in: idsRelEliminar } }
+					});
+
+					// Borrar las ubicaciones físicas asociadas
+					await tx.ubicacion.deleteMany({
+						where: { id_ubicacion: { in: idsUbiEliminar } }
+					});
+				}
+
+				// c. Procesar cada ubicación del payload (Update o Create)
+				for (const pu of ubicacionesEnPayload) {
+					const uData = pu.ubicacion as any;
+					if (!uData) continue;
+
+					const mappingData = {
+						tipo_ubicacion: uData.tipo_ubicacion,
+						modalidad: uData.modalidad,
+						calle: uData.calle || null,
+						numero: uData.numero || null,
+						piso: uData.piso || null,
+						departamento: uData.departamento || null,
+						referencia: uData.referencia || null,
+						url_google_maps: uData.url_google_maps || null,
+						url_virtual: uData.url_virtual || null,
+						localidad_id: uData.localidad_id || null
+					};
+
+					if (pu.id_proyecto_ubicacion) {
+						// Es una actualización
+						const relacionExistente = relacionesActuales.find(
+							(r) => r.id_proyecto_ubicacion === pu.id_proyecto_ubicacion
+						);
+						if (relacionExistente) {
+							await tx.ubicacion.update({
+								where: { id_ubicacion: relacionExistente.ubicacion_id },
+								data: mappingData
+							});
+						}
+					} else {
+						// Es una creación nueva
+						const nuevaUbicacion = await tx.ubicacion.create({
+							data: mappingData
+						});
+
+						await tx.proyectoUbicacion.create({
+							data: {
+								proyecto_id: proyecto.id_proyecto!,
+								ubicacion_id: nuevaUbicacion.id_ubicacion
+							}
+						});
+					}
+				}
+
+				// Retornar el proyecto completo actualizado
+				const finalProject = await tx.proyecto.findUnique({
+					where: { id_proyecto: proyecto.id_proyecto },
+					include: this.includeOptions
+				});
+
+				return finalProject;
 			},
-			include: this.includeOptions
-		});
-		return ProyectoMapper.toDomain(updated as any);
+			{ timeout: 30000 }
+		);
+
+		return ProyectoMapper.toDomain(result as any);
 	}
 
 	async updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto> {
@@ -495,7 +569,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
-	async cancel(id: number, justificacion?: string): Promise<void> {
+	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string): Promise<void> {
 		const estadoCancelado = await prisma.estado.findUnique({
 			where: { descripcion: 'cancelado' }
 		});
@@ -527,8 +601,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					atributo_afectado: 'estado',
 					valor_anterior: proyectoAnterior.estado?.descripcion || 'desconocido',
 					valor_nuevo: 'cancelado',
-					justificacion: justificacion || 'Cancelación manual por la institución',
-					usuario_id: proyectoAnterior.institucion_id // Atribuimos el cambio a la institución dueña
+					justificacion:
+						justificacion ||
+						(usuarioEjecutorId === proyectoAnterior.institucion_id
+							? 'Cancelación manual por la institución'
+							: 'Cancelación administrativa por irregularidad'),
+					usuario_id: usuarioEjecutorId
 				}
 			});
 		});

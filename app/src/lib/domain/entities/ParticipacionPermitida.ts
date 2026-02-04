@@ -1,7 +1,6 @@
 import type { ParticipacionPermitida as IParticipacionPermitida } from '../types/ParticipacionPermitida';
-import type { Proyecto as ProyectoType } from '../types/Proyecto';
-import { Proyecto } from './Proyecto';
-import { TipoParticipacion } from './TipoParticipacion';
+import type { Proyecto } from '../types/Proyecto';
+import type { TipoParticipacion } from '../types/TipoParticipacion';
 
 export class ParticipacionPermitida implements IParticipacionPermitida {
 	id_participacion_permitida?: number;
@@ -24,20 +23,21 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 		this.actual = data.actual || 0;
 		this.unidad_medida = data.unidad_medida;
 		this.especie = data.especie;
-		this.proyecto = data.proyecto ? new Proyecto(data.proyecto) : undefined;
-		this.tipo_participacion = data.tipo_participacion
-			? new TipoParticipacion(data.tipo_participacion)
-			: undefined;
+		this.proyecto = data.proyecto;
+		this.tipo_participacion = data.tipo_participacion;
 
 		this.validar();
 	}
 
 	private validar(): void {
-		if (this.objetivo < 0) {
-			throw new Error('El objetivo no puede ser negativo.');
+		if (this.objetivo <= 0) {
+			throw new Error('El objetivo debe ser mayor a cero.');
 		}
 		if (this.actual && this.actual < 0) {
 			throw new Error('La cantidad actual no puede ser negativa.');
+		}
+		if (this.id_tipo_participacion && this.id_tipo_participacion <= 0) {
+			throw new Error('El ID de tipo de participación no es válido.');
 		}
 	}
 
