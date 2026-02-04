@@ -174,7 +174,7 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 			const colaboraciones = await prisma.colaboracion.findMany({
 				where: {
 					proyecto_id: proyectoId,
-					estado: 'aprobada'
+					estado: { in: ['aprobada', 'pendiente'] }
 				},
 				include: this.includeOptions,
 				orderBy: { created_at: 'desc' }

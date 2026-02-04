@@ -47,6 +47,14 @@
 	let archivosTemporales: (Archivo & { file: File })[] = $state([]);
 	let evidenciasNuevas: EvidenciaEntradaNueva[] = $state([]);
 
+	let contribucionExistente = $derived(
+		data.existingContributions?.find(
+			(c: any) => c.participacion_permitida_id === selectedParticipacionPermitidaId
+		)
+	);
+
+	let totalResultante = $derived((contribucionExistente?.cantidad || 0) + (cantidadAporte || 0));
+
 	let hayaCambios = $derived(
 		evidenciasNuevas.length > 0 ||
 			archivosTemporales.length > 0 ||
@@ -350,6 +358,35 @@
 								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-400"
 							>
 								{selectedParticipacion?.unidad_medida}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				{#if contribucionExistente}
+					<div
+						class="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-800"
+						transition:slide
+					>
+						<div class="flex items-start gap-3">
+							<AlertCircle size={20} class="shrink-0 text-blue-600" />
+							<div class="space-y-1">
+								<p class="font-bold text-blue-900">Ya tenés un aporte registrado</p>
+								<p>
+									Actualmente tu aporte es de: <strong class="text-blue-900"
+										>{contribucionExistente.cantidad} {selectedParticipacion?.unidad_medida}</strong
+									>
+								</p>
+								<p class="text-xs text-blue-600">
+									El valor que ingreses arriba se <span class="font-bold uppercase">sumará</span> a lo
+									que ya aportaste.
+								</p>
+								{#if cantidadAporte && cantidadAporte > 0}
+									<div class="mt-3 border-t border-blue-200 pt-2 font-bold text-blue-900">
+										Total resultante: {totalResultante}
+										{selectedParticipacion?.unidad_medida}
+									</div>
+								{/if}
 							</div>
 						</div>
 					</div>

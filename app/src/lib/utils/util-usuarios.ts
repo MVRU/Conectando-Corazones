@@ -19,10 +19,16 @@ export function obtenerNombreUsuario(usuarioId: number): string {
  * @returns Nombre completo del usuario
  */
 export function obtenerNombreCompleto(usuario: Usuario): string {
-	if ('nombre_legal' in usuario) {
-		return (usuario as Institucion).nombre_legal;
+	const u = usuario as any;
+	if (u.rol === 'institucion' && u.nombre_legal) {
+		return u.nombre_legal;
 	}
-	return `${usuario.nombre} ${usuario.apellido}`;
+
+	if (u.tipo_colaborador === 'organizacion' && u.razon_social) {
+		return u.razon_social;
+	}
+
+	return `${u.nombre} ${u.apellido}`.trim() || u.username;
 }
 
 /**

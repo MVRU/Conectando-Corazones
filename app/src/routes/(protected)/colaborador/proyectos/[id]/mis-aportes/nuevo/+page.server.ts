@@ -34,6 +34,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	return {
 		proyecto: JSON.parse(JSON.stringify(proyecto)),
 		participacionesPermitidas: JSON.parse(JSON.stringify(proyecto.participacion_permitida || [])),
-		colaboracionId: colaboracion.id_colaboracion
+		colaboracionId: colaboracion.id_colaboracion,
+		existingContributions: JSON.parse(
+			JSON.stringify(colaboracion.colaboraciones_tipo_participacion || [])
+		)
 	};
 };

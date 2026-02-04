@@ -16,7 +16,10 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: { categoria: true }
 		},
 		participacion_permitida: {
-			include: { tipo_participacion: true }
+			include: {
+				tipo_participacion: true,
+				colaboraciones_tipo_participacion: true
+			}
 		},
 		proyecto_ubicaciones: {
 			include: { ubicacion: { include: { localidad: { include: { provincia: true } } } } }
@@ -125,9 +128,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						id_proyecto: true,
 						id_tipo_participacion: true,
 						objetivo: true,
-						actual: true,
 						unidad_medida: true,
 						especie: true,
+						colaboraciones_tipo_participacion: {
+							select: {
+								cantidad: true
+							}
+						},
 						tipo_participacion: {
 							select: {
 								id_tipo_participacion: true,
@@ -328,7 +335,6 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 									id_proyecto: created.id_proyecto,
 									id_tipo_participacion: tipoId,
 									objetivo: p.objetivo,
-									actual: 0,
 									unidad_medida: p.unidad_medida,
 									especie: p.especie
 								}
@@ -447,7 +453,6 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 									id_proyecto: proyecto.id_proyecto!,
 									id_tipo_participacion: tipoId,
 									objetivo: p.objetivo,
-									actual: p.actual || 0,
 									unidad_medida: p.unidad_medida,
 									especie: p.especie
 								}

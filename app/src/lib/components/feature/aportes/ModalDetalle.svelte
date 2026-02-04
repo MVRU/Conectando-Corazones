@@ -12,6 +12,7 @@
 	} from 'lucide-svelte';
 	import ArchivoCard from '$lib/components/ui/cards/ArchivoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
 
 	let { data, cerrarModal, projectId, isMobile } = $props();
 
@@ -58,7 +59,7 @@
 						class="mt-1 flex items-center gap-x-1.5 truncate text-xs font-semibold text-slate-500 sm:mt-1.5 sm:text-sm"
 					>
 						<User size={14} class="shrink-0 text-slate-400" />
-						<span class="truncate">{data.colaborador.nombre} {data.colaborador.apellido}</span>
+						<span class="truncate">{obtenerNombreCompleto(data.colaborador)}</span>
 						<span class="hidden text-slate-300 sm:inline">•</span>
 						<span class="hidden shrink-0 font-bold text-slate-600 sm:inline"
 							>{data.colaborador.tipo_etiqueta}</span

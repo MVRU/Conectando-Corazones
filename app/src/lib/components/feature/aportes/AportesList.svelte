@@ -18,20 +18,26 @@
 	import { goto } from '$app/navigation';
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import { Info } from 'lucide-svelte';
+	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+	import type { Usuario } from '$lib/domain/types/Usuario';
 
 	let {
 		colaboradores,
 		participacion_permitida = [],
-		estado = 'en_curso'
+		estado = 'en_curso',
+		evidenciasInstitucion = []
 	} = $props<{
 		colaboradores: {
 			id_usuario: number;
+			usuario: Usuario;
 			nombre: string;
 			tipo_colaborador: string;
-			aportes: { cosa: string; cantidad: string }[];
+			aportes: { cosa: string; cantidad: string; unidad_medida?: string }[];
+			evidencias?: any[];
 		}[];
 		participacion_permitida?: any[];
 		estado?: EstadoDescripcion;
+		evidenciasInstitucion?: any[];
 	}>();
 
 	let esEstadoPermitido = $derived(
@@ -155,7 +161,7 @@
 
 									<div class="min-w-0 flex-1">
 										<h3 class="truncate text-sm leading-tight font-bold text-slate-900 md:text-lg">
-											{colab.nombre}
+											{obtenerNombreCompleto(colab.usuario)}
 										</h3>
 										<p class="truncate text-[11px] text-slate-500 md:text-sm">
 											{colab.tipo_colaborador}
@@ -212,7 +218,8 @@
 																{aporte.cosa}
 															</p>
 															<p class="text-[11px] font-medium text-slate-500 md:text-sm">
-																Cant: {aporte.cantidad}
+																Cantidad: {aporte.cantidad}
+																{aporte.unidad_medida}
 															</p>
 														</div>
 													</div>
@@ -224,7 +231,11 @@
 														onclick={() => abrirEvidencias(colab.id_usuario)}
 													>
 														<Eye size={18} />
-														<span>Ver evidencias</span>
+														<span
+															>Ver evidencias {colab.evidencias?.length
+																? `(${colab.evidencias.length})`
+																: ''}</span
+														>
 													</button>
 												</div>
 											</div>
@@ -262,9 +273,43 @@
 					</div>
 
 					<div class="flex flex-col items-stretch gap-4 md:items-start md:gap-6">
+						{#if evidenciasInstitucion.length > 0}
+							<div class="grid grid-cols-2 gap-2 md:grid-cols-3">
+								{#each evidenciasInstitucion.slice(0, 6) as file}
+									<a
+										href={file.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="group relative aspect-square overflow-hidden rounded-lg bg-slate-800"
+									>
+										{#if file.tipo_mime?.startsWith('image/')}
+											<img
+												src={file.url}
+												alt={file.nombre_original}
+												class="h-full w-full object-cover transition-transform group-hover:scale-110"
+											/>
+										{:else}
+											<div class="flex h-full w-full items-center justify-center text-slate-400">
+												<Package size={24} />
+											</div>
+										{/if}
+									</a>
+								{/each}
+								{#if evidenciasInstitucion.length > 6}
+									<div
+										class="flex items-center justify-center rounded-lg bg-slate-800 text-xs text-slate-400"
+									>
+										+{evidenciasInstitucion.length - 6} más
+									</div>
+								{/if}
+							</div>
+						{/if}
+
 						{#if esEstadoPermitido}
 							<Button
-								label="Subir evidencias ahora"
+								label={evidenciasInstitucion.length > 0
+									? 'Subir más evidencias'
+									: 'Subir evidencias ahora'}
 								variant="ghost"
 								href={`/institucion/proyectos/${projectId}/aportes/evidencias/nueva`}
 							/>
@@ -296,18 +341,51 @@
 				</div>
 
 				<div class="relative h-48 p-4 md:h-full md:min-h-[400px] md:p-10">
-					<div
-						class="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 md:rounded-3xl"
-					>
-						<img
-							src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=800"
-							alt="Impacto comunitario"
-							class="h-full w-full object-cover opacity-60 grayscale-[10%] md:opacity-100"
-						/>
+					{#if evidenciasInstitucion.length > 0}
+						{@const latestImage = evidenciasInstitucion.find((e: any) =>
+							e.tipo_mime?.startsWith('image/')
+						)}
+						{#if latestImage}
+							<div
+								class="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 md:rounded-3xl"
+							>
+								<img
+									src={latestImage.url}
+									alt="Impacto comunitario"
+									class="h-full w-full object-cover opacity-80 transition-opacity hover:opacity-100"
+								/>
+								<div
+									class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:from-[#0f1029]/80"
+								></div>
+							</div>
+						{:else}
+							<div
+								class="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 md:rounded-3xl"
+							>
+								<img
+									src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=800"
+									alt="Impacto comunitario"
+									class="h-full w-full object-cover opacity-60 grayscale-[10%] md:opacity-100"
+								/>
+								<div
+									class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:from-[#0f1029]/80"
+								></div>
+							</div>
+						{/if}
+					{:else}
 						<div
-							class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:from-[#0f1029]/80"
-						></div>
-					</div>
+							class="relative h-full w-full overflow-hidden rounded-2xl border border-white/10 md:rounded-3xl"
+						>
+							<img
+								src="https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&q=80&w=800"
+								alt="Impacto comunitario"
+								class="h-full w-full object-cover opacity-60 grayscale-[10%] md:opacity-100"
+							/>
+							<div
+								class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent md:from-[#0f1029]/80"
+							></div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</section>
