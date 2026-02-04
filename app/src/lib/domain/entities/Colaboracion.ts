@@ -1,4 +1,5 @@
 import type { ColaboradorDisyuncion } from '../types/Usuario';
+import type { ColaboracionTipoParticipacion } from '../types/ColaboracionTipoParticipacion';
 
 export class Colaboracion {
 	id_colaboracion?: number;
@@ -13,6 +14,7 @@ export class Colaboracion {
 
 	// Relaciones
 	colaborador?: ColaboradorDisyuncion;
+	colaboraciones_tipo_participacion?: ColaboracionTipoParticipacion[];
 
 	constructor(data: Partial<Colaboracion>) {
 		this.id_colaboracion = data.id_colaboracion;
@@ -23,6 +25,7 @@ export class Colaboracion {
 		this.proyecto_id = data.proyecto_id;
 		this.colaborador_id = data.colaborador_id;
 		this.colaborador = data.colaborador;
+		this.colaboraciones_tipo_participacion = data.colaboraciones_tipo_participacion;
 
 		this.validar();
 	}

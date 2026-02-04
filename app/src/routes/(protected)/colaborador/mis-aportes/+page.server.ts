@@ -14,18 +14,37 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const id_usuario = usuario.id_usuario;
 
-	// Consultar evidencias de entrada del colaborador
+	// 1. Obtener todas las colaboraciones aprobadas del usuario con sus compromisos
+	const colaboraciones = await prisma.colaboracion.findMany({
+		where: {
+			colaborador_id: id_usuario,
+			estado: 'aprobada'
+		},
+		include: {
+			proyecto: {
+				include: {
+					estado: true
+				}
+			},
+			colaboraciones_tipo_participacion: {
+				include: {
+					participacion_permitida: {
+						include: {
+							tipo_participacion: true
+						}
+					}
+				}
+			}
+		}
+	});
+
+	// 2. Obtener todas las evidencias de entrada subidas por el usuario
 	const evidencias = await prisma.evidencia.findMany({
 		where: {
 			tipo_evidencia: 'entrada',
-			participacion_permitida: {
-				proyecto: {
-					colaboraciones: {
-						some: {
-							colaborador_id: id_usuario,
-							estado: 'approved'
-						}
-					}
+			archivos: {
+				some: {
+					usuario_id: id_usuario
 				}
 			}
 		},
@@ -35,14 +54,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 				include: {
 					tipo_participacion: true,
 					proyecto: {
-						select: {
-							id_proyecto: true,
-							titulo: true,
-							estado: {
-								select: {
-									descripcion: true
-								}
-							}
+						include: {
+							estado: true
 						}
 					}
 				}
@@ -51,31 +64,48 @@ export const load: PageServerLoad = async ({ locals }) => {
 		orderBy: { created_at: 'desc' }
 	});
 
-	// Agrupar evidencias por proyecto
-	const evidenciasPorProyecto = evidencias.reduce(
-		(acc, evidencia) => {
-			const proyecto = evidencia.participacion_permitida.proyecto;
-			if (!proyecto) return acc;
+	// 3. Agrupar por proyecto
+	const dataPorProyecto: Record<number, any> = {};
 
-			const proyectoId = proyecto.id_proyecto;
+	// Procesar colaboraciones para asegurar que los proyectos aparezcan incluso sin evidencias aún
+	colaboraciones.forEach((colab) => {
+		const p = colab.proyecto;
+		if (!p) return;
 
-			if (!acc[proyectoId]) {
-				acc[proyectoId] = {
-					proyecto,
-					evidencias: []
-				};
-			}
+		if (!dataPorProyecto[p.id_proyecto]) {
+			dataPorProyecto[p.id_proyecto] = {
+				proyecto: p,
+				compromisos: colab.colaboraciones_tipo_participacion,
+				evidencias: []
+			};
+		} else {
+			// Si ya existe (poco probable por la unicidad de colab), sumamos compromisos
+			dataPorProyecto[p.id_proyecto].compromisos = [
+				...dataPorProyecto[p.id_proyecto].compromisos,
+				...colab.colaboraciones_tipo_participacion
+			];
+		}
+	});
 
-			acc[proyectoId].evidencias.push(evidencia);
-			return acc;
-		},
-		{} as Record<number, any>
-	);
+	// Agregar evidencias al proyecto correspondiente
+	evidencias.forEach((evidencia) => {
+		const p = evidencia.participacion_permitida.proyecto;
+		if (!p) return;
+
+		if (!dataPorProyecto[p.id_proyecto]) {
+			dataPorProyecto[p.id_proyecto] = {
+				proyecto: p,
+				compromisos: [],
+				evidencias: []
+			};
+		}
+		dataPorProyecto[p.id_proyecto].evidencias.push(evidencia);
+	});
 
 	return JSON.parse(
 		JSON.stringify({
 			usuario,
-			evidenciasPorProyecto: Object.values(evidenciasPorProyecto),
+			evidenciasPorProyecto: Object.values(dataPorProyecto),
 			totalEvidencias: evidencias.length
 		})
 	);

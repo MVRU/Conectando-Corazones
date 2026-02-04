@@ -1,4 +1,5 @@
 import type { ColaboradorDisyuncion } from '$lib/domain/types/Usuario';
+import type { ColaboracionTipoParticipacion } from './ColaboracionTipoParticipacion';
 export interface Colaboracion {
 	id_colaboracion?: number;
 	estado: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada';
@@ -13,4 +14,5 @@ export interface Colaboracion {
 
 	// -*- Objetos expandidos para read
 	colaborador?: ColaboradorDisyuncion;
+	colaboraciones_tipo_participacion?: ColaboracionTipoParticipacion[];
 }

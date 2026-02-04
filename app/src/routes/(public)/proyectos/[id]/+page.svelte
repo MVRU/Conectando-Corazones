@@ -90,8 +90,7 @@
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
 			: undefined;
 
-	$: misAportes = [];
-	// TODO: Implementar lógica para obtener aportes del colaborador desde la base de datos
+	$: misAportes = colaboracionUsuario?.colaboraciones_tipo_participacion || [];
 
 	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
 	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';

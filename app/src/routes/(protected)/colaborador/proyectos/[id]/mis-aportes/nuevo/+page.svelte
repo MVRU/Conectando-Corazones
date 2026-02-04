@@ -87,7 +87,7 @@
 				evidenciasNuevas = [];
 				cantidadAporte = undefined;
 				descripcionAporte = '';
-				goto(navigation.to?.url.pathname || `/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
+				goto(navigation.to?.url.pathname || `/colaborador/mis-aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		}
@@ -99,11 +99,11 @@
 				evidenciasNuevas = [];
 				cantidadAporte = undefined;
 				descripcionAporte = '';
-				goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
+				goto(`/colaborador/mis-aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		} else {
-			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
+			goto(`/colaborador/mis-aportes`);
 		}
 	}
 
@@ -245,7 +245,7 @@
 				message: 'Tu aporte ha sido registrado exitosamente.',
 				duration: 5000
 			});
-			goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes`);
+			goto(`/colaborador/mis-aportes`);
 		} catch (err) {
 			const message = err instanceof Error ? err.message : 'Error desconocido';
 			toastStore.show({
