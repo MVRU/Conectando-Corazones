@@ -4,10 +4,15 @@ import type { Chat, Mensaje } from '$lib/domain/types/Chat';
 
 export class PostgresChatRepository implements ChatRepository {
 	async obtenerChatsPorUsuario(idUsuario: number): Promise<Chat[]> {
-		// Encontrar proyectos donde es dueño (institucion)
-		// O donde tiene una colaboracion aprobada
+		// Encontrar proyectos donde el usuario es la institución o un colaborador aprobado,
+		// y asegurar que el proyecto tenga al menos una colaboración aprobada.
 		const proyectos = await prisma.proyecto.findMany({
 			where: {
+				colaboraciones: {
+					some: {
+						estado: 'aprobada'
+					}
+				},
 				OR: [
 					{ institucion_id: idUsuario },
 					{
@@ -18,14 +23,13 @@ export class PostgresChatRepository implements ChatRepository {
 							}
 						}
 					}
-				],
-				colaboraciones: {
-					some: {
-						estado: 'aprobada'
-					}
-				}
+				]
+			},
+			orderBy: {
+				updated_at: 'desc'
 			},
 			include: {
+				estado: true,
 				colaboraciones: {
 					where: { estado: 'aprobada' },
 					select: { colaborador_id: true }
@@ -40,7 +44,8 @@ export class PostgresChatRepository implements ChatRepository {
 			participantes_ids: [p.institucion_id, ...p.colaboraciones.map((c) => c.colaborador_id!)],
 			mensajes: [],
 			updated_at: p.updated_at || p.created_at,
-			created_at: p.created_at
+			created_at: p.created_at,
+			estado_proyecto: p.estado?.descripcion as any
 		}));
 	}
 
@@ -48,6 +53,7 @@ export class PostgresChatRepository implements ChatRepository {
 		const proyecto = await prisma.proyecto.findUnique({
 			where: { id_proyecto: idProyecto },
 			include: {
+				estado: true,
 				colaboraciones: {
 					where: { estado: 'aprobada' },
 					select: { colaborador_id: true }
@@ -69,12 +75,13 @@ export class PostgresChatRepository implements ChatRepository {
 			],
 			mensajes: [],
 			updated_at: proyecto.updated_at || proyecto.created_at,
-			created_at: proyecto.created_at
+			created_at: proyecto.created_at,
+			estado_proyecto: proyecto.estado?.descripcion as any
 		};
 	}
 
 	async enviarMensaje(idChat: number, idRemitente: number, contenido: string): Promise<Mensaje> {
-		// Mock implementation as discussed in the plan
+		// Mock implementation
 		return {
 			id_mensaje: Math.floor(Math.random() * 100000),
 			chat_id: idChat,
