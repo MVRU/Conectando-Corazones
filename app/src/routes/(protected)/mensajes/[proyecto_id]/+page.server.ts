@@ -32,11 +32,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(404, 'Proyecto no encontrado');
 	}
 
-	const estadoValido = proyecto.estado && ESTADOS_CHAT_ACTIVO.includes(proyecto.estado);
-	if (!estadoValido) {
-		throw error(403, 'El chat no está disponible para este proyecto');
-	}
-
 	const esDuenoDelProyecto = proyecto.institucion_id === usuario.id_usuario;
 
 	let tieneColaboracionAprobada = false;

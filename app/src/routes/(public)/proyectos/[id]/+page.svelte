@@ -428,7 +428,7 @@
 			acc.push({
 				label: 'Ir al chat',
 				icon: ChatBubbleLeftRight,
-				onclick: () => goto(`/chat?proyecto=${proyecto.id_proyecto}`)
+				onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
 			});
 
 			if (esCreador) {
