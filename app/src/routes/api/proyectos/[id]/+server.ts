@@ -30,7 +30,7 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 		const data = await request.json();
 		const useCase = new EditarProyecto(repo, historialDeCambiosRepo);
 
-		const updated = await useCase.execute(id, data, usuario.id_usuario!);
+		const updated = await useCase.execute(id, data, usuario.id_usuario!, usuario.rol);
 		return json(updated);
 	} catch (error: any) {
 		console.error('Error al editar el proyecto:', error);

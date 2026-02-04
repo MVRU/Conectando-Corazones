@@ -33,12 +33,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 
 		return {
-			colaborador: {
-				...colaborador,
-				tipo_etiqueta: tipoLabel
-			},
-			aportes,
-			colaboradores
+			colaborador: JSON.parse(
+				JSON.stringify({
+					...colaborador,
+					tipo_etiqueta: tipoLabel
+				})
+			),
+			aportes: JSON.parse(JSON.stringify(aportes)),
+			colaboradores: JSON.parse(JSON.stringify(colaboradores))
 		};
 	} catch (e) {
 		console.error(e);

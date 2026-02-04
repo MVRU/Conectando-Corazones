@@ -4,6 +4,8 @@ import type { UsuarioRepository } from '../../repositories/UsuarioRepository';
 import type { ColaboracionTipoParticipacion } from '../../types/ColaboracionTipoParticipacion';
 import type { Evidencia } from '../../types/Evidencia';
 import type { Colaboracion } from '../../types/Colaboracion';
+import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+import type { Usuario } from '../../types/Usuario';
 
 export class ObtenerDetalleAportesColaborador {
 	constructor(
@@ -84,13 +86,13 @@ export class ObtenerDetalleAportesColaborador {
 
 		// Lógica para obtener la lista de todos los colaboradores
 		const allCollaborations = await this.colaboracionRepo.getColaboracionesPorProyecto(proyectoId);
-		const approvedCollaborations = allCollaborations.filter(
-			(c: Colaboracion) => c.estado === 'aprobada'
+		const activeCollaborations = allCollaborations.filter(
+			(c: Colaboracion) => c.estado === 'aprobada' || c.estado === 'pendiente'
 		);
 
 		const uniqueCollaboratorIds = [
 			...new Set(
-				approvedCollaborations
+				activeCollaborations
 					.map((c: Colaboracion) => c.colaborador_id)
 					.filter((id): id is number => id !== undefined)
 			)
@@ -101,11 +103,11 @@ export class ObtenerDetalleAportesColaborador {
 				const user = await this.usuarioRepo.findById(userId);
 				if (!user) return null;
 
-				const userColabs = approvedCollaborations.filter(
+				const userColabs = activeCollaborations.filter(
 					(c: Colaboracion) => c.colaborador_id === userId
 				);
 
-				let aportesList: { cosa: string; cantidad: string }[] = [];
+				let aportesList: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
 
 				for (const colab of userColabs) {
 					const participations = (await this.colaboracionRepo.getAportesPorColaboracion(
@@ -139,25 +141,24 @@ export class ObtenerDetalleAportesColaborador {
 								const unidad = permitida.unidad_medida || '';
 								cantidadStr = `${p.cantidad} ${unidad}`;
 							}
-							aportesList.push({ cosa, cantidad: cantidadStr });
+							const unidad_medida = permitida.unidad_medida || '';
+							aportesList.push({ cosa, cantidad: cantidadStr, unidad_medida });
 						}
 					});
 				}
 
-				const nombre =
-					user.nombre && user.apellido ? `${user.nombre} ${user.apellido}` : user.username;
+				const displayUserName = obtenerNombreCompleto(user as unknown as Usuario);
+
 				let tipoUserLabel = 'Colaborador';
 				if ('tipo_colaborador' in user) {
 					const tipo = (user as any).tipo_colaborador;
 					if (tipo === 'organizacion') tipoUserLabel = 'Colaborador - ONG';
 					else tipoUserLabel = 'Colaborador - Voluntario/a';
 				}
-				const displayUserName = (
-					'nombre_legal' in user ? (user as any).nombre_legal : nombre
-				) as string;
 
 				return {
 					id_usuario: user.id_usuario ?? userId,
+					usuario: user as unknown as Usuario,
 					nombre: displayUserName,
 					tipo_colaborador: tipoUserLabel,
 					aportes: aportesList
