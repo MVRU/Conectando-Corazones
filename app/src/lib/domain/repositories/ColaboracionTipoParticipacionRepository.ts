@@ -1,15 +1,16 @@
 import type { ColaboracionTipoParticipacion } from '../entities/ColaboracionTipoParticipacion';
 
 export interface ColaboracionTipoParticipacionRepository {
-    create(aporte: ColaboracionTipoParticipacion): Promise<ColaboracionTipoParticipacion>;
     findById(id: number): Promise<ColaboracionTipoParticipacion | null>;
     findByParticipacionPermitida(participacionPermitidaId: number): Promise<ColaboracionTipoParticipacion[]>;
+    findByColaboracionAndParticipacion(
+        colaboracionId: number,
+        participacionPermitidaId: number
+    ): Promise<ColaboracionTipoParticipacion | null>;
 
-    // Crea aporte + actualiza métricas + registra auditoría
-    createConActualizacionMetricas(
+    // Crea o actualiza aporte + actualiza métricas + registra auditoría
+    upsertConActualizacionMetricas(
         aporte: ColaboracionTipoParticipacion,
-        participacionPermitidaId: number,
-        cantidadAAgregar: number,
         usuarioId: number
     ): Promise<ColaboracionTipoParticipacion>;
 }

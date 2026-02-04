@@ -10,56 +10,6 @@ export class PostgresColaboracionTipoParticipacionRepository
         participacion_permitida: { include: { tipo_participacion: true } }
     };
 
-    async create(aporte: ColaboracionTipoParticipacion): Promise<ColaboracionTipoParticipacion> {
-        const data = ColaboracionTipoParticipacionMapper.toPrisma(aporte);
-        const created = await prisma.colaboracionTipoParticipacion.create({
-            data,
-            include: this.includeOptions
-        });
-        return ColaboracionTipoParticipacionMapper.toDomain(created);
-    }
-
-    // Crea aporte + actualiza métricas + registra auditoría (atómico)
-    async createConActualizacionMetricas(
-        aporte: ColaboracionTipoParticipacion,
-        participacionPermitidaId: number,
-        cantidadAAgregar: number,
-        usuarioId: number
-    ): Promise<ColaboracionTipoParticipacion> {
-        const data = ColaboracionTipoParticipacionMapper.toPrisma(aporte);
-
-        const result = await prisma.$transaction(async (tx) => {
-            // 1. Crear el aporte
-            const created = await tx.colaboracionTipoParticipacion.create({
-                data,
-                include: this.includeOptions
-            });
-
-            // 2. Actualizar métricas (incrementar 'actual')
-            await tx.participacionPermitida.update({
-                where: { id_participacion_permitida: participacionPermitidaId },
-                data: { actual: { increment: cantidadAAgregar } }
-            });
-
-            // 3. Registrar en log de auditoría
-            await tx.historialDeCambios.create({
-                data: {
-                    tipo_objeto: 'colaboracion_tipo_participacion',
-                    id_objeto: created.id_colaboracion_tipo_participacion,
-                    accion: 'crear',
-                    atributo_afectado: 'cantidad',
-                    valor_anterior: '0',
-                    valor_nuevo: String(cantidadAAgregar),
-                    usuario_id: usuarioId
-                }
-            });
-
-            return created;
-        });
-
-        return ColaboracionTipoParticipacionMapper.toDomain(result);
-    }
-
     async findById(id: number): Promise<ColaboracionTipoParticipacion | null> {
         const aporte = await prisma.colaboracionTipoParticipacion.findUnique({
             where: { id_colaboracion_tipo_participacion: id },
@@ -76,5 +26,95 @@ export class PostgresColaboracionTipoParticipacionRepository
             include: this.includeOptions
         });
         return aportes.map((a) => ColaboracionTipoParticipacionMapper.toDomain(a));
+    }
+
+    async findByColaboracionAndParticipacion(
+        colaboracionId: number,
+        participacionPermitidaId: number
+    ): Promise<ColaboracionTipoParticipacion | null> {
+        const aporte = await prisma.colaboracionTipoParticipacion.findUnique({
+            where: {
+                colaboracion_id_participacion_permitida_id: {
+                    colaboracion_id: colaboracionId,
+                    participacion_permitida_id: participacionPermitidaId
+                }
+            },
+            include: this.includeOptions
+        });
+        return aporte ? ColaboracionTipoParticipacionMapper.toDomain(aporte) : null;
+    }
+
+    // Crea o actualiza aporte + actualiza métricas + registra auditoría 
+    async upsertConActualizacionMetricas(
+        aporte: ColaboracionTipoParticipacion,
+        usuarioId: number
+    ): Promise<ColaboracionTipoParticipacion> {
+        if (!aporte.colaboracion_id || !aporte.participacion_permitida_id) {
+            throw new Error('El aporte debe tener colaboracion_id y participacion_permitida_id');
+        }
+        if (aporte.cantidad <= 0) {
+            throw new Error('La cantidad a agregar debe ser mayor a 0');
+        }
+
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Buscar si ya existe un aporte 
+            const existente = await tx.colaboracionTipoParticipacion.findUnique({
+                where: {
+                    colaboracion_id_participacion_permitida_id: {
+                        colaboracion_id: aporte.colaboracion_id!,
+                        participacion_permitida_id: aporte.participacion_permitida_id!
+                    }
+                }
+            });
+
+            let registro;
+            let valorAnterior: string;
+            let accion: string;
+            // La cantidad del aporte es la cantidad a agregar
+            const cantidadAAgregar = aporte.cantidad;
+
+            if (existente) {
+                // actualiza: suma la cantidad
+                valorAnterior = String(existente.cantidad);
+                accion = 'actualizar';
+                registro = await tx.colaboracionTipoParticipacion.update({
+                    where: { id_colaboracion_tipo_participacion: existente.id_colaboracion_tipo_participacion },
+                    data: { cantidad: { increment: cantidadAAgregar } },
+                    include: this.includeOptions
+                });
+            } else {
+                //nuevo registro
+                valorAnterior = '0';
+                accion = 'crear';
+                const data = ColaboracionTipoParticipacionMapper.toPrisma(aporte);
+                registro = await tx.colaboracionTipoParticipacion.create({
+                    data,
+                    include: this.includeOptions
+                });
+            }
+
+            // 2. Actualiza métricas (incrementa 'actual')
+            await tx.participacionPermitida.update({
+                where: { id_participacion_permitida: aporte.participacion_permitida_id! },
+                data: { actual: { increment: cantidadAAgregar } }
+            });
+
+            // 3. Registra en log de auditoría
+            await tx.historialDeCambios.create({
+                data: {
+                    tipo_objeto: 'colaboracion_tipo_participacion',
+                    id_objeto: registro.id_colaboracion_tipo_participacion,
+                    accion,
+                    atributo_afectado: 'cantidad',
+                    valor_anterior: valorAnterior,
+                    valor_nuevo: String(registro.cantidad),
+                    usuario_id: usuarioId
+                }
+            });
+
+            return registro;
+        });
+
+        return ColaboracionTipoParticipacionMapper.toDomain(result);
     }
 }

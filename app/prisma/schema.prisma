@@ -75,6 +75,7 @@ model ColaboracionTipoParticipacion {
   colaboracion            Colaboracion?           @relation(fields: [colaboracion_id], references: [id_colaboracion])
   participacion_permitida ParticipacionPermitida? @relation(fields: [participacion_permitida_id], references: [id_participacion_permitida], onDelete: Restrict)
 
+  @@unique([colaboracion_id, participacion_permitida_id])
   @@map("colaboraciones_tipo_participacion")
 }
 

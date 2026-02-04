@@ -69,10 +69,8 @@ export class RegistrarAporte {
             cantidad: data.cantidad
         });
 
-        return await this.aporteRepo.createConActualizacionMetricas(
+        return await this.aporteRepo.upsertConActualizacionMetricas(
             aporte,
-            data.participacion_permitida_id,
-            data.cantidad,
             usuarioId
         );
     }
