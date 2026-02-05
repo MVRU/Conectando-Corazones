@@ -1,13 +1,16 @@
 import type { ArchivoRepository } from '../repositories/ArchivoRepository';
 import type { ProyectoRepository } from '../repositories/ProyectoRepository';
+import type { HistorialDeCambiosRepository } from '../repositories/HistorialDeCambiosRepository';
+import type { Archivo } from '../entities/Archivo';
 
 export class EliminarArchivo {
 	constructor(
 		private archivoRepo: ArchivoRepository,
-		private proyectoRepo: ProyectoRepository
+		private proyectoRepo: ProyectoRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
-	async execute(archivoId: number, usuarioSolicitanteId: number): Promise<void> {
+	async execute(archivoId: number, usuarioSolicitanteId: number): Promise<Archivo> {
 		const archivo = await this.archivoRepo.findById(archivoId);
 
 		if (!archivo) {
@@ -34,12 +37,23 @@ export class EliminarArchivo {
 			);
 		}
 
-		// TODO: acá debería ir la lógica para borrar de Supabase Storage también,
-		// pero como el contrato dice que el backend maneja los metadatos,
-		// asumimos que quien llama a esto (controller) orquestará o este método deberá extenderse
-		// con un StorageService en infraestructura.
-		// Por ahora cumplimos la regla de negocio de la DB.
+		// Registrar en Historial antes de borrar
+		await this.historialRepo.create({
+			tipo_objeto: 'Archivo',
+			id_objeto: archivoId,
+			accion: 'Eliminar',
+			atributo_afectado: 'id_archivo',
+			valor_anterior: JSON.stringify({
+				url: archivo.url,
+				nombre: archivo.nombre_original
+			}),
+			valor_nuevo: 'Eliminado',
+			justificacion: `Archivo eliminado por el usuario dueño.`,
+			usuario_id: usuarioSolicitanteId
+		});
 
 		await this.archivoRepo.delete(archivoId);
+
+		return archivo;
 	}
 }

@@ -5,11 +5,35 @@ import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres
 import { Usuario } from '$lib/domain/entities/Usuario';
 import type { RegisterColaboradorInput } from '$lib/stores/auth';
 import type { Organizacion } from '$lib/domain/types/Usuario';
+import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const input = (await request.json()) as RegisterColaboradorInput;
 
+		// 1. Crear usuario en Supabase Auth
+		const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+			email: input.email,
+			password: input.password,
+			email_confirm: true, // Auto-confirmar para migración/MVP
+			user_metadata: {
+				username: input.perfil.username,
+				nombre: input.perfil.nombre,
+				apellido: input.perfil.apellido,
+				rol: 'colaborador'
+			}
+		});
+
+		if (authError) {
+			console.error('Supabase Auth Error:', authError);
+			return json({ error: authError.message }, { status: 400 });
+		}
+
+		if (!authData.user) {
+			return json({ error: 'No se pudo crear el usuario en Auth' }, { status: 500 });
+		}
+
+		// 2. Crear usuario en Base de Datos (PostgreSQL)
 		const repo = new PostgresUsuarioRepository();
 		const useCase = new RegistrarUsuario(repo);
 
@@ -18,7 +42,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const nuevoUsuario = new Usuario({
 			username: input.perfil.username,
-			password: input.password,
+			// No guardamos password en DB local
+			auth_user_id: authData.user.id,
 			nombre: input.perfil.nombre,
 			apellido: input.perfil.apellido,
 			fecha_nacimiento: input.perfil.fecha_nacimiento
@@ -34,11 +59,16 @@ export const POST: RequestHandler = async ({ request }) => {
 			con_fines_de_lucro: orgMetadata?.con_fines_de_lucro
 		});
 
-		const created = await useCase.execute(nuevoUsuario);
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password: _, ...usuarioSafe } = created;
-
-		return json({ usuario: usuarioSafe });
+		try {
+			const created = await useCase.execute(nuevoUsuario);
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { password: _, ...usuarioSafe } = created;
+			return json({ usuario: usuarioSafe });
+		} catch (dbError: any) {
+			// Si falla la DB, deberíamos borrar el usuario de Auth para consistencia (Rollback manual)
+			await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+			throw dbError;
+		}
 	} catch (error) {
 		console.error('Error registering collaborator:', error);
 		if (error instanceof Error) {

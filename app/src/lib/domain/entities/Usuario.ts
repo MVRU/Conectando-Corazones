@@ -8,6 +8,7 @@ import type { Consentimiento } from '../types/Consentimiento';
 export class Usuario {
 	id_usuario?: number;
 	username: string;
+	auth_user_id?: string;
 	password?: string;
 	nombre: string;
 	apellido: string;
@@ -47,6 +48,7 @@ export class Usuario {
 		this.created_at = data.created_at ? new Date(data.created_at) : undefined;
 		this.estado_verificacion = data.estado_verificacion || undefined;
 		this.descripcion = data.descripcion || undefined;
+		this.auth_user_id = data.auth_user_id || undefined;
 		this.password = data.password || undefined;
 
 		// Relaciones FK

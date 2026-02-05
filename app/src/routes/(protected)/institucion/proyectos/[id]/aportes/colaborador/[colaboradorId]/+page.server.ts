@@ -4,6 +4,7 @@ import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/pos
 import { ObtenerDetalleAportesColaborador } from '$lib/domain/use-cases/colaboraciones/ObtenerDetalleAportesColaborador';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
+import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const projectId = Number(params.id);
@@ -25,6 +26,51 @@ export const load: PageServerLoad = async ({ params }) => {
 			collaboratorId
 		);
 
+		// Función auxiliar para firmar URLs
+		const firmarUrl = async (url: string | undefined) => {
+			if (!url || url.startsWith('http') || url.startsWith('data:')) return url;
+
+			const partes = url.split('/');
+			if (partes.length < 2) return url;
+
+			const bucket = partes[0];
+			const path = partes.slice(1).join('/');
+
+			const { data } = await supabaseAdmin.storage.from(bucket).createSignedUrl(path, 3600);
+			return data?.signedUrl || url;
+		};
+
+		// Procesar aportes para firmar evidencias
+		const aportesProcesados = await Promise.all(
+			aportes.map(async (aporte: any) => {
+				const evidenciasEntrada = await Promise.all(
+					(aporte.evidencias_entrada || []).map(async (archivo: any) => ({
+						...archivo,
+						url: await firmarUrl(archivo.url)
+					}))
+				);
+
+				const evidenciasSalida = await Promise.all(
+					(aporte.evidencias_salida || []).map(async (archivo: any) => ({
+						...archivo,
+						url: await firmarUrl(archivo.url)
+					}))
+				);
+
+				return {
+					...aporte,
+					evidencias_entrada: evidenciasEntrada,
+					evidencias_salida: evidenciasSalida
+				};
+			})
+		);
+
+		// Procesar colaborador para firmar avatar
+		const colaboradorProcesado = {
+			...colaborador,
+			avatar_url: await firmarUrl((colaborador as any).avatar_url)
+		};
+
 		let tipoLabel = 'Colaborador';
 		if ('tipo_colaborador' in colaborador) {
 			const tipo = (colaborador as any).tipo_colaborador;
@@ -35,11 +81,11 @@ export const load: PageServerLoad = async ({ params }) => {
 		return {
 			colaborador: JSON.parse(
 				JSON.stringify({
-					...colaborador,
+					...colaboradorProcesado,
 					tipo_etiqueta: tipoLabel
 				})
 			),
-			aportes: JSON.parse(JSON.stringify(aportes)),
+			aportes: JSON.parse(JSON.stringify(aportesProcesados)),
 			colaboradores: JSON.parse(JSON.stringify(colaboradores))
 		};
 	} catch (e) {

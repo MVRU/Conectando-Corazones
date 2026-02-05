@@ -5,35 +5,64 @@
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { shouldShowBreadcrumbs } from '\$lib/infrastructure/config/breadcrumbs.config';
+	import { shouldShowBreadcrumbs } from '$lib/infrastructure/config/breadcrumbs.config';
 	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
-	import { beforeNavigate } from '$app/navigation';
+	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { authActions, canAccessRoute, isLoading } from '$lib/stores/auth';
+	import {
+		authActions,
+		canAccessRoute,
+		isLoading,
+		authStore,
+		unauthenticatedState
+	} from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 	import { goto } from '$app/navigation';
 
+	import { Usuario } from '$lib/domain/entities/Usuario';
+
 	export let data: LayoutData;
 
-	/**
-	 * ! DECISIÓN DE DISEÑO
-	 * -!- Se muestran Breadcrumbs sólo cuando existen migas configuradas.
-	 */
+	let { supabase, session } = data;
+	$: ({ supabase, session } = data);
 
 	let showBreadcrumbs = false;
 	$: showBreadcrumbs = shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2;
 
 	let mounted = false;
 
-	/**
-	 * * Limpia migas de pan al cambiar de ruta para evitar estados huérfanos
-	 */
-	onMount(async () => {
+	onMount(() => {
 		beforeNavigate(clearBreadcrumbs);
-		await authActions.checkAuth();
+
+		const { data: subscription } = supabase.auth.onAuthStateChange((event, _session) => {
+			if (_session?.expires_at !== session?.expires_at) {
+				invalidate('supabase:auth');
+			}
+		});
+
+		// Inicializar estado global de auth con datos del servidor
+		if (data.user) {
+			const usuarioInstance = new Usuario(data.user);
+			authStore.update((s) => ({
+				...s,
+				usuario: usuarioInstance,
+				isAuthenticated: true,
+				isLoading: false
+			}));
+		} else {
+			if (session) {
+				authStore.update((s) => ({ ...s, isLoading: false }));
+			} else {
+				// Sin sesión
+				authStore.set(unauthenticatedState);
+			}
+		}
+
 		mounted = true;
+
+		return () => subscription.subscription.unsubscribe();
 	});
 
 	$: if (mounted && !$isLoading) {

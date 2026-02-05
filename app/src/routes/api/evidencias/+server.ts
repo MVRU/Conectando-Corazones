@@ -3,6 +3,7 @@ import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgr
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresParticipacionPermitidaRepository } from '$lib/infrastructure/supabase/postgres/participacion-permitida.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
 import { SubirEvidencia } from '$lib/domain/use-cases/SubirEvidencia';
 import { ListarEvidencias } from '$lib/domain/use-cases/ListarEvidencias';
 import { Archivo } from '$lib/domain/entities/Archivo';
@@ -53,12 +54,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const proyectoRepo = new PostgresProyectoRepository();
 		const colaboracionRepo = new PostgresColaboracionRepository();
 		const participacionRepo = new PostgresParticipacionPermitidaRepository();
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
 
 		const subirEvidenciaUseCase = new SubirEvidencia(
 			evidenciaRepo,
 			proyectoRepo,
 			colaboracionRepo,
-			participacionRepo
+			participacionRepo,
+			historialRepo
 		);
 
 		// Convertir archivos recibidos (DTO/JSON) a entidades Archivo

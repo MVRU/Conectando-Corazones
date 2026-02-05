@@ -80,7 +80,7 @@ const initialState: AuthState = {
 };
 
 // Estado para usuario no autenticado (cargado pero no conectado)
-const unauthenticatedState: AuthState = {
+export const unauthenticatedState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
 	isLoading: false,

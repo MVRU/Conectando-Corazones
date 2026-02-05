@@ -1,11 +1,13 @@
 import type { ArchivoRepository } from '../repositories/ArchivoRepository';
 import type { ProyectoRepository } from '../repositories/ProyectoRepository';
+import type { HistorialDeCambiosRepository } from '../repositories/HistorialDeCambiosRepository';
 import type { Archivo } from '../entities/Archivo';
 
 export class ActualizarArchivo {
 	constructor(
 		private archivoRepo: ArchivoRepository,
-		private proyectoRepo: ProyectoRepository
+		private proyectoRepo: ProyectoRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
 	async execute(
@@ -39,6 +41,24 @@ export class ActualizarArchivo {
 			throw new Error(
 				`No se puede editar el archivo porque el proyecto está en estado: ${estado}.`
 			);
+		}
+
+		// Registrar cambios en el historial
+		const entries = Object.entries(nuevosDatos);
+		for (const [key, value] of entries) {
+			const valorAnterior = (archivo as any)[key];
+			if (valorAnterior !== value) {
+				await this.historialRepo.create({
+					tipo_objeto: 'Archivo',
+					id_objeto: archivoId,
+					accion: 'Actualizar',
+					atributo_afectado: key,
+					valor_anterior: String(valorAnterior),
+					valor_nuevo: String(value),
+					justificacion: `Actualización de metadatos de archivo.`,
+					usuario_id: usuarioSolicitanteId
+				});
+			}
 		}
 
 		await this.archivoRepo.update(archivoId, nuevosDatos);

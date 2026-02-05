@@ -1,6 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { PostgresArchivoRepository } from '$lib/infrastructure/supabase/postgres/archivo.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
 import { EliminarArchivo } from '$lib/domain/use-cases/EliminarArchivo';
 import { ActualizarArchivo } from '$lib/domain/use-cases/ActualizarArchivo';
 
@@ -18,7 +19,8 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		const nuevosDatos = await request.json();
 		const archivoRepo = new PostgresArchivoRepository();
 		const proyectoRepo = new PostgresProyectoRepository();
-		const actualizarUseCase = new ActualizarArchivo(archivoRepo, proyectoRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const actualizarUseCase = new ActualizarArchivo(archivoRepo, proyectoRepo, historialRepo);
 
 		await actualizarUseCase.execute(Number(id), locals.usuario.id_usuario, nuevosDatos);
 
@@ -42,7 +44,8 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 	try {
 		const archivoRepo = new PostgresArchivoRepository();
 		const proyectoRepo = new PostgresProyectoRepository();
-		const eliminarUseCase = new EliminarArchivo(archivoRepo, proyectoRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const eliminarUseCase = new EliminarArchivo(archivoRepo, proyectoRepo, historialRepo);
 
 		await eliminarUseCase.execute(Number(id), locals.usuario.id_usuario);
 
