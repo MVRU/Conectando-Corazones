@@ -1,6 +1,6 @@
 <!--
 * Componente: GestionColaboraciones  
-        -*- Descripción: Gestíon completa de colaboraciones con selector de proyecto, estadísticas y acciones
+* Descripción: Gestión completa de colaboraciones con diseño responsive mejorado
 -->
 
 <script lang="ts">
@@ -10,7 +10,15 @@
 	import { obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { toastStore } from '$lib/stores/toast';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { InboxArrowDown, CheckCircle, XCircle, ChartBar, HandRaised } from '@steeze-ui/heroicons';
+	import {
+		InboxArrowDown,
+		CheckCircle,
+		XCircle,
+		ChartBar,
+		HandRaised,
+		Phone,
+		Envelope
+	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import {
 		getTipoIcon,
@@ -20,6 +28,7 @@
 		getColaboracionesAprobadas,
 		calcularDiasActivo
 	} from '$lib/utils/util-colaboraciones';
+	import { slide, fade, scale } from 'svelte/transition';
 
 	// Prop recibida desde el padre
 	export let proyectos: Proyecto[] = [];
@@ -159,46 +168,41 @@
 	$: colaboraciones = proyectoSeleccionado.colaboraciones || [];
 	$: pendientes = colaboraciones.filter((c) => c.estado === 'pendiente');
 	$: aprobadas = colaboraciones.filter((c) => c.estado === 'aprobada');
+
+	// Función para obtener iniciales
+	function getIniciales(username: string | undefined): string {
+		return username ? username.charAt(0).toUpperCase() : '?';
+	}
 </script>
 
 <svelte:head>
-	<title>Solicitudes de colaboración recibidas - Conectando Corazones</title>
+	<title>Solicitudes de colaboración - Conectando Corazones</title>
 	<meta name="description" content="Gestioná las solicitudes de colaboración para tus proyectos" />
 </svelte:head>
 
-<main class="min-h-screen bg-gray-50">
-	<div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-8 lg:px-8">
+<main class="min-h-screen bg-gray-50/50">
+	<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
 			<h1 class="text-2xl font-bold text-[rgb(var(--base-color))] sm:text-3xl">
-				Solicitudes de colaboración recibidas
+				Solicitudes de colaboración
 			</h1>
-			<p class="mt-2 text-gray-600">Gestioná las solicitudes de colaboración para tus proyectos</p>
+			<p class="mt-2 text-gray-500">Gestioná quién se une a tus proyectos de impacto social.</p>
 		</div>
 
-		<!-- Selector de proyecto -->
+		<!-- Selector de proyecto y Estadísticas -->
 		{#if proyectos.length > 1}
-			<div class="mb-6 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-				<div class="mb-4 flex items-center justify-between">
-					<h2 class="text-lg font-semibold text-gray-900">Seleccionar proyecto</h2>
-					<span class="text-sm text-gray-500">
-						{proyectos.length} proyecto{proyectos.length !== 1 ? 's' : ''} total{proyectos.length !==
-						1
-							? 'es'
-							: ''}
-					</span>
-				</div>
-
-				<div class="space-y-4">
-					<!-- Selector dropdown -->
-					<div>
-						<label for="project-select" class="mb-2 block text-sm font-medium text-gray-700">
-							Proyecto en curso:
-						</label>
+			<section class="mb-8 space-y-6">
+				<!-- Selector -->
+				<div class="relative max-w-sm">
+					<label for="project-select" class="mb-1 ml-1 block text-sm font-medium text-gray-700"
+						>Proyecto seleccionado</label
+					>
+					<div class="relative">
 						<select
 							id="project-select"
 							bind:value={proyectoSeleccionadoId}
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-3 text-base transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 sm:py-2 sm:text-sm"
+							class="w-full cursor-pointer appearance-none rounded-xl border-gray-200 bg-white py-3 pr-10 pl-4 text-gray-900 shadow-sm transition-colors hover:border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none sm:text-sm"
 						>
 							{#each proyectos as proyecto}
 								<option value={proyecto.id_proyecto}>
@@ -207,205 +211,214 @@
 							{/each}
 						</select>
 					</div>
+				</div>
 
-					<div class="rounded-lg bg-gray-50 p-4">
-						<!-- Estadísticas rápidas -->
-						<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-							<div class="rounded-lg border border-gray-200 bg-white p-3">
-								<div class="flex items-center">
-									<div class="mr-2 text-orange-500">
-										<Icon src={InboxArrowDown} class="h-6 w-6" />
-									</div>
-									<div>
-										<p class="text-xs text-gray-500">Pendientes</p>
-										<p class="text-lg font-semibold text-gray-900">
-											{getColaboracionesPendientes(proyectoSeleccionado)}
-										</p>
-									</div>
-								</div>
+				<!-- Estadísticas: Mobile (Compactas) vs Desktop (Cards Detalladas) -->
+				<div class="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:gap-4">
+					<!-- Pendientes -->
+					<div
+						class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+					>
+						<div class="flex items-center gap-3">
+							<div class="rounded-lg bg-orange-50 p-2 text-orange-600">
+								<Icon src={InboxArrowDown} class="h-6 w-6" />
 							</div>
-
-							<div class="rounded-lg border border-gray-200 bg-white p-3">
-								<div class="flex items-center">
-									<div class="mr-2 text-green-500">
-										<Icon src={CheckCircle} class="h-6 w-6" />
-									</div>
-									<div>
-										<p class="text-xs text-gray-500">Aprobadas</p>
-										<p class="text-lg font-semibold text-gray-900">
-											{getColaboracionesAprobadas(proyectoSeleccionado)}
-										</p>
-									</div>
-								</div>
-							</div>
-
-							<div class="rounded-lg border border-gray-200 bg-white p-3">
-								<div class="flex items-center">
-									<div class="mr-2 text-red-500">
-										<Icon src={XCircle} class="h-6 w-6" />
-									</div>
-									<div>
-										<p class="text-xs text-gray-500">Rechazadas</p>
-										<p class="text-lg font-semibold text-gray-900">
-											{getColaboracionesRechazadas(proyectoSeleccionado)}
-										</p>
-									</div>
-								</div>
-							</div>
-
-							<div class="rounded-lg border border-gray-200 bg-white p-3">
-								<div class="flex items-center">
-									<div class="mr-2 text-blue-500">
-										<Icon src={ChartBar} class="h-6 w-6" />
-									</div>
-									<div>
-										<p class="text-xs text-gray-500">Total</p>
-										<p class="text-lg font-semibold text-gray-900">
-											{getColaboracionesCount(proyectoSeleccionado)}
-										</p>
-									</div>
-								</div>
+							<div>
+								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesPendientes(proyectoSeleccionado)}
+								</p>
+								<p class="hidden text-sm font-medium text-gray-500 sm:block">Pendientes</p>
+								<p class="text-xs text-gray-400 sm:hidden">Pend.</p>
 							</div>
 						</div>
+					</div>
 
-						<!-- Información adicional -->
-						<div class="mt-4 space-y-2">
-							{#if proyectoSeleccionado.fecha_fin_tentativa}
-								<p class="text-xs text-gray-500">
-									<span class="font-medium">Finalización tentativa:</span>
-									{formatearFecha(proyectoSeleccionado.fecha_fin_tentativa)}
+					<!-- Aprobadas -->
+					<div
+						class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+					>
+						<div class="flex items-center gap-3">
+							<div class="rounded-lg bg-green-50 p-2 text-green-600">
+								<Icon src={CheckCircle} class="h-6 w-6" />
+							</div>
+							<div>
+								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesAprobadas(proyectoSeleccionado)}
 								</p>
-							{/if}
+								<p class="hidden text-sm font-medium text-gray-500 sm:block">Activas</p>
+								<p class="text-xs text-gray-400 sm:hidden">Act.</p>
+							</div>
+						</div>
+					</div>
 
-							{#if proyectoSeleccionado.created_at}
-								<p class="text-xs text-gray-500">
-									<span class="font-medium">Creado el:</span>
-									{formatearFecha(proyectoSeleccionado.created_at)}
+					<!-- Rechazadas -->
+					<div
+						class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+					>
+						<div class="flex items-center gap-3">
+							<div class="rounded-lg bg-red-50 p-2 text-red-600">
+								<Icon src={XCircle} class="h-6 w-6" />
+							</div>
+							<div>
+								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesRechazadas(proyectoSeleccionado)}
 								</p>
-							{/if}
+								<p class="hidden text-sm font-medium text-gray-500 sm:block">Rechazadas</p>
+								<p class="text-xs text-gray-400 sm:hidden">Rech.</p>
+							</div>
+						</div>
+					</div>
+
+					<!-- Total -->
+					<div
+						class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+					>
+						<div class="flex items-center gap-3">
+							<div class="rounded-lg bg-blue-50 p-2 text-blue-600">
+								<Icon src={ChartBar} class="h-6 w-6" />
+							</div>
+							<div>
+								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesCount(proyectoSeleccionado)}
+								</p>
+								<p class="hidden text-sm font-medium text-gray-500 sm:block">Total</p>
+								<p class="text-xs text-gray-400 sm:hidden">Total</p>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+
+				<!-- Info extra desktop -->
+				<div class="hidden gap-6 pl-1 text-sm text-gray-500 lg:flex">
+					{#if proyectoSeleccionado.fecha_fin_tentativa}
+						<p>
+							<span class="font-medium text-gray-700">Finalización tentativa:</span>
+							{formatearFecha(proyectoSeleccionado.fecha_fin_tentativa)}
+						</p>
+					{/if}
+					{#if proyectoSeleccionado.created_at}
+						<p>
+							<span class="font-medium text-gray-700">Creado el:</span>
+							{formatearFecha(proyectoSeleccionado.created_at)}
+						</p>
+					{/if}
+				</div>
+			</section>
 		{/if}
-		<!-- Dos columnas: Solicitudes + Colaboradores activos -->
-		<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-			<!-- Solicitudes de colaboración (pendientes) -->
-			<div class="rounded-lg border border-gray-200 bg-white shadow-sm">
-				<div class="border-b border-gray-200 px-6 py-4">
-					<div class="flex items-center justify-between">
-						<h2 class="truncate text-lg font-semibold text-gray-900">
-							<span class="sm:hidden">Solicitudes</span>
-							<span class="hidden sm:inline">Solicitudes de colaboración</span>
-						</h2>
-						<span
-							class="inline-flex shrink-0 items-center rounded-full bg-orange-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-orange-800"
-						>
-							{pendientes.length} pendiente{pendientes.length !== 1 ? 's' : ''}
-						</span>
-					</div>
+
+		<!-- Layout Columnas -->
+		<div class="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+			<!-- Solicitudes Pendientes -->
+			<section class="flex flex-col gap-4">
+				<div class="flex items-center justify-between px-1">
+					<h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+						Solicitudes pendientes
+						{#if pendientes.length > 0}
+							<span
+								class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-orange-100 px-1 text-xs font-semibold text-orange-700"
+							>
+								{pendientes.length}
+							</span>
+						{/if}
+					</h2>
 				</div>
 
-				<div class="divide-y divide-gray-200">
-					{#if pendientes.length === 0}
-						<div class="px-6 py-12 text-center">
-							<div class="mb-4 flex justify-center text-4xl">
-								<Icon src={InboxArrowDown} class="h-12 w-12 text-gray-400" />
-							</div>
-							<h3 class="mb-2 text-lg font-medium text-gray-900">No hay solicitudes pendientes</h3>
-							<p class="text-gray-500">
-								Cuando recibas solicitudes de colaboración aparecerán aquí para que puedas
-								gestionarlas.
-							</p>
+				{#if pendientes.length === 0}
+					<div
+						class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-12 text-center"
+					>
+						<div
+							class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-900/5"
+						>
+							<Icon src={InboxArrowDown} class="h-6 w-6 text-gray-400" />
 						</div>
-					{:else}
+						<h3 class="mt-2 text-sm font-semibold text-gray-900">Sin solicitudes nuevas</h3>
+						<p class="mt-1 text-sm text-gray-500">
+							Cuando alguien quiera unirse a tu proyecto, aparecerá aquí.
+						</p>
+					</div>
+				{:else}
+					<div class="space-y-4">
 						{#each pendientes as colaboracion (colaboracion.id_colaboracion)}
-							<div class="px-4 py-4 transition-colors hover:bg-gray-50 sm:px-6">
-								<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-									<div class="w-full min-w-0 flex-1">
-										<div class="mb-3 flex items-start gap-3 sm:mb-4 sm:gap-4">
-											<!-- Avatar Clickeable -->
-											<a
-												href="/perfil/{colaboracion.colaborador?.username}"
-												class="group flex-shrink-0"
-											>
-												{#if colaboracion.colaborador?.url_foto}
-													<img
-														src={colaboracion.colaborador.url_foto}
-														alt={colaboracion.colaborador.username}
-														class="h-12 w-12 rounded-full border-2 border-white object-cover shadow-sm transition-transform group-hover:scale-105"
-													/>
-												{:else}
-													<div
-														class="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-lg font-bold text-gray-500 shadow-sm transition-transform group-hover:scale-105"
-													>
-														{colaboracion.colaborador?.username?.charAt(0).toUpperCase()}
-													</div>
-												{/if}
-											</a>
-
-											<div class="min-w-0 flex-1">
-												<!-- Nombre y Link -->
-												<a
-													href="/perfil/{colaboracion.colaborador?.username}"
-													class="hover:underline"
-												>
-													<h3 class="truncate text-base font-semibold text-gray-900">
-														{obtenerNombreColaborador(colaboracion.colaborador)}
-													</h3>
-												</a>
-
-												<!-- Info de Participación -->
+							<div
+								class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
+							>
+								<div class="p-5">
+									<div class="flex items-start gap-4">
+										<!-- Avatar -->
+										<div class="shrink-0">
+											{#if colaboracion.colaborador?.url_foto}
+												<img
+													src={colaboracion.colaborador.url_foto}
+													alt={colaboracion.colaborador.username}
+													class="h-12 w-12 rounded-full object-cover shadow-sm ring-2 ring-white"
+												/>
+											{:else}
 												<div
-													class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500"
+													class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-lg font-bold text-gray-600 shadow-sm"
 												>
-													<Icon src={getTipoIcon(colaboracion)} class="h-4 w-4 text-gray-400" />
-													<span>{getTipoLabel(colaboracion)}</span>
-													<span>• Postulado el {formatearFecha(colaboracion.created_at)}</span>
+													{getIniciales(colaboracion.colaborador?.username)}
 												</div>
-											</div>
+											{/if}
 										</div>
 
-										{#if obtenerEmailColaborador(colaboracion)}
-											<p class="mb-1 text-sm text-gray-600">
-												<span class="font-medium">Email:</span>
-												{obtenerEmailColaborador(colaboracion)}
-											</p>
-										{/if}
-
-										{#if obtenerTelefonoColaborador(colaboracion)}
-											<p class="mb-1 text-sm text-gray-600">
-												<span class="font-medium">Teléfono:</span>
-												{obtenerTelefonoColaborador(colaboracion)}
-											</p>
-										{/if}
-
-										{#if colaboracion.mensaje}
-											<div class="mt-3 rounded-lg bg-gray-50 p-3">
-												<p class="text-sm text-gray-700">
-													<span class="font-medium">Mensaje:</span>
-												</p>
-												<p class="mt-1 text-sm text-gray-600">
-													{colaboracion.mensaje}
-												</p>
+										<!-- Content -->
+										<div class="min-w-0 flex-1">
+											<div
+												class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
+											>
+												<a
+													href="/perfil/{colaboracion.colaborador?.username}"
+													class="truncate font-semibold text-gray-900 hover:underline"
+												>
+													{obtenerNombreColaborador(colaboracion.colaborador)}
+												</a>
+												<span class="text-xs text-gray-400 tabular-nums">
+													{formatearFecha(colaboracion.created_at)}
+												</span>
 											</div>
-										{/if}
 
-										{#if colaboracion.estado === 'rechazada' && colaboracion.justificacion}
-											<div class="mt-3 rounded-lg bg-red-50 p-3">
-												<p class="text-sm text-red-700">
-													<span class="font-medium">Motivo del rechazo:</span>
-												</p>
-												<p class="mt-1 text-sm text-red-600">
-													{colaboracion.justificacion}
-												</p>
+											<div class="mt-1 flex items-center gap-2 text-sm text-gray-600">
+												<Icon src={getTipoIcon(colaboracion)} class="h-4 w-4 text-gray-400" />
+												<span>{getTipoLabel(colaboracion)}</span>
 											</div>
-										{/if}
+
+											{#if colaboracion.mensaje}
+												<div
+													class="mt-3 rounded-lg border border-gray-100 bg-gray-50 p-3 text-sm text-gray-600 italic"
+												>
+													"{colaboracion.mensaje}"
+												</div>
+											{/if}
+
+											<div class="mt-3 hidden flex-col gap-1 text-sm text-gray-500 sm:flex">
+												{#if obtenerEmailColaborador(colaboracion)}
+													<div class="flex items-center gap-2">
+														<Icon src={Envelope} class="h-4 w-4 text-gray-400" />
+														<span class="truncate">{obtenerEmailColaborador(colaboracion)}</span>
+													</div>
+												{/if}
+												{#if obtenerTelefonoColaborador(colaboracion)}
+													<div class="flex items-center gap-2">
+														<Icon src={Phone} class="h-4 w-4 text-gray-400" />
+														<span>{obtenerTelefonoColaborador(colaboracion)}</span>
+													</div>
+												{/if}
+											</div>
+										</div>
 									</div>
 
-									<div
-										class="mt-2 flex w-full gap-3 sm:mt-0 sm:ml-6 sm:w-auto sm:flex-col sm:gap-2"
-									>
+									<!-- Actions -->
+									<div class="mt-5 grid grid-cols-2 gap-3 border-t border-gray-100 pt-4">
+										<Button
+											label="Rechazar"
+											variant="secondary"
+											size="sm"
+											type="button"
+											onclick={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
+											disabled={loadingAprobacion !== null}
+											customClass="!w-full justify-center"
+										/>
 										<Button
 											label={loadingAprobacion === colaboracion.id_colaboracion
 												? 'Aprobando...'
@@ -416,224 +429,200 @@
 											onclick={() => aceptarColaboracion(colaboracion.id_colaboracion || 0)}
 											disabled={loadingAprobacion !== null}
 											loading={loadingAprobacion === colaboracion.id_colaboracion}
-											customClass="flex-1 !min-w-0 sm:flex-none !bg-green-600 hover:!bg-green-700 sm:!min-w-[90px] transition-all duration-200"
-										/>
-										<Button
-											label="Rechazar"
-											variant="secondary"
-											size="sm"
-											type="button"
-											onclick={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
-											disabled={loadingAprobacion !== null}
-											customClass="flex-1 !min-w-0 sm:flex-none !bg-red-600 hover:!bg-red-700 !text-white sm:!min-w-[90px] transition-all duration-200"
+											customClass="!w-full justify-center"
 										/>
 									</div>
 								</div>
 							</div>
 						{/each}
-					{/if}
-				</div>
-			</div>
-
-			<!-- Colaboradores activos (aprobadas) -->
-			<div class="rounded-lg border border-gray-200 bg-white shadow-sm">
-				<div class="border-b border-gray-200 px-6 py-4">
-					<div class="flex items-center justify-between gap-2">
-						<h2 class="truncate text-lg font-semibold text-gray-900">
-							<span class="sm:hidden">Activos</span>
-							<span class="hidden sm:inline">Colaboradores activos</span>
-						</h2>
-						<span
-							class="inline-flex shrink-0 items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium whitespace-nowrap text-green-800"
-						>
-							{aprobadas.length} activo{aprobadas.length !== 1 ? 's' : ''}
-						</span>
 					</div>
+				{/if}
+			</section>
+
+			<!-- Colaboradores Activos -->
+			<section class="flex flex-col gap-4">
+				<div class="flex items-center justify-between px-1">
+					<h2 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+						Colaboradores activos
+						{#if aprobadas.length > 0}
+							<span
+								class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-green-100 px-1 text-xs font-semibold text-green-700"
+							>
+								{aprobadas.length}
+							</span>
+						{/if}
+					</h2>
 				</div>
 
-				<div class="divide-y divide-gray-200">
-					{#if aprobadas.length === 0}
-						<div class="px-6 py-12 text-center">
-							<div class="mb-4 flex justify-center text-4xl">
-								<Icon src={HandRaised} class="h-12 w-12 text-gray-400" />
-							</div>
-							<h3 class="mb-2 text-lg font-medium text-gray-900">Aún no tenés colaboradores</h3>
-							<p class="text-gray-500">
-								Los colaboradores aceptados aparecerán aquí. Revisá las solicitudes pendientes para
-								encontrar personas dispuestas a ayudar.
-							</p>
+				{#if aprobadas.length === 0}
+					<div
+						class="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 p-12 text-center"
+					>
+						<div
+							class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-gray-900/5"
+						>
+							<Icon src={HandRaised} class="h-6 w-6 text-gray-400" />
 						</div>
-					{:else}
+						<h3 class="mt-2 text-sm font-semibold text-gray-900">Aún sin colaboradores</h3>
+						<p class="mt-1 text-sm text-gray-500">
+							Los voluntarios aceptados aparecerán en esta lista.
+						</p>
+					</div>
+				{:else}
+					<div class="space-y-3">
 						{#each aprobadas as colaboracion (colaboracion.id_colaboracion)}
-							<div class="px-4 py-4 sm:px-6">
-								<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-									<div class="flex w-full min-w-0 flex-1 items-center gap-3 sm:gap-4">
-										<!-- Avatar Clickeable -->
-										<a
-											href="/perfil/{colaboracion.colaborador?.username}"
-											class="group flex-shrink-0"
+							<div
+								class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:border-gray-300 hover:shadow-md"
+							>
+								<div class="flex items-center gap-4">
+									<!-- Avatar Small -->
+									<a href="/perfil/{colaboracion.colaborador?.username}" class="relative shrink-0">
+										{#if colaboracion.colaborador?.url_foto}
+											<img
+												src={colaboracion.colaborador.url_foto}
+												alt={colaboracion.colaborador.username}
+												class="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-white"
+											/>
+										{:else}
+											<div
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100 text-sm font-bold text-blue-600 shadow-sm"
+											>
+												{getIniciales(colaboracion.colaborador?.username)}
+											</div>
+										{/if}
+										<div
+											class="absolute -right-1 -bottom-1 rounded-full border-2 border-white bg-green-500 p-0.5"
 										>
-											{#if colaboracion.colaborador?.url_foto}
-												<img
-													src={colaboracion.colaborador.url_foto}
-													alt={colaboracion.colaborador.username}
-													class="h-10 w-10 rounded-full border-2 border-white object-cover shadow-sm transition-transform group-hover:scale-105"
-												/>
-											{:else}
-												<div
-													class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-base font-bold text-gray-500 shadow-sm transition-transform group-hover:scale-105"
-												>
-													{colaboracion.colaborador?.username?.charAt(0).toUpperCase()}
-												</div>
-											{/if}
-										</a>
+											<div class="h-1.5 w-1.5 rounded-full bg-white"></div>
+										</div>
+									</a>
 
-										<div class="min-w-0 flex-1">
+									<div class="min-w-0 flex-1">
+										<div class="flex items-center justify-between">
 											<a
 												href="/perfil/{colaboracion.colaborador?.username}"
-												class="hover:underline"
+												class="truncate text-sm font-semibold text-gray-900 transition-colors hover:text-blue-600"
 											>
-												<h3 class="truncate text-sm font-semibold text-gray-900">
-													{obtenerNombreColaborador(colaboracion.colaborador)}
-												</h3>
+												{obtenerNombreColaborador(colaboracion.colaborador)}
 											</a>
-
-											<div
-												class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-gray-500"
-											>
-												<div class="flex items-center gap-1">
-													<Icon src={getTipoIcon(colaboracion)} class="h-3.5 w-3.5 text-gray-400" />
-													<span>{getTipoLabel(colaboracion)}</span>
-												</div>
-
-												{#if colaboracion.created_at}
-													<span class="text-gray-400">
-														• Desde {formatearFecha(colaboracion.created_at)}
-														({calcularDiasActivo(colaboracion.created_at)} d)
-													</span>
-												{/if}
-											</div>
+											{#if colaboracion.created_at}
+												<span
+													class="hidden items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 sm:inline-flex"
+												>
+													{calcularDiasActivo(colaboracion.created_at)} días
+												</span>
+											{/if}
+										</div>
+										<div class="mt-0.5 flex items-center gap-1 text-xs text-gray-500">
+											<span>{getTipoLabel(colaboracion)}</span>
+											<span class="text-gray-300">•</span>
+											<span>Desde {formatearFecha(colaboracion.created_at)}</span>
 										</div>
 									</div>
 
-									<div class="mt-2 flex items-center justify-start gap-2 sm:mt-0 sm:justify-end">
-										<span
-											class="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700"
-										>
-											Activo
-										</span>
-									</div>
-								</div>
-
-								{#if obtenerEmailColaborador(colaboracion)}
-									<div class="mt-3 pl-11">
-										<p class="text-sm text-gray-600">
-											<span class="font-medium">Email:</span>
+									<!-- Desktop Contacts -->
+									<div class="hidden items-center gap-2 sm:flex">
+										{#if obtenerEmailColaborador(colaboracion)}
 											<a
 												href="mailto:{obtenerEmailColaborador(colaboracion)}"
-												class="text-blue-600 transition-colors hover:text-blue-800"
+												class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+												title="Enviar email"
 											>
-												{obtenerEmailColaborador(colaboracion)}
+												<Icon src={Envelope} class="h-5 w-5" />
 											</a>
-										</p>
-									</div>
-								{/if}
-
-								{#if obtenerTelefonoColaborador(colaboracion)}
-									<div class="mt-1 pl-11">
-										<p class="text-sm text-gray-600">
-											<span class="font-medium">Teléfono:</span>
+										{/if}
+										{#if obtenerTelefonoColaborador(colaboracion)}
 											<a
 												href="tel:{obtenerTelefonoColaborador(colaboracion)}"
-												class="text-blue-600 transition-colors hover:text-blue-800"
+												class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+												title="Llamar"
 											>
-												{obtenerTelefonoColaborador(colaboracion)}
+												<Icon src={Phone} class="h-5 w-5" />
 											</a>
-										</p>
+										{/if}
 									</div>
-								{/if}
+								</div>
 							</div>
 						{/each}
-					{/if}
-				</div>
-			</div>
+					</div>
+				{/if}
+			</section>
 		</div>
 	</div>
 </main>
 
-<!-- Modal de rechazo con animaciones mejoradas -->
+<!-- Modal de rechazo -->
 {#if mostrarModalRechazo}
 	<div
-		class="animate-in fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm duration-200"
+		class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0"
 		on:click={cerrarModalRechazo}
 		on:keydown={(e) => e.key === 'Escape' && cerrarModalRechazo()}
 		role="button"
 		tabindex="-1"
-		aria-label="Cerrar modal"
+		transition:fade={{ duration: 200 }}
 	>
+		<div class="absolute inset-0 bg-gray-900/30 backdrop-blur-sm"></div>
+
 		<div
-			class="animate-in zoom-in-95 slide-in-from-bottom-4 mx-4 w-full max-w-md transform rounded-2xl border border-red-100 bg-white shadow-2xl duration-300"
+			class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
 			on:click|stopPropagation
 			role="none"
+			transition:scale={{ start: 0.95, duration: 200 }}
 		>
-			<!-- Header con ícono -->
-			<div class="border-b border-gray-200 px-6 py-5">
-				<div class="flex items-start">
+			<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+				<div class="sm:flex sm:items-start">
 					<div
-						class="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100"
+						class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
 					>
-						<Icon src={XCircle} class="h-6 w-6 text-red-600" id="modal-title-icon" />
+						<Icon src={XCircle} class="h-6 w-6 text-red-600" />
 					</div>
-					<div class="flex-1">
-						<h3 class="text-xl font-semibold text-gray-900" id="modal-title">Rechazar solicitud</h3>
-						<p class="mt-1 text-sm text-gray-500">
-							Esta acción es irreversible. El colaborador será notificado.
-						</p>
+					<div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+						<h3 class="text-base leading-6 font-semibold text-gray-900" id="modal-title">
+							Rechazar solicitud
+						</h3>
+						<div class="mt-2">
+							<p class="text-sm text-gray-500">
+								¿Estás seguro que querés rechazar esta colaboración? Esta acción enviará una
+								notificación al usuario.
+							</p>
+						</div>
 					</div>
+				</div>
+
+				<div class="mt-4">
+					<label for="justificacion" class="block text-sm font-medium text-gray-700"
+						>Motivo (requerido)</label
+					>
+					<textarea
+						id="justificacion"
+						bind:value={justificacionRechazo}
+						rows="3"
+						class="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm"
+						placeholder="Por ejemplo: El perfil no coincide con lo buscado..."
+					></textarea>
 				</div>
 			</div>
 
-			<!-- Body -->
-			<div class="px-6 py-5">
-				<label for="justificacion-rechazo" class="mb-2 block text-sm font-medium text-gray-900">
-					Justificación del rechazo <span class="text-red-500">*</span>
-				</label>
-				<textarea
-					id="justificacion-rechazo"
-					bind:value={justificacionRechazo}
-					rows="4"
+			<div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+				<Button
+					label={loadingRechazo ? 'Rechazando...' : 'Rechazar solicitud'}
+					variant="danger"
+					size="sm"
+					type="button"
+					onclick={confirmarRechazo}
+					disabled={!justificacionRechazo.trim() || loadingRechazo}
+					loading={loadingRechazo}
+					customClass="!w-full sm:!w-auto sm:!ml-3 justify-center !bg-red-600 hover:!bg-red-700"
+				/>
+				<Button
+					label="Cancelar"
+					variant="secondary"
+					size="sm"
+					type="button"
+					onclick={cerrarModalRechazo}
 					disabled={loadingRechazo}
-					class="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm shadow-sm transition-colors placeholder:text-gray-400 focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500"
-					placeholder="Explicá el motivo del rechazo. Ejemplo: El perfil no cumple con los requisitos específicos del proyecto..."
-				></textarea>
-				<p class="mt-2 text-xs text-gray-500">
-					{justificacionRechazo.trim().length} caracteres
-				</p>
-			</div>
-
-			<!-- Footer con botones -->
-			<div class="border-t border-gray-200 bg-gray-50 px-6 py-4">
-				<div class="flex justify-end space-x-3">
-					<Button
-						label="Cancelar"
-						variant="secondary"
-						size="sm"
-						type="button"
-						onclick={cerrarModalRechazo}
-						disabled={loadingRechazo}
-						customClass="!bg-white !text-gray-700 hover:!bg-gray-100 !border !border-gray-300"
-					/>
-					<Button
-						label={loadingRechazo ? 'Rechazando...' : 'Confirmar rechazo'}
-						variant="danger"
-						size="sm"
-						type="button"
-						onclick={confirmarRechazo}
-						disabled={!justificacionRechazo.trim() || loadingRechazo}
-						loading={loadingRechazo}
-						customClass="!min-w-[140px]"
-					/>
-				</div>
+					customClass="!w-full sm:!w-auto mt-3 sm:mt-0 justify-center !bg-white !text-gray-900 !ring-1 !ring-inset !ring-gray-300 hover:!bg-gray-50"
+				/>
 			</div>
 		</div>
 	</div>
