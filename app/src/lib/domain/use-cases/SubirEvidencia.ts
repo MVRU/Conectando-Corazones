@@ -114,22 +114,6 @@ export class SubirEvidencia {
 				archivosConProyecto
 			);
 
-			// Registrar en Historial
-			await Promise.all(
-				archivosConProyecto.map((a) =>
-					this.historialRepo.create({
-						tipo_objeto: 'Archivo',
-						id_objeto: evidenciaExistente.id_evidencia!, // Relacionado a la evidencia
-						accion: 'Crear',
-						atributo_afectado: 'evidencia_id',
-						valor_anterior: 'null',
-						valor_nuevo: `Evidencia ${evidenciaExistente.id_evidencia}`,
-						justificacion: `Archivo agregado a evidencia existente: ${a.nombre_original}`,
-						usuario_id: usuarioId
-					})
-				)
-			);
-
 			// Retornamos la evidencia existente actualizada con los nuevos archivos (en memoria para response)
 			evidenciaExistente.archivos = [...(evidenciaExistente.archivos || []), ...nuevosArchivos];
 			return evidenciaExistente;
@@ -142,18 +126,6 @@ export class SubirEvidencia {
 			});
 
 			const evidenciaCreada = await this.evidenciaRepo.create(nuevaEvidencia);
-
-			// Registrar en Historial
-			await this.historialRepo.create({
-				tipo_objeto: 'Evidencia',
-				id_objeto: evidenciaCreada.id_evidencia!,
-				accion: 'Crear',
-				atributo_afectado: 'id_evidencia',
-				valor_anterior: 'null',
-				valor_nuevo: `Evidencia ${evidenciaCreada.id_evidencia}`,
-				justificacion: `Nueva evidencia de ${tipoEvidencia} creada con ${archivos.length} archivos.`,
-				usuario_id: usuarioId
-			});
 
 			return evidenciaCreada;
 		}

@@ -69,6 +69,19 @@
 	let isMobile = $state(false);
 
 	onMount(() => {
+		// Pre-selección por query param (desde el botón "Subir evidencias" de Mis Aportes)
+		const participacionId = $page.url.searchParams.get('participacion');
+		if (participacionId) {
+			const id = Number(participacionId);
+			if (data.participacionesPermitidas.some((p: any) => p.id_participacion_permitida === id)) {
+				selectedParticipacionPermitidaId = id;
+				// Si ya existe una contribución de este tipo, sugerimos cantidad 0 para solo evidencias
+				if (data.existingContributions?.some((c: any) => c.participacion_permitida_id === id)) {
+					cantidadAporte = 0;
+				}
+			}
+		}
+
 		const mql = window.matchMedia('(max-width: 640px)');
 		isMobile = mql.matches;
 		const listener = (e: MediaQueryListEvent) => (isMobile = e.matches);
@@ -146,9 +159,50 @@
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
 			const nuevosArchivos: (Archivo & { file: File })[] = [];
+			const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+			const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+			const FORBIDDEN_EXTENSIONS = [
+				'.exe',
+				'.bat',
+				'.msi',
+				'.js',
+				'.vbs',
+				'.sh',
+				'.command',
+				'.php',
+				'.asp'
+			];
 
 			for (let i = 0; i < input.files.length; i++) {
 				const file = input.files[i];
+
+				// 1. Validar tamaño
+				if (file.size > MAX_SIZE) {
+					toastStore.show({
+						variant: 'error',
+						message: `El archivo ${file.name} supera los 10MB permitidos.`
+					});
+					continue;
+				}
+
+				// 2. Validar tipo MIME
+				if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+					toastStore.show({
+						variant: 'error',
+						message: `El archivo ${file.name} no es un formato permitido (Solo JPG, PNG, WEBP o PDF).`
+					});
+					continue;
+				}
+
+				// 3. Validar extensiones peligrosas (doble check)
+				const fileNameLower = file.name.toLowerCase();
+				if (FORBIDDEN_EXTENSIONS.some((ext) => fileNameLower.endsWith(ext))) {
+					toastStore.show({
+						variant: 'error',
+						message: `El archivo ${file.name} tiene una extensión no permitida por seguridad.`
+					});
+					continue;
+				}
 
 				const yaExisteEnTemp = archivosTemporales.some((a) => a.nombre_original === file.name);
 				const yaExisteEnEvidencias = evidenciasNuevas.some((ev) =>
@@ -209,12 +263,48 @@
 		evidenciasNuevas = [...evidenciasNuevas];
 	}
 
+	async function subirArchivoASupabase(archivo: Archivo & { file: File }) {
+		// 1. Obtener URL firmada
+		const response = await fetch('/api/storage/upload-url', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				nombre_archivo: archivo.nombre_original,
+				tipo_mime: archivo.tipo_mime,
+				bucket: 'evidencias'
+			})
+		});
+
+		const { uploadUrl, fullPath, error } = await response.json();
+		if (error) throw new Error(error);
+
+		// 2. Subir archivo
+		const uploadRes = await fetch(uploadUrl, {
+			method: 'PUT',
+			body: archivo.file,
+			headers: { 'Content-Type': archivo.tipo_mime! }
+		});
+
+		if (!uploadRes.ok) throw new Error('Error al subir archivo a storage');
+
+		return {
+			...archivo,
+			url: fullPath,
+			proyecto_id: Number(projectIdUrl)
+		};
+	}
+
 	async function guardarAporte() {
-		if (!cantidadAporte || cantidadAporte <= 0) {
+		const tieneEvidencias = evidenciasNuevas.length > 0;
+		const cantidadEfectiva = cantidadAporte ?? 0;
+		const esCantidadCeroValida = cantidadEfectiva === 0 && tieneEvidencias;
+
+		if (!esCantidadCeroValida && cantidadEfectiva <= 0) {
 			toastStore.show({
 				variant: 'error',
 				title: 'Error de validación',
-				message: 'La cantidad debe ser mayor a 0.'
+				message:
+					'La cantidad debe ser mayor a 0, o debés subir al menos una evidencia para aportar en 0.'
 			});
 			return;
 		}
@@ -231,30 +321,55 @@
 		estaGuardando = true;
 
 		try {
-			const response = await fetch('/api/aportes', {
+			// 1. Subir archivos a Supabase si los hay
+			const archivosSubidos: any[] = [];
+			for (const evidencia of evidenciasNuevas) {
+				for (const archivo of evidencia.archivos) {
+					const archivoSubido = await subirArchivoASupabase(archivo);
+					archivosSubidos.push({
+						nombre_original: archivoSubido.nombre_original,
+						descripcion: archivoSubido.descripcion,
+						tipo_mime: archivoSubido.tipo_mime,
+						tamanio_bytes: archivoSubido.tamanio_bytes,
+						url: archivoSubido.url, // Path en storage
+						proyecto_id: archivoSubido.proyecto_id
+					});
+				}
+			}
+
+			// 2. Preparar FormData para la acción de SvelteKit
+			const formData = new FormData();
+			formData.append('colaboracion_id', (data.colaboracionId || 0).toString());
+			formData.append('participacion_permitida_id', selectedParticipacionPermitidaId.toString());
+			formData.append('cantidad', (cantidadAporte ?? 0).toString());
+			formData.append('evidencias', JSON.stringify([{ archivos: archivosSubidos }]));
+
+			const response = await fetch('?/guardarAporte', {
 				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					colaboracion_id: data.colaboracionId,
-					participacion_permitida_id: selectedParticipacionPermitidaId,
-					cantidad: cantidadAporte
-				})
+				body: formData
 			});
 
 			const result = await response.json();
 
-			if (!response.ok) {
-				throw new Error(result.message || 'Error al registrar aporte');
+			if (response.status >= 400) {
+				// Intentar extraer error si es posible
+				let errorMsg = 'Error al guardar el aporte';
+				try {
+					const parsed = JSON.parse(result.data);
+					errorMsg = parsed[1] || parsed.error || errorMsg;
+				} catch (e) {
+					/* ignore */
+				}
+				throw new Error(errorMsg);
 			}
 
 			toastStore.show({
 				variant: 'success',
 				title: 'Aporte registrado',
-				message: 'Tu aporte ha sido registrado exitosamente.',
+				message: 'Tu aporte y evidencias han sido registrados exitosamente.',
 				duration: 5000
 			});
 
-			// Limpiar estado para que hayaCambios sea falso y no dispare el modal de confirmación
 			evidenciasNuevas = [];
 			cantidadAporte = undefined;
 			descripcionAporte = '';
@@ -347,7 +462,7 @@
 							<input
 								id="cantidad"
 								type="number"
-								min="0.01"
+								min="0"
 								step="any"
 								bind:value={cantidadAporte}
 								disabled={estaGuardando}
@@ -360,6 +475,11 @@
 								{selectedParticipacion?.unidad_medida}
 							</div>
 						</div>
+						{#if contribucionExistente}
+							<p class="mt-2 text-xs text-slate-400">
+								Podés dejar la cantidad en 0 si solo vas a subir evidencias adicionales.
+							</p>
+						{/if}
 					</div>
 				{/if}
 

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import {
 		ChevronLeft,
 		Plus,
@@ -35,8 +35,9 @@
 		data.proyecto?.estado === 'en_curso' || data.proyecto?.estado === 'pendiente_solicitud_cierre'
 	);
 
-	function irANuevoAporte() {
-		goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes/nuevo`);
+	function irANuevoAporte(participacionId?: number) {
+		const query = participacionId ? `?participacion=${participacionId}` : '';
+		goto(`/colaborador/proyectos/${projectIdUrl}/mis-aportes/nuevo${query}`);
 	}
 
 	function volver() {
@@ -56,6 +57,10 @@
 	let newDescription = $state('');
 	let newFile = $state<File | null>(null);
 
+	let estaGuardando = $state(false);
+	let showDeleteModal = $state(false);
+	let fileToDelete = $state<Archivo | null>(null);
+
 	function editarEvidencia(archivo: Archivo) {
 		currentEditingFile = archivo;
 		newDescription = archivo.descripcion || '';
@@ -64,6 +69,7 @@
 	}
 
 	function closeEditModal() {
+		if (estaGuardando) return;
 		showEditModal = false;
 		currentEditingFile = null;
 		newDescription = '';
@@ -73,7 +79,29 @@
 	function handleNewFileSelection(event: Event) {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files[0]) {
-			newFile = input.files[0];
+			const file = input.files[0];
+			const MAX_SIZE = 10 * 1024 * 1024; // 10MB
+			const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+
+			if (file.size > MAX_SIZE) {
+				toastStore.show({
+					variant: 'error',
+					message: 'El archivo supera los 10MB permitidos.'
+				});
+				input.value = '';
+				return;
+			}
+
+			if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+				toastStore.show({
+					variant: 'error',
+					message: 'Formato no permitido (Solo JPG, PNG, WEBP o PDF).'
+				});
+				input.value = '';
+				return;
+			}
+
+			newFile = file;
 			if (!newDescription) {
 				newDescription = newFile.name;
 			}
@@ -81,20 +109,121 @@
 		input.value = '';
 	}
 
-	function saveEvidenceEdit() {
-		console.log('Saving evidence edit:', {
-			id: currentEditingFile?.id_archivo,
-			newDescription,
-			newFile
+	async function subirNuevoArchivoASupabase(file: File) {
+		const response = await fetch('/api/storage/upload-url', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				nombre_archivo: file.name,
+				tipo_mime: file.type,
+				bucket: 'evidencias'
+			})
 		});
 
-		toastStore.show({
-			variant: 'success',
-			title: 'Evidencia actualizada',
-			message: 'Los cambios se han guardado correctamente (simulado).'
+		const { uploadUrl, fullPath, error } = await response.json();
+		if (error) throw new Error(error);
+
+		const uploadRes = await fetch(uploadUrl, {
+			method: 'PUT',
+			body: file,
+			headers: { 'Content-Type': file.type }
 		});
 
-		closeEditModal();
+		if (!uploadRes.ok) throw new Error('Error al subir archivo a storage');
+
+		return {
+			url: fullPath,
+			nombre_original: file.name,
+			tipo_mime: file.type,
+			tamanio_bytes: file.size
+		};
+	}
+
+	async function saveEvidenceEdit() {
+		if (!currentEditingFile) return;
+		estaGuardando = true;
+
+		try {
+			const formData = new FormData();
+			formData.append('id_archivo', currentEditingFile.id_archivo!.toString());
+			formData.append('descripcion', newDescription);
+
+			if (newFile) {
+				const fileData = await subirNuevoArchivoASupabase(newFile);
+				formData.append('url', fileData.url);
+				formData.append('nombre_original', fileData.nombre_original);
+				formData.append('tipo_mime', fileData.tipo_mime);
+				formData.append('tamanio_bytes', fileData.tamanio_bytes.toString());
+			}
+
+			const response = await fetch('?/editarArchivo', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) throw new Error('Error al guardar los cambios');
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Evidencia actualizada',
+				message: 'Los cambios se han guardado correctamente.'
+			});
+
+			closeEditModal();
+			await invalidateAll();
+		} catch (err) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message: err instanceof Error ? err.message : 'Error al actualizar'
+			});
+		} finally {
+			estaGuardando = false;
+		}
+	}
+
+	function handleEliminarEvidencia(archivo: Archivo) {
+		fileToDelete = archivo;
+		showDeleteModal = true;
+	}
+
+	function closeDeleteModal() {
+		showDeleteModal = false;
+		fileToDelete = null;
+	}
+
+	async function confirmDelete() {
+		if (!fileToDelete) return;
+		estaGuardando = true;
+
+		try {
+			const formData = new FormData();
+			formData.append('id_archivo', fileToDelete.id_archivo!.toString());
+
+			const response = await fetch('?/eliminarArchivo', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) throw new Error('Error al eliminar el archivo');
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Archivo eliminado',
+				message: 'La evidencia ha sido eliminada correctamente.'
+			});
+
+			closeDeleteModal();
+			await invalidateAll();
+		} catch (err) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message: err instanceof Error ? err.message : 'Error al eliminar'
+			});
+		} finally {
+			estaGuardando = false;
+		}
 	}
 </script>
 
@@ -129,7 +258,7 @@
 						<Button
 							label="Nuevo aporte"
 							icon={Plus}
-							onclick={irANuevoAporte}
+							onclick={() => irANuevoAporte()}
 							size="md"
 							customClass="shadow-lg shadow-blue-200"
 						/>
@@ -169,7 +298,7 @@
 							{#if esEstadoPermitido}
 								<Button
 									label="Realizar mi primer aporte"
-									onclick={irANuevoAporte}
+									onclick={() => irANuevoAporte()}
 									variant="secondary"
 								/>
 							{/if}
@@ -245,13 +374,26 @@
 															<ArchivoCard
 																archivo={file}
 																editable={esEstadoPermitido}
+																deletable={esEstadoPermitido}
 																onedit={() => editarEvidencia(file)}
+																ondelete={() => handleEliminarEvidencia(file)}
 															/>
 														{/each}
 													{:else}
-														<p class="pl-3 text-xs text-slate-400 italic">
-															No cargaste evidencias para este aporte.
-														</p>
+														<div class="flex items-center justify-between pr-1 pl-3">
+															<p class="text-xs text-slate-400 italic">
+																No cargaste evidencias para este aporte.
+															</p>
+															{#if esEstadoPermitido}
+																<button
+																	onclick={() => irANuevoAporte(aporte.participacion_permitida_id)}
+																	class="flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50/50 px-3 py-1.5 text-xs font-bold text-blue-600 transition-all hover:bg-blue-100"
+																>
+																	<Plus size={14} />
+																	Subir evidencias
+																</button>
+															{/if}
+														</div>
 													{/if}
 												</div>
 											</div>
@@ -465,14 +607,61 @@
 
 				<div class="flex w-full justify-center sm:w-auto sm:justify-end">
 					<Button
-						label="Guardar cambios"
+						label={estaGuardando ? 'Guardando...' : 'Guardar cambios'}
 						onclick={saveEvidenceEdit}
-						disabled={!newDescription}
+						disabled={!newDescription || estaGuardando}
 						size="md"
 						customClass="w-full sm:w-auto shadow-lg shadow-blue-200/50"
 					/>
 				</div>
 			</footer>
+		</div>
+	</div>
+{/if}
+
+<!-- Modal de Confirmación de Eliminación -->
+{#if showDeleteModal}
+	<div
+		class="fixed inset-0 z-[60] flex items-end justify-center bg-slate-900/60 p-0 backdrop-blur-md sm:items-center sm:p-4"
+		transition:fade
+		role="button"
+		tabindex="-1"
+		onclick={closeDeleteModal}
+		onkeydown={(e) => e.key === 'Escape' && closeDeleteModal()}
+	>
+		<div
+			class="w-full max-w-md overflow-hidden rounded-t-3xl bg-white p-8 shadow-2xl sm:rounded-3xl"
+			transition:fly={{ y: 40 }}
+			role="dialog"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
+		>
+			<div class="mb-6 flex flex-col items-center text-center">
+				<div class="mb-4 rounded-full bg-red-50 p-4 text-red-500">
+					<X size={32} />
+				</div>
+				<h3 class="text-xl font-bold text-slate-900">¿Eliminar evidencia?</h3>
+				<p class="mt-2 text-sm text-slate-500">
+					Esta acción eliminará el archivo permanentemente. No podrás deshacer este cambio.
+				</p>
+			</div>
+
+			<div class="flex flex-col gap-3 sm:flex-row">
+				<button
+					onclick={closeDeleteModal}
+					class="w-full rounded-2xl bg-slate-100 px-6 py-3 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-200"
+				>
+					Cancelar
+				</button>
+				<button
+					onclick={confirmDelete}
+					disabled={estaGuardando}
+					class="w-full rounded-2xl bg-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:bg-red-700 disabled:opacity-50"
+				>
+					{estaGuardando ? 'Eliminando...' : 'Eliminar'}
+				</button>
+			</div>
 		</div>
 	</div>
 {/if}

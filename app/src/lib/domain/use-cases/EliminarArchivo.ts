@@ -37,22 +37,7 @@ export class EliminarArchivo {
 			);
 		}
 
-		// Registrar en Historial antes de borrar
-		await this.historialRepo.create({
-			tipo_objeto: 'Archivo',
-			id_objeto: archivoId,
-			accion: 'Eliminar',
-			atributo_afectado: 'id_archivo',
-			valor_anterior: JSON.stringify({
-				url: archivo.url,
-				nombre: archivo.nombre_original
-			}),
-			valor_nuevo: 'Eliminado',
-			justificacion: `Archivo eliminado por el usuario dueño.`,
-			usuario_id: usuarioSolicitanteId
-		});
-
-		await this.archivoRepo.delete(archivoId);
+		await this.archivoRepo.delete(archivoId, usuarioSolicitanteId);
 
 		return archivo;
 	}

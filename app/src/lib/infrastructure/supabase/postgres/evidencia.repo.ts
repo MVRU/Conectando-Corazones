@@ -18,6 +18,20 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 				}
 			});
 
+			const usuarioId = evidencia.archivos[0].usuario_id;
+			await tx.historialDeCambios.create({
+				data: {
+					tipo_objeto: 'Evidencia',
+					id_objeto: ev.id_evidencia,
+					accion: 'Crear',
+					atributo_afectado: 'id_evidencia',
+					valor_anterior: 'null',
+					valor_nuevo: String(ev.id_evidencia),
+					justificacion: `Nueva evidencia de ${ev.tipo_evidencia} creada`,
+					usuario_id: usuarioId
+				}
+			});
+
 			// Crear los archivos asociados
 			const archivosCreados = [];
 			for (const archivo of evidencia.archivos) {
@@ -33,6 +47,20 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 						proyecto_id: archivo.proyecto_id
 					}
 				});
+
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: 'Archivo',
+						id_objeto: nuevoArchivo.id_archivo,
+						accion: 'Crear',
+						atributo_afectado: 'id_archivo',
+						valor_anterior: 'null',
+						valor_nuevo: String(nuevoArchivo.id_archivo),
+						justificacion: `Archivo agregado a evidencia ${ev.id_evidencia}: ${nuevoArchivo.nombre_original}`,
+						usuario_id: archivo.usuario_id
+					}
+				});
+
 				archivosCreados.push(
 					new Archivo({
 						...nuevoArchivo,
@@ -97,6 +125,20 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 						proyecto_id: archivo.proyecto_id
 					}
 				});
+
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: 'Archivo',
+						id_objeto: nuevoArchivo.id_archivo,
+						accion: 'Crear',
+						atributo_afectado: 'id_archivo',
+						valor_anterior: 'null',
+						valor_nuevo: String(nuevoArchivo.id_archivo),
+						justificacion: `Archivo agregado a evidencia ${idEvidencia}: ${nuevoArchivo.nombre_original}`,
+						usuario_id: archivo.usuario_id
+					}
+				});
+
 				creados.push(
 					new Archivo({
 						...nuevoArchivo,

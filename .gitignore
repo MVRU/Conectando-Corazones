@@ -43,6 +43,7 @@ serviceAccountKey.json
 *.jks
 *.keystore
 .agent
+.agents
 .gemini/
 
 # ----------------------------------------

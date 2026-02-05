@@ -18,8 +18,8 @@ export class ColaboracionTipoParticipacion implements IColaboracionTipoParticipa
 	}
 
 	private validar(): void {
-		if (this.cantidad <= 0) {
-			throw new Error('La cantidad del aporte debe ser mayor a cero.');
+		if (this.cantidad < 0) {
+			throw new Error('La cantidad del aporte no puede ser negativa.');
 		}
 	}
 }
