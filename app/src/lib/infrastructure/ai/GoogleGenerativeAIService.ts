@@ -4,6 +4,7 @@ import { env } from '$env/dynamic/private';
 interface ProjectContext {
     titulo: string;
     descripcion: string;
+    beneficiarios: number | string;
     resenas: { contenido: string; puntaje: number }[];
     progreso: {
         tipo: string;
@@ -11,6 +12,7 @@ interface ProjectContext {
         alcanzado: number;
         unidad: string;
         estado: string;
+        especie?: string | null;
     }[];
 }
 
@@ -42,9 +44,14 @@ export class GoogleGenerativeAIService {
 
             TÍTULO: ${context.titulo}
             DESCRIPCIÓN: ${context.descripcion}
+            BENEFICIARIOS ESTIMADOS: ${context.beneficiarios}
             
             CUMPLIMIENTO DE OBJETIVOS (META vs REAL):
             ${JSON.stringify(context.progreso)}
+
+            NOTA IMPORTANTE SOBRE DATOS:
+            - Si en "CUMPLIMIENTO DE OBJETIVOS" ves un campo "especie" (ej: "libros", "alimentos"), ÚSALO como el nombre principal de lo que se donó o aportó. A veces el campo "tipo" es genérico (ej: "Voluntariado" o "Especie") y confunde. Prioriza "especie" o "unidad" para describir de qué se trata la meta.
+            - "BENEFICIARIOS ESTIMADOS" es la cantidad de personas que recibieron ayuda.
             
             RESEÑAS:
             ${JSON.stringify(context.resenas)}

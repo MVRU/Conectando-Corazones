@@ -22,11 +22,13 @@ export async function analizarProyecto(idProyecto: number) {
     const context = {
         titulo: proyecto.titulo,
         descripcion: proyecto.descripcion,
+        beneficiarios: proyecto.beneficiarios || 'No especificado',
         progreso: (proyecto.participacion_permitida || []).map(p => ({
             tipo: p.tipo_participacion?.descripcion || 'General',
             meta: p.objetivo,
             alcanzado: p.actual || 0,
             unidad: p.unidad_medida || 'unidades',
+            especie: p.especie || null,
             estado: (p.actual || 0) >= p.objetivo ? 'Meta Alcanzada' : 'No Alcanzada'
         })),
         resenas: resenas.map(r => ({
@@ -37,6 +39,7 @@ export async function analizarProyecto(idProyecto: number) {
 
     // Ejecución IA
     const aiService = new GoogleGenerativeAIService();
+
     const analisis = await aiService.analyzeProject(context);
 
     // Persistencia
