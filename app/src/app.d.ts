@@ -2,14 +2,17 @@
 /// <reference types="vite/client" />
 import '$lib/domain/types/otros/svelte-jsx';
 
-// See https://svelte.dev/docs/kit/types#app.d.ts
-// for information about these interfaces
 import type { Usuario } from '$lib/domain/types/Usuario';
+import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 declare global {
 	namespace App {
 		interface Locals {
 			usuario?: Usuario;
+			supabase: SupabaseClient;
+			safeGetSession: () => Promise<{ session: Session | null; user: User | null }>;
+			session: Session | null;
+			user: User | null;
 		}
 		// interface Error {}
 		// interface PageData {}

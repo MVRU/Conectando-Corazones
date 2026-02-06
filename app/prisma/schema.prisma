@@ -139,6 +139,7 @@ model Evidencia {
   archivos             Archivo[]
   solicitud_evidencias SolicitudFinalizacionEvidencia[]
 
+  @@unique([id_participacion_permitida, tipo_evidencia]) // Garantiza una única carpeta/registro de evidencia por tipo para una participación
   @@map("evidencias")
 }
 
@@ -370,7 +371,8 @@ model Ubicacion {
 model Usuario {
   id_usuario          Int       @id @default(autoincrement())
   username            String    @unique
-  password            String?
+  auth_user_id        String?   @unique // Vinculación con Supabase Auth
+  password            String?   // Opcional, ya que Supabase maneja la auth
   nombre              String
   apellido            String
   fecha_nacimiento    DateTime?

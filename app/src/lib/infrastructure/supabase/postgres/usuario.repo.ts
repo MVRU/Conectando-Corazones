@@ -68,10 +68,36 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(usuario as any);
 	}
 
+	async findByAuthId(authId: string): Promise<Usuario | null> {
+		const usuario = await prisma.usuario.findUnique({
+			where: { auth_user_id: authId },
+			select: {
+				id_usuario: true,
+				username: true,
+				auth_user_id: true,
+				nombre: true,
+				apellido: true,
+				rol: true,
+				url_foto: true,
+				estado: true,
+				localidad_id: true,
+				nombre_legal: true,
+				tipo_institucion: true,
+				tipo_colaborador: true,
+				razon_social: true,
+				contactos: true
+			}
+		});
+
+		if (!usuario) return null;
+		return UsuarioMapper.toDomain(usuario as any);
+	}
+
 	async create(usuario: Usuario): Promise<Usuario> {
 		const created = await prisma.usuario.create({
 			data: {
 				username: usuario.username,
+				auth_user_id: usuario.auth_user_id,
 				password: usuario.password,
 				nombre: usuario.nombre,
 				apellido: usuario.apellido,

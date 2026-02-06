@@ -60,6 +60,7 @@
 	export let etiquetaOmitir = 'Omitir';
 	export let valoresIniciales: Contacto[] = [];
 	export let bloquearPrimerContacto = true;
+	export let ocultarBotones = false;
 
 	// Si vienen valores iniciales y el formulario está "vacío", precargamos
 	$: if (valoresIniciales && valoresIniciales.length > 0) {
@@ -138,8 +139,12 @@
 		);
 	}
 
-	function manejarEnvio(event: SubmitEvent) {
-		event.preventDefault();
+	export function submit() {
+		manejarEnvio();
+	}
+
+	function manejarEnvio(event?: SubmitEvent) {
+		if (event) event.preventDefault();
 		intentoEnvio = true;
 		if (tieneErrores) return;
 
@@ -148,12 +153,7 @@
 		setTimeout(() => {
 			enviando = false;
 			dispatch('submit', contactos);
-			toastStore.show({
-				variant: 'success',
-				title: 'Cambios guardados',
-				message: 'Tu descripción, ubicación y formas de contacto se actualizaron correctamente.'
-			});
-		}, 800);
+		}, 0);
 	}
 
 	function omitirContactos() {
@@ -297,23 +297,25 @@
 	</div>
 
 	<!-- Botones de acción -->
-	<div class="mt-8 flex justify-end gap-4">
-		{#if mostrarOmitir}
+	{#if !ocultarBotones}
+		<div class="mt-8 flex justify-end gap-4">
+			{#if mostrarOmitir}
+				<Button
+					label={etiquetaOmitir}
+					variant="secondary"
+					size="sm"
+					on:click={omitirContactos}
+					customClass="w-full md:w-auto"
+				/>
+			{/if}
+			<slot name="botones-extra" />
 			<Button
-				label={etiquetaOmitir}
-				variant="secondary"
+				label={enviando ? 'Guardando...' : 'Continuar'}
+				variant="primary"
 				size="sm"
-				on:click={omitirContactos}
+				disabled={tieneErrores || enviando}
 				customClass="w-full md:w-auto"
 			/>
-		{/if}
-		<slot name="botones-extra" />
-		<Button
-			label={enviando ? 'Guardando...' : 'Continuar'}
-			variant="primary"
-			size="sm"
-			disabled={tieneErrores || enviando}
-			customClass="w-full md:w-auto"
-		/>
-	</div>
+		</div>
+	{/if}
 </form>

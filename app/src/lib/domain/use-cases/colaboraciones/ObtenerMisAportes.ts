@@ -35,14 +35,16 @@ export class ObtenerMisAportes {
 					participacion_permitida?: { colaboraciones_tipo_participacion?: any[] };
 				})[];
 
+				// Extraer archivos de evidencias de entrada (del usuario)
 				const evidenciasEntrada = todasEvidencias
 					.filter((e) => e.tipo_evidencia === 'entrada')
-					// Filtramos evidencias que pertenezcan a las colaboraciones del usuario
-					.filter((e) => {
-						return e.archivos?.some((a) => a.usuario_id === usuarioId);
-					});
+					.flatMap((e) => e.archivos || [])
+					.filter((a) => a.usuario_id === usuarioId);
 
-				const evidenciasSalida = todasEvidencias.filter((e) => e.tipo_evidencia === 'salida');
+				// Extraer archivos de evidencias de salida (de la institución)
+				const evidenciasSalida = todasEvidencias
+					.filter((e) => e.tipo_evidencia === 'salida')
+					.flatMap((e) => e.archivos || []);
 
 				return {
 					...aporte,

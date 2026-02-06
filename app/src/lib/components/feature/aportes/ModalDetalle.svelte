@@ -131,7 +131,7 @@
 								{:else}
 									<div class="flex flex-col gap-3">
 										{#each aporte.evidencias_entrada as file}
-											<ArchivoCard archivo={file} />
+											<ArchivoCard archivo={file} showUploader={true} />
 										{/each}
 									</div>
 								{/if}
@@ -162,7 +162,11 @@
 								{:else}
 									<div class="flex flex-col gap-3">
 										{#each aporte.evidencias_salida as file}
-											<ArchivoCard archivo={file} customClass="hover:border-amber-400" />
+											<ArchivoCard
+												archivo={file}
+												showUploader={true}
+												customClass="hover:border-amber-400"
+											/>
 										{/each}
 									</div>
 								{/if}

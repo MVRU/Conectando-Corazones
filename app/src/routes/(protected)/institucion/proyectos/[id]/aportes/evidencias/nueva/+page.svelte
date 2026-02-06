@@ -12,6 +12,10 @@
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
 
+	import { applyAction, deserialize } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
+	import type { ActionResult } from '@sveltejs/kit';
+
 	let { data } = $props();
 
 	const projectIdUrl = $page.params.id;
@@ -105,6 +109,9 @@
 
 	let evidenciasEliminadas: Set<number> = $state(new Set());
 
+	let mostrarModalEliminar = $state(false);
+	let archivoAEliminarId = $state<number | null>(null);
+
 	let evidenciasSalidaTotal = $derived<ArchivoUI[]>([
 		...evidenciasSalidaExistentes.filter((e) => !evidenciasEliminadas.has(e.id_archivo ?? 0)),
 		...evidenciasSalidaNuevas.flatMap((ev) =>
@@ -195,24 +202,119 @@
 		mostrarModalConfirmacion = false;
 	}
 
-	function guardarCambios() {
-		// TODO: Implementar lógica de guardado real
+	async function subirArchivoASupabase(archivo: ArchivoUI): Promise<string> {
+		try {
+			// 1. Obtener URL firmada
+			const response = await fetch('/api/storage/upload-url', {
+				method: 'POST',
+				body: JSON.stringify({
+					nombre_archivo: archivo.nombre_original,
+					tipo_mime: archivo.tipo_mime,
+					bucket: 'evidencias'
+				}),
+				headers: { 'Content-Type': 'application/json' }
+			});
 
-		// Marcar que estamos guardando para evitar el modal de confirmación
+			if (!response.ok) {
+				const error = await response.json();
+				throw new Error(error.message || 'Error al obtener URL de subida');
+			}
+
+			const { uploadUrl, fullPath } = await response.json();
+
+			// 2. Subir archivo a Storage
+			const uploadResponse = await fetch(uploadUrl, {
+				method: 'PUT',
+				body: archivo.file,
+				headers: {
+					'Content-Type': archivo.tipo_mime!
+				}
+			});
+
+			if (!uploadResponse.ok) {
+				throw new Error('Error al subir el archivo a Storage');
+			}
+
+			return fullPath;
+		} catch (error) {
+			console.error('Error subiendo archivo:', error);
+			throw error;
+		}
+	}
+
+	async function guardarCambios() {
+		if (!selectedParticipacionPermitidaId) return;
+
 		estaGuardando = true;
-
-		// Limpiar el estado de cambios
-		evidenciasSalidaNuevas = [];
-		evidenciasEliminadas = new Set();
-
-		toastStore.show({
-			variant: 'success',
-			title: 'Cambios guardados',
-			message: 'Las evidencias fueron guardadas exitosamente',
-			duration: 5000
+		const toastId = toastStore.show({
+			variant: 'info',
+			title: 'Guardando...',
+			message: 'Subiendo archivos y registrando evidencias',
+			duration: 0
 		});
 
-		goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
+		try {
+			// 1. Subir archivos nuevos a Supabase Storage
+			const evidenciasProcesadas = await Promise.all(
+				evidenciasSalidaNuevas.map(async (evidencia) => {
+					const archivosSubidos = await Promise.all(
+						evidencia.archivos.map(async (archivo) => {
+							const archivoUI = archivo as unknown as ArchivoUI;
+							if (archivoUI.file) {
+								const path = await subirArchivoASupabase(archivoUI);
+								return {
+									...archivo,
+									url: path
+								};
+							}
+							return archivo;
+						})
+					);
+					return { ...evidencia, archivos: archivosSubidos };
+				})
+			);
+
+			// 2. Enviar datos al servidor
+			const formData = new FormData();
+			formData.append('evidencias', JSON.stringify(evidenciasProcesadas));
+			formData.append('eliminadas', JSON.stringify(Array.from(evidenciasEliminadas)));
+			formData.append('id_participacion_permitida', selectedParticipacionPermitidaId.toString());
+
+			const response = await fetch('?/guardarEvidencia', {
+				method: 'POST',
+				body: formData
+			});
+
+			const result: ActionResult = deserialize(await response.text());
+
+			if (result.type === 'success') {
+				toastStore.dismiss(toastId.id);
+				toastStore.show({
+					variant: 'success',
+					title: '¡Éxito!',
+					message: 'Evidencias guardadas correctamente'
+				});
+
+				// Limpiar estado
+				evidenciasSalidaNuevas = [];
+				evidenciasEliminadas = new Set();
+
+				await invalidateAll();
+				goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
+			} else {
+				throw new Error('Error al registrar en base de datos');
+			}
+		} catch (error) {
+			console.error('Error en guardado:', error);
+			toastStore.dismiss(toastId.id);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message: 'No se pudieron guardar las evidencias. Intentá nuevamente.'
+			});
+		} finally {
+			estaGuardando = false;
+		}
 	}
 
 	function abrirModalSubirArchivos() {
@@ -229,9 +331,46 @@
 		const input = event.target as HTMLInputElement;
 		if (input.files) {
 			const nuevosArchivos: (Archivo & { file: File })[] = [];
+			const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+			const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
 
 			for (let i = 0; i < input.files.length; i++) {
 				const file = input.files[i];
+
+				// Validar tamaño
+				if (file.size > MAX_FILE_SIZE) {
+					toastStore.show({
+						variant: 'error',
+						title: 'Archivo muy pesado',
+						message: `El archivo "${file.name}" supera el límite de 10MB.`
+					});
+					continue;
+				}
+
+				// Validar tipo MIME
+				if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+					toastStore.show({
+						variant: 'error',
+						title: 'Formato no válido',
+						message: `El archivo "${file.name}" no es válido. Solo se aceptan imágenes (JPG, PNG, WEBP) y PDF.`
+					});
+					continue;
+				}
+
+				// Validar extensión
+				const extension = file.name.split('.').pop()?.toLowerCase();
+				if (
+					extension &&
+					['exe', 'bat', 'sh', 'js', 'php', 'pl', 'py', 'cmd', 'msi'].includes(extension)
+				) {
+					toastStore.show({
+						variant: 'error',
+						title: 'Archivo peligroso',
+						message: `El archivo "${file.name}" fue rechazado por motivos de seguridad.`
+					});
+					continue;
+				}
+
 				const isImage = file.type.startsWith('image/');
 				const url = isImage ? URL.createObjectURL(file) : '';
 
@@ -277,7 +416,15 @@
 		cerrarModalSubirArchivos();
 	}
 
-	function removeEvidencia(id: number) {
+	function solicitarEliminarEvidencia(id: number) {
+		archivoAEliminarId = id;
+		mostrarModalEliminar = true;
+	}
+
+	function confirmarEliminacion() {
+		if (archivoAEliminarId === null) return;
+
+		const id = archivoAEliminarId;
 		const indexNueva = evidenciasSalidaNuevas.findIndex((ev) =>
 			ev.archivos.some((a) => a.id_archivo === id)
 		);
@@ -299,6 +446,14 @@
 			evidenciasEliminadas.add(id);
 			evidenciasEliminadas = new Set(evidenciasEliminadas);
 		}
+
+		mostrarModalEliminar = false;
+		archivoAEliminarId = null;
+	}
+
+	function cancelarEliminacion() {
+		mostrarModalEliminar = false;
+		archivoAEliminarId = null;
 	}
 
 	$effect(() => {
@@ -518,7 +673,7 @@
 										archivo={file}
 										showUploader={true}
 										deletable={true}
-										ondelete={() => removeEvidencia(file.id_archivo || 0)}
+										ondelete={() => solicitarEliminarEvidencia(file.id_archivo || 0)}
 										customClass="hover:border-amber-400"
 									/>
 								</div>
@@ -625,6 +780,65 @@
 						class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
 					>
 						Descartar cambios
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Modal de Confirmación de Eliminación -->
+{#if mostrarModalEliminar}
+	<div
+		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="modal-delete-title"
+		tabindex="-1"
+		transition:fade={{ duration: 200 }}
+		onclick={(e) => {
+			if (e.target === e.currentTarget) cancelarEliminacion();
+		}}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') cancelarEliminacion();
+		}}
+	>
+		<div
+			class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
+			transition:slide={{ duration: 300 }}
+		>
+			<!-- Header -->
+			<div class="border-b border-slate-100 bg-gradient-to-br from-red-50 to-orange-50 p-6 md:p-8">
+				<div class="flex items-start gap-4">
+					<div class="shrink-0 rounded-xl bg-red-100 p-3 text-red-600">
+						<AlertCircle size={24} />
+					</div>
+					<div>
+						<h3 id="modal-delete-title" class="mb-2 text-xl font-black text-slate-900">
+							¿Eliminar evidencia?
+						</h3>
+						<p class="text-sm leading-relaxed text-slate-600">
+							Esta acción eliminará el archivo permanentemente. Tendrás que guardar los cambios para
+							completar la operación.
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Actions -->
+			<div class="bg-slate-50/50 p-6 md:p-8">
+				<div class="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
+					<button
+						onclick={cancelarEliminacion}
+						class="flex-1 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-600 transition-all hover:border-slate-300 hover:text-slate-800"
+					>
+						Cancelar
+					</button>
+					<button
+						onclick={confirmarEliminacion}
+						class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
+					>
+						Eliminar
 					</button>
 				</div>
 			</div>

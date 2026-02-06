@@ -51,8 +51,8 @@ export class PostgresColaboracionTipoParticipacionRepository
 		if (!aporte.colaboracion_id || !aporte.participacion_permitida_id) {
 			throw new Error('El aporte debe tener colaboracion_id y participacion_permitida_id');
 		}
-		if (aporte.cantidad <= 0) {
-			throw new Error('La cantidad a agregar debe ser mayor a 0');
+		if (aporte.cantidad < 0) {
+			throw new Error('La cantidad a agregar no puede ser negativa');
 		}
 
 		const result = await prisma.$transaction(async (tx) => {

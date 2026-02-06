@@ -113,10 +113,6 @@
 		}
 	}
 
-	function handleCambioFoto(event: Event) {
-		edicion.cambiarFoto(event);
-	}
-
 	// Funciones para Reseñas
 	function abrirModalResena() {
 		if (esMiPerfil || !puedeResenar) return;
@@ -259,10 +255,10 @@
 	{provinciaSeleccionada}
 	{localidadesFiltradas}
 	{errorDescripcion}
-	onCambioFoto={handleCambioFoto}
 	onCambiarProvincia={(p) => edicion.cambiarProvincia(p)}
 	onActualizarDescripcion={(v) => edicion.actualizarDescripcion(v)}
 	onActualizarCampo={(c, v) => edicion.actualizarCampo(c, v)}
+	{edicion}
 	on:guardar={handleGuardarPerfil}
 	on:cerrar={() => modales.cerrar('edicion')}
 />

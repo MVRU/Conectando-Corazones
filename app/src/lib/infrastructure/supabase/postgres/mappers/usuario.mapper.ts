@@ -29,6 +29,7 @@ export class UsuarioMapper {
 		return new Usuario({
 			id_usuario: prismaUsuario.id_usuario,
 			username: prismaUsuario.username,
+			auth_user_id: prismaUsuario.auth_user_id || undefined,
 			password: prismaUsuario.password || undefined,
 			nombre: prismaUsuario.nombre,
 			apellido: prismaUsuario.apellido,
