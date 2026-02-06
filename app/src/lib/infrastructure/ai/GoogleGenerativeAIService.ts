@@ -70,7 +70,8 @@ export class GoogleGenerativeAIService {
                - Usá formato de lista conciso: cada bullet = problema + sugerencia(s).
                - Evitá repetir "problema" o "solución" para priorizar el contenido.
                - Ofrecé soluciones concretas, realistas y factibles para instituciones con recursos limitados.
-
+               - NO incluir "comunicación" o "chat" como aspectos a mejorar, ya que la plataforma ya cuenta con un chat interno.
+               
             Formato esperado de salida estricta:
             {
               "resumen": "...",
