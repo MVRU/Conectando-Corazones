@@ -1,30 +1,15 @@
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { GoogleGenerativeAIService } from '$lib/infrastructure/ai/GoogleGenerativeAIService';
 
 export async function analizarProyecto(idProyecto: number) {
-    const proyecto = await prisma.proyecto.findUnique({
-        where: { id_proyecto: idProyecto },
-        include: {
-            estado: true,
-            participacion_permitida: {
-                include: { tipo_participacion: true }
-            },
-            colaboraciones: {
-                where: { estado: 'aprobada' },
-                include: {
-                    colaboraciones_tipo_participacion: {
-                        include: { participacion_permitida: { include: { tipo_participacion: true } } }
-                    }
-                }
-            }
-        }
-    });
+    const repo = new PostgresProyectoRepository();
+    const proyecto = await repo.findById(idProyecto);
 
     if (!proyecto) throw new Error('Proyecto no encontrado');
 
-    // Solo analiza si el proyecto está completado
-    if (proyecto.estado?.descripcion !== 'completado') {
-        throw new Error('El proyecto debe estar en estado completado para realizar el análisis.');
+    if (!proyecto.estaFinalizado()) {
+        throw new Error(`El proyecto no está completado (Estado actual: ${proyecto.estado}).`);
     }
 
     const resenas = await prisma.resena.findMany({
@@ -37,19 +22,13 @@ export async function analizarProyecto(idProyecto: number) {
     const context = {
         titulo: proyecto.titulo,
         descripcion: proyecto.descripcion,
-        objetivos: proyecto.participacion_permitida.map(p => ({
+        progreso: (proyecto.participacion_permitida || []).map(p => ({
             tipo: p.tipo_participacion?.descripcion || 'General',
             meta: p.objetivo,
-            unidad: p.unidad_medida || 'unidades'
+            alcanzado: p.actual || 0,
+            unidad: p.unidad_medida || 'unidades',
+            estado: (p.actual || 0) >= p.objetivo ? 'Meta Alcanzada' : 'No Alcanzada'
         })),
-        colaboraciones: proyecto.colaboraciones.flatMap(c =>
-            c.colaboraciones_tipo_participacion.map(ctp => ({
-                mensaje: c.mensaje || '',
-                estado: c.estado,
-                tipo_participacion: ctp.participacion_permitida?.tipo_participacion?.descripcion || 'Varios',
-                cantidad: ctp.cantidad
-            }))
-        ),
         resenas: resenas.map(r => ({
             contenido: r.contenido,
             puntaje: r.puntaje

@@ -5,16 +5,12 @@ interface ProjectContext {
     titulo: string;
     descripcion: string;
     resenas: { contenido: string; puntaje: number }[];
-    colaboraciones: {
-        mensaje: string;
-        estado: string;
-        tipo_participacion: string;
-        cantidad: number
-    }[];
-    objetivos: {
+    progreso: {
         tipo: string;
         meta: number;
+        alcanzado: number;
         unidad: string;
+        estado: string;
     }[];
 }
 
@@ -47,11 +43,8 @@ export class GoogleGenerativeAIService {
             TÍTULO: ${context.titulo}
             DESCRIPCIÓN: ${context.descripcion}
             
-            OBJETIVOS:
-            ${JSON.stringify(context.objetivos)}
-            
-            APORTES RECIBIDOS:
-            ${JSON.stringify(context.colaboraciones)}
+            CUMPLIMIENTO DE OBJETIVOS (META vs REAL):
+            ${JSON.stringify(context.progreso)}
             
             RESEÑAS:
             ${JSON.stringify(context.resenas)}
@@ -60,6 +53,7 @@ export class GoogleGenerativeAIService {
 
             1. "resumen": Redacta un párrafo extenso (8–15 líneas) en español argentino claro. Debe:
                - Destacar los logros y aspectos positivos del proyecto.
+               - Mencionar explicitamente si se alcanzaron o superaron las metas basándote en los datos de "CUMPLIMIENTO DE OBJETIVOS". Si no se alcanzaron, mencionarlo constructivamente.
                - Indicar el alcance real, impacto en beneficiarios y participación de voluntarios.
                - Indicar los logros alcanzados.
                - Indicar el promedio de puntaje de las reseñas para el proyecto y una justificación breve (usar formato X.X/5).
@@ -87,11 +81,8 @@ export class GoogleGenerativeAIService {
         try {
             const result = await this.model.generateContent(prompt);
             const text = result.response.text();
-
-            // Parseamos la respuesta
             const rawResult = JSON.parse(text);
 
-            // Adaptamos 'aprendizajes' si viene como array (lo esperado) a string para la DB
             let aprendizajesString = "";
             if (Array.isArray(rawResult.aprendizajes)) {
                 aprendizajesString = rawResult.aprendizajes.join('\n');
