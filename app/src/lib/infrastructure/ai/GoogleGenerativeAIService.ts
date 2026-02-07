@@ -2,44 +2,44 @@ import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 import { env } from '$env/dynamic/private';
 
 interface ProjectContext {
-    titulo: string;
-    descripcion: string;
-    beneficiarios: number | string;
-    resenas: { contenido: string; puntaje: number }[];
-    progreso: {
-        tipo: string;
-        meta: number;
-        alcanzado: number;
-        unidad: string;
-        estado: string;
-        especie?: string | null;
-    }[];
+	titulo: string;
+	descripcion: string;
+	beneficiarios: number | string;
+	resenas: { contenido: string; puntaje: number }[];
+	progreso: {
+		tipo: string;
+		meta: number;
+		alcanzado: number;
+		unidad: string;
+		estado: string;
+		especie?: string | null;
+	}[];
 }
 
 export interface AnalysisResult {
-    resumen: string;
-    aprendizajes: string;
+	resumen: string;
+	aprendizajes: string;
 }
 
 export class GoogleGenerativeAIService {
-    private genAI: GoogleGenerativeAI;
-    private model: GenerativeModel;
+	private genAI: GoogleGenerativeAI;
+	private model: GenerativeModel;
 
-    constructor() {
-        if (!env.GOOGLE_API_KEY) {
-            throw new Error('GOOGLE_API_KEY no está definida en las variables de entorno.');
-        }
-        this.genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
-        this.model = this.genAI.getGenerativeModel({
-            model: 'gemini-2.5-flash-lite',
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
-        });
-    }
+	constructor() {
+		if (!env.GOOGLE_API_KEY) {
+			throw new Error('GOOGLE_API_KEY no está definida en las variables de entorno.');
+		}
+		this.genAI = new GoogleGenerativeAI(env.GOOGLE_API_KEY);
+		this.model = this.genAI.getGenerativeModel({
+			model: 'gemini-2.5-flash-lite',
+			generationConfig: {
+				responseMimeType: 'application/json'
+			}
+		});
+	}
 
-    async analyzeProject(context: ProjectContext): Promise<AnalysisResult> {
-        const prompt = `
+	async analyzeProject(context: ProjectContext): Promise<AnalysisResult> {
+		const prompt = `
             Actúa como un experto con muchos años liderando proyectos de servicio y voluntariado. Participaste activamente en este proyecto y has leído todas las reseñas de participantes involucrados. Tu tarea es generar un resumen completo y aprendizajes accionables sobre el siguiente proyecto:
 
             TÍTULO: ${context.titulo}
@@ -85,26 +85,26 @@ export class GoogleGenerativeAIService {
             IMPORTANTE: Responde ÚNICAMENTE con el objeto JSON válido.
         `;
 
-        try {
-            const result = await this.model.generateContent(prompt);
-            const text = result.response.text();
-            const rawResult = JSON.parse(text);
+		try {
+			const result = await this.model.generateContent(prompt);
+			const text = result.response.text();
+			// Limpieza de bloques de código markdown si la IA los incluye
+			const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+			const rawResult = JSON.parse(cleanText);
 
-            let aprendizajesString = "";
-            if (Array.isArray(rawResult.aprendizajes)) {
-                aprendizajesString = rawResult.aprendizajes.join('\n');
-            } else if (typeof rawResult.aprendizajes === 'string') {
-                aprendizajesString = rawResult.aprendizajes;
-            }
+			let aprendizajesString = '';
+			if (Array.isArray(rawResult.aprendizajes)) {
+				aprendizajesString = rawResult.aprendizajes.join('\n');
+			} else if (typeof rawResult.aprendizajes === 'string') {
+				aprendizajesString = rawResult.aprendizajes;
+			}
 
-            return {
-                resumen: rawResult.resumen,
-                aprendizajes: aprendizajesString
-            };
-
-        } catch (error) {
-            console.error('Error Google AI:', error);
-            throw new Error('Fallo al generar análisis de IA');
-        }
-    }
+			return {
+				resumen: rawResult.resumen,
+				aprendizajes: aprendizajesString
+			};
+		} catch (error) {
+			throw new Error('Fallo al generar análisis de IA');
+		}
+	}
 }

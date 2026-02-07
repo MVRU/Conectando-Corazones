@@ -184,6 +184,19 @@
 	// 	'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 	$: resumenTexto = (proyecto?.resumen || '').trim();
 	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
+	$: listadoAprendizajes = (aprendizajesTexto || '')
+		.split('\n')
+		.map((l) => l.trim())
+		.filter((l) => l.length > 0)
+		.map((l) => l.replace(/^[-*•]\s*/, '')); // Remover viñetas "-" generadas por la IA
+
+	// Dividimos el resumen en oraciones para que no sea un bloque de texto denso
+	$: listadoResumen = (resumenTexto || '')
+		.split('. ')
+		.map((s) => s.trim())
+		.filter((s) => s.length > 0)
+		.map((s) => (s.endsWith('.') ? s : s + '.'));
+
 	$: tieneResumenIA = Boolean(resumenTexto);
 	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
 	$: mostrarSeccionResumenIA =
@@ -948,51 +961,92 @@
 								</div>
 
 								<div class="space-y-3">
-									<div class="overflow-hidden rounded-xl border border-gray-200">
+									<div
+										class="overflow-hidden rounded-xl border border-gray-200 transition-shadow hover:shadow-md"
+									>
 										<button
 											type="button"
-											class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+											class="flex w-full items-center justify-between gap-3 bg-white px-4 py-4 text-left transition hover:bg-gray-50"
 											aria-expanded={mostrarResumenIA}
 											onclick={() => (mostrarResumenIA = !mostrarResumenIA)}
 										>
-											<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-												<FileText class="h-4 w-4 text-sky-600" />
+											<span class="flex items-center gap-2.5 text-base font-semibold text-gray-900">
+												<FileText class="h-5 w-5 text-sky-600" />
 												Resumen ejecutivo
 											</span>
 											<ChevronDownIcon
-												class="h-4 w-4 text-gray-400 transition-transform {mostrarResumenIA
+												class="h-5 w-5 text-gray-400 transition-transform {mostrarResumenIA
 													? 'rotate-180'
 													: ''}"
 											/>
 										</button>
 										{#if mostrarResumenIA}
-											<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
-												{resumenTexto || 'El resumen aún no está disponible.'}
+											<div class="border-t border-gray-100 bg-sky-50/30 px-4 pt-4 pb-6">
+												<div class="space-y-4">
+													{#each listadoResumen as parrafo}
+														<p class="text-base leading-relaxed text-gray-700">
+															{parrafo}
+														</p>
+													{/each}
+													{#if listadoResumen.length === 0}
+														<p class="text-sm text-gray-500 italic">
+															El resumen aún no está disponible.
+														</p>
+													{/if}
+												</div>
 											</div>
 										{/if}
 									</div>
 
 									{#if puedeVerAprendizajesIA}
-										<div class="overflow-hidden rounded-xl border border-gray-200">
+										<div
+											class="overflow-hidden rounded-xl border border-gray-200 bg-white transition-shadow hover:shadow-md"
+										>
 											<button
 												type="button"
-												class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-gray-50"
+												class="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition hover:bg-gray-50"
 												aria-expanded={mostrarAprendizajesIA}
 												onclick={() => (mostrarAprendizajesIA = !mostrarAprendizajesIA)}
 											>
-												<span class="flex items-center gap-2 text-sm font-semibold text-gray-900">
-													<Lightbulb class="h-4 w-4 text-amber-500" />
-													Aprendizajes
+												<span
+													class="flex items-center gap-2.5 text-base font-semibold text-gray-900"
+												>
+													<Lightbulb class="h-5 w-5 text-amber-500" />
+													Aprendizajes clave
 												</span>
 												<ChevronDownIcon
-													class="h-4 w-4 text-gray-400 transition-transform {mostrarAprendizajesIA
+													class="h-5 w-5 text-gray-400 transition-transform {mostrarAprendizajesIA
 														? 'rotate-180'
 														: ''}"
 												/>
 											</button>
 											{#if mostrarAprendizajesIA}
-												<div class="px-4 pb-4 text-sm whitespace-pre-line text-gray-700">
-													{aprendizajesTexto || 'Los aprendizajes aún no están disponibles.'}
+												<div class="border-t border-gray-100 bg-amber-50/30 px-4 pt-4 pb-6">
+													{#if listadoAprendizajes.length > 0}
+														<ul class="flex flex-col gap-4">
+															{#each listadoAprendizajes as item}
+																<li class="flex gap-4">
+																	<div class="relative mt-2 flex-shrink-0">
+																		<div
+																			class="flex h-2 w-2 items-center justify-center rounded-full bg-amber-400 ring-4 ring-amber-100"
+																		></div>
+																	</div>
+																	<span class="text-base leading-relaxed text-gray-800">
+																		{item}
+																	</span>
+																</li>
+															{/each}
+														</ul>
+													{:else}
+														<div class="flex flex-col items-center justify-center py-6 text-center">
+															<span class="mb-2 rounded-full bg-gray-100 p-3">
+																<Lightbulb class="h-6 w-6 text-gray-400" />
+															</span>
+															<p class="text-sm text-gray-500">
+																No hay detalles adicionales disponibles por el momento.
+															</p>
+														</div>
+													{/if}
 												</div>
 											{/if}
 										</div>

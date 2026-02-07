@@ -568,17 +568,18 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: this.includeOptions
 		});
 
-		// IA
+		// Generación de resumen y aprendizajes (asíncrono)
 		if (nuevoEstado === 'completado') {
-			(async () => {
+			setTimeout(async () => {
 				try {
-					console.log(`[IA] Iniciando análisis de IA para proyecto ${id}...`);
-					await analizarProyecto(id);
-					console.log(`[IA] Análisis de IA finalizado exitosamente para proyecto ${id}.`);
-				} catch (error) {
-					console.error(`[IA] Error en análisis de IA para proyecto ${id}:`, error);
+					const result = await analizarProyecto(id);
+					if (!result.success && result.error) {
+						console.error(`[IA] Error en análisis del proyecto ${id}:`, result.error);
+					}
+				} catch (err) {
+					console.error(`[IA] Excepción no controlada en background task del proyecto ${id}:`, err);
 				}
-			})();
+			}, 0);
 		}
 
 		return ProyectoMapper.toDomain(updated as any);
