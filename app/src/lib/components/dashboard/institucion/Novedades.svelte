@@ -19,23 +19,28 @@
 	></div>
 
 	<div class="relative z-10 w-full">
+		<!-- Header -->
 		<div class="mb-6 flex items-center justify-between">
-			<div class="flex items-center gap-2">
-				<h2 class="text-xl font-semibold tracking-tight text-white">Novedades</h2>
-				<Bell size={16} class="text-rose-400" />
+			<div class="flex items-center gap-3">
+				<div class="relative flex items-center justify-center">
+					<div
+						class="absolute h-8 w-8 animate-pulse rounded-full bg-violet-500/20 blur-lg filter"
+					></div>
+					<Bell size={18} class="text-rose-400" />
+				</div>
+				<div>
+					<h2 class="text-xl font-semibold tracking-tight text-white">Novedades</h2>
+					<p class="text-[10px] font-medium tracking-wider text-rose-400/80 uppercase">
+						Lo último en Conectando Corazones
+					</p>
+				</div>
 			</div>
-			<a
-				href="/institucion/novedades"
-				class="text-xs font-medium text-slate-500 transition-colors hover:text-white"
-			>
-				Ver todas
-			</a>
 		</div>
 
 		<div class="flex flex-col gap-4">
 			{#each novedades as novedad}
 				<div
-					class="group relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg outline outline-1 outline-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl hover:outline-white/20 sm:aspect-[2.5/1]"
+					class="group relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg outline-1 outline-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl hover:outline-white/20 sm:aspect-[2.5/1]"
 				>
 					<!-- Background Image -->
 					{#if novedad.imagen}

@@ -1,3 +1,63 @@
+export interface EstadisticasProyectos {
+	totalDineroRecaudado: number;
+	totalBeneficiarios: number;
+	promedioProgreso: number;
+	proyectosEnAuditoria: {
+		id: string;
+		titulo: string;
+		motivo: string;
+		fecha: string;
+	}[];
+	distribucionEstado: { label: string; count: number; percentage: number; color: string }[];
+	distribucionCategoria: { label: string; count: number; percentage: number }[];
+	proyectosDestacados: {
+		id: string;
+		titulo: string;
+		estado: string;
+		progreso: number;
+		beneficiarios: number;
+		imagen?: string;
+	}[];
+}
+
+export interface EstadisticasCalendario {
+	verificacion: {
+		estado: 'verificada' | 'pendiente' | 'expirado';
+		fechaRenovacion: string;
+		diasRestantes: number;
+	};
+	projectTimeline: {
+		id: string;
+		titulo: string;
+		fechaInicio: string;
+		fechaFin: string;
+		estado: string;
+		color: string;
+	}[];
+	proximosVencimientos: {
+		id: string;
+		titulo: string;
+		fecha: string;
+		tipo: 'finalizacion_proyecto' | 'verificacion' | 'otro';
+	}[];
+}
+
+export interface EstadisticasColaboradores {
+	totalActivos: number;
+	nuevosEsteMes: number;
+	retencion: number;
+	distribucionCategorias: { label: string; count: number; percentage: number }[];
+	distribucionUbicacion: { label: string; count: number; percentage: number }[];
+	topColaboradores: {
+		id: string;
+		nombre: string;
+		rol: string;
+		avatarUrl: string;
+		aportes: string;
+		proyectos: number;
+	}[];
+}
+
 export interface InstitucionDashboardData {
 	info: {
 		nombre: string;
@@ -5,10 +65,16 @@ export interface InstitucionDashboardData {
 		fecha: string;
 		ubicacion: string;
 	};
-	metrics: {
+	metricas: {
 		proyectosTotales: number;
 		colaboradoresActivos: number;
 		diasProximoCierre: number;
+		solicitudesPendientes: number;
+		mensajesNoLeidos: number;
+		proyectosPendienteCierre: number;
+		estadisticasColaboradores?: EstadisticasColaboradores;
+		estadisticasProyectos?: EstadisticasProyectos;
+		estadisticasCalendario?: EstadisticasCalendario;
 	};
 	seguimientoObjetivos: {
 		id: string;
@@ -16,12 +82,12 @@ export interface InstitucionDashboardData {
 		fechaFin: string;
 		objetivos: {
 			id: string;
-			descripcion: string; // e.g. "Recaudación"
+			descripcion: string; // por ejemplo: "Recaudación"
 			tipo: 'monetaria' | 'voluntariado' | 'especie';
 			progreso: number; // %
 			actual: number;
 			meta: number;
-			unidad: string; // e.g. "$" or "voluntarios"
+			unidad: string; // por ejemplo: "$" o "voluntarios"
 		}[];
 	}[];
 	estadisticasAyuda: {
@@ -33,7 +99,7 @@ export interface InstitucionDashboardData {
 	topColaboradores: {
 		id: string;
 		nombre: string;
-		avatarUrl?: string; // Optional
+		avatarUrl?: string; // opcional
 		aportes: number;
 		rol: string;
 	}[];
@@ -42,7 +108,7 @@ export interface InstitucionDashboardData {
 		titulo: string;
 		descripcion: string;
 		fecha: string;
-		tipo: 'proyecto' | 'colaboracion' | 'sistema';
+		tipo: 'proyecto' | 'colaboracion' | 'evidencia';
 	}[];
 	ultimasResenas: {
 		id: string;

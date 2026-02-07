@@ -6,8 +6,14 @@
 		titulo: string;
 		descripcion: string;
 		fecha: string;
-		tipo: 'proyecto' | 'colaboracion' | 'sistema';
+		tipo: 'proyecto' | 'colaboracion' | 'evidencia';
 	}[] = [];
+
+	const TIPO_LABELS = {
+		proyecto: 'Proyecto',
+		colaboracion: 'Colaboración',
+		evidencia: 'Evidencia'
+	};
 
 	function getIcon(tipo: string) {
 		switch (tipo) {
@@ -55,7 +61,7 @@
 						>
 						<span class="h-1 w-1 rounded-full bg-slate-600"></span>
 						<span class="text-xs font-medium tracking-wider text-slate-500 uppercase"
-							>{item.tipo}</span
+							>{TIPO_LABELS[item.tipo]}</span
 						>
 					</div>
 					<h4 class="text-base font-medium text-white">{item.titulo}</h4>
