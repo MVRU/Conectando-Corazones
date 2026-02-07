@@ -8,6 +8,7 @@ import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
 import { PostgresCategoriaRepository } from './categoria.repo';
 import { RegistrarCategoriasDeProyecto } from '$lib/domain/use-cases/proyecto-categoria/RegistrarCategoriasDeProyecto';
 import type { ProyectoSearchCriteria } from '$lib/domain/types/dto/ProyectoSearchCriteria';
+import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
 	private includeOptions = {
@@ -566,6 +567,21 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			},
 			include: this.includeOptions
 		});
+
+		// Generación de resumen y aprendizajes (asíncrono)
+		if (nuevoEstado === 'completado') {
+			setTimeout(async () => {
+				try {
+					const result = await analizarProyecto(id);
+					if (!result.success && result.error) {
+						console.error(`[IA] Error en análisis del proyecto ${id}:`, result.error);
+					}
+				} catch (err) {
+					console.error(`[IA] Excepción no controlada en background task del proyecto ${id}:`, err);
+				}
+			}, 0);
+		}
+
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
