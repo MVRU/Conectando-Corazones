@@ -627,4 +627,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			});
 		});
 	}
+
+	async countSolicitudesRechazadas(id: number): Promise<number> {
+		return await prisma.solicitudFinalizacion.count({
+			where: {
+				proyecto_id: id,
+				estado: 'rechazada'
+			}
+		});
+	}
 }
