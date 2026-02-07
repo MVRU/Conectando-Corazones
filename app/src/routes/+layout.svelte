@@ -21,6 +21,7 @@
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 	import { goto } from '$app/navigation';
 
+	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 	import { Usuario } from '$lib/domain/entities/Usuario';
 
 	export let data: LayoutData;
@@ -36,11 +37,13 @@
 	onMount(() => {
 		beforeNavigate(clearBreadcrumbs);
 
-		const { data: subscription } = supabase.auth.onAuthStateChange((event, _session) => {
-			if (_session?.expires_at !== session?.expires_at) {
-				invalidate('supabase:auth');
+		const { data: subscription } = supabase.auth.onAuthStateChange(
+			(event: AuthChangeEvent, _session: Session | null) => {
+				if (_session?.expires_at !== session?.expires_at) {
+					invalidate('supabase:auth');
+				}
 			}
-		});
+		);
 
 		// Inicializar estado global de auth con datos del servidor
 		if (data.user) {

@@ -1,250 +1,509 @@
-<!--
-* Componente: Dashboard Colaborador
-	-*- TODO: corregir en PR de dashboard
--->
-
 <script lang="ts">
-	import type { Proyecto } from '$lib/domain/types/Proyecto';
-	import { goto } from '$app/navigation';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { clsx } from 'clsx';
-	import { Send, CheckSquare, Upload, Heart } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	import { Filter, ChevronRight, ChevronDown, MapPin, Sparkles, Users } from 'lucide-svelte';
+	import { slide } from 'svelte/transition';
+	import AccionesRapidas from './colaborador/AccionesRapidas.svelte';
+	import MetricasPanel from './colaborador/MetricasPanel.svelte';
+	import SeguimientoObjetivos from './colaborador/SeguimientoObjetivos.svelte';
+	import EstadisticasAyuda from './colaborador/EstadisticasAyuda.svelte';
+	import ActividadReciente from './colaborador/ActividadReciente.svelte';
+	import UltimasResenas from './colaborador/UltimasResenas.svelte';
+	import Novedades from './colaborador/Novedades.svelte';
+	import EstadisticasProyectoModal from './colaborador/EstadisticasProyectoModal.svelte';
+	import EstadisticasAgendaModal from './colaborador/EstadisticasAgendaModal.svelte';
+	import GestionarEvidenciasModal from './colaborador/GestionarEvidenciasModal.svelte';
+	import InstitucionesAlcanzadasModal from './colaborador/InstitucionesAlcanzadasModal.svelte';
+	import EvaluarCierreModal from './colaborador/EvaluarCierreModal.svelte';
+	import HeatmapActividad from './colaborador/HeatmapActividad.svelte';
+	import ProyectosComunidad from './colaborador/ProyectosComunidad.svelte';
+	import type { ColaboradorDashboardData } from './colaborador/types';
 
-	let {
-		colaboradorInfo,
-		proyectosActivos = [],
-		evaluacionesPendientes = 0
-	} = $props<{
-		colaboradorInfo: {
-			nombre: string;
-			apellido: string;
-			tipoColaborador?: string;
-			proyectosColaborando: number;
-			aportesRealizados: number;
-			evaluacionesPendientes: number;
-		};
-		proyectosActivos: Proyecto[];
-		evaluacionesPendientes?: number;
-	}>();
+	export let data: ColaboradorDashboardData;
 
-	const proyectosRecientes = $derived(proyectosActivos.slice(0, 3));
-	const nombreCompleto = $derived(`${colaboradorInfo.nombre} ${colaboradorInfo.apellido}`);
+	// Estado de los filtros
+	let filters = {
+		periodo: 'mes_actual',
+		categoria: 'todas',
+		estado: 'en_curso',
+		tipoParticipacion: 'todos',
+		ubicacion: 'todas'
+	};
+
+	// Animación y Scroll
+	let mounted = false;
+	let filterScrollContainer: HTMLDivElement;
+	let showFilterIndicator = false;
+	let showFilters = false;
+	let showLeftGradient = false;
+	let showRightGradient = false;
+	let showCollaboratorStats = false;
+	let showProjectStats = false;
+	let showCalendarStats = false;
+	let showEvidenceModal = false;
+	let showInstitucionesModal = false;
+	let showClosureModal = false;
+
+	function checkFilterScroll() {
+		if (!filterScrollContainer) return;
+		const { scrollLeft, scrollWidth, clientWidth } = filterScrollContainer;
+		showLeftGradient = scrollLeft > 10;
+		showRightGradient = scrollWidth > clientWidth && scrollLeft < scrollWidth - clientWidth - 10;
+		showFilterIndicator = showRightGradient;
+	}
+
+	import jsPDF from 'jspdf';
+	import autoTable from 'jspdf-autotable';
+	import { FileText } from 'lucide-svelte';
+
+	onMount(() => {
+		mounted = true;
+		setTimeout(checkFilterScroll, 100);
+		window.addEventListener('resize', checkFilterScroll);
+		return () => window.removeEventListener('resize', checkFilterScroll);
+	});
+
+	function generatePDF() {
+		const doc = new jsPDF();
+		const pageWidth = doc.internal.pageSize.getWidth();
+		const margin = 14;
+
+		// --- Encabezado ---
+		doc.setFillColor(15, 16, 41);
+		doc.rect(0, 0, pageWidth, 40, 'F');
+
+		doc.setTextColor(255, 255, 255);
+		doc.setFontSize(22);
+		doc.setFont('helvetica', 'bold');
+		doc.text('Reporte de Colaborador', margin, 20);
+
+		doc.setFontSize(12);
+		doc.setFont('helvetica', 'normal');
+		doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, margin, 32);
+
+		doc.setFontSize(14);
+		doc.text('Conectando Corazones', pageWidth - margin, 20, { align: 'right' });
+		doc.setFontSize(10);
+		doc.setTextColor(161, 161, 170);
+		doc.text(data.info.nombre, pageWidth - margin, 32, { align: 'right' });
+
+		let yPos = 50;
+
+		// --- Métricas Generales ---
+		doc.setTextColor(15, 23, 42);
+		doc.setFontSize(16);
+		doc.setFont('helvetica', 'bold');
+		doc.text('Métricas Clave', margin, yPos);
+		yPos += 10;
+
+		const metricsData = [
+			['Proyectos Activos', data.metricas.proyectosTotales],
+			['Instituciones Alcanzadas', data.metricas.institucionesAlcanzadas],
+			['Mensajes No Leídos', data.metricas.mensajesNoLeidos],
+			['Solicitudes Pendientes', data.metricas.solicitudesPendientes],
+			['Próximo Cierre (días)', Math.floor(data.metricas.diasProximoCierre)]
+		];
+
+		autoTable(doc, {
+			startY: yPos,
+			head: [['Métrica', 'Valor']],
+			body: metricsData,
+			theme: 'grid',
+			headStyles: { fillColor: [16, 185, 129] },
+			styles: { fontSize: 10, cellPadding: 4 }
+		});
+
+		// @ts-ignore
+		yPos = doc.lastAutoTable.finalY + 20;
+
+		// --- Seguimiento de Objetivos ---
+		doc.text('Seguimiento de Objetivos', margin, yPos);
+		yPos += 10;
+
+		const objetivosData = data.seguimientoObjetivos.flatMap((proyecto) =>
+			proyecto.objetivos.map((obj) => [
+				`${proyecto.nombre} - ${obj.descripcion}`,
+				`${obj.actual} / ${obj.meta} ${obj.unidad}`,
+				`${obj.progreso}%`
+			])
+		);
+
+		autoTable(doc, {
+			startY: yPos,
+			head: [['Proyecto / Objetivo', 'Progreso', 'Porcentaje']],
+			body: objetivosData,
+			theme: 'striped',
+			headStyles: { fillColor: [59, 130, 246] }
+		});
+
+		// @ts-ignore
+		yPos = doc.lastAutoTable.finalY + 20;
+
+		// Pie de página
+		const pageCount = doc.getNumberOfPages();
+		for (let i = 1; i <= pageCount; i++) {
+			doc.setPage(i);
+			doc.setFontSize(8);
+			doc.setTextColor(150);
+			doc.text(
+				`Página ${i} de ${pageCount}`,
+				pageWidth / 2,
+				doc.internal.pageSize.getHeight() - 10,
+				{ align: 'center' }
+			);
+		}
+
+		doc.save(`reporte-institucional-${new Date().toISOString().split('T')[0]}.pdf`);
+	}
 </script>
 
-<div class="w-full space-y-8">
-	<!-- Header con saludo personalizado -->
-	<div class="text-center lg:text-left">
-		<div class="mb-3 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
-			<h2 class="text-3xl font-bold text-gray-900">
-				¡Hola, {colaboradorInfo.nombre}!
-			</h2>
-			{#if colaboradorInfo.tipoColaborador}
-				<span
-					class="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800"
-				>
-					{colaboradorInfo.tipoColaborador === 'unipersonal' ? 'Voluntario' : 'Organización'}
-				</span>
-			{/if}
-		</div>
-		<p class="text-gray-600">Tu impacto en proyectos solidarios</p>
-	</div>
+<div
+	class="min-h-screen overflow-x-hidden bg-[#0F1029] text-slate-200 selection:bg-emerald-500/30 selection:text-emerald-200"
+>
+	<!-- overlay de textura con ruido -->
+	<div
+		class="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+		style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"
+	></div>
 
-	<!-- Tarjetas de estadísticas -->
-	<div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-		<!-- Proyectos Colaborando -->
+	<div class="relative z-10 mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+		<!-- Elementos Decorativos de Fondo -->
 		<div
-			class="rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm transition-all hover:shadow-md"
-		>
-			<div class="flex items-start justify-between">
-				<div>
-					<p class="text-sm font-medium text-blue-600">Proyectos Colaborando</p>
-					<p class="mt-2 text-3xl font-bold text-blue-900">
-						{colaboradorInfo.proyectosColaborando}
-					</p>
-				</div>
-				<div class="rounded-lg bg-blue-200/50 p-3">
-					<Heart class="h-6 w-6 text-blue-700" />
-				</div>
-			</div>
-		</div>
-
-		<!-- Aportes Realizados -->
+			class="fixed top-0 left-1/4 -z-10 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-emerald-500/10 blur-[130px]"
+		></div>
 		<div
-			class="rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 p-6 shadow-sm transition-all hover:shadow-md"
-		>
-			<div class="flex items-start justify-between">
-				<div>
-					<p class="text-sm font-medium text-purple-600">Aportes Realizados</p>
-					<p class="mt-2 text-3xl font-bold text-purple-900">
-						{colaboradorInfo.aportesRealizados}
-					</p>
-				</div>
-				<div class="rounded-lg bg-purple-200/50 p-3">
-					<Upload class="h-6 w-6 text-purple-700" />
-				</div>
-			</div>
-		</div>
-
-		<!-- Evaluaciones Pendientes -->
+			class="fixed top-20 right-1/4 -z-10 h-[400px] w-[400px] rounded-full bg-blue-600/10 blur-[120px]"
+		></div>
 		<div
-			class="rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 p-6 shadow-sm transition-all hover:shadow-md sm:col-span-2 lg:col-span-1"
+			class="fixed bottom-0 left-1/3 -z-10 h-[300px] w-[300px] translate-y-1/2 rounded-full bg-blue-500/5 blur-[100px]"
+		></div>
+
+		<!-- Información del Encabezado -->
+		<div
+			class="animate-fade-in-up flex w-full flex-col justify-between gap-6 md:flex-row md:items-end"
 		>
-			<div class="flex items-start justify-between">
-				<div>
-					<p class="text-sm font-medium text-orange-600">Evaluaciones Pendientes</p>
-					<p class="mt-2 text-3xl font-bold text-orange-900">
-						{colaboradorInfo.evaluacionesPendientes}
-					</p>
-				</div>
-				<div class="rounded-lg bg-orange-200/50 p-3">
-					<CheckSquare class="h-6 w-6 text-orange-700" />
-				</div>
-			</div>
-		</div>
-	</div>
-
-	<!-- Proyectos Activos donde Colaboro -->
-	{#if proyectosRecientes.length > 0}
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<h3 class="text-xl font-semibold text-gray-900">Mis Proyectos Activos</h3>
-				<button
-					onclick={() => goto('/proyectos/mis-proyectos')}
-					class="text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
-				>
-					Ver todos →
-				</button>
-			</div>
-
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each proyectosRecientes as proyecto}
-					<button
-						onclick={() => goto(`/proyectos/${proyecto.id_proyecto}`)}
-						class="group rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm transition-all hover:border-blue-300 hover:shadow-md"
+			<div class="w-full">
+				<div class="mb-4 flex items-center gap-2 md:mb-6">
+					<span
+						class="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400"
 					>
-						<div class="mb-3 flex items-start justify-between">
-							<span
-								class={clsx(
-									'inline-block rounded-full px-3 py-1 text-xs font-semibold',
-									proyecto.estado === 'en_curso' && 'bg-green-100 text-green-700',
-									proyecto.estado === 'pendiente' && 'bg-yellow-100 text-yellow-700',
-									proyecto.estado === 'completado' && 'bg-blue-100 text-blue-700',
-									proyecto.estado === 'cancelado' && 'bg-red-100 text-red-700'
-								)}
-							>
-								{proyecto.estado === 'en_curso'
-									? 'En curso'
-									: proyecto.estado === 'pendiente'
-										? 'Pendiente'
-										: proyecto.estado === 'completado'
-											? 'Completado'
-											: 'Cancelado'}
-							</span>
-						</div>
-						<h4
-							class="mb-2 line-clamp-2 font-semibold text-gray-900 transition-colors group-hover:text-blue-600"
+						<span class="mr-1.5 h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
+						Panel de control
+					</span>
+				</div>
+				<h1
+					class="font-display mb-6 text-3xl font-bold tracking-tight text-white drop-shadow-sm md:mb-8 md:text-5xl lg:text-6xl"
+				>
+					Hola, <span
+						class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+						>{data.info.nombre}</span
+					>
+				</h1>
+				<div
+					class="flex w-full flex-col justify-between gap-4 text-sm font-medium text-slate-400 md:flex-row md:items-center md:text-base"
+				>
+					<!-- Metadata del Colaborador -->
+					<div class="flex flex-row flex-wrap items-center gap-3 md:gap-4">
+						<span
+							class="flex w-fit items-center gap-1.5 rounded-full border border-blue-500/20 bg-blue-500/10 px-3 py-1 text-blue-400 shadow-sm"
 						>
-							{proyecto.titulo}
-						</h4>
-						<p class="line-clamp-2 text-sm text-gray-600">
-							{proyecto.descripcion}
-						</p>
-					</button>
-				{/each}
+							<Users size={15} />
+							{data.info.tipo}
+						</span>
+						<span class="inline-block h-1 w-1 rounded-full bg-slate-600"></span>
+						<span class="flex items-center gap-1">
+							<MapPin size={14} class="text-slate-500" />
+							{data.info.ubicacion}
+						</span>
+					</div>
+
+					<!-- Alternar Filtros (Escritorio: Alineado a la derecha) -->
+					<div class="flex items-center gap-3">
+						<button
+							on:click={() => (showFilters = !showFilters)}
+							class="group flex w-fit items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 transition-all hover:bg-white/10 active:scale-95"
+						>
+							<Filter
+								size={14}
+								class="text-slate-400 transition-colors group-hover:text-blue-400"
+							/>
+							<span
+								class="text-xs font-medium text-slate-400 transition-colors group-hover:text-slate-200"
+							>
+								{showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+							</span>
+							<ChevronDown
+								size={14}
+								class="text-slate-500 transition-transform duration-300 {showFilters
+									? 'rotate-180'
+									: ''}"
+							/>
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
-	{:else}
-		<!-- Estado vacío si no colabora en ningún proyecto -->
-		<div class="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 text-center">
-			<div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
-				<Heart class="h-8 w-8 text-gray-400" />
-			</div>
-			<h3 class="mb-2 text-lg font-semibold text-gray-900">Aún no colaborás en ningún proyecto</h3>
-			<p class="mb-4 text-gray-600">
-				Descubrí proyectos que necesitan tu ayuda y comenzá a generar impacto
-			</p>
-			<Button
-				label="Descubrir Proyectos"
-				variant="primary"
-				size="sm"
-				onclick={() => goto('/proyectos')}
+
+		<!-- Acciones rápidas -->
+		<div class="animate-fade-in-up delay-100">
+			<AccionesRapidas
+				solicitudesPendientes={data.metricas.solicitudesPendientes}
+				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
+				bind:showEvidenceModal
+				bind:showClosureModal
+				onExportPDF={generatePDF}
 			/>
 		</div>
-	{/if}
 
-	<!-- Botones de Acción -->
-	<div class="space-y-4 rounded-2xl bg-gray-50 p-6">
-		<h3 class="text-lg font-semibold text-gray-900">Acciones Rápidas</h3>
-
-		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			<!-- Mis Solicitudes -->
-			<button
-				onclick={() => goto('/colaborador/solicitudes-colaboracion')}
-				class="group overflow-hidden rounded-xl border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 text-left transition-all hover:border-blue-400 hover:shadow-md"
+		{#if showFilters}
+			<div
+				transition:slide={{ duration: 300, axis: 'y' }}
+				class="relative flex w-full flex-col items-start justify-between gap-4 rounded-2xl border border-white/5 bg-white/5 p-6 backdrop-blur-md lg:flex-row lg:items-center"
 			>
-				<div class="mb-3 inline-flex rounded-lg bg-blue-100 p-2">
-					<Send class="h-5 w-5 text-blue-600" />
+				<div class="mb-2 flex items-center gap-2 text-slate-300 lg:mb-0">
+					<div class="rounded-lg bg-blue-500/10 p-2 text-blue-400">
+						<Filter size={18} />
+					</div>
+					<span class="text-sm font-medium">Filtrar vista por:</span>
 				</div>
-				<h4 class="font-semibold text-gray-900 group-hover:text-blue-600">
-					Mis Solicitudes de Colaboración
-				</h4>
-				<p class="mt-1 text-sm text-gray-600">Ver solicitudes enviadas</p>
-			</button>
 
-			<!-- Evaluar Finalización -->
-			<button
-				onclick={() => {
-					const primerProyecto = proyectosActivos[0];
-					if (primerProyecto) {
-						goto(`/colaborador/proyectos/${primerProyecto.id_proyecto}/evaluar-cierre`);
-					} else {
-						goto('/proyectos/mis-proyectos');
-					}
-				}}
-				class="group relative overflow-hidden rounded-xl border-2 border-orange-200 bg-white p-4 text-left transition-all hover:border-orange-400 hover:shadow-md"
-				disabled={proyectosActivos.length === 0}
-			>
-				{#if evaluacionesPendientes > 0}
-					<span
-						class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-					>
-						{evaluacionesPendientes}
-					</span>
+				<div
+					bind:this={filterScrollContainer}
+					on:scroll={checkFilterScroll}
+					class="grid w-full grid-cols-1 gap-3 pb-2 md:grid md:w-full md:grid-cols-3 md:pb-0 lg:w-auto xl:grid-cols-5"
+				>
+					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
+						<select
+							bind:value={filters.periodo}
+							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+						>
+							<option value="mes_actual">Este mes</option>
+							<option value="trimestre">Este trimestre</option>
+							<option value="anio">Este año</option>
+						</select>
+						<ChevronDown
+							size={14}
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+						/>
+					</div>
+
+					<div class="relative w-full min-w-[160px] shrink-0 snap-start">
+						<select
+							bind:value={filters.categoria}
+							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+						>
+							<option value="todas">Todas las categorías</option>
+							<option value="educacion">Educación</option>
+							<option value="salud">Salud</option>
+							<option value="tecnologia">Tecnología</option>
+						</select>
+						<ChevronDown
+							size={14}
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+						/>
+					</div>
+
+					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
+						<select
+							bind:value={filters.estado}
+							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+						>
+							<option value="todos">Todos los estados</option>
+							<option value="en_curso">En curso</option>
+							<option value="pendiente_solicitud_cierre">Pendiente solicitud cierre</option>
+							<option value="en_revision">En revisión</option>
+							<option value="completado">Completado</option>
+							<option value="cancelado">Cancelado</option>
+						</select>
+						<ChevronDown
+							size={14}
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+						/>
+					</div>
+
+					<div class="relative w-full min-w-[150px] shrink-0 snap-start">
+						<select
+							bind:value={filters.tipoParticipacion}
+							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+						>
+							<option value="todos">Cualquier ayuda</option>
+							<option value="voluntariado">Voluntariado</option>
+							<option value="monetaria">Monetaria</option>
+							<option value="especie">En especie</option>
+						</select>
+						<ChevronDown
+							size={14}
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+						/>
+					</div>
+
+					<div class="relative w-full min-w-[150px] shrink-0 snap-start">
+						<select
+							bind:value={filters.ubicacion}
+							class="focus:border-primary focus:ring-primary w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 focus:ring-1"
+						>
+							<option value="todas">Todas las ubicaciones</option>
+							<option value="local">Local</option>
+							<option value="provincial">Provincial</option>
+							<option value="nacional">Nacional</option>
+						</select>
+						<ChevronDown
+							size={14}
+							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+						/>
+					</div>
+				</div>
+
+				<!-- Indicadores de Scroll -->
+				{#if showLeftGradient}
+					<div
+						class="from-bg-[#0F1029] via-bg-[#0F1029]/80 pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-8 bg-gradient-to-r to-transparent md:hidden"
+					></div>
 				{/if}
-				<div class="mb-3 inline-flex rounded-lg bg-orange-100 p-2">
-					<CheckSquare class="h-5 w-5 text-orange-600" />
-				</div>
-				<h4 class="font-semibold text-gray-900 group-hover:text-orange-600">
-					Evaluar Finalización
-				</h4>
-				<p class="mt-1 text-sm text-gray-600">
-					{evaluacionesPendientes > 0
-						? `${evaluacionesPendientes} pendiente${evaluacionesPendientes > 1 ? 's' : ''}`
-						: 'Revisar cierres de proyectos'}
-				</p>
-			</button>
+				{#if showRightGradient}
+					<div
+						class="to-bg-[#0F1029] via-bg-[#0F1029]/80 pointer-events-none absolute top-0 right-0 bottom-0 z-10 flex w-12 items-center justify-end bg-gradient-to-r from-transparent p-2 md:hidden"
+					>
+						<ChevronRight size={16} class="text-primary animate-pulse" />
+					</div>
+				{/if}
+			</div>
+		{/if}
 
-			<!-- Mis Aportes -->
-			<button
-				onclick={() => goto('/colaborador/mis-aportes')}
-				class="group overflow-hidden rounded-xl border-2 border-purple-200 bg-white p-4 text-left transition-all hover:border-purple-400 hover:shadow-md"
-			>
-				<div class="mb-3 inline-flex rounded-lg bg-purple-100 p-2">
-					<Upload class="h-5 w-5 text-purple-600" />
+		<!-- Tarjetas de Métricas -->
+		<div class="animate-fade-in-up delay-200">
+			<MetricasPanel
+				metricas={{
+					proyectosActivos: data.metricas.proyectosTotales,
+					institucionesAlcanzadas: data.metricas.institucionesAlcanzadas,
+					nuevasInstituciones: data.metricas.nuevasInstituciones,
+					proximoCierre: data.metricas.diasProximoCierre
+				}}
+				on:clickInstituciones={() => (showInstitucionesModal = true)}
+				on:clickProyectos={() => (showProjectStats = true)}
+				on:clickAgenda={() => (showCalendarStats = true)}
+			/>
+		</div>
+
+		<!-- Grilla de Diseño Principal -->
+		<div class="animate-fade-in-up grid grid-cols-1 gap-6 delay-300 lg:grid-cols-12">
+			<!-- Columna Izquierda: Actividad Principal (7/12 ancho) -->
+			<div class="flex flex-col gap-6 lg:col-span-7">
+				<!-- Seguimiento de Objetivos -->
+				<div class="min-h-[400px]">
+					<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
 				</div>
-				<h4 class="font-semibold text-gray-900 group-hover:text-purple-600">Mis Aportes</h4>
-				<p class="mt-1 text-sm text-gray-600">Evidencias de entrada cargadas</p>
-			</button>
+				<!-- Heatmap de Actividad -->
+				<div class="flex-1">
+					<HeatmapActividad data={data.heatmapActividad} />
+				</div>
+			</div>
+
+			<!-- Columna Derecha: Estadísticas Laterales (5/12 ancho) -->
+			<div class="flex flex-col gap-6 lg:col-span-5">
+				<!-- Estadísticas Ayuda -->
+				<div class="min-h-[300px]">
+					<EstadisticasAyuda estadisticas={data.estadisticasAyuda} />
+				</div>
+
+				<!-- Últimas Reseñas -->
+				<div class="min-h-[300px]">
+					<UltimasResenas resenas={data.ultimasResenas} />
+				</div>
+			</div>
+		</div>
+
+		<!-- Fila Inferior: Proyectos y Novedades -->
+		<div class="animate-fade-in-up grid grid-cols-1 gap-6 delay-300 md:grid-cols-2">
+			<!-- Proyectos de la Comunidad -->
+			<div class="min-h-[200px]">
+				<ProyectosComunidad proyectos={data.proyectosComunidad} />
+			</div>
+
+			<!-- Novedades -->
+			<div class="min-h-[200px]">
+				<Novedades
+					novedades={[
+						{
+							id: '1',
+							titulo: 'Nueva función habilitada',
+							fecha: new Date().toISOString(),
+							contenido: 'Ahora podés exportar tus reportes en PDF.',
+							imagen:
+								'https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+						},
+						{
+							id: '2',
+							titulo: 'Lanzamiento a la comunidad',
+							fecha: '2026-02-13',
+							contenido:
+								'¡Ya tenemos fecha! El 13 de febrero será el primer lanzamiento oficial de Conectando Corazones.',
+							imagen:
+								'https://images.pexels.com/photos/853168/pexels-photo-853168.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+						}
+					]}
+				/>
+			</div>
 		</div>
 	</div>
 
-	<!-- CTA Principal para descubrir proyectos (mobile) -->
-	<div class="flex justify-center lg:hidden">
-		<Button
-			label="Descubrir Proyectos"
-			variant="primary"
-			size="md"
-			onclick={() => goto('/proyectos')}
-		/>
-	</div>
+	<!-- Modales -->
+
+	<EstadisticasProyectoModal
+		show={showProjectStats}
+		stats={data.metricas.estadisticasProyectos}
+		onClose={() => (showProjectStats = false)}
+	/>
+
+	<EstadisticasAgendaModal
+		show={showCalendarStats}
+		stats={data.metricas.estadisticasCalendario}
+		onClose={() => (showCalendarStats = false)}
+	/>
+
+	<GestionarEvidenciasModal
+		show={showEvidenceModal}
+		proyectos={data.metricas.estadisticasProyectos?.proyectosDestacados || []}
+		onClose={() => (showEvidenceModal = false)}
+	/>
+
+	<!-- Modal de Instituciones Alcanzadas -->
+	<InstitucionesAlcanzadasModal
+		show={showInstitucionesModal}
+		stats={data.metricas.estadisticasInstituciones}
+		onClose={() => (showInstitucionesModal = false)}
+	/>
+
+	<EvaluarCierreModal
+		show={showClosureModal}
+		proyectos={data.metricas.proyectosParaCierre || []}
+		onClose={() => (showClosureModal = false)}
+	/>
 </div>
+
+<style>
+	/* Animación personalizada de aparición (Fade In) */
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(20px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	.animate-fade-in-up {
+		animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		opacity: 0;
+	}
+	.delay-100 {
+		animation-delay: 100ms;
+	}
+	.delay-200 {
+		animation-delay: 200ms;
+	}
+	.delay-300 {
+		animation-delay: 300ms;
+	}
+</style>
