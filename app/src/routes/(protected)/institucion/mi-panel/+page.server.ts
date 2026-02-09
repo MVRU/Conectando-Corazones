@@ -1,10 +1,13 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { prisma } from '$lib/infrastructure/prisma/client';
-import { ProyectoMapper } from '$lib/infrastructure/supabase/postgres/mappers/proyecto.mapper';
+import { ObtenerDashboardInstitucion } from '$lib/domain/use-cases/institucion/ObtenerDashboardInstitucion';
+import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const usuario = locals.usuario;
+
 	if (!usuario) {
 		throw redirect(303, '/iniciar-sesion');
 	}
@@ -13,56 +16,25 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(303, '/mi-panel');
 	}
 
-	const id_usuario = usuario.id_usuario;
+	try {
+		const proyectoRepo = new PostgresProyectoRepository();
+		const colaboracionRepo = new PostgresColaboracionRepository();
+		const usuarioRepo = new PostgresUsuarioRepository();
 
-	// Datos para Institución
-	const proyectos = await prisma.proyecto.findMany({
-		where: { institucion_id: id_usuario },
-		include: {
-			estado: true,
-			colaboraciones: true,
-			participacion_permitida: {
-				include: { tipo_participacion: true }
-			},
-			proyecto_categorias: {
-				include: { categoria: true }
-			},
-			proyecto_ubicaciones: {
-				include: { ubicacion: { include: { localidad: { include: { provincia: true } } } } }
-			}
-		},
-		orderBy: { created_at: 'desc' }
-	});
+		const useCase = new ObtenerDashboardInstitucion(proyectoRepo, colaboracionRepo, usuarioRepo);
 
-	const stats = {
-		proyectosPublicados: proyectos.length,
-		proyectosActivos: proyectos.filter((p) => p.estado?.descripcion === 'en_curso').length,
-		totalRecaudado: 0,
-		tasaExito: 0
-	};
+		const dashboardData = await useCase.execute(usuario.id_usuario!);
 
-	const solicitudesPendientes = await prisma.colaboracion.count({
-		where: {
-			proyecto: { institucion_id: id_usuario },
-			estado: 'pending'
-		}
-	});
-
-	return JSON.parse(
-		JSON.stringify({
-			usuario,
-			proyectos: proyectos
-				.map((p) => {
-					try {
-						return ProyectoMapper.toDomain(p as any);
-					} catch (err) {
-						console.error(`Error al mapear proyecto ${p.id_proyecto} en panel institución:`, err);
-						return null;
-					}
-				})
-				.filter((p) => p !== null),
-			stats,
-			solicitudesPendientes
-		})
-	);
+		return {
+			usuario: { ...usuario },
+			dashboardData
+		};
+	} catch (error) {
+		console.error('Error al cargar dashboard institucional:', error);
+		return {
+			usuario: { ...usuario },
+			dashboardData: null,
+			error: 'Error al cargar los datos del dashboard'
+		};
+	}
 };

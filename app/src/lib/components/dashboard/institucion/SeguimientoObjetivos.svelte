@@ -14,10 +14,48 @@
 			actual: number;
 			meta: number;
 			unidad: string;
+			especie?: string;
 		}[];
 	}[] = [];
 
 	let revealed = false;
+
+	function obtenerColorProgreso(progreso: number): string {
+		if (progreso >= 75) return 'bg-emerald-500';
+		if (progreso >= 50) return 'bg-yellow-500';
+		if (progreso >= 25) return 'bg-orange-500';
+		return 'bg-red-500';
+	}
+
+	function obtenerSombraProgreso(progreso: number): string {
+		if (progreso >= 75) return 'shadow-[0_0_10px_rgba(16,185,129,0.4)]';
+		if (progreso >= 50) return 'shadow-[0_0_10px_rgba(234,179,8,0.4)]';
+		if (progreso >= 25) return 'shadow-[0_0_10px_rgba(249,115,22,0.4)]';
+		return 'shadow-[0_0_10px_rgba(239,68,68,0.4)]';
+	}
+
+	function obtenerEtiquetaObjetivo(obj: {
+		tipo: 'monetaria' | 'voluntariado' | 'especie';
+		descripcion: string;
+		especie?: string;
+		unidad: string;
+	}): string {
+		if (obj.tipo === 'especie' && obj.especie) {
+			return `${obj.especie}`;
+		}
+		return obj.descripcion;
+	}
+
+	function obtenerUnidadDisplay(obj: {
+		tipo: 'monetaria' | 'voluntariado' | 'especie';
+		unidad: string;
+		especie?: string;
+	}): string {
+		if (obj.tipo === 'especie' && obj.unidad) {
+			return obj.unidad;
+		}
+		return obj.unidad;
+	}
 </script>
 
 <div
@@ -28,7 +66,7 @@
 	<div class="mb-8 flex items-center justify-between">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Seguimiento de objetivos</h2>
 		<a
-			href="/institucion/progresos"
+			href="/proyectos?tab=mis-proyectos"
 			class="group text-primary flex items-center gap-1 text-sm font-medium transition-all hover:text-white"
 		>
 			Ver todo <ChevronRight size={16} class="transition-transform group-hover:translate-x-1" />
@@ -38,36 +76,36 @@
 	<div class="space-y-8">
 		{#each objetivos as proyecto}
 			<div class="border-b border-white/5 pb-6 last:border-0 last:pb-0">
-				<!-- Project Header -->
 				<div class="mb-4 flex items-center justify-between">
-					<h4 class="text-base font-medium text-white">
+					<a
+						href="/proyectos/{proyecto.id}"
+						class="text-base font-medium text-white transition-colors hover:text-emerald-400 hover:underline"
+					>
 						{proyecto.nombre}
-					</h4>
+					</a>
 					<span class="text-xs font-medium tracking-wide text-slate-500 uppercase"
 						>Cierre: {new Date(proyecto.fechaFin).toLocaleDateString()}</span
 					>
 				</div>
 
-				<!-- Goals List -->
 				<div class="space-y-5">
 					{#each proyecto.objetivos as obj}
 						<div>
 							<div class="mb-2 flex items-end justify-between text-sm">
-								<span class="text-slate-400">{obj.descripcion}</span>
+								<span class="text-slate-400">{obtenerEtiquetaObjetivo(obj)}</span>
 								<div class="text-right">
 									<span class="mr-2 font-bold text-white">{obj.progreso}%</span>
-									<span class="text-xs text-slate-500">{obj.actual} / {obj.meta} {obj.unidad}</span>
+									<span class="text-xs text-slate-500"
+										>{obj.actual} / {obj.meta}
+										{obtenerUnidadDisplay(obj)}</span
+									>
 								</div>
 							</div>
-							<!-- Progress Bar -->
 							<div class="relative h-2 w-full overflow-hidden rounded-full bg-white/5">
 								<div
-									class="absolute top-0 left-0 h-full rounded-full shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all duration-1000 ease-out
-                                    {obj.tipo === 'monetaria'
-										? 'bg-emerald-500'
-										: obj.tipo === 'voluntariado'
-											? 'bg-blue-500'
-											: 'bg-amber-500'}"
+									class="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out {obtenerColorProgreso(
+										obj.progreso
+									)} {obtenerSombraProgreso(obj.progreso)}"
 									style="width: {revealed ? obj.progreso : 0}%"
 								>
 									<div

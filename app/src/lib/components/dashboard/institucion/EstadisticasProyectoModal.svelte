@@ -148,7 +148,7 @@
 							Distribución por categorías
 						</h3>
 						<div class="space-y-4">
-							{#each stats.distribucionEstado as cat}
+							{#each stats.distribucionCategoria as cat}
 								<div>
 									<div class="mb-1 flex justify-between text-xs">
 										<span class="font-medium text-slate-300">{cat.label}</span>
@@ -201,7 +201,8 @@
 					</h3>
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						{#each stats.proyectosDestacados as project}
-							<div
+							<a
+								href="/proyectos/{project.id}"
 								class="group relative flex flex-col gap-4 rounded-xl border border-white/5 bg-slate-900/50 p-4 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5 hover:shadow-lg hover:shadow-emerald-900/20 sm:flex-row sm:items-center"
 							>
 								<div
@@ -244,7 +245,7 @@
 										{project.estado}
 									</span>
 								</div>
-							</div>
+							</a>
 						{/each}
 					</div>
 				</div>

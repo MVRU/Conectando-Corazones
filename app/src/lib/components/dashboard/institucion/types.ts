@@ -51,6 +51,7 @@ export interface EstadisticasColaboradores {
 	topColaboradores: {
 		id: string;
 		nombre: string;
+		username: string;
 		rol: string;
 		avatarUrl: string;
 		aportes: string;
@@ -99,6 +100,7 @@ export interface InstitucionDashboardData {
 	topColaboradores: {
 		id: string;
 		nombre: string;
+		username: string;
 		avatarUrl?: string; // opcional
 		aportes: number;
 		rol: string;

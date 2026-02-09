@@ -5,6 +5,7 @@
 	export let colaboradores: {
 		id: string;
 		nombre: string;
+		username: string;
 		avatarUrl?: string;
 		aportes: number;
 		rol: string;
@@ -58,11 +59,12 @@
 				</div>
 
 				<div class="min-w-0 flex-1">
-					<p
-						class="group-hover:text-primary truncate text-base font-medium text-white transition-colors"
+					<a
+						href="/perfil/{colab.username}"
+						class="group-hover:text-primary block truncate text-base font-medium text-white transition-colors hover:underline"
 					>
 						{colab.nombre}
-					</p>
+					</a>
 					<p class="truncate text-xs font-medium tracking-wide text-slate-500 uppercase">
 						{colab.rol}
 					</p>

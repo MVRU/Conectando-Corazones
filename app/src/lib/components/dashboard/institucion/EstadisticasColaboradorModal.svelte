@@ -131,25 +131,34 @@
 							Distribución por categorías
 						</h3>
 						<div class="space-y-3">
-							{#each stats.distribucionCategorias.slice(0, 3) as skill}
-								<div
-									class="relative flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-white/5 p-3 px-4 transition-colors hover:bg-white/10"
-								>
-									<!-- Progress Bar Background -->
+							{#if stats.distribucionCategorias && stats.distribucionCategorias.length > 0}
+								{#each stats.distribucionCategorias as skill}
 									<div
-										class="absolute top-0 left-0 h-full bg-amber-500/20 transition-all duration-1000 ease-out"
-										style="width: {skill.percentage}%"
-									></div>
+										class="relative flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-white/5 p-3 px-4 transition-colors hover:bg-white/10"
+									>
+										<!-- Progress Bar Background -->
+										<div
+											class="absolute top-0 left-0 h-full bg-amber-500/20 transition-all duration-1000 ease-out"
+											style="width: {skill.percentage}%"
+										></div>
 
-									<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
-										<span class="truncate font-medium text-slate-200">{skill.label}</span>
+										<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
+											<span class="truncate font-medium text-slate-200">{skill.label}</span>
+										</div>
+										<div class="relative z-10 flex-shrink-0 text-right">
+											<div class="font-bold text-white">{skill.count}</div>
+											<div class="text-[10px] text-slate-400">{skill.percentage}%</div>
+										</div>
 									</div>
-									<div class="relative z-10 flex-shrink-0 text-right">
-										<div class="font-bold text-white">{skill.count}</div>
-										<div class="text-[10px] text-slate-400">{skill.percentage}%</div>
+								{/each}
+							{:else}
+								<div class="flex flex-col items-center justify-center gap-2 py-8 text-slate-400">
+									<div class="rounded-full bg-slate-800 p-3">
+										<Star size={24} class="opacity-50" />
 									</div>
+									<span class="text-sm">Sin datos de categorías</span>
 								</div>
-							{/each}
+							{/if}
 						</div>
 					</div>
 
@@ -160,25 +169,34 @@
 							Distribución geográfica
 						</h3>
 						<div class="space-y-3">
-							{#each stats.distribucionUbicacion.slice(0, 3) as loc}
-								<div
-									class="relative flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-white/5 p-3 px-4 transition-colors hover:bg-white/10"
-								>
-									<!-- Progress Bar Background -->
+							{#if stats.distribucionUbicacion && stats.distribucionUbicacion.length > 0}
+								{#each stats.distribucionUbicacion as loc}
 									<div
-										class="absolute top-0 left-0 h-full bg-rose-500/20 transition-all duration-1000 ease-out"
-										style="width: {loc.percentage}%"
-									></div>
+										class="relative flex items-center justify-between gap-4 overflow-hidden rounded-xl bg-white/5 p-3 px-4 transition-colors hover:bg-white/10"
+									>
+										<!-- Progress Bar Background -->
+										<div
+											class="absolute top-0 left-0 h-full bg-rose-500/20 transition-all duration-1000 ease-out"
+											style="width: {loc.percentage}%"
+										></div>
 
-									<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
-										<span class="truncate font-medium text-slate-200">{loc.label}</span>
+										<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
+											<span class="truncate font-medium text-slate-200">{loc.label}</span>
+										</div>
+										<div class="relative z-10 flex-shrink-0 text-right">
+											<div class="font-bold text-white">{loc.count}</div>
+											<div class="text-[10px] text-slate-400">{loc.percentage}%</div>
+										</div>
 									</div>
-									<div class="relative z-10 flex-shrink-0 text-right">
-										<div class="font-bold text-white">{loc.count}</div>
-										<div class="text-[10px] text-slate-400">{loc.percentage}%</div>
+								{/each}
+							{:else}
+								<div class="flex flex-col items-center justify-center gap-2 py-8 text-slate-400">
+									<div class="rounded-full bg-slate-800 p-3">
+										<MapPin size={24} class="opacity-50" />
 									</div>
+									<span class="text-sm">Sin datos de ubicación</span>
 								</div>
-							{/each}
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -220,11 +238,12 @@
 									</div>
 								</div>
 								<div class="min-w-0 flex-1">
-									<div
-										class="truncate font-bold text-white transition-colors group-hover:text-blue-400"
+									<a
+										href="/perfil/{collaborator.username}"
+										class="block truncate font-bold text-white transition-colors group-hover:text-blue-400 hover:underline"
 									>
 										{collaborator.nombre}
-									</div>
+									</a>
 									<div class="truncate text-xs text-slate-400">{collaborator.rol}</div>
 									<div
 										class="mt-1 flex w-fit items-center gap-1 rounded-full bg-white/5 px-2 py-0.5 text-[10px] text-slate-300"
