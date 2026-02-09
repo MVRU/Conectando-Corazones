@@ -41,7 +41,7 @@ TODO:
 		}
 
 		try {
-			await authActions.login(identificador, password, recordarme);
+			const usuario = await authActions.login(identificador, password, recordarme);
 
 			toastStore.show({
 				variant: 'success',
@@ -50,8 +50,23 @@ TODO:
 			});
 
 			// Redirigir según el rol del usuario
-			// TODO: Implementar redirección basada en el rol
-			goto('/');
+			if (usuario) {
+				switch (usuario.rol) {
+					case 'institucion':
+						goto('/institucion/mi-panel');
+						break;
+					case 'colaborador':
+						goto('/colaborador/mi-panel');
+						break;
+					case 'administrador':
+						goto('/admin');
+						break;
+					default:
+						goto('/');
+				}
+			} else {
+				goto('/');
+			}
 		} catch (error) {
 			// El error ya se maneja en el store, pero mostramos toast también
 			console.error('Error en login:', error);

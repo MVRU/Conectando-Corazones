@@ -1,6 +1,7 @@
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
+import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import type { ParticipacionPermitida } from '$lib/domain/entities/ParticipacionPermitida';
 import type { InstitucionDashboardData } from '$lib/components/dashboard/institucion/types';
 import type { Colaboracion } from '$lib/domain/entities/Colaboracion';
@@ -12,7 +13,8 @@ export class ObtenerDashboardInstitucion {
 	constructor(
 		private proyectoRepo: ProyectoRepository,
 		private colaboracionRepo: ColaboracionRepository,
-		private usuarioRepo: UsuarioRepository
+		private usuarioRepo: UsuarioRepository,
+		private resenaRepo: ResenaRepository
 	) {}
 
 	async execute(institucionId: number): Promise<InstitucionDashboardData> {
@@ -647,7 +649,16 @@ export class ObtenerDashboardInstitucion {
 	}
 
 	private async obtenerUltimasResenas(institucionId: number) {
-		return [];
+		const resenas = await this.resenaRepo.findByObjetoAprobadas('institucion', institucionId, 5);
+
+		return resenas.map((r) => ({
+			id: r.id_resena?.toString() || '',
+			usuario: r.username || 'Usuario anónimo',
+			avatarUrl: undefined,
+			calificacion: r.puntaje || 0,
+			comentario: r.contenido || '',
+			fecha: new Date().toISOString()
+		}));
 	}
 
 	private generarAspectosMejorar(proyectos: Proyecto[]) {
