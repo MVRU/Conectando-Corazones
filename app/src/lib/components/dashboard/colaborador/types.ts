@@ -114,7 +114,8 @@ export interface ColaboradorDashboardData {
 		}[];
 	}[];
 	estadisticasAyuda: {
-		voluntariado: number; // Horas totales
+		voluntariado: number; // Horas, días o veces según la especie
+		unidadVoluntariado: string; // 'horas', 'dias', 'persona'
 		monetaria: number; // Pesos totales
 		especie: number; // Unidades totales
 		totalProyectos: number;

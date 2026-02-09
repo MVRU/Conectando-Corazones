@@ -25,6 +25,18 @@
 			onClose();
 		}
 	}
+	function formatCompactNumber(val: number): string {
+		if (val >= 1_000_000_000) {
+			return (val / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+		}
+		if (val >= 1_000_000) {
+			return (val / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+		}
+		if (val >= 1_000) {
+			return (val / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+		}
+		return val.toString();
+	}
 </script>
 
 <svelte:window on:keydown={handleKeydown} />
@@ -89,8 +101,14 @@
 								<TrendingUp size={12} /> Donado
 							</span>
 						</div>
-						<div class="mb-1 text-3xl font-bold text-white">
-							${stats.totalDineroRecaudado.toLocaleString('es-AR')}
+						<div class="mb-1 flex items-baseline gap-1">
+							<span class="text-lg font-bold text-emerald-500">$</span>
+							<span class="text-3xl font-extrabold tracking-tight text-white">
+								{formatCompactNumber(stats.totalDineroRecaudado)}
+							</span>
+							<span class="ml-1 text-xs font-bold tracking-wider text-emerald-500/80 uppercase"
+								>ARS</span
+							>
 						</div>
 						<div class="text-xs text-slate-400">Total aportado</div>
 						<div
@@ -145,7 +163,7 @@
 							Causas por categoría
 						</h3>
 						<div class="space-y-4">
-							{#each stats.distribucionEstado as cat}
+							{#each stats.distribucionCategoria as cat}
 								<div>
 									<div class="mb-1 flex justify-between text-xs">
 										<span class="font-medium text-slate-300">{cat.label}</span>
@@ -168,21 +186,23 @@
 							<PieChart size={18} class="text-violet-500" />
 							Estado de proyectos
 						</h3>
-						<div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+						<div class="grid grid-cols-2 gap-3">
 							{#each stats.distribucionEstado as estado}
 								<div
-									class="flex items-center justify-between rounded-xl bg-white/5 p-3 px-4 ring-1 ring-transparent transition-all hover:bg-white/10 hover:ring-white/10"
+									class="flex flex-col gap-2 rounded-xl bg-white/5 p-4 ring-1 ring-transparent transition-all hover:bg-white/10 hover:ring-white/10"
 								>
-									<div class="flex items-center gap-3">
+									<div class="flex items-center gap-2">
 										<div
-											class="h-3 w-3 rounded-full"
+											class="h-3 w-3 flex-shrink-0 rounded-full"
 											style="background-color: {estado.color}; box-shadow: 0 0 10px {estado.color}40;"
 										></div>
-										<span class="font-medium text-slate-200">{estado.label}</span>
+										<span class="text-xs leading-tight font-medium text-slate-300"
+											>{estado.label}</span
+										>
 									</div>
-									<div class="text-right">
-										<div class="font-bold text-white">{estado.count}</div>
-										<div class="text-[10px] text-slate-400">{estado.percentage}%</div>
+									<div class="flex items-baseline justify-between">
+										<div class="text-2xl font-bold text-white">{estado.count}</div>
+										<div class="text-xs text-slate-400">{estado.percentage}%</div>
 									</div>
 								</div>
 							{/each}

@@ -5,6 +5,7 @@
 
 	export let estadisticas: {
 		voluntariado: number;
+		unidadVoluntariado: string;
 		monetaria: number;
 		especie: number;
 		totalProyectos: number;
@@ -15,13 +16,24 @@
 		};
 	};
 
-	// Formateador de moneda
-	const formatCurrency = (val: number) =>
-		new Intl.NumberFormat('es-AR', {
-			style: 'currency',
-			currency: 'ARS',
-			maximumFractionDigits: 0
-		}).format(val);
+	// Formateador compacto de números
+	const formatCompactNumber = (val: number): string => {
+		if (val >= 1_000_000_000) {
+			return (val / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+		}
+		if (val >= 1_000_000) {
+			return (val / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+		}
+		if (val >= 1_000) {
+			return (val / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+		}
+		return val.toString();
+	};
+
+	// Formateador compacto de moneda
+	const formatCompactCurrency = (val: number): string => {
+		return '$' + formatCompactNumber(val);
+	};
 
 	// Calculate target percentages for the donut chart based on PROJECT COUNT (distribucion)
 	$: totalDistribucion =
@@ -96,17 +108,25 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+						class="h-3 w-3 flex-shrink-0 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>Voluntariado</span
 					>
 				</div>
-				<div class="flex items-baseline gap-2 pl-6">
+				<div class="flex flex-wrap items-baseline gap-2 pl-6">
 					<span class="text-2xl font-bold tracking-tight text-white"
-						>{estadisticas.voluntariado}</span
+						>{formatCompactNumber(estadisticas.voluntariado)}</span
 					>
-					<span class="text-xs font-medium text-slate-500 uppercase">hs</span>
+					<span class="text-xs font-medium text-slate-500 uppercase">
+						{#if estadisticas.unidadVoluntariado === 'horas'}
+							hs
+						{:else if estadisticas.unidadVoluntariado === 'dias'}
+							días
+						{:else}
+							veces
+						{/if}
+					</span>
 				</div>
 			</div>
 
@@ -114,16 +134,17 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
+						class="h-3 w-3 flex-shrink-0 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>Monetaria</span
 					>
 				</div>
-				<div class="flex items-baseline gap-2 pl-6">
+				<div class="flex flex-wrap items-baseline gap-2 pl-6">
 					<span class="text-2xl font-bold tracking-tight text-white"
-						>{formatCurrency(estadisticas.monetaria)}</span
+						>{formatCompactCurrency(estadisticas.monetaria)}</span
 					>
+					<span class="text-xs font-medium text-slate-500 uppercase">ARS</span>
 				</div>
 			</div>
 
@@ -131,14 +152,16 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
+						class="h-3 w-3 flex-shrink-0 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>En especie</span
 					>
 				</div>
-				<div class="flex items-baseline gap-2 pl-6">
-					<span class="text-2xl font-bold tracking-tight text-white">{estadisticas.especie}</span>
+				<div class="flex flex-wrap items-baseline gap-2 pl-6">
+					<span class="text-2xl font-bold tracking-tight text-white"
+						>{formatCompactNumber(estadisticas.especie)}</span
+					>
 					<span class="text-xs font-medium text-slate-500 uppercase">unid.</span>
 				</div>
 			</div>

@@ -1,9 +1,20 @@
 <script lang="ts">
-	import { FolderOpen, Users, CalendarClock } from 'lucide-svelte';
+	import {
+		FolderOpen,
+		Users,
+		CalendarClock,
+		Flame,
+		AlertTriangle,
+		Clock,
+		Calendar,
+		CheckCircle2,
+		Smile
+	} from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import { createEventDispatcher } from 'svelte';
+	import type { ComponentType } from 'svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -23,6 +34,60 @@
 		tInstituciones.set(metricas.institucionesAlcanzadas);
 		tCierre.set(metricas.proximoCierre);
 	}
+
+	// Función para generar mensaje contextual según días restantes
+	function getMensajeCierre(dias: number): {
+		texto: string;
+		icono: ComponentType;
+		colorTexto: string;
+		colorIcono: string;
+	} {
+		if (dias === 0) {
+			return {
+				texto: '¡Hoy es el día!',
+				icono: Flame,
+				colorTexto: 'text-amber-300',
+				colorIcono: 'text-amber-400'
+			};
+		} else if (dias <= 3) {
+			return {
+				texto: '¡Fecha límite inminente!',
+				icono: AlertTriangle,
+				colorTexto: 'text-amber-300',
+				colorIcono: 'text-amber-400'
+			};
+		} else if (dias <= 7) {
+			return {
+				texto: 'Fecha límite cercana',
+				icono: Clock,
+				colorTexto: 'text-amber-400',
+				colorIcono: 'text-amber-500'
+			};
+		} else if (dias <= 14) {
+			return {
+				texto: 'Aún hay tiempo',
+				icono: Calendar,
+				colorTexto: 'text-amber-400',
+				colorIcono: 'text-amber-500'
+			};
+		} else if (dias <= 30) {
+			return {
+				texto: 'Todo bajo control',
+				icono: CheckCircle2,
+				colorTexto: 'text-amber-400/80',
+				colorIcono: 'text-amber-500/80'
+			};
+		} else {
+			return {
+				texto: 'Sin urgencias',
+				icono: Smile,
+				colorTexto: 'text-amber-400/60',
+				colorIcono: 'text-amber-500/60'
+			};
+		}
+	}
+
+	$: mensajeCierre = getMensajeCierre(metricas.proximoCierre);
 </script>
 
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -114,10 +179,9 @@
 				</div>
 			</div>
 			<div class="mt-4">
-				<span
-					class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-xs font-medium text-amber-300"
-				>
-					<span class="mr-1 font-bold">Atención</span> fecha límite cercana
+				<span class="flex items-center gap-1.5 text-sm {mensajeCierre.colorTexto}">
+					<svelte:component this={mensajeCierre.icono} size={16} class={mensajeCierre.colorIcono} />
+					{mensajeCierre.texto}
 				</span>
 			</div>
 		</div>

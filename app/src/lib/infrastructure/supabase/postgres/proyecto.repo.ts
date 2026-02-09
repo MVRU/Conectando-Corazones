@@ -18,7 +18,11 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		participacion_permitida: {
 			include: {
 				tipo_participacion: true,
-				colaboraciones_tipo_participacion: true
+				colaboraciones_tipo_participacion: {
+					include: {
+						colaboracion: true
+					}
+				}
 			}
 		},
 		proyecto_ubicaciones: {

@@ -18,6 +18,25 @@
 	}[] = [];
 
 	let revealed = false;
+
+	// Formateador compacto de números
+	const formatCompactNumber = (val: number): string => {
+		if (val >= 1_000_000_000) {
+			return (val / 1_000_000_000).toFixed(1).replace(/\.0$/, '') + 'B';
+		}
+		if (val >= 1_000_000) {
+			return (val / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M';
+		}
+		if (val >= 1_000) {
+			return (val / 1_000).toFixed(1).replace(/\.0$/, '') + 'K';
+		}
+		return val.toString();
+	};
+
+	// Formateador moneda
+	const formatMoney = (val: number) => {
+		return '$' + formatCompactNumber(val);
+	};
 </script>
 
 <div
@@ -28,7 +47,7 @@
 	<div class="mb-8 flex items-center justify-between">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Seguimiento de objetivos</h2>
 		<a
-			href="/colaborador/progresos"
+			href="/proyectos?tab=mis-proyectos"
 			class="group text-primary flex items-center gap-1 text-sm font-medium transition-all hover:text-white"
 		>
 			Ver todo <ChevronRight size={16} class="transition-transform group-hover:translate-x-1" />
@@ -56,7 +75,14 @@
 								<span class="text-slate-400">{obj.descripcion}</span>
 								<div class="text-right">
 									<span class="mr-2 font-bold text-white">{obj.progreso}%</span>
-									<span class="text-xs text-slate-500">{obj.actual} / {obj.meta} {obj.unidad}</span>
+									<span class="text-xs text-slate-500">
+										{#if obj.tipo === 'monetaria'}
+											{formatMoney(obj.actual)} / {formatMoney(obj.meta)} {obj.unidad}
+										{:else}
+											{formatCompactNumber(obj.actual)} / {formatCompactNumber(obj.meta)}
+											{obj.unidad}
+										{/if}
+									</span>
 								</div>
 							</div>
 							<!-- Barra de Progreso -->
