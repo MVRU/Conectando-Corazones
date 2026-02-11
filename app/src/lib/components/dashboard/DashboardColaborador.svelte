@@ -62,66 +62,174 @@
 		return () => window.removeEventListener('resize', checkFilterScroll);
 	});
 
-	function generatePDF() {
+	async function loadImage(url: string): Promise<HTMLImageElement> {
+		return new Promise((resolve, reject) => {
+			const img = new Image();
+			img.crossOrigin = 'Anonymous';
+			img.src = url;
+			img.onload = () => resolve(img);
+			img.onerror = reject;
+		});
+	}
+
+	async function generatePDF() {
 		const doc = new jsPDF();
 		const pageWidth = doc.internal.pageSize.getWidth();
-		const margin = 14;
+		const pageHeight = doc.internal.pageSize.getHeight();
+		const margin = 20;
+		let yPos = 20;
 
-		// --- Encabezado ---
+		// Load Logo
+		let logoImg: HTMLImageElement | null = null;
+		try {
+			logoImg = await loadImage('/logo-1.png');
+		} catch (e) {
+			console.error('No se pudo cargar el logo', e);
+		}
+
+		// --- Header ---
 		doc.setFillColor(15, 16, 41);
-		doc.rect(0, 0, pageWidth, 40, 'F');
+		doc.rect(0, 0, pageWidth, 55, 'F');
+
+		if (logoImg) {
+			const logoWidth = 25;
+			const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
+			doc.addImage(logoImg, 'PNG', margin, 15, logoWidth, logoHeight);
+		}
 
 		doc.setTextColor(255, 255, 255);
 		doc.setFontSize(22);
 		doc.setFont('helvetica', 'bold');
-		doc.text('Reporte de Colaborador', margin, 20);
+		const titleX = logoImg ? margin + 30 : margin;
+		doc.text('Reporte de Impacto', titleX, 25);
 
 		doc.setFontSize(12);
 		doc.setFont('helvetica', 'normal');
-		doc.text(`Generado: ${new Date().toLocaleDateString('es-AR')}`, margin, 32);
+		doc.setTextColor(148, 163, 184); // Slate 400
+		doc.text(data.info.tipo.toUpperCase(), titleX, 32);
 
-		doc.setFontSize(14);
-		doc.text('Conectando Corazones', pageWidth - margin, 20, { align: 'right' });
 		doc.setFontSize(10);
-		doc.setTextColor(161, 161, 170);
-		doc.text(data.info.nombre, pageWidth - margin, 32, { align: 'right' });
+		doc.setTextColor(203, 213, 225); // Slate 300
+		doc.text(data.info.ubicacion, titleX, 38);
 
-		let yPos = 50;
+		if (data.info.bio) {
+			doc.setFontSize(9);
+			doc.setFont('helvetica', 'italic');
+			doc.setTextColor(148, 163, 184); // Slate 400
+			const bioLines = doc.splitTextToSize(data.info.bio, pageWidth - titleX - margin);
+			doc.text(bioLines.slice(0, 2), titleX, 44);
+		}
 
-		// --- Métricas Generales ---
+		yPos = 70;
+
+		// --- Métricas Clave (Grilla 3x2) ---
 		doc.setTextColor(15, 23, 42);
 		doc.setFontSize(16);
 		doc.setFont('helvetica', 'bold');
 		doc.text('Métricas Clave', margin, yPos);
 		yPos += 10;
 
-		const metricsData = [
-			['Proyectos Activos', data.metricas.proyectosTotales],
-			['Instituciones Alcanzadas', data.metricas.institucionesAlcanzadas],
-			['Mensajes No Leídos', data.metricas.mensajesNoLeidos],
-			['Solicitudes Pendientes', data.metricas.solicitudesPendientes],
-			['Próximo Cierre (días)', Math.floor(data.metricas.diasProximoCierre)]
+		const metrics = [
+			{ label: 'Proyectos Colaborados', value: data.metricas.proyectosTotales.toString() },
+			{
+				label: 'Instituciones Ayudadas',
+				value: data.metricas.institucionesAlcanzadas.toString()
+			},
+			{
+				label: 'Total Aportado (ARS)',
+				value: `$${(data.metricas.estadisticasProyectos?.totalDineroRecaudado || 0).toLocaleString('es-AR')}`
+			},
+			{
+				label: 'Beneficiarios Alcanzados',
+				value: (data.metricas.estadisticasProyectos?.totalBeneficiarios || 0).toString()
+			},
+			{ label: 'Solicitudes Pendientes', value: data.metricas.solicitudesPendientes.toString() },
+			{
+				label: 'Progreso Promedio',
+				value: `${data.metricas.estadisticasProyectos?.promedioProgreso || 0}%`
+			}
 		];
 
-		autoTable(doc, {
-			startY: yPos,
-			head: [['Métrica', 'Valor']],
-			body: metricsData,
-			theme: 'grid',
-			headStyles: { fillColor: [16, 185, 129] },
-			styles: { fontSize: 10, cellPadding: 4 }
+		const gridCols = 3;
+		const colWidth = (pageWidth - margin * 2) / gridCols;
+		const rowHeight = 22;
+
+		metrics.forEach((metric, index) => {
+			const col = index % gridCols;
+			const row = Math.floor(index / gridCols);
+			const x = margin + col * colWidth;
+			const y = yPos + row * rowHeight;
+
+			doc.setFillColor(248, 250, 252); // Slate 50
+			doc.setDrawColor(226, 232, 240); // Slate 200
+			doc.roundedRect(x + 2, y, colWidth - 4, rowHeight - 6, 3, 3, 'FD');
+
+			doc.setFontSize(8);
+			doc.setFont('helvetica', 'normal');
+			doc.setTextColor(100, 116, 139);
+			doc.text(metric.label, x + 6, y + 6);
+
+			doc.setFontSize(11);
+			doc.setFont('helvetica', 'bold');
+			doc.setTextColor(15, 23, 42);
+			doc.text(metric.value, x + 6, y + 12);
 		});
 
-		// @ts-ignore
-		yPos = doc.lastAutoTable.finalY + 20;
+		yPos += Math.ceil(metrics.length / gridCols) * rowHeight + 10;
 
-		// --- Seguimiento de Objetivos ---
-		doc.text('Seguimiento de Objetivos', margin, yPos);
+		// --- Análisis de Impacto ---
+		doc.setFontSize(14);
+		doc.setFont('helvetica', 'bold');
+		doc.text('Distribución de Ayuda por Tipo', margin, yPos);
 		yPos += 10;
 
-		const objetivosData = data.seguimientoObjetivos.flatMap((proyecto) =>
-			proyecto.objetivos.map((obj) => [
-				`${proyecto.nombre} - ${obj.descripcion}`,
+		const impactData = [
+			{
+				label: 'Monetaria',
+				value: data.estadisticasAyuda.monetaria,
+				unit: 'ARS',
+				color: [16, 185, 129]
+			},
+			{
+				label: 'Voluntariado',
+				value: data.estadisticasAyuda.voluntariado,
+				unit: data.estadisticasAyuda.unidadVoluntariado,
+				color: [59, 130, 246]
+			},
+			{
+				label: 'En Especie',
+				value: data.estadisticasAyuda.especie,
+				unit: 'unidades',
+				color: [245, 158, 11]
+			}
+		];
+
+		impactData.forEach((item) => {
+			doc.setFontSize(10);
+			doc.setFont('helvetica', 'bold');
+			doc.setTextColor(71, 85, 105);
+			doc.text(`${item.label}:`, margin, yPos);
+
+			const valText = `${item.value.toLocaleString('es-AR')} ${item.unit}`;
+			doc.setFont('helvetica', 'normal');
+			doc.text(valText, margin + 30, yPos);
+
+			yPos += 6;
+		});
+
+		yPos += 10;
+
+		// --- Seguimiento de Objetivos ---
+		doc.setFontSize(14);
+		doc.setFont('helvetica', 'bold');
+		doc.setTextColor(15, 23, 42);
+		doc.text('Seguimiento de Objetivos en Proyectos', margin, yPos);
+		yPos += 5;
+
+		const objetivosRows = data.seguimientoObjetivos.flatMap((p) =>
+			p.objetivos.map((obj) => [
+				p.nombre,
+				obj.descripcion,
 				`${obj.actual} / ${obj.meta} ${obj.unidad}`,
 				`${obj.progreso}%`
 			])
@@ -129,30 +237,34 @@
 
 		autoTable(doc, {
 			startY: yPos,
-			head: [['Proyecto / Objetivo', 'Progreso', 'Porcentaje']],
-			body: objetivosData,
-			theme: 'striped',
-			headStyles: { fillColor: [59, 130, 246] }
+			head: [['Proyecto', 'Objetivo / Especie', 'Avance', '%']],
+			body: objetivosRows,
+			theme: 'grid',
+			headStyles: { fillColor: [15, 16, 41], textColor: 255 },
+			styles: { fontSize: 9 },
+			columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 }, 3: { halign: 'center' } },
+			margin: { left: margin, right: margin }
 		});
 
 		// @ts-ignore
-		yPos = doc.lastAutoTable.finalY + 20;
+		yPos = doc.lastAutoTable.finalY + 15;
 
-		// Pie de página
-		const pageCount = doc.getNumberOfPages();
-		for (let i = 1; i <= pageCount; i++) {
+		// --- Footer ---
+		const totalPages = doc.getNumberOfPages();
+		for (let i = 1; i <= totalPages; i++) {
 			doc.setPage(i);
 			doc.setFontSize(8);
-			doc.setTextColor(150);
-			doc.text(
-				`Página ${i} de ${pageCount}`,
-				pageWidth / 2,
-				doc.internal.pageSize.getHeight() - 10,
-				{ align: 'center' }
-			);
+			doc.setTextColor(148, 163, 184);
+			doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+
+			const dateStr = `Generado el: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`;
+			doc.text(dateStr, margin, pageHeight - 10);
+			doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 10, {
+				align: 'right'
+			});
 		}
 
-		doc.save(`reporte-institucional-${new Date().toISOString().split('T')[0]}.pdf`);
+		doc.save(`reporte-colaborador-${data.info.nombre.replace(/\s+/g, '-').toLowerCase()}.pdf`);
 	}
 </script>
 
@@ -408,6 +520,7 @@
 
 				<!-- Últimas Reseñas -->
 				<div class="min-h-[300px]">
+					<!-- TODO: implementar módulo de reseñas -->
 					<UltimasResenas resenas={data.ultimasResenas} />
 				</div>
 			</div>

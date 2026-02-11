@@ -79,6 +79,7 @@ export interface ColaboradorDashboardData {
 		tipo: string;
 		fecha: string;
 		ubicacion: string;
+		bio?: string;
 	};
 	metricas: {
 		proyectosTotales: number;

@@ -57,13 +57,15 @@ export class ObtenerDashboardInstitucion {
 			? Math.ceil((proximoCierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
 			: 0;
 
-		const proyectosPendienteCierre = proyectos.filter((p) => {
-			if (!p.fecha_fin_tentativa) return false;
-			const fechaFin = new Date(p.fecha_fin_tentativa as string);
-			const diff = fechaFin.getTime() - hoy.getTime();
-			const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-			return dias >= 0 && dias <= 30 && p.estado === 'pendiente_solicitud_cierre';
-		}).length;
+		const proyectosPendienteCierre = proyectos.filter(
+			(p) => p.estado === 'pendiente_solicitud_cierre'
+		).length;
+
+		const estaVerificado = !!(
+			institucion.estado_verificacion === 'aprobada' ||
+			(institucion.verificaciones &&
+				institucion.verificaciones.some((v: any) => v.estado === 'aprobada'))
+		);
 
 		const colaboradoresUnicos = new Set(
 			colaboracionesAprobadas.map((c) => c.colaborador_id).filter(Boolean)
@@ -95,7 +97,12 @@ export class ObtenerDashboardInstitucion {
 					month: 'long',
 					day: 'numeric'
 				}),
-				ubicacion: (institucion as any).domicilio_legal || 'Sin ubicación'
+				ubicacion:
+					institucion.localidad?.nombre && institucion.localidad?.provincia?.nombre
+						? `${institucion.localidad.nombre}, ${institucion.localidad.provincia.nombre}`
+						: (institucion as any).domicilio_legal || 'Sin ubicación',
+				estaVerificado,
+				bio: institucion.descripcion || 'Sin descripción disponible.'
 			},
 			metricas: {
 				proyectosTotales: proyectos.length,

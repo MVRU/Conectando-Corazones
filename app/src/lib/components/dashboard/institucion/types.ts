@@ -65,6 +65,8 @@ export interface InstitucionDashboardData {
 		tipo: string;
 		fecha: string;
 		ubicacion: string;
+		estaVerificado: boolean;
+		bio?: string;
 	};
 	metricas: {
 		proyectosTotales: number;

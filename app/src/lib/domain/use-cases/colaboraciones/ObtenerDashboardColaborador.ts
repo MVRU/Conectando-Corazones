@@ -62,13 +62,7 @@ export class ObtenerDashboardColaborador {
 			: 0;
 
 		const proyectosParaCierre = proyectosColaborador
-			.filter((p) => {
-				if (!p.fecha_fin_tentativa) return false;
-				const fechaFin = new Date(p.fecha_fin_tentativa);
-				const diff = fechaFin.getTime() - hoy.getTime();
-				const dias = Math.ceil(diff / (1000 * 60 * 60 * 24));
-				return dias >= 0 && dias <= 30 && p.estado === 'en_revision';
-			})
+			.filter((p) => p.estado === 'en_revision')
 			.map((p) => ({
 				id: p.id_proyecto?.toString() || '',
 				titulo: p.titulo,
@@ -79,9 +73,10 @@ export class ObtenerDashboardColaborador {
 				estado: p.estado || 'desconocido'
 			}));
 
-		const ubicacion = colaborador.localidad
-			? `${colaborador.localidad.nombre}, ${colaborador.localidad.provincia?.nombre || ''}`
-			: 'Sin ubicación';
+		const ubicacion =
+			colaborador.localidad?.nombre && colaborador.localidad?.provincia?.nombre
+				? `${colaborador.localidad.nombre}, ${colaborador.localidad.provincia.nombre}`
+				: 'Sin ubicación';
 
 		const tipoColaborador =
 			colaborador.tipo_colaborador === 'unipersonal'
@@ -124,7 +119,8 @@ export class ObtenerDashboardColaborador {
 					month: 'long',
 					day: 'numeric'
 				}),
-				ubicacion
+				ubicacion,
+				bio: colaborador.descripcion
 			},
 			metricas: {
 				proyectosTotales: proyectosColaborador.length,
