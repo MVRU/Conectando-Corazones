@@ -44,10 +44,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		orderBy: { created_at: 'desc' },
 		include: {
 			solicitud_evidencias: {
-				include: { evidencia: { include: { archivos: true } } }
+				include: {
+					evidencia: {
+						include: {
+							archivos: {
+								include: { usuario: true }
+							}
+						}
+					}
+				}
 			}
 		}
 	});
+
+	// Para el frontend
+	const evidencias = solicitud?.solicitud_evidencias?.map((se) => se.evidencia) ?? [];
 
 	// Si no hay solicitud y el proyecto está en revisión, es un estado inconsistente o
 	// la solicitud se borró manualmente. Manejar con cuidado.
@@ -72,7 +83,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	return {
 		proyecto: JSON.parse(JSON.stringify(proyecto)),
-		solicitud: JSON.parse(JSON.stringify(solicitud)), // Serializar fechas
+		solicitud: JSON.parse(JSON.stringify({ ...solicitud, evidencias })),
 		evaluacion: evaluacionUsuario ? JSON.parse(JSON.stringify(evaluacionUsuario)) : null,
 		yaVote: !!evaluacionUsuario,
 		totalColaboradores,
