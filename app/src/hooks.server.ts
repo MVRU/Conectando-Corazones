@@ -4,19 +4,26 @@ import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres
 import { env } from '$lib/infrastructure/config/env';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// 1. Inicializar Supabase Client para SSR
+	const rememberMe = event.cookies.get('remember_me') === 'true';
+
 	event.locals.supabase = createServerClient(env.SUPABASE_URL || '', env.SUPABASE_ANON_KEY || '', {
 		cookies: {
 			getAll: () => event.cookies.getAll(),
 			setAll: (cookiesToSet) => {
 				cookiesToSet.forEach(({ name, value, options }) => {
-					event.cookies.set(name, value, { ...options, path: '/' });
+					const cookieOptions = { ...options, path: '/' };
+					// Si el usuario pidió recordar sesión, extendemos la duración de las cookies de auth
+					if (rememberMe) {
+						cookieOptions.maxAge = 60 * 60 * 24 * 30; // 30 días
+					} else if (cookieOptions.maxAge) {
+						cookieOptions.maxAge = undefined;
+					}
+					event.cookies.set(name, value, cookieOptions);
 				});
 			}
 		}
 	});
 
-	// 2. Helper seguro para obtener sesión
 	event.locals.safeGetSession = async () => {
 		const {
 			data: { user },
@@ -34,33 +41,55 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return { session, user };
 	};
 
-	// 3. Ejecutar auth check
 	const { session, user } = await event.locals.safeGetSession();
 	event.locals.session = session;
 	event.locals.user = user;
 
-	// 4. Sincronizar con Usuario de dominio (PostgreSQL)
 	if (user) {
-		const usuarioRepo = new PostgresUsuarioRepository();
-		const usuario = await usuarioRepo.findByAuthId(user.id);
+		const sessionCookie = event.cookies.get('session_usuario');
+		let usuario: PostgresUsuarioRepository | null = null;
 
-		if (usuario) {
-			event.locals.usuario = usuario;
-		} else {
-			// Usuario autenticado en Supabase pero no existe en nuestra DB
-			// Esto puede pasar si el registro falló a medias o se borró el usuario local.
-			// Permitimos continuar, pero event.locals.usuario será undefined.
-			console.warn(`Usuario autenticado en Supabase (ID: ${user.id}) sin registro en DB local.`);
+		if (sessionCookie) {
+			try {
+				const parsed = JSON.parse(sessionCookie);
+				// Verificar que la cookie pertenezca al usuario autenticado actual
+				if (parsed.auth_user_id === user.id) {
+					const { Usuario } = await import('$lib/domain/entities/Usuario');
+					event.locals.usuario = new Usuario(parsed);
+				}
+			} catch (e) {
+				console.warn('Error al parsear cookie de sesión de usuario, se invalidará.', e);
+				event.cookies.delete('session_usuario', { path: '/' });
+			}
+		}
+
+		// Si no se recuperó de la cookie (o era inválida/otro usuario), consultar DB
+		if (!event.locals.usuario) {
+			const usuarioRepo = new PostgresUsuarioRepository();
+			const usuarioDb = await usuarioRepo.findByAuthId(user.id);
+
+			if (usuarioDb) {
+				event.locals.usuario = usuarioDb;
+				const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
+				event.cookies.set('session_usuario', JSON.stringify(usuarioDb), {
+					path: '/',
+					httpOnly: false,
+					secure: process.env.NODE_ENV === 'production',
+					sameSite: 'lax',
+					maxAge
+				});
+			} else {
+				console.warn(`Usuario autenticado en Supabase (ID: ${user.id}) sin registro en DB local.`);
+			}
 		}
 	}
 
-	// 5. Protección de Rutas (Middleware)
+	// Protección de Rutas (Middleware)
 	if (event.url.pathname.startsWith('/mis-proyectos')) {
 		if (!event.locals.usuario) {
 			throw redirect(303, '/iniciar-sesion');
 		}
 	}
-	// Protección de rutas api que requieran auth estricta podría ir aquí o en cada endpoint
 
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {

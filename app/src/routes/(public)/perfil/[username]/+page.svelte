@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { error } from '@sveltejs/kit';
-	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
+	import { usuario as usuarioStore, isAuthenticated, isLoading } from '$lib/stores/auth';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
 	import type { PageData } from './$types';
 
@@ -11,13 +11,9 @@
 
 	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
 
-	onMount(() => {
-		// Si no hay usuario autenticado y están viendo un perfil específico, permitir verlo
-		// pero si están viendo su propio perfil sin estar autenticado, redirigir
-		if (esMiPerfil && !$isAuthenticated) {
-			goto('/iniciar-sesion');
-		}
-	});
+	$: if (esMiPerfil && !$isLoading && !$isAuthenticated) {
+		goto('/iniciar-sesion');
+	}
 </script>
 
 <svelte:head>

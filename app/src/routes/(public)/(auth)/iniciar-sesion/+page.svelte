@@ -1,12 +1,3 @@
-<!--
-TODO:
-	- [ ] Conectar con backend de autenticación
-	- [ ] Implementar validación de campos
-	- [ ] Agregar manejo de errores
-	- [ ] Implementar "Recordar sesión"
-	- [ ] Agregar autenticación con redes sociales
--->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -15,8 +6,7 @@ TODO:
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 	import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
-	import { LockClosed, Eye, EyeSlash } from '@steeze-ui/heroicons';
-	import { Icon } from '@steeze-ui/svelte-icon';
+	import { Lock, Eye, EyeOff, Check } from 'lucide-svelte';
 
 	let identificador = '';
 	let password = '';
@@ -112,7 +102,7 @@ TODO:
 				<h2
 					class="mb-6 flex items-center gap-2 text-2xl font-semibold text-[rgb(var(--base-color))]"
 				>
-					<Icon src={LockClosed} class="h-6 w-6" /> Acceder a tu cuenta
+					<Lock class="h-6 w-6" /> Acceder a tu cuenta
 				</h2>
 
 				{#if erroresValidacion.length > 0}
@@ -177,9 +167,9 @@ TODO:
 								on:click={() => (mostrarPassword = !mostrarPassword)}
 							>
 								{#if mostrarPassword}
-									<Icon src={EyeSlash} class="h-5 w-5" />
+									<EyeOff class="h-5 w-5" />
 								{:else}
-									<Icon src={Eye} class="h-5 w-5" />
+									<Eye class="h-5 w-5" />
 								{/if}
 							</button>
 						</div>
@@ -191,17 +181,24 @@ TODO:
 					</div>
 
 					<div class="flex items-center justify-between">
-						<label class="flex items-center">
-							<input
-								bind:checked={recordarme}
-								type="checkbox"
-								class="h-4 w-4 rounded border-gray-300 text-[rgb(var(--color-primary))] focus:ring-[rgb(var(--color-primary))]"
-							/>
-							<span class="ml-2 text-sm text-gray-600">Recordar sesión</span>
+						<label class="group flex cursor-pointer items-center space-x-2">
+							<div class="relative flex items-center">
+								<input
+									bind:checked={recordarme}
+									type="checkbox"
+									class="peer h-4 w-4 cursor-pointer appearance-none rounded border border-gray-300 transition-all checked:border-[rgb(var(--color-primary))] checked:bg-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2"
+								/>
+								<Check
+									class="pointer-events-none absolute h-4 w-4 p-0.5 text-white opacity-0 transition-opacity peer-checked:opacity-100"
+								/>
+							</div>
+							<span class="text-sm text-gray-600 transition-colors group-hover:text-gray-900">
+								Recordar sesión
+							</span>
 						</label>
 						<a
 							href="/recuperar-contrasena"
-							class="text-sm text-[rgb(var(--color-primary))] hover:underline"
+							class="text-sm font-medium text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary-dark,var(--color-primary)))] hover:underline"
 						>
 							¿Olvidaste tu contraseña?
 						</a>

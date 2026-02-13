@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		const dashboardData = await useCase.execute(usuario.id_usuario!);
 
 		return {
-			usuario: { ...usuario },
+			usuario: usuario.toPOJO(),
 			dashboardData
 		};
 	} catch (error) {

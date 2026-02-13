@@ -4,7 +4,7 @@ import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres
 import { ActualizarUsuario } from '$lib/domain/use-cases/usuarios/ActualizarUsuario';
 import type { Usuario } from '$lib/domain/entities/Usuario';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		const body = await request.json();
 		const { id_usuario, contactos, direccion, categorias, tiposParticipacion } = body;
@@ -50,6 +50,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		const updatedUser = await actualizarUseCase.execute(parseInt(id_usuario), cambios);
+
+		// Actualizar cookie de sesión
+		cookies.set('session_usuario', JSON.stringify(updatedUser), {
+			path: '/',
+			httpOnly: false,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
+			maxAge: 60 * 60 * 24 * 7
+		});
 
 		return json({ success: true, data: updatedUser });
 	} catch (error: any) {

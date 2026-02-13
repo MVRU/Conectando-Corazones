@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { Mail, AlertCircle } from 'lucide-svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import Loader from '\$lib/components/ui/feedback/Loader.svelte';
+	import Loader from '$lib/components/ui/feedback/Loader.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -58,14 +59,7 @@
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-blue-100 p-5 shadow-md">
-			<svg class="h-16 w-16 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M16 12H8m0 0l4 4m-4-4l4-4m8 8V8a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2z"
-				/>
-			</svg>
+			<Mail class="h-16 w-16 text-blue-500" />
 		</div>
 		<h2 class="mt-6 text-3xl font-bold text-gray-800">Revisá tu correo</h2>
 		<p class="mt-4 max-w-md text-base text-gray-600">
@@ -99,10 +93,7 @@
 	</div>
 	<div class="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
 		<div class="rounded-full bg-red-100 p-6 shadow-xl">
-			<svg class="h-14 w-14 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<circle cx="12" cy="12" r="10" stroke-width="2" />
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01" />
-			</svg>
+			<AlertCircle class="h-14 w-14 text-red-600" />
 		</div>
 		<h2 class="mt-6 text-3xl font-extrabold text-gray-800">No pudimos enviar el email</h2>
 		<p class="mt-4 max-w-sm text-base text-gray-600">

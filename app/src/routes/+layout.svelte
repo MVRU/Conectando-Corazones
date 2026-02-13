@@ -46,8 +46,8 @@
 		);
 
 		// Inicializar estado global de auth con datos del servidor
-		if (data.user) {
-			const usuarioInstance = new Usuario(data.user);
+		if (data.usuario) {
+			const usuarioInstance = new Usuario(data.usuario);
 			authStore.update((s) => ({
 				...s,
 				usuario: usuarioInstance,

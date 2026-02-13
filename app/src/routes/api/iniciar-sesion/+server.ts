@@ -3,9 +3,9 @@ import type { RequestHandler } from './$types';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { validarCorreo } from '$lib/utils/validaciones';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	try {
-		const { identificador, password } = await request.json();
+		const { identificador, password, rememberMe } = await request.json();
 
 		if (!identificador || !password) {
 			return json({ error: 'Credenciales incompletas' }, { status: 400 });
@@ -56,10 +56,34 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Usuario no registrado en el sistema' }, { status: 401 });
 		}
 
-		// Strip sensitive data
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password: _, ...usuarioSafe } = usuario;
 
+		// Configurar duración de cookies según "Recordar sesión"
+		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined; // 30 días o sesión
+
+		if (rememberMe) {
+			cookies.set('remember_me', 'true', {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				maxAge
+			});
+		} else {
+			cookies.delete('remember_me', { path: '/' });
+		}
+
+		// Guardar cookie de sesión para optimizar cargas subsiguientes
+		cookies.set('session_usuario', JSON.stringify(usuarioSafe), {
+			path: '/',
+			httpOnly: false,
+			secure: process.env.NODE_ENV === 'production',
+			sameSite: 'lax',
+			maxAge
+		});
+
+		// Retornar usuario
 		return json({ usuario: usuarioSafe });
 	} catch (error) {
 		console.error('ERROR INICIAR SESION:', error);

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Loader from '\$lib/components/ui/feedback/Loader.svelte';
+	import { AlertCircle } from 'lucide-svelte';
+	import Loader from '$lib/components/ui/feedback/Loader.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -61,15 +62,7 @@
 				class="rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 ease-in-out hover:shadow-xl"
 			>
 				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
-					<svg class="h-10 w-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<circle cx="12" cy="12" r="10" stroke-width="2" />
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 8v4m0 4h.01"
-						/>
-					</svg>
+					<AlertCircle class="h-10 w-10 text-red-600" />
 				</div>
 
 				<h2 class="mt-6 text-2xl font-bold text-gray-800">No pudimos verificar tu identidad</h2>

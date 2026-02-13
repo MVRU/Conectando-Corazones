@@ -1,5 +1,6 @@
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { ObtenerUsuario } from '$lib/domain/use-cases/usuarios/ObtenerUsuario';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
@@ -15,11 +16,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 
 		const usuarioRepo = new PostgresUsuarioRepository();
+		const obtenerUsuario = new ObtenerUsuario(usuarioRepo);
 		const proyectoRepo = new PostgresProyectoRepository();
 		const categoriaRepo = new PostgresCategoriaRepository();
 
 		// 1. Obtener Usuario
-		const perfilUsuario = await usuarioRepo.findByUsername(username);
+		const perfilUsuario = await obtenerUsuario.porUsername(username);
 		if (!perfilUsuario) {
 			throw error(404, 'Usuario no encontrado');
 		}

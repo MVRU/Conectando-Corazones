@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Star } from 'lucide-svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import type {
 		Usuario,
@@ -7,7 +8,6 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
 	export let resena: Resena;
@@ -45,15 +45,9 @@
 >
 	<div class="mb-3 flex items-center gap-1">
 		{#each Array(5).keys() as i}
-			<svg
-				class="h-4 w-4 {i < resena.puntaje ? 'text-amber-400' : 'text-gray-200'}"
-				fill="currentColor"
-				viewBox="0 0 20 20"
-			>
-				<path
-					d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.955a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.955c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.197-1.54-1.118l1.287-3.955a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.955z"
-				/>
-			</svg>
+			<Star
+				class="h-4 w-4 {i < resena.puntaje ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}"
+			/>
 		{/each}
 	</div>
 

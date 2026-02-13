@@ -112,4 +112,22 @@ export class Usuario {
 			throw new Error('El usuario debe tener un rol asignado.');
 		}
 	}
+
+	/**
+	 * Convierte la instancia a un objeto plano (POJO) para serialización en SvelteKit.
+	 * Elimina métodos y asegura que las propiedades anidadas sean serializables.
+	 */
+	toPOJO() {
+		return {
+			...this,
+			fecha_nacimiento: this.fecha_nacimiento ? this.fecha_nacimiento.toISOString() : undefined,
+			created_at: this.created_at ? this.created_at.toISOString() : undefined,
+			categorias_preferidas: this.categorias_preferidas?.map((c) => ({ ...c })),
+			tipos_participacion_preferidas: this.tipos_participacion_preferidas?.map((t) => ({ ...t })),
+			localidad: this.localidad ? { ...this.localidad } : undefined,
+			contactos: this.contactos?.map((c) => ({ ...c })),
+			verificaciones: this.verificaciones?.map((v) => ({ ...v })),
+			consentimientos: this.consentimientos?.map((c) => ({ ...c }))
+		};
+	}
 }

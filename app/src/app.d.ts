@@ -2,7 +2,7 @@
 /// <reference types="vite/client" />
 import '$lib/domain/types/otros/svelte-jsx';
 
-import type { Usuario } from '$lib/domain/types/Usuario';
+import type { Usuario } from '$lib/domain/entities/Usuario';
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
 
 declare global {
