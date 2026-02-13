@@ -74,7 +74,9 @@
 		}
 	}
 
-	$: {
+	import { browser } from '$app/environment';
+
+	$: if (browser) {
 		const error = $page.url.searchParams.get('error');
 		if (error === 'already_logged_in') {
 			setTimeout(() => {

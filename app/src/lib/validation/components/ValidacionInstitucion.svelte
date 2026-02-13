@@ -316,13 +316,13 @@
 							type="button"
 							variant="secondary"
 							label="Cancelar"
-							on:click={cancelar}
+							onclick={cancelar}
 							customClass="w-full sm:w-auto"
 						/>
 						<Button
 							type="button"
 							label="Enviar"
-							on:click={enviarDocumentos}
+							onclick={enviarDocumentos}
 							customClass="w-full sm:w-auto"
 							disabled={botonEnviarDeshabilitado}
 							ariaDisabled={botonEnviarDeshabilitado}
@@ -347,7 +347,7 @@
 						completar este paso antes de publicar proyectos.
 					</p>
 					<div class="flex justify-center">
-						<Button type="button" label="Omitir verificación" on:click={omitirRevision} />
+						<Button type="button" label="Omitir verificación" onclick={omitirRevision} />
 					</div>
 				</div>
 			{/if}

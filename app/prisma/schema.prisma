@@ -19,10 +19,12 @@ model Archivo {
   usuario_id   Int?
   evidencia_id Int?
   proyecto_id  Int?
+  verificacion_id Int?
 
   usuario   Usuario?   @relation(fields: [usuario_id], references: [id_usuario])
   evidencia Evidencia? @relation(fields: [evidencia_id], references: [id_evidencia])
   proyecto  Proyecto?  @relation(fields: [proyecto_id], references: [id_proyecto])
+  verificacion Verificacion? @relation(fields: [verificacion_id], references: [id_verificacion])
 
   @@map("archivos")
 }
@@ -415,6 +417,7 @@ model Verificacion {
   usuario_id        Int?
 
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+  documentos Archivo[]
 
   @@map("verificaciones")
 }

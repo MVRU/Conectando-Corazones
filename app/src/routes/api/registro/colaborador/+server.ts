@@ -1,80 +1,49 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { RegistrarUsuario } from '$lib/domain/use-cases/auth/RegistrarUsuario';
-import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
-import { Usuario } from '$lib/domain/entities/Usuario';
 import type { RegisterColaboradorInput } from '$lib/stores/auth';
 import type { Organizacion } from '$lib/domain/types/Usuario';
-import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
+import { RegistrationService } from '$lib/server/registration.service';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const input = (await request.json()) as RegisterColaboradorInput;
-
-		// 1. Crear usuario en Supabase Auth
-		const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-			email: input.email,
-			password: input.password,
-			email_confirm: true, // Auto-confirmar para migración/MVP
-			user_metadata: {
-				username: input.perfil.username,
-				nombre: input.perfil.nombre,
-				apellido: input.perfil.apellido,
-				rol: 'colaborador'
-			}
-		});
-
-		if (authError) {
-			console.error('Supabase Auth Error:', authError);
-			return json({ error: authError.message }, { status: 400 });
-		}
-
-		if (!authData.user) {
-			return json({ error: 'No se pudo crear el usuario en Auth' }, { status: 500 });
-		}
-
-		// 2. Crear usuario en Base de Datos (PostgreSQL)
-		const repo = new PostgresUsuarioRepository();
-		const useCase = new RegistrarUsuario(repo);
+		const service = new RegistrationService();
 
 		// Extraer metadata adicional
 		const orgMetadata = input.metadata?.organizacion as Partial<Organizacion> | undefined;
 
-		const nuevoUsuario = new Usuario({
-			username: input.perfil.username,
-			// No guardamos password en DB local
-			auth_user_id: authData.user.id,
-			nombre: input.perfil.nombre,
-			apellido: input.perfil.apellido,
-			fecha_nacimiento: input.perfil.fecha_nacimiento
-				? new Date(input.perfil.fecha_nacimiento)
-				: undefined,
-			estado: 'activo',
+		const usuarioCreado = await service.registrar({
+			email: input.email,
+			password: input.password,
 			rol: 'colaborador',
-			url_foto: input.perfil.url_foto,
-			contactos: input.perfil.contactos,
-			tipo_colaborador: input.perfil.tipo_colaborador,
-
-			razon_social: orgMetadata?.razon_social,
-			con_fines_de_lucro: orgMetadata?.con_fines_de_lucro
+			perfil: {
+				username: input.perfil.username,
+				nombre: input.perfil.nombre,
+				apellido: input.perfil.apellido,
+				fecha_nacimiento: input.perfil.fecha_nacimiento?.toString(),
+				url_foto: input.perfil.url_foto,
+				contactos: input.perfil.contactos,
+				tipo_colaborador: input.perfil.tipo_colaborador
+			},
+			metadata: {
+				organizacion: {
+					razon_social: orgMetadata?.razon_social,
+					con_fines_de_lucro: orgMetadata?.con_fines_de_lucro ? 'true' : 'false'
+				}
+			}
 		});
 
-		try {
-			const created = await useCase.execute(nuevoUsuario);
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-			const { password: _, ...usuarioSafe } = created;
-			return json({ usuario: usuarioSafe });
-		} catch (dbError: any) {
-			// Si falla la DB, deberíamos borrar el usuario de Auth para consistencia (Rollback manual)
-			await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-			throw dbError;
-		}
+		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registering collaborator:', error);
 		if (error instanceof Error) {
 			// Prisma P2002 es violación de restricción única
 			if (error.message.includes('unique') || error.message.includes('P2002')) {
 				return json({ error: 'El nombre de usuario o email ya está en uso' }, { status: 409 });
+			}
+			// Auth errors
+			if (error.message.includes('Auth')) {
+				return json({ error: error.message }, { status: 400 });
 			}
 			return json({ error: error.message }, { status: 500 });
 		}

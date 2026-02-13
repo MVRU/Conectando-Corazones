@@ -179,6 +179,10 @@ export const authActions = {
 			console.error('Error al cerrar sesión:', error);
 		} finally {
 			authStore.set(unauthenticatedState);
+			if (typeof window !== 'undefined') {
+				window.localStorage.removeItem(CLAVE_REGISTROS_SIMULADOS);
+				window.sessionStorage.clear(); // Limpiar todo el sessionStorage
+			}
 		}
 	},
 
@@ -232,6 +236,8 @@ export const authActions = {
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
 			await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			// Auto-login después del registro exitoso
+			await this.login(input.email, input.password);
 		} catch (error) {
 			const message = obtenerMensajeError(error, fallbackError);
 			authStore.update((state) => ({ ...state, error: message }));
@@ -241,7 +247,7 @@ export const authActions = {
 		}
 	},
 
-	async registerInstitucion(input: RegisterInstitucionInput): Promise<void> {
+	async registerInstitucion(input: RegisterInstitucionInput): Promise<Usuario | void> {
 		validarRegistroInstitucion(input);
 		const endpoint = '/api/registro/institucion';
 		const fallbackError =
@@ -249,7 +255,12 @@ export const authActions = {
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
-			await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			if (data && data.usuario) {
+				// Auto-login después del registro exitoso
+				await this.login(input.email, input.password);
+				return data.usuario;
+			}
 		} catch (error) {
 			const message = obtenerMensajeError(error, fallbackError);
 			authStore.update((state) => ({ ...state, error: message }));
@@ -442,7 +453,7 @@ async function enviarSolicitudRegistro(
 	endpoint: string,
 	input: RegisterColaboradorInput | RegisterInstitucionInput,
 	fallbackError: string
-): Promise<RegistroResultado> {
+): Promise<any> {
 	const payload =
 		typeof structuredClone === 'function'
 			? structuredClone(input)
@@ -456,7 +467,7 @@ async function enviarSolicitudRegistro(
 		});
 
 		if (response.ok) {
-			return 'api';
+			return response.json();
 		}
 
 		if (esCodigoSimulable(response.status)) {

@@ -1,39 +1,31 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { RegistrarUsuario } from '$lib/domain/use-cases/auth/RegistrarUsuario';
-import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
-import { Usuario } from '$lib/domain/entities/Usuario';
 import type { RegisterInstitucionInput } from '$lib/stores/auth';
+import { RegistrationService } from '$lib/server/registration.service';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const input = (await request.json()) as RegisterInstitucionInput;
+		const service = new RegistrationService();
 
-		const repo = new PostgresUsuarioRepository();
-		const useCase = new RegistrarUsuario(repo);
-
-		const nuevoUsuario = new Usuario({
-			username: input.perfil.username,
+		const usuarioCreado = await service.registrar({
+			email: input.email,
 			password: input.password,
-			nombre: input.perfil.nombre,
-			apellido: input.perfil.apellido,
-			fecha_nacimiento: input.perfil.fecha_nacimiento
-				? new Date(input.perfil.fecha_nacimiento)
-				: undefined,
-			estado: 'activo',
 			rol: 'institucion',
-			url_foto: input.perfil.url_foto,
-			contactos: input.perfil.contactos,
-
-			nombre_legal: input.perfil.nombre_legal,
-			tipo_institucion: input.perfil.tipo_institucion
+			perfil: {
+				username: input.perfil.username,
+				nombre: input.perfil.nombre,
+				apellido: input.perfil.apellido,
+				fecha_nacimiento: input.perfil.fecha_nacimiento?.toString(),
+				url_foto: input.perfil.url_foto,
+				contactos: input.perfil.contactos,
+				nombre_legal: input.perfil.nombre_legal,
+				tipo_institucion: input.perfil.tipo_institucion
+			},
+			metadata: input.metadata
 		});
 
-		const created = await useCase.execute(nuevoUsuario);
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password: _, ...usuarioSafe } = created;
-
-		return json({ usuario: usuarioSafe });
+		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registering institution:', error);
 		if (error instanceof Error) {

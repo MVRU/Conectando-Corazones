@@ -304,12 +304,13 @@
 					label={etiquetaOmitir}
 					variant="secondary"
 					size="sm"
-					on:click={omitirContactos}
+					onclick={omitirContactos}
 					customClass="w-full md:w-auto"
 				/>
 			{/if}
 			<slot name="botones-extra" />
 			<Button
+				type="submit"
 				label={enviando ? 'Guardando...' : 'Continuar'}
 				variant="primary"
 				size="sm"

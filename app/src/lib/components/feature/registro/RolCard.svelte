@@ -98,6 +98,6 @@
 		variant="secondary"
 		label="Seleccionar"
 		size="sm"
-		on:click={onSelect}
+		onclick={onSelect}
 	></Button>
 </div>

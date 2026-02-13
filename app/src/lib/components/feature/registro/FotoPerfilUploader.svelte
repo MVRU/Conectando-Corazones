@@ -306,10 +306,11 @@
 				<label class="sr-only" for={`${id}-archivo`} id={`${id}-archivo-label`}>
 					Subí una imagen desde tu dispositivo
 				</label>
-				<button
-					type="button"
+				<div
+					role="button"
+					tabindex="0"
 					class={clsx(
-						'flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition',
+						'flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]',
 						arrastrandoArchivo
 							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)]'
 							: 'border-gray-300 bg-gray-50 hover:border-[rgb(var(--color-primary))] hover:bg-white'
@@ -317,6 +318,12 @@
 					aria-label="Elegí un archivo para la foto de perfil"
 					aria-describedby={mensajeErrorGlobal ? `${id}-error` : undefined}
 					on:click={abrirSelectorDeArchivos}
+					on:keydown={(e) => {
+						if (e.key === 'Enter' || e.key === ' ') {
+							e.preventDefault();
+							abrirSelectorDeArchivos();
+						}
+					}}
 					on:dragover={manejarArrastreSobre}
 					on:dragleave={manejarSalidaArrastre}
 					on:drop={manejarSoltar}
@@ -338,8 +345,10 @@
 							Arrastrá y soltá tu archivo o hacé clic para buscarlo.
 						</p>
 					</div>
-					<Button label="Buscar archivo" type="button" variant="primary" size="sm"></Button>
-				</button>
+					<div class="pointer-events-none">
+						<Button label="Buscar archivo" type="button" variant="primary" size="sm"></Button>
+					</div>
+				</div>
 				<input
 					id={`${id}-archivo`}
 					bind:this={inputArchivoRef}

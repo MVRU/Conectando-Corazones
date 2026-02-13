@@ -1,18 +1,18 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
-	import Loader from '\$lib/components/ui/feedback/Loader.svelte';
+	import Loader from '$lib/components/ui/feedback/Loader.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	// import ValidacionRenaper from '\$lib/validation/components/ValidacionRenaper.svelte';
-	// import ValidacionEmail from '\$lib/validation/components/ValidacionEmail.svelte';
-	import ValidacionInstitucion from '\$lib/validation/components/ValidacionInstitucion.svelte';
-	import DireccionForm from '\$lib/components/ui/forms/DireccionForm.svelte';
-	import MetodosContactoForm from '\$lib/components/ui/forms/MetodosContactoForm.svelte';
+	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
+	import DireccionForm from '$lib/components/ui/forms/DireccionForm.svelte';
+	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
+	import PreferenciasForm from '$lib/components/feature/registro/PreferenciasForm.svelte';
 	import { goto } from '$app/navigation';
-	import { fly, fade } from 'svelte/transition';
+	import { fly, fade, scale } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 	import type { RegistroCuentaSubmitDetail } from '$lib/domain/types/forms/registro';
 	import { authActions, isAuthenticated } from '$lib/stores/auth';
 	import {
@@ -29,8 +29,11 @@
 		REGISTRO_PAGE_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
-	} from '\$lib/domain/types/constants/registro';
+	} from '$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
+	import { env } from '$lib/infrastructure/config/env';
+
+	export let data;
 
 	let cargada = false; // para saber si la página terminó de cargar
 
@@ -46,15 +49,18 @@
 		timestamp: number;
 		etapa: RegistroEtapa;
 		rol: RegistroRol;
+		usuarioId?: number;
 	};
 
 	let storageRegistroDisponible = false;
 	let persistenciaPaginaLista = false;
 	let notificacionEtapaMostrada = false;
+	let usuarioRegistradoId: number | null = null;
 
 	$: procesandoFormulario = registrando;
 
-	$: if ($isAuthenticated) {
+	// Redirección si ya está autenticado y en el paso inicial
+	$: if ($isAuthenticated && etapa === 'seleccion') {
 		if (typeof window !== 'undefined') {
 			toastStore.show({
 				variant: 'info',
@@ -72,6 +78,7 @@
 			if (snapshot) {
 				rol = snapshot.rol;
 				etapa = snapshot.etapa;
+				usuarioRegistradoId = snapshot.usuarioId ?? null;
 				guardarProgresoRegistro({
 					...snapshot,
 					timestamp: Date.now()
@@ -118,8 +125,17 @@
 				await authActions.registerColaborador(mapping.input);
 			} else {
 				const mapping = mapearFormularioInstitucionAInputRegistro(detalle);
-				await authActions.registerInstitucion(mapping.input);
+				const usuario = await authActions.registerInstitucion(mapping.input);
+				if (usuario && usuario.id_usuario) {
+					usuarioRegistradoId = usuario.id_usuario;
+				}
 			}
+
+			// Subir foto de perfil si existe
+			if (detalle.archivoFoto) {
+				await subirFotoPerfil(detalle.archivoFoto);
+			}
+
 			const siguienteEtapa = obtenerSiguienteEtapaCuenta(detalle.rol);
 			setEtapaConPersistencia(siguienteEtapa, { limpiarFormulario: true });
 		} catch (error) {
@@ -132,8 +148,104 @@
 		}
 	}
 
+	async function subirFotoPerfil(archivo: File) {
+		try {
+			const response = await fetch('/api/storage/upload-url', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					nombre_archivo: archivo.name,
+					tipo_mime: archivo.type,
+					bucket: 'avatars'
+				})
+			});
+
+			const { uploadUrl, fullPath, error } = await response.json();
+			if (error) throw new Error(error);
+
+			const uploadRes = await fetch(uploadUrl, {
+				method: 'PUT',
+				body: archivo,
+				headers: { 'Content-Type': archivo.type }
+			});
+
+			if (!uploadRes.ok) throw new Error('Error al subir la imagen');
+
+			const baseUrl = env.SUPABASE_URL.replace(/\/$/, '');
+			const publicUrl = `${baseUrl}/storage/v1/object/public/${fullPath}`;
+
+			if (usuarioRegistradoId) {
+				const updateRes = await fetch('/api/usuarios/me/foto', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						url: publicUrl,
+						nombreArchivo: archivo.name,
+						tipoMime: archivo.type,
+						tamanio: archivo.size
+					})
+				});
+
+				if (!updateRes.ok) throw new Error('Error al actualizar el perfil con la foto');
+			}
+		} catch (e) {
+			console.error('Error subiendo foto de perfil:', e);
+			toastStore.show({
+				variant: 'warning',
+				message:
+					'Tu cuenta se creó, pero hubo un problema al subir tu foto. Podrás intentarlo luego.'
+			});
+		}
+	}
+
+	async function manejarSubidaVerificacion(event: CustomEvent<{ files: File[] }>) {
+		if (!usuarioRegistradoId) {
+			toastStore.show({
+				variant: 'warning',
+				message: 'No se identificó al usuario. Por favor, contactanos si persiste el problema.'
+			});
+			setEtapaConPersistencia('contacto');
+			return;
+		}
+
+		try {
+			const files = event.detail.files;
+			const formData = new FormData();
+			formData.append('id_usuario', usuarioRegistradoId.toString());
+			files.forEach((f) => formData.append('files', f));
+
+			const res = await fetch('/api/registro/verificacion', {
+				method: 'POST',
+				body: formData
+			});
+
+			const data = await res.json();
+
+			if (!res.ok) {
+				throw new Error(data.error || 'Error al subir archivos');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Documentación recibida',
+				message: 'Tu verificación quedó en proceso de revisión.'
+			});
+			setEtapaConPersistencia('contacto');
+		} catch (error) {
+			console.error('Error subiendo verificación:', error);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de carga',
+				message: 'No pudimos subir los archivos. Podrás intentarlo luego desde tu perfil.'
+			});
+			setEtapaConPersistencia('contacto');
+		}
+	}
+
 	function manejarFormularioInvalido() {
 		errorRegistro = 'Revisá los campos marcados en rojo antes de continuar.';
+		// Scroll al tope para ver errores
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	function volverASeleccion() {
@@ -151,8 +263,10 @@
 				return rol === 'institucion' ? 'verificacion' : 'formulario';
 			case 'direccion':
 				return 'contacto';
-			case 'exito':
+			case 'preferencias':
 				return 'direccion';
+			case 'exito':
+				return 'preferencias';
 			default:
 				return null;
 		}
@@ -227,6 +341,9 @@
 		nueva: RegistroEtapa,
 		opciones: { limpiarFormulario?: boolean; limpiarTodo?: boolean } = {}
 	) {
+		// Animación suave de scroll al cambiar de etapa
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+
 		etapa = nueva;
 
 		if (!storageRegistroDisponible || !persistenciaPaginaLista) {
@@ -241,6 +358,10 @@
 		if (opciones.limpiarTodo || nueva === 'exito') {
 			limpiarProgresoTotal();
 			notificacionEtapaMostrada = false;
+			if (nueva === 'exito') {
+				notificacionEtapaMostrada = false;
+				return;
+			}
 			return;
 		}
 
@@ -261,7 +382,8 @@
 			version: REGISTRO_STORAGE_VERSION,
 			timestamp: Date.now(),
 			rol,
-			etapa: nueva
+			etapa: nueva,
+			usuarioId: usuarioRegistradoId ?? undefined
 		});
 		notificarProgresoGuardado();
 	}
@@ -273,23 +395,104 @@
 		notificacionEtapaMostrada = true;
 		toastStore.show({
 			variant: 'info',
-			title: 'Progreso asegurado',
-			message:
-				'Recordamos el paso del registro en este dispositivo. Si necesitas salir, podrás retomar desde donde quedaste.'
+			title: 'Progreso guardado',
+			message: 'Podés continuar tu registro más tarde si lo necesitás. Guardamos tu avance.'
 		});
 	}
 
 	function obtenerEtiquetaRetroceso(actual: RegistroEtapa): string {
 		switch (actual) {
 			case 'contacto':
-				return rol === 'institucion'
-					? 'Volver a validación de institución'
-					: 'Volver a credenciales';
+				return rol === 'institucion' ? 'Volver a validación' : 'Volver a credenciales';
 			case 'direccion':
-				return 'Volver a formas de contacto';
+				return 'Volver a contacto';
 			default:
-				return 'Volver al paso anterior';
+				return 'Volver';
 		}
+	}
+
+	async function manejarEnvioContactos(event: CustomEvent<any>) {
+		if (!usuarioRegistradoId) {
+			toastStore.show({ variant: 'error', message: 'No se identificó al usuario.' });
+			return;
+		}
+		const contactos = event.detail;
+		try {
+			const res = await fetch('/api/registro/completar-perfil', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					id_usuario: usuarioRegistradoId,
+					contactos
+				})
+			});
+			if (!res.ok) throw new Error('Error al guardar contactos');
+
+			setEtapaConPersistencia('direccion');
+		} catch (error) {
+			console.error(error);
+			toastStore.show({ variant: 'error', message: 'Error guardando contactos.' });
+		}
+	}
+
+	async function manejarEnvioDireccion(event: CustomEvent<any>) {
+		if (!usuarioRegistradoId) {
+			toastStore.show({ variant: 'error', message: 'No se identificó al usuario.' });
+			return;
+		}
+		const direccion = event.detail;
+		try {
+			const res = await fetch('/api/registro/completar-perfil', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					id_usuario: usuarioRegistradoId,
+					direccion
+				})
+			});
+			if (!res.ok) throw new Error('Error al guardar ubicación');
+
+			setEtapaConPersistencia('preferencias');
+		} catch (error) {
+			console.error(error);
+			toastStore.show({ variant: 'error', message: 'Error guardando ubicación.' });
+		}
+	}
+
+	async function manejarPreferencias(
+		event: CustomEvent<{ categorias: number[]; tiposParticipacion: number[] }>
+	) {
+		if (!usuarioRegistradoId) return;
+		procesandoFormulario = true;
+		try {
+			const res = await fetch('/api/registro/completar-perfil', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					id_usuario: usuarioRegistradoId,
+					categorias: event.detail.categorias,
+					tiposParticipacion: event.detail.tiposParticipacion
+				})
+			});
+
+			if (!res.ok) throw new Error('Error guardando preferencias');
+
+			setEtapaConPersistencia('exito', { limpiarTodo: true });
+		} catch (error) {
+			console.error(error);
+			toastStore.show({
+				variant: 'warning',
+				message: 'No pudimos guardar tus preferencias, pero tu cuenta está lista.'
+			});
+			setEtapaConPersistencia('exito', { limpiarTodo: true });
+		} finally {
+			procesandoFormulario = false;
+		}
+	}
+
+	function irAlPanel() {
+		const rutaPanel = rol === 'institucion' ? '/institucion/mi-panel' : '/colaborador/mi-panel';
+		goto(rutaPanel);
 	}
 </script>
 
@@ -301,214 +504,287 @@
 	/>
 </svelte:head>
 
-<!-- ! Fondo decorativo -->
-<div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
 <div
-	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
-	style="background-size: 100% 400px; background-repeat: repeat-y;"
-></div>
+	class="fixed inset-0 -z-50 min-h-screen w-full overflow-hidden bg-white selection:bg-blue-100 selection:text-blue-900"
+>
+	<!-- Gradient Mesh Background -->
+	<div
+		class="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_100%_0%,rgba(168,85,247,0.08),transparent_25%),radial-gradient(circle_at_100%_100%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_0%_100%,rgba(168,85,247,0.08),transparent_25%)]"
+	></div>
 
-<main class="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-	<section class="transition-all duration-300 sm:p-12">
+	<!-- Subtle grid pattern -->
+	<div class="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.02]"></div>
+
+	<!-- Floating orbs -->
+	<div
+		class="animate-float-slow absolute top-20 -left-20 hidden h-96 w-96 rounded-full bg-blue-200/20 blur-3xl filter lg:block"
+	></div>
+	<div
+		class="animate-float-slower absolute -right-20 bottom-20 hidden h-96 w-96 rounded-full bg-purple-200/20 blur-3xl filter lg:block"
+	></div>
+</div>
+
+<main
+	class="relative z-10 mx-auto flex min-h-screen w-full flex-col justify-center px-4 py-8 sm:px-6 lg:px-8"
+>
+	<!-- Logo / Header Mobile-First -->
+	<header class="mb-8 text-center sm:mb-12">
+		<h1 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
+			<span class="block">Unite a</span>
+			<span
+				class="mt-1 block bg-gradient-to-r from-[rgb(var(--color-primary))] via-blue-400 to-[rgb(var(--color-primary))] bg-clip-text text-transparent"
+			>
+				Conectando Corazones
+			</span>
+		</h1>
 		{#if etapa === 'seleccion'}
-			<div in:fly={{ y: 20, opacity: 0, duration: 400 }} out:fade={{ duration: 200 }}>
-				<div class="mb-20">
+			<p
+				class="mx-auto mt-4 max-w-lg text-lg text-gray-600"
+				in:fade={{ duration: 400, delay: 200 }}
+			>
+				Donde la ayuda encuentra su destino.
+			</p>
+		{/if}
+	</header>
+
+	<!-- Main Content Card -->
+	<section class="mx-auto w-full max-w-4xl transition-all duration-500 ease-out">
+		{#if etapa === 'seleccion'}
+			<div in:fly={{ y: 20, duration: 500, easing: cubicOut }} out:fade={{ duration: 200 }}>
+				<div class="mb-12 hidden sm:block">
 					<Stepper pasoActual={1} pasosTotales={TOTAL_PASOS} />
 				</div>
-				<h1 class="mb-4 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
-					<span class="block">Unite a</span>
-					<span
-						class="mt-1 block bg-gradient-to-r from-[rgb(var(--color-primary))] via-blue-400 to-[rgb(var(--color-primary))] bg-clip-text text-transparent"
+
+				<div
+					class="rounded-3xl bg-white/60 p-6 shadow-2xl ring-1 shadow-blue-900/5 ring-gray-900/5 backdrop-blur-xl sm:p-12"
+				>
+					<p class="mb-8 text-center text-xl font-medium text-gray-800">¿Cómo querés participar?</p>
+
+					<div class="grid gap-6 md:grid-cols-2 lg:gap-8">
+						<RolCard
+							titulo="Soy una institución"
+							descripcion="Busco apoyo, voluntarios y recursos para mis proyectos solidarios."
+							icono="institucion"
+							onSelect={() => elegir('institucion')}
+						/>
+						<RolCard
+							titulo="Soy colaborador/a"
+							descripcion="Quiero ayudar donando mi tiempo, habilidades o recursos a causas nobles."
+							icono="colaborador"
+							onSelect={() => elegir('colaborador')}
+						/>
+					</div>
+
+					<div
+						class="mt-8 rounded-lg bg-blue-50/50 p-4 text-center text-sm text-gray-600 ring-1 ring-blue-100"
 					>
-						Conectando Corazones
-					</span>
-				</h1>
-				<p class="mx-auto mb-10 max-w-2xl text-center text-lg text-gray-600">
-					Creá tu cuenta para publicar proyectos solidarios o sumarte como colaborador. Juntos,
-					hacemos la diferencia.
-				</p>
-				<p class="mb-8 text-center text-base font-medium text-gray-700">
-					¿Cómo querés registrarte?
-				</p>
-
-				<div class="grid gap-8 sm:grid-cols-2">
-					<RolCard
-						titulo="Soy una institución"
-						descripcion="Quiero publicar, administrar y visibilizar proyectos solidarios para recibir ayuda."
-						icono="institucion"
-						onSelect={() => elegir('institucion')}
-					/>
-					<RolCard
-						titulo="Soy colaborador/a"
-						descripcion="Quiero ayudar o participar en proyectos como organización o entidad unipersonal."
-						icono="colaborador"
-						onSelect={() => elegir('colaborador')}
-					/>
+						<p>
+							Si sos una organización (ONG, empresa, fundación) que quiere <span
+								class="font-semibold text-blue-700">ayudar</span
+							>
+							a otros, registrate como
+							<span class="font-semibold text-blue-700">Colaborador/a</span>.
+						</p>
+					</div>
 				</div>
-
-				<p class="mt-6 text-center text-sm text-gray-500">
-					Si sos una organización —con o sin fines de lucro—, seleccioná
-					<span class="font-bold text-[rgb(var(--color-primary))]">"Colaborador/a"</span> para ayudar
-					a las instituciones.
-				</p>
 			</div>
 		{:else if etapa === 'formulario'}
-			<div class="mb-20">
-				<Stepper pasoActual={2} pasosTotales={TOTAL_PASOS} />
-			</div>
-			<button
-				class="group mb-6 flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-				type="button"
-				on:click={volverASeleccion}
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
-				Volver a elegir tipo de cuenta
-			</button>
-
-			<RegistroCuentaForm
-				{rol}
-				procesando={procesandoFormulario}
-				errorGeneral={errorRegistro}
-				on:submit={manejarRegistroCuenta}
-				on:invalid={manejarFormularioInvalido}
-				on:back={() => retrocederEtapa('formulario')}
-			/>
-		{:else if etapa === 'verificacion'}
-			<ValidacionInstitucion
-				pasoActual={3}
-				pasosTotales={TOTAL_PASOS}
-				on:submit={() => setEtapaConPersistencia('contacto')}
-				on:skip={() => setEtapaConPersistencia('contacto')}
-				on:cancel={() => {
-					resetFeedback();
-					setEtapaConPersistencia('formulario');
-				}}
-			/>
-		{:else if etapa === 'contacto'}
-			<div class="mb-8">
-				<Stepper pasoActual={4} pasosTotales={TOTAL_PASOS} />
-				<button
-					type="button"
-					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-					on:click={() => retrocederEtapa('contacto')}
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
-					{obtenerEtiquetaRetroceso('contacto')}
-				</button>
-			</div>
-
-			<main class="relative z-10 mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-				<h2 class="text-center text-3xl font-extrabold text-gray-900">Agregá formas de contacto</h2>
-				<p class="mx-auto max-w-2xl text-center text-base text-gray-600">
-					Agregá al menos un número de teléfono. Podés incluir otros medios como redes sociales o
-					emails secundarios.
-				</p>
-
-				<MetodosContactoForm
-					mostrarOmitir
-					bloquearPrimerContacto={false}
-					on:skip={() => setEtapaConPersistencia('direccion')}
-					on:submit={() => setEtapaConPersistencia('direccion')}
-				/>
-			</main>
-		{:else if etapa === 'direccion'}
-			<div class="mb-8">
-				<Stepper pasoActual={5} pasosTotales={TOTAL_PASOS} />
-				<button
-					type="button"
-					class="group mt-4 inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
-					on:click={() => retrocederEtapa('direccion')}
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-4 w-4 transition-transform group-hover:-translate-x-1"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
-					{obtenerEtiquetaRetroceso('direccion')}
-				</button>
-			</div>
-
-			<div class="mx-auto max-w-4xl space-y-10 px-4 py-12 sm:px-6 lg:px-8">
-				<div class="text-center">
-					<h2 class="mb-2 text-3xl font-extrabold text-gray-900 sm:text-4xl">
-						Contanos desde dónde ayudás
-					</h2>
-					<p class="mx-auto mt-3 max-w-2xl text-lg text-gray-600">
-						Seleccioná la provincia y localidad donde funciona tu organización o donde te encontrás
-						para colaborar. Esta información nos ayuda a conectarte con iniciativas cercanas. Podrás
-						sumar más ubicaciones luego desde tu panel.
-					</p>
+			<div in:fly={{ x: 20, duration: 400 }} class="relative">
+				<div class="mb-8">
+					<Stepper pasoActual={2} pasosTotales={TOTAL_PASOS} />
 				</div>
 
-				<DireccionForm
-					mostrarOmitir
-					on:skip={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
-					on:submit={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
+				<div class="mb-6 flex items-center justify-between">
+					<button
+						class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+						type="button"
+						on:click={volverASeleccion}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 19l-7-7 7-7"
+							/>
+						</svg>
+						Cambiar tipo de cuenta
+					</button>
+				</div>
+
+				<div class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-100 sm:p-10">
+					<RegistroCuentaForm
+						{rol}
+						procesando={procesandoFormulario}
+						errorGeneral={errorRegistro}
+						on:submit={manejarRegistroCuenta}
+						on:invalid={manejarFormularioInvalido}
+						on:back={() => retrocederEtapa('formulario')}
+					/>
+				</div>
+			</div>
+		{:else if etapa === 'verificacion'}
+			<div in:fly={{ x: 20, duration: 400 }}>
+				<ValidacionInstitucion
+					pasoActual={3}
+					pasosTotales={TOTAL_PASOS}
+					on:submit={manejarSubidaVerificacion}
+					on:skip={() => setEtapaConPersistencia('contacto')}
+					on:cancel={() => {
+						resetFeedback();
+						setEtapaConPersistencia('formulario');
+					}}
 				/>
+			</div>
+		{:else if etapa === 'contacto'}
+			<div in:fly={{ x: 20, duration: 400 }}>
+				<div class="mb-8">
+					<Stepper pasoActual={4} pasosTotales={TOTAL_PASOS} />
+				</div>
+
+				<div class="mb-6">
+					<button
+						type="button"
+						class="group inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+						on:click={() => retrocederEtapa('contacto')}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 19l-7-7 7-7"
+							/>
+						</svg>
+						{obtenerEtiquetaRetroceso('contacto')}
+					</button>
+				</div>
+
+				<div class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-100 sm:p-10">
+					<div class="mb-8 text-center">
+						<h2 class="text-2xl font-bold text-gray-900 sm:text-3xl">Estemos en contacto</h2>
+						<p class="mt-2 text-gray-600">
+							Agregá medios de contacto para que otros usuarios puedan comunicarse con vos.
+						</p>
+					</div>
+
+					<MetodosContactoForm
+						mostrarOmitir
+						bloquearPrimerContacto={false}
+						on:skip={() => setEtapaConPersistencia('direccion')}
+						on:submit={manejarEnvioContactos}
+					/>
+				</div>
+			</div>
+		{:else if etapa === 'direccion'}
+			<div in:fly={{ x: 20, duration: 400 }}>
+				<div class="mb-8">
+					<Stepper pasoActual={5} pasosTotales={TOTAL_PASOS} />
+				</div>
+
+				<div class="mb-6">
+					<button
+						type="button"
+						class="group inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
+						on:click={() => retrocederEtapa('direccion')}
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							class="h-4 w-4 transition-transform group-hover:-translate-x-1"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M15 19l-7-7 7-7"
+							/>
+						</svg>
+						{obtenerEtiquetaRetroceso('direccion')}
+					</button>
+				</div>
+
+				<div class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-100 sm:p-10">
+					<div class="mb-8 text-center">
+						<h2 class="text-2xl font-bold text-gray-900 sm:text-3xl">¿Dónde te encontrás?</h2>
+						<p class="mt-2 text-gray-600">
+							Esta información nos ayuda a mostrarles proyectos cercanos a tu ubicación.
+						</p>
+					</div>
+
+					<DireccionForm
+						mostrarOmitir
+						on:skip={() => setEtapaConPersistencia('preferencias')}
+						on:submit={manejarEnvioDireccion}
+					/>
+				</div>
+			</div>
+		{:else if etapa === 'preferencias'}
+			<div in:fly={{ x: 20, duration: 400 }}>
+				<div class="mb-8">
+					<Stepper pasoActual={6} pasosTotales={TOTAL_PASOS} />
+				</div>
+
+				<div class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-100 sm:p-10">
+					<PreferenciasForm
+						categorias={data.categorias}
+						tiposParticipacion={data.tiposParticipacion}
+						procesando={procesandoFormulario}
+						on:submit={manejarPreferencias}
+						on:skip={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
+					/>
+				</div>
 			</div>
 		{:else if etapa === 'exito'}
-			<div class="mb-20">
-				<Stepper pasoActual={TOTAL_PASOS + 1} pasosTotales={TOTAL_PASOS} />
-			</div>
-
-			<div class="flex min-h-[60vh] flex-col items-center justify-center text-center">
-				<div class="animate-pulse rounded-full bg-green-100 p-6 shadow-xl">
-					<svg
-						class="h-20 w-20 text-green-600"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
+			<div
+				in:scale={{ duration: 500, start: 0.9, opacity: 0, easing: cubicOut }}
+				class="flex min-h-[50vh] flex-col items-center justify-center text-center"
+			>
+				<div class="relative mb-8">
+					<div
+						class="absolute -inset-4 animate-pulse rounded-full bg-green-100 opacity-70 blur-xl"
+					></div>
+					<div
+						class="relative flex h-24 w-24 items-center justify-center rounded-full bg-green-50 text-green-500 shadow-xl ring-1 ring-green-100"
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M5 13l4 4L19 7"
-						/>
-					</svg>
+						<svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="3"
+								d="M5 13l4 4L19 7"
+							/>
+						</svg>
+					</div>
 				</div>
-				<h2 class="mt-8 text-4xl font-extrabold text-gray-800">¡Cuenta creada exitosamente!</h2>
-				<p class="mt-4 max-w-md text-base text-gray-600">
-					Tu registro está completo. Ya podés acceder a tu cuenta y empezar a colaborar o publicar
-					tus proyectos solidarios.
+
+				<h2 class="mb-4 text-4xl font-extrabold text-gray-900">¡Registro exitoso!</h2>
+				<p class="mb-8 max-w-md text-lg text-gray-600">
+					Tu cuenta está lista para empezar a cambiar el mundo. ¡Gracias por sumarte!
 				</p>
-				<div class="mt-8">
-					<Button label="Ir al panel" variant="primary" on:click={() => goto('/mi-panel')} />
+
+				<div class="w-full max-w-xs transition-transform hover:scale-105">
+					<Button
+						label="Ir a mi panel"
+						variant="primary"
+						size="md"
+						customClass="w-full shadow-lg shadow-blue-500/30"
+						onclick={irAlPanel}
+					/>
 				</div>
 			</div>
 		{/if}
@@ -516,3 +792,30 @@
 
 	<Loader size={80} loading={!cargada} />
 </main>
+
+<style>
+	@keyframes float-slow {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-20px);
+		}
+	}
+	@keyframes float-slower {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(20px);
+		}
+	}
+	.animate-float-slow {
+		animation: float-slow 8s ease-in-out infinite;
+	}
+	.animate-float-slower {
+		animation: float-slower 12s ease-in-out infinite;
+	}
+</style>

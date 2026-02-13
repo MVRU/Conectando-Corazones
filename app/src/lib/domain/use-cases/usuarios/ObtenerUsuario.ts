@@ -13,4 +13,9 @@ export class ObtenerUsuario {
 		if (!username) return null;
 		return await this.usuarioRepository.findByUsername(username);
 	}
+
+	async porEmail(email: string): Promise<Usuario | null> {
+		if (!email) return null;
+		return await this.usuarioRepository.findByEmail(email);
+	}
 }

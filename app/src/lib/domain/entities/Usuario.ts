@@ -91,4 +91,25 @@ export class Usuario {
 		}
 		return 'Ubicación no disponible';
 	}
+
+	esMayorDeEdad(): boolean {
+		if (!this.fecha_nacimiento) return false;
+		const hoy = new Date();
+		const nacimiento = new Date(this.fecha_nacimiento);
+		let edad = hoy.getFullYear() - nacimiento.getFullYear();
+		const m = hoy.getMonth() - nacimiento.getMonth();
+		if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+			edad--;
+		}
+		return edad >= 18;
+	}
+
+	validarInvariantes(): void {
+		if (this.fecha_nacimiento && !this.esMayorDeEdad()) {
+			throw new Error('El usuario debe ser mayor de 18 años.');
+		}
+		if (!this.rol) {
+			throw new Error('El usuario debe tener un rol asignado.');
+		}
+	}
 }

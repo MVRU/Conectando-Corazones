@@ -334,11 +334,12 @@
 				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"
-				on:click={omitirDireccion}
+				onclick={omitirDireccion}
 				customClass="w-full md:w-auto"
 			/>
 		{/if}
 		<Button
+			type="submit"
 			label={enviando ? 'Guardando...' : 'Continuar'}
 			variant="primary"
 			size="md"

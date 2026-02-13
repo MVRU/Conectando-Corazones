@@ -33,6 +33,24 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(usuario);
 	}
 
+	async findByEmail(email: string): Promise<Usuario | null> {
+		const usuario = await prisma.usuario.findFirst({
+			where: {
+				contactos: {
+					some: {
+						tipo_contacto: 'email',
+						valor: email
+					}
+				}
+			},
+			include: this.includeOptions
+		});
+
+		if (!usuario) return null;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		return UsuarioMapper.toDomain(usuario as any);
+	}
+
 	/**
 	 * Versión optimizada para autenticación - solo carga datos esenciales
 	 * Reduce el tiempo de carga en hooks.server.ts
@@ -115,7 +133,16 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				tipo_institucion: usuario.tipo_institucion || null,
 				tipo_colaborador: usuario.tipo_colaborador || null,
 				razon_social: usuario.razon_social || null,
-				con_fines_de_lucro: usuario.con_fines_de_lucro
+				con_fines_de_lucro: usuario.con_fines_de_lucro,
+				contactos: usuario.contactos?.length
+					? {
+							create: usuario.contactos.map((c) => ({
+								tipo_contacto: c.tipo_contacto,
+								valor: c.valor,
+								etiqueta: c.etiqueta
+							}))
+						}
+					: undefined
 			},
 			include: this.includeOptions
 		});
@@ -139,7 +166,36 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				tipo_institucion: usuario.tipo_institucion || null,
 				tipo_colaborador: usuario.tipo_colaborador || null,
 				razon_social: usuario.razon_social || null,
-				con_fines_de_lucro: usuario.con_fines_de_lucro
+				con_fines_de_lucro: usuario.con_fines_de_lucro,
+				// Actualización de contactos: Reemplazar existentes con los nuevos
+				contactos: usuario.contactos
+					? {
+							deleteMany: {}, // Borra los anteriores del usuario
+							create: usuario.contactos.map((c) => ({
+								tipo_contacto: c.tipo_contacto,
+								valor: c.valor,
+								etiqueta: c.etiqueta
+							}))
+						}
+					: undefined,
+				// Preferencias: Categorías
+				categorias_preferidas: usuario.categorias_preferidas
+					? {
+							deleteMany: {},
+							create: usuario.categorias_preferidas.map((c) => ({
+								categoria: { connect: { id_categoria: c.id_categoria } }
+							}))
+						}
+					: undefined,
+				// Preferencias: Tipos de Participación
+				tipos_participacion_preferidos: usuario.tipos_participacion_preferidas
+					? {
+							deleteMany: {},
+							create: usuario.tipos_participacion_preferidas.map((t) => ({
+								tipo_participacion: { connect: { id_tipo_participacion: t.id_tipo_participacion } }
+							}))
+						}
+					: undefined
 			},
 			include: this.includeOptions
 		});

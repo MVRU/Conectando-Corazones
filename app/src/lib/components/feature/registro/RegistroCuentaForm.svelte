@@ -315,6 +315,13 @@
 	let mostrarModalPasswordTexto = false;
 	let mostrarModalPasswordConfirmTexto = false;
 	let metodoAcceso: MetodoAcceso | null = null;
+	let verificando = false;
+	let verificandoUsername = false;
+	let verificandoEmail = false;
+	let erroresDisponibilidad = {
+		username: '',
+		email: ''
+	};
 
 	let rolInterno: RegistroRol = rol;
 
@@ -440,6 +447,17 @@
 					tipoInstitucionSeleccion,
 					tipoInstitucionPersonalizado
 				});
+
+	// Combinar errores locales con errores de disponibilidad
+	$: {
+		if (erroresDisponibilidad.username && !errores.username) {
+			errores.username = erroresDisponibilidad.username;
+		}
+		if (erroresDisponibilidad.email && !errores.email) {
+			errores.email = erroresDisponibilidad.email;
+		}
+	}
+
 	$: tieneErrores = Object.values(errores).some((error) => error);
 
 	function resetFormulario() {
@@ -468,6 +486,7 @@
 		modalPasswordConfirm = '';
 		modalPasswordError = '';
 		modalPasswordConfirmError = '';
+		erroresDisponibilidad = { username: '', email: '' };
 		limpiarFormularioPersistido();
 	}
 
@@ -696,19 +715,84 @@
 		elemento?.focus();
 	}
 
-	function continuarConDetalles() {
+	async function verificarDisponibilidad(campo: 'username' | 'email', valor: string) {
+		if (!valor) return;
+
+		const erroresLocales =
+			rolInterno === 'colaborador'
+				? calcularErroresColaborador({
+						username,
+						email,
+						password,
+						passwordConfirm,
+						nombre: nombrePersona,
+						apellido: apellidoPersona,
+						fechaNacimiento,
+						urlFoto,
+						archivoFoto,
+						tipoColaborador,
+						razonSocial,
+						conFinesDeLucro: conFinesDeLucroSeleccion
+					})
+				: calcularErroresInstitucion({
+						username,
+						email,
+						password,
+						passwordConfirm,
+						nombre: nombrePersona,
+						apellido: apellidoPersona,
+						fechaNacimiento,
+						urlFoto,
+						archivoFoto,
+						nombreLegal,
+						tipoInstitucionSeleccion,
+						tipoInstitucionPersonalizado
+					});
+
+		if (erroresLocales[campo]) {
+			erroresDisponibilidad[campo] = '';
+			return;
+		}
+
+		if (campo === 'username') verificandoUsername = true;
+		if (campo === 'email') verificandoEmail = true;
+
+		try {
+			const res = await fetch('/api/usuarios/verificar-disponibilidad', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [campo]: valor })
+			});
+
+			const data = await res.json();
+
+			if (data.errores && data.errores[campo]) {
+				erroresDisponibilidad[campo] = data.errores[campo];
+			} else {
+				erroresDisponibilidad[campo] = '';
+			}
+		} catch (error) {
+			console.error(`Error verificando disponibilidad de ${campo}:`, error);
+		} finally {
+			if (campo === 'username') verificandoUsername = false;
+			if (campo === 'email') verificandoEmail = false;
+		}
+	}
+
+	async function continuarConDetalles() {
 		if (metodoAcceso !== 'manual') {
 			seleccionarMetodoAcceso('manual');
 			return;
 		}
 
-		intentoEnvio = true;
 		const camposCredenciales: Array<keyof ErroresFormulario> = [
 			'username',
 			'email',
 			'password',
 			'passwordConfirm'
 		];
+
+		errores = { ...errores };
 		const camposConErrores = camposCredenciales.filter((campo) => errores[campo]);
 
 		if (camposConErrores.length) {
@@ -717,7 +801,46 @@
 			return;
 		}
 
-		intentoEnvio = false;
+		intentoEnvio = true;
+		verificando = true;
+
+		try {
+			const res = await fetch('/api/usuarios/verificar-disponibilidad', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, email })
+			});
+
+			const data = await res.json();
+
+			if (data.errores) {
+				if (data.errores.username) {
+					erroresDisponibilidad.username = data.errores.username;
+				}
+				if (data.errores.email) {
+					erroresDisponibilidad.email = data.errores.email;
+				}
+
+				if (Object.keys(data.errores).length > 0) {
+					enfocarPrimerCampoConError();
+					return;
+				}
+			} else {
+				erroresDisponibilidad.username = '';
+				erroresDisponibilidad.email = '';
+			}
+		} catch (error) {
+			console.error('Error verificando disponibilidad:', error);
+			toastStore.show({
+				variant: 'warning',
+				message: 'No pudimos verificar la disponibilidad. Intenta nuevamente.'
+			});
+			return;
+		} finally {
+			verificando = false;
+			intentoEnvio = false;
+		}
+
 		pasoFormulario = 'detalles';
 	}
 
@@ -763,31 +886,12 @@
 		return {
 			username: !usernameNormalizado
 				? MENSAJES_ERROR.obligatorio
-				: /*
 				: !validarUsername(usernameNormalizado)
-					? MENSAJES_ERROR.usuarioInvalido
-					: // TODO: Reemplazar validación contra mockUsuarios por llamada a API real
-						Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
-						? `El nombre de usuario "${usernameNormalizado}" ya está en uso`
-						: '',
-				*/
-					!validarUsername(usernameNormalizado)
 					? MENSAJES_ERROR.usuarioInvalido
 					: '',
 			email: !emailNormalizado
 				? MENSAJES_ERROR.obligatorio
-				: /*
 				: !validarCorreo(emailNormalizado)
-					? MENSAJES_ERROR.correoInvalido
-					: Object.values(mockUsuarios).some((u) =>
-								u.contactos?.some(
-									(c) => c.tipo_contacto === 'email' && c.valor === emailNormalizado
-								)
-						  )
-						? `El correo electrónico "${emailNormalizado}" ya está en uso`
-						: '',
-				*/
-					!validarCorreo(emailNormalizado)
 					? MENSAJES_ERROR.correoInvalido
 					: '',
 			password: !password
@@ -1120,7 +1224,7 @@
 
 		{#if metodoAcceso === null}
 			<div class="rounded-2xl bg-slate-50/80 p-8 text-center text-slate-500">
-				Seleccioná una de las opciones superiores para continuar con el formulario.
+				Seleccioná una de las opciones para continuar con el formulario.
 			</div>
 		{:else if metodoAcceso === 'federado'}
 			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
@@ -1214,8 +1318,10 @@
 						placeholder="ej: solidario123"
 						autocomplete="username"
 						bind:value={username}
-						error={intentoEnvio ? errores.username : ''}
+						error={intentoEnvio || erroresDisponibilidad.username ? errores.username : ''}
 						disabled={procesando}
+						cargando={verificandoUsername}
+						on:blur={() => verificarDisponibilidad('username', username)}
 					/>
 					<CampoFormulario
 						id="email"
@@ -1228,8 +1334,10 @@
 						type="email"
 						autocomplete="email"
 						bind:value={email}
-						error={intentoEnvio ? errores.email : ''}
+						error={intentoEnvio || erroresDisponibilidad.email ? errores.email : ''}
 						disabled={procesando}
+						cargando={verificandoEmail}
+						on:blur={() => verificarDisponibilidad('email', email)}
 					/>
 					<div class="space-y-2">
 						<label
@@ -1311,10 +1419,10 @@
 			<div class="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-end">
 				<Button
 					type="submit"
-					label="Continuar"
+					label={verificando ? 'Verificando...' : 'Continuar'}
 					variant="primary"
 					customClass="w-full sm:w-auto"
-					disabled={procesando}
+					disabled={procesando || verificando}
 					customAriaLabel="Pasar al siguiente paso del registro"
 				/>
 			</div>
