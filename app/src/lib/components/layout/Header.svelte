@@ -30,6 +30,8 @@
 		FileWarning
 	} from 'lucide-svelte';
 
+	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+
 	export let proyectos: Proyecto[] = [];
 
 	let menuAbierto = false;
@@ -69,6 +71,8 @@
 	$: emailUsuario =
 		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
 			?.valor || 'Sin email';
+
+	$: nombreCompleto = $usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario';
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -210,9 +214,7 @@
 							/>
 						</div>
 						<div class="hidden flex-col items-start leading-none md:flex">
-							<span class="text-sm font-semibold text-white"
-								>{$usuarioStore?.nombre || 'Usuario'}</span
-							>
+							<span class="text-sm font-semibold text-white">{nombreCompleto}</span>
 						</div>
 						<ChevronDown
 							class="h-4 w-4 text-blue-200 transition-transform duration-200 {mostrarDropdown
@@ -229,8 +231,7 @@
 							<!-- Header del menú -->
 							<div class="border-b border-blue-500/10 bg-blue-500/5 px-4 py-3">
 								<p class="text-sm font-medium text-white">
-									{$usuarioStore?.nombre}
-									{$usuarioStore?.apellido}
+									{nombreCompleto}
 								</p>
 								<p class="truncate text-xs text-blue-300">{emailUsuario}</p>
 							</div>
@@ -261,7 +262,7 @@
 								{/if}
 
 								<a
-									href={$isInstitucion ? '/institucion/mi-panel' : '/mi-panel'}
+									href={$isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
 									on:click={() => (mostrarDropdown = false)}
 								>
@@ -368,7 +369,7 @@
 							class="h-10 w-10 rounded-full object-cover"
 						/>
 						<div class="flex flex-col">
-							<span class="font-medium text-white">{$usuarioStore?.nombre}</span>
+							<span class="font-medium text-white">{nombreCompleto}</span>
 							<span class="text-xs text-blue-300">{emailUsuario}</span>
 						</div>
 					</div>
@@ -384,7 +385,7 @@
 							<span class="text-xs font-medium text-blue-100">Mis chats</span>
 						</a>
 						<a
-							href={$isInstitucion ? '/institucion/mi-panel' : '/mi-panel'}
+							href={$isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
 							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							on:click={() => (menuAbierto = false)}
 						>

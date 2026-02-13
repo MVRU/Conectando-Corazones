@@ -1,12 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import DashboardColaborador from '$lib/components/dashboard/DashboardColaborador.svelte';
 	import type { PageData } from './$types';
 
 	export let data: PageData;
 
-	const { usuario } = data;
 	let animate = false;
 
 	onMount(() => {
@@ -15,46 +13,31 @@
 </script>
 
 <svelte:head>
-	<title>Panel de Colaborador - Conectando Corazones</title>
+	<title>Panel de colaborador - Conectando Corazones</title>
 </svelte:head>
 
-<!-- Fondo decorativo -->
-<div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
-
-<main class="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-	<!-- Header -->
+{#if data.dashboardData}
 	<div
-		class="mb-8 text-center"
+		class="w-full transition-opacity duration-700 ease-out"
 		class:opacity-0={!animate}
-		class:translate-y-4={!animate}
-		style="transition: all 0.6s ease-out"
+		class:opacity-100={animate}
 	>
-		<div class="mb-4 flex justify-center">
-			<Badge text="Panel de Colaborador" />
+		<DashboardColaborador data={data.dashboardData} />
+	</div>
+{:else if data.error}
+	<div class="flex min-h-screen items-center justify-center">
+		<div class="text-center">
+			<h2 class="text-2xl font-bold text-red-600">Error al cargar el dashboard</h2>
+			<p class="mt-2 text-gray-600">{data.error}</p>
 		</div>
-		<h1 class="mb-4 text-4xl font-bold text-gray-900">
-			Mis <span class="text-blue-600">Colaboraciones</span>
-		</h1>
 	</div>
-
-	<!-- Dashboard Principal -->
-	<div
-		class="transition-all duration-500"
-		class:opacity-0={!animate}
-		class:translate-y-8={!animate}
-		style="transition-delay: 200ms"
-	>
-		<DashboardColaborador
-			colaboradorInfo={{
-				nombre: usuario.nombre || '',
-				apellido: usuario.apellido || '',
-				tipoColaborador: (usuario as any).tipo_colaborador || 'unipersonal',
-				proyectosColaborando: data.stats.proyectosColaborando,
-				aportesRealizados: data.stats.aportesRealizados,
-				evaluacionesPendientes: data.stats.evaluacionesPendientes
-			}}
-			proyectosActivos={data.proyectos}
-			evaluacionesPendientes={data.stats.evaluacionesPendientes}
-		/>
+{:else}
+	<div class="flex min-h-screen items-center justify-center">
+		<div class="text-center">
+			<div
+				class="border-primary h-12 w-12 animate-spin rounded-full border-4 border-t-transparent"
+			></div>
+			<p class="mt-4 text-gray-600">Cargando dashboard...</p>
+		</div>
 	</div>
-</main>
+{/if}

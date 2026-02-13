@@ -22,7 +22,14 @@ export class ParticipacionPermitidaMapper {
 			especie: prismaParticipacion.especie ?? undefined,
 			tipo_participacion: prismaParticipacion.tipo_participacion
 				? TipoParticipacionMapper.toDomain(prismaParticipacion.tipo_participacion)
-				: undefined
+				: undefined,
+			colaboraciones_tipo_participacion: contributions.map((c: any) => ({
+				id_colaboracion_tipo_participacion: c.id_colaboracion_tipo_participacion,
+				colaboracion_id: c.colaboracion_id,
+				participacion_permitida_id: c.participacion_permitida_id,
+				cantidad: c.cantidad,
+				colaboracion: c.colaboracion // Asegurar que pasamos la relacion colaboracion si existe
+			}))
 		});
 	}
 

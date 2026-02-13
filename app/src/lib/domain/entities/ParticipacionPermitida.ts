@@ -14,6 +14,7 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 	// Relaciones (opcionales)
 	proyecto?: Proyecto;
 	tipo_participacion?: TipoParticipacion;
+	colaboraciones_tipo_participacion?: import('../types/ColaboracionTipoParticipacion').ColaboracionTipoParticipacion[];
 
 	constructor(data: IParticipacionPermitida) {
 		this.id_participacion_permitida = data.id_participacion_permitida;
@@ -25,6 +26,7 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 		this.especie = data.especie;
 		this.proyecto = data.proyecto;
 		this.tipo_participacion = data.tipo_participacion;
+		this.colaboraciones_tipo_participacion = data.colaboraciones_tipo_participacion;
 
 		this.validar();
 	}
