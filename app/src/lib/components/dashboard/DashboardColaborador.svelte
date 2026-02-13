@@ -8,7 +8,7 @@
 	import EstadisticasAyuda from './colaborador/EstadisticasAyuda.svelte';
 	import ActividadReciente from './colaborador/ActividadReciente.svelte';
 	import UltimasResenas from './colaborador/UltimasResenas.svelte';
-	import Novedades from './colaborador/Novedades.svelte';
+	import Novedades from './Novedades.svelte';
 	import EstadisticasProyectoModal from './colaborador/EstadisticasProyectoModal.svelte';
 	import EstadisticasAgendaModal from './colaborador/EstadisticasAgendaModal.svelte';
 	import GestionarEvidenciasModal from './colaborador/GestionarEvidenciasModal.svelte';
@@ -72,199 +72,124 @@
 		});
 	}
 
+	import { PdfService } from '$lib/utils/pdf.service';
+
 	async function generatePDF() {
 		const doc = new jsPDF();
-		const pageWidth = doc.internal.pageSize.getWidth();
-		const pageHeight = doc.internal.pageSize.getHeight();
-		const margin = 20;
-		let yPos = 20;
 
-		// Load Logo
 		let logoImg: HTMLImageElement | null = null;
 		try {
-			logoImg = await loadImage('/logo-1.png');
+			logoImg = await PdfService.cargarImagen('/logo-1.png');
 		} catch (e) {
 			console.error('No se pudo cargar el logo', e);
 		}
 
-		// --- Header ---
-		doc.setFillColor(15, 16, 41);
-		doc.rect(0, 0, pageWidth, 55, 'F');
-
-		if (logoImg) {
-			const logoWidth = 25;
-			const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
-			doc.addImage(logoImg, 'PNG', margin, 15, logoWidth, logoHeight);
-		}
-
-		doc.setTextColor(255, 255, 255);
-		doc.setFontSize(22);
-		doc.setFont('helvetica', 'bold');
-		const titleX = logoImg ? margin + 30 : margin;
-		doc.text('Reporte de Impacto', titleX, 25);
-
-		doc.setFontSize(12);
-		doc.setFont('helvetica', 'normal');
-		doc.setTextColor(148, 163, 184); // Slate 400
-		doc.text(data.info.tipo.toUpperCase(), titleX, 32);
-
-		doc.setFontSize(10);
-		doc.setTextColor(203, 213, 225); // Slate 300
-		doc.text(data.info.ubicacion, titleX, 38);
-
-		if (data.info.bio) {
-			doc.setFontSize(9);
-			doc.setFont('helvetica', 'italic');
-			doc.setTextColor(148, 163, 184); // Slate 400
-			const bioLines = doc.splitTextToSize(data.info.bio, pageWidth - titleX - margin);
-			doc.text(bioLines.slice(0, 2), titleX, 44);
-		}
-
-		yPos = 70;
-
-		// --- Métricas Clave (Grilla 3x2) ---
-		doc.setTextColor(15, 23, 42);
-		doc.setFontSize(16);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Métricas Clave', margin, yPos);
-		yPos += 10;
-
-		const metrics = [
-			{ label: 'Proyectos Colaborados', value: data.metricas.proyectosTotales.toString() },
-			{
-				label: 'Instituciones Ayudadas',
-				value: data.metricas.institucionesAlcanzadas.toString()
-			},
-			{
-				label: 'Total Aportado (ARS)',
-				value: `$${(data.metricas.estadisticasProyectos?.totalDineroRecaudado || 0).toLocaleString('es-AR')}`
-			},
-			{
-				label: 'Beneficiarios Alcanzados',
-				value: (data.metricas.estadisticasProyectos?.totalBeneficiarios || 0).toString()
-			},
-			{ label: 'Solicitudes Pendientes', value: data.metricas.solicitudesPendientes.toString() },
-			{
-				label: 'Progreso Promedio',
-				value: `${data.metricas.estadisticasProyectos?.promedioProgreso || 0}%`
-			}
-		];
-
-		const gridCols = 3;
-		const colWidth = (pageWidth - margin * 2) / gridCols;
-		const rowHeight = 22;
-
-		metrics.forEach((metric, index) => {
-			const col = index % gridCols;
-			const row = Math.floor(index / gridCols);
-			const x = margin + col * colWidth;
-			const y = yPos + row * rowHeight;
-
-			doc.setFillColor(248, 250, 252); // Slate 50
-			doc.setDrawColor(226, 232, 240); // Slate 200
-			doc.roundedRect(x + 2, y, colWidth - 4, rowHeight - 6, 3, 3, 'FD');
-
-			doc.setFontSize(8);
-			doc.setFont('helvetica', 'normal');
-			doc.setTextColor(100, 116, 139);
-			doc.text(metric.label, x + 6, y + 6);
-
-			doc.setFontSize(11);
-			doc.setFont('helvetica', 'bold');
-			doc.setTextColor(15, 23, 42);
-			doc.text(metric.value, x + 6, y + 12);
-		});
-
-		yPos += Math.ceil(metrics.length / gridCols) * rowHeight + 10;
-
-		// --- Análisis de Impacto ---
-		doc.setFontSize(14);
-		doc.setFont('helvetica', 'bold');
-		doc.text('Distribución de Ayuda por Tipo', margin, yPos);
-		yPos += 10;
-
-		const impactData = [
-			{
-				label: 'Monetaria',
-				value: data.estadisticasAyuda.monetaria,
-				unit: 'ARS',
-				color: [16, 185, 129]
-			},
-			{
-				label: 'Voluntariado',
-				value: data.estadisticasAyuda.voluntariado,
-				unit: data.estadisticasAyuda.unidadVoluntariado,
-				color: [59, 130, 246]
-			},
-			{
-				label: 'En Especie',
-				value: data.estadisticasAyuda.especie,
-				unit: 'unidades',
-				color: [245, 158, 11]
-			}
-		];
-
-		impactData.forEach((item) => {
-			doc.setFontSize(10);
-			doc.setFont('helvetica', 'bold');
-			doc.setTextColor(71, 85, 105);
-			doc.text(`${item.label}:`, margin, yPos);
-
-			const valText = `${item.value.toLocaleString('es-AR')} ${item.unit}`;
-			doc.setFont('helvetica', 'normal');
-			doc.text(valText, margin + 30, yPos);
-
-			yPos += 6;
-		});
-
-		yPos += 10;
-
-		// --- Seguimiento de Objetivos ---
-		doc.setFontSize(14);
-		doc.setFont('helvetica', 'bold');
-		doc.setTextColor(15, 23, 42);
-		doc.text('Seguimiento de Objetivos en Proyectos', margin, yPos);
-		yPos += 5;
-
-		const objetivosRows = data.seguimientoObjetivos.flatMap((p) =>
-			p.objetivos.map((obj) => [
-				p.nombre,
-				obj.descripcion,
-				`${obj.actual} / ${obj.meta} ${obj.unidad}`,
-				`${obj.progreso}%`
-			])
+		// --- Encabezado ---
+		let yPos = PdfService.dibujarEncabezado(
+			doc,
+			logoImg,
+			'Reporte de Impacto Social',
+			`Colaborador: ${data.info.nombre} | ${data.info.tipo.toUpperCase()}`,
+			data.info.ubicacion,
+			data.info.bio
 		);
 
-		autoTable(doc, {
-			startY: yPos,
-			head: [['Proyecto', 'Objetivo / Especie', 'Avance', '%']],
-			body: objetivosRows,
-			theme: 'grid',
-			headStyles: { fillColor: [15, 16, 41], textColor: 255 },
-			styles: { fontSize: 9 },
-			columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50 }, 3: { halign: 'center' } },
-			margin: { left: margin, right: margin }
+		// --- Resumen de Impacto Personal (Destacado) ---
+		yPos = PdfService.dibujarTituloSeccion(doc, 'Mi Impacto Personal', yPos);
+
+		const personalImpact = [
+			{
+				etiqueta: 'Voluntariado',
+				valor: data.estadisticasAyuda.voluntariado.toString(),
+				unidad: data.estadisticasAyuda.unidadVoluntariado,
+				color: PdfService.COLORES.AZUL_500
+			},
+			{
+				etiqueta: 'Donaciones Monetarias',
+				valor: `$${data.estadisticasAyuda.monetaria.toLocaleString('es-AR')}`,
+				unidad: 'ARS',
+				color: PdfService.COLORES.ESMERALDA_500
+			},
+			{
+				etiqueta: 'Donaciones en Especie',
+				valor: data.estadisticasAyuda.especie.toString(),
+				unidad: 'unidades',
+				color: PdfService.COLORES.AMBAR_500
+			}
+		];
+
+		yPos = PdfService.dibujarTarjetasMetricas(doc, personalImpact, yPos);
+
+		// --- Métricas Globales (Contexto) ---
+		yPos = PdfService.dibujarTituloSeccion(doc, 'Impacto en la Comunidad', yPos);
+
+		const metricasGlobales = [
+			{ etiqueta: 'Proyectos Apoyados', valor: data.metricas.proyectosTotales.toString() },
+			{
+				etiqueta: 'Instituciones Ayudadas',
+				valor: data.metricas.institucionesAlcanzadas.toString()
+			},
+			{
+				etiqueta: 'Beneficiarios Potenciales',
+				valor: (data.metricas.estadisticasProyectos?.totalBeneficiarios || 0).toString()
+			},
+			{ etiqueta: 'Solicitudes Activas', valor: data.metricas.solicitudesPendientes.toString() }
+		];
+
+		yPos = PdfService.dibujarTarjetasMetricas(doc, metricasGlobales, yPos, 4);
+		yPos += 5;
+
+		// --- Gráfico de Distribución ---
+		yPos = PdfService.dibujarTituloSeccion(doc, 'Distribución de Ayuda', yPos);
+
+		let total = data.estadisticasAyuda.totalProyectos || 1;
+		if (total === 0) total = 1;
+
+		const distribucion = [
+			{
+				valor: data.estadisticasAyuda.distribucion.voluntariado,
+				color: PdfService.COLORES.AZUL_500,
+				etiqueta: 'Voluntariado'
+			},
+			{
+				valor: data.estadisticasAyuda.distribucion.monetaria,
+				color: PdfService.COLORES.ESMERALDA_500,
+				etiqueta: 'Monetaria'
+			},
+			{
+				valor: data.estadisticasAyuda.distribucion.especie,
+				color: PdfService.COLORES.AMBAR_500,
+				etiqueta: 'Especie'
+			}
+		];
+
+		// Usar barra de distribución (segmentada)
+		yPos = PdfService.dibujarBarraDistribucion(doc, distribucion, total, yPos);
+
+		// --- Detalle de Proyectos (Tabla) ---
+		yPos = PdfService.dibujarTituloSeccion(doc, 'Detalle de Participación en Proyectos', yPos);
+
+		const filasTabla = data.seguimientoObjetivos.flatMap((p) => {
+			return p.objetivos.map((obj) => [
+				p.nombre,
+				obj.descripcion,
+				obj.tipo.charAt(0).toUpperCase() + obj.tipo.slice(1),
+				`${obj.actual} / ${obj.meta} ${obj.unidad}`,
+				`${obj.progreso}%`
+			]);
 		});
 
-		// @ts-ignore
-		yPos = doc.lastAutoTable.finalY + 15;
+		yPos = PdfService.dibujarTabla(
+			doc,
+			[['Proyecto', 'Objetivo', 'Tipo', 'Aporte / Meta', 'Avance']],
+			filasTabla,
+			yPos
+		);
 
-		// --- Footer ---
-		const totalPages = doc.getNumberOfPages();
-		for (let i = 1; i <= totalPages; i++) {
-			doc.setPage(i);
-			doc.setFontSize(8);
-			doc.setTextColor(148, 163, 184);
-			doc.line(margin, pageHeight - 15, pageWidth - margin, pageHeight - 15);
+		// --- Pie de Página ---
+		PdfService.dibujarPieDePagina(doc);
 
-			const dateStr = `Generado el: ${new Date().toLocaleDateString('es-AR')} ${new Date().toLocaleTimeString('es-AR')}`;
-			doc.text(dateStr, margin, pageHeight - 10);
-			doc.text(`Página ${i} de ${totalPages}`, pageWidth - margin, pageHeight - 10, {
-				align: 'right'
-			});
-		}
-
-		doc.save(`reporte-colaborador-${data.info.nombre.replace(/\s+/g, '-').toLowerCase()}.pdf`);
+		doc.save(`reporte-impacto-${data.info.nombre.replace(/\s+/g, '-').toLowerCase()}.pdf`);
 	}
 </script>
 

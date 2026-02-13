@@ -77,6 +77,7 @@
 
 	<div class="mt-4 flex items-center gap-2 rounded-lg bg-white/5 p-3 text-xs text-slate-400">
 		<Info size={14} class="text-blue-400" />
+		<!-- TODO: implementar historial de cambios -->
 		<p>Tu actividad impulsa proyectos. ¡Seguí así!</p>
 	</div>
 </div>

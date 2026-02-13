@@ -97,13 +97,13 @@ export class ObtenerDashboardColaborador {
 			proyectosColaborador,
 			colaboraciones
 		);
+
 		const seguimientoObjetivos = this.calcularSeguimientoObjetivos(
 			proyectosColaborador,
 			colaboraciones
 		);
 		const estadisticasAyuda = this.calcularEstadisticasAyuda(colaboraciones);
 
-		// Obtener proyectos recomendados
 		const proyectosComunidad = await this.calcularProyectosRecomendados(
 			colaborador,
 			proyectosColaborador
@@ -145,7 +145,6 @@ export class ObtenerDashboardColaborador {
 	}
 
 	private calcularEstadisticasProyectos(proyectos: any[], colaboraciones: any[]) {
-		// Calcular total aportado en ARS desde colaboraciones_tipo_participacion
 		// Calcular total aportado en ARS desde colaboraciones_tipo_participacion
 		const totalDineroRecaudado = colaboraciones.reduce((total, colab) => {
 			if (!colab.colaboraciones_tipo_participacion) return total;
@@ -252,10 +251,8 @@ export class ObtenerDashboardColaborador {
 			completado: 'Completado'
 		};
 
-		// Orden específico de estados - siempre mostrar estos 4
 		const ordenEstados = ['en_curso', 'pendiente_solicitud_cierre', 'en_revision', 'completado'];
 
-		// Retornar siempre los 4 estados, incluso si tienen 0 proyectos
 		return ordenEstados.map((estado) => ({
 			label: labels[estado] || this.formatearEstado(estado),
 			count: (estados[estado] as number) || 0,
@@ -361,7 +358,6 @@ export class ObtenerDashboardColaborador {
 
 		const resto = institucionesArray.slice(3);
 
-		// Calcular estadísticas de colaboraciones por estado
 		const aprobadas = colaboraciones.filter((c) => c.estaAprobada()).length;
 		const pendientes = colaboraciones.filter((c) => c.estaPendiente()).length;
 		const rechazadas = colaboraciones.filter((c) => c.estaRechazada()).length;
@@ -379,60 +375,85 @@ export class ObtenerDashboardColaborador {
 	}
 
 	private calcularSeguimientoObjetivos(proyectos: any[], colaboraciones: any[]) {
-		return proyectos
-			.filter((p) => p.participacion_permitida && p.participacion_permitida.length > 0)
-			.slice(0, 3)
-			.map((p) => {
-				const objetivos = p.participacion_permitida.map((pp: any) => {
-					const objetivo = pp.objetivo || 0;
+		// 1. Filtrar colaboraciones del usuario que estén APROBADAS
+		const misColaboracionesAprobadas = colaboraciones.filter((c) => c.estaAprobada());
+		const idsProyectosAprobados = new Set(misColaboracionesAprobadas.map((c) => c.proyecto_id));
 
-					// Sumar TODAS las colaboraciones_tipo_participacion para esta participación permitida
-					// Estas ya vienen filtradas por participación permitida desde la base de datos
-					// Y ahora filtramos por estado de la colaboración (solo aprobadas)
-					const actual =
-						pp.colaboraciones_tipo_participacion
-							?.filter(
-								(ctp: any) =>
-									ctp.colaboracion?.estado === 'approved' ||
-									ctp.colaboracion?.estado === 'completed'
-							) // Ajustar estados según lógica de negocio
-							.reduce((sum: number, ctp: any) => sum + (Number(ctp.cantidad) || 0), 0) || 0;
+		return (
+			proyectos
+				// 2. Filtrar proyectos donde el usuario tiene colaboración aprobada
+				.filter(
+					(p) =>
+						p.id_proyecto &&
+						idsProyectosAprobados.has(p.id_proyecto) &&
+						p.participacion_permitida &&
+						p.participacion_permitida.length > 0
+				)
+				.map((p) => {
+					// 3. Identificar en qué tipos de participación está colaborando el usuario en este proyecto
+					const miColaboracion = misColaboracionesAprobadas.find(
+						(c) => c.proyecto_id === p.id_proyecto
+					);
 
-					const progreso = objetivo > 0 ? Math.round((actual / objetivo) * 100) : 0;
-
-					const tipoDescripcion = pp.tipo_participacion?.descripcion?.toLowerCase() || '';
-					const tipo =
-						tipoDescripcion === 'monetaria'
-							? 'monetaria'
-							: tipoDescripcion === 'voluntariado'
-								? 'voluntariado'
-								: 'especie';
-
-					// Para tipo "Especie", mostrar la especie y unidad de medida
-					let descripcion = pp.tipo_participacion?.descripcion || 'Sin descripción';
-					if (tipo === 'especie' && pp.especie) {
-						const unidadMedida = pp.unidad_medida || '';
-						descripcion = `${pp.especie}${unidadMedida ? ` (${unidadMedida})` : ''}`;
+					const misTiposParticipacionIds = new Set<number>();
+					if (miColaboracion && miColaboracion.colaboraciones_tipo_participacion) {
+						miColaboracion.colaboraciones_tipo_participacion.forEach((ctp: any) => {
+							if (ctp.participacion_permitida_id) {
+								misTiposParticipacionIds.add(ctp.participacion_permitida_id);
+							}
+						});
 					}
 
-					return {
-						id: pp.id_participacion_permitida?.toString() || '',
-						descripcion,
-						tipo,
-						progreso: Math.min(progreso, 100),
-						actual,
-						meta: objetivo,
-						unidad: pp.unidad_medida || 'unidades'
-					};
-				});
+					// 4. Filtrar las participaciones permitidas del proyecto para mostrar SOLO aquellas en las que el usuario colabora
+					const objetivosFiltrados = p.participacion_permitida
+						.filter((pp: any) => misTiposParticipacionIds.has(pp.id_participacion_permitida))
+						.map((pp: any) => {
+							const objetivo = pp.objetivo || 0;
 
-				return {
-					id: p.id_proyecto?.toString() || '',
-					nombre: p.titulo,
-					fechaFin: p.fecha_fin_tentativa || '',
-					objetivos
-				};
-			});
+							// 5. Calcular el progreso GLOBAL (de todos los colaboradores) para esta participación
+							const actual =
+								pp.colaboraciones_tipo_participacion
+									?.filter((ctp: any) => ctp.colaboracion?.estado === 'aprobada')
+									.reduce((sum: number, ctp: any) => sum + (Number(ctp.cantidad) || 0), 0) || 0;
+
+							const progreso = objetivo > 0 ? Math.round((actual / objetivo) * 100) : 0;
+
+							const tipoDescripcion = pp.tipo_participacion?.descripcion?.toLowerCase() || '';
+							const tipo =
+								tipoDescripcion === 'monetaria'
+									? 'monetaria'
+									: tipoDescripcion === 'voluntariado'
+										? 'voluntariado'
+										: 'especie';
+
+							let descripcion = pp.tipo_participacion?.descripcion || 'Sin descripción';
+							if (tipo === 'especie' && pp.especie) {
+								const unidadMedida = pp.unidad_medida || '';
+								descripcion = `${pp.especie}${unidadMedida ? ` (${unidadMedida})` : ''}`;
+							}
+
+							return {
+								id: pp.id_participacion_permitida?.toString() || '',
+								descripcion,
+								tipo,
+								progreso: Math.min(progreso, 100),
+								actual,
+								meta: objetivo,
+								unidad: pp.unidad_medida || 'unidades',
+								especie: pp.especie
+							};
+						});
+
+					return {
+						id: p.id_proyecto?.toString() || '',
+						nombre: p.titulo,
+						fechaFin: p.fecha_fin_tentativa || '',
+						objetivos: objetivosFiltrados
+					};
+				})
+				.filter((p) => p.objetivos.length > 0)
+				.slice(0, 5) // Mostrar hasta 5 proyectos
+		);
 	}
 
 	private calcularEstadisticasAyuda(colaboraciones: any[]) {
@@ -462,13 +483,11 @@ export class ObtenerDashboardColaborador {
 					ctp.participacion_permitida?.especie?.toLowerCase() || 'persona';
 
 				if (tipo === 'voluntariado') {
-					// Agrupar por especie
 					if (especieParticipacion === 'horas') {
 						voluntariadoPorEspecie.horas += cantidad;
 					} else if (especieParticipacion === 'dias' || especieParticipacion === 'días') {
 						voluntariadoPorEspecie.dias += cantidad;
 					} else {
-						// Por defecto es "persona"
 						voluntariadoPorEspecie.persona += cantidad;
 					}
 					if (c.proyecto_id) proyectosPorTipo.voluntariado.add(c.proyecto_id);
@@ -534,7 +553,6 @@ export class ObtenerDashboardColaborador {
 	}
 
 	private async calcularProyectosRecomendados(colaborador: any, proyectosColaborador: any[]) {
-		// Obtener todos los proyectos disponibles
 		const todosProyectos = await this.proyectoRepo.findAllSummary();
 
 		// Filtrar proyectos en los que ya colabora
@@ -616,9 +634,7 @@ export class ObtenerDashboardColaborador {
 				}));
 		}
 
-		// Mapear a formato esperado por el componente
 		return proyectosFiltrados.map((item) => {
-			// Formatear ubicación según modalidad
 			let ubicacionTexto = 'Sin ubicación';
 			if (item.proyecto.proyecto_ubicaciones && item.proyecto.proyecto_ubicaciones.length > 0) {
 				const primeraUbicacion = item.proyecto.proyecto_ubicaciones[0].ubicacion;
