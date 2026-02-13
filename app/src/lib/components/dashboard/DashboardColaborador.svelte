@@ -142,7 +142,10 @@
 		// --- Gráfico de Distribución ---
 		yPos = PdfService.dibujarTituloSeccion(doc, 'Distribución de Ayuda', yPos);
 
-		let total = data.estadisticasAyuda.totalProyectos || 1;
+		let total =
+			data.estadisticasAyuda.distribucion.voluntariado +
+				data.estadisticasAyuda.distribucion.monetaria +
+				data.estadisticasAyuda.distribucion.especie || 1;
 		if (total === 0) total = 1;
 
 		const distribucion = [
