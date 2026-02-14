@@ -55,7 +55,6 @@
 		REGISTRO_STORAGE_VERSION
 	} from '\$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
-	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
 	const dispatch = createEventDispatcher<{
 		submit: RegistroCuentaSubmitDetail;

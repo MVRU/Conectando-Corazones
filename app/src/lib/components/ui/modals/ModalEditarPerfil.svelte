@@ -152,6 +152,20 @@
 	}
 
 	async function handleGuardarClick() {
+		if (formContactos) {
+			if (!formContactos.isValid()) {
+				toastStore.show({
+					variant: 'error',
+					title: 'Datos de contacto inválidos',
+					message:
+						'Por favor, revisá los métodos de contacto. Asegurate de completarlos o eliminarlos si están vacíos.'
+				});
+				return;
+			}
+			edicion.actualizarCampo('contactos', formContactos.getValues());
+		}
+
+		// Subida de foto (si aplica)
 		if (pendingUploadMetadata) {
 			try {
 				const response = await fetch('/api/usuarios/me/foto', {
@@ -176,11 +190,7 @@
 				return;
 			}
 		}
-		handleSubmit();
-	}
 
-	function handleGuardarContactos(e: CustomEvent) {
-		edicion.actualizarCampo('contactos', e.detail);
 		handleSubmit();
 	}
 
@@ -215,6 +225,8 @@
 		perfilUsuario.rol === 'institucion' ? 'Contanos sobre tu institución' : 'Contanos sobre vos';
 
 	$: tieneFoto = $datosEdicion.url_foto && $datosEdicion.url_foto !== '/logo-1.png';
+
+	let formContactos: MetodosContactoForm;
 </script>
 
 {#if mostrar}
@@ -502,11 +514,11 @@
 							</h4>
 							<div class="rounded-lg border border-gray-100 bg-gray-50 p-4 sm:p-5">
 								<MetodosContactoForm
+									bind:this={formContactos}
 									valoresIniciales={$datosEdicion.contactos}
 									mostrarOmitir={false}
 									bloquearPrimerContacto={true}
-									ocultarBotones={false}
-									on:submit={handleGuardarContactos}
+									ocultarBotones={true}
 								/>
 							</div>
 						</section>

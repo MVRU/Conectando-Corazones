@@ -9,7 +9,7 @@
 
 	export let data: PageData;
 
-	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
+	$: ({ perfilUsuario, proyectos, resenas, categorias, tiposParticipacion, esMiPerfil } = data);
 
 	$: if (esMiPerfil && !$isLoading && !$isAuthenticated) {
 		goto('/iniciar-sesion');
@@ -27,7 +27,14 @@
 </svelte:head>
 
 {#if perfilUsuario}
-	<VistaPerfil {perfilUsuario} {esMiPerfil} {proyectos} {resenas} {categorias} />
+	<VistaPerfil
+		{perfilUsuario}
+		{esMiPerfil}
+		{proyectos}
+		{resenas}
+		{categorias}
+		{tiposParticipacion}
+	/>
 {:else}
 	<div class="flex min-h-screen items-center justify-center bg-gray-50">
 		<div class="text-center">

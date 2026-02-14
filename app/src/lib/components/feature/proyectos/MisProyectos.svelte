@@ -9,7 +9,6 @@
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	// import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 
 	export let usuario: Usuario | null = null;
 	export let proyectos: Proyecto[] = [];

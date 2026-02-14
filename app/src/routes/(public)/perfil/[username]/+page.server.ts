@@ -3,7 +3,9 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { ObtenerUsuario } from '$lib/domain/use-cases/usuarios/ObtenerUsuario';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
+import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
@@ -30,9 +32,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const obtenerProyectos = new ObtenerProyectosPerfil(proyectoRepo);
 		const getAllCategorias = new GetAllCategorias(categoriaRepo);
 
-		const [proyectos, categorias] = await Promise.all([
+		const [proyectos, categorias, tiposParticipacion] = await Promise.all([
 			obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol),
-			getAllCategorias.execute()
+			getAllCategorias.execute(),
+			new GetAllTiposParticipacion(new PostgresTipoParticipacionRepository()).execute()
 		]);
 
 		// 3. Obtener Reseñas (Backend no implementado aún)
@@ -43,10 +46,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Serializar todas las entidades de dominio
 		return {
-			perfilUsuario: JSON.parse(JSON.stringify(perfilUsuario)),
+			perfilUsuario: perfilUsuario.toPOJO(),
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			resenas: JSON.parse(JSON.stringify(resenas)),
 			categorias: categorias.map((c) => ({ ...c })),
+			tiposParticipacion: tiposParticipacion.map((t) => ({ ...t })),
 			esMiPerfil
 		};
 	} catch (err) {

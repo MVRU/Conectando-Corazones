@@ -219,13 +219,50 @@ export const authActions = {
 	},
 
 	/**
-	 * Actualizar datos del usuario
+	 * Actualizar datos del usuario localmente
 	 */
 	updateUsuario(usuarioData: Partial<Usuario>) {
 		authStore.update((state) => ({
 			...state,
 			usuario: state.usuario ? ({ ...state.usuario, ...usuarioData } as Usuario) : null
 		}));
+	},
+
+	/**
+	 * Actualizar perfil del usuario y persistir en la base de datos
+	 */
+	async actualizarPerfil(id: number, cambios: Partial<Usuario>): Promise<UsuarioCompleto | null> {
+		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
+		try {
+			const response = await fetch(`/api/usuarios/${id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(cambios)
+			});
+
+			if (!response.ok) {
+				const { error } = await response.json().catch(() => ({ error: null }));
+				throw new Error(error ?? 'Error al actualizar el perfil');
+			}
+
+			const usuarioActualizado = (await response.json()) as UsuarioCompleto;
+
+			authStore.update((state) => ({
+				...state,
+				usuario: usuarioActualizado,
+				isLoading: false,
+				error: null
+			}));
+
+			return usuarioActualizado;
+		} catch (error) {
+			authStore.update((state) => ({
+				...state,
+				isLoading: false,
+				error: error instanceof Error ? error.message : 'Error al actualizar el perfil'
+			}));
+			throw error;
+		}
 	},
 
 	async registerColaborador(input: RegisterColaboradorInput): Promise<void> {

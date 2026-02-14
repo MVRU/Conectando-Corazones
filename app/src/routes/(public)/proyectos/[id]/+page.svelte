@@ -32,9 +32,6 @@
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
-	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
-	// import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
-	// import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';

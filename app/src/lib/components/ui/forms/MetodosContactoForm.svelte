@@ -117,11 +117,13 @@
 		return '';
 	});
 
-	$: telefonoValido = contactos.some(
-		(c) => c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)
+	$: algunContactoValido = contactos.some(
+		(c) =>
+			(c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)) ||
+			(c.tipo_contacto === 'email' && validarCorreo(c.valor))
 	);
 
-	$: tieneErrores = !telefonoValido || contactos.some((_, i) => errors[i]);
+	$: tieneErrores = !algunContactoValido || contactos.some((_, i) => errors[i]);
 
 	function agregarContacto() {
 		contactos = [...contactos, { tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
@@ -141,6 +143,14 @@
 
 	export function submit() {
 		manejarEnvio();
+	}
+
+	export function getValues(): Contacto[] {
+		return contactos;
+	}
+
+	export function isValid(): boolean {
+		return !tieneErrores;
 	}
 
 	function manejarEnvio(event?: SubmitEvent) {
@@ -313,7 +323,6 @@
 				type="submit"
 				label={enviando ? 'Guardando...' : 'Continuar'}
 				variant="primary"
-				size="sm"
 				disabled={tieneErrores || enviando}
 				customClass="w-full md:w-auto"
 			/>

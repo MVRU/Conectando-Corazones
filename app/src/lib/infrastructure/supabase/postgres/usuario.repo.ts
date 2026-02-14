@@ -165,7 +165,13 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				categorias_preferidas: usuario.categorias_preferidas
 					? {
 							deleteMany: {},
-							create: usuario.categorias_preferidas.map((c) => ({
+							create: Array.from(
+								new Map(
+									usuario.categorias_preferidas
+										.filter((c) => c.id_categoria !== undefined)
+										.map((c) => [c.id_categoria, c])
+								).values()
+							).map((c) => ({
 								categoria: { connect: { id_categoria: c.id_categoria } }
 							}))
 						}
@@ -174,7 +180,13 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				tipos_participacion_preferidos: usuario.tipos_participacion_preferidas
 					? {
 							deleteMany: {},
-							create: usuario.tipos_participacion_preferidas.map((t) => ({
+							create: Array.from(
+								new Map(
+									usuario.tipos_participacion_preferidas
+										.filter((t) => t.id_tipo_participacion !== undefined)
+										.map((t) => [t.id_tipo_participacion, t])
+								).values()
+							).map((t) => ({
 								tipo_participacion: { connect: { id_tipo_participacion: t.id_tipo_participacion } }
 							}))
 						}

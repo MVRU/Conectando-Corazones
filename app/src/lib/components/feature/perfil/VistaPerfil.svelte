@@ -1,5 +1,12 @@
 <script lang="ts">
-	import { usuario as usuarioStore, isAuthenticated, authActions, isAdmin } from '$lib/stores/auth';
+	import {
+		usuario as usuarioStore,
+		isAuthenticated,
+		authActions,
+		authStore,
+		isAdmin
+	} from '$lib/stores/auth';
+	import { invalidateAll } from '$app/navigation';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import ResenaModal from '$lib/components/ui/modals/ResenaModal.svelte';
 	import EditarCategoriasModal from '$lib/components/ui/modals/EditarCategoriasModal.svelte';
@@ -32,7 +39,6 @@
 		determinarEstadoVerificacion,
 		obtenerVerificacionesUsuario
 	} from '$lib/utils/util-verificacion';
-	// import { mockVerificaciones } from '$lib/infrastructure/mocks/mock-verificaciones';
 	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 
@@ -41,23 +47,18 @@
 	export let proyectos: Proyecto[] = [];
 	export let resenas: Resena[] = [];
 	export let categorias: Categoria[] = [];
-
-	// Si es mi perfil, sincronizar con el store para que los cambios se reflejen
-	$: if (esMiPerfil && $usuarioStore) {
-		perfilUsuario = $usuarioStore as UsuarioCompleto;
-	}
+	export let tiposParticipacion: TipoParticipacion[] = [];
 
 	// Verificar si el usuario actual puede ver los contactos del perfil
-	// Usamos los proyectos cargados del servidor
 	$: puedeVerContactosPerfil = puedeVerContactos($usuarioStore, perfilUsuario, proyectos);
 
 	// Verificar si el usuario actual puede dejar Reseña
 	$: puedeResenar = puedeDejarResena($usuarioStore, perfilUsuario, proyectos);
 
-	// Proyectos del usuario (ya vienen cargados)
+	// Proyectos del usuario
 	$: proyectosUsuario = proyectos;
 
-	// Reseñas del usuario - usando writable store local
+	// Reseñas del usuario
 	const resenasStore = writable<Resena[]>(resenas);
 
 	$: yaResenoUsuario =
@@ -73,20 +74,39 @@
 		(r) => r.id_objeto === perfilUsuario.id_usuario && r.tipo_objeto === 'usuario'
 	);
 
-	// Gestión de modales usando composable
+	// Gestión de modales
 	const modales = usePerfilModales();
 
-	// Gestión de edición de perfil usando composable
+	// Gestión de edición de perfil
 	const edicion = usePerfilEdicion();
 	const { datosEdicion, provinciaSeleccionada, errorDescripcion, localidadesFiltradas } = edicion;
 
-	function actualizarUsuarioCon(parcial: Partial<UsuarioCompleto>, cerrarModal?: () => void) {
-		if (!$usuarioStore) return;
-		authActions.updateUsuario({
-			...$usuarioStore,
-			...parcial
-		} as any);
-		if (cerrarModal) cerrarModal();
+	async function actualizarUsuarioCon(parcial: Partial<UsuarioCompleto>, cerrarModal?: () => void) {
+		if (!$usuarioStore || !$usuarioStore.id_usuario) return;
+
+		try {
+			await authActions.actualizarPerfil($usuarioStore.id_usuario, parcial as any);
+
+			await invalidateAll();
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Perfil actualizado',
+				message: 'Los cambios se guardaron correctamente.'
+			});
+
+			if (cerrarModal) cerrarModal();
+		} catch (error) {
+			console.error('Error al actualizar perfil:', error);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error al actualizar',
+				message:
+					error instanceof Error
+						? error.message
+						: 'No se pudieron guardar los cambios en el perfil.'
+			});
+		}
 	}
 
 	function crearAbrirModal(tipo: 'categorias' | 'tiposParticipacion', validacion?: () => boolean) {
@@ -247,7 +267,6 @@
 	</div>
 </main>
 
-<!-- Modal de edición de perfil -->
 <ModalEditarPerfil
 	mostrar={$modales.edicion && esMiPerfil}
 	{perfilUsuario}
@@ -262,7 +281,7 @@
 	on:guardar={handleGuardarPerfil}
 	on:cerrar={() => modales.cerrar('edicion')}
 />
-<!-- Modal de añadir Reseña  -->
+
 {#if $modales.resena && !esMiPerfil && $isAuthenticated && $usuarioStore}
 	<ResenaModal
 		mostrar={$modales.resena}
@@ -275,28 +294,28 @@
 	/>
 {/if}
 
-<!-- Modal de editar categorías favoritas -->
 {#if $modales.categorias && esMiPerfil}
 	<EditarCategoriasModal
 		mostrar={$modales.categorias}
 		categoriasSeleccionadas={perfilUsuario.categorias_preferidas || []}
 		{categorias}
+		guardando={$authStore.isLoading}
 		on:guardar={handleGuardarCategorias}
 		on:cerrar={() => modales.cerrar('categorias')}
 	/>
 {/if}
 
-<!-- Modal de editar tipos de participación favoritas -->
 {#if $modales.tiposParticipacion && esMiPerfil}
 	<EditarTiposParticipacionModal
 		mostrar={$modales.tiposParticipacion}
 		tiposSeleccionados={perfilUsuario.tipos_participacion_preferidas || []}
+		{tiposParticipacion}
+		guardando={$authStore.isLoading}
 		on:guardar={handleGuardarTiposParticipacion}
 		on:cerrar={() => modales.cerrar('tiposParticipacion')}
 	/>
 {/if}
 
-<!-- Modal de reportar irregularidad -->
 {#if mostrarModalReporte}
 	<ModalReportarIrregularidad
 		bind:open={mostrarModalReporte}

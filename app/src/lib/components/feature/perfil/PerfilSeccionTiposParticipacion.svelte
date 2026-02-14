@@ -40,7 +40,11 @@
 		{#if tieneTipos}
 			<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{#each tiposParticipacion as tipoParticipacion}
-					{@const info = INFO_TIPOS_PARTICIPACION[tipoParticipacion.descripcion]}
+					{@const info = INFO_TIPOS_PARTICIPACION[tipoParticipacion.descripcion] || {
+						titulo: tipoParticipacion.descripcion,
+						color: 'gray',
+						icon: null
+					}}
 					<div
 						class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
 					>

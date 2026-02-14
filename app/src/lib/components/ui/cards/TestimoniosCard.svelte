@@ -30,7 +30,6 @@
 					? 'fill-amber-400 text-amber-400 drop-shadow-sm'
 					: 'text-gray-200 group-hover:text-gray-300'}
           group-hover:scale-110"
-				aria-hidden="true"
 			/>
 		{/each}
 	</div>

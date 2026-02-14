@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/domain/types/Categoria';
-	// import { mockCategorias } from '$lib/infrastructure/mocks/mock-categorias';
-	import { obtenerIconoCategoria, crearValidadorCategoria } from '$lib/utils/util-proyecto-form';
+	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { toastStore } from '$lib/stores/toast';
 
 	export let mostrar: boolean = false;
 	export let categoriasSeleccionadas: Categoria[] = [];
 	export let categorias: Categoria[] = [];
+	export let guardando: boolean = false;
 
 	const dispatch = createEventDispatcher<{
 		guardar: Categoria[];
@@ -17,33 +16,8 @@
 	}>();
 
 	let categoriasMarcadas: Set<number> = new Set();
-	let categoriaOtraDescripcion = '';
-	let errorCategoriaOtra = '';
-	let categoriaOtraTouched = false;
-	let guardando = false;
 
-	$: ({ validarCategoriaOtraDescripcion } = crearValidadorCategoria(
-		categorias.map((c) => c.descripcion || '')
-	));
-
-	$: idCategoriaOtra = categorias.find(
-		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
-	)?.id_categoria;
-
-	$: seleccionoOtra = idCategoriaOtra != null && categoriasMarcadas.has(idCategoriaOtra ?? -1);
-
-	$: if (seleccionoOtra && categoriaOtraTouched) {
-		const err = validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
-		if (err) {
-			errorCategoriaOtra = err;
-		} else {
-			errorCategoriaOtra = '';
-		}
-	} else if (!seleccionoOtra) {
-		errorCategoriaOtra = '';
-		categoriaOtraDescripcion = '';
-		categoriaOtraTouched = false;
-	}
+	$: categoriasVisibles = categorias;
 
 	// Inicializar categorías marcadas cuando cambian las seleccionadas
 	$: if (categoriasSeleccionadas && categoriasSeleccionadas.length > 0) {
@@ -65,65 +39,22 @@
 			nuevoSet.add(categoria.id_categoria);
 		}
 
-		categoriasMarcadas = nuevoSet; // Asignar nuevo Set para trigger reactivity
+		categoriasMarcadas = nuevoSet;
 	}
 
-	// Variable reactiva para calcular si una categoría está seleccionada
-	// Se recalcula cuando cambia categoriasMarcadas
 	$: categoriasMarcadasArray = Array.from(categoriasMarcadas);
-
-	function estaSeleccionada(categoria: Categoria): boolean {
-		return categoria.id_categoria !== undefined && categoriasMarcadas.has(categoria.id_categoria);
-	}
 
 	function cerrar() {
 		dispatch('cerrar');
 	}
 
 	function guardar() {
-		// Marcar como touched para mostrar validación si no se ha hecho
-		if (seleccionoOtra) {
-			categoriaOtraTouched = true;
-			const err = validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
-			if (err) {
-				errorCategoriaOtra = err;
-				return;
-			}
-		}
+		const categoriasFinales = categorias.filter(
+			(cat) => cat.id_categoria !== undefined && categoriasMarcadas.has(cat.id_categoria)
+		);
 
-		guardando = true;
-
-		setTimeout(() => {
-			let categoriasFinales = categorias.filter(
-				(cat) =>
-					cat.id_categoria !== undefined &&
-					categoriasMarcadas.has(cat.id_categoria) &&
-					cat.id_categoria !== idCategoriaOtra // Excluir "Otra" de las finales
-			);
-
-			// Si seleccionó "Otra", agregar la categoría personalizada
-			if (seleccionoOtra && categoriaOtraDescripcion.trim()) {
-				categoriasFinales = [
-					...categoriasFinales,
-					{
-						id_categoria: undefined, // Sin ID porque es personalizada
-						descripcion: categoriaOtraDescripcion.trim()
-					}
-				];
-			}
-
-			console.log('Guardando categorías:', categoriasFinales);
-			dispatch('guardar', categoriasFinales);
-
-			toastStore.show({
-				variant: 'success',
-				title: 'Cambios guardados',
-				message: 'Tus categorías favoritas se guardaron correctamente.'
-			});
-
-			guardando = false;
-			cerrar();
-		}, 500);
+		console.log('Guardando categorías:', categoriasFinales);
+		dispatch('guardar', categoriasFinales);
 	}
 
 	function abrir() {
@@ -184,7 +115,7 @@
 			<!-- Lista de categorías -->
 			<div class="mb-6 max-h-[400px] overflow-y-auto">
 				<div class="grid gap-3 sm:grid-cols-2">
-					{#each categorias as categoria}
+					{#each categoriasVisibles as categoria}
 						{@const seleccionada =
 							categoria.id_categoria !== undefined &&
 							categoriasMarcadas.has(categoria.id_categoria)}
@@ -236,33 +167,6 @@
 				</div>
 			</div>
 
-			<!-- Campo para "Otra" categoría -->
-			{#if seleccionoOtra}
-				<div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-					<label for="categoria-otra" class="mb-2 block text-sm font-medium text-gray-900">
-						Específica la categoría:
-					</label>
-					<input
-						type="text"
-						id="categoria-otra"
-						bind:value={categoriaOtraDescripcion}
-						on:input={() => (categoriaOtraTouched = true)}
-						on:blur={() => (categoriaOtraTouched = true)}
-						placeholder="Ej: Derechos humanos, Deportes, etc."
-						class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none {errorCategoriaOtra
-							? 'border-red-500 bg-red-50'
-							: 'bg-white'}"
-					/>
-					{#if errorCategoriaOtra}
-						<p class="mt-2 text-sm text-red-600">{errorCategoriaOtra}</p>
-					{/if}
-					<p class="mt-2 text-xs text-gray-600">
-						Ingresá una categoría que no esté en la lista. Debe tener al menos 3 caracteres y no
-						puede repetirse.
-					</p>
-				</div>
-			{/if}
-
 			<!-- Contador de seleccionadas -->
 			<div class="mb-6 rounded-lg bg-blue-50 p-3">
 				<p class="text-sm text-blue-800">
@@ -281,16 +185,16 @@
 					variant="secondary"
 					size="md"
 					type="button"
-					on:click={cerrar}
+					onclick={cerrar}
 					customClass="w-full md:w-auto"
 				/>
 				<Button
-					label={guardando ? 'Guardando...' : 'Continuar'}
+					label={guardando ? 'Guardando...' : 'Guardar'}
 					variant="primary"
 					size="md"
 					type="button"
-					disabled={(seleccionoOtra && errorCategoriaOtra !== '') || guardando}
-					on:click={guardar}
+					disabled={guardando}
+					onclick={guardar}
 					customClass="w-full md:w-auto"
 				/>
 			</div>
