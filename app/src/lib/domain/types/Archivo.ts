@@ -12,4 +12,7 @@ export interface Archivo {
 	usuario_id?: number;
 	evidencia_id?: number;
 	proyecto_id?: number;
+
+	// -*- Objetos expandidos para read
+	usuario?: { nombre: string; apellido: string; username: string };
 }

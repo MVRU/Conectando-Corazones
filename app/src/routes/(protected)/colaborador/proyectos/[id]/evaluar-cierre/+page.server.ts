@@ -2,16 +2,16 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
+import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postgres/evaluacion.repo';
+import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
+import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 
-// Repositories
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
+const evaluacionRepo = new PostgresEvaluacionRepository();
+const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 
-// Helper para asegurar numero id
-function ensureId(id: number | undefined): number {
-	if (id === undefined) throw new Error('El ID es undefined');
-	return id;
-}
+const registrarEvaluacion = new RegistrarEvaluacion(evaluacionRepo, proyectoRepo, colaboracionRepo, solicitudRepo);
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const user = locals.usuario;
@@ -31,39 +31,42 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw redirect(303, `/proyectos/${proyectoId}`);
 	}
 
-	// 2. Verificar estado del proyecto
+	// 2. Verificar proyecto
 	const proyecto = await proyectoRepo.findById(proyectoId);
-	if (!proyecto) {
-		throw redirect(303, '/proyectos');
+	if (!proyecto) throw redirect(303, '/proyectos');
+
+	// 3. Buscar Solicitud más reciente del proyecto
+	const solicitud = await solicitudRepo.findByProyectoId(proyectoId);
+
+	// Para el frontend
+	const evidencias = solicitud?.evidencias ?? [];
+
+	// Si no hay solicitud y el proyecto está en revisión, es un estado inconsistente o
+	// la solicitud se borró manualmente. Manejar con cuidado.
+	if (!solicitud && proyecto.estado === 'en_revision') {
+		// Log error interno
 	}
 
-	// 3. Buscar la solicitud PENDIENTE (Backend no implementado aún)
-	// Como no hay repo de solicitudes, devolvemos null para simular que no hay solicitud activa o evitar 500
-	const solicitud = null;
-
-	let solicitudConEvidencias = null;
-	let evaluacion = null;
-	let yaVote = false;
-
-	let totalColaboradores = 0;
-	let votosRealizados = 0;
-
-	// Simulamos lógica si hubiera solicitud
-	/*
+	// 4. Buscar Evaluación del usuario actual
+	let evaluacionUsuario = null;
 	if (solicitud) {
-		// ... lógica de evidencias y evaluaciones ...
+		evaluacionUsuario = await evaluacionRepo.findBySolicitudAndColaborador(
+			solicitud.id_solicitud,
+			user.id_usuario
+		);
 	}
-	*/
 
-	// Contar colaboradores reales
-	const todasColaboraciones = await colaboracionRepo.findByProyecto(proyectoId);
-	totalColaboradores = todasColaboraciones.filter((c) => c.estado === 'aprobada').length;
+	// 5. Contadores
+	const totalColaboradores = colaboraciones.filter((c) => c.estado === 'aprobada').length;
+	const votosRealizados = solicitud
+		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud)).total
+		: 0;
 
 	return {
 		proyecto: JSON.parse(JSON.stringify(proyecto)),
-		solicitud: solicitudConEvidencias, // null
-		evaluacion, // null
-		yaVote, // false
+		solicitud: JSON.parse(JSON.stringify({ ...solicitud, evidencias })),
+		evaluacion: evaluacionUsuario ? JSON.parse(JSON.stringify(evaluacionUsuario)) : null,
+		yaVote: !!evaluacionUsuario,
 		totalColaboradores,
 		votosRealizados,
 		isEnRevision: proyecto.estado === 'en_revision'
@@ -72,13 +75,54 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
 	aprobar: async ({ request, params, locals }) => {
-		// Funcionalidad deshabilitada hasta tener backend de solicitudes
-		return fail(501, { error: 'Funcionalidad de aprobación aún no disponible' });
+		const user = locals.usuario;
+		if (!user) throw redirect(303, '/iniciar-sesion');
+
+		const formData = await request.formData();
+		const justificacion = formData.get('justificacion') as string;
+		const solicitudId = Number(formData.get('solicitud_id'));
+		const proyectoId = Number(params.id);
+
+		if (!solicitudId) return fail(400, { error: 'Falta ID de solicitud' });
+
+		try {
+			await registrarEvaluacion.execute({
+				proyectoId,
+				solicitudId,
+				colaboradorId: user.id_usuario,
+				voto: 'aprobado',
+				justificacion
+			});
+			return { success: true };
+		} catch (error: any) {
+			return fail(400, { error: error.message });
+		}
 	},
 
 	rechazar: async ({ request, params, locals }) => {
-		// Funcionalidad deshabilitada hasta tener backend de solicitudes
-		return fail(501, { error: 'Funcionalidad de rechazo aún no disponible' });
+		const user = locals.usuario;
+		if (!user) throw redirect(303, '/iniciar-sesion');
+
+		const formData = await request.formData();
+		const justificacion = formData.get('justificacion') as string;
+		const solicitudId = Number(formData.get('solicitud_id'));
+		const proyectoId = Number(params.id);
+
+		if (!solicitudId) return fail(400, { error: 'Falta ID de solicitud' });
+		if (!justificacion) return fail(400, { error: 'La justificación es obligatoria para rechazar' });
+
+		try {
+			await registrarEvaluacion.execute({
+				proyectoId,
+				solicitudId,
+				colaboradorId: user.id_usuario,
+				voto: 'rechazado',
+				justificacion
+			});
+			return { success: true };
+		} catch (error: any) {
+			return fail(400, { error: error.message });
+		}
 	},
 
 	reportar: async ({ request, params }) => {
