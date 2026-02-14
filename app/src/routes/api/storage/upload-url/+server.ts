@@ -16,7 +16,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Validar bucket (permitir solo buckets definidos)
-		const targetBucket = bucket === 'avatars' ? 'avatars' : 'evidencias';
+		const targetBucket =
+			bucket === 'avatars' ? 'avatars' : bucket === 'proyectos' ? 'proyectos' : 'evidencias';
 
 		// Generar ruta segura con UUID
 		const fileExt = nombre_archivo.split('.').pop();

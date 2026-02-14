@@ -15,6 +15,8 @@
 	} from '$lib/utils/util-proyecto-form';
 	import { Lock } from 'lucide-svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import { env } from '$lib/infrastructure/config/env';
+	import { toastStore } from '$lib/stores/toast';
 
 	export let titulo = '';
 	export let descripcion = '';
@@ -27,6 +29,80 @@
 	export let errores: Record<string, string> = {};
 	export let limpiarError: (campo: string) => void;
 	export let categorias: Categoria[] = [];
+
+	let subiendoPortada = false;
+
+	async function handleFileUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		// Validaciones
+		const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+		if (!tiposPermitidos.includes(file.type)) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Formato no válido',
+				message: 'Por favor selecciona un archivo de imagen válido (JPG, PNG, WEBP).'
+			});
+			return;
+		}
+
+		if (file.size > 5 * 1024 * 1024) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Archivo muy grande',
+				message: 'La imagen no debe superar los 5MB.'
+			});
+			return;
+		}
+
+		subiendoPortada = true;
+		try {
+			// 1. Obtener URL firmada
+			const response = await fetch('/api/storage/upload-url', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					nombre_archivo: file.name,
+					tipo_mime: file.type,
+					bucket: 'proyectos'
+				})
+			});
+
+			const { uploadUrl, fullPath, error } = await response.json();
+			if (error) throw new Error(error);
+
+			// 2. Subir archivo
+			const uploadRes = await fetch(uploadUrl, {
+				method: 'PUT',
+				body: file,
+				headers: { 'Content-Type': file.type }
+			});
+
+			if (!uploadRes.ok) throw new Error('Error al subir la imagen');
+
+			// 3. Actualizar URL
+			urlPortada = `${env.SUPABASE_URL}/storage/v1/object/public/${fullPath}`;
+			limpiarError('urlPortada');
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Imagen subida',
+				message: 'La portada se cargó correctamente.'
+			});
+		} catch (e) {
+			console.error('Error subiendo portada:', e);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de subida',
+				message: 'No se pudo subir la imagen de portada.'
+			});
+		} finally {
+			subiendoPortada = false;
+			input.value = '';
+		}
+	}
 
 	// Modo edición
 	export let esEdicionRestringida = false;
@@ -142,16 +218,108 @@
 
 		<div>
 			<label for="urlPortada" class="mb-2 block text-sm font-medium text-gray-700"
-				>URL de imagen de portada</label
+				>Imagen de portada</label
 			>
+
+			{#if urlPortada}
+				<div
+					class="group relative mb-2 aspect-video w-full overflow-hidden rounded-lg border border-gray-200"
+				>
+					<img src={urlPortada} alt="Portada del proyecto" class="h-full w-full object-cover" />
+
+					{#if (!esEdicionRestringida || esAdmin) && !subiendoPortada}
+						<div
+							class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100"
+						>
+							<button
+								type="button"
+								class="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-white"
+								on:click={() => document.getElementById('portada-upload')?.click()}
+							>
+								Cambiar imagen
+							</button>
+						</div>
+					{/if}
+				</div>
+
+				{#if (!esEdicionRestringida || esAdmin) && !subiendoPortada}
+					<div class="flex justify-end">
+						<button
+							type="button"
+							class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
+							on:click={() => {
+								urlPortada = '';
+								limpiarError('urlPortada');
+							}}
+						>
+							Eliminar imagen
+						</button>
+					</div>
+				{/if}
+			{:else}
+				<button
+					type="button"
+					disabled={esEdicionRestringida && !esAdmin}
+					class="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 py-8 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+					class:border-red-300={errores.urlPortada}
+					on:click={() => document.getElementById('portada-upload')?.click()}
+					on:keydown={(e) =>
+						(e.key === 'Enter' || e.key === ' ') &&
+						document.getElementById('portada-upload')?.click()}
+				>
+					{#if subiendoPortada}
+						<svg
+							class="h-8 w-8 animate-spin text-blue-500"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+						>
+							<circle
+								class="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								stroke-width="4"
+							></circle>
+							<path
+								class="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						<p class="mt-2 text-sm text-gray-500">Subiendo imagen...</p>
+					{:else}
+						<div class="mb-3 rounded-full bg-gray-100 p-3">
+							<svg
+								class="h-6 w-6 text-gray-500"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+								/>
+							</svg>
+						</div>
+						<p class="text-sm font-medium text-gray-900">Hacé click para subir una portada</p>
+						<p class="mt-1 text-xs text-gray-500">JPG, PNG, WEBP hasta 5MB</p>
+					{/if}
+				</button>
+			{/if}
+
 			<input
-				id="urlPortada"
-				type="text"
-				bind:value={urlPortada}
-				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-				class:border-red-300={errores.urlPortada}
-				placeholder="https://ejemplo.com/imagen.jpg"
+				id="portada-upload"
+				type="file"
+				accept="image/jpeg,image/png,image/webp,image/gif"
+				class="sr-only"
+				disabled={subiendoPortada || (esEdicionRestringida && !esAdmin)}
+				on:change={handleFileUpload}
 			/>
+
 			{#if errores.urlPortada}
 				<p class="mt-1 text-sm text-red-600">{errores.urlPortada}</p>
 			{/if}
