@@ -2,12 +2,14 @@ import { Evaluacion, type VotoEvaluacion } from '$lib/domain/entities/Evaluacion
 import type { EvaluacionRepository } from '$lib/domain/repositories/EvaluacionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
+import type { SolicitudFinalizacionRepository } from '$lib/domain/repositories/SolicitudFinalizacionRepository';
 
 export class RegistrarEvaluacion {
     constructor(
         private evaluacionRepo: EvaluacionRepository,
         private proyectoRepo: ProyectoRepository,
-        private colaboracionRepo: ColaboracionRepository
+        private colaboracionRepo: ColaboracionRepository,
+        private solicitudRepo: SolicitudFinalizacionRepository
     ) { }
 
     async execute(params: {
@@ -56,7 +58,7 @@ export class RegistrarEvaluacion {
                 await this.proyectoRepo.updateEstado(params.proyectoId, 'pendiente_solicitud_cierre');
             }
 
-            // TODO: Marcar la Solicitud actual como 'rechazada'
+            await this.solicitudRepo.updateEstado(params.solicitudId, 'rechazada');
         } else {
             // Caso aprobado: verificar si todos aprobaron
             const conteo = await this.evaluacionRepo.countVotosBySolicitud(params.solicitudId);
@@ -68,7 +70,7 @@ export class RegistrarEvaluacion {
             if (conteo.aprobados >= totalActivos) {
                 // Hay consenso -> proyecto completado
                 await this.proyectoRepo.updateEstado(params.proyectoId, 'completado');
-                // TODO: Marcar Solicitud como 'aprobada'
+                await this.solicitudRepo.updateEstado(params.solicitudId, 'aprobada');
             }
         }
     }

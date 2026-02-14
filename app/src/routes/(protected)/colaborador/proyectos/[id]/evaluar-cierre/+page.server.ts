@@ -3,14 +3,16 @@ import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postgres/evaluacion.repo';
+import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 import { prisma } from '$lib/infrastructure/prisma/client'; // TODO: Eliminar acceso directo cuando exista SolicitudRepository
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
 const evaluacionRepo = new PostgresEvaluacionRepository();
+const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 
-const registrarEvaluacion = new RegistrarEvaluacion(evaluacionRepo, proyectoRepo, colaboracionRepo);
+const registrarEvaluacion = new RegistrarEvaluacion(evaluacionRepo, proyectoRepo, colaboracionRepo, solicitudRepo);
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const user = locals.usuario;
