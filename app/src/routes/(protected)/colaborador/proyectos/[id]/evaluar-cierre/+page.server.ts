@@ -5,7 +5,6 @@ import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/pos
 import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postgres/evaluacion.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
-import { prisma } from '$lib/infrastructure/prisma/client'; // TODO: Eliminar acceso directo cuando exista SolicitudRepository
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
@@ -36,31 +35,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const proyecto = await proyectoRepo.findById(proyectoId);
 	if (!proyecto) throw redirect(303, '/proyectos');
 
-	// 3. Buscar Solicitud Pendiente (TODO: Usar Repository)
-	// Usamos Prisma directo SOLO en load como permitido temporalmente
-	const solicitud = await prisma.solicitudFinalizacion.findFirst({
-		where: {
-			proyecto_id: proyectoId,
-			// Asumo que si el proyecto esta 'en_revision', la ultima solicitud es la vigente
-		},
-		orderBy: { created_at: 'desc' },
-		include: {
-			solicitud_evidencias: {
-				include: {
-					evidencia: {
-						include: {
-							archivos: {
-								include: { usuario: true }
-							}
-						}
-					}
-				}
-			}
-		}
-	});
+	// 3. Buscar Solicitud más reciente del proyecto
+	const solicitud = await solicitudRepo.findByProyectoId(proyectoId);
 
 	// Para el frontend
-	const evidencias = solicitud?.solicitud_evidencias?.map((se) => se.evidencia) ?? [];
+	const evidencias = solicitud?.evidencias ?? [];
 
 	// Si no hay solicitud y el proyecto está en revisión, es un estado inconsistente o
 	// la solicitud se borró manualmente. Manejar con cuidado.

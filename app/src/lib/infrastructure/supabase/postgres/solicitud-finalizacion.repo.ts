@@ -11,7 +11,7 @@ export class PostgresSolicitudFinalizacionRepository implements SolicitudFinaliz
                 solicitud_evidencias: {
                     include: {
                         evidencia: {
-                            include: { archivos: true }
+                            include: { archivos: { include: { usuario: true } } }
                         }
                     }
                 }
