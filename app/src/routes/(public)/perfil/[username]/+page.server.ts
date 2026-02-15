@@ -6,9 +6,10 @@ import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategoria
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, url }) => {
 	try {
 		const username = params.username;
+		const proyectoContextoId = url.searchParams.get('proyecto');
 
 		if (!username) {
 			throw error(404, 'Usuario no encontrado');
@@ -28,9 +29,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const obtenerProyectos = new ObtenerProyectosPerfil(proyectoRepo);
 		const getAllCategorias = new GetAllCategorias(categoriaRepo);
 
-		const [proyectos, categorias] = await Promise.all([
+		const [proyectos, categorias, proyectoContexto] = await Promise.all([
 			obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol),
-			getAllCategorias.execute()
+			getAllCategorias.execute(),
+			proyectoContextoId ? proyectoRepo.findById(Number(proyectoContextoId)) : Promise.resolve(null)
 		]);
 
 		// 3. Obtener Reseñas (Backend no implementado aún)
@@ -45,7 +47,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			resenas: JSON.parse(JSON.stringify(resenas)),
 			categorias: categorias.map((c) => ({ ...c })),
-			esMiPerfil
+			esMiPerfil,
+			proyectoContexto: proyectoContexto ? JSON.parse(JSON.stringify(proyectoContexto)) : null
 		};
 	} catch (err) {
 		console.error('Error loading profile:', err);

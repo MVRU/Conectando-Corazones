@@ -29,6 +29,7 @@
 		calcularDiasActivo
 	} from '$lib/utils/util-colaboraciones';
 	import { slide, fade, scale } from 'svelte/transition';
+	import { page } from '$app/stores';
 
 	// Prop recibida desde el padre
 	export let proyectos: Proyecto[] = [];
@@ -36,9 +37,24 @@
 	let proyectoSeleccionado: Proyecto;
 	let proyectoSeleccionadoId: number | undefined;
 
+	// Para contexto de navegación
+	$: contextoProyectoId = $page.url.searchParams.get('proyecto');
+
 	$: if (proyectos.length > 0 && !proyectoSeleccionado) {
-		proyectoSeleccionado = proyectos[0];
-		proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
+		// Si hay contexto en URL, seleccionamos ese proyecto
+		if (contextoProyectoId) {
+			const p = proyectos.find((p) => String(p.id_proyecto) === contextoProyectoId);
+			if (p) {
+				proyectoSeleccionado = p;
+				proyectoSeleccionadoId = p.id_proyecto;
+			} else {
+				proyectoSeleccionado = proyectos[0];
+				proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
+			}
+		} else {
+			proyectoSeleccionado = proyectos[0];
+			proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
+		}
 	}
 
 	// Variables para el modal de rechazo
@@ -368,7 +384,10 @@
 												class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
 											>
 												<a
-													href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
+													href="/perfil/{colaboracion.colaborador
+														?.username}?from=solicitudes{contextoProyectoId
+														? `&proyecto=${contextoProyectoId}`
+														: ''}"
 													class="truncate font-semibold text-gray-900 hover:underline"
 												>
 													{obtenerNombreColaborador(colaboracion.colaborador)}
@@ -477,7 +496,10 @@
 								<div class="flex items-center gap-4">
 									<!-- Avatar Small -->
 									<a
-										href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
+										href="/perfil/{colaboracion.colaborador
+											?.username}?from=solicitudes{contextoProyectoId
+											? `&proyecto=${contextoProyectoId}`
+											: ''}"
 										class="relative shrink-0"
 									>
 										{#if colaboracion.colaborador?.url_foto}
@@ -503,7 +525,10 @@
 									<div class="min-w-0 flex-1">
 										<div class="flex items-center justify-between">
 											<a
-												href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
+												href="/perfil/{colaboracion.colaborador
+													?.username}?from=solicitudes{contextoProyectoId
+													? `&proyecto=${contextoProyectoId}`
+													: ''}"
 												class="truncate text-sm font-semibold text-gray-900 transition-colors hover:text-blue-600"
 											>
 												{obtenerNombreColaborador(colaboracion.colaborador)}

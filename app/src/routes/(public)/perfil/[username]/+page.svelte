@@ -10,7 +10,7 @@
 
 	export let data: PageData;
 
-	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
+	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil, proyectoContexto } = data);
 
 	// Breadcrumbs contextuales
 	$: {
@@ -22,12 +22,28 @@
 			: 'Perfil';
 
 		if (from === 'solicitudes') {
-			setBreadcrumbs([
-				{ label: 'Inicio', href: '/' },
-				{ label: 'Mi Panel', href: '/institucion/mi-panel' },
-				{ label: 'Solicitudes', href: '/institucion/solicitudes-colaboracion' },
-				{ label: nombrePerfil }
-			]);
+			if (proyectoContexto) {
+				setBreadcrumbs([
+					{ label: 'Inicio', href: '/' },
+					{ label: 'Proyectos', href: '/proyectos' },
+					{
+						label: proyectoContexto.titulo,
+						href: `/proyectos/${proyectoContexto.id_proyecto}`
+					},
+					{
+						label: 'Solicitudes',
+						href: `/institucion/solicitudes-colaboracion?proyecto=${proyectoContexto.id_proyecto}`
+					},
+					{ label: nombrePerfil }
+				]);
+			} else {
+				setBreadcrumbs([
+					{ label: 'Inicio', href: '/' },
+					{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+					{ label: 'Solicitudes', href: '/institucion/solicitudes-colaboracion' },
+					{ label: nombrePerfil }
+				]);
+			}
 		} else {
 			setBreadcrumbs([{ label: 'Inicio', href: '/' }, { label: nombrePerfil }]);
 		}
