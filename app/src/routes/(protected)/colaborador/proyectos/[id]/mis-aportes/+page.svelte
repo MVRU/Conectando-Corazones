@@ -21,9 +21,20 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { fly } from 'svelte/transition';
 	import ObjetivosProyecto from '$lib/components/feature/proyectos/ObjetivosProyecto.svelte';
+	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	let { data } = $props();
 	const projectIdUrl = $page.params.id;
+
+	$effect(() => {
+		const titulo = data.proyecto?.titulo || 'Proyecto';
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.home,
+			BREADCRUMB_ROUTES.proyectos,
+			{ label: titulo, href: `/proyectos/${projectIdUrl}` },
+			{ label: 'Mis Aportes' }
+		]);
+	});
 
 	let misAportes = $state(data.aportes.map((a: any) => ({ ...a, expanded: false })));
 

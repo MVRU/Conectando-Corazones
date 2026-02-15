@@ -15,10 +15,22 @@
 	import { fade, slide } from 'svelte/transition';
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
+	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	let { data } = $props();
 
 	const projectIdUrl = $page.params.id;
+
+	$effect(() => {
+		const titulo = data.proyecto?.titulo || 'Proyecto';
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.home,
+			BREADCRUMB_ROUTES.proyectos,
+			{ label: titulo, href: `/proyectos/${projectIdUrl}` },
+			{ label: 'Mis Aportes', href: `/colaborador/proyectos/${projectIdUrl}/mis-aportes` },
+			{ label: 'Nuevo Aporte' }
+		]);
+	});
 
 	type EvidenciaEntradaNueva = {
 		id_temp: number;

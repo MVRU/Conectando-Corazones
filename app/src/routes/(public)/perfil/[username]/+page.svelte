@@ -6,14 +6,34 @@
 	import { usuario as usuarioStore, isAuthenticated } from '$lib/stores/auth';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
 	import type { PageData } from './$types';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	export let data: PageData;
 
 	$: ({ perfilUsuario, proyectos, resenas, categorias, esMiPerfil } = data);
 
+	// Breadcrumbs contextuales
+	$: {
+		const from = $page.url.searchParams.get('from');
+		const nombrePerfil = perfilUsuario
+			? perfilUsuario.rol === 'institucion'
+				? (perfilUsuario as any).nombre_legal || perfilUsuario.nombre
+				: (perfilUsuario as any).razon_social || `${perfilUsuario.nombre} ${perfilUsuario.apellido}`
+			: 'Perfil';
+
+		if (from === 'solicitudes') {
+			setBreadcrumbs([
+				{ label: 'Inicio', href: '/' },
+				{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+				{ label: 'Solicitudes', href: '/institucion/solicitudes-colaboracion' },
+				{ label: nombrePerfil }
+			]);
+		} else {
+			setBreadcrumbs([{ label: 'Inicio', href: '/' }, { label: nombrePerfil }]);
+		}
+	}
+
 	onMount(() => {
-		// Si no hay usuario autenticado y están viendo un perfil específico, permitir verlo
-		// pero si están viendo su propio perfil sin estar autenticado, redirigir
 		if (esMiPerfil && !$isAuthenticated) {
 			goto('/iniciar-sesion');
 		}

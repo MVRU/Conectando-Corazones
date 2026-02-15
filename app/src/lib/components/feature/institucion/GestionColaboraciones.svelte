@@ -368,7 +368,7 @@
 												class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"
 											>
 												<a
-													href="/perfil/{colaboracion.colaborador?.username}"
+													href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
 													class="truncate font-semibold text-gray-900 hover:underline"
 												>
 													{obtenerNombreColaborador(colaboracion.colaborador)}
@@ -476,7 +476,10 @@
 							>
 								<div class="flex items-center gap-4">
 									<!-- Avatar Small -->
-									<a href="/perfil/{colaboracion.colaborador?.username}" class="relative shrink-0">
+									<a
+										href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
+										class="relative shrink-0"
+									>
 										{#if colaboracion.colaborador?.url_foto}
 											<img
 												src={colaboracion.colaborador.url_foto}
@@ -500,7 +503,7 @@
 									<div class="min-w-0 flex-1">
 										<div class="flex items-center justify-between">
 											<a
-												href="/perfil/{colaboracion.colaborador?.username}"
+												href="/perfil/{colaboracion.colaborador?.username}?from=solicitudes"
 												class="truncate text-sm font-semibold text-gray-900 transition-colors hover:text-blue-600"
 											>
 												{obtenerNombreColaborador(colaboracion.colaborador)}

@@ -11,6 +11,7 @@
 	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	import { applyAction, deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -19,6 +20,15 @@
 	let { data } = $props();
 
 	const projectIdUrl = $page.params.id;
+
+	$effect(() => {
+		setBreadcrumbs([
+			{ label: 'Inicio', href: '/' },
+			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+			{ label: 'Aportes', href: `/institucion/proyectos/${projectIdUrl}/aportes` },
+			{ label: 'Nueva Evidencia' }
+		]);
+	});
 
 	// Extensiones para el manejo de UI y subida de archivos
 	type ArchivoUI = Archivo & {
