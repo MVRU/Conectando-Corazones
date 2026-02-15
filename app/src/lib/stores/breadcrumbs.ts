@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { page } from '$app/stores';
-import { shouldShowBreadcrumbs } from '\$lib/infrastructure/config/breadcrumbs.config';
+import { shouldShowBreadcrumbs } from '$lib/infrastructure/config/breadcrumbs.config';
 
 // * DECISIÓN DE DISEÑO
 // -*- Fuente única de verdad para las migas de pan.
@@ -61,10 +61,5 @@ export function clearBreadcrumbs() {
 
 export const BREADCRUMB_ROUTES = {
 	home: { label: 'Inicio', href: '/' },
-	proyectos: { label: 'Proyectos', href: '/proyectos' },
-	nosotros: { label: 'Nosotros', href: '/nosotros' },
-	contacto: { label: 'Contacto', href: '/contacto' },
-	faq: { label: 'Preguntas frecuentes', href: '/faq' },
-	login: { label: 'Iniciar sesión', href: '/iniciar-sesion' },
-	registro: { label: 'Registrarse', href: '/registrarse' }
+	proyectos: { label: 'Proyectos', href: '/proyectos' }
 };

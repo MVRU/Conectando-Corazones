@@ -3,8 +3,18 @@
 	import { isLoading, usuario } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { toastStore } from '$lib/stores/toast';
+	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	export let data;
+
+	$: if (data.form?.titulo) {
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.home,
+			BREADCRUMB_ROUTES.proyectos,
+			{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
+			{ label: 'Editar' }
+		]);
+	}
 
 	$: if (!$isLoading) {
 		if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {

@@ -3,6 +3,13 @@
 	import { goto } from '$app/navigation';
 	import { usuario, isLoading } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
+
+	setBreadcrumbs([
+		{ label: 'Inicio', href: '/' },
+		{ label: 'Proyectos', href: '/proyectos' },
+		{ label: 'Crear Proyecto' }
+	]);
 
 	export let data;
 
