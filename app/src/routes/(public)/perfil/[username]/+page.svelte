@@ -44,6 +44,16 @@
 					{ label: nombrePerfil }
 				]);
 			}
+		} else if (from === 'proyecto' && proyectoContexto) {
+			setBreadcrumbs([
+				{ label: 'Inicio', href: '/' },
+				{ label: 'Proyectos', href: '/proyectos' },
+				{
+					label: proyectoContexto.titulo,
+					href: `/proyectos/${proyectoContexto.id_proyecto}`
+				},
+				{ label: nombrePerfil }
+			]);
 		} else {
 			setBreadcrumbs([{ label: 'Inicio', href: '/' }, { label: nombrePerfil }]);
 		}

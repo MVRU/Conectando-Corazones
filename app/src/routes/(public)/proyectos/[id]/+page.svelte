@@ -1223,7 +1223,9 @@
 								<div class="flex items-center justify-between">
 									{#if obtenerUrlPerfil(proyecto.institucion)}
 										<a
-											href={obtenerUrlPerfil(proyecto.institucion)}
+											href="{obtenerUrlPerfil(
+												proyecto.institucion
+											)}?from=proyecto&proyecto={proyecto.id_proyecto}"
 											class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
 										>
 											<div
@@ -1422,7 +1424,9 @@
 										>
 											{#if obtenerUrlPerfil(colab.colaborador)}
 												<a
-													href={obtenerUrlPerfil(colab.colaborador)}
+													href="{obtenerUrlPerfil(
+														colab.colaborador
+													)}?from=proyecto&proyecto={proyecto.id_proyecto}"
 													class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
 													title={obtenerNombreColaborador(colab.colaborador)}
 												>
