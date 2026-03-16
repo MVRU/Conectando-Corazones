@@ -1,12 +1,14 @@
 <script lang="ts">
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
+	import { usuario as usuarioStore } from '$lib/stores/auth';
 
 	export let resenas: Resena[];
 	export let esMiPerfil: boolean;
 	export let puedeAgregarResena: boolean;
 	export let yaResenoUsuario: boolean;
 	export let onAgregarResenaClick: () => void;
+	export let onEliminar: (resena: Resena) => void = () => {};
 	export let limiteMostrar: number = 4;
 
 	$: resenasMostradas = resenas.slice(0, limiteMostrar);
@@ -53,7 +55,13 @@
 		<div class="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
 			{#each resenasMostradas as resena (resena.id_resena || resena.contenido)}
 				<div class="w-full">
-					<ResenaCard {resena} />
+					<ResenaCard
+						{resena}
+						autor={resena.autor}
+						onEliminar={resena.autor_id === $usuarioStore?.id_usuario || $usuarioStore?.rol === 'administrador'
+							? () => onEliminar(resena)
+							: null}
+					/>
 				</div>
 			{/each}
 		</div>

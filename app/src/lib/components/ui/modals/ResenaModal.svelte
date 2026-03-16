@@ -8,6 +8,7 @@
 	export let placeholder: string = 'Compartí tu experiencia...';
 	export let tipoObjeto: string = 'usuario';
 	export let idObjeto: number | undefined = undefined;
+	export let maxCaracteres: number = 500;
 
 	const dispatch = createEventDispatcher<{
 		guardar: Resena;
@@ -106,9 +107,19 @@
 						bind:value={nuevaResena.contenido}
 						rows="4"
 						{placeholder}
+						maxlength={maxCaracteres}
 						class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 						required
 					></textarea>
+					<div class="mt-1 flex justify-end">
+						<span
+							class="text-xs {nuevaResena.contenido.length >= maxCaracteres
+								? 'font-bold text-red-500'
+								: 'text-gray-500'}"
+						>
+							{nuevaResena.contenido.length} / {maxCaracteres}
+						</span>
+					</div>
 				</div>
 
 				<!-- Botones de acción -->

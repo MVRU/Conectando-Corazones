@@ -60,6 +60,9 @@
 	// Reseñas del usuario - usando writable store local
 	const resenasStore = writable<Resena[]>(resenas);
 
+	let resenaAEliminar: Resena | null = null;
+	let mostrarConfirmarEliminar = false;
+
 	$: yaResenoUsuario =
 		$usuarioStore && !esMiPerfil
 			? $resenasStore.some(
@@ -119,29 +122,92 @@
 		modales.abrir('resena');
 	}
 
-	function handleGuardarResena(event: CustomEvent<Resena>) {
+	async function handleGuardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
 		if (!$usuarioStore) return;
 
-		const nuevaResena: Resena = {
-			...event.detail,
-			username: $usuarioStore.username || `${$usuarioStore.nombre} ${$usuarioStore.apellido}`,
-			rol:
-				$usuarioStore.rol === 'colaborador'
-					? ($usuarioStore as any).razon_social || 'Colaborador'
-					: ($usuarioStore as any).nombre_legal || 'Institución'
-		};
+		try {
+			const res = await fetch('/api/resenas', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					tipo_objeto: 'usuario',
+					id_objeto: perfilUsuario.id_usuario,
+					contenido: event.detail.contenido,
+					puntaje: event.detail.puntaje
+				})
+			});
 
-		// Agregar reseña al store local
-		resenasStore.update((resenas) => [...resenas, nuevaResena]);
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error || 'Error al guardar reseña.');
+			}
 
-		toastStore.show({
-			variant: 'success',
-			title: 'Reseña publicada correctamente',
-			message: '¡Gracias por tu Reseña! Tu aporte ayuda a mejorar la comunidad.'
-		});
+			const nuevaResenaStr = await res.json();
 
-		console.log('Reseña guardada:', nuevaResena);
-		modales.cerrar('resena');
+			const reseñaConAutor = {
+				...nuevaResenaStr,
+				autor: {
+					...$usuarioStore,
+					rol: $usuarioStore.rol,
+					nombre: $usuarioStore.nombre,
+					apellido: $usuarioStore.apellido,
+					url_foto: $usuarioStore.url_foto,
+
+					nombre_legal: ($usuarioStore as any).nombre_legal,
+					razon_social: ($usuarioStore as any).razon_social
+				}
+			};
+
+			// Agregar reseña al store local
+			resenasStore.update((resenas) => [reseñaConAutor, ...resenas]);
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Reseña publicada correctamente',
+				message: '¡Gracias por tu Reseña! Tu aporte ayuda a mejorar la comunidad.'
+			});
+			modales.cerrar('resena');
+		} catch (err: any) {
+			toastStore.show({ variant: 'error', message: err.message });
+		}
+	}
+
+	function solicitarEliminarResena(resena: Resena) {
+		resenaAEliminar = resena;
+		mostrarConfirmarEliminar = true;
+	}
+
+	function cancelarEliminarResena() {
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
+
+	async function confirmarEliminarResena() {
+		if (!resenaAEliminar) return;
+
+		try {
+			const res = await fetch('/api/resenas', {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ id_resena: resenaAEliminar.id_resena })
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error || 'Error al eliminar la reseña.');
+			}
+
+			const idEliminado = resenaAEliminar.id_resena;
+			resenasStore.update((actuales) => actuales.filter((r) => r.id_resena !== idEliminado));
+			toastStore.show({
+				variant: 'success',
+				message: 'Reseña eliminada correctamente.'
+			});
+		} catch (err: any) {
+			toastStore.show({ variant: 'error', message: err.message });
+		} finally {
+			cancelarEliminarResena();
+		}
 	}
 
 	const abrirModalCategorias = crearAbrirModal('categorias');
@@ -209,6 +275,7 @@
 			puedeAgregarResena={puedeResenar}
 			{yaResenoUsuario}
 			onAgregarResenaClick={abrirModalResena}
+			onEliminar={solicitarEliminarResena}
 		/>
 
 		<!-- Reportar perfil -->
@@ -270,9 +337,58 @@
 		placeholder={obtenerPlaceholderResena('usuario')}
 		tipoObjeto="usuario"
 		idObjeto={perfilUsuario.id_usuario}
+		maxCaracteres={500}
 		on:guardar={handleGuardarResena}
 		on:cerrar={() => modales.cerrar('resena')}
 	/>
+{/if}
+
+{#if mostrarConfirmarEliminar}
+	<!-- svelte-ignore a11y-click-events-have-key-events -->
+	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<div
+		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+		on:click={cancelarEliminarResena}
+		aria-hidden="true"
+	></div>
+
+	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+		<div
+			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="modal-eliminar-resena-titulo"
+			tabindex="-1"
+			on:click|stopPropagation
+		>
+			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
+				<h3
+					id="modal-eliminar-resena-titulo"
+					class="text-base font-semibold text-gray-900 sm:text-lg"
+				>
+					¿Eliminar reseña?
+				</h3>
+				<p class="text-sm text-gray-500">Esta acción no se puede deshacer.</p>
+			</div>
+
+			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					on:click={cancelarEliminarResena}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
+					on:click={confirmarEliminarResena}
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
 {/if}
 
 <!-- Modal de editar categorías favoritas -->

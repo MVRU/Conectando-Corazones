@@ -7,7 +7,6 @@
 		Unipersonal,
 		Administrador
 	} from '$lib/domain/types/Usuario';
-	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
 	export let resena: Resena;
@@ -21,20 +20,44 @@
 	export let autor: UsuarioCompleto | undefined = undefined;
 
 	function obtenerNombreAutor(usuario: UsuarioCompleto): string {
-		if (usuario.rol === 'institucion') {
-			return (usuario as Institucion).nombre_legal || usuario.nombre;
-		} else if (usuario.rol === 'colaborador') {
-			if ('razon_social' in usuario) {
-				return (usuario as Organizacion).razon_social;
-			}
-			return `${usuario.nombre} ${usuario.apellido}`;
+		if ('nombre_legal' in usuario && usuario.nombre_legal) {
+			return usuario.nombre_legal as string;
+		} else if ('razon_social' in usuario && usuario.razon_social) {
+			return usuario.razon_social as string;
 		}
-		return `${usuario.nombre} ${usuario.apellido}`;
+
+		const partes = [];
+		if (usuario.nombre) partes.push(usuario.nombre);
+		if (usuario.apellido) partes.push(usuario.apellido);
+
+		if (partes.length > 0) return partes.join(' ');
+
+		return usuario.username || 'Usuario Desconocido';
 	}
 
 	$: nombreMostrar = autor ? obtenerNombreAutor(autor) : resena.username;
-	$: roleLabel = autor?.rol === 'institucion' ? 'Institución' : 'Colaborador';
-	$: roleClass = autor ? obtenerColorRol(autor.rol) : 'bg-gray-100 text-gray-800';
+
+	function obtenerEtiquetaRol(r: string | undefined): string {
+		if (!r) return 'Colaborador';
+		switch (r.toLowerCase()) {
+			case 'institucion':
+				return 'Institución';
+			case 'organizacion':
+				return 'Organización';
+			case 'unipersonal':
+				return 'Voluntario';
+			case 'admin':
+			case 'administrador':
+				return 'Administración';
+			default:
+				return 'Colaborador';
+		}
+	}
+
+	$: roleLabel = autor ? obtenerEtiquetaRol(autor.rol) : obtenerEtiquetaRol(resena.rol);
+	$: roleClass = autor
+		? obtenerColorRol(autor.rol)
+		: obtenerColorRol(resena.rol) || 'bg-gray-100 text-gray-800';
 </script>
 
 <div
