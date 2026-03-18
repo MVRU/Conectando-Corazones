@@ -8,3 +8,4 @@ bun.lockb
 node_modules
 build
 dist
+.vercel

@@ -1,14 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
-	import { mockTestimonios } from '$lib/infrastructure/mocks/mock-testimonios';
-	import { swipe } from '\$lib/utils/actions/swipe';
+	import { swipe } from '$lib/utils/actions/swipe';
+	import type { Resena } from '$lib/domain/types/Resena';
 
+	let testimonios: Resena[] = [];
 	let centerIndex = 0;
 	let cantidadVisible = 3;
 
 	function limitarCentro() {
-		const maxStart = Math.max(0, mockTestimonios.length - cantidadVisible);
+		const maxStart = Math.max(0, testimonios.length - cantidadVisible);
 		if (centerIndex < 0) centerIndex = 0;
 		if (centerIndex > maxStart) centerIndex = maxStart;
 	}
@@ -18,13 +19,22 @@
 		limitarCentro();
 	}
 
-	const mostrarAnterior = () => centerIndex--;
-	const mostrarSiguiente = () => centerIndex++;
+	const mostrarAnterior = () => {
+		centerIndex--;
+		limitarCentro();
+	};
+	const mostrarSiguiente = () => {
+		centerIndex++;
+		limitarCentro();
+	};
 
-	$: testimoniosVisibles = Array.from({ length: cantidadVisible }, (_, i) => {
-		const index = (centerIndex + i) % mockTestimonios.length;
-		return mockTestimonios[(index + mockTestimonios.length) % mockTestimonios.length];
-	});
+	$: testimoniosVisibles =
+		testimonios.length > 0
+			? Array.from({ length: Math.min(cantidadVisible, testimonios.length) }, (_, i) => {
+					const index = (centerIndex + i) % testimonios.length;
+					return testimonios[(index + testimonios.length) % testimonios.length];
+				})
+			: [];
 
 	let visible = false;
 	let sectionRef: HTMLElement;
@@ -37,6 +47,16 @@
 			threshold: 0.15
 		});
 		if (sectionRef) io.observe(sectionRef);
+
+		fetch('/api/resenas')
+			.then((res) => (res.ok ? res.json() : []))
+			.then((data) => {
+				testimonios = data;
+				limitarCentro();
+			})
+			.catch(() => {
+				// Si falla la carga, el carrusel simplemente no muestra nada
+			});
 
 		return () => {
 			window.removeEventListener('resize', actualizarCantidadVisible);
@@ -72,53 +92,60 @@
 		</p>
 	</div>
 
-	<!-- Carrusel -->
-	<!-- ! Ignorar el error que aparece, está ok -->
-	<div
-		use:swipe={{}}
-		on:swipeleft={mostrarSiguiente}
-		on:swiperight={mostrarAnterior}
-		class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
-	>
-		<!-- Contenedor de tarjetas -->
-		<div class="flex w-full flex-row items-center justify-center gap-4 md:gap-6">
-			{#each testimoniosVisibles as testimonio, i (testimonio.contenido)}
-				<TestimoniosCard
-					{...testimonio}
-					active={i === Math.floor(cantidadVisible / 2)}
-					locked={i !== Math.floor(cantidadVisible / 2)}
-				/>
-			{/each}
-		</div>
-
-		<!-- Flechas únicas para todos los dispositivos -->
-		<div class="mt-6 flex w-full justify-between px-4">
-			<button
-				on:click={mostrarAnterior}
-				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-				aria-label="Anterior testimonio"
-			>
-				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
+	{#if testimoniosVisibles.length > 0}
+		<!-- Carrusel -->
+		<!-- ! Ignorar el error que aparece, está ok -->
+		<div
+			use:swipe={{}}
+			on:swipeleft={mostrarSiguiente}
+			on:swiperight={mostrarAnterior}
+			class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
+		>
+			<!-- Contenedor de tarjetas -->
+			<div class="flex w-full flex-row items-center justify-center gap-4 md:gap-6">
+				{#each testimoniosVisibles as testimonio, i (testimonio.contenido)}
+					<TestimoniosCard
+						{...testimonio}
+						active={i === Math.floor(cantidadVisible / 2)}
+						locked={i !== Math.floor(cantidadVisible / 2)}
 					/>
-				</svg>
-			</button>
+				{/each}
+			</div>
 
-			<button
-				on:click={mostrarSiguiente}
-				class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
-				aria-label="Siguiente testimonio"
-			>
-				<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-				</svg>
-			</button>
+			<!-- Flechas únicas para todos los dispositivos -->
+			<div class="mt-6 flex w-full justify-between px-4">
+				<button
+					on:click={mostrarAnterior}
+					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					aria-label="Anterior testimonio"
+				>
+					<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15 19l-7-7 7-7"
+						/>
+					</svg>
+				</button>
+
+				<button
+					on:click={mostrarSiguiente}
+					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					aria-label="Siguiente testimonio"
+				>
+					<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 5l7 7-7 7"
+						/>
+					</svg>
+				</button>
+			</div>
 		</div>
-	</div>
+	{/if}
 </section>
 
 <style>

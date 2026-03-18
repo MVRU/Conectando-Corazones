@@ -132,6 +132,21 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(created);
 	}
 
+	async findAll(filtros?: { rol?: string; estado?: string }): Promise<Usuario[]> {
+		const usuarios = await prisma.usuario.findMany({
+			where: {
+				...(filtros?.rol ? { rol: filtros.rol } : {}),
+				...(filtros?.estado ? { estado: filtros.estado } : {})
+			},
+			include: this.includeOptions
+		});
+		return usuarios.map((u) => UsuarioMapper.toDomain(u));
+	}
+
+	async delete(id: number): Promise<void> {
+		await prisma.usuario.delete({ where: { id_usuario: id } });
+	}
+
 	async update(usuario: Usuario): Promise<Usuario> {
 		if (!usuario.id_usuario) throw new Error('ID requerido para actualizar');
 

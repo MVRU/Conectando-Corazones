@@ -105,11 +105,27 @@ export class Usuario {
 	}
 
 	validarInvariantes(): void {
-		if (this.fecha_nacimiento && !this.esMayorDeEdad()) {
-			throw new Error('El usuario debe ser mayor de 18 años.');
+		if (!this.username?.trim()) {
+			throw new Error('El username no puede estar vacío.');
+		}
+		if (!this.nombre?.trim()) {
+			throw new Error('El nombre no puede estar vacío.');
+		}
+		if (!this.apellido?.trim()) {
+			throw new Error('El apellido no puede estar vacío.');
 		}
 		if (!this.rol) {
 			throw new Error('El usuario debe tener un rol asignado.');
+		}
+		const estadosValidos = ['activo', 'inactivo', 'suspendido'];
+		if (!estadosValidos.includes(this.estado)) {
+			throw new Error(`Estado inválido: "${this.estado}". Debe ser activo, inactivo o suspendido.`);
+		}
+		if (this.fecha_nacimiento && !this.esMayorDeEdad()) {
+			throw new Error('El usuario debe ser mayor de 18 años.');
+		}
+		if (this.rol === 'institucion' && !this.nombre_legal?.trim()) {
+			throw new Error('Una institución debe tener un nombre legal.');
 		}
 	}
 

@@ -1,37 +1,20 @@
-// TODO: corregir todo esto
-
+import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import type { Resena } from '$lib/domain/types/Resena';
-import { writable } from 'svelte/store';
-import { mockTestimonios } from '$lib/infrastructure/mocks/mock-testimonios';
-import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 
-// Store global de reseñas
-const resenasStore = writable<Resena[]>([...mockTestimonios, ...mockResenas]);
+export class AgregarResena {
+	constructor(private resenaRepository: ResenaRepository) {}
 
-/**
- * Caso de uso: Agregar una nueva reseña
- *
- * @param resena - Datos de la reseña (sin id_resena)
- * @returns La reseña creada con su ID
- *
- * TODO: Reemplazar con llamada real a Supabase
- */
-export function agregarResena(resena: Omit<Resena, 'id_resena'>): Resena {
-	const nuevaResena: Resena = {
-		...resena,
-		id_resena: Date.now(),
-		aprobado: true
-	};
+	async execute(resena: Omit<Resena, 'id_resena'>): Promise<Resena> {
+		if (!resena.contenido?.trim()) {
+			throw new Error('El contenido de la reseña no puede estar vacío.');
+		}
+		if (resena.puntaje < 1 || resena.puntaje > 5) {
+			throw new Error('El puntaje debe estar entre 1 y 5.');
+		}
 
-	// Actualiza el store
-	resenasStore.update((resenas) => [...resenas, nuevaResena]);
-
-	return nuevaResena;
-}
-
-/**
- * Obtener el store de reseñas
- */
-export function obtenerResenasStore() {
-	return resenasStore;
+		return await this.resenaRepository.save({
+			...resena,
+			aprobado: false
+		});
+	}
 }

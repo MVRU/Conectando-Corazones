@@ -29,6 +29,43 @@ export interface RegistroInput {
 	};
 }
 
+function traducirErrorAuth(mensaje: string): string {
+	const m = mensaje.toLowerCase();
+
+	if (
+		m.includes('already been registered') ||
+		m.includes('already registered') ||
+		m.includes('already exists') ||
+		m.includes('user already')
+	) {
+		return 'Este correo electrónico ya está registrado. Intentá iniciar sesión o usá otro correo.';
+	}
+	if (m.includes('invalid email') || m.includes('email is invalid')) {
+		return 'El formato del correo electrónico es inválido.';
+	}
+	if (
+		m.includes('password') &&
+		(m.includes('weak') || m.includes('short') || m.includes('length'))
+	) {
+		return 'La contraseña no cumple los requisitos mínimos de seguridad (mínimo 8 caracteres).';
+	}
+	if (
+		m.includes('rate limit') ||
+		m.includes('too many requests') ||
+		m.includes('over_email_send_rate_limit')
+	) {
+		return 'Demasiados intentos. Esperá unos minutos antes de volver a intentar.';
+	}
+	if (m.includes('email not confirmed')) {
+		return 'El correo electrónico no fue confirmado. Revisá tu bandeja de entrada.';
+	}
+	if (m.includes('signup disabled') || m.includes('signups not allowed')) {
+		return 'El registro de nuevos usuarios está temporalmente deshabilitado. Intentá más tarde.';
+	}
+
+	return 'No pudimos crear tu cuenta. Revisá los datos ingresados o intentá nuevamente.';
+}
+
 export class RegistrationService {
 	private usuarioRepo: PostgresUsuarioRepository;
 	private crearUsuarioUseCase: CrearUsuario;
@@ -57,11 +94,11 @@ export class RegistrationService {
 
 			if (authError) {
 				console.error('Error creando usuario en Supabase Auth:', authError);
-				throw new Error(`Error Auth: ${authError.message}`);
+				throw new Error(traducirErrorAuth(authError.message));
 			}
 
 			if (!authData.user) {
-				throw new Error('No se pudo crear el usuario en Auth (respuesta vacía)');
+				throw new Error('No se pudo crear el usuario. Intentá nuevamente en unos instantes.');
 			}
 
 			authUserId = authData.user.id;

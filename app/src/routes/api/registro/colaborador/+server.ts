@@ -35,17 +35,16 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		return json({ usuario: usuarioCreado });
 	} catch (error) {
-		console.error('Error registering collaborator:', error);
+		console.error('Error registrando colaborador:', error);
 		if (error instanceof Error) {
-			// Prisma P2002 es violación de restricción única
-			if (error.message.includes('unique') || error.message.includes('P2002')) {
-				return json({ error: 'El nombre de usuario o email ya está en uso' }, { status: 409 });
+			// Prisma P2002: violación de restricción única (username o email duplicado)
+			if (error.message.includes('P2002') || error.message.includes('unique constraint')) {
+				return json(
+					{ error: 'El nombre de usuario o correo electrónico ya está en uso.' },
+					{ status: 409 }
+				);
 			}
-			// Auth errors
-			if (error.message.includes('Auth')) {
-				return json({ error: error.message }, { status: 400 });
-			}
-			return json({ error: error.message }, { status: 500 });
+			return json({ error: error.message }, { status: 400 });
 		}
 		return json({ error: 'Error interno del servidor' }, { status: 500 });
 	}

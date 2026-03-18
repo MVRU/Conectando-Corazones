@@ -6,6 +6,8 @@ export interface UsuarioRepository {
 	findByUsername(username: string): Promise<Usuario | null>;
 	findByUsernameBasic(username: string): Promise<Usuario | null>;
 	findByEmail(email: string): Promise<Usuario | null>;
-	findByAuthId?(authId: string): Promise<Usuario | null>; // Optional to avoid breaking other impls immediately
+	findByAuthId?(authId: string): Promise<Usuario | null>;
+	findAll(filtros?: { rol?: string; estado?: string }): Promise<Usuario[]>;
 	update(usuario: Usuario): Promise<Usuario>;
+	delete(id: number): Promise<void>;
 }

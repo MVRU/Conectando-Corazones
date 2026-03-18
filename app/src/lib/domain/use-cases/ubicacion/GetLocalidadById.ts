@@ -3,10 +3,10 @@ import type { LocalidadRepository } from '$lib/domain/repositories/LocalidadRepo
 import type { Localidad } from '$lib/domain/entities/Localidad';
 
 export class GetLocalidadById {
-    constructor(private readonly repository: LocalidadRepository) { }
+	constructor(private readonly repository: LocalidadRepository) {}
 
-    async execute(id: number): Promise<Localidad | null> {
-        if (!id) return null;
-        return this.repository.findById(id);
-    }
+	async execute(id: number): Promise<Localidad | null> {
+		if (!id) return null;
+		return this.repository.findById(id);
+	}
 }

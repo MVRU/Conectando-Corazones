@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	const proyectos = await proyectoRepo.findByInstitucionId(usuario.id_usuario!);
 
 	// Filtra solo los proyectos en curso
-	const proyectosEnCurso = proyectos.filter(p => p.estado?.toLowerCase() === 'en_curso');
+	const proyectosEnCurso = proyectos.filter((p) => p.estado?.toLowerCase() === 'en_curso');
 
 	return JSON.parse(
 		JSON.stringify({

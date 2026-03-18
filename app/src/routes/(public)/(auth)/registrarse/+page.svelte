@@ -122,7 +122,10 @@
 		try {
 			if (detalle.rol === 'colaborador') {
 				const mapping = mapearFormularioColaboradorAInputRegistro(detalle);
-				await authActions.registerColaborador(mapping.input);
+				const usuario = await authActions.registerColaborador(mapping.input);
+				if (usuario && usuario.id_usuario) {
+					usuarioRegistradoId = usuario.id_usuario;
+				}
 			} else {
 				const mapping = mapearFormularioInstitucionAInputRegistro(detalle);
 				const usuario = await authActions.registerInstitucion(mapping.input);

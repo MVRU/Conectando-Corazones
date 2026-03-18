@@ -6,10 +6,10 @@
 	import { Button } from '$lib';
 
 	// recibidas del componente padre
-	let { 
-		open = $bindable(false), 
-		tipo_objeto, 
-		id_objeto, 
+	let {
+		open = $bindable(false),
+		tipo_objeto,
+		id_objeto,
 		nombre_objeto = '',
 		onclose,
 		onsuccess
@@ -39,7 +39,11 @@
 		}
 	}
 
-	async function handleFormSubmit(detail: { motivo: string; motivoOtro?: string; descripcion: string }) {
+	async function handleFormSubmit(detail: {
+		motivo: string;
+		motivoOtro?: string;
+		descripcion: string;
+	}) {
 		const { motivo, motivoOtro, descripcion } = detail;
 		errorEnvio = '';
 

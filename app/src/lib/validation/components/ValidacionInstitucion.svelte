@@ -113,12 +113,6 @@
 
 		errorFormulario = null;
 		dispatch('submit', { files: archivosSeleccionados });
-		toastStore.show({
-			variant: 'success',
-			title: 'Documentos enviados',
-			message:
-				'Nuestro equipo está verificando tu documentación. Te avisaremos cuando finalice la revisión.'
-		});
 	}
 
 	function omitirRevision() {

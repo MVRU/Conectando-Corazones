@@ -265,16 +265,19 @@ export const authActions = {
 		}
 	},
 
-	async registerColaborador(input: RegisterColaboradorInput): Promise<void> {
+	async registerColaborador(input: RegisterColaboradorInput): Promise<Usuario | void> {
 		validarRegistroColaborador(input);
 		const endpoint = '/api/registro/colaborador';
 		const fallbackError = 'No pudimos registrar tu cuenta de colaborador. Intentá nuevamente.';
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
-			await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
 			// Auto-login después del registro exitoso
 			await this.login(input.email, input.password);
+			if (data && data.usuario) {
+				return data.usuario;
+			}
 		} catch (error) {
 			const message = obtenerMensajeError(error, fallbackError);
 			authStore.update((state) => ({ ...state, error: message }));
@@ -288,7 +291,7 @@ export const authActions = {
 		validarRegistroInstitucion(input);
 		const endpoint = '/api/registro/institucion';
 		const fallbackError =
-			'No pudimos registrar la cuenta institucional. Revisa los datos e intentá más tarde.';
+			'No pudimos registrar la cuenta institucional. Revisá los datos e intentá más tarde.';
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {

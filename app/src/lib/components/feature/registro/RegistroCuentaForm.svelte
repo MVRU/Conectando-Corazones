@@ -53,7 +53,7 @@
 		REGISTRO_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
-	} from '\$lib/domain/types/constants/registro';
+	} from '$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
 
 	const dispatch = createEventDispatcher<{
@@ -851,10 +851,6 @@
 		}
 	}
 
-	function solicitarRetroceso() {
-		dispatch('back');
-	}
-
 	function calcularErroresBase({
 		username,
 		email,
@@ -1146,7 +1142,7 @@
 				aria-label="Seleccioná el método de registro"
 				class="grid gap-4 md:grid-cols-2"
 			>
-				{#each metodosRegistro as metodo}
+				{#each metodosRegistro as metodo (metodo.id)}
 					<button
 						type="button"
 						data-metodo={metodo.id}
@@ -1241,7 +1237,7 @@
 				</header>
 
 				<div class="grid gap-4 md:grid-cols-2">
-					{#each proveedoresFederados as proveedor}
+					{#each proveedoresFederados as proveedor (proveedor.id)}
 						<button
 							type="button"
 							class={`group flex flex-col gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]/30 focus-visible:ring-offset-2 ${proveedor.cardClass} cursor-not-allowed`}
@@ -1254,6 +1250,7 @@
 									class={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/50  ${proveedor.iconClass}`}
 									aria-hidden="true"
 								>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									{@html iconosFederados[proveedor.id]}
 								</span>
 								<div>
@@ -1536,7 +1533,7 @@
 					</div>
 
 					<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{#each opcionesTipoInstitucion as opcion}
+						{#each opcionesTipoInstitucion as opcion (opcion.value)}
 							<div class="relative">
 								<input
 									id={`tipo-institucion-${opcion.value}`}
@@ -1692,7 +1689,7 @@
 						</p>
 					</div>
 					<div class="grid gap-4 md:grid-cols-2">
-						{#each opcionesTipoColaborador as opcion}
+						{#each opcionesTipoColaborador as opcion (opcion.value)}
 							<div class="relative">
 								<input
 									id={`tipo-colaborador-${opcion.value}`}
@@ -1756,7 +1753,7 @@
 									<span class="text-red-600">*</span>
 								</p>
 								<div class="grid gap-3 sm:grid-cols-2">
-									{#each [{ value: 'true', label: 'Sí, con fines de lucro', descripcion: 'Opera como empresa o entidad mixta.', icon: Building2 }, { value: 'false', label: 'No, sin fines de lucro', descripcion: 'Asociación civil o fundación.', icon: ShieldCheck }] as opcion}
+									{#each [{ value: 'true', label: 'Sí, con fines de lucro', descripcion: 'Opera como empresa o entidad mixta.', icon: Building2 }, { value: 'false', label: 'No, sin fines de lucro', descripcion: 'Asociación civil o fundación.', icon: ShieldCheck }] as opcion (opcion.value)}
 										<label
 											class={`flex h-full cursor-pointer flex-col gap-2 rounded-2xl border p-4 transition ${
 												conFinesDeLucroSeleccion === opcion.value
@@ -1918,7 +1915,7 @@
 					variant="secondary"
 					size="sm"
 					customClass="w-full sm:w-auto"
-					on:click={() => cerrarModalPassword({ regresarACredenciales: true })}
+					onclick={() => cerrarModalPassword({ regresarACredenciales: true })}
 				/>
 				<Button
 					type="button"
@@ -1926,7 +1923,7 @@
 					variant="primary"
 					size="sm"
 					customClass="w-full sm:w-auto"
-					on:click={confirmarModalPassword}
+					onclick={confirmarModalPassword}
 				/>
 			</div>
 		</div>
