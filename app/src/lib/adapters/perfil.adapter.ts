@@ -18,6 +18,13 @@ class StubResenaRepository implements ResenaRepository {
 	async findByUsuario(id: number): Promise<Resena[]> {
 		return [];
 	}
+	async findByObjetoAprobadas(
+		tipoObjeto: string,
+		idObjeto: number,
+		limite?: number
+	): Promise<Resena[]> {
+		return [];
+	}
 	async save(resena: Resena): Promise<Resena> {
 		return resena;
 	}

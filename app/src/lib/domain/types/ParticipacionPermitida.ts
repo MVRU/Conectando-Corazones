@@ -13,4 +13,5 @@ export interface ParticipacionPermitida {
 	// * Relaciones, opcionales para lectura
 	proyecto?: Proyecto;
 	tipo_participacion?: TipoParticipacion;
+	colaboraciones_tipo_participacion?: import('./ColaboracionTipoParticipacion').ColaboracionTipoParticipacion[];
 }

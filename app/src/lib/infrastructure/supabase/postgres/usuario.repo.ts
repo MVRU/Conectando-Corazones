@@ -85,7 +85,9 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				tipo_institucion: true,
 				tipo_colaborador: true,
 				razon_social: true,
-				contactos: true
+				contactos: true,
+				estado_verificacion: true,
+				verificaciones: true
 			}
 		});
 
