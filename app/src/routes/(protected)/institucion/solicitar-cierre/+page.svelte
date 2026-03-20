@@ -37,7 +37,7 @@
 		mensajeErrorAcceso = '';
 
 		if (!$isAuthenticated || !$usuario) {
-			goto('/login');
+			goto('/iniciar-sesion');
 		} else if (!$isInstitucion) {
 			accesoDenegado = true;
 			mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';

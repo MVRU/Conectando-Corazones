@@ -1,70 +1,44 @@
 <script lang="ts">
-	import { usuario as user, isAdmin, isInstitucion, isColaborador } from '$lib/stores/auth';
-	import type { Reporte } from '$lib/domain/types/Reporte';
+	import { isAdmin } from '$lib/stores/auth';
+	import type { Reporte } from '$lib/domain/entities/Reporte';
 	import { fly } from 'svelte/transition';
-	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';
-
+	import { User, Folder, AlertCircle } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { page, navigating } from '$app/stores';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
 
-	let filteredReportes: Reporte[] = [];
-	let estadoFilter: 'todos' | 'pendiente' | 'resuelto' | 'rechazado' = 'todos';
-	let sortOrder: 'recent' | 'oldest' = 'recent';
+	export let data;
+
+	$: reportes = data.reportes;
+	$: totalReportes = data.total;
+
+	$: estadoFilter = data.filtros.estado || 'todos';
+	$: tipoFilter = data.filtros.tipo_objeto || 'todos';
 
 	// Estado del Modal de Resolución
 	let modalResolucionAbierto = false;
 	let reporteSeleccionado: Reporte | null = null;
 	let resolucionComentario = '';
-	let resolucionEstado: 'resuelto' | 'rechazado' = 'resuelto';
+	let resolucionEstado: 'verificado' | 'desestimado' = 'verificado';
 	let errorValidacion = '';
-
-	// Estado del Modal de Retiro
-	let modalRetiroAbierto = false;
-	let reporteARetirar: Reporte | null = null;
+	let enviandoResolucion = false;
 
 	// Paginación
-	let currentPage = 1;
-	const itemsPerPage = 10;
-	let paginatedReportes: Reporte[] = [];
+	$: itemsPerPage = data.filtros.limit;
+	$: totalPages = itemsPerPage ? Math.ceil(totalReportes / itemsPerPage) : 1;
+	$: currentPage = Math.floor(data.filtros.offset / (itemsPerPage || 1)) + 1;
 
-	// Filtra reportes reactivamente cuando cambia el usuario o los filtros
-	$: {
-		let result: any[] = [];
-		if ($user) {
-			if ($isAdmin) {
-				result = [];
-			} else {
-				result = [];
-			}
-
-			// Filtrar por estado
-			if (estadoFilter !== 'todos') {
-				result = result.filter((r) => r.estado === estadoFilter);
-			}
-
-			// Ordenar
-			result.sort((a, b) => {
-				const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-				const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-				return sortOrder === 'recent' ? dateB - dateA : dateA - dateB;
-			});
-
-			filteredReportes = result;
+	// Navegación reactiva cuando cambian los filtros
+	function updateQuery(paramsToUpdate: Record<string, string | null>) {
+		const params = new URLSearchParams($page.url.searchParams);
+		for (const key in paramsToUpdate) {
+			const value = paramsToUpdate[key];
+			if (value !== null) params.set(key, value);
+			else params.delete(key);
 		}
-	}
-
-	$: totalPages = Math.ceil(filteredReportes.length / itemsPerPage);
-	$: {
-		if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
-		if (currentPage < 1) currentPage = 1;
-
-		const start = (currentPage - 1) * itemsPerPage;
-		const end = start + itemsPerPage;
-		paginatedReportes = filteredReportes.slice(start, end);
-	}
-
-	$: if (estadoFilter || sortOrder) {
-		currentPage = 1;
+		params.set('offset', '0');
+		goto(`?${params.toString()}`, { keepFocus: true, noScroll: true });
 	}
 
 	function formatDate(date: Date | undefined) {
@@ -82,9 +56,9 @@
 		switch (estado) {
 			case 'pendiente':
 				return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-			case 'resuelto':
+			case 'verificado':
 				return 'bg-green-100 text-green-800 border-green-200';
-			case 'rechazado':
+			case 'desestimado':
 				return 'bg-red-100 text-red-800 border-red-200';
 			default:
 				return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -95,33 +69,19 @@
 		switch (estado) {
 			case 'pendiente':
 				return 'border-l-yellow-400';
-			case 'resuelto':
+			case 'verificado':
 				return 'border-l-green-500';
-			case 'rechazado':
+			case 'desestimado':
 				return 'border-l-red-500';
 			default:
 				return 'border-l-gray-300';
 		}
 	}
 
-	function getNombreUsuario(id: number | null | undefined): string {
-		if (!id) return 'Desconocido';
-		return `ID ${id}`;
-	}
-
-	function getTituloObjeto(tipo: string, id: number): string {
-		if (tipo === 'Proyecto') {
-			return `Proyecto ID ${id}`;
-		} else if (tipo === 'Usuario') {
-			return getNombreUsuario(id);
-		}
-		return `${tipo} #${id}`;
-	}
-
 	function abrirModalResolucion(reporte: Reporte) {
 		reporteSeleccionado = reporte;
 		resolucionComentario = '';
-		resolucionEstado = 'resuelto';
+		resolucionEstado = 'verificado';
 		errorValidacion = '';
 		modalResolucionAbierto = true;
 	}
@@ -131,48 +91,57 @@
 		reporteSeleccionado = null;
 	}
 
-	function confirmarResolucion() {
-		if (!reporteSeleccionado) return;
-		if (!resolucionComentario.trim()) {
-			errorValidacion = 'El comentario de resolución es obligatorio.';
+	async function confirmarResolucion() {
+		if (!reporteSeleccionado || enviandoResolucion) return;
+		const comentarioTrim = resolucionComentario.trim();
+		if (comentarioTrim.length < 20) {
+			errorValidacion = 'El comentario debe tener al menos 20 caracteres.';
+			return;
+		}
+		if (comentarioTrim.length > 800) {
+			errorValidacion = 'El comentario no puede superar los 800 caracteres.';
 			return;
 		}
 
-		toastStore.show({
-			message: 'Funcionalidad no disponible (Backend pendiente).',
-			variant: 'info'
-		});
+		enviandoResolucion = true;
+		try {
+			const res = await fetch(`/api/reportes/${reporteSeleccionado.id_reporte}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					estado: resolucionEstado,
+					comentario: resolucionComentario
+				})
+			});
 
-		cerrarModalResolucion();
+			const result = await res.json();
+			if (!res.ok || !result.success) {
+				throw new Error(result.error || 'Error al procesar la resolución.');
+			}
+
+			toastStore.show({
+				message: `Reporte #${reporteSeleccionado.id_reporte} marcado como ${resolucionEstado}.`,
+				variant: 'success'
+			});
+
+			// Recargar datos actuales
+			goto($page.url.pathname + $page.url.search, { invalidateAll: true });
+			cerrarModalResolucion();
+		} catch (error: any) {
+			toastStore.show({
+				message: error.message || 'Error al conectar con el servidor.',
+				variant: 'error'
+			});
+		} finally {
+			enviandoResolucion = false;
+		}
 	}
 
-	function abrirModalRetiro(reporte: Reporte) {
-		if (!$isColaborador && !$isInstitucion) return;
-		reporteARetirar = reporte;
-		modalRetiroAbierto = true;
-	}
-
-	function cerrarModalRetiro() {
-		modalRetiroAbierto = false;
-		reporteARetirar = null;
-	}
-
-	function confirmarRetiro() {
-		if (!reporteARetirar) return;
-
-		// Mock logic removed
-		toastStore.show({
-			message: 'Funcionalidad no disponible (Backend pendiente).',
-			variant: 'info'
-		});
-
-		cerrarModalRetiro();
-	}
-
-	function goToPage(page: number) {
-		if (page >= 1 && page <= totalPages) {
-			currentPage = page;
-			window.scrollTo({ top: 0, behavior: 'smooth' });
+	function goToPage(pageNumber: number) {
+		if (pageNumber >= 1 && pageNumber <= totalPages) {
+			const params = new URLSearchParams($page.url.searchParams);
+			params.set('offset', ((pageNumber - 1) * itemsPerPage).toString());
+			goto(`?${params.toString()}`, { noScroll: false });
 		}
 	}
 </script>
@@ -181,7 +150,7 @@
 	<title>Reportes - Conectando Corazones</title>
 </svelte:head>
 
-<main class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
+<main class="w-full bg-gradient-to-b from-gray-50 to-white px-0 py-20 md:px-12 lg:px-28">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h1 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
@@ -202,177 +171,211 @@
 
 	<!-- Contenedor principal -->
 	<div class="animate-fade-in-up mx-auto w-full max-w-5xl">
+		{#if data.error}
+			<div
+				class="mb-6 flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-red-700 shadow-sm"
+			>
+				<AlertCircle class="h-5 w-5" />
+				<p class="text-sm font-medium">{data.error}</p>
+			</div>
+		{/if}
+
+		{#if $navigating}
+			<div class="mb-4 flex items-center justify-center gap-2 text-sm text-gray-500">
+				<svg
+					class="h-4 w-4 animate-spin"
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"
+					></circle>
+					<path
+						class="opacity-75"
+						fill="currentColor"
+						d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+					></path>
+				</svg>
+				Cargando...
+			</div>
+		{/if}
+
 		<!-- Filtros y Controles -->
 		<div
-			class="mb-6 flex flex-col items-center justify-between gap-4 rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:flex-row"
+			class="mb-8 flex flex-col items-center justify-between gap-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm sm:flex-row"
 		>
-			<div class="flex w-full items-center gap-2 sm:w-auto">
-				<label for="status-filter" class="text-sm font-medium whitespace-nowrap text-gray-700"
+			<div class="flex w-full items-center gap-3 sm:w-auto">
+				<label for="status-filter" class="text-base font-bold whitespace-nowrap text-gray-700"
 					>Estado:</label
 				>
 				<select
 					id="status-filter"
 					bind:value={estadoFilter}
-					class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-lg border-gray-300 text-sm sm:w-48"
+					on:change={() => updateQuery({ estado: estadoFilter })}
+					class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-xl border-gray-300 py-2.5 text-base font-medium sm:w-64"
 				>
-					<option value="todos">Todos</option>
+					<option value="todos">Todos los estados</option>
 					<option value="pendiente">Pendiente</option>
-					<option value="resuelto">Resuelto</option>
-					<option value="rechazado">Rechazado</option>
+					<option value="verificado">Verificado</option>
+					<option value="desestimado">Desestimado</option>
 				</select>
 			</div>
 
-			<div class="flex w-full items-center gap-2 sm:w-auto">
-				<label for="sort-order" class="text-sm font-medium whitespace-nowrap text-gray-700"
-					>Orden:</label
-				>
-				<select
-					id="sort-order"
-					bind:value={sortOrder}
-					class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-lg border-gray-300 text-sm sm:w-48"
-				>
-					<option value="recent">Más recientes</option>
-					<option value="oldest">Más antiguos</option>
-				</select>
-			</div>
+			{#if $isAdmin}
+				<div class="flex w-full items-center gap-3 sm:w-auto">
+					<label for="type-filter" class="text-base font-bold whitespace-nowrap text-gray-700"
+						>Tipo:</label
+					>
+					<select
+						id="type-filter"
+						bind:value={tipoFilter}
+						on:change={() => updateQuery({ tipo_objeto: tipoFilter })}
+						class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-xl border-gray-300 py-2.5 text-base font-medium sm:w-64"
+					>
+						<option value="todos">Todos los tipos</option>
+						<option value="Proyecto">Proyectos</option>
+						<option value="Usuario">Usuarios</option>
+					</select>
+				</div>
+			{/if}
 		</div>
 
 		<!-- Lista de Reportes -->
-		{#if paginatedReportes.length > 0}
+		{#if reportes.length > 0}
 			<div class="space-y-4">
-				{#each paginatedReportes as reporte (reporte.id_reporte)}
+				{#each reportes as reporte (reporte.id_reporte)}
 					<div
 						in:fly={{ y: 20, duration: 300 }}
 						class={`overflow-hidden rounded-l-md rounded-r-xl border-y border-r border-l-4 border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md ${getEstadoBorderColor(reporte.estado)}`}
 					>
-						<div class="p-6">
-							<div class="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row">
+						<div class="p-2 md:p-8">
+							<div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row">
 								<div>
-									<div class="mb-1 flex items-center gap-2">
-										{#if reporte.tipo_objeto === 'Usuario'}
-											<User class="h-5 w-5 text-gray-500" />
-										{:else}
-											<Folder class="h-5 w-5 text-gray-500" />
-										{/if}
-
-										<h3 class="text-lg font-semibold text-gray-900">
-											{#if $isAdmin}
-												Reporte #{reporte.id_reporte}
-											{:else}
-												<!-- Para usuarios no admin, mostrar info más amigable -->
-												{#if reporte.tipo_objeto === 'Proyecto'}
-													Sobre Proyecto: <span class="text-primary-600"
-														>{getTituloObjeto(reporte.tipo_objeto, reporte.id_objeto)}</span
-													>
-												{:else if reporte.tipo_objeto === 'Usuario'}
-													Sobre Usuario: <span class="text-primary-600"
-														>{getTituloObjeto(reporte.tipo_objeto, reporte.id_objeto)}</span
-													>
+									<div class="mb-1 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+										<!-- Fila superior: foto + nombre -->
+										<div class="flex items-center gap-4">
+											{#if reporte.tipo_objeto === 'Usuario'}
+												{#if reporte.imagen_objeto}
+													<img
+														src={reporte.imagen_objeto}
+														alt="Foto de perfil"
+														class="h-12 w-12 flex-shrink-0 rounded-full object-cover shadow-sm ring-2 ring-gray-100"
+													/>
 												{:else}
-													Reporte #{reporte.id_reporte}
+													<User class="h-6 w-6 text-gray-400" />
 												{/if}
+											{:else if reporte.imagen_objeto}
+												<img
+													src={reporte.imagen_objeto}
+													alt="Imagen del proyecto"
+													class="h-12 w-12 flex-shrink-0 rounded-xl object-cover shadow-sm ring-2 ring-gray-100"
+												/>
+											{:else}
+												<Folder class="h-6 w-6 text-gray-400" />
 											{/if}
-										</h3>
-										<span
-											class={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${getEstadoBadgeColor(reporte.estado)}`}
-										>
-											{(reporte.estado ?? 'pendiente').charAt(0).toUpperCase() +
-												(reporte.estado ?? 'pendiente').slice(1)}
-										</span>
+
+											<h3 class="min-w-0 text-xl font-bold tracking-tight text-gray-900">
+												{#if reporte.tipo_objeto === 'Proyecto'}
+													<a
+														href={`/proyectos/${reporte.id_objeto}`}
+														class="hover:text-primary-600 transition-colors hover:underline"
+													>
+														Proyecto: {reporte.nombre_objeto ?? `ID ${reporte.id_objeto}`}
+													</a>
+												{:else if reporte.tipo_objeto === 'Usuario'}
+													<a
+														href={reporte.nombre_objeto
+															? `/perfil/${reporte.nombre_objeto}`
+															: `/perfil/${reporte.id_objeto}`}
+														class="hover:text-primary-600 transition-colors hover:underline"
+													>
+														Usuario: {reporte.nombre_objeto ?? `ID ${reporte.id_objeto}`}
+													</a>
+												{:else}
+													{reporte.tipo_objeto}: {reporte.nombre_objeto ?? `ID ${reporte.id_objeto}`}
+												{/if}
+											</h3>
+										</div>
+
+										<!-- Badge de estado: debajo de la foto+nombre, alineado con el texto -->
+										<div class="pl-[64px] sm:pl-0">
+											<span
+												class={`inline-block rounded-full border px-3 py-1 text-sm font-semibold shadow-sm ${getEstadoBadgeColor(reporte.estado)}`}
+											>
+												{(reporte.estado ?? 'pendiente').charAt(0).toUpperCase() +
+													(reporte.estado ?? 'pendiente').slice(1)}
+											</span>
+										</div>
 									</div>
-									<p class="pl-7 text-sm text-gray-500">
+									<p class="pl-0 text-base text-gray-500 md:pl-[64px]">
 										Enviado el {formatDate(reporte.created_at)}
 									</p>
 
 									{#if $isAdmin}
-										<div class="mt-1 ml-7 flex items-center gap-1 text-sm text-gray-600">
+										<div class="mt-2 ml-0 flex items-center gap-2 text-base text-gray-600 md:ml-[64px]">
 											<span class="font-medium">Reportado por:</span>
-											<div class="flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5">
-												<User class="h-3 w-3 text-gray-500" />
-												{getNombreUsuario(reporte.reportante_id)}
-												<span class="text-xs text-gray-400">(ID: {reporte.reportante_id})</span>
-											</div>
+											<a
+												href={reporte.reportante?.username
+													? `/perfil/${reporte.reportante.username}`
+													: '#'}
+												class="flex min-w-0 items-center gap-2 rounded-full bg-gray-100 px-3 py-1 transition-colors hover:bg-gray-200"
+											>
+												{#if reporte.reportante?.url_foto}
+													<img
+														src={reporte.reportante.url_foto}
+														alt="Foto de perfil"
+														class="h-6 w-6 rounded-full object-cover shadow-sm"
+													/>
+												{:else}
+													<User class="h-4 w-4 text-gray-500" />
+												{/if}
+												<span class="min-w-0 truncate font-bold text-gray-800"
+													>{reporte.reportante?.username ?? `ID ${reporte.reportante_id}`}</span
+												>
+												<span class="text-xs text-gray-400">ID: {reporte.reportante_id}</span>
+											</a>
 										</div>
 									{/if}
 								</div>
-
-								{#if !$isAdmin && reporte.estado === 'pendiente'}
-									<button
-										on:click={() => abrirModalRetiro(reporte)}
-										class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700"
-										title="Retirar reporte"
-									>
-										<Trash2 class="h-4 w-4" />
-										<span class="hidden sm:inline">Retirar reporte</span>
-									</button>
-								{/if}
 							</div>
 
-							<div class="grid gap-6 md:grid-cols-2">
-								<div class="pl-7">
-									<div class="mb-3">
+							<div class="mt-8 grid gap-4 md:grid-cols-2 md:gap-8">
+								<div class="pl-0 md:pl-[64px]">
+									<div class="mb-6">
 										<span
-											class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
-											>Motivo</span
+											class="mb-2 block text-sm font-bold tracking-widest text-gray-400 uppercase"
+											>Motivo del Reporte</span
 										>
-										<p class="font-medium text-gray-900">{reporte.motivo}</p>
+										<p class="text-lg font-semibold text-gray-800">{reporte.motivo}</p>
 									</div>
 									<div>
 										<span
-											class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
-											>Descripción</span
+											class="mb-2 block text-sm font-bold tracking-widest text-gray-400 uppercase"
+											>Descripción Detallada</span
 										>
-										<p class="text-sm leading-relaxed text-gray-700">{reporte.descripcion}</p>
+										<p class="break-words text-lg leading-relaxed text-gray-700">{reporte.descripcion}</p>
 									</div>
-
-									{#if $isAdmin}
-										<div class="mt-3">
-											<span
-												class="mb-1 block text-xs font-semibold tracking-wider text-gray-500 uppercase"
-												>Objeto Reportado</span
-											>
-											<div class="flex items-center gap-2">
-												<span
-													class="badge rounded border border-blue-100 bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
-												>
-													{reporte.tipo_objeto}
-												</span>
-												{#if $isAdmin}
-													<span class="text-xs text-gray-500">
-														ID: {reporte.id_objeto} - {getTituloObjeto(
-															reporte.tipo_objeto,
-															reporte.id_objeto
-														)}
-													</span>
-												{:else}
-													<span class="text-xs font-medium text-gray-700">
-														{getTituloObjeto(reporte.tipo_objeto, reporte.id_objeto)}
-													</span>
-												{/if}
-											</div>
-										</div>
-									{/if}
 								</div>
 
-								<div class="flex flex-col gap-3">
-									{#if reporte.estado === 'resuelto' || reporte.estado === 'rechazado'}
-										<div class="h-full rounded-lg border border-gray-100 bg-gray-50 p-4">
-											<h4 class="mb-3 flex items-center gap-2 font-medium text-gray-900">
-												<AlertCircle class="h-4 w-4 text-gray-500" />
-												Resolución
+								<div class="flex flex-col gap-4">
+									{#if reporte.estado === 'verificado' || reporte.estado === 'desestimado'}
+										<div class="h-full rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm md:p-6">
+											<h4 class="mb-4 flex items-center gap-2 break-words text-lg font-bold text-gray-900">
+												<AlertCircle class="text-primary-500 h-5 w-5" />
+												Resolución Administrativa
 											</h4>
 											{#if reporte.fecha_resolucion}
-												<p class="mb-2 text-xs text-gray-500">
-													Resuelto el {formatDate(reporte.fecha_resolucion)}
+												<p class="mb-2 break-all text-xs text-gray-500">
+													Finalizado el {formatDate(reporte.fecha_resolucion)}
 													{#if reporte.admin_id}
 														por <span class="font-medium text-gray-700"
-															>{getNombreUsuario(reporte.admin_id)}</span
-														> (Admin)
+															>{reporte.admin?.username ?? `ID ${reporte.admin_id}`}</span
+														>
 													{/if}
 												</p>
 											{/if}
 											{#if reporte.comentario_resolucion}
-												<p class="text-sm text-gray-700 italic">
+												<p class="break-all text-sm text-gray-700 italic">
 													"{reporte.comentario_resolucion}"
 												</p>
 											{:else}
@@ -381,18 +384,37 @@
 										</div>
 									{:else}
 										<div
-											class="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4"
+											class="flex h-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-blue-100 bg-blue-50/50 p-6 shadow-sm"
 										>
-											<p class="text-sm text-gray-400">Esperando revisión...</p>
+											<div class="mb-3 rounded-full bg-blue-100 p-3">
+												<svg
+													class="h-6 w-6 animate-pulse text-blue-600"
+													xmlns="http://www.w3.org/2000/svg"
+													fill="none"
+													viewBox="0 0 24 24"
+													stroke="currentColor"
+												>
+													<path
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="2"
+														d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+													/>
+												</svg>
+											</div>
+											<h4 class="mb-1 text-base font-bold text-gray-900">En revisión</h4>
+											<p class="text-center text-sm text-gray-500">
+												El reporte ha sido recibido y está esperando por su resolución.
+											</p>
 
 											{#if $isAdmin && reporte.estado === 'pendiente'}
 												<button
 													on:click={() => abrirModalResolucion(reporte)}
-													class="mt-3 flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-blue-600 shadow-sm transition-colors hover:bg-blue-50"
+													class="bg-primary hover:bg-primary-hover mt-4 flex items-center gap-2 rounded-xl px-6 py-2.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95"
 												>
 													<svg
 														xmlns="http://www.w3.org/2000/svg"
-														class="h-4 w-4"
+														class="h-5 w-5"
 														fill="none"
 														viewBox="0 0 24 24"
 														stroke="currentColor"
@@ -400,11 +422,11 @@
 														<path
 															stroke-linecap="round"
 															stroke-linejoin="round"
-															stroke-width="2"
+															stroke-width="2.5"
 															d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 														/>
 													</svg>
-													Resolver reporte
+													Resolver reporte ahora
 												</button>
 											{/if}
 										</div>
@@ -418,10 +440,10 @@
 
 			<!-- Paginación -->
 			{#if totalPages > 1}
-				<div class="mt-8 flex items-center justify-center gap-2">
+				<div class="mt-8 flex items-center justify-center gap-3">
 					<button
 						disabled={currentPage === 1}
-						class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+						class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-base font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md disabled:opacity-40 disabled:shadow-none"
 						on:click={() => goToPage(currentPage - 1)}
 					>
 						Anterior
@@ -429,10 +451,10 @@
 
 					{#each Array(totalPages) as _, i}
 						<button
-							class={`h-8 w-8 rounded-lg text-sm font-medium transition-colors ${
+							class={`h-11 w-11 rounded-xl text-base font-bold shadow-sm transition-all ${
 								currentPage === i + 1
-									? 'bg-blue-600 text-white'
-									: 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+									? 'bg-primary hover:bg-primary-hover text-white'
+									: 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md'
 							}`}
 							on:click={() => goToPage(i + 1)}
 						>
@@ -442,25 +464,29 @@
 
 					<button
 						disabled={currentPage === totalPages}
-						class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+						class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-base font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md disabled:opacity-40 disabled:shadow-none"
 						on:click={() => goToPage(currentPage + 1)}
 					>
 						Siguiente
 					</button>
 				</div>
-				<div class="mt-2 text-center text-xs text-gray-500">
-					Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, filteredReportes.length)} - {Math.min(
+				<div class="mt-4 text-center text-sm font-medium text-gray-500">
+					Mostrando {Math.min((currentPage - 1) * itemsPerPage + 1, totalReportes)} - {Math.min(
 						currentPage * itemsPerPage,
-						filteredReportes.length
-					)} de {filteredReportes.length} resultados
+						totalReportes
+					)} de <span class="font-bold text-gray-800">{totalReportes}</span> resultados
 				</div>
 			{/if}
 		{:else}
-			<div class="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-				<div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-50">
+			<div
+				class="rounded-2xl border-2 border-dashed border-gray-200 bg-white py-24 text-center shadow-sm"
+			>
+				<div
+					class="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gray-50/50"
+				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
-						class="h-8 w-8 text-gray-400"
+						class="h-10 w-10 text-gray-300"
 						fill="none"
 						viewBox="0 0 24 24"
 						stroke="currentColor"
@@ -468,19 +494,29 @@
 						<path
 							stroke-linecap="round"
 							stroke-linejoin="round"
-							stroke-width="2"
+							stroke-width="1.5"
 							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 						/>
 					</svg>
 				</div>
-				<h3 class="text-lg font-medium text-gray-900">No se encontraron reportes</h3>
-				<p class="mt-1 text-gray-500">
-					No hay reportes que coincidan con los filtros seleccionados.
+				<h3 class="text-2xl font-bold text-gray-900">
+					{#if $isAdmin}
+						No se encontraron reportes
+					{:else}
+						Todavía no has realizado reportes
+					{/if}
+				</h3>
+				<p class="mx-auto mt-3 max-w-md text-lg text-gray-500">
+					{#if $isAdmin}
+						No hay reportes que coincidan con los filtros seleccionados o el historial está vacío.
+					{:else}
+						Aquí aparecerán los reportes que realices sobre proyectos o usuarios de la comunidad.
+					{/if}
 				</p>
 				{#if estadoFilter !== 'todos'}
 					<button
 						class="text-primary-600 hover:text-primary-700 mt-4 text-sm font-medium"
-						on:click={() => (estadoFilter = 'todos')}
+						on:click={() => updateQuery({ estado: null })}
 					>
 						Limpiar filtros
 					</button>
@@ -492,7 +528,7 @@
 	<!-- Modal de Resolución de Reporte -->
 	<Modal
 		abierto={modalResolucionAbierto}
-		titulo={`Resolver reporte #${reporteSeleccionado?.id_reporte}`}
+		titulo="Resolver reporte"
 		on:cerrar={cerrarModalResolucion}
 		anchoMaximo="max-w-md"
 	>
@@ -504,21 +540,21 @@
 						<input
 							type="radio"
 							name="estado"
-							value="resuelto"
+							value="verificado"
 							bind:group={resolucionEstado}
 							class="text-primary-600 focus:ring-primary-500 h-4 w-4 border-gray-300"
 						/>
-						<span class="text-sm text-gray-700">Marcar como resuelto</span>
+						<span class="text-sm text-gray-700">Verificar reporte</span>
 					</label>
 					<label class="flex items-center gap-2">
 						<input
 							type="radio"
 							name="estado"
-							value="rechazado"
+							value="desestimado"
 							bind:group={resolucionEstado}
 							class="text-primary-600 focus:ring-primary-500 h-4 w-4 border-gray-300"
 						/>
-						<span class="text-sm text-gray-700">Rechazar reporte</span>
+						<span class="text-sm text-gray-700">Desestimar reporte</span>
 					</label>
 				</div>
 			</div>
@@ -531,9 +567,25 @@
 					id="comentario"
 					bind:value={resolucionComentario}
 					rows="4"
+					minlength="20"
+					maxlength="800"
 					class="focus:ring-primary-500 focus:border-primary-500 mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm"
-					placeholder="Describe la resolución o razón del rechazo..."
+					placeholder="Explica detalladamente la resolución (mínimo 20 caracteres)..."
 				></textarea>
+				<div class="mt-2 flex items-center justify-between">
+					<p
+						class="text-xs transition-colors duration-200 {resolucionComentario.length < 20
+							? 'text-amber-600'
+							: resolucionComentario.length > 800
+								? 'text-red-600'
+								: 'text-gray-500'}"
+					>
+						Mínimo 20 caracteres • Máximo 800 • Caracteres: {resolucionComentario.length}
+					</p>
+					{#if resolucionComentario.length > 0}
+						<p class="text-xs text-gray-400">Máximo: 800</p>
+					{/if}
+				</div>
 				{#if errorValidacion}
 					<p class="mt-1 text-sm text-red-600">{errorValidacion}</p>
 				{/if}
@@ -551,48 +603,13 @@
 			<button
 				type="button"
 				class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm ${
-					resolucionEstado === 'resuelto'
+					resolucionEstado === 'verificado'
 						? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
 						: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
 				}`}
 				on:click={confirmarResolucion}
 			>
-				{resolucionEstado === 'resuelto' ? 'Confirmar resolución' : 'Rechazar reporte'}
-			</button>
-		</div>
-	</Modal>
-
-	<!-- Modal de Retiro de Reporte -->
-	<Modal
-		abierto={modalRetiroAbierto}
-		titulo="Retirar reporte"
-		on:cerrar={cerrarModalRetiro}
-		anchoMaximo="max-w-md"
-	>
-		<div class="px-2">
-			<div class="mx-auto mb-4 flex w-fit items-center justify-center rounded-full bg-red-100 p-3">
-				<Trash2 class="h-6 w-6 text-red-600" />
-			</div>
-			<p class="text-center text-sm text-gray-600">
-				¿Estás seguro de que querés descartar este reporte? Esta acción no se puede deshacer y el
-				reporte se eliminará permanentemente.
-			</p>
-		</div>
-
-		<div slot="footer" class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
-			<button
-				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
-				on:click={cerrarModalRetiro}
-			>
-				Cancelar
-			</button>
-			<button
-				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm"
-				on:click={confirmarRetiro}
-			>
-				Confirmar retiro
+				{resolucionEstado === 'verificado' ? 'Confirmar verificación' : 'Desestimar reporte'}
 			</button>
 		</div>
 	</Modal>

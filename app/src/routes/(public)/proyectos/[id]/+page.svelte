@@ -16,7 +16,7 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { goto, pushState } from '$app/navigation';
+	import { goto, pushState, invalidateAll } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
@@ -37,7 +37,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
+	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb } from 'lucide-svelte';
 
 	import {
@@ -524,21 +524,16 @@
 		return acc;
 	})();
 
-	let yaReporto = false;
-
-	$: if ($usuario && proyecto?.id_proyecto) {
-		yaReporto = haReportado($usuario.id_usuario, proyecto.id_proyecto);
-	}
-
-	function handleReportSuccess() {
+	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
-			guardarReporteLog($usuario.id_usuario, proyecto.id_proyecto);
-			yaReporto = true;
+			guardarReporteLog($usuario.id_usuario, 'Proyecto', proyecto.id_proyecto);
 			toastStore.show({
 				variant: 'success',
 				message:
 					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
 			});
+			// Refrescar datos antes de volver
+			await invalidateAll();
 			history.back();
 		}
 	}
@@ -818,7 +813,12 @@
 			<div
 				class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 			>
-				<ProyectoHeader {proyecto} {esAdministrador} {esCreador} />
+				<ProyectoHeader
+					{proyecto}
+					{esAdministrador}
+					{esCreador}
+					tieneReportePendiente={data.tieneReportePendiente ?? false}
+				/>
 
 				<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 					<!-- Columna principal -->
@@ -1472,12 +1472,12 @@
 									</p>
 									<button
 										type="button"
-										disabled={yaReporto}
+										disabled={data.tieneReportePendiente}
 										onclick={() => pushState('', { showReportModal: true })}
 										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>

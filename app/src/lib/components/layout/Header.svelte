@@ -437,6 +437,27 @@
 						>
 							<User class="h-4 w-4" /> Mi perfil
 						</a>
+
+						{#if $isAdmin}
+							<a
+								href="/reportes"
+								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+								on:click={() => (menuAbierto = false)}
+							>
+								<FileWarning class="h-4 w-4" /> Reportes
+							</a>
+						{/if}
+
+						{#if $isInstitucion || $isColaborador}
+							<a
+								href="/reportes"
+								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+								on:click={() => (menuAbierto = false)}
+							>
+								<FileText class="h-4 w-4" /> Mis reportes
+							</a>
+						{/if}
+
 						<a
 							href="/configuracion"
 							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
