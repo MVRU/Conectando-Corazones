@@ -16,9 +16,14 @@ import { Archivo } from '$lib/domain/entities/Archivo';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	try {
 		const projectId = Number(params.id);
+		const usuario = locals.usuario;
 
 		if (isNaN(projectId)) {
 			throw error(404, 'Proyecto no encontrado');
+		}
+
+		if (!usuario || usuario.rol !== 'institucion' || typeof usuario.id_usuario !== 'number') {
+			throw error(403, 'No autorizado');
 		}
 
 		const proyectoRepo = new PostgresProyectoRepository();
@@ -27,6 +32,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const project = await proyectoRepo.findById(projectId);
 
 		if (!project) throw error(404, 'Proyecto no encontrado');
+		if (project.institucion_id !== usuario.id_usuario) {
+			throw error(403, 'No autorizado para acceder a este proyecto');
+		}
 
 		// Extraer tipos de participación únicos permitidos para este proyecto
 		const tiposUnicos = Array.from(
@@ -37,7 +45,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Usar findAllSummary() para reducir datos transferidos
 		const allProjects = await proyectoRepo.findAllSummary();
 		const proyectosDisponibles = allProjects
-			.filter((p) => p.estado === 'en_curso' || p.estado === 'pendiente_solicitud_cierre')
+			.filter(
+				(p) =>
+					p.institucion_id === usuario.id_usuario &&
+					(p.estado === 'en_curso' || p.estado === 'pendiente_solicitud_cierre')
+			)
 			.map((p) => ({
 				id_proyecto: p.id_proyecto,
 				titulo: p.titulo,
