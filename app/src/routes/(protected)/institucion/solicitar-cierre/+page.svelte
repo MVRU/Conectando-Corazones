@@ -163,12 +163,34 @@
 
 		enviandoSolicitud = true;
 
-		// Simulación de envío al backend
-		setTimeout(() => {
+		try {
+			const formData = new FormData();
+			formData.set('proyecto_id', proyectoSeleccionado);
+
+			// Por ahora usamos todas las evidencias del proyecto como respaldo
+			const evidenciasProyecto = (data.evidencias || []) as any[];
+			for (const ev of evidenciasProyecto) {
+				if (ev.id_evidencia != null) {
+					formData.append('evidencia_ids', String(ev.id_evidencia));
+				}
+			}
+
+			const response = await fetch('?/solicitarCierre', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				console.error('Error al enviar solicitud de cierre', errorData ?? response.statusText);
+				enviandoSolicitud = false;
+				return;
+			}
+
+			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
 			solicitudEnviada = true;
 
-			// Resetear form y limpiar URL
 			const url = new URL(window.location.href);
 			url.searchParams.delete('proyecto');
 			goto(url.toString(), { replaceState: true });
@@ -181,11 +203,13 @@
 				conformidadRevision: false
 			};
 
-			// Ocultar mensaje de éxito después de 5 segundos
 			setTimeout(() => {
 				solicitudEnviada = false;
 			}, 5000);
-		}, 2000);
+		} catch (err) {
+			console.error('Error inesperado al enviar la solicitud de cierre', err);
+			enviandoSolicitud = false;
+		}
 	}
 </script>
 
@@ -428,22 +452,22 @@
 									Reportar irregularidad
 								</button>
 							</div>
-						</div>
 
-						{#if !tieneTresSolicitudesRechazadas && !tieneSolicitudPendiente}
-							<div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
-									<div class="text-sm text-blue-800">
-										<p class="font-medium">Información importante</p>
-										<p class="mt-1 text-xs leading-relaxed text-blue-700">
-											Al enviar, los colaboradores recibirán una notificación para validar
-											evidencias. Al aprobarse, el proyecto pasará a "Completado".
-										</p>
+							{#if !tieneTresSolicitudesRechazadas && !tieneSolicitudPendiente}
+								<div class="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4">
+									<div class="flex gap-3">
+										<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
+										<div class="text-sm text-slate-800">
+											<p class="font-semibold text-blue-900">Información importante</p>
+											<p class="mt-1 text-sm leading-relaxed text-slate-700">
+												Al enviar, los colaboradores recibirán una notificación para validar
+												evidencias. Al aprobarse, el proyecto pasará a "Completado".
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
-						{/if}
+							{/if}
+						</div>
 					{:else}
 						<div
 							class="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-slate-500"
