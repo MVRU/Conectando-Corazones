@@ -5,8 +5,9 @@ import { redirect, fail } from '@sveltejs/kit';
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = locals.usuario;
 
-	if (!user) throw redirect(302, '/login');
+	if (!user) throw redirect(302, '/iniciar-sesion');
 	if (user.rol !== 'institucion') {
+		throw redirect(303, '/mi-panel');
 	}
 
 	const proyectoRepo = new PostgresProyectoRepository();
@@ -22,9 +23,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectoId = url.searchParams.get('proyecto');
 	let proyectoActual = null;
 
-	let solicitudPendiente = null;
-	let solicitudesRechazadas: any[] = [];
-	let evidencias: any[] = [];
+	const solicitudPendiente = null;
+	const solicitudesRechazadas: unknown[] = [];
+	const evidencias: unknown[] = [];
 
 	if (proyectoId) {
 		const p = await proyectoRepo.findById(Number(proyectoId));
@@ -47,7 +48,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-	solicitarCierre: async ({ request }) => {
+	solicitarCierre: async () => {
 		return fail(501, { message: 'Funcionalidad no implementada en backend' });
 	}
 };
