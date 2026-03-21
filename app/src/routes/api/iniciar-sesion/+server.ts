@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 import { validarCorreo } from '$lib/utils/validaciones';
 
 export const POST: RequestHandler = async ({ request, locals, cookies }) => {
@@ -14,26 +15,34 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		const repo = new PostgresUsuarioRepository();
 		let email = identificador;
 
-		// Si no es correo, asumimos que es username y buscamos el email
-		if (!validarCorreo(identificador)) {
-			// Necesitamos buscar el usuario por username y extraer el email de sus contactos.
 
-			const usuario = await repo.findByUsername(identificador);
-			if (!usuario || !usuario.contactos) {
+		if (!validarCorreo(identificador)) {
+			const usuarioDb = await repo.findByUsername(identificador);
+			if (!usuarioDb) {
 				return json({ error: 'Credenciales inválidas' }, { status: 401 });
 			}
 
-			const emailContacto = usuario.contactos.find((c) => c.tipo_contacto === 'email');
-			if (!emailContacto || !emailContacto.valor) {
-				return json(
-					{ error: 'El usuario no tiene un email asociado para iniciar sesión' },
-					{ status: 401 }
-				);
+
+			const emailContacto = usuarioDb.contactos?.find((c) => c.tipo_contacto === 'email');
+
+			if (emailContacto?.valor) {
+				email = emailContacto.valor;
+			} else if (usuarioDb.auth_user_id) {
+
+				const { data: authUserData, error: authLookupError } =
+					await supabaseAdmin.auth.admin.getUserById(usuarioDb.auth_user_id);
+
+				if (authLookupError || !authUserData.user?.email) {
+					console.error('No se pudo obtener el email desde Supabase Auth:', authLookupError);
+					return json({ error: 'Credenciales inválidas' }, { status: 401 });
+				}
+				email = authUserData.user.email;
+			} else {
+				return json({ error: 'Credenciales inválidas' }, { status: 401 });
 			}
-			email = emailContacto.valor;
 		}
 
-		// Iniciar sesión en Supabase
+
 		const { data, error } = await locals.supabase.auth.signInWithPassword({
 			email: email,
 			password: password
@@ -48,19 +57,20 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			return json({ error: 'Error al iniciar sesión' }, { status: 500 });
 		}
 
-		// Obtener usuario de dominio completo para devolver al frontend
+
 		const usuario = await repo.findByAuthId(data.user.id);
 
 		if (!usuario) {
-			// Caso borde: Existe en Auth pero no en DB local
+
 			return json({ error: 'Usuario no registrado en el sistema' }, { status: 401 });
 		}
 
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { password: _, ...usuarioSafe } = usuario;
 
-		// Configurar duración de cookies según "Recordar sesión"
-		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined; // 30 días o sesión
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
+
+
+		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
 
 		if (rememberMe) {
 			cookies.set('remember_me', 'true', {
@@ -74,7 +84,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			cookies.delete('remember_me', { path: '/' });
 		}
 
-		// Guardar cookie de sesión para optimizar cargas subsiguientes
+
 		cookies.set('session_usuario', JSON.stringify(usuarioSafe), {
 			path: '/',
 			httpOnly: false,
@@ -83,7 +93,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			maxAge
 		});
 
-		// Retornar usuario
+
 		return json({ usuario: usuarioSafe });
 	} catch (error) {
 		console.error('ERROR INICIAR SESION:', error);

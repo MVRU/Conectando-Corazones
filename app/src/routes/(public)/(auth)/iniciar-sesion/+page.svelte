@@ -5,7 +5,7 @@
 	import { authActions, authError, isLoading } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
+	import { validarCorreo } from '$lib/utils/validaciones';
 	import { Lock, Eye, EyeOff, Check } from 'lucide-svelte';
 
 	let identificador = '';
@@ -14,16 +14,16 @@
 	let mostrarPassword = false;
 	let erroresValidacion: string[] = [];
 
-	// Función para manejar el login
+
 	async function handleLogin(event: Event) {
 		event.preventDefault();
 
-		// Validar campos
+
 		erroresValidacion = [];
 		if (!identificador.trim()) erroresValidacion.push('El usuario o correo es requerido');
 		if (!password.trim()) erroresValidacion.push('La contraseña es requerida');
-		if (identificador && !validarCorreo(identificador) && !validarUsername(identificador)) {
-			erroresValidacion.push('Ingresá un correo o usuario válido');
+		if (identificador.includes('@') && !validarCorreo(identificador)) {
+			erroresValidacion.push('Ingresá un correo electrónico válido');
 		}
 
 		if (erroresValidacion.length > 0) {
@@ -39,7 +39,7 @@
 				message: 'Iniciaste sesión correctamente.'
 			});
 
-			// Redirigir según el rol del usuario
+
 			if (usuario) {
 				switch (usuario.rol) {
 					case 'institucion':
@@ -58,7 +58,7 @@
 				goto('/');
 			}
 		} catch (error) {
-			// El error ya se maneja en el store, pero mostramos toast también
+
 			console.error('Error en login:', error);
 			toastStore.show({
 				variant: 'error',
@@ -80,7 +80,7 @@
 
 <main class="min-h-screen bg-gray-50 py-8">
 	<div class="mx-auto max-w-7xl px-8">
-		<!-- Header de la página -->
+
 		<div class="mb-12 text-center">
 			<div class="mx-auto mb-6 w-20">
 				<Image
@@ -96,7 +96,7 @@
 			</p>
 		</div>
 
-		<!-- Formulario de login -->
+
 		<div class="mx-auto max-w-md">
 			<div class="rounded-2xl bg-white p-8 shadow-lg">
 				<h2
@@ -213,14 +213,14 @@
 					/>
 				</form>
 
-				<!-- Separador -->
+
 				<div class="my-6 flex items-center">
 					<div class="flex-1 border-t border-gray-300"></div>
 					<span class="px-4 text-sm text-gray-500">o</span>
 					<div class="flex-1 border-t border-gray-300"></div>
 				</div>
 
-				<!-- Enlace al registro -->
+
 				<div class="text-center">
 					<p class="text-gray-600">
 						¿No tenés una cuenta?
@@ -235,7 +235,7 @@
 			</div>
 		</div>
 
-		<!-- Información adicional -->
+
 		<div class="mt-12 text-center">
 			<div class="rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 p-8">
 				<h2 class="mb-4 text-2xl font-semibold text-[rgb(var(--base-color))]">

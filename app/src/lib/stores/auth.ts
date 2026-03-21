@@ -11,12 +11,9 @@ import type {
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 
-/**
- * * DECISIÓN DE DISEÑO:
- *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
- */
 
-// Tipo uniión para todos los tipos de usuario posibles
+
+
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
 interface RegisterPerfilBase
@@ -44,7 +41,7 @@ interface RegisterInputBase<TPerfil extends RegisterPerfilBase> {
 export type RegisterColaboradorInput = RegisterInputBase<RegisterColaboradorPerfil>;
 export type RegisterInstitucionInput = RegisterInputBase<RegisterInstitucionPerfil>;
 
-type RegistroResultado = 'api' | 'simulado';
+
 
 interface StorageLike {
 	getItem(key: string): string | null;
@@ -61,7 +58,7 @@ interface RegistroSimulado {
 
 const CLAVE_REGISTROS_SIMULADOS = 'cc:registro:simulado';
 
-// Estado de autenticación
+
 interface AuthState {
 	usuario: UsuarioCompleto | null;
 	isAuthenticated: boolean;
@@ -69,17 +66,17 @@ interface AuthState {
 	error: string | null;
 }
 
-// TODO: corregir la lógica de autenticación
 
-// Estado inicial
+
+
 const initialState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
-	isLoading: true, // Estado de carga inicial verdadero para evitar destellos/condiciones de carrera
+	isLoading: true,
 	error: null
 };
 
-// Estado para usuario no autenticado (cargado pero no conectado)
+
 export const unauthenticatedState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
@@ -87,30 +84,30 @@ export const unauthenticatedState: AuthState = {
 	error: null
 };
 
-// Store principal de autenticación
+
 export const authStore = writable<AuthState>(initialState);
 
-// Stores derivados para facilitar el acceso
+
 export const usuario = derived(authStore, ($auth) => $auth.usuario);
 export const isAuthenticated = derived(authStore, ($auth) => $auth.isAuthenticated);
 export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
-// Store derivado para el rol del usuario
+
 export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol ?? null);
 
-// Store derivado para verificar rol
+
 export const isAdmin = derived(authStore, ($auth) => $auth.usuario?.rol === 'administrador');
 export const isInstitucion = derived(authStore, ($auth) => $auth.usuario?.rol === 'institucion');
 export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol === 'colaborador');
 
-// Store derivado para verificar estado
+
 export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
 export const isInstitucionVerificada = derived(authStore, ($auth) =>
 	esInstitucionVerificada($auth.usuario)
 );
 
-// Funciones para manejar la autenticación
+
 export const authActions = {
 	/**
 	 * Iniciar sesión (acepta email o username como "identificador")
@@ -121,12 +118,13 @@ export const authActions = {
 		recordarSesion: boolean = false
 	): Promise<UsuarioCompleto | null> {
 		const credencial = identificador?.trim();
-		if (
-			!credencial ||
-			!password?.trim() ||
-			(!validarCorreo(credencial) && !validarUsername(credencial))
-		) {
-			authStore.update((s) => ({ ...s, error: 'Credenciales inválidas', isLoading: false }));
+		const esCorreo = credencial?.includes('@');
+		if (!credencial || !password?.trim() || (esCorreo && !validarCorreo(credencial))) {
+			authStore.update((s) => ({
+				...s,
+				error: esCorreo ? 'Ingresá un correo electrónico válido' : 'Credenciales inválidas',
+				isLoading: false
+			}));
 			return null;
 		}
 
@@ -273,9 +271,8 @@ export const authActions = {
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
 			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
-			// Auto-login después del registro exitoso
 			await this.login(input.email, input.password);
-			if (data && data.usuario) {
+			if (data !== 'simulado' && data.usuario) {
 				return data.usuario;
 			}
 		} catch (error) {
@@ -296,8 +293,7 @@ export const authActions = {
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
 			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
-			if (data && data.usuario) {
-				// Auto-login después del registro exitoso
+			if (data !== 'simulado' && data.usuario) {
 				await this.login(input.email, input.password);
 				return data.usuario;
 			}
@@ -339,9 +335,7 @@ export const authActions = {
 	}
 };
 
-/**
- * Verificar permisos por rol
- */
+
 export function hasPermission(permission: string): boolean {
 	const state = get(authStore);
 	if (state.usuario?.rol === 'administrador') return true;
@@ -359,9 +353,7 @@ export function hasPermission(permission: string): boolean {
 	return false;
 }
 
-/**
- * Verificar acceso a rutas por rol
- */
+
 export function canAccessRoute(route: string): boolean {
 	const routePermissions: Record<string, string[]> = {
 		'/admin': ['administrador'],
@@ -426,12 +418,7 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un correo electrónico válido.');
 	}
 
-	/*
-	const emailExistente = Object.values(mockUsuarios).some((u) =>
-		u.contactos?.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)
-	);
-	*/
-	const emailExistente = false; // Validación se realiza en backend
+	const emailExistente = false;
 
 	if (emailExistente) {
 		throw new Error(`El correo electrónico "${input.email}" ya está en uso`);
@@ -445,12 +432,7 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un nombre de usuario válido.');
 	}
 
-	/*
-	const usuarioExistente = Object.values(mockUsuarios).some(
-		(u) => u.username === input.perfil.username
-	);
-	*/
-	const usuarioExistente = false; // Validación se realiza en backend
+	const usuarioExistente = false;
 
 	if (usuarioExistente) {
 		throw new Error(`El nombre de usuario "${input.perfil.username}" ya está en uso`);
@@ -489,11 +471,11 @@ function validarRegistroInstitucion(input: RegisterInstitucionInput): void {
 	}
 }
 
-async function enviarSolicitudRegistro(
+async function enviarSolicitudRegistro<T = { usuario: Usuario }>(
 	endpoint: string,
 	input: RegisterColaboradorInput | RegisterInstitucionInput,
 	fallbackError: string
-): Promise<any> {
+): Promise<T | 'simulado'> {
 	const payload =
 		typeof structuredClone === 'function'
 			? structuredClone(input)
@@ -586,7 +568,7 @@ function esErrorDeConectividad(error: unknown): boolean {
 	return false;
 }
 
-// ? Riesgo: los registros simulados se almacenan sin cifrado y deben eliminarse al habilitar la integración real.
+
 function simularRegistroLocal(
 	endpoint: string,
 	input: RegisterColaboradorInput | RegisterInstitucionInput
