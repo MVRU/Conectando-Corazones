@@ -62,6 +62,10 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
 
+		if (usuarioSafe.estado !== 'activo') {
+			return json({ error: 'La cuenta no se encuentra activa.' }, { status: 403 });
+		}
+
 		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
 
 		if (rememberMe) {

@@ -17,10 +17,10 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 	try {
 		const { estado } = await request.json();
-		const estadosValidos = ['activo', 'inactivo', 'suspendido'];
+		const estadosValidos = ['activo', 'inactivo'];
 		if (!estadosValidos.includes(estado)) {
 			return json(
-				{ error: `Estado inválido. Debe ser: ${estadosValidos.join(', ')}` },
+				{ error: `Estado inválido. Debe ser: ${estadosValidos.join(' o ')}` },
 				{ status: 400 }
 			);
 		}

@@ -117,9 +117,9 @@ export class Usuario {
 		if (!this.rol) {
 			throw new Error('El usuario debe tener un rol asignado.');
 		}
-		const estadosValidos = ['activo', 'inactivo', 'suspendido'];
+		const estadosValidos = ['activo', 'inactivo'];
 		if (!estadosValidos.includes(this.estado)) {
-			throw new Error(`Estado inválido: "${this.estado}". Debe ser activo, inactivo o suspendido.`);
+			throw new Error(`Estado inválido: "${this.estado}". Debe ser activo o inactivo.`);
 		}
 		if (this.fecha_nacimiento && !this.esMayorDeEdad()) {
 			throw new Error('El usuario debe ser mayor de 18 años.');

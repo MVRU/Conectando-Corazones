@@ -1,7 +1,7 @@
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
 import type { Usuario } from '$lib/domain/entities/Usuario';
 
-type EstadoUsuario = 'activo' | 'inactivo' | 'suspendido';
+type EstadoUsuario = 'activo' | 'inactivo';
 
 export class DesactivarUsuario {
 	constructor(private usuarioRepository: UsuarioRepository) {}
