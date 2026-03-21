@@ -11,9 +11,6 @@ import type {
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
 
-
-
-
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
 interface RegisterPerfilBase
@@ -41,33 +38,12 @@ interface RegisterInputBase<TPerfil extends RegisterPerfilBase> {
 export type RegisterColaboradorInput = RegisterInputBase<RegisterColaboradorPerfil>;
 export type RegisterInstitucionInput = RegisterInputBase<RegisterInstitucionPerfil>;
 
-
-
-interface StorageLike {
-	getItem(key: string): string | null;
-	setItem(key: string, value: string): void;
-}
-
-interface RegistroSimulado {
-	tipo: 'colaborador' | 'institucion';
-	email: string;
-	timestamp: string;
-	perfil: Record<string, unknown>;
-	metadata: RegistroMetadata | null;
-}
-
-const CLAVE_REGISTROS_SIMULADOS = 'cc:registro:simulado';
-
-
 interface AuthState {
 	usuario: UsuarioCompleto | null;
 	isAuthenticated: boolean;
 	isLoading: boolean;
 	error: string | null;
 }
-
-
-
 
 const initialState: AuthState = {
 	usuario: null,
@@ -76,7 +52,6 @@ const initialState: AuthState = {
 	error: null
 };
 
-
 export const unauthenticatedState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
@@ -84,29 +59,23 @@ export const unauthenticatedState: AuthState = {
 	error: null
 };
 
-
 export const authStore = writable<AuthState>(initialState);
-
 
 export const usuario = derived(authStore, ($auth) => $auth.usuario);
 export const isAuthenticated = derived(authStore, ($auth) => $auth.isAuthenticated);
 export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
-
 export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol ?? null);
-
 
 export const isAdmin = derived(authStore, ($auth) => $auth.usuario?.rol === 'administrador');
 export const isInstitucion = derived(authStore, ($auth) => $auth.usuario?.rol === 'institucion');
 export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol === 'colaborador');
 
-
 export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
 export const isInstitucionVerificada = derived(authStore, ($auth) =>
 	esInstitucionVerificada($auth.usuario)
 );
-
 
 export const authActions = {
 	/**
@@ -178,7 +147,6 @@ export const authActions = {
 		} finally {
 			authStore.set(unauthenticatedState);
 			if (typeof window !== 'undefined') {
-				window.localStorage.removeItem(CLAVE_REGISTROS_SIMULADOS);
 				window.sessionStorage.clear(); // Limpiar todo el sessionStorage
 			}
 		}
@@ -272,7 +240,7 @@ export const authActions = {
 		try {
 			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
 			await this.login(input.email, input.password);
-			if (data !== 'simulado' && data.usuario) {
+			if (data.usuario) {
 				return data.usuario;
 			}
 		} catch (error) {
@@ -293,7 +261,7 @@ export const authActions = {
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
 			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
-			if (data !== 'simulado' && data.usuario) {
+			if (data.usuario) {
 				await this.login(input.email, input.password);
 				return data.usuario;
 			}
@@ -335,7 +303,6 @@ export const authActions = {
 	}
 };
 
-
 export function hasPermission(permission: string): boolean {
 	const state = get(authStore);
 	if (state.usuario?.rol === 'administrador') return true;
@@ -352,7 +319,6 @@ export function hasPermission(permission: string): boolean {
 
 	return false;
 }
-
 
 export function canAccessRoute(route: string): boolean {
 	const routePermissions: Record<string, string[]> = {
@@ -475,37 +441,24 @@ async function enviarSolicitudRegistro<T = { usuario: Usuario }>(
 	endpoint: string,
 	input: RegisterColaboradorInput | RegisterInstitucionInput,
 	fallbackError: string
-): Promise<T | 'simulado'> {
+): Promise<T> {
 	const payload =
 		typeof structuredClone === 'function'
 			? structuredClone(input)
 			: JSON.parse(JSON.stringify(input));
 
-	try {
-		const response = await fetch(endpoint, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
+	const response = await fetch(endpoint, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload)
+	});
 
-		if (response.ok) {
-			return response.json();
-		}
-
-		if (esCodigoSimulable(response.status)) {
-			simularRegistroLocal(endpoint, input);
-			return 'simulado';
-		}
-
-		const mensaje = await extraerMensajeDeRespuesta(response, fallbackError);
-		throw new Error(mensaje);
-	} catch (error) {
-		if (esErrorDeConectividad(error)) {
-			simularRegistroLocal(endpoint, input);
-			return 'simulado';
-		}
-		throw error;
+	if (response.ok) {
+		return response.json();
 	}
+
+	const mensaje = await extraerMensajeDeRespuesta(response, fallbackError);
+	throw new Error(mensaje);
 }
 
 async function enviarSolicitudOAuth(
@@ -550,124 +503,5 @@ async function extraerMensajeDeRespuesta(response: Response, fallback: string): 
 	} catch (error) {
 		console.warn('No se pudo interpretar la respuesta de error del registro.', error);
 		return fallback;
-	}
-}
-
-function esCodigoSimulable(status: number): boolean {
-	return status === 404 || status === 501;
-}
-
-function esErrorDeConectividad(error: unknown): boolean {
-	if (error instanceof TypeError) {
-		return true;
-	}
-	if (error instanceof Error) {
-		const mensaje = error.message.toLowerCase();
-		return mensaje.includes('fetch') || mensaje.includes('network');
-	}
-	return false;
-}
-
-
-function simularRegistroLocal(
-	endpoint: string,
-	input: RegisterColaboradorInput | RegisterInstitucionInput
-): void {
-	const storage = obtenerAlmacenamientoSeguro();
-	if (!storage) {
-		return;
-	}
-
-	const registro: RegistroSimulado = {
-		tipo: tipoRegistroDesdeEndpoint(endpoint),
-		email: input.email,
-		timestamp: new Date().toISOString(),
-		perfil: serializarPerfilSimulado(input.perfil),
-		metadata: clonarMetadata(input.metadata)
-	};
-
-	try {
-		const existentes = JSON.parse(
-			storage.getItem(CLAVE_REGISTROS_SIMULADOS) ?? '[]'
-		) as RegistroSimulado[];
-		const actualizados = [...existentes.slice(-9), registro];
-		storage.setItem(CLAVE_REGISTROS_SIMULADOS, JSON.stringify(actualizados));
-		console.info('Registro simulado almacenado localmente hasta completar la integración real.');
-	} catch (error) {
-		console.warn('No fue posible persistir el registro simulado.', error);
-	}
-}
-
-function obtenerAlmacenamientoSeguro(): StorageLike | null {
-	try {
-		if (typeof window !== 'undefined' && window.localStorage) {
-			return window.localStorage;
-		}
-	} catch (error) {
-		console.warn('Acceso a localStorage restringido en window.', error);
-	}
-
-	try {
-		if (typeof globalThis !== 'undefined') {
-			const posible = (globalThis as { localStorage?: StorageLike }).localStorage;
-			if (posible) {
-				return posible;
-			}
-		}
-	} catch (error) {
-		console.warn('Acceso a localStorage restringido en globalThis.', error);
-	}
-
-	return null;
-}
-
-function tipoRegistroDesdeEndpoint(endpoint: string): 'colaborador' | 'institucion' {
-	return endpoint.includes('institucion') ? 'institucion' : 'colaborador';
-}
-
-function serializarPerfilSimulado(
-	perfil: RegisterColaboradorPerfil | RegisterInstitucionPerfil
-): Record<string, unknown> {
-	const { contactos, fecha_nacimiento, ...resto } = perfil;
-	return {
-		...resto,
-		fecha_nacimiento: normalizarFecha(fecha_nacimiento),
-		contactos: serializarContactos(contactos)
-	};
-}
-
-function serializarContactos(contactos: Contacto[]): Array<Record<string, string>> {
-	return contactos.filter(Boolean).map((contacto) => ({
-		tipo_contacto: contacto.tipo_contacto ?? '',
-		etiqueta: contacto.etiqueta ?? '',
-		valor: contacto.valor ?? ''
-	}));
-}
-
-function normalizarFecha(fecha: unknown): string | null {
-	if (fecha instanceof Date) {
-		return fecha.toISOString();
-	}
-	if (typeof fecha === 'string') {
-		const parseada = new Date(fecha);
-		if (!Number.isNaN(parseada.getTime())) {
-			return parseada.toISOString();
-		}
-		return fecha;
-	}
-	return null;
-}
-
-function clonarMetadata(metadata: RegistroMetadata | undefined): RegistroMetadata | null {
-	if (metadata === undefined) {
-		return null;
-	}
-	try {
-		return typeof structuredClone === 'function'
-			? structuredClone(metadata)
-			: JSON.parse(JSON.stringify(metadata));
-	} catch (error) {
-		console.warn('No se pudo clonar la metadata para el modo simulado.', error);
-		return null;
 	}
 }

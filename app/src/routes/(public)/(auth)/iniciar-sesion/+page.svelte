@@ -14,10 +14,8 @@
 	let mostrarPassword = false;
 	let erroresValidacion: string[] = [];
 
-
 	async function handleLogin(event: Event) {
 		event.preventDefault();
-
 
 		erroresValidacion = [];
 		if (!identificador.trim()) erroresValidacion.push('El usuario o correo es requerido');
@@ -39,7 +37,6 @@
 				message: 'Iniciaste sesión correctamente.'
 			});
 
-
 			if (usuario) {
 				switch (usuario.rol) {
 					case 'institucion':
@@ -58,7 +55,6 @@
 				goto('/');
 			}
 		} catch (error) {
-
 			console.error('Error en login:', error);
 			toastStore.show({
 				variant: 'error',
@@ -80,7 +76,6 @@
 
 <main class="min-h-screen bg-gray-50 py-8">
 	<div class="mx-auto max-w-7xl px-8">
-
 		<div class="mb-12 text-center">
 			<div class="mx-auto mb-6 w-20">
 				<Image
@@ -95,7 +90,6 @@
 				Accedé a tu cuenta para gestionar tus proyectos y contribuir a causas sociales
 			</p>
 		</div>
-
 
 		<div class="mx-auto max-w-md">
 			<div class="rounded-2xl bg-white p-8 shadow-lg">
@@ -213,13 +207,11 @@
 					/>
 				</form>
 
-
 				<div class="my-6 flex items-center">
 					<div class="flex-1 border-t border-gray-300"></div>
 					<span class="px-4 text-sm text-gray-500">o</span>
 					<div class="flex-1 border-t border-gray-300"></div>
 				</div>
-
 
 				<div class="text-center">
 					<p class="text-gray-600">
@@ -234,7 +226,6 @@
 				</div>
 			</div>
 		</div>
-
 
 		<div class="mt-12 text-center">
 			<div class="rounded-2xl bg-gradient-to-r from-blue-50 to-purple-50 p-8">

@@ -83,6 +83,7 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		});
 
 		if (!usuario) return null;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return UsuarioMapper.toDomain(usuario as any);
 	}
 
@@ -144,7 +145,10 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 	}
 
 	async delete(id: number): Promise<void> {
-		await prisma.usuario.delete({ where: { id_usuario: id } });
+		await prisma.usuario.update({
+			where: { id_usuario: id },
+			data: { estado: 'inactivo' }
+		});
 	}
 
 	async update(usuario: Usuario): Promise<Usuario> {
