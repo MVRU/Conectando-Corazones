@@ -27,7 +27,9 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 		const desactivarUsuario = new DesactivarUsuario(repository);
 		const usuarioActualizado = await desactivarUsuario.execute(id, estado);
-		return json(usuarioActualizado);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { password: _pwd, ...usuarioActualizadoSafe } = usuarioActualizado.toPOJO();
+		return json(usuarioActualizadoSafe);
 	} catch (error) {
 		if (error instanceof Error) {
 			return json({ error: error.message }, { status: 400 });

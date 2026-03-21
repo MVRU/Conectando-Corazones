@@ -15,14 +15,20 @@ export class ActualizarUsuario {
 			throw new Error('No se permite cambiar el rol del usuario.');
 		}
 
-		// Actualizamos campos permitidos en la entidad existente
+		// Campos requeridos
 		if (cambios.nombre) usuarioExistente.nombre = cambios.nombre;
 		if (cambios.apellido) usuarioExistente.apellido = cambios.apellido;
-		if (cambios.fecha_nacimiento)
-			usuarioExistente.fecha_nacimiento = new Date(cambios.fecha_nacimiento);
-		if (cambios.descripcion) usuarioExistente.descripcion = cambios.descripcion;
-		if (cambios.localidad_id) usuarioExistente.localidad_id = cambios.localidad_id;
 		if (cambios.url_foto) usuarioExistente.url_foto = cambios.url_foto;
+
+		// Campos opcionales
+		if (cambios.fecha_nacimiento !== undefined)
+			usuarioExistente.fecha_nacimiento = cambios.fecha_nacimiento
+				? new Date(cambios.fecha_nacimiento)
+				: undefined;
+		if (cambios.descripcion !== undefined)
+			usuarioExistente.descripcion = cambios.descripcion || undefined;
+		if (cambios.localidad_id !== undefined)
+			usuarioExistente.localidad_id = cambios.localidad_id ?? undefined;
 
 		// Relaciones y preferencias
 		if (cambios.contactos) usuarioExistente.contactos = cambios.contactos;
@@ -31,11 +37,15 @@ export class ActualizarUsuario {
 		if (cambios.tipos_participacion_preferidas)
 			usuarioExistente.tipos_participacion_preferidas = cambios.tipos_participacion_preferidas;
 
-		// Campos específicos
-		if (cambios.nombre_legal) usuarioExistente.nombre_legal = cambios.nombre_legal;
-		if (cambios.tipo_institucion) usuarioExistente.tipo_institucion = cambios.tipo_institucion;
-		if (cambios.tipo_colaborador) usuarioExistente.tipo_colaborador = cambios.tipo_colaborador;
-		if (cambios.razon_social) usuarioExistente.razon_social = cambios.razon_social;
+		// Campos específicos opcionales
+		if (cambios.nombre_legal !== undefined)
+			usuarioExistente.nombre_legal = cambios.nombre_legal || '';
+		if (cambios.tipo_institucion !== undefined)
+			usuarioExistente.tipo_institucion = cambios.tipo_institucion || '';
+		if (cambios.tipo_colaborador !== undefined)
+			usuarioExistente.tipo_colaborador = cambios.tipo_colaborador || '';
+		if (cambios.razon_social !== undefined)
+			usuarioExistente.razon_social = cambios.razon_social || '';
 		if (cambios.con_fines_de_lucro !== undefined)
 			usuarioExistente.con_fines_de_lucro = cambios.con_fines_de_lucro;
 

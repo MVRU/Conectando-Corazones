@@ -20,7 +20,9 @@ export const GET: RequestHandler = async ({ params }) => {
 		return json({ error: 'Usuario no encontrado' }, { status: 404 });
 	}
 
-	return json(usuario);
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
+	return json(usuarioSafe);
 };
 
 export const PUT: RequestHandler = async ({ params, request }) => {
@@ -33,7 +35,9 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		const data = await request.json();
 		const actualizarUsuario = new ActualizarUsuario(repository);
 		const usuarioActualizado = await actualizarUsuario.execute(id, data);
-		return json(usuarioActualizado);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { password: _pwd, ...usuarioActualizadoSafe } = usuarioActualizado.toPOJO();
+		return json(usuarioActualizadoSafe);
 	} catch (error) {
 		if (error instanceof Error) {
 			return json({ error: error.message }, { status: 400 });

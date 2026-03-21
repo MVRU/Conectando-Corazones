@@ -21,9 +21,6 @@ export class ObtenerUsuario {
 
 	async porAuthId(authId: string): Promise<Usuario | null> {
 		if (!authId) return null;
-		if (!this.usuarioRepository.findByAuthId) {
-			throw new Error('El repositorio no implementa findByAuthId');
-		}
 		return await this.usuarioRepository.findByAuthId(authId);
 	}
 }

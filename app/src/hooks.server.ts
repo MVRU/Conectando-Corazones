@@ -47,7 +47,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	if (user) {
 		const sessionCookie = event.cookies.get('session_usuario');
-		let usuario: PostgresUsuarioRepository | null = null;
 
 		if (sessionCookie) {
 			try {
@@ -71,7 +70,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			if (usuarioDb) {
 				event.locals.usuario = usuarioDb;
 				const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
-				event.cookies.set('session_usuario', JSON.stringify(usuarioDb), {
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const { password: _pwd, ...usuarioDbSafe } = usuarioDb.toPOJO();
+				event.cookies.set('session_usuario', JSON.stringify(usuarioDbSafe), {
 					path: '/',
 					httpOnly: false,
 					secure: process.env.NODE_ENV === 'production',
