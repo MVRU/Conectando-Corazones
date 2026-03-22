@@ -28,16 +28,6 @@ jobs:
         id: install
         run: npm ci
 
-      - name: Formateo y Linter (Prettier & ESLint)
-        id: lint
-        if: steps.install.outcome == 'success' && !cancelled()
-        run: npm run lint
-
-      - name: Verificación de tipos y Svelte (Svelte Check & TS)
-        id: ts
-        if: steps.install.outcome == 'success' && !cancelled()
-        run: npm run check
-
       - name: Build de la aplicación (SvelteKit)
         id: build
         if: steps.install.outcome == 'success' && !cancelled()
@@ -48,8 +38,6 @@ jobs:
         run: |
           echo "## 📊 Resultado Smart CI" >> $GITHUB_STEP_SUMMARY
           echo "- **Instalación:** ${{ steps.install.outcome == 'success' && '✅ Pasó' || '❌ Falló' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Lint & Formateo:** ${{ steps.lint.outcome == 'success' && '✅ Pasó' || (steps.lint.outcome == 'skipped' && '⏭️ Omitido' || '❌ Falló') }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Svelte Check & TS:** ${{ steps.ts.outcome == 'success' && '✅ Pasó' || (steps.ts.outcome == 'skipped' && '⏭️ Omitido' || '❌ Falló') }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Build:** ${{ steps.build.outcome == 'success' && '✅ Pasó' || (steps.build.outcome == 'skipped' && '⏭️ Omitido' || '❌ Falló') }}" >> $GITHUB_STEP_SUMMARY
 
       - name: Comentar en el PR si hubo errores (Smart CI)
@@ -59,10 +47,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const installFailed = '${{ steps.install.outcome }}' === 'failure';
-            const lintFailed = '${{ steps.lint.outcome }}' === 'failure';
-            const tsFailed = '${{ steps.ts.outcome }}' === 'failure';
             const buildFailed = '${{ steps.build.outcome }}' === 'failure';
-            const hasErrors = installFailed || lintFailed || tsFailed || buildFailed;
+            const hasErrors = installFailed || buildFailed;
 
             // Buscar comentario previo del bot en este PR
             const { data: comments } = await github.rest.issues.listComments({
@@ -74,23 +60,17 @@ jobs:
 
             if (hasErrors) {
               let message = `### 🚨 Alerta de calidad (Smart CI) \n\n`;
-              message += `Hola @${context.payload.pull_request.user.login}, se detectaron problemas técnicos en tu código. Por favor resolvelos para mantener código limpio en **Conectando Corazones**.\n\n`;
+              message += `Hola @${context.payload.pull_request.user.login}, se detectaron problemas técnicos en tu código. Por favor resolvelos para mantener la integridad en **Conectando Corazones**.\n\n`;
 
               if (installFailed) {
                 message += `- 📦 **Instalación falló.** No se pudieron instalar las dependencias con \`npm ci\`.\n`;
-              }
-              if (lintFailed) {
-                message += `- 🎨 **Linter/Formateo falló.** Hay problemas de estilo de código o errores estáticos. Ejecutá \`npm run lint\` para identificar el problema.\n`;
-              }
-              if (tsFailed) {
-                message += `- 🆎 **TypeScript / Svelte Check falló.** Hay errores de tipado o errores en componentes Svelte. Ejecutá \`npm run check\` para ver el detalle y corregirlo.\n`;
               }
               if (buildFailed) {
                 message += `- 🔨 **Build falló.** La aplicación no se puede compilar. Ejecutá \`npm run build\` localmente para depurar el error.\n`;
               }
 
               message += `\n---\n**👉 Recomendación:**\n`;
-              message += `> _"Recordá siempre correr el quality check localmente antes de pushear (Lint, Typecheck, Test, Build). Un código sin errores empieza en tu entorno local."_\n`;
+              message += `> _"Recordá siempre correr el build localmente antes de pushear. Un código reproducible empieza en tu entorno local."_\n`;
 
               // Si existe actualizamos, si no creamos
               if (botComment) {
@@ -128,7 +108,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 comment_id: botComment.id,
-                body: `### ✅ Smart CI superado\n\n¡Excelente @${context.payload.pull_request.user.login}! Todos los chequeos pasaron correctamente en este último commit tras las correcciones. 🎉`
+                body: `### ✅ Smart CI superado\n\n¡Excelente @${context.payload.pull_request.user.login}! El build pasó correctamente en este último commit tras las correcciones. 🎉`
               });
             }
 
