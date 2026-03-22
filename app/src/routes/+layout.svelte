@@ -9,6 +9,7 @@
 	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import {
 		authActions,
@@ -73,8 +74,6 @@
 			goto('/iniciar-sesion');
 		}
 	}
-
-	import { browser } from '$app/environment';
 
 	$: if (browser) {
 		const error = $page.url.searchParams.get('error');

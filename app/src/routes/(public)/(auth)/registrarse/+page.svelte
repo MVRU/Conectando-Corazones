@@ -14,7 +14,22 @@
 	import { fly, fade, scale } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import type { RegistroCuentaSubmitDetail } from '$lib/domain/types/forms/registro';
-	import { authActions, isAuthenticated } from '$lib/stores/auth';
+	import { authActions, isAuthenticated, usuario } from '$lib/stores/auth';
+
+	function urlPanelPorRolRegistro(
+		r: 'institucion' | 'colaborador' | 'administrador' | string | undefined
+	): string {
+		switch (r) {
+			case 'institucion':
+				return '/institucion/mi-panel';
+			case 'colaborador':
+				return '/colaborador/mi-panel';
+			case 'administrador':
+				return '/admin';
+			default:
+				return '/';
+		}
+	}
 	import {
 		obtenerSiguienteEtapaCuenta,
 		type RegistroEtapa,
@@ -60,13 +75,13 @@
 	$: procesandoFormulario = registrando;
 
 	// Redirección si ya está autenticado y en el paso inicial
-	$: if ($isAuthenticated && etapa === 'seleccion') {
+	$: if ($isAuthenticated && etapa === 'seleccion' && $usuario?.rol) {
 		if (typeof window !== 'undefined') {
 			toastStore.show({
 				variant: 'info',
 				message: 'Ya iniciaste sesión. Te redirigimos a tu panel.'
 			});
-			goto('/mi-panel');
+			goto(urlPanelPorRolRegistro($usuario.rol));
 		}
 	}
 
@@ -779,7 +794,6 @@
 				<p class="mb-8 max-w-md text-lg text-gray-600">
 					Tu cuenta está lista para empezar a cambiar el mundo. ¡Gracias por sumarte!
 				</p>
-
 				<div class="w-full max-w-xs transition-transform hover:scale-105">
 					<Button
 						label="Ir a mi panel"
@@ -787,7 +801,7 @@
 						size="md"
 						customClass="w-full shadow-lg shadow-blue-500/30"
 						onclick={irAlPanel}
-					/>
+					></Button>
 				</div>
 			</div>
 		{/if}

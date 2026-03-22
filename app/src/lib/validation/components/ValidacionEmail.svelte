@@ -82,7 +82,7 @@
 		<Button
 			customClass="mt-6 w-full max-w-xs"
 			label="Verificar código"
-			on:click={verificarCodigoManual}
+			onclick={verificarCodigoManual}
 		/>
 	</div>
 
@@ -100,8 +100,8 @@
 			Hubo un problema al enviar el correo. Podés reintentarlo o volver atrás.
 		</p>
 		<div class="mt-8 flex flex-col gap-4 sm:flex-row">
-			<Button label="Reintentar" on:click={() => (etapa = 'sending')} />
-			<Button label="Volver" variant="secondary" on:click={() => dispatch('back')} />
+			<Button label="Reintentar" onclick={() => (etapa = 'sending')} />
+			<Button label="Volver" variant="secondary" onclick={() => dispatch('back')} />
 		</div>
 	</div>
 {/if}

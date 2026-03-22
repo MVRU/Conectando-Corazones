@@ -74,13 +74,13 @@
 					<Button
 						customClass="w-full sm:w-auto"
 						label="Reintentar validación"
-						on:click={() => location.reload()}
+						onclick={() => location.reload()}
 					/>
 					<Button
 						customClass="w-full sm:w-auto"
 						label="Volver al formulario"
 						variant="secondary"
-						on:click={() => dispatch('back')}
+						onclick={() => dispatch('back')}
 					/>
 				</div>
 			</div>
