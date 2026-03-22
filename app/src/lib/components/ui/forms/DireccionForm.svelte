@@ -331,6 +331,7 @@
 	>
 		{#if mostrarOmitir}
 			<Button
+				type="button"
 				label={etiquetaOmitir}
 				variant="secondary"
 				size="md"

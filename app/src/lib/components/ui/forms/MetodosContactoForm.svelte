@@ -311,6 +311,7 @@
 		<div class="mt-8 flex justify-end gap-4">
 			{#if mostrarOmitir}
 				<Button
+					type="button"
 					label={etiquetaOmitir}
 					variant="secondary"
 					size="sm"
