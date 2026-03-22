@@ -47,7 +47,12 @@ jobs:
               }
 
               const created = new Date(pr.created_at);
-              const diffHours = (now - created) / (1000 * 60 * 60);
+              const systemStart = new Date(process.env.SYSTEM_START);
+
+              // Si el PR es anterior al sistema, arrancamos desde SYSTEM_START
+              const effectiveStart = created < systemStart ? systemStart : created;
+
+              const diffHours = (now - effectiveStart) / (1000 * 60 * 60);
 
               if (diffHours <= 24) {
                  console.log(`✅ PR #${pr.number} está dentro del margen de 24h.`);

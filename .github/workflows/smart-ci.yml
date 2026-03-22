@@ -36,9 +36,13 @@ jobs:
         if: steps.install.outcome == 'success' && !cancelled()
         run: npm run build
         env:
-          PUBLIC_SUPABASE_URL: "https://mock.supabase.co"
+          PUBLIC_SUPABASE_URL: "https://twwgzweviswxhnfjthxk.supabase.co"
           PUBLIC_SUPABASE_ANON_KEY: "mock-key"
+          SUPABASE_SERVICE_ROLE_KEY: "mock-key"
           DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock"
+          DB_POOLER_URL: "postgresql://mock:mock@localhost:5432/mock"
+          DIRECT_URL: "postgresql://mock:mock@localhost:5432/mock"
+          GOOGLE_API_KEY: "mock-key"
 
       - name: Resumen del Job (GitHub UI)
         if: always()
