@@ -98,38 +98,61 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 	}
 
 	async create(usuario: Usuario): Promise<Usuario> {
-		const created = await prisma.usuario.create({
-			data: {
-				username: usuario.username,
-				auth_user_id: usuario.auth_user_id,
-				password: usuario.password,
-				nombre: usuario.nombre,
-				apellido: usuario.apellido,
-				fecha_nacimiento: usuario.fecha_nacimiento,
-				estado: usuario.estado,
-				rol: usuario.rol,
-				url_foto: usuario.url_foto,
-				estado_verificacion: usuario.estado_verificacion,
-				descripcion: usuario.descripcion,
-				localidad_id: usuario.localidad_id,
-				// Propiedades específicas
-				nombre_legal: usuario.nombre_legal || null,
-				tipo_institucion: usuario.tipo_institucion || null,
-				tipo_colaborador: usuario.tipo_colaborador || null,
-				razon_social: usuario.razon_social || null,
-				con_fines_de_lucro: usuario.con_fines_de_lucro,
-				contactos: usuario.contactos?.length
-					? {
-							create: usuario.contactos.map((c) => ({
-								tipo_contacto: c.tipo_contacto,
-								valor: c.valor,
-								etiqueta: c.etiqueta
-							}))
-						}
-					: undefined
-			},
-			include: this.includeOptions
+		const created = await prisma.$transaction(async (tx) => {
+			const row = await tx.usuario.create({
+				data: {
+					username: usuario.username,
+					auth_user_id: usuario.auth_user_id,
+					password: usuario.password,
+					nombre: usuario.nombre,
+					apellido: usuario.apellido,
+					fecha_nacimiento: usuario.fecha_nacimiento,
+					estado: usuario.estado,
+					rol: usuario.rol,
+					url_foto: usuario.url_foto,
+					estado_verificacion: usuario.estado_verificacion,
+					descripcion: usuario.descripcion,
+					localidad_id: usuario.localidad_id,
+					nombre_legal: usuario.nombre_legal || null,
+					tipo_institucion: usuario.tipo_institucion || null,
+					tipo_colaborador: usuario.tipo_colaborador || null,
+					razon_social: usuario.razon_social || null,
+					con_fines_de_lucro: usuario.con_fines_de_lucro,
+					contactos:
+						usuario.contactos && usuario.contactos.length > 0
+							? {
+									create: usuario.contactos.map((c) => ({
+										tipo_contacto: c.tipo_contacto,
+										valor: String(c.valor).trim(),
+										etiqueta: c.etiqueta ?? null
+									}))
+								}
+							: undefined
+				},
+				include: { contactos: true }
+			});
+
+			for (const c of row.contactos) {
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: 'Contacto',
+						id_objeto: c.id_contacto,
+						accion: 'Crear',
+						atributo_afectado: 'id_contacto',
+						valor_anterior: 'null',
+						valor_nuevo: String(c.id_contacto),
+						justificacion: `Contacto creado en registro (${c.tipo_contacto})`,
+						usuario_id: row.id_usuario
+					}
+				});
+			}
+
+			return tx.usuario.findUniqueOrThrow({
+				where: { id_usuario: row.id_usuario },
+				include: this.includeOptions
+			});
 		});
+
 		return UsuarioMapper.toDomain(created);
 	}
 

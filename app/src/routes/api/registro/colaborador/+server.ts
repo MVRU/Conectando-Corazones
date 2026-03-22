@@ -9,7 +9,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		const input = (await request.json()) as RegisterColaboradorInput;
 		const service = new RegistrationService();
 
-		// Extraer metadata adicional
 		const orgMetadata = input.metadata?.organizacion as Partial<Organizacion> | undefined;
 
 		const usuarioCreado = await service.registrar({
@@ -30,14 +29,14 @@ export const POST: RequestHandler = async ({ request }) => {
 					razon_social: orgMetadata?.razon_social,
 					con_fines_de_lucro: orgMetadata?.con_fines_de_lucro ? 'true' : 'false'
 				}
-			}
+			},
+			consentimientos: input.consentimientos
 		});
 
 		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registrando colaborador:', error);
 		if (error instanceof Error) {
-			// Prisma P2002: violación de restricción única (username o email duplicado)
 			if (error.message.includes('P2002') || error.message.includes('unique constraint')) {
 				return json(
 					{ error: 'El nombre de usuario o correo electrónico ya está en uso.' },

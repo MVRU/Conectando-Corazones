@@ -22,14 +22,14 @@ export const POST: RequestHandler = async ({ request }) => {
 				nombre_legal: input.perfil.nombre_legal,
 				tipo_institucion: input.perfil.tipo_institucion
 			},
-			metadata: input.metadata
+			metadata: input.metadata,
+			consentimientos: input.consentimientos
 		});
 
 		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registrando institución:', error);
 		if (error instanceof Error) {
-			// Prisma P2002: violación de restricción única (username o email duplicado)
 			if (error.message.includes('P2002') || error.message.includes('unique constraint')) {
 				return json(
 					{ error: 'El nombre de usuario o correo electrónico ya está en uso.' },

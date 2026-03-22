@@ -1,6 +1,11 @@
 import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
+import { prisma } from '$lib/infrastructure/prisma/client';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { PostgresConsentimientoRepository } from '$lib/infrastructure/supabase/postgres/consentimiento.repo';
 import { CrearUsuario } from '$lib/domain/use-cases/usuarios/CrearUsuario';
+import { RegistrarConsentimiento } from '$lib/domain/use-cases/consentimiento/RegistrarConsentimiento';
+import { validarListaContactosPerfil } from '$lib/domain/use-cases/contacto/validar-contactos-perfil';
+import { Contacto as ContactoEntidad } from '$lib/domain/entities/Contacto';
 import type { Contacto } from '$lib/domain/types/Contacto';
 
 export interface RegistroInput {
@@ -114,6 +119,16 @@ export class RegistrationService {
 				});
 			}
 
+			const contactosParaValidar = contactos.map(
+				(c) =>
+					new ContactoEntidad({
+						tipo_contacto: c.tipo_contacto,
+						valor: c.valor,
+						etiqueta: c.etiqueta
+					})
+			);
+			validarListaContactosPerfil(contactosParaValidar);
+
 			const usuarioCreado = await this.crearUsuarioUseCase.execute({
 				username: input.perfil.username,
 				auth_user_id: authUserId,
@@ -138,6 +153,20 @@ export class RegistrationService {
 				nombre_legal: input.perfil.nombre_legal,
 				tipo_institucion: input.perfil.tipo_institucion
 			});
+
+			const uid = usuarioCreado.id_usuario;
+			if (input.consentimientos?.length && uid) {
+				try {
+					const consentRepo = new PostgresConsentimientoRepository();
+					const registrarConsent = new RegistrarConsentimiento(consentRepo);
+					for (const item of input.consentimientos) {
+						await registrarConsent.execute(uid, uid, item.tipo, item.version);
+					}
+				} catch (consentErr) {
+					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => {});
+					throw consentErr;
+				}
+			}
 
 			// Eliminar password del objeto retornado
 			const { password: _, ...usuarioSafe } = usuarioCreado;

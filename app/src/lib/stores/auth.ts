@@ -33,6 +33,8 @@ interface RegisterInputBase<TPerfil extends RegisterPerfilBase> {
 	password: string;
 	perfil: TPerfil;
 	metadata?: RegistroMetadata;
+	/** Consentimientos a registrar tras crear el usuario (tipo canónico + versión del documento). */
+	consentimientos?: Array<{ tipo: string; version: string }>;
 }
 
 export type RegisterColaboradorInput = RegisterInputBase<RegisterColaboradorPerfil>;
