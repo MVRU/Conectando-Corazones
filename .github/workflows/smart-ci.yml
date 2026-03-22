@@ -8,6 +8,9 @@ jobs:
   validate:
     name: Validación técnica
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
     permissions:
       contents: read
       pull-requests: write
