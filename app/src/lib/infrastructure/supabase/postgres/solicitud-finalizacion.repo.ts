@@ -2,14 +2,15 @@ import { prisma } from '$lib/infrastructure/prisma/client';
 import type { SolicitudFinalizacionRepository } from '$lib/domain/repositories/SolicitudFinalizacionRepository';
 import type { SolicitudFinalizacion } from '$lib/domain/types/SolicitudFinalizacion';
 
+const archivoInclude = { include: { usuario: true } } as const;
+
 export class PostgresSolicitudFinalizacionRepository
 	implements SolicitudFinalizacionRepository
 {
 	async findByProyectoId(proyectoId: number): Promise<SolicitudFinalizacion | null> {
 		const solicitud = await prisma.solicitudFinalizacion.findFirst({
 			where: {
-				proyecto_id: proyectoId,
-				// En la UI solo nos interesa la solicitud pendiente más reciente
+				proyecto_id: proyectoId
 			},
 			orderBy: {
 				created_at: 'desc'
@@ -20,7 +21,7 @@ export class PostgresSolicitudFinalizacionRepository
 					include: {
 						evidencia: {
 							include: {
-								archivos: true,
+								archivos: archivoInclude,
 								participacion_permitida: true
 							}
 						}
@@ -77,7 +78,7 @@ export class PostgresSolicitudFinalizacionRepository
 					include: {
 						evidencia: {
 							include: {
-								archivos: true,
+								archivos: archivoInclude,
 								participacion_permitida: true
 							}
 						}
@@ -118,7 +119,6 @@ export class PostgresSolicitudFinalizacionRepository
 				}
 			});
 
-			// Crear relaciones con las evidencias seleccionadas
 			for (const evidenciaId of solicitud.evidencia_ids) {
 				await tx.solicitudFinalizacionEvidencia.create({
 					data: {
@@ -136,7 +136,7 @@ export class PostgresSolicitudFinalizacionRepository
 						include: {
 							evidencia: {
 								include: {
-									archivos: true,
+									archivos: archivoInclude,
 									participacion_permitida: true
 								}
 							}
@@ -185,4 +185,3 @@ export class PostgresSolicitudFinalizacionRepository
 		return domain;
 	}
 }
-
