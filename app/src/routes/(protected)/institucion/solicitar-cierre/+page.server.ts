@@ -5,17 +5,28 @@ import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgr
 import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
 import { redirect, fail } from '@sveltejs/kit';
 
+const ESTADOS_SOLICITUD_ACTIVA = new Set(['', 'pendiente', 'en_revision']);
+
+function normalizeEstadoSolicitud(estado: string | null | undefined): string {
+	return (estado || '').trim().toLowerCase();
+}
+
+function esSolicitudActiva(estado: string | null | undefined): boolean {
+	const e = normalizeEstadoSolicitud(estado);
+	return e === '' || ESTADOS_SOLICITUD_ACTIVA.has(e);
+}
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = locals.usuario;
 
 	if (!user) throw redirect(302, '/login');
 	if (user.rol !== 'institucion') {
+		throw redirect(302, '/');
 	}
 
 	const proyectoRepo = new PostgresProyectoRepository();
 	const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 	const evidenciaRepo = new PostgresEvidenciaRepository();
-	// Usar findAllSummary() ya que solo necesitamos datos básicos para filtrar
 	const allProyectos = await proyectoRepo.findAllSummary();
 	const proyectosDisponibles =
 		user.rol === 'institucion'
@@ -28,8 +39,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	let proyectoActual = null;
 
 	let solicitudPendiente = null;
-	let solicitudesRechazadas: any[] = [];
-	let evidencias: any[] = [];
+	let solicitudesRechazadas: unknown[] = [];
+	let evidencias: unknown[] = [];
 
 	if (proyectoId) {
 		const idProyecto = Number(proyectoId);
@@ -37,29 +48,25 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		if (p && p.institucion_id === user?.id_usuario) {
 			proyectoActual = p;
 
-			// Cargar solicitud pendiente (si existe) y solicitudes rechazadas
 			const solicitud = await solicitudRepo.findByProyectoId(idProyecto);
-			if (solicitud) {
-				if (solicitud.estado === 'pendiente') {
-					solicitudPendiente = solicitud;
-				}
-			}
+			solicitudPendiente =
+				solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
 
 			solicitudesRechazadas = await solicitudRepo.findRechazadasByProyectoId(idProyecto);
 
-			// Cargar evidencias del proyecto para agrupar en el frontend
-			evidencias = await evidenciaRepo.findAllByProyecto(idProyecto);
+			const evs = await evidenciaRepo.findAllByProyecto(idProyecto);
+			evidencias = evs;
 		}
 	}
 
 	return {
 		proyectosDisponibles: JSON.parse(JSON.stringify(proyectosDisponibles)),
 		proyectoActual: JSON.parse(JSON.stringify(proyectoActual)),
-		solicitudPendiente,
+		solicitudPendiente: JSON.parse(JSON.stringify(solicitudPendiente)),
 		solicitudesRechazadas: JSON.parse(JSON.stringify(solicitudesRechazadas)),
 		evidencias: JSON.parse(JSON.stringify(evidencias)),
 		verificacion: {
-			estado: user.estado_verificacion || 'pendiente', // Fallback
+			estado: user.estado_verificacion || 'pendiente',
 			usuario_id: user.id_usuario
 		}
 	};
@@ -112,4 +119,3 @@ export const actions: Actions = {
 		}
 	}
 };
-
