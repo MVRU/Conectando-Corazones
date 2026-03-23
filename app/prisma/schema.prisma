@@ -317,12 +317,13 @@ model SolicitudFinalizacion {
 
 model SolicitudFinalizacionEvidencia {
   id_solicitud_finalizacion_evidencia Int @id @default(autoincrement())
-  evidencia_id                        Int @unique
+  evidencia_id                        Int
   solicitud_finalizacion_id           Int
 
   evidencia              Evidencia             @relation(fields: [evidencia_id], references: [id_evidencia])
   solicitud_finalizacion SolicitudFinalizacion @relation(fields: [solicitud_finalizacion_id], references: [id_solicitud])
 
+  @@unique([evidencia_id, solicitud_finalizacion_id])
   @@map("solicitud_finalizacion_evidencias")
 }
 
