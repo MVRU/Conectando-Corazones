@@ -24,7 +24,7 @@
 	// Configuracion de indicadores y color para los botones de acción rápida
 	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
 	$: badgeConfig = {
-		'Ver solicitudes': {
+		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
 			shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
@@ -62,7 +62,7 @@
 			disabled: !estaVerificado,
 			title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
 		},
-		{ label: 'Ver solicitudes', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
+		{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
 		{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
 		{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
 		{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
