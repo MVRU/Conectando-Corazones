@@ -55,12 +55,10 @@
 		XCircle,
 		Pencil,
 		ShieldCheck,
-		Trash,
 		ChevronDown,
 		ChatBubbleLeftRight,
 		ClipboardDocumentList,
 		Photo,
-		Star,
 		Flag,
 		Plus,
 		ClipboardDocumentCheck
@@ -445,7 +443,7 @@
 
 			if (esCreador) {
 				acc.push({
-					label: 'Ver solicitudes',
+					label: 'Solicitudes de colaboración',
 					icon: ClipboardDocumentList,
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
@@ -468,7 +466,7 @@
 				}
 			} else {
 				acc.push({
-					label: 'Ver solicitud',
+					label: 'Solicitudes de colaboración',
 					icon: ClipboardDocumentList,
 					onclick: () =>
 						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)

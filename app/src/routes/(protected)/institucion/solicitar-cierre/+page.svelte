@@ -107,15 +107,15 @@
 					(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
 				);
 				// Separar evidencias de entrada y salida
-				const evidenciasEntrada = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'entrada');
-				const evidenciasSalida = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'salida');
+				const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
+				const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
 
 				return {
 					objetivo,
 					evidencias: evidenciasObjetivo,
 					evidenciasEntrada,
 					evidenciasSalida,
-					totalArchivos: evidenciasObjetivo.reduce((sum, ev) => sum + (ev.archivos?.length || 0), 0)
+					totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
 				};
 			}) || []
 		: [];
@@ -331,7 +331,7 @@
 										<div class="mt-2 text-xs text-red-700">
 											<p class="font-medium">Fechas de solicitudes rechazadas:</p>
 											<ul class="mt-1 list-inside list-disc space-y-1">
-												{#each solicitudesRechazadas as solicitud}
+												{#each solicitudesRechazadas as solicitud (solicitud.id_solicitud_finalizacion)}
 													<li>
 														{new Date(solicitud.created_at).toLocaleDateString('es-AR', {
 															day: 'numeric',
@@ -395,7 +395,7 @@
 								</p>
 							</div>
 							<div class="space-y-4 p-6">
-								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos }}
+								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo.id_participacion_permitida)}
 									<ObjetivoEvidencias
 										{objetivo}
 										{evidencias}
