@@ -1,0 +1,114 @@
+name: PR Focus Reminder
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  remind:
+    name: Recordatorio de Foco en PRs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Chequear PRs existentes y recordar
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const currentPR = context.payload.pull_request.number;
+
+            // Ignoramos si el PR recién abierto o reabierto es un draft
+            if (context.payload.pull_request.draft) {
+              console.log("El PR actual es un draft, no emitimos recordatorio.");
+              return;
+            }
+
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+            });
+
+            // Solo contamos los otros PRs del mismo autor que NO sean drafts
+            const otherPRs = pulls.filter(pr =>
+              pr.user.login === author &&
+              pr.number !== currentPR &&
+              pr.draft === false
+            );
+
+            // Ordenar por prioridad (más viejo primero)
+            otherPRs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            // Advertencia estricta: si ya tiene al menos 1 PR extra activo
+            if (otherPRs.length > 0) {
+              // Consultar labels reales, ya que el payload podría estar desactualizado
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: currentPR,
+              });
+              const hasLabel = issue.labels.some(label =>
+                (typeof label === "string" ? label : label.name) === "needs-focus"
+              );
+
+              if (hasLabel) {
+                 console.log(`El PR #${currentPR} ya tiene la etiqueta 'needs-focus'. Evitamos comentario duplicado.`);
+                 return;
+              }
+
+              const prList = otherPRs
+                .map(pr => `- #${pr.number} (${pr.title})`)
+                .join("\n");
+
+              const oldestPR = otherPRs[0];
+              const message = `⚠️ **Tenés múltiples PRs activos.**\n\n` +
+                `Para evitar trabajo fragmentado y acelerar las revisiones, es importante cerrar lo que ya está en curso antes de abrir nuevas líneas de trabajo.\n\n` +
+                `**PRs activos:**\n` +
+                `${prList}\n\n` +
+                `👉 **Prioridad sugerida:** cerrar primero **#${oldestPR.number}** (${oldestPR.html_url}) (el más antiguo).\n\n` +
+                `Mantener foco mejora el throughput del equipo y reduce tiempos de integración.`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: currentPR,
+                body: message
+              });
+
+              // Agregar etiqueta para indicar que requiere foco/cierre de los otros
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: currentPR,
+                  labels: ["needs-focus"]
+                });
+                console.log("Etiqueta 'needs-focus' agregada correctamente.");
+              } catch (error) {
+                console.log("Aviso: no se pudo agregar la etiqueta needs-focus. ¿Está creada en el repositorio?", error);
+              }
+            } else {
+              // Check rápido con el payload. Así evitamos pegarle a la API (issues.get) si no es necesario
+              const payloadLabels = context.payload.pull_request.labels || [];
+              const payloadHasLabel = payloadLabels.some(label =>
+                (typeof label === "string" ? label : label.name) === "needs-focus"
+              );
+
+              if (payloadHasLabel) {
+                try {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: currentPR,
+                    name: "needs-focus"
+                  });
+                  console.log("Etiqueta 'needs-focus' removida correctamente.");
+                } catch (e) {
+                  console.log("Aviso: no se pudo remover la etiqueta needs-focus.", e);
+                }
+              }
+              console.log("Excelente, el autor no tiene múltiples PRs activos interrumpiendo su foco.");
+            }

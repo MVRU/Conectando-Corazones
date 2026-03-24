@@ -1,0 +1,269 @@
+name: PR Reminder Bot
+
+on:
+  schedule:
+    # 08:00 Argentina (UTC-3 → 11:00 UTC)
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+
+    env:
+      CORE_TEAM: '["MVRU","TomasAlvarez0","AleSklate0807"]'
+      TARGET_LABEL: "ready-for-review"
+
+    permissions:
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Run PR Reminder
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const now = new Date();
+
+            const CORE_TEAM = JSON.parse(process.env.CORE_TEAM);
+            const TARGET_LABEL = process.env.TARGET_LABEL;
+
+            const REMINDER_LABELS = [
+              'reminder-24h',
+              'reminder-48h',
+              'reminder-72h'
+            ];
+
+            console.log(`Iniciando análisis de PRs...`);
+
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner,
+              repo,
+              state: "open",
+              per_page: 100
+            });
+
+            console.log(`Total PRs encontrados: ${prs.length}`);
+
+            for (const pr of prs) {
+              if (!pr || pr.draft || pr.user?.type === 'Bot') continue;
+
+              const prNumber = pr.number;
+              const author = pr.user.login.toLowerCase();
+
+              const labels = (pr.labels || []).map(l => l.name);
+
+              if (!labels.includes(TARGET_LABEL)) {
+                console.log(`PR #${prNumber} ignorado (sin ${TARGET_LABEL})`);
+                continue;
+              }
+
+              // ================================
+              // Obtener evento de label (IMPORTANTE)
+              // ================================
+              const events = await github.paginate(
+                github.rest.issues.listEvents,
+                {
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  per_page: 100
+                }
+              );
+
+              const labelEvent = events
+                .filter(e =>
+                  e.event === 'labeled' &&
+                  e.label?.name === TARGET_LABEL
+                )
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+              const startDate = labelEvent
+                ? new Date(labelEvent.created_at)
+                : new Date(pr.created_at);
+
+              const diffHours = (now - startDate) / (1000 * 60 * 60);
+
+              console.log(`PR #${prNumber} → ${diffHours.toFixed(2)}h desde ready-for-review`);
+
+              // ================================
+              // LIMPIEZA: si el label es reciente (<24h)
+              // ================================
+              if (diffHours <= 24) {
+                console.log(`PR #${prNumber} fresco (<24h), limpiando labels viejos si existen`);
+
+                for (const label of REMINDER_LABELS) {
+                  if (labels.includes(label)) {
+                    try {
+                      await github.rest.issues.removeLabel({
+                        owner,
+                        repo,
+                        issue_number: prNumber,
+                        name: label
+                      });
+                    } catch (e) {
+                      console.log(`No se pudo remover ${label}: ${e.message}`);
+                    }
+                  }
+                }
+
+                continue;
+              }
+
+              // ================================
+              // Obtener reviews
+              // ================================
+              const reviews = await github.paginate(
+                github.rest.pulls.listReviews,
+                {
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  per_page: 100
+                }
+              );
+
+              const latestReviewByUser = {};
+
+              for (const review of reviews) {
+                if (!review.user) continue;
+
+                const user = review.user.login.toLowerCase();
+                const submittedAt = new Date(review.submitted_at || 0);
+
+                if (
+                  !latestReviewByUser[user] ||
+                  new Date(latestReviewByUser[user].submitted_at) < submittedAt
+                ) {
+                  latestReviewByUser[user] = review;
+                }
+              }
+
+              const reviewersWhoCompleted = Object.values(latestReviewByUser)
+                .filter(r =>
+                  r.state === 'APPROVED' ||
+                  r.state === 'CHANGES_REQUESTED' ||
+                  r.state === 'COMMENTED'
+                )
+                .map(r => r.user.login.toLowerCase());
+
+              let pendingReviewers = (pr.requested_reviewers || [])
+                .map(r => r.login)
+                .filter(r =>
+                  !reviewersWhoCompleted.includes(r.toLowerCase())
+                );
+
+              // fallback al core team
+              if (pendingReviewers.length === 0) {
+                pendingReviewers = CORE_TEAM.filter(u =>
+                  u.toLowerCase() !== author &&
+                  !reviewersWhoCompleted.includes(u.toLowerCase())
+                );
+              }
+
+              if (pendingReviewers.length === 0) {
+                console.log(`PR #${prNumber} sin reviewers pendientes`);
+                continue;
+              }
+
+              const reviewersStr = pendingReviewers
+                .map(u => `@${u}`)
+                .join(" ");
+
+              // ================================
+              // Determinar ventana de tiempo
+              // ================================
+              let body = "";
+              let newLabel = "";
+              let oldLabelToRemove = "";
+
+              if (diffHours > 72) {
+                if (labels.includes('reminder-72h')) {
+                  console.log(`PR #${prNumber} ya tiene reminder-72h`);
+                  continue;
+                }
+
+                newLabel = 'reminder-72h';
+                oldLabelToRemove = 'reminder-48h';
+
+                body = `🚨 **Atención ${reviewersStr}: este PR lleva más de 72h esperando review.**
+
+                Esto ya es prioridad. Si no pueden revisarlo, avisen para redistribuir.
+
+                Se marca como \`needs-attention\`.`;
+
+              } else if (diffHours > 48 && diffHours <= 72) {
+                if (labels.includes('reminder-48h')) {
+                  console.log(`PR #${prNumber} ya tiene reminder-48h`);
+                  continue;
+                }
+
+                newLabel = 'reminder-48h';
+                oldLabelToRemove = 'reminder-24h';
+
+                body = `⚠️ **Buenas ${reviewersStr} 👋**
+
+                Este PR ya supera las 48h en revisión. Si hay bloqueos, levántenlos; si no, denle prioridad.`;
+
+              } else if (diffHours > 24 && diffHours <= 48) {
+                if (labels.includes('reminder-24h')) {
+                  console.log(`PR #${prNumber} ya tiene reminder-24h`);
+                  continue;
+                }
+
+                newLabel = 'reminder-24h';
+
+                body = `⏰ **Hola ${reviewersStr} 👋**
+
+                Este PR lleva más de 24h listo para review. Cuando puedan, denle una mirada.`;
+              }
+
+              if (!body) continue;
+
+              // ================================
+              // Escritura (Protegida)
+              // ================================
+              try {
+                // 1. Crear comentario
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body
+                });
+
+                // 2. Manejar labels
+                const labelsToAdd = [newLabel];
+                if (diffHours > 72 && !labels.includes('needs-attention')) {
+                  labelsToAdd.push('needs-attention');
+                }
+
+                await github.rest.issues.addLabels({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  labels: labelsToAdd
+                });
+
+                if (oldLabelToRemove && labels.includes(oldLabelToRemove)) {
+                  try {
+                    await github.rest.issues.removeLabel({
+                      owner,
+                      repo,
+                      issue_number: prNumber,
+                      name: oldLabelToRemove
+                    });
+                  } catch (e) {
+                    console.log(`Error removiendo label previo en PR #${prNumber}: ${e.message}`);
+                  }
+                }
+
+                console.log(`Reminder ${newLabel} enviado con éxito a PR #${prNumber}`);
+              } catch (error) {
+                console.error(`ERROR FATAL procesando escritura para PR #${prNumber}: ${error.message}`);
+                // No lanzamos el error para que el 'for' continúe con el siguiente PR
+              }
+            }
+
+            console.log("Ejecución finalizada.");
