@@ -59,7 +59,8 @@
 		Photo,
 		Flag,
 		Plus,
-		ClipboardDocumentCheck
+		ClipboardDocumentCheck,
+		Star
 	} from '@steeze-ui/heroicons';
 
 	let proyecto: Proyecto;
