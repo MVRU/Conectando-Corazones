@@ -1,6 +1,9 @@
 <!--
 * Componente: GestionColaboraciones  
 * Descripción: Gestión completa de colaboraciones con diseño responsive mejorado
+
+TODO: corregir este componente, está roto
+
 -->
 
 <script lang="ts">

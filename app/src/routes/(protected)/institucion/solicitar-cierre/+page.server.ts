@@ -1,6 +1,20 @@
 import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
+import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgres/evidencia.repo';
+import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
 import { redirect, fail } from '@sveltejs/kit';
+
+const ESTADOS_SOLICITUD_ACTIVA = new Set(['', 'pendiente', 'en_revision']);
+
+function normalizeEstadoSolicitud(estado: string | null | undefined): string {
+	return (estado || '').trim().toLowerCase();
+}
+
+function esSolicitudActiva(estado: string | null | undefined): boolean {
+	const e = normalizeEstadoSolicitud(estado);
+	return e === '' || ESTADOS_SOLICITUD_ACTIVA.has(e);
+}
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = locals.usuario;
@@ -11,7 +25,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	}
 
 	const proyectoRepo = new PostgresProyectoRepository();
-	// Usar findAllSummary() ya que solo necesitamos datos básicos para filtrar
+	const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
+	const evidenciaRepo = new PostgresEvidenciaRepository();
 	const allProyectos = await proyectoRepo.findAllSummary();
 	const proyectosDisponibles =
 		user.rol === 'institucion'
@@ -23,32 +38,84 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectoId = url.searchParams.get('proyecto');
 	let proyectoActual = null;
 
-	const solicitudPendiente = null;
-	const solicitudesRechazadas: unknown[] = [];
-	const evidencias: unknown[] = [];
+	let solicitudPendiente = null;
+	let solicitudesRechazadas: unknown[] = [];
+	let evidencias: unknown[] = [];
 
 	if (proyectoId) {
-		const p = await proyectoRepo.findById(Number(proyectoId));
+		const idProyecto = Number(proyectoId);
+		const p = await proyectoRepo.findById(idProyecto);
 		if (p && p.institucion_id === user?.id_usuario) {
 			proyectoActual = p;
+
+			const solicitud = await solicitudRepo.findByProyectoId(idProyecto);
+			solicitudPendiente =
+				solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
+
+			solicitudesRechazadas = await solicitudRepo.findRechazadasByProyectoId(idProyecto);
+
+			const evs = await evidenciaRepo.findAllByProyecto(idProyecto);
+			evidencias = evs;
 		}
 	}
 
 	return {
 		proyectosDisponibles: JSON.parse(JSON.stringify(proyectosDisponibles)),
 		proyectoActual: JSON.parse(JSON.stringify(proyectoActual)),
-		solicitudPendiente,
-		solicitudesRechazadas,
-		evidencias,
+		solicitudPendiente: JSON.parse(JSON.stringify(solicitudPendiente)),
+		solicitudesRechazadas: JSON.parse(JSON.stringify(solicitudesRechazadas)),
+		evidencias: JSON.parse(JSON.stringify(evidencias)),
 		verificacion: {
-			estado: user.estado_verificacion || 'pendiente', // Fallback
+			estado: user.estado_verificacion || 'pendiente',
 			usuario_id: user.id_usuario
 		}
 	};
 };
 
 export const actions: Actions = {
-	solicitarCierre: async () => {
-		return fail(501, { message: 'Funcionalidad no implementada en backend' });
+	solicitarCierre: async ({ request, locals }) => {
+		const user = locals.usuario;
+
+		if (!user) {
+			return fail(401, { message: 'No autenticado' });
+		}
+
+		if (user.rol !== 'institucion') {
+			return fail(403, { message: 'Solo las instituciones pueden solicitar cierre de proyectos' });
+		}
+
+		const formData = await request.formData();
+		const proyectoIdRaw = formData.get('proyecto_id');
+		const evidenciasRaw = formData.getAll('evidencia_ids');
+
+		if (!proyectoIdRaw) {
+			return fail(400, { message: 'Debe seleccionar un proyecto' });
+		}
+
+		const proyectoId = Number(proyectoIdRaw);
+		const evidenciaIds = evidenciasRaw.map((v) => Number(v)).filter((n) => !isNaN(n));
+
+		const proyectoRepo = new PostgresProyectoRepository();
+		const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
+		const evidenciaRepo = new PostgresEvidenciaRepository();
+
+		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+
+		try {
+			if (typeof user.id_usuario !== 'number') {
+				return fail(500, { message: 'El usuario autenticado no tiene un ID válido' });
+			}
+
+			const solicitud = await useCase.execute(user.id_usuario, proyectoId, evidenciaIds);
+
+			return {
+				success: true,
+				solicitud
+			};
+		} catch (error: any) {
+			return fail(400, {
+				message: error.message || 'No se pudo crear la solicitud de finalización'
+			});
+		}
 	}
 };

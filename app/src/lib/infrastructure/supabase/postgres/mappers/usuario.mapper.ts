@@ -51,16 +51,23 @@ export class UsuarioMapper {
 			// Relaciones
 			localidad: prismaUsuario.localidad as any, // TODO: Mapear LocalidadEntity si es necesario estricto
 			contactos: prismaUsuario.contactos as any, // TODO: Mapear ContactoEntity
-			categorias_preferidas: prismaUsuario.categorias_preferidas?.map(
-				(cp) => new Categoria(cp.categoria)
-			),
-			tipos_participacion_preferidas: prismaUsuario.tipos_participacion_preferidos?.map(
-				(tp) =>
-					new TipoParticipacion({
-						...tp.tipo_participacion,
-						descripcion: tp.tipo_participacion.descripcion as any
-					})
-			),
+			categorias_preferidas: prismaUsuario.categorias_preferidas
+				?.map((cp) => new Categoria(cp.categoria))
+				.filter(
+					(cat, index, self) => index === self.findIndex((c) => c.id_categoria === cat.id_categoria)
+				),
+			tipos_participacion_preferidas: prismaUsuario.tipos_participacion_preferidos
+				?.map(
+					(tp) =>
+						new TipoParticipacion({
+							...tp.tipo_participacion,
+							descripcion: tp.tipo_participacion.descripcion as any
+						})
+				)
+				.filter(
+					(tipo, index, self) =>
+						index === self.findIndex((t) => t.id_tipo_participacion === tipo.id_tipo_participacion)
+				),
 			consentimientos: prismaUsuario.consentimientos as any, // TODO: Mapear ConsentimientoEntity
 			verificaciones: (prismaUsuario as any).verificaciones // Se asume que viene el objeto plano de Prisma
 		});

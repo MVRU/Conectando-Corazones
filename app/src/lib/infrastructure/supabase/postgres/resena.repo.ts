@@ -91,4 +91,40 @@ export class PostgresResenaRepository implements ResenaRepository {
 			throw new Error('Error en BD al intentar eliminar la resena.');
 		}
 	}
+
+	// Métodos legados mantenidos por compatibilidad con perfil.adapter.ts y otras vistas
+	async findByUsuario(usuarioId: number): Promise<Resena[]> {
+		try {
+			const resenas = await prisma.resena.findMany({
+				where: { username: usuarioId.toString() },
+				orderBy: { id_resena: 'desc' }
+			});
+			return resenas.map(ResenaMapper.toDomain);
+		} catch (error) {
+			console.error('Error in PostgresResenaRepository.findByUsuario:', error);
+			throw new Error('Error al buscar las reseñas por usuario');
+		}
+	}
+
+	async findByObjetoAprobadas(
+		tipoObjeto: string,
+		idObjeto: number,
+		limite?: number
+	): Promise<Resena[]> {
+		try {
+			const resenas = await prisma.resena.findMany({
+				where: { tipo_objeto: tipoObjeto, id_objeto: idObjeto, aprobado: true },
+				orderBy: { id_resena: 'desc' },
+				take: limite
+			});
+			return resenas.map(ResenaMapper.toDomain);
+		} catch (error) {
+			console.error('Error in PostgresResenaRepository.findByObjetoAprobadas:', error);
+			throw new Error('Error al buscar las reseñas aprobadas del objeto');
+		}
+	}
+
+	async save(resena: Resena): Promise<Resena> {
+		return this.create(resena);
+	}
 }
