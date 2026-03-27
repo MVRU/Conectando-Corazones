@@ -236,6 +236,7 @@
 		con_fines_de_lucro: string;
 		nombre_legal: string;
 		tipo_institucion: string;
+		terminos_privacidad: string;
 	}
 
 	type MetodoAcceso = 'manual' | 'federado';
@@ -252,7 +253,8 @@
 		razon_social: '',
 		con_fines_de_lucro: '',
 		nombre_legal: '',
-		tipo_institucion: ''
+		tipo_institucion: '',
+		terminos_privacidad: ''
 	});
 
 	const TIPO_INSTITUCION_POR_DEFECTO = 'escuela';
@@ -304,6 +306,7 @@
 	let tipoInstitucionPersonalizado = '';
 	let tipoColaborador: TipoColaborador = 'unipersonal';
 	let archivoFoto: File | null = null;
+	let aceptaTerminosYPrivacidad = false;
 	let intentoEnvio = false;
 	let errores: ErroresFormulario = crearErroresIniciales();
 	let tieneErrores = false;
@@ -402,6 +405,8 @@
 		fechaNacimiento: Date | null;
 		urlFoto: string;
 		archivoFoto: File | null;
+		aceptaTerminosYPrivacidad: boolean;
+		validarLegales: boolean;
 	}
 
 	interface DatosValidacionColaborador extends DatosValidacionBase {
@@ -430,7 +435,9 @@
 					archivoFoto,
 					tipoColaborador,
 					razonSocial,
-					conFinesDeLucro: conFinesDeLucroSeleccion
+					conFinesDeLucro: conFinesDeLucroSeleccion,
+					aceptaTerminosYPrivacidad,
+					validarLegales: pasoFormulario === 'detalles'
 				})
 			: calcularErroresInstitucion({
 					username,
@@ -444,7 +451,9 @@
 					archivoFoto,
 					nombreLegal,
 					tipoInstitucionSeleccion,
-					tipoInstitucionPersonalizado
+					tipoInstitucionPersonalizado,
+					aceptaTerminosYPrivacidad,
+					validarLegales: pasoFormulario === 'detalles'
 				});
 
 	// Combinar errores locales con errores de disponibilidad
@@ -475,6 +484,7 @@
 		tipoInstitucionPersonalizado = '';
 		tipoColaborador = 'unipersonal';
 		archivoFoto = null;
+		aceptaTerminosYPrivacidad = false;
 		intentoEnvio = false;
 		errores = crearErroresIniciales();
 		pasoFormulario = 'credenciales';
@@ -731,7 +741,9 @@
 						archivoFoto,
 						tipoColaborador,
 						razonSocial,
-						conFinesDeLucro: conFinesDeLucroSeleccion
+						conFinesDeLucro: conFinesDeLucroSeleccion,
+						aceptaTerminosYPrivacidad,
+						validarLegales: false
 					})
 				: calcularErroresInstitucion({
 						username,
@@ -745,7 +757,9 @@
 						archivoFoto,
 						nombreLegal,
 						tipoInstitucionSeleccion,
-						tipoInstitucionPersonalizado
+						tipoInstitucionPersonalizado,
+						aceptaTerminosYPrivacidad,
+						validarLegales: false
 					});
 
 		if (erroresLocales[campo]) {
@@ -860,7 +874,9 @@
 		apellido,
 		fechaNacimiento,
 		urlFoto,
-		archivoFoto
+		archivoFoto,
+		aceptaTerminosYPrivacidad,
+		validarLegales
 	}: DatosValidacionBase): Pick<
 		ErroresFormulario,
 		| 'username'
@@ -871,6 +887,7 @@
 		| 'apellido'
 		| 'fecha_nacimiento'
 		| 'url_foto'
+		| 'terminos_privacidad'
 	> {
 		const emailNormalizado = email.trim();
 		const usernameNormalizado = username.trim();
@@ -924,6 +941,10 @@
 					? validarUrl(urlNormalizada)
 						? ''
 						: MENSAJES_ERROR.urlInvalida
+					: '',
+			terminos_privacidad:
+				validarLegales && !aceptaTerminosYPrivacidad
+					? 'Debés aceptar los términos y condiciones y la política de privacidad para continuar.'
 					: ''
 		};
 	}
@@ -1053,7 +1074,8 @@
 					colaborador,
 					organizacion
 				},
-				archivoFoto
+				archivoFoto,
+				aceptaTerminosYPrivacidad
 			});
 			return;
 		}
@@ -1079,7 +1101,8 @@
 		dispatch('submit', {
 			rol: 'institucion',
 			payload: { institucion },
-			archivoFoto
+			archivoFoto,
+			aceptaTerminosYPrivacidad
 		});
 	}
 
@@ -1797,6 +1820,35 @@
 				{/if}
 			</section>
 		{/if}
+
+		<div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+			<label class="flex cursor-pointer gap-3 text-sm text-slate-700">
+				<input
+					type="checkbox"
+					class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300"
+					bind:checked={aceptaTerminosYPrivacidad}
+					disabled={procesando}
+				/>
+				<span>
+					Declaro haber leído y acepto los
+					<a
+						href="/terminos"
+						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
+						target="_blank"
+						rel="noopener noreferrer">términos y condiciones</a>
+					y la
+					<a
+						href="/privacidad"
+						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
+						target="_blank"
+						rel="noopener noreferrer">política de privacidad</a>
+					de la plataforma. <span class="text-red-600">*</span>
+				</span>
+			</label>
+			{#if intentoEnvio && errores.terminos_privacidad}
+				<p class="mt-2 text-sm text-red-600">{errores.terminos_privacidad}</p>
+			{/if}
+		</div>
 
 		<div class="mt-10 flex justify-end">
 			<Button

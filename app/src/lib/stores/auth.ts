@@ -10,6 +10,7 @@ import type {
 } from '$lib/domain/types/Usuario';
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
+import { cumpleConsentimientosRegistro } from '$lib/domain/types/constants/consentimiento-registro';
 
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
@@ -416,6 +417,12 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 
 	if (!validarMetadata(input.metadata)) {
 		throw new Error('La metadata enviada no tiene el formato correcto.');
+	}
+
+	if (!cumpleConsentimientosRegistro(input.consentimientos)) {
+		throw new Error(
+			'Debés aceptar los términos y condiciones y la política de privacidad para registrarte.'
+		);
 	}
 }
 

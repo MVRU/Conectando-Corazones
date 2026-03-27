@@ -7,11 +7,13 @@ import { RegistrarConsentimiento } from '$lib/domain/use-cases/consentimiento/Re
 import { validarListaContactosPerfil } from '$lib/domain/use-cases/contacto/validar-contactos-perfil';
 import { Contacto as ContactoEntidad } from '$lib/domain/entities/Contacto';
 import type { Contacto } from '$lib/domain/types/Contacto';
+import { cumpleConsentimientosRegistro } from '$lib/domain/types/constants/consentimiento-registro';
 
 export interface RegistroInput {
 	email: string;
 	password: string;
 	rol: 'colaborador' | 'institucion';
+	consentimientos: Array<{ tipo: string; version: string }>;
 	perfil: {
 		username: string;
 		nombre: string;
@@ -84,6 +86,12 @@ export class RegistrationService {
 		let authUserId: string | null = null;
 
 		try {
+			if (!cumpleConsentimientosRegistro(input.consentimientos)) {
+				throw new Error(
+					'Debés aceptar los términos y condiciones y la política de privacidad para registrarte.'
+				);
+			}
+
 			// 1. Crear usuario en Supabase Auth
 			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
 				email: input.email,
@@ -155,7 +163,7 @@ export class RegistrationService {
 			});
 
 			const uid = usuarioCreado.id_usuario;
-			if (input.consentimientos?.length && uid) {
+			if (uid) {
 				try {
 					const consentRepo = new PostgresConsentimientoRepository();
 					const registrarConsent = new RegistrarConsentimiento(consentRepo);

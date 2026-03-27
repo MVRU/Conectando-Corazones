@@ -12,6 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			email: input.email,
 			password: input.password,
 			rol: 'institucion',
+			consentimientos: input.consentimientos ?? [],
 			perfil: {
 				username: input.perfil.username,
 				nombre: input.perfil.nombre,
@@ -22,8 +23,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				nombre_legal: input.perfil.nombre_legal,
 				tipo_institucion: input.perfil.tipo_institucion
 			},
-			metadata: input.metadata,
-			consentimientos: input.consentimientos
+			metadata: input.metadata
 		});
 
 		return json({ usuario: usuarioCreado });
