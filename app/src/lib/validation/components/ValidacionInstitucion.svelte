@@ -13,6 +13,8 @@
 
 	export let pasoActual = 3;
 	export let pasosTotales = 5;
+	/** En el registro se puede omitir; desde el panel conviene exigir documentación o volver atrás. */
+	export let permitirOmitir = true;
 
 	type MetodoVerificacion = 'manual' | 'renaper' | 'omitido';
 
@@ -27,6 +29,10 @@
 	const renaperDisponible = false;
 
 	const MAX_FILES = 5;
+
+	$: if (!permitirOmitir && metodoSeleccionado === 'omitido') {
+		metodoSeleccionado = 'manual';
+	}
 
 	function actualizarArchivos(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -197,29 +203,31 @@
 					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase"> Bloqueado </span>
 				</label>
 
-				<label
-					class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'omitido' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
-				>
-					<div class="flex items-center justify-between">
-						<div>
-							<span class="text-base font-semibold text-gray-900">Omitir por ahora</span>
-							<p class="mt-1 text-sm text-gray-600">
-								Podrás completar la verificación cuando lo necesites.
-							</p>
+				{#if permitirOmitir}
+					<label
+						class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'omitido' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
+					>
+						<div class="flex items-center justify-between">
+							<div>
+								<span class="text-base font-semibold text-gray-900">Omitir por ahora</span>
+								<p class="mt-1 text-sm text-gray-600">
+									Podrás completar la verificación cuando lo necesites.
+								</p>
+							</div>
+							<input
+								type="radio"
+								name="metodo"
+								value="omitido"
+								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
+								bind:group={metodoSeleccionado}
+								aria-label="Omitir verificación por ahora"
+							/>
 						</div>
-						<input
-							type="radio"
-							name="metodo"
-							value="omitido"
-							class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
-							bind:group={metodoSeleccionado}
-							aria-label="Omitir verificación por ahora"
-						/>
-					</div>
-					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-						Sin validación inmediata
-					</span>
-				</label>
+						<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+							Sin validación inmediata
+						</span>
+					</label>
+				{/if}
 			</div>
 
 			{#if metodoSeleccionado === 'manual'}
@@ -332,7 +340,7 @@
 						cuando esté disponible.
 					</p>
 				</div>
-			{:else}
+			{:else if permitirOmitir}
 				<div
 					class="mt-10 space-y-6 rounded-2xl border border-dashed border-yellow-200 bg-yellow-50 p-6 text-center text-sm text-gray-700 sm:p-8"
 				>
