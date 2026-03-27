@@ -217,19 +217,9 @@
 	}
 
 	async function manejarSubidaVerificacion(event: CustomEvent<{ files: File[] }>) {
-		if (!usuarioRegistradoId) {
-			toastStore.show({
-				variant: 'warning',
-				message: 'No se identificó al usuario. Por favor, contactanos si persiste el problema.'
-			});
-			setEtapaConPersistencia('contacto');
-			return;
-		}
-
 		try {
 			const files = event.detail.files;
 			const formData = new FormData();
-			formData.append('id_usuario', usuarioRegistradoId.toString());
 			files.forEach((f) => formData.append('files', f));
 
 			const res = await fetch('/api/registro/verificacion', {

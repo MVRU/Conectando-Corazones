@@ -3,20 +3,30 @@ import type { RequestHandler } from './$types';
 import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 import { prisma } from '$lib/infrastructure/prisma/client';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
-		const formData = await request.formData();
-		const id_usuario = formData.get('id_usuario');
-		const files = formData.getAll('files') as File[];
-
-		if (!id_usuario || !files.length) {
+		const usuarioSesion = locals.usuario;
+		if (!usuarioSesion?.id_usuario) {
 			return json(
-				{ success: false, error: 'Faltan datos requeridos (usuario o archivos)' },
-				{ status: 400 }
+				{ success: false, error: 'Tenés que iniciar sesión para subir la documentación de verificación.' },
+				{ status: 401 }
+			);
+		}
+		if (usuarioSesion.rol !== 'institucion') {
+			return json(
+				{ success: false, error: 'Solo las cuentas de institución pueden enviar esta documentación.' },
+				{ status: 403 }
 			);
 		}
 
-		const usuarioIdInt = parseInt(id_usuario.toString());
+		const formData = await request.formData();
+		const files = formData.getAll('files') as File[];
+
+		if (!files.length) {
+			return json({ success: false, error: 'Seleccioná al menos un archivo.' }, { status: 400 });
+		}
+
+		const usuarioIdInt = usuarioSesion.id_usuario;
 
 		// 1. Buscar si ya existe una verificación pendiente o crearla
 		let verificacion = await prisma.verificacion.findFirst({
@@ -58,18 +68,16 @@ export const POST: RequestHandler = async ({ request }) => {
 				continue;
 			}
 
-			const publicUrl = supabaseAdmin.storage.from('documentos-privados').getPublicUrl(filePath)
-				.data.publicUrl;
-
 			const archivo = await prisma.archivo.create({
 				data: {
 					nombre_original: file.name,
-					url: filePath, // Guardamos el path del storage
+					url: filePath,
 					tipo_mime: file.type,
 					tamanio_bytes: file.size,
 					descripcion: 'Documentación de Verificación',
-					usuario_id: usuarioIdInt,
-					verificacion_id: verificacion.id_verificacion
+					verificacion: {
+						connect: { id_verificacion: verificacion.id_verificacion }
+					}
 				}
 			});
 
