@@ -1,6 +1,7 @@
 import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import { Resena } from '$lib/domain/entities/Resena';
 import type { TipoObjetoResena } from '$lib/domain/types/Resena';
 
@@ -21,7 +22,8 @@ export class CrearResena {
 	constructor(
 		private resenaRepository: ResenaRepository,
 		private colaboracionRepository: ColaboracionRepository,
-		private proyectoRepository: ProyectoRepository
+		private proyectoRepository: ProyectoRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) { }
 
 	async execute(input: CrearResenaInput): Promise<Resena> {
@@ -129,6 +131,18 @@ export class CrearResena {
 			// created_at se asigna en el constructor con new Date()
 		});
 
-		return await this.resenaRepository.create(resena);
+		const resenaCreada = await this.resenaRepository.create(resena);
+
+		await this.historialRepo.create({
+			tipo_objeto: 'resena',
+			id_objeto: resenaCreada.id_resena ?? 0,
+			accion: 'creacion',
+			atributo_afectado: 'registro',
+			valor_anterior: '-',
+			valor_nuevo: String(resenaCreada.id_resena ?? 0),
+			usuario_id: input.autor_id
+		});
+
+		return resenaCreada;
 	}
 }

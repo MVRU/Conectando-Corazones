@@ -4,14 +4,22 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postgres/evaluacion.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
 const evaluacionRepo = new PostgresEvaluacionRepository();
 const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
+const historialRepo = new PostgresHistorialDeCambiosRepository();
 
-const registrarEvaluacion = new RegistrarEvaluacion(evaluacionRepo, proyectoRepo, colaboracionRepo, solicitudRepo);
+const registrarEvaluacion = new RegistrarEvaluacion(
+	evaluacionRepo,
+	proyectoRepo,
+	colaboracionRepo,
+	solicitudRepo,
+	historialRepo
+);
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const user = locals.usuario;

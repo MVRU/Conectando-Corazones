@@ -4,6 +4,7 @@ import type { RequestHandler } from './$types';
 import { PostgresResenaRepository } from '$lib/infrastructure/supabase/postgres/resena.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 
 import { CrearResena } from '$lib/domain/use-cases/resenas/CrearResena';
 import { EliminarResena } from '$lib/domain/use-cases/resenas/EliminarResena';
@@ -16,8 +17,10 @@ const resenaRepo = new PostgresResenaRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
 const proyectoRepo = new PostgresProyectoRepository();
 
-const crearResenaUC = new CrearResena(resenaRepo, colaboracionRepo, proyectoRepo);
-const eliminarResenaUC = new EliminarResena(resenaRepo);
+const historialRepo = new PostgresHistorialDeCambiosRepository();
+ 
+const crearResenaUC = new CrearResena(resenaRepo, colaboracionRepo, proyectoRepo, historialRepo);
+const eliminarResenaUC = new EliminarResena(resenaRepo, historialRepo);
 const obtenerResenasPorObjetoUC = new ObtenerResenasPorObjeto(resenaRepo);
 const obtenerResenasEscritasUC = new ObtenerResenasEscritas(resenaRepo);
 
