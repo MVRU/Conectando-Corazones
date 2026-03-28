@@ -498,7 +498,7 @@
 			acc.push({ divider: true } as any);
 
 			if (esCreador) {
-				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+				const esEditable = estadoCodigo === 'en_curso';
 
 				if (estadoCodigo === 'en_curso') {
 					acc.push({
