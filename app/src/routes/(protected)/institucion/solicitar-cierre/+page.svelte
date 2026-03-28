@@ -81,23 +81,25 @@
 
 	$: solicitudesRechazadas = data.solicitudesRechazadas;
 
-	$: tieneTresSolicitudesRechazadas = solicitudesRechazadas.length >= 3;
+	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
+	$: muchosRechazos = solicitudesRechazadas.length >= 3;
+	$: formularioBloqueadoPorAuditoria = muchosRechazos && proyectoActual?.estado === 'en_auditoria';
 
 	$: evidenciasPorObjetivo = proyectoActual
 		? proyectoActual.participacion_permitida?.map((objetivo: any) => {
 				const evidenciasObjetivo = (data.evidencias || []).filter(
 					(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
 				);
-
-				const evidenciasEntrada = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'entrada');
-				const evidenciasSalida = evidenciasObjetivo.filter((e) => e.tipo_evidencia === 'salida');
+				// Separar evidencias de entrada y salida
+				const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
+				const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
 
 				return {
 					objetivo,
 					evidencias: evidenciasObjetivo,
 					evidenciasEntrada,
 					evidenciasSalida,
-					totalArchivos: evidenciasObjetivo.reduce((sum, ev) => sum + (ev.archivos?.length || 0), 0)
+					totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
 				};
 			}) || []
 		: [];
@@ -127,8 +129,8 @@
 			return;
 		}
 
-		if (tieneTresSolicitudesRechazadas) {
-			console.error('[VALIDACIÓN] Proyecto con 3 solicitudes rechazadas');
+		if (formularioBloqueadoPorAuditoria) {
+			console.error('[VALIDACIÓN] Proyecto en auditoría con límite de rechazos');
 			return;
 		}
 
@@ -143,7 +145,31 @@
 
 		enviandoSolicitud = true;
 
-		setTimeout(() => {
+		try {
+			const formData = new FormData();
+			formData.set('proyecto_id', proyectoSeleccionado);
+
+			// Por ahora usamos todas las evidencias del proyecto como respaldo
+			const evidenciasProyecto = (data.evidencias || []) as any[];
+			for (const ev of evidenciasProyecto) {
+				if (ev.id_evidencia != null) {
+					formData.append('evidencia_ids', String(ev.id_evidencia));
+				}
+			}
+
+			const response = await fetch('?/solicitarCierre', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => null);
+				console.error('Error al enviar solicitud de cierre', errorData ?? response.statusText);
+				enviandoSolicitud = false;
+				return;
+			}
+
+			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
 			solicitudEnviada = true;
 
@@ -162,7 +188,10 @@
 			setTimeout(() => {
 				solicitudEnviada = false;
 			}, 5000);
-		}, 2000);
+		} catch (err) {
+			console.error('Error inesperado al enviar la solicitud de cierre', err);
+			enviandoSolicitud = false;
+		}
 	}
 </script>
 
@@ -185,6 +214,16 @@
 					Solo podrás avanzar si <strong>todos los puntos están completos</strong>. Asegurate de
 					haber cargado todas las evidencias necesarias.
 				</p>
+				{#if proyectoSeleccionado}
+					<p class="mt-3 text-center">
+						<a
+							href={`/institucion/proyectos/${proyectoSeleccionado}/solicitudes-cierre`}
+							class="text-sm font-semibold text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-900"
+						>
+							Ver historial de solicitudes de este proyecto
+						</a>
+					</p>
+				{/if}
 			</div>
 		</header>
 
@@ -252,22 +291,24 @@
 							</div>
 						{/if}
 
-						{#if tieneTresSolicitudesRechazadas}
+						<!-- Alerts inside Selection Card -->
+						{#if formularioBloqueadoPorAuditoria}
 							<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
 								<div class="flex gap-3">
 									<AlertTriangle class="h-5 w-5 flex-shrink-0 text-red-600" />
 									<div>
-										<h3 class="text-sm font-bold text-red-800">Límite de rechazos alcanzado</h3>
+										<h3 class="text-sm font-bold text-red-800">Revisión administrativa</h3>
 										<p class="mt-1 text-sm text-red-700">
-											Este proyecto ha sido rechazado 3 veces. Por favor, ponete en contacto con
-											soporte.
+											Este proyecto acumuló varias solicitudes rechazadas y está en auditoría. No
+											podés enviar una nueva solicitud desde acá; contactá a soporte si necesitás
+											ayuda.
 										</p>
 										<div class="mt-2 text-xs text-red-700">
-											<p class="font-medium">Fechas de rechazo:</p>
+											<p class="font-medium">Fechas de solicitudes rechazadas:</p>
 											<ul class="mt-1 list-inside list-disc space-y-1">
-												{#each solicitudesRechazadas as solicitud}
+												{#each solicitudesRechazadas as solicitud (solicitud.id_solicitud_finalizacion)}
 													<li>
-														{solicitud.created_at?.toLocaleDateString('es-AR', {
+														{new Date(solicitud.created_at).toLocaleDateString('es-AR', {
 															day: 'numeric',
 															month: 'long',
 															year: 'numeric'
@@ -276,6 +317,28 @@
 												{/each}
 											</ul>
 										</div>
+									</div>
+								</div>
+							</div>
+						{:else if muchosRechazos}
+							<div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+								<div class="flex gap-3">
+									<Info class="h-5 w-5 flex-shrink-0 text-amber-700" />
+									<div>
+										<h3 class="text-sm font-bold text-amber-900">Podés volver a intentar</h3>
+										<p class="mt-1 text-sm text-amber-800">
+											Hubo varias solicitudes rechazadas, pero el proyecto no está en auditoría.
+											Revisá el feedback en el historial, actualizá las evidencias si hace falta y
+											enviá una nueva solicitud.
+										</p>
+										{#if proyectoSeleccionado}
+											<a
+												href="/institucion/proyectos/{proyectoSeleccionado}/solicitudes-cierre"
+												class="mt-3 inline-flex text-sm font-semibold text-amber-900 underline hover:text-amber-950"
+											>
+												Ver historial de solicitudes de cierre
+											</a>
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -306,7 +369,7 @@
 								</p>
 							</div>
 							<div class="space-y-4 p-6">
-								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos }}
+								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo.id_participacion_permitida)}
 									<ObjetivoEvidencias
 										{objetivo}
 										{evidencias}
@@ -354,7 +417,7 @@
 
 							<ChecklistVerificacion
 								bind:checks
-								disabled={tieneSolicitudPendiente || tieneTresSolicitudesRechazadas}
+								disabled={tieneSolicitudPendiente || formularioBloqueadoPorAuditoria}
 							/>
 
 							<button
@@ -363,7 +426,7 @@
 									!todosLosChecksCompletos ||
 									!todosLosObjetivosTienenEvidencias ||
 									tieneSolicitudPendiente ||
-									tieneTresSolicitudesRechazadas}
+									formularioBloqueadoPorAuditoria}
 								class="mt-6 flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
 							>
 								{#if enviandoSolicitud}
@@ -395,22 +458,22 @@
 									Reportar irregularidad
 								</button>
 							</div>
-						</div>
 
-						{#if !tieneTresSolicitudesRechazadas && !tieneSolicitudPendiente}
-							<div class="rounded-xl border border-blue-100 bg-blue-50 p-4">
-								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
-									<div class="text-sm text-blue-800">
-										<p class="font-medium">Información importante</p>
-										<p class="mt-1 text-xs leading-relaxed text-blue-700">
-											Al enviar, los colaboradores recibirán una notificación para validar
-											evidencias. Al aprobarse, el proyecto pasará a "Completado".
-										</p>
+							{#if !formularioBloqueadoPorAuditoria && !tieneSolicitudPendiente}
+								<div class="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4">
+									<div class="flex gap-3">
+										<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
+										<div class="text-sm text-slate-800">
+											<p class="font-semibold text-blue-900">Información importante</p>
+											<p class="mt-1 text-sm leading-relaxed text-slate-700">
+												Al enviar, los colaboradores recibirán una notificación para validar
+												evidencias. Al aprobarse, el proyecto pasará a "Completado".
+											</p>
+										</div>
 									</div>
 								</div>
-							</div>
-						{/if}
+							{/if}
+						</div>
 					{:else}
 						<div
 							class="rounded-2xl border border-slate-200 bg-slate-50 p-8 text-center text-slate-500"

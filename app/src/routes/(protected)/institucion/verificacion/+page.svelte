@@ -2,12 +2,11 @@
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			{ label: 'Institución', href: '/institucion/mi-panel' },
 			{ label: 'Verificación' }
 		]);

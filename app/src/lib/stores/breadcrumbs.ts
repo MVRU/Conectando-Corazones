@@ -1,6 +1,6 @@
 import { writable, derived, get } from 'svelte/store';
 import { page } from '$app/stores';
-import { shouldShowBreadcrumbs } from '\$lib/infrastructure/config/breadcrumbs.config';
+import { shouldShowBreadcrumbs } from '$lib/infrastructure/config/breadcrumbs.config';
 
 // * DECISIÓN DE DISEÑO
 // -*- Fuente única de verdad para las migas de pan.
@@ -22,7 +22,6 @@ const auto = derived(page, ($page) => {
 	const segments = $page.url.pathname.split('/').filter(Boolean);
 	let path = '';
 	const items: BreadcrumbItem[] = [
-		{ label: 'Inicio', href: '/' },
 		...segments.map((segment, idx) => {
 			path += '/' + segment;
 			return {
@@ -34,7 +33,7 @@ const auto = derived(page, ($page) => {
 		})
 	];
 
-	return items.length > 2 ? items : [];
+	return items.length >= 2 ? items : [];
 });
 
 // * Migas en uso (manuales o automáticas) según la ruta actual
@@ -60,11 +59,6 @@ export function clearBreadcrumbs() {
 }
 
 export const BREADCRUMB_ROUTES = {
-	home: { label: 'Inicio', href: '/' },
 	proyectos: { label: 'Proyectos', href: '/proyectos' },
-	nosotros: { label: 'Nosotros', href: '/nosotros' },
-	contacto: { label: 'Contacto', href: '/contacto' },
-	faq: { label: 'Preguntas frecuentes', href: '/faq' },
-	login: { label: 'Iniciar sesión', href: '/iniciar-sesion' },
-	registro: { label: 'Registrarse', href: '/registrarse' }
+	personas: { label: 'Personas', href: '/perfil' }
 };

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		Plus,
 		FileText,
 		UploadCloud,
 		FolderKanban,
@@ -24,7 +23,7 @@
 	// Configuracion de indicadores y color para los botones de acción rápida
 	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
 	$: badgeConfig = {
-		'Ver solicitudes': {
+		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
 			shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
@@ -58,7 +57,7 @@
 			href: '/proyectos?tab=mis-proyectos',
 			primary: true
 		},
-		{ label: 'Ver solicitudes', icon: FileText, href: '/colaborador/solicitudes-colaboracion' },
+		{ label: 'Ver colaboraciones', icon: FileText, href: '/colaborador/solicitudes-colaboracion' },
 		{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
 		{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
 		{

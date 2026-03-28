@@ -1,0 +1,125 @@
+name: Smart CI
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  validate:
+    name: Validación técnica
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+
+      - name: Instalar dependencias
+        id: install
+        run: npm ci
+
+      - name: Build de la aplicación (SvelteKit)
+        id: build
+        if: steps.install.outcome == 'success' && !cancelled()
+        run: npm run build
+        env:
+          PUBLIC_SUPABASE_URL: "https://twwgzweviswxhnfjthxk.supabase.co"
+          PUBLIC_SUPABASE_ANON_KEY: "mock-key"
+          SUPABASE_SERVICE_ROLE_KEY: "mock-key"
+          DATABASE_URL: "postgresql://mock:mock@localhost:5432/mock"
+          DB_POOLER_URL: "postgresql://mock:mock@localhost:5432/mock"
+          DIRECT_URL: "postgresql://mock:mock@localhost:5432/mock"
+          GOOGLE_API_KEY: "mock-key"
+
+      - name: Resumen del Job (GitHub UI)
+        if: always()
+        run: |
+          echo "## 📊 Resultado Smart CI" >> $GITHUB_STEP_SUMMARY
+          echo "- **Instalación:** ${{ steps.install.outcome == 'success' && '✅ Pasó' || '❌ Falló' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build:** ${{ steps.build.outcome == 'success' && '✅ Pasó' || (steps.build.outcome == 'skipped' && '⏭️ Omitido' || '❌ Falló') }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comentar en el PR si hubo errores (Smart CI)
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const installFailed = '${{ steps.install.outcome }}' === 'failure';
+            const buildFailed = '${{ steps.build.outcome }}' === 'failure';
+            const hasErrors = installFailed || buildFailed;
+
+            // Buscar comentario previo del bot en este PR
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes('Smart CI'));
+
+            if (hasErrors) {
+              let message = `### 🚨 Alerta de calidad (Smart CI) \n\n`;
+              message += `Hola @${context.payload.pull_request.user.login}, se detectaron problemas técnicos en tu código. Por favor resolvelos para mantener la integridad en **Conectando Corazones**.\n\n`;
+
+              if (installFailed) {
+                message += `- 📦 **Instalación falló.** No se pudieron instalar las dependencias con \`npm ci\`.\n`;
+              }
+              if (buildFailed) {
+                message += `- 🔨 **Build falló.** La aplicación no se puede compilar. Ejecutá \`npm run build\` localmente para depurar el error.\n`;
+              }
+
+              message += `\n---\n**👉 Recomendación:**\n`;
+              message += `> _"Recordá siempre correr el build localmente antes de pushear. Un código reproducible empieza en tu entorno local."_\n`;
+
+              // Si existe actualizamos, si no creamos
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: message
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: message
+                });
+              }
+            }
+
+      - name: Comentar éxito si fue previamente fallido
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(c => c.user.login === 'github-actions[bot]' && c.body.includes('Smart CI'));
+            
+            if (botComment && botComment.body.includes('🚨')) {
+               await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: `### ✅ Smart CI superado\n\n¡Excelente @${context.payload.pull_request.user.login}! El build pasó correctamente en este último commit tras las correcciones. 🎉`
+              });
+            }
+

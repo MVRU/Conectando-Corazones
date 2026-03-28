@@ -1,0 +1,166 @@
+name: Asignación automática de PRs
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+jobs:
+  assign-and-review:
+    name: Asignar responsable y reviewers
+    # Ignoramos PRs en estado Draft y PRs creados por Bots automatizados
+    if: github.event.pull_request.draft == false && github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    env:
+      CORE_TEAM: '["MVRU","TomasAlvarez0","AleSklate0807"]'
+    permissions:
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Ejecutar motor de asignación
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const author = pr.user.login;
+            const authorNormalized = author.toLowerCase();
+
+            // 🚨 MEJORA VITAL: Lista estricta del Core Team a nivel repositorio.
+            const CORE_TEAM = JSON.parse(process.env.CORE_TEAM);
+            const CORE_TEAM_NORMALIZED = CORE_TEAM.map(u => u.toLowerCase());
+
+            console.log(`=== Gestor de PRs ===`);
+            console.log(`Procesando PR #${pr.number} (Autor original: @${author})`);
+
+            // 1. Case Sensitivity Resuelto
+            // Validar que el autor pertenezca al equipo central usando lowercase, para protegerse de cambios en capitalización.
+            if (!CORE_TEAM_NORMALIZED.includes(authorNormalized)) {
+               console.log(`⚠️ El autor @${author} no pertenece al CORE_TEAM estricto. Abortando auto-asignación.`);
+               return;
+            }
+
+            // Asignar Responsable (Assignee)
+            const currentAssignees = pr.assignees ? pr.assignees.map(a => a.login.toLowerCase()) : [];
+            if (currentAssignees.includes(authorNormalized)) {
+              console.log(`1. @${author} ya figura como responsable asignado del PR. Omitiendo redundancia.`);
+            } else {
+              try {
+                console.log(`1. Asignando a @${author} como responsable del PR...`);
+                await github.rest.issues.addAssignees({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  assignees: [author] // Github API requiere el case original para mostrarlo bien preferentemente
+                });
+              } catch (error) {
+                console.log(`⚠️ No se pudo asignar a @${author}. Error: ${error.message}`);
+              }
+            }
+
+            // 2. Gestionar Reviewers: Lógica Fina (COMMENTED vs APPROVED)
+            let hasPastReviews = false;
+            try {
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              // Ignoramos reviews que son solo 'COMMENTED' ya que pueden ser comentarios sueltos (de bots, linter, o dudas)
+              // Contamos como revisión verdadera a estados como 'APPROVED', 'CHANGES_REQUESTED' o 'DISMISSED'
+              if (reviews && reviews.some(r => r.state !== 'COMMENTED')) {
+                hasPastReviews = true;
+              }
+            } catch (err) {
+               console.log(`Aviso: No se pudo verificar el historial de reviews (${err.message}).`);
+            }
+
+            const existingReviewers = pr.requested_reviewers ? pr.requested_reviewers.map(r => r.login) : [];
+
+            if (existingReviewers.length > 0 || hasPastReviews) {
+              console.log(`2. El PR ya tiene historial de reviews formales o evaluadores requeridos. Se omite nueva solicitud.`);
+              return;
+            }
+
+            console.log(`2. Asignando reviewers de la nómina técnica autorizada...`);
+
+            // Restamos al autor normalizado.
+            const reviewersToRequest = CORE_TEAM.filter(u => u.toLowerCase() !== authorNormalized);
+              
+            // 3. Seguro Extremo contra Self-Review
+            // Garantizamos que bajo ningún concepto el array final tenga al propio autor del PR.
+            if (reviewersToRequest.map(u => u.toLowerCase()).includes(authorNormalized)) {
+                throw new Error("🚨 SECURITY ALERT: Tentativa de generar un self-review detectada.");
+            }
+
+            if (reviewersToRequest.length > 0) {
+              console.log(`   -> Solicitando review formal estricta a: ${reviewersToRequest.join(', ')}`);
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  reviewers: reviewersToRequest
+                });
+                console.log("✅ Reviewers blindados y asignados exitosamente.");
+                
+                // 4. UX: Control de Spam y Feedback Visible
+                console.log("3. Buscando comentarios previos para evitar spam...");
+                
+                const { data: comments } = await github.rest.issues.listComments({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number
+                });
+
+                const signature = "Se ha configurado este PR y asignado responsabilidades claras";
+                const existingComment = comments.find(c => c.body.includes(signature) && c.user.type === 'Bot');
+
+                const commentBody = [
+                  `Se ha configurado este PR y asignado responsabilidades claras con éxito:`,
+                  `- 👮‍♂️ **Autor y responsable:** @${author}`,
+                  `- 🔍 **Evalúan:** ${reviewersToRequest.map(r => '@' + r).join(', ')}`,
+                  ``,
+                  `¡Éxitos con la revisión de código! 🚀`
+                ].join('\n');
+                
+                if (existingComment) {
+                  console.log("   -> Comentario existente encontrado. Actualizando para evitar spam.");
+                  await github.rest.issues.updateComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: existingComment.id,
+                    body: commentBody
+                  });
+                  console.log("✅ Comentario actualizado con éxito.");
+                } else {
+                  console.log("   -> Publicando nuevo mensaje de estado en el Pull Request...");
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: commentBody
+                  });
+                  console.log("✅ Comentario de trazabilidad publicado con éxito.");
+                }
+
+                // 5. Etiqueta visual de estado
+                console.log("4. Aplicando etiqueta de estado...");
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    labels: ['needs-review']
+                  });
+                  console.log("✅ Etiqueta 'needs-review' añadida con éxito.");
+                } catch (labelError) {
+                  console.log("⚠️ Aviso: No se pudo añadir la etiqueta 'needs-review' (puede que debas crearla primero en Settings > Labels):", labelError.message);
+                }
+
+              } catch (actionError) {
+                 console.log("⚠️ Falló un paso de asignación o comentario:", actionError.message);
+              }
+            } else {
+              console.log("   -> El autor es el único miembro técnico disponible en el repositorio de validación.");
+            }
+
+            console.log(`=== Cierre del proceso ===`);

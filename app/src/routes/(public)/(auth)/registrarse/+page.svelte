@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
@@ -51,8 +50,6 @@
 	import { env } from '$lib/infrastructure/config/env';
 
 	let { data } = $props();
-
-	let cargada = $state(false); // para saber si la página terminó de cargar
 
 	const PASOS_REGISTRO = [
 		{
@@ -148,7 +145,7 @@
 	});
 
 	onMount(() => {
-		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
+		// No breadcrumbs on registration page
 		if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
 			storageRegistroDisponible = true;
 			const snapshot = leerProgresoRegistro();
@@ -163,7 +160,6 @@
 			}
 			persistenciaPaginaLista = true;
 		}
-		cargada = true;
 	});
 
 	function resetFeedback() {

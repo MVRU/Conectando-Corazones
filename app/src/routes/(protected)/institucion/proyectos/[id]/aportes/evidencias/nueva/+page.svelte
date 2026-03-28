@@ -11,6 +11,7 @@
 	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	import { applyAction, deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -19,6 +20,14 @@
 	let { data } = $props();
 
 	const projectIdUrl = $page.params.id;
+
+	$effect(() => {
+		setBreadcrumbs([
+			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+			{ label: 'Aportes', href: `/institucion/proyectos/${projectIdUrl}/aportes` },
+			{ label: 'Nueva Evidencia' }
+		]);
+	});
 
 	// Extensiones para el manejo de UI y subida de archivos
 	type ArchivoUI = Archivo & {
@@ -36,7 +45,9 @@
 	};
 
 	let selectedProyectoId = $state<number>(data.proyecto.id_proyecto ?? 0);
-	let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>('');
+let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
+	(data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || ''
+);
 	let selectedParticipacionPermitidaId = $state<number | null>(null);
 
 	// Filtrar participaciones por tipo seleccionado
@@ -318,6 +329,15 @@
 	}
 
 	function abrirModalSubirArchivos() {
+		if (!selectedParticipacionPermitidaId) {
+			toastStore.show({
+				variant: 'warning',
+				title: 'Seleccioná una meta primero',
+				message: 'Antes de cargar evidencias, elegí tipo de participación y meta del proyecto.'
+			});
+			return;
+		}
+
 		mostrarModalSubirArchivos = true;
 		archivosTemporales = [];
 	}
@@ -637,7 +657,14 @@
 
 						<button
 							onclick={abrirModalSubirArchivos}
-							class="cursor-pointer rounded-xl bg-slate-900 p-3 text-white shadow-lg transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:shadow-blue-200 active:scale-95"
+							disabled={!selectedParticipacionPermitidaId}
+							title={!selectedParticipacionPermitidaId
+								? 'Seleccioná tipo/meta para habilitar la carga'
+								: 'Agregar evidencia de salida'}
+							class="rounded-xl p-3 text-white shadow-lg transition-all
+								{selectedParticipacionPermitidaId
+									? 'cursor-pointer bg-slate-900 hover:-translate-y-0.5 hover:bg-blue-600 hover:shadow-blue-200 active:scale-95'
+									: 'cursor-not-allowed bg-slate-300 shadow-none'}"
 							aria-label="Agregar evidencia de salida"
 						>
 							<Plus size={20} />
