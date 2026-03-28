@@ -4,9 +4,6 @@ import '@testing-library/jest-dom/vitest';
 import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 import FotoPerfilUploader from '$lib/components/feature/registro/FotoPerfilUploader.svelte';
 
-/**
- * Helper para simular la selección de archivos en inputs de tipo file
- */
 function createFileList(files: File[]): FileList {
 	const fileList = {
 		length: files.length,
@@ -18,7 +15,6 @@ function createFileList(files: File[]): FileList {
 		}
 	};
 
-	// Agregar cada archivo como propiedad numérica
 	files.forEach((file, index) => {
 		Object.defineProperty(fileList, index, {
 			value: file,
@@ -29,9 +25,6 @@ function createFileList(files: File[]): FileList {
 	return fileList as FileList;
 }
 
-/**
- * Helper para asignar archivos a un input de tipo file
- */
 function setInputFiles(input: HTMLInputElement, files: File[]) {
 	const fileList = createFileList(files);
 	Object.defineProperty(input, 'files', {
@@ -41,19 +34,15 @@ function setInputFiles(input: HTMLInputElement, files: File[]) {
 	});
 }
 
-/**
- * ! Tests de integración para el flujo de registro en /registrarse
- */
-
 describe('Flujo de Registro - /registrarse', () => {
 	describe('Métodos de Acceso', () => {
 		beforeEach(() => {
-			// Renderizar el formulario en estado inicial
 			render(RegistroCuentaForm, {
 				props: {
 					rol: 'institucion',
 					procesando: false,
-					errorGeneral: null
+					errorGeneral: null,
+					onsubmit: () => {}
 				}
 			});
 		});
@@ -102,7 +91,8 @@ describe('Flujo de Registro - /registrarse', () => {
 				props: {
 					rol: 'institucion',
 					procesando: false,
-					errorGeneral: null
+					errorGeneral: null,
+					onsubmit: () => {}
 				}
 			});
 
@@ -181,7 +171,8 @@ describe('Flujo de Registro - /registrarse', () => {
 				props: {
 					rol: 'institucion',
 					procesando: false,
-					errorGeneral: null
+					errorGeneral: null,
+					onsubmit: () => {}
 				}
 			});
 

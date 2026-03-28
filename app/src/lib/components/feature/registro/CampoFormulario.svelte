@@ -3,19 +3,51 @@
 	import type { ComponentType } from 'svelte';
 	import { Loader2 } from 'lucide-svelte';
 
-	export let id: string;
-	export let label: string;
-	export let value: string = '';
-	export let placeholder = '';
-	export let type: string = 'text';
-	export let autocomplete: string | undefined = undefined;
-	export let required = false;
-	export let error: string = '';
-	export let disabled = false;
-	export let name: string | undefined = undefined;
-	export let icon: ComponentType | null = null;
-	export let iconClass = '';
-	export let cargando = false;
+	interface Props {
+		id: string;
+		label: string;
+		value?: string;
+		placeholder?: string;
+		type?: string;
+		autocomplete?: string;
+		required?: boolean;
+		error?: string;
+		disabled?: boolean;
+		name?: string;
+		icon?: ComponentType | null;
+		iconClass?: string;
+		cargando?: boolean;
+		suffix?: import('svelte').Snippet;
+		onblur?: (e: FocusEvent) => void;
+		onfocus?: (e: FocusEvent) => void;
+		oninput?: (e: Event) => void;
+		onchange?: (e: Event) => void;
+		onkeydown?: (e: KeyboardEvent) => void;
+		[key: string]: unknown;
+	}
+
+	let {
+		id,
+		label,
+		value = $bindable(''),
+		placeholder = '',
+		type = 'text',
+		autocomplete,
+		required = false,
+		error = '',
+		disabled = false,
+		name,
+		icon = null,
+		iconClass = '',
+		cargando = false,
+		suffix,
+		onblur,
+		onfocus,
+		oninput,
+		onchange,
+		onkeydown,
+		...rest
+	}: Props = $props();
 </script>
 
 <div class="group space-y-2">
@@ -45,11 +77,12 @@
 		{disabled}
 		prefixIcon={icon}
 		prefixIconClass={iconClass}
-		{...$$restProps}
-		on:blur
-		on:focus
-		on:input
-		on:change
-		on:keydown
+		{suffix}
+		{onblur}
+		{onfocus}
+		{oninput}
+		{onchange}
+		{onkeydown}
+		{...rest}
 	/>
 </div>

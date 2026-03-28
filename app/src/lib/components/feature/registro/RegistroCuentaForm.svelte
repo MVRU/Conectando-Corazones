@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { ComponentType } from 'svelte';
-	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import FotoPerfilUploader from '$lib/components/feature/registro/FotoPerfilUploader.svelte';
@@ -65,6 +64,7 @@
 		onprocessing?: (detail: { value: boolean }) => void;
 		onback?: () => void;
 		onselectMethod?: (detail: { metodo: MetodoAcceso }) => void;
+		onchange?: () => void;
 	}
 
 	let {
@@ -75,7 +75,8 @@
 		oninvalid,
 		onprocessing,
 		onback = () => {},
-		onselectMethod
+		onselectMethod,
+		onchange
 	}: Props = $props();
 
 	const opcionesTipoColaborador: Array<{
@@ -189,28 +190,6 @@
 		}
 	];
 
-	const iconosFederados: Record<IdProveedorFederado, string> = {
-		google: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" id="google">
-		<path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
-		<path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
-		<path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
-		<path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
-		</svg>`,
-		facebook: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 1024 1024" id="facebook">
-		<path fill="#1877f2" d="M1024,512C1024,229.23016,794.76978,0,512,0S0,229.23016,0,512c0,255.554,187.231,467.37012,432,505.77777V660H302V512H432V399.2C432,270.87982,508.43854,200,625.38922,200,681.40765,200,740,210,740,210V336H675.43713C611.83508,336,592,375.46667,592,415.95728V512H734L711.3,660H592v357.77777C836.769,979.37012,1024,767.554,1024,512Z"></path>
-		<path fill="#fff" d="M711.3,660,734,512H592V415.95728C592,375.46667,611.83508,336,675.43713,336H740V210s-58.59235-10-114.61078-10C508.43854,200,432,270.87982,432,399.2V512H302V660H432v357.77777a517.39619,517.39619,0,0,0,160,0V660Z"></path>
-		</svg>`,
-		microsoft: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" xml:space="preserve" viewBox="0 0 16 16" id="microsoft">
-		<path fill="#4CAF50" d="M8.5 7.5H16v-7a.5.5 0 0 0-.5-.5h-7v7.5z"></path>
-		<path fill="#F44336" d="M7.5 7.5V0h-7a.5.5 0 0 0-.5.5v7h7.5z"></path>
-		<path fill="#2196F3" d="M7.5 8.5H0v7a.5.5 0 0 0 .5.5h7V8.5z"></path>
-		<path fill="#FFC107" d="M8.5 8.5V16h7a.5.5 0 0 0 .5-.5v-7H8.5z"></path>
-		</svg>`,
-		apple: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 128 128" id="apple">
-		<path d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"></path>
-		</svg>`
-	};
-
 	type InstantaneaFormulario = {
 		version: number;
 		timestamp: number;
@@ -285,7 +264,7 @@
 		},
 		{
 			id: 'federado',
-			label: 'Iniciar con Google, Microsoft, Apple o Facebook',
+			label: 'Registrarme con Google, Microsoft, Apple o Facebook',
 			description: 'Muy pronto vas a poder ingresar con tus cuentas favoritas de manera segura.',
 			chip: 'Próximamente',
 			disponible: false
@@ -322,7 +301,6 @@
 	let pasoFormulario: 'credenciales' | 'detalles' = $state('credenciales');
 	let formularioRef: HTMLFormElement | null = $state(null);
 	let mostrarPassword = $state(false);
-	let mostrarPasswordConfirm = $state(false);
 	let mostrarModalPasswordTexto = $state(false);
 	let mostrarModalPasswordConfirmTexto = $state(false);
 	let metodoAcceso: MetodoAcceso | null = $state(null);
@@ -478,7 +456,33 @@
 		email: erroresCalculados.email || erroresDisponibilidad.email
 	});
 
-	let tieneErrores = $derived(Object.values(errores).some((error) => error));
+	let tieneErrores = $derived(Object.values(errores).some((v) => v !== ''));
+
+	$effect(() => {
+		void username;
+		erroresDisponibilidad.username = '';
+	});
+
+	$effect(() => {
+		void email;
+		erroresDisponibilidad.email = '';
+	});
+
+	$effect(() => {
+		void username;
+		void email;
+		void password;
+		void passwordConfirm;
+		void nombrePersona;
+		void apellidoPersona;
+		void fechaNacimiento;
+		void nombreLegal;
+		void razonSocial;
+		void tipoInstitucionSeleccion;
+		void tipoColaborador;
+		void aceptaTerminosYPrivacidad;
+		onchange?.();
+	});
 
 	function resetFormulario() {
 		username = '';
@@ -804,7 +808,9 @@
 		}
 	}
 
+
 	async function continuarConDetalles() {
+		intentoEnvio = true;
 		if (metodoAcceso !== 'manual') {
 			seleccionarMetodoAcceso('manual');
 			return;
@@ -817,7 +823,6 @@
 			'passwordConfirm'
 		];
 
-		errores = { ...errores };
 		const camposConErrores = camposCredenciales.filter((campo) => errores[campo]);
 
 		if (camposConErrores.length) {
@@ -826,7 +831,6 @@
 			return;
 		}
 
-		intentoEnvio = true;
 		verificando = true;
 
 		try {
@@ -863,7 +867,6 @@
 			return;
 		} finally {
 			verificando = false;
-			intentoEnvio = false;
 		}
 
 		pasoFormulario = 'detalles';
@@ -1273,6 +1276,79 @@
 				</header>
 
 				<div class="grid gap-4 md:grid-cols-2">
+						{#snippet IconoFederado(id: IdProveedorFederado)}
+							{#if id === 'google'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="30"
+									height="30"
+									preserveAspectRatio="xMidYMid"
+									viewBox="0 0 256 262"
+									id="google"
+								>
+									<path
+										fill="#4285F4"
+										d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+									></path>
+									<path
+										fill="#34A853"
+										d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+									></path>
+									<path
+										fill="#FBBC05"
+										d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+									></path>
+									<path
+										fill="#EB4335"
+										d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+									></path>
+								</svg>
+							{:else if id === 'facebook'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="30"
+									height="30"
+									viewBox="0 0 1024 1024"
+									id="facebook"
+								>
+									<path
+										fill="#1877f2"
+										d="M1024,512C1024,229.23016,794.76978,0,512,0S0,229.23016,0,512c0,255.554,187.231,467.37012,432,505.77777V660H302V512H432V399.2C432,270.87982,508.43854,200,625.38922,200,681.40765,200,740,210,740,210V336H675.43713C611.83508,336,592,375.46667,592,415.95728V512H734L711.3,660H592v357.77777C836.769,979.37012,1024,767.554,1024,512Z"
+									></path>
+									<path
+										fill="#fff"
+										d="M711.3,660,734,512H592V415.95728C592,375.46667,611.83508,336,675.43713,336H740V210s-58.59235-10-114.61078-10C508.43854,200,432,270.87982,432,399.2V512H302V660H432v357.77777a517.39619,517.39619,0,0,0,160,0V660Z"
+									></path>
+								</svg>
+							{:else if id === 'microsoft'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="30"
+									height="30"
+									xml:space="preserve"
+									viewBox="0 0 16 16"
+									id="microsoft"
+								>
+									<path fill="#4CAF50" d="M8.5 7.5H16v-7a.5.5 0 0 0-.5-.5h-7v7.5z"></path>
+									<path fill="#F44336" d="M7.5 7.5V0h-7a.5.5 0 0 0-.5.5v7h7.5z"></path>
+									<path fill="#2196F3" d="M7.5 8.5H0v7a.5.5 0 0 0 .5.5h7V8.5z"></path>
+									<path fill="#FFC107" d="M8.5 8.5V16h7a.5.5 0 0 0 .5-.5v-7H8.5z"></path>
+								</svg>
+							{:else if id === 'apple'}
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									width="30"
+									height="30"
+									viewBox="0 0 128 128"
+									id="apple"
+								>
+									<path
+										d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"
+									></path>
+								</svg>
+							{/if}
+						{/snippet}
+
 					{#each proveedoresFederados as proveedor (proveedor.id)}
 						<button
 							type="button"
@@ -1286,7 +1362,7 @@
 									class={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/50  ${proveedor.iconClass}`}
 									aria-hidden="true"
 								>
-									{@html iconosFederados[proveedor.id]}
+									{@render IconoFederado(proveedor.id)}
 								</span>
 								<div>
 									<p class="text-base font-semibold text-slate-900">
@@ -1341,6 +1417,24 @@
 				</div>
 
 				<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+					{#snippet togglePassword(isConfirm = false)}
+						<button
+							type="button"
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-[rgb(var(--color-primary))]"
+							onclick={() => (mostrarPassword = !mostrarPassword)}
+							aria-label={mostrarPassword
+								? `Ocultar ${isConfirm ? 'confirmación de ' : ''}contraseña`
+								: `Mostrar ${isConfirm ? 'confirmación de ' : ''}contraseña`}
+							disabled={procesando}
+						>
+							{#if mostrarPassword}
+								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
+							{:else}
+								<Eye class="h-5 w-5" strokeWidth={1.5} />
+							{/if}
+						</button>
+					{/snippet}
+
 					<CampoFormulario
 						id="username"
 						name="username"
@@ -1352,8 +1446,9 @@
 						error={intentoEnvio || erroresDisponibilidad.username ? errores.username : ''}
 						disabled={procesando}
 						cargando={verificandoUsername}
-						on:blur={() => verificarDisponibilidad('username', username)}
+						onblur={() => verificarDisponibilidad('username', username)}
 					/>
+
 					<CampoFormulario
 						id="email"
 						name="email"
@@ -1368,82 +1463,46 @@
 						error={intentoEnvio || erroresDisponibilidad.email ? errores.email : ''}
 						disabled={procesando}
 						cargando={verificandoEmail}
-						on:blur={() => verificarDisponibilidad('email', email)}
+						onblur={() => verificarDisponibilidad('email', email)}
 					/>
-					<div class="space-y-2">
-						<label
-							for="password"
-							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
-						>
-							Contraseña <span class="text-red-500">*</span>
-						</label>
-						<div class="relative">
-							<Input
-								id="password"
-								name="password"
-								placeholder="Ingresá una contraseña segura"
-								autocomplete="new-password"
-								type={mostrarPassword ? 'text' : 'password'}
-								bind:value={password}
-								error={intentoEnvio ? errores.password : ''}
-								disabled={procesando}
-								customClass="pr-12"
-								required
-							/>
-							<button
-								type="button"
-								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								onclick={() => (mostrarPassword = !mostrarPassword)}
-								aria-pressed={mostrarPassword}
-								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-								disabled={procesando}
-							>
-								{#if mostrarPassword}
-									<EyeOff class="h-4 w-4" strokeWidth={1.7} />
-								{:else}
-									<Eye class="h-4 w-4" strokeWidth={1.7} />
-								{/if}
-							</button>
-						</div>
-					</div>
-					<div class="space-y-2">
-						<label
-							for="passwordConfirm"
-							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
-						>
-							Confirmá la contraseña <span class="text-red-500">*</span>
-						</label>
-						<div class="relative">
-							<Input
-								id="passwordConfirm"
-								name="passwordConfirm"
-								placeholder="Repetí la contraseña"
-								autocomplete="new-password"
-								type={mostrarPasswordConfirm ? 'text' : 'password'}
-								bind:value={passwordConfirm}
-								error={intentoEnvio ? errores.passwordConfirm : ''}
-								disabled={procesando}
-								customClass="pr-12"
-								required
-							/>
-							<button
-								type="button"
-								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								onclick={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
-								aria-pressed={mostrarPasswordConfirm}
-								aria-label={mostrarPasswordConfirm
-									? 'Ocultar confirmación de contraseña'
-									: 'Mostrar confirmación de contraseña'}
-								disabled={procesando}
-							>
-								{#if mostrarPasswordConfirm}
-									<EyeOff class="h-4 w-4" strokeWidth={1.7} />
-								{:else}
-									<Eye class="h-4 w-4" strokeWidth={1.7} />
-								{/if}
-							</button>
-						</div>
-					</div>
+
+					{#snippet passwordSuffix()}
+						{@render togglePassword(false)}
+					{/snippet}
+
+					{#snippet passwordConfirmSuffix()}
+						{@render togglePassword(true)}
+					{/snippet}
+
+					<CampoFormulario
+						id="password"
+						name="password"
+						label="Contraseña"
+						required
+						placeholder="Mínimo 8 caracteres"
+						autocomplete="new-password"
+						type={mostrarPassword ? 'text' : 'password'}
+						bind:value={password}
+						error={intentoEnvio ? errores.password : ''}
+						disabled={procesando}
+						icon={LockKeyhole}
+						suffix={passwordSuffix}
+					/>
+
+					<CampoFormulario
+						id="passwordConfirm"
+						name="passwordConfirm"
+						label="Confirmar contraseña"
+						required
+						placeholder="Repetí la contraseña"
+						autocomplete="new-password"
+						type={mostrarPassword ? 'text' : 'password'}
+						bind:value={passwordConfirm}
+						error={intentoEnvio ? errores.passwordConfirm : ''}
+						disabled={procesando}
+						icon={ShieldCheck}
+						suffix={passwordConfirmSuffix}
+					/>
 				</div>
 			</section>
 

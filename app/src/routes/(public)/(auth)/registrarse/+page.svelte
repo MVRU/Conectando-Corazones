@@ -625,7 +625,9 @@
 						errorGeneral={errorRegistro}
 						onsubmit={manejarRegistroCuenta}
 						oninvalid={manejarFormularioInvalido}
-						onback={() => retrocederEtapa('formulario')}
+						onprocessing={(e) => (registrando = e.value)}
+						onback={volverASeleccion}
+						onchange={() => (errorRegistro = null)}
 					/>
 				</div>
 			</div>

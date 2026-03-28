@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onDestroy, tick } from 'svelte';
+	import { onDestroy, tick } from 'svelte';
 	import type { ComponentType } from 'svelte';
 	import { clsx } from 'clsx';
 	import { UserRoundPlus } from 'lucide-svelte';
@@ -7,74 +7,94 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	export let id = '';
-	export let nombre = '';
-	export let etiqueta = 'Foto de perfil';
-	export let etiquetaOpcional = '(opcional)';
-	export let placeholder = 'https://...';
-	export let textoAyuda =
-		'Podés pegar un enlace o arrastrar una imagen en formato JPG, PNG o WebP.';
-	export let descripcion = 'Subí una imagen cuadrada o tu isologotipo para personalizar tu perfil.';
-	export let accept = 'image/*';
-	export let error = '';
-	export let enlace = '';
-	export let archivo: File | null = null;
-	export let icono: ComponentType = UserRoundPlus;
-	export let claseIcono = 'text-sky-600';
+	interface Props {
+		id?: string;
+		nombre?: string;
+		etiqueta?: string;
+		etiquetaOpcional?: string;
+		placeholder?: string;
+		textoAyuda?: string;
+		descripcion?: string;
+		accept?: string;
+		error?: string;
+		enlace?: string;
+		archivo?: File | null;
+		icono?: ComponentType;
+		claseIcono?: string;
+		onenlace?: (val: string) => void;
+		onarchivo?: (val: File | null) => void;
+	}
 
-	const despacho = createEventDispatcher<{
-		enlace: string;
-		archivo: File | null;
-	}>();
+	let {
+		id = '',
+		nombre = '',
+		etiqueta = 'Foto de perfil',
+		etiquetaOpcional = '(opcional)',
+		placeholder = 'https://...',
+		textoAyuda = 'Podés pegar un enlace o arrastrar una imagen en formato JPG, PNG o WebP.',
+		descripcion = 'Subí una imagen cuadrada o tu isologotipo para personalizar tu perfil.',
+		accept = 'image/*',
+		error = '',
+		enlace = $bindable(''),
+		archivo = $bindable(null),
+		icono = UserRoundPlus,
+		claseIcono = 'text-sky-600',
+		onenlace,
+		onarchivo
+	}: Props = $props();
 
 	const MENSAJE_ARCHIVO_INVALIDO = 'El archivo debe ser una imagen compatible (JPG, PNG o WebP).';
 
-	let inputArchivoRef: HTMLInputElement | null = null;
-	let inputEnlaceRef: HTMLInputElement | null = null;
-	let urlObjeto: string | null = null;
-	let modoActivo: 'enlace' | 'archivo' = archivo ? 'archivo' : 'enlace';
-	let arrastrandoArchivo = false;
-	let errorInterno = '';
-	let errorVistaPrevia = false;
-	let ultimaVistaPrevia = '';
-	let vistaPreviaInterna = '';
+	let inputArchivoRef = $state<HTMLInputElement | null>(null);
+	let inputEnlaceRef = $state<HTMLInputElement | null>(null);
+	let urlObjeto = $state<string | null>(null);
+	let modoActivo = $state<'enlace' | 'archivo'>(archivo ? 'archivo' : 'enlace');
+	let arrastrandoArchivo = $state(false);
+	let errorInterno = $state('');
+	let errorVistaPrevia = $state(false);
+	let vistaPreviaInterna = $state('');
 
 	const botonesModo: Array<{ id: 'enlace' | 'archivo'; etiqueta: string }> = [
 		{ id: 'enlace', etiqueta: 'Usar enlace' },
 		{ id: 'archivo', etiqueta: 'Subir archivo' }
 	];
 
-	$: if (archivo && modoActivo !== 'archivo') {
-		modoActivo = 'archivo';
-	}
-
-	$: vistaPrevia = enlace.trim();
-	$: vistaPreviaNormalizada = normalizarUrlVistaPrevia(vistaPrevia);
-
-	$: if (vistaPrevia !== ultimaVistaPrevia) {
-		errorVistaPrevia = false;
-		ultimaVistaPrevia = vistaPrevia;
-		if (modoActivo === 'enlace') {
-			prepararVistaPreviaDesdeUrl(vistaPrevia);
+	$effect(() => {
+		if (archivo && modoActivo !== 'archivo') {
+			modoActivo = 'archivo';
 		}
-	}
+	});
 
-	$: errorParaInput = modoActivo === 'enlace' ? error : '';
-	$: mensajeErrorGlobal = modoActivo === 'archivo' ? errorInterno || error : errorInterno;
-	$: mensajeEstado = archivo?.name
-		? `Imagen cargada: ${archivo.name}`
-		: enlace.trim()
-			? 'Vista previa aplicada desde el enlace proporcionado.'
-			: '';
+	let vistaPrevia = $derived(enlace.trim());
+	let vistaPreviaNormalizada = $derived(normalizarUrlVistaPrevia(vistaPrevia));
+
+	$effect(() => {
+		if (vistaPrevia) {
+			errorVistaPrevia = false;
+			if (modoActivo === 'enlace') {
+				prepararVistaPreviaDesdeUrl(vistaPrevia);
+			}
+		}
+	});
+
+	let errorParaInput = $derived(modoActivo === 'enlace' ? error : '');
+	let mensajeErrorGlobal = $derived(modoActivo === 'archivo' ? errorInterno || error : errorInterno);
+	let mensajeEstado = $derived(
+		archivo?.name
+			? `Imagen cargada: ${archivo.name}`
+			: enlace.trim()
+				? 'Vista previa aplicada desde el enlace proporcionado.'
+				: ''
+	);
 
 	function emitirEnlace(nuevoEnlace: string) {
 		enlace = nuevoEnlace;
-		despacho('enlace', enlace);
+		onenlace?.(enlace);
 	}
 
 	function emitirArchivo(nuevoArchivo: File | null) {
 		archivo = nuevoArchivo;
-		despacho('archivo', archivo);
+		onarchivo?.(archivo);
 	}
 
 	function limpiarUrlObjeto() {
@@ -115,13 +135,11 @@
 	}
 
 	function validarArchivo(archivoAValidar: File) {
-		// Validar tipo de archivo
 		if (!archivoAValidar.type.startsWith('image/')) {
 			errorInterno = MENSAJE_ARCHIVO_INVALIDO;
 			return false;
 		}
 
-		// Validar tamaño de archivo (máximo 2MB)
 		const MAX_SIZE_MB = 2;
 		const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
 		if (archivoAValidar.size > MAX_SIZE_BYTES) {
@@ -147,8 +165,8 @@
 		errorVistaPrevia = false;
 	}
 
-	function manejarEntradaEnlace(evento: Event) {
-		const nuevoEnlace = (evento.target as HTMLInputElement).value;
+	function manejarEntradaEnlace(evento: Event & { currentTarget: HTMLInputElement }) {
+		const nuevoEnlace = evento.currentTarget.value;
 		modoActivo = 'enlace';
 		errorInterno = '';
 		emitirEnlace(nuevoEnlace);
@@ -171,7 +189,6 @@
 
 	function normalizarUrlVistaPrevia(cruda: string): string {
 		const recortada = cruda.trim();
-		if (!recortada) return '';
 		if (/^(?:data|blob):/i.test(recortada)) {
 			return recortada;
 		}
@@ -194,8 +211,8 @@
 		errorVistaPrevia = false;
 	}
 
-	function manejarCambioArchivo(evento: Event) {
-		const input = evento.target as HTMLInputElement;
+	function manejarCambioArchivo(evento: Event & { currentTarget: HTMLInputElement }) {
+		const input = evento.currentTarget;
 		const archivoSeleccionado = input.files?.[0] ?? null;
 		if (!archivoSeleccionado) {
 			limpiarArchivoSeleccionado(true);
@@ -249,7 +266,10 @@
 				class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-sky-50"
 				aria-hidden="true"
 			>
-				<svelte:component this={icono} class={clsx('h-5 w-5', claseIcono)} stroke-width={1.7} />
+				{#if icono}
+					{@const IconoRender = icono}
+					<IconoRender class={clsx('h-5 w-5', claseIcono)} stroke-width={1.7} />
+				{/if}
 			</span>
 			<div class="flex items-baseline gap-2">
 				<p class="text-base font-semibold text-slate-900">{etiqueta}</p>
@@ -268,7 +288,7 @@
 		>
 			<p class="text-sm text-slate-600">{textoAyuda}</p>
 			<div class="inline-flex rounded-full bg-white/90 p-1 text-sm font-medium shadow-inner">
-				{#each botonesModo as boton}
+				{#each botonesModo as boton (boton.id)}
 					<button
 						type="button"
 						class={clsx(
@@ -278,7 +298,7 @@
 								: 'text-gray-600 hover:text-gray-900'
 						)}
 						aria-pressed={modoActivo === boton.id}
-						on:click={() => seleccionarModo(boton.id)}
+						onclick={() => seleccionarModo(boton.id)}
 					>
 						{boton.etiqueta}
 					</button>
@@ -296,8 +316,8 @@
 					bind:value={enlace}
 					{placeholder}
 					error={errorParaInput}
-					on:input={manejarEntradaEnlace}
-					inputRef={inputEnlaceRef}
+					oninput={manejarEntradaEnlace}
+					bind:inputRef={inputEnlaceRef}
 					aria-describedby={mensajeErrorGlobal ? `${id}-error` : undefined}
 				/>
 			</div>
@@ -317,16 +337,16 @@
 					)}
 					aria-label="Elegí un archivo para la foto de perfil"
 					aria-describedby={mensajeErrorGlobal ? `${id}-error` : undefined}
-					on:click={abrirSelectorDeArchivos}
-					on:keydown={(e) => {
+					onclick={abrirSelectorDeArchivos}
+					onkeydown={(e) => {
 						if (e.key === 'Enter' || e.key === ' ') {
 							e.preventDefault();
 							abrirSelectorDeArchivos();
 						}
 					}}
-					on:dragover={manejarArrastreSobre}
-					on:dragleave={manejarSalidaArrastre}
-					on:drop={manejarSoltar}
+					ondragover={manejarArrastreSobre}
+					ondragleave={manejarSalidaArrastre}
+					ondrop={manejarSoltar}
 				>
 					<div class="flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm">
 						<svg
@@ -356,7 +376,7 @@
 					type="file"
 					{accept}
 					aria-labelledby={`${id}-archivo-label`}
-					on:change={manejarCambioArchivo}
+					onchange={manejarCambioArchivo}
 				/>
 			</div>
 		{/if}
@@ -376,8 +396,8 @@
 								class="h-full w-full object-cover"
 								loading="lazy"
 								referrerpolicy="no-referrer"
-								on:error={manejarErrorVistaPrevia}
-								on:load={manejarCargaVistaPrevia}
+								onerror={manejarErrorVistaPrevia}
+								onload={manejarCargaVistaPrevia}
 							/>
 						{:else}
 							<div
@@ -406,7 +426,7 @@
 					<button
 						type="button"
 						class="rounded-full border border-transparent bg-white px-4 py-2 text-sm font-semibold text-[rgb(var(--color-primary))] shadow-sm transition hover:border-[rgb(var(--color-primary))] hover:bg-[rgba(var(--color-primary),0.08)]"
-						on:click={limpiarSeleccionManual}
+						onclick={limpiarSeleccionManual}
 					>
 						Quitar imagen
 					</button>

@@ -15,10 +15,13 @@
 		inputRef?: HTMLInputElement | null;
 		prefixIcon?: ComponentType | null;
 		prefixIconClass?: string;
+		suffix?: import('svelte').Snippet;
 		oninput?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		onblur?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
+		onfocus?: (e: FocusEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
 		onkeydown?: (e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) => void;
-		[key: string]: any;
+		onchange?: (e: Event & { currentTarget: EventTarget & HTMLInputElement }) => void;
+		[key: string]: unknown;
 	}
 
 	let {
@@ -34,8 +37,11 @@
 		inputRef = $bindable(null),
 		prefixIcon = null,
 		prefixIconClass = '',
+		suffix,
 		oninput,
 		onblur,
+		onfocus,
+		onchange,
 		onkeydown,
 		...rest
 	}: Props = $props();
@@ -79,6 +85,8 @@
 			value={internalValue}
 			oninput={handleInput}
 			{onblur}
+			{onfocus}
+			{onchange}
 			{onkeydown}
 			{type}
 			{required}
@@ -93,9 +101,11 @@
 				prefixIcon && 'pl-12',
 				customClass
 			)}
-			aria-invalid={error ? 'true' : 'false'}
 			aria-describedby={error ? `${id}-error` : undefined}
 		/>
+		{#if suffix}
+			{@render suffix()}
+		{/if}
 	</div>
 
 	{#if error}

@@ -2,50 +2,54 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import type { ComponentType } from 'svelte';
 
-	export let id = '';
-	export let name = '';
-	export let required = false;
-	export let value: Date | null = null;
-	export let error = '';
-	export let prefixIcon: ComponentType | null = null;
-	export let prefixIconClass = '';
-
-	let internal = '';
-	let ultimaCadenaProcesada: string | null = null;
-
-	function formatForInput(d: Date | null): string {
-		if (!d) return '';
-		const year = d.getFullYear();
-		const month = String(d.getMonth() + 1).padStart(2, '0');
-		const day = String(d.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
+	interface Props {
+		id?: string;
+		name?: string;
+		required?: boolean;
+		value?: Date | null;
+		error?: string;
+		prefixIcon?: ComponentType | null;
+		prefixIconClass?: string;
+		onchange?: (e: Event) => void;
 	}
 
-	function actualizarValorDesdeCadena(cadena: string): Date | null {
-		if (!cadena) {
-			value = null;
-			return null;
+	let {
+		id = '',
+		name = '',
+		required = false,
+		value = $bindable(null),
+		error = '',
+		prefixIcon = null,
+		prefixIconClass = '',
+		onchange
+	}: Props = $props();
+
+	let internal = $state('');
+
+	$effect.pre(() => {
+		if (value) {
+			const year = value.getFullYear();
+			const month = String(value.getMonth() + 1).padStart(2, '0');
+			const day = String(value.getDate()).padStart(2, '0');
+			internal = `${year}-${month}-${day}`;
+		} else {
+			internal = '';
 		}
+	});
 
-		const fecha = new Date(`${cadena}T00:00:00`);
-		if (Number.isNaN(fecha.getTime())) {
+	function handleInput(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+		const val = e.currentTarget.value;
+		if (!val) {
 			value = null;
-			return null;
+		} else {
+			const fecha = new Date(`${val}T00:00:00`);
+			if (!Number.isNaN(fecha.getTime())) {
+				value = fecha;
+			} else {
+				value = null;
+			}
 		}
-
-		value = fecha;
-		return fecha;
-	}
-
-	$: internal = formatForInput(value);
-
-	$: if (internal !== ultimaCadenaProcesada) {
-		ultimaCadenaProcesada = internal;
-		actualizarValorDesdeCadena(internal);
-	}
-
-	function handleEntrada(e: Event) {
-		actualizarValorDesdeCadena((e.target as HTMLInputElement).value);
+		onchange?.(e);
 	}
 </script>
 
@@ -58,6 +62,6 @@
 	{error}
 	{prefixIcon}
 	{prefixIconClass}
-	on:input={handleEntrada}
-	on:change={handleEntrada}
+	oninput={handleInput}
+	onchange={handleInput}
 />
