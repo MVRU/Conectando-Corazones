@@ -25,7 +25,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	return json(usuarioSafe);
 };
 
-export const PUT: RequestHandler = async ({ params, request }) => {
+export const PUT: RequestHandler = async ({ params, request, locals, cookies }) => {
 	const id = parseInt(params.id);
 	if (isNaN(id)) {
 		return json({ error: 'ID inválido' }, { status: 400 });
@@ -38,6 +38,20 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 		const usuarioActualizado = await actualizarUsuario.execute(id, data);
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password: _pwd, ...usuarioActualizadoSafe } = usuarioActualizado.toPOJO();
+
+		// Actualizar cookie de sesión si es el usuario autenticado para que el Header refleje cambios
+		if (locals.usuario?.id_usuario === id) {
+			const rememberMe = cookies.get('remember_me') === 'true';
+			const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
+			cookies.set('session_usuario', JSON.stringify(usuarioActualizadoSafe), {
+				path: '/',
+				httpOnly: false,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				maxAge
+			});
+		}
+
 		return json(usuarioActualizadoSafe);
 	} catch (error) {
 		if (error instanceof Error) {
@@ -58,7 +72,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 	}
 
 	try {
-		// TODO (Marina Milo): Validar RN 1.3 - No permitir eliminación si hay proyectos en curso o colaboraciones activas
 		const eliminarUsuario = new EliminarUsuario(repository);
 		await eliminarUsuario.execute(id);
 		return new Response(null, { status: 204 });

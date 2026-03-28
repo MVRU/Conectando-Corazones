@@ -10,4 +10,6 @@ export interface UsuarioRepository {
 	findAll(filtros?: { rol?: string; estado?: string }): Promise<Usuario[]>;
 	update(usuario: Usuario): Promise<Usuario>;
 	delete(id: number): Promise<void>;
+	hasActiveProjects(id: number): Promise<boolean>;
+	hasActiveCollaborations(id: number): Promise<boolean>;
 }

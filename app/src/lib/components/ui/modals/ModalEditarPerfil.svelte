@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import type { Writable, Readable } from 'svelte/store';
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
@@ -7,6 +8,7 @@
 	import type { Provincia } from '$lib/domain/entities/Provincia';
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { toastStore } from '$lib/stores/toast';
 
 	let provincias: Provincia[] = [];
 	let cargandoProvincias = true;
@@ -18,8 +20,10 @@
 		tamanio: number;
 	} | null = null;
 
-	import type { Contacto } from '$lib/domain/types/Contacto';
-	import { toastStore } from '$lib/stores/toast';
+	let modoFoto: 'upload' | 'url' = 'upload';
+	let urlFotoManual = '';
+	let validandoUrl = false;
+
 	import { env } from '$lib/infrastructure/config/env';
 
 	async function handleFileUpload(event: Event) {
@@ -98,6 +102,67 @@
 		}
 	}
 
+	async function handleUrlUpload() {
+		if (!urlFotoManual) {
+			toastStore.show({
+				variant: 'error',
+				title: 'URL vacía',
+				message: 'Por favor ingresá una dirección de imagen válida.'
+			});
+			return;
+		}
+
+		if (!urlFotoManual.startsWith('http')) {
+			toastStore.show({
+				variant: 'error',
+				title: 'URL inválida',
+				message: 'La dirección debe comenzar con http:// o https://'
+			});
+			return;
+		}
+
+		validandoUrl = true;
+		try {
+			// Intentar cargar la imagen para validar que existe y es una imagen
+			await new Promise((resolve, reject) => {
+				const img = new Image();
+				img.onload = resolve;
+				img.onerror = () => reject(new Error('No se pudo cargar la imagen desde esa URL.'));
+				img.src = urlFotoManual;
+				// Timeout de 5 segundos
+				setTimeout(() => reject(new Error('Tiempo de espera agotado al validar la imagen.')), 5000);
+			});
+
+			onActualizarCampo('url_foto', urlFotoManual);
+
+			pendingUploadMetadata = {
+				url: urlFotoManual,
+				nombreArchivo: urlFotoManual.split('/').pop()?.split('?')[0] || 'foto-externa.jpg',
+				tipoMime: 'image/jpeg', // Default
+				tamanio: 0
+			};
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Enlace validado',
+				message: 'La imagen se vinculó correctamente. Guardá los cambios para confirmar.'
+			});
+		} catch (e) {
+			console.error('Error validando URL de foto:', e);
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: e instanceof Error ? e.message : 'No se pudo validar el enlace de la imagen.'
+			});
+		} finally {
+			validandoUrl = false;
+		}
+	}
+
+	function setModoFoto(nuevoModo: 'upload' | 'url') {
+		modoFoto = nuevoModo;
+	}
+
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
 	export let mostrar: boolean;
@@ -113,6 +178,7 @@
 		validarDescripcion: (descripcion: string) => string | null;
 		actualizarCampo: (campo: keyof EditarPerfilForm, valor: any) => void;
 	};
+	export let guardando = false;
 
 	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
@@ -200,6 +266,8 @@
 
 	$: nombreUsuario = obtenerNombreUsuario(perfilUsuario);
 	$: nombreDeshabilitado = campoNombreDeshabilitado(perfilUsuario);
+
+
 	$: tituloSeccionNombre =
 		perfilUsuario.rol === 'institucion' ? 'Representante legal' : 'Información personal';
 	$: mensajeDeshabilitado =
@@ -212,8 +280,6 @@
 			: 'Describí tus intereses, experiencia, motivaciones...';
 	$: labelDescripcion =
 		perfilUsuario.rol === 'institucion' ? 'Contanos sobre tu institución' : 'Contanos sobre vos';
-
-	$: tieneFoto = $datosEdicion.url_foto && $datosEdicion.url_foto !== '/logo-1.png';
 
 	let formContactos: MetodosContactoForm;
 </script>
@@ -259,9 +325,9 @@
 				<div
 					class="col-span-1 flex flex-col items-center overflow-y-auto border-b border-gray-100 bg-gray-50 p-6 text-center md:col-span-3 md:border-r md:border-b-0"
 				>
-					<div class="group relative mb-4">
+					<div class="group relative mb-6">
 						<div
-							class="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg ring-1 ring-gray-200"
+							class="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg ring-1 ring-gray-200 transition-transform duration-300 group-hover:scale-[1.02]"
 						>
 							<img
 								src={$datosEdicion.url_foto || '/logo-1.png'}
@@ -269,60 +335,112 @@
 								class="h-full w-full object-cover"
 							/>
 						</div>
+					</div>
 
-						<button
-							type="button"
-							class="absolute right-1 bottom-1 cursor-pointer rounded-full bg-blue-600 p-2.5 text-white shadow-md transition-colors hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-blue-400"
-							aria-label="Cambiar foto de perfil"
-							disabled={subiendoFoto}
-							on:click={() => document.getElementById('file-upload')?.click()}
-						>
-							{#if subiendoFoto}
-								<svg
-									class="h-4 w-4 animate-spin"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
+					<div class="mb-4 w-full px-4 text-left">
+						<label class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+							Cambiar foto
+						</label>
+						<div class="flex gap-1 rounded-lg border border-gray-200 bg-white p-1 mb-4">
+							<button
+								type="button"
+								class="flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all {modoFoto ===
+								'upload'
+									? 'bg-blue-600 text-white shadow-sm'
+									: 'text-gray-600 hover:bg-gray-100'}"
+								on:click={() => setModoFoto('upload')}
+							>
+								Subir
+							</button>
+							<button
+								type="button"
+								class="flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all {modoFoto ===
+								'url'
+									? 'bg-blue-600 text-white shadow-sm'
+									: 'text-gray-600 hover:bg-gray-100'}"
+								on:click={() => setModoFoto('url')}
+							>
+								Enlace
+							</button>
+						</div>
+
+						{#if modoFoto === 'upload'}
+							<div class="space-y-3" in:fly={{ y: 10, duration: 200 }}>
+								<p class="text-[11px] text-gray-500">Subí un archivo JPG, PNG o WEBP (máx. 5MB).</p>
+								<button
+									type="button"
+									class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-blue-400 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50"
+									disabled={subiendoFoto}
+									on:click={() => document.getElementById('file-upload')?.click()}
 								>
-									<circle
-										class="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										stroke-width="4"
-									></circle>
-									<path
-										class="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
-							{:else}
-								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+									{#if subiendoFoto}
+										<svg
+											class="h-4 w-4 animate-spin text-blue-600"
+											fill="none"
+											viewBox="0 0 24 24"
+										>
+											<circle
+												class="opacity-25"
+												cx="12"
+												cy="12"
+												r="10"
+												stroke="currentColor"
+												stroke-width="4"
+											></circle>
+											<path
+												class="opacity-75"
+												fill="currentColor"
+												d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+											></path>
+										</svg>
+										<span>Subiendo...</span>
+									{:else}
+										<svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+										</svg>
+										<span>Seleccionar archivo</span>
+									{/if}
+								</button>
+								<input
+									id="file-upload"
+									type="file"
+									accept="image/*"
+									disabled={subiendoFoto}
+									on:change={handleFileUpload}
+									class="sr-only"
+								/>
+							</div>
+						{:else}
+							<div class="space-y-3" in:fly={{ y: 10, duration: 200 }}>
+								<p class="text-[11px] text-gray-500">Pegá el enlace directo a una imagen pública.</p>
+								<div class="relative">
+									<input
+										type="url"
+										placeholder="https://ejemplo.com/mi-foto.jpg"
+										bind:value={urlFotoManual}
+										class="block w-full rounded-xl border-gray-300 pr-10 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
 									/>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-									/>
-								</svg>
-							{/if}
-						</button>
-						<input
-							id="file-upload"
-							type="file"
-							accept="image/*"
-							disabled={subiendoFoto}
-							on:change={handleFileUpload}
-							class="sr-only"
-						/>
+									<button
+										type="button"
+										on:click={handleUrlUpload}
+										disabled={validandoUrl || !urlFotoManual}
+										class="absolute right-2 top-1.5 rounded-lg bg-blue-100 p-1.5 text-blue-600 transition-colors hover:bg-blue-200 disabled:opacity-50"
+										title="Validar URL"
+									>
+										{#if validandoUrl}
+											<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+												<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+												<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+											</svg>
+										{:else}
+											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+											</svg>
+										{/if}
+									</button>
+								</div>
+							</div>
+						{/if}
 					</div>
 
 					<h4 class="mb-1 text-lg font-bold text-gray-900">{nombreUsuario}</h4>
@@ -415,7 +533,7 @@
 										<option value={undefined}>
 											{cargandoProvincias ? 'Cargando...' : 'Seleccioná una provincia'}
 										</option>
-										{#each provincias as prov}
+										{#each provincias as prov (prov.id_provincia)}
 											<option value={prov.id_provincia}>{prov.nombre}</option>
 										{/each}
 									</select>
@@ -435,7 +553,7 @@
 												? 'Primero elegí provincia'
 												: 'Seleccioná localidad'}
 										</option>
-										{#each $localidadesFiltradas as loc}
+										{#each $localidadesFiltradas as loc (loc.id_localidad)}
 											<option value={loc.id_localidad}>{loc.nombre}</option>
 										{/each}
 									</select>
@@ -510,20 +628,23 @@
 
 					<div class="z-10 border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:px-8">
 						<div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-							<button
-								type="button"
-								class="min-w-[120px] rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:ring-4 focus:ring-gray-100 focus:outline-none"
-								on:click={handleCerrar}
-							>
-								Cancelar
-							</button>
-							<button
-								type="button"
-								class="min-w-[140px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none"
-								on:click={handleGuardarClick}
-							>
-								Guardar cambios
-							</button>
+							<Button
+								onclick={handleCerrar}
+								variant="secondary"
+								size="sm"
+								label="Cancelar"
+								disabled={guardando}
+								customClass="min-w-[120px]"
+							/>
+							<Button
+								onclick={handleGuardarClick}
+								variant="primary"
+								size="sm"
+								label="Guardar cambios"
+								loading={guardando}
+								loadingLabel="Guardando..."
+								customClass="min-w-[140px]"
+							/>
 						</div>
 					</div>
 				</div>

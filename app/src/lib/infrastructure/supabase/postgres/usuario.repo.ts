@@ -174,6 +174,33 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		});
 	}
 
+	async hasActiveProjects(id: number): Promise<boolean> {
+		const count = await prisma.proyecto.count({
+			where: {
+				institucion_id: id,
+				estado: {
+					descripcion: 'en_curso'
+				}
+			}
+		});
+		return count > 0;
+	}
+
+	async hasActiveCollaborations(id: number): Promise<boolean> {
+		const count = await prisma.colaboracion.count({
+			where: {
+				colaborador_id: id,
+				estado: 'aprobada',
+				proyecto: {
+					estado: {
+						descripcion: 'en_curso'
+					}
+				}
+			}
+		});
+		return count > 0;
+	}
+
 	async update(usuario: Usuario): Promise<Usuario> {
 		if (!usuario.id_usuario) throw new Error('ID requerido para actualizar');
 

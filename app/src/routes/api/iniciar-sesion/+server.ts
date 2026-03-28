@@ -64,8 +64,12 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
 
 		if (usuarioSafe.estado !== 'activo') {
-			// TODO (Marina Milo): Si el estado es "inhabilitado" o "pendiente", dar feedback específico al usuario
-			return json({ error: 'La cuenta no se encuentra activa.' }, { status: 403 });
+			const mensaje =
+				usuarioSafe.estado === 'inactivo'
+					? 'Tu cuenta ha sido eliminada o desactivada. Si creés que es un error, contactanos.'
+					: 'Tu cuenta se encuentra suspendida temporalmente por incumplimiento de las normas.';
+
+			return json({ error: mensaje }, { status: 403 });
 		}
 
 		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;

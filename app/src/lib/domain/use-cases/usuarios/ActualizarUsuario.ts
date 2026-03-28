@@ -10,8 +10,31 @@ export class ActualizarUsuario {
 			throw new Error('Usuario no encontrado');
 		}
 
-		// TODO (Marina Milo): Validar disponibilidad de username/email si cambiaron (RN 1.1)
-		// TODO (Marina Milo): No permitir modificar campos sensibles como estado_verificacion
+		// No permitir modificar campos sensibles como estado_verificacion
+		if (cambios.estado_verificacion !== undefined && cambios.estado_verificacion !== usuarioExistente.estado_verificacion) {
+			throw new Error('No se permite modificar el estado de verificación manualmente.');
+		}
+
+		// Validar disponibilidad de username si cambió
+		if (cambios.username && cambios.username !== usuarioExistente.username) {
+			const existente = await this.usuarioRepository.findByUsername(cambios.username);
+			if (existente && existente.id_usuario !== id) {
+				throw new Error('El nombre de usuario ya está en uso.');
+			}
+			usuarioExistente.username = cambios.username;
+		}
+
+		// Validar disponibilidad de email si cambió en los contactos
+		if (cambios.contactos) {
+			const emails = cambios.contactos.filter(c => c.tipo_contacto === 'email');
+			for (const email of emails) {
+				// Solo validamos el email principal si es el que cambió
+				const emailExistente = await this.usuarioRepository.findByEmail(email.valor);
+				if (emailExistente && emailExistente.id_usuario !== id) {
+					throw new Error(`El email ${email.valor} ya está en uso.`);
+				}
+			}
+		}
 
 		// Evitar cambios en el rol
 		if (cambios.rol && cambios.rol !== usuarioExistente.rol) {

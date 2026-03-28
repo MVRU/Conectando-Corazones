@@ -3,7 +3,6 @@
 		usuario as usuarioStore,
 		isAuthenticated,
 		authActions,
-		authStore,
 		isAdmin
 	} from '$lib/stores/auth';
 	import { invalidateAll } from '$app/navigation';
@@ -40,6 +39,7 @@
 	import { determinarEstadoVerificacion } from '$lib/utils/util-verificacion';
 	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
+	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 	import { Settings, Flag, ShieldAlert, BarChart3 } from 'lucide-svelte';
 
 	let { perfilUsuario, esMiPerfil, proyectos = [], resenas = [], categorias = [], tiposParticipacion = [] } = $props<{
@@ -89,8 +89,11 @@
 	const edicion = usePerfilEdicion();
 	const { datosEdicion, provinciaSeleccionada, errorDescripcion, localidadesFiltradas } = edicion;
 
+	let guardando = $state(false);
+
 	async function actualizarUsuarioCon(parcial: Partial<UsuarioCompleto>, cerrarModal?: () => void) {
 		if (!$usuarioStore || !$usuarioStore.id_usuario) return;
+		guardando = true;
 		try {
 			await authActions.actualizarPerfil($usuarioStore.id_usuario, parcial as Parameters<typeof authActions.actualizarPerfil>[1]);
 			await invalidateAll();
@@ -103,7 +106,7 @@
 				message: error instanceof Error ? error.message : 'No se pudieron guardar los cambios en el perfil.'
 			});
 		} finally {
-			// TODO (Marina Milo): Implementar estado de loading visible en la UI para el guardado (button feedback)
+			guardando = false;
 		}
 	}
 
@@ -353,10 +356,11 @@
 	{provinciaSeleccionada}
 	{localidadesFiltradas}
 	{errorDescripcion}
-	onCambiarProvincia={(p) => edicion.cambiarProvincia(p)}
-	onActualizarDescripcion={(v) => edicion.actualizarDescripcion(v)}
-	onActualizarCampo={(c, v) => edicion.actualizarCampo(c, v)}
+	onCambiarProvincia={(p: number | undefined) => edicion.cambiarProvincia(p)}
+	onActualizarDescripcion={(v: string) => edicion.actualizarDescripcion(v)}
+	onActualizarCampo={(c: keyof EditarPerfilForm, v: any) => edicion.actualizarCampo(c, v)}
 	{edicion}
+	{guardando}
 	on:guardar={handleGuardarPerfil}
 	on:cerrar={() => modales.cerrar('edicion')}
 />
@@ -378,7 +382,7 @@
 		mostrar={$modales.categorias}
 		categoriasSeleccionadas={perfilUsuario.categorias_preferidas || []}
 		{categorias}
-		guardando={$authStore.isLoading}
+		{guardando}
 		on:guardar={handleGuardarCategorias}
 		on:cerrar={() => modales.cerrar('categorias')}
 	/>
@@ -389,7 +393,7 @@
 		mostrar={$modales.tiposParticipacion}
 		tiposSeleccionados={perfilUsuario.tipos_participacion_preferidas || []}
 		{tiposParticipacion}
-		guardando={$authStore.isLoading}
+		{guardando}
 		on:guardar={handleGuardarTiposParticipacion}
 		on:cerrar={() => modales.cerrar('tiposParticipacion')}
 	/>
