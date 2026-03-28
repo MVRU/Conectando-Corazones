@@ -329,7 +329,7 @@
 						variant="primary"
 						size="sm"
 						customClass="px-4 py-1.5 text-sm"
-						on:click={() => step++}
+						onclick={() => step++}
 					/>
 				{:else}
 					<Button
@@ -337,7 +337,7 @@
 						variant="secondary"
 						size="sm"
 						customClass="px-4 py-1.5 text-sm"
-						on:click={() => {
+						onclick={() => {
 							showModal = false;
 							step = 0;
 						}}
