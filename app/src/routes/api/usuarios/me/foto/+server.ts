@@ -8,7 +8,7 @@ import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
-export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
 	const user = locals.usuario;
 	if (!user || !user.id_usuario) {
 		return json({ error: 'No autenticado o usuario no encontrado' }, { status: 401 });
@@ -104,20 +104,8 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			tipoMime: tipoMime || 'application/octet-stream',
 			tamanio: tamanio || 0
 		});
-
-		// Actualizar cookie de sesión para que el Header y otros componentes reflejen el cambio
-		const rememberMe = cookies.get('remember_me') === 'true';
-		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password: _pwd, ...usuarioActualizadoSafe } = usuarioActualizado.toPOJO();
-
-		cookies.set('session_usuario', JSON.stringify(usuarioActualizadoSafe), {
-			path: '/',
-			httpOnly: false,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
-			maxAge
-		});
 
 		return json({ success: true, url, usuario: usuarioActualizadoSafe });
 	} catch (error) {

@@ -1,26 +1,17 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { AuthGuard } from '$lib/infrastructure/auth/AuthGuard';
 
+/**
+ * Endpoint de redirección para el panel principal según el rol del usuario.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
 	const { usuario } = locals;
 
+	// AuthGuard en hooks ya verificó que el usuario existe si llegó aquí.
 	if (!usuario) {
 		throw redirect(303, '/iniciar-sesion');
 	}
 
-	const usuarioPojo = usuario.toPOJO();
-
-	if (usuario.rol === 'administrador') {
-		throw redirect(303, '/admin/panel-admin'); // TODO: implementar panel admin
-	}
-
-	if (usuario.rol === 'institucion') {
-		throw redirect(303, '/institucion/mi-panel');
-	}
-
-	if (usuario.rol === 'colaborador') {
-		throw redirect(303, '/colaborador/mi-panel');
-	}
-
-	throw redirect(303, '/');
+	throw redirect(303, AuthGuard.getPanelRedirect(usuario));
 };

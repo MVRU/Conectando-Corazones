@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
-	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
+	import type { Usuario, Institucion, Colaborador, Organizacion } from '$lib/domain/types/Usuario';
 	import type { Writable, Readable } from 'svelte/store';
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 	import type { Localidad } from '$lib/domain/entities/Localidad';
@@ -173,10 +173,10 @@
 	export let errorDescripcion: Readable<string | null>;
 	export let onCambiarProvincia: (idProvincia: number | undefined) => void;
 	export let onActualizarDescripcion: (valor: string) => void;
-	export let onActualizarCampo: (campo: keyof EditarPerfilForm, valor: any) => void;
+	export let onActualizarCampo: (campo: keyof EditarPerfilForm, valor: EditarPerfilForm[keyof EditarPerfilForm]) => void;
 	export let edicion: {
 		validarDescripcion: (descripcion: string) => string | null;
-		actualizarCampo: (campo: keyof EditarPerfilForm, valor: any) => void;
+		actualizarCampo: (campo: keyof EditarPerfilForm, valor: EditarPerfilForm[keyof EditarPerfilForm]) => void;
 	};
 	export let guardando = false;
 
@@ -251,14 +251,14 @@
 
 	function obtenerNombreUsuario(usuario: UsuarioCompleto): string {
 		if (usuario.rol === 'institucion') {
-			return (usuario as any).nombre_legal || usuario.nombre;
+		return (usuario as Institucion).nombre_legal || usuario.nombre;
 		}
 		return `${usuario.nombre} ${usuario.apellido}`;
 	}
 
 	function campoNombreDeshabilitado(usuario: UsuarioCompleto): boolean {
 		if (usuario.rol === 'institucion') return true;
-		if (usuario.rol === 'colaborador' && (usuario as any).tipo_colaborador === 'unipersonal') {
+		if (usuario.rol === 'colaborador' && (usuario as Colaborador).tipo_colaborador === 'unipersonal') {
 			return true;
 		}
 		return false;
@@ -338,9 +338,9 @@
 					</div>
 
 					<div class="mb-4 w-full px-4 text-left">
-						<label class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+						<p class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
 							Cambiar foto
-						</label>
+						</p>
 						<div class="flex gap-1 rounded-lg border border-gray-200 bg-white p-1 mb-4">
 							<button
 								type="button"

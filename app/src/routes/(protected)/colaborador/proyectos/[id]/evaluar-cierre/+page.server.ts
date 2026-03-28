@@ -11,13 +11,20 @@ const colaboracionRepo = new PostgresColaboracionRepository();
 const evaluacionRepo = new PostgresEvaluacionRepository();
 const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 
-const registrarEvaluacion = new RegistrarEvaluacion(evaluacionRepo, proyectoRepo, colaboracionRepo, solicitudRepo);
+const registrarEvaluacion = new RegistrarEvaluacion(
+	evaluacionRepo,
+	proyectoRepo,
+	colaboracionRepo,
+	solicitudRepo
+);
 
+/**
+ * Evaluación de solicitudes de cierre por parte del colaborador.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ * La verificación de colaboración aprobada es lógica de negocio.
+ */
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const user = locals.usuario;
-	if (!user || user.rol !== 'colaborador') {
-		throw redirect(303, '/iniciar-sesion');
-	}
+	const user = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	const proyectoId = Number(params.id);
 
@@ -49,7 +56,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// 4. Buscar Evaluación del usuario actual
 	let evaluacionUsuario = null;
-	if (solicitud) {
+	if (solicitud && solicitud.id_solicitud !== undefined && user.id_usuario !== undefined) {
 		evaluacionUsuario = await evaluacionRepo.findBySolicitudAndColaborador(
 			solicitud.id_solicitud,
 			user.id_usuario
@@ -58,7 +65,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// 5. Contadores
 	const totalColaboradores = colaboraciones.filter((c) => c.estado === 'aprobada').length;
-	const votosRealizados = solicitud
+	const votosRealizados = solicitud?.id_solicitud
 		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud)).total
 		: 0;
 
@@ -76,7 +83,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 export const actions: Actions = {
 	aprobar: async ({ request, params, locals }) => {
 		const user = locals.usuario;
-		if (!user) throw redirect(303, '/iniciar-sesion');
+		if (!user) return fail(401, { error: 'No autenticado' });
 
 		const formData = await request.formData();
 		const justificacion = formData.get('justificacion') as string;
@@ -89,19 +96,21 @@ export const actions: Actions = {
 			await registrarEvaluacion.execute({
 				proyectoId,
 				solicitudId,
-				colaboradorId: user.id_usuario,
+				colaboradorId: user.id_usuario!,
 				voto: 'aprobado',
 				justificacion
 			});
+
 			return { success: true };
-		} catch (error: any) {
-			return fail(400, { error: error.message });
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error interno';
+			return fail(400, { error: errorMessage });
 		}
 	},
 
 	rechazar: async ({ request, params, locals }) => {
 		const user = locals.usuario;
-		if (!user) throw redirect(303, '/iniciar-sesion');
+		if (!user) return fail(401, { error: 'No autenticado' });
 
 		const formData = await request.formData();
 		const justificacion = formData.get('justificacion') as string;
@@ -109,23 +118,26 @@ export const actions: Actions = {
 		const proyectoId = Number(params.id);
 
 		if (!solicitudId) return fail(400, { error: 'Falta ID de solicitud' });
-		if (!justificacion) return fail(400, { error: 'La justificación es obligatoria para rechazar' });
+		if (!justificacion)
+			return fail(400, { error: 'La justificación es obligatoria para rechazar' });
 
 		try {
 			await registrarEvaluacion.execute({
 				proyectoId,
 				solicitudId,
-				colaboradorId: user.id_usuario,
+				colaboradorId: user.id_usuario!,
 				voto: 'rechazado',
 				justificacion
 			});
+
 			return { success: true };
-		} catch (error: any) {
-			return fail(400, { error: error.message });
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Error interno';
+			return fail(400, { error: errorMessage });
 		}
 	},
 
-	reportar: async ({ request, params }) => {
+	reportar: async () => {
 		return {
 			success: true,
 			message: 'Irregularidad reportada correctamente. El equipo de auditoría revisará el caso.'

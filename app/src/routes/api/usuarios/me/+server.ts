@@ -17,8 +17,8 @@ export const DELETE: RequestHandler = async ({ locals, cookies }) => {
 		if (locals.supabase) {
 			await locals.supabase.auth.signOut();
 		}
-		cookies.delete('session_usuario', { path: '/' });
 		cookies.delete('remember_me', { path: '/' });
+
 
 		return new Response(null, { status: 204 });
 	} catch (error) {

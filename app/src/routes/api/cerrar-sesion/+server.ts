@@ -6,8 +6,8 @@ export const POST: RequestHandler = async ({ locals, cookies }) => {
 		await locals.supabase.auth.signOut();
 	}
 
-	cookies.delete('session_usuario', { path: '/' });
 	cookies.delete('remember_me', { path: '/' });
+
 
 	return json({ success: true });
 };

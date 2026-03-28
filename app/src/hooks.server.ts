@@ -1,29 +1,45 @@
-import { redirect, type Handle } from '@sveltejs/kit';
+import { type Handle } from '@sveltejs/kit';
 import { createServerClient } from '@supabase/ssr';
-import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { dev } from '$app/environment';
 import { env } from '$lib/infrastructure/config/env';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { ObtenerUsuarioSesion } from '$lib/domain/use-cases/auth/ObtenerUsuarioSesion';
+import { AuthGuard } from '$lib/infrastructure/auth/AuthGuard';
 
+/**
+ * Handler principal para gestionar sesión, Supabase y RBAC.
+ */
 export const handle: Handle = async ({ event, resolve }) => {
 	const rememberMe = event.cookies.get('remember_me') === 'true';
 
+	// 1. Inicializar cliente de Supabase (SSR)
 	event.locals.supabase = createServerClient(env.SUPABASE_URL || '', env.SUPABASE_ANON_KEY || '', {
 		cookies: {
 			getAll: () => event.cookies.getAll(),
 			setAll: (cookiesToSet) => {
 				cookiesToSet.forEach(({ name, value, options }) => {
-					const cookieOptions = { ...options, path: '/' };
-					// Si el usuario pidió recordar sesión, extendemos la duración de las cookies de auth
-					if (rememberMe) {
+					const cookieOptions = {
+						...options,
+						path: '/',
+						secure: !dev,
+						httpOnly: true,
+						sameSite: 'lax' as const
+					};
+
+					// Extender duración si el usuario marcó 'recordarme'
+					if (rememberMe && name.includes('auth-token')) {
 						cookieOptions.maxAge = 60 * 60 * 24 * 30; // 30 días
-					} else if (cookieOptions.maxAge) {
-						cookieOptions.maxAge = undefined;
 					}
+
 					event.cookies.set(name, value, cookieOptions);
 				});
 			}
 		}
 	});
 
+	/**
+	 * Función para obtener la sesión de forma segura y tipada.
+	 */
 	event.locals.safeGetSession = async () => {
 		const {
 			data: { user },
@@ -41,57 +57,32 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return { session, user };
 	};
 
+	// 2. Pre-poblar locals con sesión de Supabase
 	const { session, user } = await event.locals.safeGetSession();
 	event.locals.session = session;
 	event.locals.user = user;
 
+	// 3. Resolución de usuario de dominio (Backend local)
 	if (user) {
-		const sessionCookie = event.cookies.get('session_usuario');
+		const usuarioRepo = new PostgresUsuarioRepository();
+		const obtenerUsuario = new ObtenerUsuarioSesion(usuarioRepo);
 
-		if (sessionCookie) {
-			try {
-				const parsed = JSON.parse(sessionCookie);
-				// Verificar que la cookie pertenezca al usuario autenticado actual
-				if (parsed.auth_user_id === user.id) {
-					const { Usuario } = await import('$lib/domain/entities/Usuario');
-					event.locals.usuario = new Usuario(parsed);
-				}
-			} catch (e) {
-				console.warn('Error al parsear cookie de sesión de usuario, se invalidará.', e);
-				event.cookies.delete('session_usuario', { path: '/' });
-			}
-		}
-
-		// Si no se recuperó de la cookie (o era inválida/otro usuario), consultar DB
-		if (!event.locals.usuario) {
-			const usuarioRepo = new PostgresUsuarioRepository();
-			const usuarioDb = await usuarioRepo.findByAuthId(user.id);
-
-			if (usuarioDb) {
-				event.locals.usuario = usuarioDb;
-				const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
-				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const { password: _pwd, ...usuarioDbSafe } = usuarioDb.toPOJO();
-				event.cookies.set('session_usuario', JSON.stringify(usuarioDbSafe), {
-					path: '/',
-					httpOnly: false,
-					secure: process.env.NODE_ENV === 'production',
-					sameSite: 'lax',
-					maxAge
-				});
-			} else {
-				console.warn(`Usuario autenticado en Supabase (ID: ${user.id}) sin registro en DB local.`);
-			}
+		const usuarioDb = await obtenerUsuario.execute(user.id);
+		if (usuarioDb) {
+			event.locals.usuario = usuarioDb;
 		}
 	}
 
-	// Protección de Rutas (Middleware)
-	if (event.url.pathname.startsWith('/mis-proyectos')) {
-		if (!event.locals.usuario) {
-			throw redirect(303, '/iniciar-sesion');
-		}
-	}
+	// 4. Centralización de Control de Acceso (RBAC)
+	const { pathname } = event.url;
 
+	// Prevenir acceso a login/registro si ya está logueado
+	AuthGuard.handleAuthRoutes(pathname, event.locals.usuario);
+
+	// Proteger rutas según roles
+	AuthGuard.checkAccess(pathname, event.locals.usuario);
+
+	// 5. Resolver el request original
 	return resolve(event, {
 		filterSerializedResponseHeaders(name) {
 			return name === 'content-range' || name === 'x-supabase-api-version';

@@ -1,16 +1,12 @@
-import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 
+/**
+ * Carga de proyectos institucionales para gestión de solicitudes.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
-	if (!usuario) {
-		throw redirect(303, '/iniciar-sesion');
-	}
-
-	if (usuario.rol !== 'institucion') {
-		throw error(403, 'Acceso denegado. Esta página es para instituciones.');
-	}
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	const proyectoRepo = new PostgresProyectoRepository();
 	const proyectos = await proyectoRepo.findByInstitucionId(usuario.id_usuario!);

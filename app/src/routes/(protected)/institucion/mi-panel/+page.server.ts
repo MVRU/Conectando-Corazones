@@ -1,4 +1,3 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { ObtenerDashboardInstitucion } from '$lib/domain/use-cases/institucion/ObtenerDashboardInstitucion';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
@@ -6,16 +5,12 @@ import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/pos
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresResenaRepository } from '$lib/infrastructure/supabase/postgres/resena.repo';
 
+/**
+ * Carga de datos para el dashboard institucional.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
-
-	if (!usuario) {
-		throw redirect(303, '/iniciar-sesion');
-	}
-
-	if (usuario.rol !== 'institucion') {
-		throw redirect(303, '/mi-panel');
-	}
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	try {
 		const proyectoRepo = new PostgresProyectoRepository();

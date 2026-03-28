@@ -86,15 +86,8 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 			cookies.delete('remember_me', { path: '/' });
 		}
 
-		cookies.set('session_usuario', JSON.stringify(usuarioSafe), {
-			path: '/',
-			httpOnly: false,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
-			maxAge
-		});
-
 		return json({ usuario: usuarioSafe });
+
 	} catch (error) {
 		console.error('ERROR INICIAR SESION:', error);
 		if (error instanceof Error) {
