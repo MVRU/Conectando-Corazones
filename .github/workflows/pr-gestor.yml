@@ -16,6 +16,11 @@ jobs:
       pull-requests: write
       issues: write
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Ejecutar motor de asignación
         uses: actions/github-script@v7
         with:
