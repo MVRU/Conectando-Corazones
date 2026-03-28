@@ -30,7 +30,9 @@
 		validarUnidadLibre,
 		validarReferencia,
 		validarPiso,
-		crearValidadorCategoria
+		crearValidadorCategoria,
+		validarAumentoObjetivo,
+		validarAumentoBeneficiarios
 	} from '$lib/utils/util-proyecto-form';
 	import type { Categoria } from '$lib/domain/types/Categoria';
 	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
@@ -47,6 +49,7 @@
 	// Props para edición
 	export let edicion: boolean = false;
 	export let esEdicionRestringida: boolean = false;
+	export let tieneColaboradoresAprobados: boolean = false;
 	export let proyectoId: number | undefined = undefined;
 	export let initialData: any = null;
 	export let esAdmin: boolean = initialData?.esAdmin || false;
@@ -120,7 +123,18 @@
 		limpiarError('urlPortada');
 	$: if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
 		limpiarError('fechaFinTentativa');
-	$: if (beneficiarios && beneficiarios > 0) limpiarError('beneficiarios');
+	$: if (beneficiarios != null && beneficiarios > 0) {
+		const errBenReact =
+			esEdicionRestringida && !esAdmin
+				? validarAumentoBeneficiarios(beneficiarios, initialData?.originales?.beneficiarios)
+				: null;
+		if (errBenReact) {
+			errores.beneficiarios = errBenReact;
+			errores = { ...errores };
+		} else {
+			limpiarError('beneficiarios');
+		}
+	}
 	$: if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
 	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
 	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
@@ -223,7 +237,15 @@
 			errores.fechaFinTentativa = 'La fecha es demasiado lejana (máximo 2 años).';
 		}
 		const errBen = beneficiarios != null ? validarBeneficiariosValor(beneficiarios) : null;
-		if (errBen) errores.beneficiarios = errBen;
+		if (errBen) {
+			errores.beneficiarios = errBen;
+		} else if (esEdicionRestringida && !esAdmin) {
+			const errAumento = validarAumentoBeneficiarios(
+				beneficiarios,
+				initialData?.originales?.beneficiarios
+			);
+			if (errAumento) errores.beneficiarios = errAumento;
+		}
 		if (categoriasSeleccionadas.length === 0)
 			errores.categorias = 'Debe seleccionar al menos una categoría.';
 
@@ -370,9 +392,21 @@
 		}
 
 		// Validar objetivos de participación
+		const originalesData: any[] = initialData?.originales?.participacionesOriginales || [];
 		participacionesPermitidas.forEach((participacion, index) => {
 			const tipo = participacion.tipo_participacion?.descripcion;
 			const objetivo = participacion.objetivo;
+
+			// En edición restringida, validar que el objetivo no se reduzca
+			if (esEdicionRestringida && !esAdmin && participacion.id_participacion_permitida) {
+				const original = originalesData.find(
+					(p: any) => p.id_participacion_permitida === participacion.id_participacion_permitida
+				);
+				const errAumento = validarAumentoObjetivo(objetivo, original?.objetivo);
+				if (errAumento) {
+					errores[`participacion_${index}_objetivo`] = errAumento;
+				}
+			}
 
 			if (tipo === 'Monetaria' && (objetivo == null || objetivo <= 0)) {
 				errores[`participacion_${index}_objetivo`] =
@@ -408,7 +442,9 @@
 			}
 
 			// Validar unidad_medida_otra cuando se selecciona "Otra"
-			if (participacion.unidad_medida === 'Otra') {
+			// Solo para participaciones nuevas: las originales tienen la unidad bloqueada y no pueden editarla
+			const esOriginalItem = esEdicionRestringida && !!participacion.id_participacion_permitida;
+			if (participacion.unidad_medida === 'Otra' && !esOriginalItem) {
 				const unidadOtra = participacion.unidad_medida_otra || '';
 				const esMonetaria = participacion.tipo_participacion?.descripcion === 'Monetaria';
 				const errorUnidad = validarUnidadLibre(unidadOtra, { allowUpperCase: esMonetaria });
@@ -428,6 +464,11 @@
 
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
+			toastStore.show({
+				variant: 'error',
+				title: 'Formulario incompleto',
+				message: 'Revisá los campos marcados en rojo antes de continuar.'
+			});
 			return;
 		}
 
@@ -604,9 +645,7 @@
 				{esEdicionRestringida}
 				{esAdmin}
 				participacionesOriginales={initialData?.originales?.participacionesOriginales || []}
-				tieneColaboradoresAprobados={initialData?.colaboraciones?.some(
-					(c: any) => c.estado === 'aprobada'
-				) || false}
+				tieneColaboradoresAprobados={tieneColaboradoresAprobados}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} {esEdicionRestringida} {esAdmin} />

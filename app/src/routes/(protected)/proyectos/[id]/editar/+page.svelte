@@ -31,10 +31,12 @@
 	<CrearProyecto
 		edicion={true}
 		proyectoId={data.proyectoId}
-		initialData={data.form}
+		initialData={{ ...data.form, originales: data.originales }}
 		categorias={data.categorias}
 		tiposParticipacion={data.tiposParticipacion}
 		esEdicionRestringida={data.esEdicionRestringida}
+		tieneColaboradoresAprobados={data.tieneColaboradoresAprobados}
 		esAdmin={data.esAdmin}
+		estaVerificado={true}
 	/>
 {/if}

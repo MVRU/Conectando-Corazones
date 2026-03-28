@@ -186,6 +186,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				participacionesPermitidas
 			},
 			esEdicionRestringida,
+			tieneColaboradoresAprobados: proyectoOriginal.tieneColaboradoresAprobados(),
 			esAdmin,
 			originales: {
 				fechaFin: fechaFinTentativa,

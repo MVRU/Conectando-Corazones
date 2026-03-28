@@ -221,11 +221,8 @@
 					<button
 						type="button"
 						on:click={() => toggleTipoParticipacion(tipo)}
-						disabled={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin}
-						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover} disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
-						title={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin
-							? 'No se pueden añadir tipos si ya hay colaboradores aprobados'
-							: 'Seleccionar'}
+						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
+						title="Seleccionar"
 					>
 						<div class="mb-3 text-3xl {clases.iconColor}">
 							<Icon src={info.icon} class="h-8 w-8" />
@@ -337,8 +334,7 @@
 							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							placeholder="100"
-							disabled={esOriginal && esEdicionRestringida && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
@@ -366,9 +362,9 @@
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esEdicionRestringida || esAdmin}
-							class:cursor-not-allowed={esEdicionRestringida && !esAdmin}
-							class:bg-gray-50={esEdicionRestringida && !esAdmin}
-							class:text-gray-600={esEdicionRestringida && !esAdmin}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 						>
 							{#each [...UNIDADES_POR_TIPO[(participacion.tipo_participacion?.descripcion as TipoParticipacionDescripcion) || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>
