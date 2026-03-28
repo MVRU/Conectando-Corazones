@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 		// 1. Obtener Usuario
 		const perfilUsuario = await obtenerUsuario.porUsername(username);
-		if (!perfilUsuario) {
+		if (!perfilUsuario || perfilUsuario.estado === 'inactivo') {
 			throw error(404, 'Usuario no encontrado');
 		}
 

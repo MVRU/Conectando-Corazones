@@ -81,19 +81,14 @@ export const POST: RequestHandler = async (event) => {
 
 		if (!usuario) {
 			RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
-			return json({ error: 'Usuario no registrado en el sistema' }, { status: 401 });
+			return json({ error: 'Credenciales inválidas' }, { status: 401 });
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
 
 		if (usuarioSafe.estado !== 'activo') {
-			const mensaje =
-				usuarioSafe.estado === 'inactivo'
-					? 'Tu cuenta ha sido eliminada o desactivada. Si creés que es un error, contactanos.'
-					: 'Tu cuenta se encuentra suspendida temporalmente por incumplimiento de las normas.';
-
-			return json({ error: mensaje }, { status: 403 });
+			return json({ error: 'Credenciales inválidas' }, { status: 401 });
 		}
 
 		// Reiniciar límite de velocidad en login exitoso

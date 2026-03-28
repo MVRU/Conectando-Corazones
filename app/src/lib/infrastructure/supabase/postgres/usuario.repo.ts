@@ -13,27 +13,29 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		verificaciones: true
 	};
 
-	async findById(id: number): Promise<Usuario | null> {
+	async findById(id: number, includeInactive: boolean = false): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { id_usuario: id },
 			include: this.includeOptions
 		});
 
 		if (!usuario) return null;
+		if (!includeInactive && usuario.estado === 'inactivo') return null;
 		return UsuarioMapper.toDomain(usuario);
 	}
 
-	async findByUsername(username: string): Promise<Usuario | null> {
+	async findByUsername(username: string, includeInactive: boolean = false): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { username },
 			include: this.includeOptions
 		});
 
 		if (!usuario) return null;
+		if (!includeInactive && usuario.estado === 'inactivo') return null;
 		return UsuarioMapper.toDomain(usuario);
 	}
 
-	async findByEmail(email: string): Promise<Usuario | null> {
+	async findByEmail(email: string, includeInactive: boolean = false): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findFirst({
 			where: {
 				contactos: {
@@ -47,6 +49,7 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		});
 
 		if (!usuario) return null;
+		if (!includeInactive && usuario.estado === 'inactivo') return null;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return UsuarioMapper.toDomain(usuario as any);
 	}
@@ -55,7 +58,7 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 	 * Versión optimizada para autenticación - solo carga datos esenciales
 	 * Reduce el tiempo de carga en hooks.server.ts
 	 */
-	async findByUsernameBasic(username: string): Promise<Usuario | null> {
+	async findByUsernameBasic(username: string, includeInactive: boolean = false): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { username },
 			select: {
@@ -83,17 +86,19 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		});
 
 		if (!usuario) return null;
+		if (!includeInactive && usuario.estado === 'inactivo') return null;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		return UsuarioMapper.toDomain(usuario as any);
 	}
 
-	async findByAuthId(authId: string): Promise<Usuario | null> {
+	async findByAuthId(authId: string, includeInactive: boolean = false): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { auth_user_id: authId },
 			include: this.includeOptions
 		});
 
 		if (!usuario) return null;
+		if (!includeInactive && usuario.estado === 'inactivo') return null;
 		return UsuarioMapper.toDomain(usuario);
 	}
 
@@ -156,11 +161,11 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(created);
 	}
 
-	async findAll(filtros?: { rol?: string; estado?: string }): Promise<Usuario[]> {
+	async findAll(filtros?: { rol?: string; estado?: string; includeInactive?: boolean }): Promise<Usuario[]> {
 		const usuarios = await prisma.usuario.findMany({
 			where: {
 				...(filtros?.rol ? { rol: filtros.rol } : {}),
-				...(filtros?.estado ? { estado: filtros.estado } : {})
+				...(filtros?.estado ? { estado: filtros.estado } : !filtros?.includeInactive ? { estado: { not: 'inactivo' } } : {})
 			},
 			include: this.includeOptions
 		});
