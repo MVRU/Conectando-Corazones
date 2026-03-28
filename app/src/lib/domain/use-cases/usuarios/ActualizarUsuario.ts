@@ -10,6 +10,9 @@ export class ActualizarUsuario {
 			throw new Error('Usuario no encontrado');
 		}
 
+		// TODO (Marina Milo): Validar disponibilidad de username/email si cambiaron (RN 1.1)
+		// TODO (Marina Milo): No permitir modificar campos sensibles como estado_verificacion
+
 		// Evitar cambios en el rol
 		if (cambios.rol && cambios.rol !== usuarioExistente.rol) {
 			throw new Error('No se permite cambiar el rol del usuario.');

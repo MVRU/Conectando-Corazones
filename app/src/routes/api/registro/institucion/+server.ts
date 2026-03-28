@@ -6,6 +6,7 @@ import { RegistrationService } from '$lib/server/registration.service';
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const input = (await request.json()) as RegisterInstitucionInput;
+		// TODO (Marina Milo): Validar esquema de entrada con Zod antes de procesar
 		const service = new RegistrationService();
 
 		const usuarioCreado = await service.registrar({

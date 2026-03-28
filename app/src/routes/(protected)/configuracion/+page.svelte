@@ -1,150 +1,73 @@
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
-	import type { Contacto } from '$lib/domain/types/Contacto';
-	import type { Categoria } from '$lib/domain/types/Categoria';
 	import { usuario as currentUser, authActions } from '$lib/stores/auth';
-	import { ICONOS_CATEGORIA } from '$lib/utils/constants';
 	import type { PageData } from './$types';
-	import { Wrench, ExclamationCircle } from '@steeze-ui/heroicons';
-	import { Icon } from '@steeze-ui/svelte-icon';
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
+	import { Bell, Trash2, Settings, UserCircle2, ChevronRight, ShieldCheck, AlertTriangle, Eye, EyeOff } from 'lucide-svelte';
 
-	export let data: PageData;
+	let { data } = $props<{ data: PageData }>();
 
-	$: usuario = $currentUser ?? data.usuario;
+	let usuario = $derived($currentUser ?? data.usuario);
 
-	let animate = false;
-	onMount(() => {
-		animate = true;
+	type Tab = 'seguridad' | 'notificaciones' | 'cuenta';
+	let tabActiva = $state<Tab>('seguridad');
+	let montado = $state(false);
+
+	$effect(() => {
+		const t = setTimeout(() => (montado = true), 50);
+		return () => clearTimeout(t);
 	});
 
-	let nombre = `${data.usuario.nombre} ${data.usuario.apellido}`;
-	let email = data.usuario.contactos?.find((c) => c.tipo_contacto === 'email')?.valor || '';
-	let telefono = data.usuario.contactos?.find((c) => c.tipo_contacto === 'telefono')?.valor || '';
-	let perfil = data.usuario.url_foto || '';
-	let nuevaFoto: File | null = null;
+	let passActual = $state('');
+	let passNueva = $state('');
+	let passConfirm = $state('');
+	let mostrarPassActual = $state(false);
+	let mostrarPassNueva = $state(false);
+	let mostrarPassConfirm = $state(false);
 
-	function handleFotoChange(e: Event) {
-		const file = (e.target as HTMLInputElement).files?.[0];
-		if (file) {
-			nuevaFoto = file;
-			const reader = new FileReader();
-			reader.onload = (ev) => {
-				perfil = ev.target?.result as string;
-			};
-			reader.readAsDataURL(file);
-		}
-	}
+	let notificacionesPush = $state(true);
+	let notificacionesMail = $state(true);
 
-	let preferencias: number[] =
-		data.usuario.categorias_preferidas?.map((cat) => cat.id_categoria!) || [];
+	let isLoadingPassword = $state(false);
+	let isLoadingDelete = $state(false);
+	let showDeleteModal = $state(false);
 
-	function toggleCategoria(categoriaId: number) {
-		if (preferencias.includes(categoriaId)) {
-			preferencias = preferencias.filter((id) => id !== categoriaId);
-		} else {
-			preferencias = [...preferencias, categoriaId];
-		}
-	}
+	type TabItem = { id: Tab; label: string; icon: typeof ShieldCheck };
+	const tabs: TabItem[] = [
+		{ id: 'seguridad', label: 'Seguridad', icon: ShieldCheck },
+		{ id: 'notificaciones', label: 'Notificaciones', icon: Bell },
+		{ id: 'cuenta', label: 'Mi cuenta', icon: UserCircle2 }
+	];
 
-	let notificacionesPush = true;
-	let notificacionesMail = true;
-
-	let passActual = '';
-	let passNueva = '';
-	let passConfirm = '';
-
-	let isLoadingPerfil = false;
-	let isLoadingPassword = false;
-	let isLoadingDelete = false;
-
-	async function guardarCambios() {
-		isLoadingPerfil = true;
-		try {
-			if (nuevaFoto) {
-				const fd = new FormData();
-				fd.append('archivo', nuevaFoto);
-				const res = await fetch('/api/usuarios/me/foto', { method: 'POST', body: fd });
-				if (!res.ok) {
-					const data = await res.json().catch(() => ({}));
-					throw new Error(data.error ?? 'Error al subir la foto');
-				}
-				const { url } = await res.json();
-				if (url) perfil = url;
-				nuevaFoto = null;
-			}
-			const contactosActualizados: Contacto[] = [
-				...(usuario.contactos?.filter((c) => c.tipo_contacto !== 'telefono') ?? [])
-			];
-			if (telefono.trim()) {
-				contactosActualizados.push({
-					tipo_contacto: 'telefono' as const,
-					valor: telefono.trim()
-				} as Contacto);
-			}
-			await authActions.actualizarPerfil(usuario.id_usuario!, {
-				contactos: contactosActualizados,
-				categorias_preferidas: preferencias.map((id) => {
-					const cat = data.categorias.find((c: Categoria) => c.id_categoria === id);
-					return { id_categoria: id, descripcion: cat?.descripcion || '' };
-				})
-			});
-
-			toastStore.show({
-				variant: 'success',
-				title: 'Datos actualizados',
-				message: 'Tus preferencias se guardaron correctamente.'
-			});
-		} catch (err) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Error al guardar',
-				message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.'
-			});
-		} finally {
-			isLoadingPerfil = false;
-		}
+	function obtenerNombreDisplay(): string {
+		const u = usuario as Record<string, string | undefined>;
+		if (u?.rol === 'institucion') return u.nombre_legal || u.nombre || '';
+		if (u?.rol === 'colaborador' && u?.tipo_colaborador === 'organizacion') return u.razon_social || `${u.nombre} ${u.apellido}`;
+		return `${u?.nombre || ''} ${u?.apellido || ''}`.trim();
 	}
 
 	async function cambiarPassword() {
 		if (!passActual.trim()) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Falta contraseña actual',
-				message: 'Para tu seguridad, ingresá tu contraseña actual.'
-			});
+			toastStore.show({ variant: 'error', title: 'Falta contraseña actual', message: 'Para tu seguridad, ingresá tu contraseña actual.' });
 			return;
 		}
 		if (!passNueva.trim()) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Campo requerido',
-				message: 'Por favor, ingresá una contraseña nueva.'
-			});
+			toastStore.show({ variant: 'error', title: 'Campo requerido', message: 'Por favor, ingresá una contraseña nueva.' });
 			return;
 		}
 		if (passNueva.length < 8) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Contraseña muy corta',
-				message: 'La nueva contraseña debe tener al menos 8 caracteres.'
-			});
+			toastStore.show({ variant: 'error', title: 'Contraseña muy corta', message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
 			return;
 		}
 		if (passNueva !== passConfirm) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Error de validación',
-				message: 'Las contraseñas nuevas no coinciden.'
-			});
+			toastStore.show({ variant: 'error', title: 'Error de validación', message: 'Las contraseñas nuevas no coinciden.' });
 			return;
 		}
-
 		isLoadingPassword = true;
 		try {
 			const res = await fetch('/api/usuarios/me/contrasena', {
@@ -159,30 +82,12 @@
 			passActual = '';
 			passNueva = '';
 			passConfirm = '';
-			toastStore.show({
-				variant: 'success',
-				title: 'Contraseña actualizada',
-				message: 'Tu contraseña se cambió con éxito.'
-			});
+			toastStore.show({ variant: 'success', title: 'Contraseña actualizada', message: 'Tu contraseña se cambió con éxito.' });
 		} catch (err) {
-			toastStore.show({
-				variant: 'error',
-				title: 'Error',
-				message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.'
-			});
+			toastStore.show({ variant: 'error', title: 'Error', message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.' });
 		} finally {
 			isLoadingPassword = false;
 		}
-	}
-
-	let showDeleteModal = false;
-
-	function eliminarCuenta() {
-		showDeleteModal = true;
-	}
-
-	function cancelarEliminarCuenta() {
-		if (!isLoadingDelete) showDeleteModal = false;
 	}
 
 	async function confirmarEliminarCuenta() {
@@ -198,11 +103,7 @@
 			goto('/');
 		} catch (err) {
 			isLoadingDelete = false;
-			toastStore.show({
-				variant: 'error',
-				title: 'Error',
-				message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.'
-			});
+			toastStore.show({ variant: 'error', title: 'Error', message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.' });
 		}
 	}
 </script>
@@ -211,309 +112,302 @@
 	<title>Configuración | Conectando Corazones</title>
 </svelte:head>
 
-<div
-	class="mx-auto max-w-2xl px-4 py-10 transition-opacity duration-700 ease-out sm:px-6 lg:px-8"
-	class:opacity-0={!animate}
-	class:opacity-100={animate}
->
-	<div class="mb-10 flex items-center gap-5">
-		<div
-			class="h-16 w-16 flex-shrink-0 overflow-hidden rounded-full border-4 border-blue-100 shadow-md"
-		>
-			<Image src={perfil || '/users/escuela-esperanza.jpg'} alt="Avatar" variant="circle" />
-		</div>
-		<div>
-			<h1 class="text-2xl font-bold text-gray-900">{nombre}</h1>
-			<span
-				class="mt-1 inline-block rounded-full bg-blue-50 px-3 py-0.5 text-sm font-medium text-blue-700 capitalize"
-			>
-				{usuario.rol}
-			</span>
+<div class="min-h-screen bg-gray-50">
+	<!-- Banner header -->
+	<div class="relative overflow-hidden border-b border-gray-100 bg-white">
+		<div class="absolute inset-0 bg-gradient-to-r from-[#007FFF]/5 via-transparent to-[#42A1FF]/5"></div>
+		<div class="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+			{#if montado}
+				<div in:fly={{ y: -10, duration: 350, easing: cubicOut }}>
+					<div class="flex items-center gap-3">
+						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+							<Settings class="h-5 w-5 text-white" />
+						</div>
+						<div>
+							<h1 class="text-xl font-bold text-gray-900 sm:text-2xl">Configuración</h1>
+							<p class="text-sm text-gray-500">Gestioná tu seguridad, notificaciones y cuenta</p>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	</div>
 
-	<section class="mb-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-		<h2
-			class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
-		>
-			Información personal
-		</h2>
-		<p class="mt-1 mb-6 text-sm text-gray-400">Actualizá tu número de teléfono y foto de perfil.</p>
+	<div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+		{#if montado}
+			<div class="flex flex-col gap-6 lg:flex-row lg:gap-8" in:fly={{ y: 20, duration: 400, easing: cubicOut }}>
 
-		<form class="grid grid-cols-1 items-center gap-8 md:grid-cols-3">
-			<div class="flex flex-col items-center gap-4 md:col-span-1">
-				<div
-					class="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-full border-4 border-blue-100 bg-gray-100 shadow-md"
-				>
-					<Image
-						src={perfil || '/users/escuela-esperanza.jpg'}
-						alt="Foto de perfil"
-						variant="circle"
-					/>
-					{#if nuevaFoto}
-						<div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/20">
-							<span class="text-xs font-medium text-white">Nueva foto</span>
+				<!-- Sidebar de navegación -->
+				<aside class="lg:w-64 lg:shrink-0">
+					<!-- Card de perfil / link rápido -->
+					<div class="mb-4 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+						<a
+							href="/perfil/{usuario?.username}"
+							class="group flex items-center gap-3 p-4 transition-all duration-200 hover:bg-blue-50/50"
+						>
+							<div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#007FFF]/20">
+								<img
+									src={usuario?.url_foto ?? '/logo-1.png'}
+									alt="Avatar"
+									class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+								/>
+							</div>
+							<div class="min-w-0 flex-1">
+								<p class="truncate text-sm font-semibold text-gray-900">{obtenerNombreDisplay()}</p>
+								<p class="text-xs text-[#007FFF]">Ver mi perfil público →</p>
+							</div>
+							<ChevronRight class="h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#007FFF]" />
+						</a>
+					</div>
+
+					<!-- Tabs de navegación -->
+					<nav class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+						{#each tabs as tab, i (tab.id)}
+							<button
+								onclick={() => (tabActiva = tab.id)}
+								class="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-200 {i < tabs.length - 1 ? 'border-b border-gray-50' : ''} {tabActiva === tab.id
+									? 'bg-gradient-to-r from-[#007FFF]/8 to-blue-50/60 text-[#007FFF]'
+									: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
+							>
+								<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {tabActiva === tab.id ? 'bg-[#007FFF] shadow-sm' : 'bg-gray-100'}">
+									<tab.icon class="h-4 w-4 {tabActiva === tab.id ? 'text-white' : 'text-gray-500'}" />
+								</div>
+								{tab.label}
+								{#if tabActiva === tab.id}
+									<div class="ml-auto h-1.5 w-1.5 rounded-full bg-[#007FFF]"></div>
+								{/if}
+							</button>
+						{/each}
+					</nav>
+				</aside>
+
+				<!-- Contenido principal -->
+				<div class="min-w-0 flex-1">
+
+					<!-- Tab: Seguridad -->
+					{#if tabActiva === 'seguridad'}
+						<div in:fly={{ x: 16, duration: 300, easing: cubicOut }}>
+							<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+								<div class="border-b border-gray-50 px-6 py-5">
+									<h2 class="flex items-center gap-2 text-base font-bold text-gray-900">
+										<ShieldCheck class="h-5 w-5 text-[#007FFF]" />
+										Cambiar contraseña
+									</h2>
+									<p class="mt-0.5 text-sm text-gray-500">Elegí una contraseña segura de al menos 8 caracteres.</p>
+								</div>
+								<div class="p-6">
+									<div class="flex flex-col gap-5">
+										<!-- Contraseña actual -->
+										<div>
+											<label for="passActual" class="mb-1.5 block text-sm font-semibold text-gray-700">
+												Contraseña actual
+											</label>
+											<div class="relative">
+												<Input
+													id="passActual"
+													type={mostrarPassActual ? 'text' : 'password'}
+													bind:value={passActual}
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+												/>
+												<button
+													type="button"
+													onclick={() => (mostrarPassActual = !mostrarPassActual)}
+													class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition hover:text-gray-600"
+													aria-label="Mostrar/ocultar contraseña"
+												>
+													{#if mostrarPassActual}
+														<EyeOff class="h-4 w-4" />
+													{:else}
+														<Eye class="h-4 w-4" />
+													{/if}
+												</button>
+											</div>
+										</div>
+										<!-- Nueva contraseña -->
+										<div>
+											<label for="passNueva" class="mb-1.5 block text-sm font-semibold text-gray-700">
+												Nueva contraseña
+											</label>
+											<div class="relative">
+												<Input
+													id="passNueva"
+													type={mostrarPassNueva ? 'text' : 'password'}
+													bind:value={passNueva}
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+												/>
+												<button
+													type="button"
+													onclick={() => (mostrarPassNueva = !mostrarPassNueva)}
+													class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition hover:text-gray-600"
+													aria-label="Mostrar/ocultar contraseña"
+												>
+													{#if mostrarPassNueva}
+														<EyeOff class="h-4 w-4" />
+													{:else}
+														<Eye class="h-4 w-4" />
+													{/if}
+												</button>
+											</div>
+										</div>
+										<!-- Confirmar contraseña -->
+										<div>
+											<label for="passConfirm" class="mb-1.5 block text-sm font-semibold text-gray-700">
+												Confirmar contraseña
+											</label>
+											<div class="relative">
+												<Input
+													id="passConfirm"
+													type={mostrarPassConfirm ? 'text' : 'password'}
+													bind:value={passConfirm}
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+												/>
+												<button
+													type="button"
+													onclick={() => (mostrarPassConfirm = !mostrarPassConfirm)}
+													class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition hover:text-gray-600"
+													aria-label="Mostrar/ocultar contraseña"
+												>
+													{#if mostrarPassConfirm}
+														<EyeOff class="h-4 w-4" />
+													{:else}
+														<Eye class="h-4 w-4" />
+													{/if}
+												</button>
+											</div>
+											{#if passNueva && passConfirm && passNueva !== passConfirm}
+												<p class="mt-1.5 text-xs font-medium text-[#DE1C38]">Las contraseñas no coinciden</p>
+											{/if}
+										</div>
+									</div>
+									<div class="mt-6 flex justify-end">
+										<Button
+											label="Cambiar contraseña"
+											loadingLabel="Cambiando..."
+											variant="primary"
+											loading={isLoadingPassword}
+											onclick={cambiarPassword}
+										/>
+									</div>
+								</div>
+							</div>
 						</div>
 					{/if}
-				</div>
-				<label class="block w-full text-center">
-					<span
-						class="cursor-pointer rounded-2xl border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-					>
-						{nuevaFoto ? '✓ ' + nuevaFoto.name.slice(0, 16) + '…' : 'Cambiar foto'}
-					</span>
-					<input type="file" accept="image/*" class="sr-only" on:change={handleFotoChange} />
-				</label>
-			</div>
 
-			<div class="grid grid-cols-1 gap-5 md:col-span-2">
-				<label class="block">
-					<span class="text-sm font-medium text-gray-500">Nombre completo</span>
-					<Input
-						id="nombre"
-						type="text"
-						bind:value={nombre}
-						customClass="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-50 px-5 py-3 text-gray-400 shadow-sm"
-						readonly
-						disabled
-					/>
-					<span class="mt-1 text-xs text-gray-400">El nombre no puede modificarse desde aquí.</span>
-				</label>
-				<label class="block">
-					<span class="text-sm font-medium text-gray-500">Email</span>
-					<Input
-						id="email"
-						type="email"
-						bind:value={email}
-						customClass="mt-1 block w-full cursor-not-allowed rounded-3xl border border-gray-200 bg-gray-50 px-5 py-3 text-gray-400 shadow-sm"
-						readonly
-						disabled
-					/>
-				</label>
-				<label class="block">
-					<span class="text-sm font-medium text-gray-700"
-						>Teléfono <span class="font-normal text-gray-400">(opcional)</span></span
-					>
-					<Input
-						id="telefono"
-						type="tel"
-						bind:value={telefono}
-						customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-					/>
-				</label>
-			</div>
-		</form>
+					<!-- Tab: Notificaciones -->
+					{#if tabActiva === 'notificaciones'}
+						<div in:fly={{ x: 16, duration: 300, easing: cubicOut }}>
+							<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+								<div class="border-b border-gray-50 px-6 py-5">
+									<h2 class="flex items-center gap-2 text-base font-bold text-gray-900">
+										<Bell class="h-5 w-5 text-[#007FFF]" />
+										Notificaciones
+									</h2>
+									<p class="mt-0.5 text-sm text-gray-500">Elegí cómo querés recibir novedades sobre proyectos y actividad.</p>
+								</div>
+								<div class="divide-y divide-gray-50 p-6">
+									<label class="flex cursor-pointer items-center justify-between gap-4 pb-4 select-none">
+										<div>
+											<p class="text-sm font-semibold text-gray-800">Notificaciones Push</p>
+											<p class="mt-0.5 text-xs text-gray-500">Alertas en tiempo real sobre postulaciones y mensajes.</p>
+										</div>
+										<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
+										<div class="relative h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesPush ? 'bg-[#007FFF]' : 'bg-gray-200'}">
+											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesPush ? 'translate-x-5' : 'translate-x-0'}"></div>
+										</div>
+									</label>
+									<label class="flex cursor-pointer items-center justify-between gap-4 pt-4 select-none">
+										<div>
+											<p class="text-sm font-semibold text-gray-800">Notificaciones por Email</p>
+											<p class="mt-0.5 text-xs text-gray-500">Resúmenes semanales y novedades importantes por correo.</p>
+										</div>
+										<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
+										<div class="relative h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesMail ? 'bg-[#007FFF]' : 'bg-gray-200'}">
+											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesMail ? 'translate-x-5' : 'translate-x-0'}"></div>
+										</div>
+									</label>
+								</div>
+							</div>
+						</div>
+					{/if}
 
-		<div class="mt-8 flex justify-end">
-			<Button
-				label="Guardar cambios"
-				loadingLabel="Guardando..."
-				variant="primary"
-				loading={isLoadingPerfil}
-				onclick={guardarCambios}
-			/>
-		</div>
-	</section>
+					<!-- Tab: Mi cuenta -->
+					{#if tabActiva === 'cuenta'}
+						<div in:fly={{ x: 16, duration: 300, easing: cubicOut }}>
+							<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+								<div class="border-b border-gray-50 px-6 py-5">
+									<h2 class="flex items-center gap-2 text-base font-bold text-gray-900">
+										<UserCircle2 class="h-5 w-5 text-[#007FFF]" />
+										Mi cuenta
+									</h2>
+									<p class="mt-0.5 text-sm text-gray-500">
+										Para editar tu foto, datos personales o preferencias, visitá tu perfil público.
+									</p>
+								</div>
+								<div class="p-6">
+									<!-- Enlace al perfil -->
+									<a
+										href="/perfil/{usuario?.username}"
+										class="group mb-6 flex items-center gap-4 rounded-2xl border border-[#007FFF]/20 bg-gradient-to-r from-blue-50 to-blue-50/40 p-4 transition-all duration-200 hover:border-[#007FFF]/40 hover:shadow-sm"
+									>
+										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+											<UserCircle2 class="h-6 w-6 text-white" />
+										</div>
+										<div class="flex-1">
+											<p class="text-sm font-semibold text-gray-900">Editar perfil público</p>
+											<p class="text-xs text-gray-500">Foto, descripción, contactos y preferencias</p>
+										</div>
+										<ChevronRight class="h-4 w-4 text-[#007FFF] transition-transform duration-200 group-hover:translate-x-1" />
+									</a>
 
-	{#if usuario.rol === 'colaborador'}
-		<section class="mb-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-			<h2
-				class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
-			>
-				Preferencias de categorías
-			</h2>
-			<p class="mt-1 mb-6 text-sm text-gray-400">
-				Seleccioná las áreas de proyecto que más te interesan.
-			</p>
+									<!-- Zona de peligro -->
+									<div class="overflow-hidden rounded-2xl border border-[#DE1C38]/20 bg-gradient-to-br from-red-50/60 to-red-50/20">
+										<div class="border-b border-[#DE1C38]/10 px-5 py-4">
+											<div class="flex items-center gap-2">
+												<AlertTriangle class="h-4 w-4 text-[#DE1C38]" />
+												<span class="text-sm font-bold text-[#DE1C38]">Zona de peligro</span>
+											</div>
+										</div>
+										<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+											<div>
+												<p class="text-sm font-semibold text-gray-800">Eliminar cuenta</p>
+												<p class="mt-0.5 text-xs text-gray-500">Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.</p>
+											</div>
+											<Button
+												label="Eliminar cuenta"
+												variant="danger"
+												size="sm"
+												onclick={() => (showDeleteModal = true)}
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					{/if}
 
-			<div class="mb-6 flex flex-wrap gap-3">
-				{#each data.categorias as categoria, i (i)}
-					<label
-						class="flex cursor-pointer items-center gap-2 rounded-2xl border px-4 py-2 transition-all duration-200 select-none"
-						class:border-blue-300={preferencias.includes(categoria.id_categoria!)}
-						class:bg-blue-50={preferencias.includes(categoria.id_categoria!)}
-						class:border-gray-200={!preferencias.includes(categoria.id_categoria!)}
-						class:bg-white={!preferencias.includes(categoria.id_categoria!)}
-					>
-						<input
-							type="checkbox"
-							checked={preferencias.includes(categoria.id_categoria!)}
-							on:change={() => toggleCategoria(categoria.id_categoria!)}
-							class="sr-only"
-						/>
-						<Icon
-							src={ICONOS_CATEGORIA[categoria.descripcion] || Wrench}
-							class="h-5 w-5 {preferencias.includes(categoria.id_categoria!)
-								? 'text-blue-600'
-								: 'text-gray-400'}"
-						/>
-						<span
-							class="text-sm font-medium {preferencias.includes(categoria.id_categoria!)
-								? 'text-blue-700'
-								: 'text-gray-500'}">{categoria.descripcion}</span
-						>
-					</label>
-				{/each}
-			</div>
-
-			<div class="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-blue-100">
-				<div
-					class="h-full rounded-full bg-gradient-to-r from-[#68b4ff] to-[#007fff] transition-all duration-300"
-					style="width: {Math.round((preferencias.length / data.categorias.length) * 100)}%;"
-				></div>
-			</div>
-			<p class="text-xs text-gray-400">
-				{preferencias.length} de {data.categorias.length} categorías seleccionadas
-			</p>
-		</section>
-	{/if}
-
-	<section class="mb-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-		<h2
-			class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
-		>
-			Notificaciones
-		</h2>
-		<p class="mt-1 mb-6 text-sm text-gray-400">
-			Elegí cómo querés recibir novedades sobre proyectos y actividad.
-		</p>
-
-		<div class="flex flex-col gap-5">
-			<label
-				class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 select-none"
-			>
-				<div>
-					<p class="font-medium text-gray-700">Notificaciones Push</p>
-					<p class="mt-0.5 text-sm text-gray-400">
-						Alertas en tiempo real sobre postulaciones y mensajes.
-					</p>
-				</div>
-				<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
-				<div
-					class="relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-300"
-					class:bg-blue-500={notificacionesPush}
-					class:bg-gray-200={!notificacionesPush}
-				>
-					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
-						class:translate-x-0={!notificacionesPush}
-						class:translate-x-5={notificacionesPush}
-					></div>
-				</div>
-			</label>
-
-			<label
-				class="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-gray-50 px-5 py-4 select-none"
-			>
-				<div>
-					<p class="font-medium text-gray-700">Notificaciones por Email</p>
-					<p class="mt-0.5 text-sm text-gray-400">
-						Resúmenes semanales y novedades importantes por correo.
-					</p>
-				</div>
-				<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
-				<div
-					class="relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-300"
-					class:bg-blue-500={notificacionesMail}
-					class:bg-gray-200={!notificacionesMail}
-				>
-					<div
-						class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300"
-						class:translate-x-0={!notificacionesMail}
-						class:translate-x-5={notificacionesMail}
-					></div>
-				</div>
-			</label>
-		</div>
-	</section>
-
-	<section class="mb-8 rounded-3xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
-		<h2
-			class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-xl font-bold text-transparent sm:text-2xl"
-		>
-			Seguridad
-		</h2>
-		<p class="mt-1 mb-6 text-sm text-gray-400">
-			Cambiá tu contraseña o gestioná el estado de tu cuenta.
-		</p>
-
-		<form class="flex flex-col gap-5 md:grid md:grid-cols-3 md:items-end md:gap-6">
-			<label class="block">
-				<span class="text-sm font-medium text-gray-700">Contraseña actual</span>
-				<Input
-					id="passActual"
-					type="password"
-					bind:value={passActual}
-					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-				/>
-			</label>
-			<label class="block">
-				<span class="text-sm font-medium text-gray-700">Nueva contraseña</span>
-				<Input
-					id="passNueva"
-					type="password"
-					bind:value={passNueva}
-					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-				/>
-			</label>
-			<label class="block">
-				<span class="text-sm font-medium text-gray-700">Confirmar contraseña</span>
-				<Input
-					id="passConfirm"
-					type="password"
-					bind:value={passConfirm}
-					customClass="mt-1 block w-full rounded-3xl border border-gray-200 px-5 py-3 shadow-sm focus:ring-2 focus:ring-blue-200 focus:outline-none"
-				/>
-			</label>
-		</form>
-
-		<div class="mt-6 flex justify-end">
-			<Button
-				label="Cambiar contraseña"
-				loadingLabel="Cambiando..."
-				variant="secondary"
-				loading={isLoadingPassword}
-				onclick={cambiarPassword}
-			/>
-		</div>
-
-		<div class="mt-8 rounded-2xl border border-red-200 bg-red-50/40 p-5 sm:p-6">
-			<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<div>
-					<div class="flex items-center gap-2">
-						<Icon src={ExclamationCircle} class="h-5 w-5 text-red-500" />
-						<span class="font-semibold text-red-600">Zona de peligro</span>
-					</div>
-					<p class="mt-1 text-sm text-red-400">
-						Esta acción es irreversible. Tu cuenta será eliminada permanentemente.
-					</p>
-				</div>
-				<div class="flex-shrink-0">
-					<Button label="Eliminar cuenta" variant="danger" size="sm" onclick={eliminarCuenta} />
 				</div>
 			</div>
-		</div>
-	</section>
+		{/if}
+	</div>
 </div>
 
+<!-- Modal eliminar cuenta -->
 <Modal
 	abierto={showDeleteModal}
 	titulo="Eliminar cuenta"
 	anchoMaximo="max-w-sm"
 	cerrarAlClickearFondo={!isLoadingDelete}
-	on:cerrar={cancelarEliminarCuenta}
+	on:cerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
 >
 	<div class="flex flex-col items-center py-2 text-center">
-		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-			<Icon src={ExclamationCircle} class="h-9 w-9 text-red-500" />
+		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
+			<Trash2 class="h-8 w-8 text-[#DE1C38]" />
 		</div>
-		<p class="text-base font-semibold text-gray-800">¿Eliminar tu cuenta?</p>
+		<p class="text-base font-bold text-gray-900">¿Eliminar tu cuenta?</p>
 		<p class="mt-2 text-sm text-gray-500">
-			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados
-			permanentemente.
+			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados permanentemente.
 		</p>
 	</div>
-
 	<svelte:fragment slot="footer">
 		<Button
 			label="Sí, eliminar"
@@ -526,7 +420,7 @@
 			label="Cancelar"
 			variant="secondary"
 			disabled={isLoadingDelete}
-			onclick={cancelarEliminarCuenta}
+			onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
 		/>
 	</svelte:fragment>
 </Modal>

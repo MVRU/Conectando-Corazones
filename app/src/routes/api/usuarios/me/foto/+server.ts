@@ -27,6 +27,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				return json({ error: 'Archivo requerido' }, { status: 400 });
 			}
 
+			// TODO (Marina Milo): Validar tipo de archivo (solo imágenes) y tamaño máximo
+			// TODO (Marina Milo): Implementar cleanup de la foto anterior en Storage antes de subir la nueva
+
 			const ext = archivo.name.split('.').pop() ?? 'jpg';
 			const storagePath = `avatares/${user.id_usuario}/${Date.now()}.${ext}`;
 			const bytes = await archivo.arrayBuffer();

@@ -8,6 +8,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 	try {
 		const { identificador, password, rememberMe } = await request.json();
 
+		// TODO (Marina Milo): Implementar Rate Limiting para prevenir ataques de fuerza bruta
 		if (!identificador || !password) {
 			return json({ error: 'Credenciales incompletas' }, { status: 400 });
 		}
@@ -63,6 +64,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		const { password: _pwd, ...usuarioSafe } = usuario.toPOJO();
 
 		if (usuarioSafe.estado !== 'activo') {
+			// TODO (Marina Milo): Si el estado es "inhabilitado" o "pendiente", dar feedback específico al usuario
 			return json({ error: 'La cuenta no se encuentra activa.' }, { status: 403 });
 		}
 

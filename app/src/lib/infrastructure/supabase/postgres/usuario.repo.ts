@@ -180,6 +180,7 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		const updated = await prisma.usuario.update({
 			where: { id_usuario: usuario.id_usuario },
 			data: {
+				// TODO (Marina Milo): Hardening - Asegurar que 'rol' y 'auth_user_id' sean inmutables en este update
 				nombre: usuario.nombre,
 				apellido: usuario.apellido,
 				fecha_nacimiento: usuario.fecha_nacimiento,
@@ -193,6 +194,7 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 				razon_social: usuario.razon_social || null,
 				con_fines_de_lucro: usuario.con_fines_de_lucro,
 				// Actualización de contactos: Reemplazar existentes con los nuevos
+				// TODO (Marina Milo): Evaluar uso de upsert para mantener tracking de IDs originales si es necesario
 				contactos: usuario.contactos
 					? {
 							deleteMany: {}, // Borra los anteriores del usuario

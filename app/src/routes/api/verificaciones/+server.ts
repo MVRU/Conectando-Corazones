@@ -38,6 +38,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'tipo es obligatorio' }, { status: 400 });
 		}
 
+		// TODO (Marina Milo): Validar que no exista ya una solicitud de este 'tipo' en estado 'pendiente' para evitar duplicados
+
 		const repo = new PostgresVerificacionRepository();
 		const useCase = new SolicitarVerificacion(repo);
 		const row = await useCase.execute(locals.usuario.id_usuario, locals.usuario.id_usuario, tipo);

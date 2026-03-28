@@ -2,92 +2,78 @@
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
+	import { Pencil, Plus, Tag } from 'lucide-svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-	export let perfilUsuario: UsuarioCompleto;
-	export let esMiPerfil: boolean;
-	export let onEditarClick: () => void;
+	let { perfilUsuario, esMiPerfil, onEditarClick } = $props<{
+		perfilUsuario: UsuarioCompleto;
+		esMiPerfil: boolean;
+		onEditarClick: () => void;
+	}>();
 
-	$: categorias = perfilUsuario.categorias_preferidas || [];
-	$: tieneCategorias = categorias.length > 0;
+	let categorias = $derived(perfilUsuario.categorias_preferidas || []);
+	let tieneCategorias = $derived(categorias.length > 0);
 </script>
 
-<section class="mb-8">
+<section>
 	<div class="mb-4 flex items-center justify-between">
-		<h3 class="text-xl font-semibold text-gray-900">
-			{esMiPerfil ? 'Mis categorías favoritas' : 'Categorías favoritas'}
+		<h3 class="flex items-center gap-2 text-sm font-bold text-gray-800">
+			<Tag class="h-4 w-4 text-[#007FFF]" />
+			{esMiPerfil ? 'Mis categorías' : 'Categorías'}
 		</h3>
 		{#if esMiPerfil}
 			<button
-				on:click={onEditarClick}
-				class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+				onclick={onEditarClick}
+				class="inline-flex items-center gap-1.5 rounded-xl border border-[#007FFF]/20 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:bg-blue-100 hover:shadow-sm"
+				aria-label="Editar categorías preferidas"
 			>
-				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-					/>
-				</svg>
+				<Pencil class="h-3 w-3" />
 				Editar
 			</button>
 		{/if}
 	</div>
 
 	{#if tieneCategorias}
-		<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each categorias as categoria}
+		<div class="flex flex-wrap gap-2">
+			{#each categorias as categoria, i (categoria.descripcion)}
 				<div
-					class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+					class="group flex cursor-default items-center gap-1.5 rounded-full border border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50/60 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:border-[#007FFF]/30 hover:from-blue-100 hover:to-blue-50 hover:shadow-sm"
+					in:fly={{ y: 8, duration: 250, delay: i * 50, easing: cubicOut }}
 				>
-					<div class="flex w-full items-center gap-3">
-						<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-50">
-							<Icon
-								src={obtenerIconoCategoria(categoria.descripcion)}
-								class="h-6 w-6 text-blue-600"
-							/>
-						</div>
-						<div class="flex-1">
-							<h4 class="font-medium text-gray-900">{categoria.descripcion}</h4>
-						</div>
-					</div>
+					<Icon
+						src={obtenerIconoCategoria(categoria.descripcion)}
+						class="h-3.5 w-3.5 text-[#007FFF] transition-transform duration-200 group-hover:scale-110"
+					/>
+					{categoria.descripcion}
 				</div>
 			{/each}
 		</div>
 	{:else}
-		<div class="rounded-xl border border-gray-200 bg-white py-12 text-center">
-			<div class="mx-auto h-12 w-12 text-gray-400">
-				<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-					/>
-				</svg>
+		<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-[#007FFF]/30 hover:bg-white hover:shadow-sm">
+			<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]">
+				<Tag class="h-7 w-7" />
 			</div>
-			<h3 class="mt-4 text-lg font-medium text-gray-900">No hay categorías favoritas</h3>
-			<p class="mt-2 text-gray-500">
-				{esMiPerfil
-					? 'Seleccioná tus categorías favoritas para personalizar tu experiencia.'
-					: 'Este usuario aún no ha seleccionado categorías favoritas.'}
+			
+			<h4 class="mb-1 text-sm font-semibold text-gray-800">
+				{esMiPerfil ? 'Sin categorías personalizadas' : 'No hay categorías definidas'}
+			</h4>
+			
+			<p class="max-w-[200px] text-xs leading-relaxed text-gray-500">
+				{esMiPerfil 
+					? 'Agregá las temáticas que más te interesan para personalizar tu experiencia.' 
+					: 'Este usuario aún no ha seleccionado sus categorías de interés.'}
 			</p>
+
 			{#if esMiPerfil}
 				<button
-					on:click={onEditarClick}
-					class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+					onclick={onEditarClick}
+					class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-200 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95"
 				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 4v16m8-8H4"
-						/>
-					</svg>
-					Agregar categorías
+					<Plus class="h-3.5 w-3.5" />
+					Configurar intereses
 				</button>
 			{/if}
 		</div>

@@ -13,6 +13,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ success: false, error: 'ID de usuario requerido' }, { status: 400 });
 		}
 
+		// TODO (Marina Milo): Validar que el id_usuario del body coincida con el de la sesión si el usuario no es admin
+
 		const repo = new PostgresUsuarioRepository();
 		const actualizarUseCase = new ActualizarUsuario(repo);
 

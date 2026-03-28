@@ -32,6 +32,7 @@ export const PUT: RequestHandler = async ({ params, request }) => {
 	}
 
 	try {
+		// TODO (Marina Milo): Validar que el usuario autenticado (locals.usuario.id_usuario) coincida con el ID solicitado o sea admin
 		const data = await request.json();
 		const actualizarUsuario = new ActualizarUsuario(repository);
 		const usuarioActualizado = await actualizarUsuario.execute(id, data);
@@ -57,6 +58,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 	}
 
 	try {
+		// TODO (Marina Milo): Validar RN 1.3 - No permitir eliminación si hay proyectos en curso o colaboraciones activas
 		const eliminarUsuario = new EliminarUsuario(repository);
 		await eliminarUsuario.execute(id);
 		return new Response(null, { status: 204 });
