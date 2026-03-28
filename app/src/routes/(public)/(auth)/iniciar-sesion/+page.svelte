@@ -66,10 +66,10 @@
 		event.preventDefault();
 
 		erroresValidacion = [];
-		if (!identificador.trim()) erroresValidacion.push('El usuario o correo es requerido');
-		if (!password.trim()) erroresValidacion.push('La contraseña es requerida');
+		if (!identificador.trim()) erroresValidacion.push('Ingresá tu usuario o correo electrónico');
+		if (!password.trim()) erroresValidacion.push('Ingresá tu contraseña');
 		if (identificador.includes('@') && !validarCorreo(identificador)) {
-			erroresValidacion.push('Ingresá un correo electrónico válido');
+			erroresValidacion.push('Ingresá un correo electrónico válido (ej: tu@correo.com)');
 		}
 
 		if (erroresValidacion.length > 0) {
@@ -222,7 +222,7 @@
 				<!-- Errores de validación -->
 				{#if erroresValidacion.length > 0}
 					<div class="error-banner" role="alert" in:fly={{ y: -8, duration: 300 }}>
-						<p class="error-banner-title">Por favor corregí los siguientes errores:</p>
+						<p class="error-banner-title">Verificá los siguientes datos:</p>
 						<ul>
 							{#each erroresValidacion as err (err)}
 								<li>{err}</li>
@@ -249,7 +249,7 @@
 							label="Usuario o correo electrónico"
 							bind:value={identificador}
 							type="text"
-							placeholder="Ej: maria_g o maria@correo.com"
+							placeholder="usuario o tu@correo.com"
 							autocomplete="username"
 							required
 						/>

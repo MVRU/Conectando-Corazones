@@ -1433,8 +1433,8 @@
 						label="Correo electrónico"
 						required
 						placeholder={rolInterno === 'institucion'
-							? 'ej: contacto@institucion.org'
-							: 'ej: persona@correo.com'}
+							? 'contacto@institucion.org'
+							: 'tu@correo.com'}
 						type="email"
 						autocomplete="email"
 						bind:value={email}
@@ -1457,7 +1457,7 @@
 						name="password"
 						label="Contraseña"
 						required
-						placeholder="Mínimo 8 caracteres"
+						placeholder="Min. 8 caracteres: mayúscula, minúscula y número"
 						autocomplete="new-password"
 						type={mostrarPassword ? 'text' : 'password'}
 						bind:value={password}
@@ -1527,41 +1527,51 @@
 				<FotoPerfilUploader
 					id="foto"
 					nombre="foto"
-					etiqueta="Foto o avatar"
+					etiqueta="Logo o imagen"
 					etiquetaOpcional="(opcional)"
 					descripcion="Subí un logo o imagen para que la comunidad identifique tu institución."
-					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					textoAyuda="Formatos: JPG, PNG, WebP. Tamaño máximo recomendado: 5 MB. Podés pegar un enlace o subir una imagen."
 					bind:enlace={urlFoto}
 					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 
 				<div class="grid gap-5 md:grid-cols-2">
-					<CampoFormulario
-						id="nombre"
-						name="nombre"
-						label={obtenerEtiquetaNombre()}
-						required
-						placeholder="Nombre de la persona referente"
-						bind:value={nombrePersona}
-						error={intentoEnvio ? errores.nombre : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre"
+							name="nombre"
+							label={obtenerEtiquetaNombre()}
+							required
+							placeholder="Nombre"
+							bind:value={nombrePersona}
+							error={intentoEnvio ? errores.nombre : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Nombre completo tal como figura en documentos legales.
+						</p>
+					</div>
 
-					<CampoFormulario
-						id="apellido"
-						name="apellido"
-						label={obtenerEtiquetaApellido()}
-						required
-						placeholder="Apellido de la persona referente"
-						bind:value={apellidoPersona}
-						error={intentoEnvio ? errores.apellido : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="apellido"
+							name="apellido"
+							label={obtenerEtiquetaApellido()}
+							required
+							placeholder="Apellido"
+							bind:value={apellidoPersona}
+							error={intentoEnvio ? errores.apellido : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Apellido completo tal como figura en documentos legales.
+						</p>
+					</div>
 				</div>
 
 				<div class="grid gap-5 md:grid-cols-2">
@@ -1576,19 +1586,23 @@
 							error={intentoEnvio ? errores.fecha_nacimiento : ''}
 							prefixIcon={Calendar}
 							prefixIconClass="text-sky-500"
+							validateBirthdate={true}
 						/>
+						<p class="mt-1 text-xs text-slate-500">Debés ser mayor de 18 años.</p>
 					</div>
 					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
-						Esta fecha nos ayuda a validar la idoneidad legal y operativa de la institución en la
-						comunidad.
+						Usamos esta información únicamente para validar que cumplís con los requisitos legales.
 					</p>
 				</div>
 
 				<div class="space-y-6 rounded-2xl bg-white p-6">
 					<div class="space-y-1">
-						<h4 class="text-lg font-semibold text-slate-900">Tipo de institución</h4>
+						<h4 class="text-lg font-semibold text-slate-900">
+							Tipo de institución <span class="text-red-600">*</span>
+						</h4>
 						<p class="text-sm text-slate-500">
-							Seleccioná la categoría que mejor describe tu misión.
+							Seleccioná la categoría que mejor describe tu misión. Esto nos ayuda a conectarte con
+							colaboradores y proyectos relevantes.
 						</p>
 					</div>
 
@@ -1652,18 +1666,24 @@
 						/>
 					{/if}
 
-					<CampoFormulario
-						id="nombre_legal"
-						name="nombre_legal"
-						label="Nombre legal de la institución"
-						required
-						placeholder="Razón social registrada"
-						bind:value={nombreLegal}
-						error={intentoEnvio ? errores.nombre_legal : ''}
-						disabled={procesando}
-						icon={Building2}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre_legal"
+							name="nombre_legal"
+							label="Nombre legal de la institución"
+							required
+							placeholder="Razón social registrada"
+							bind:value={nombreLegal}
+							error={intentoEnvio ? errores.nombre_legal : ''}
+							disabled={procesando}
+							icon={Building2}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Debe coincidir exactamente con el nombre en documentos legales (inscripción,
+							estatutos, etc).
+						</p>
+					</div>
 				</div>
 			</section>
 		{:else}
@@ -1673,41 +1693,51 @@
 				<FotoPerfilUploader
 					id="foto"
 					nombre="foto"
-					etiqueta="Foto o avatar"
+					etiqueta="Foto de perfil"
 					etiquetaOpcional="(opcional)"
 					descripcion="Mostrá quién estará en contacto con las instituciones para generar mayor confianza."
-					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					textoAyuda="Formatos: JPG, PNG, WebP. Tamaño máximo recomendado: 5 MB. Podés pegar un enlace o subir una imagen."
 					bind:enlace={urlFoto}
 					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 
 				<div class="grid gap-5 md:grid-cols-2">
-					<CampoFormulario
-						id="nombre"
-						name="nombre"
-						label={obtenerEtiquetaNombre()}
-						required
-						placeholder="Nombre"
-						bind:value={nombrePersona}
-						error={intentoEnvio ? errores.nombre : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre"
+							name="nombre"
+							label={obtenerEtiquetaNombre()}
+							required
+							placeholder="Nombre"
+							bind:value={nombrePersona}
+							error={intentoEnvio ? errores.nombre : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Tu nombre completo tal como figura en documentos.
+						</p>
+					</div>
 
-					<CampoFormulario
-						id="apellido"
-						name="apellido"
-						label={obtenerEtiquetaApellido()}
-						required
-						placeholder="Apellido"
-						bind:value={apellidoPersona}
-						error={intentoEnvio ? errores.apellido : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="apellido"
+							name="apellido"
+							label={obtenerEtiquetaApellido()}
+							required
+							placeholder="Apellido"
+							bind:value={apellidoPersona}
+							error={intentoEnvio ? errores.apellido : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Tu apellido completo tal como figura en documentos.
+						</p>
+					</div>
 				</div>
 
 				<div class="grid gap-5 md:grid-cols-2">
@@ -1721,22 +1751,23 @@
 							bind:value={fechaNacimiento}
 							error={intentoEnvio ? errores.fecha_nacimiento : ''}
 							prefixIcon={Calendar}
-							prefixIconClass="text-slate-500"
+							prefixIconClass="text-sky-500"
+							validateBirthdate={true}
 						/>
+						<p class="mt-1 text-xs text-slate-500">Debés ser mayor de 18 años.</p>
 					</div>
 					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
-						Usamos esta información únicamente para validar la edad mínima requerida por la
-						plataforma.
+						Usamos esta información únicamente para validar que cumplís con los requisitos legales.
 					</p>
 				</div>
 
 				<div class="space-y-4">
 					<div>
 						<p class="text-sm font-semibold text-slate-800">
-							Tipo de colaborador/a <span class="text-red-600">*</span>
+							Tipo de colaborador <span class="text-red-600">*</span>
 						</p>
 						<p class="text-sm text-slate-500">
-							Elegí cómo vas a contribuir dentro de Conectando Corazones.
+							Elegí cómo vas a contribuir. Podés cambiar esto luego en tu perfil.
 						</p>
 					</div>
 					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1787,15 +1818,16 @@
 								<CampoFormulario
 									id="razon_social"
 									name="razon_social"
-									label="Razón social"
+									label="Razón social de la organización"
 									required
-									placeholder="Nombre legal de la organización"
+									placeholder="Nombre legal registrado"
 									bind:value={razonSocial}
 									error={intentoEnvio ? errores.razon_social : ''}
 									disabled={procesando}
 									icon={Building2}
 									iconClass="text-sky-500"
 								/>
+								<p class="mt-1 text-xs text-slate-500">Debe tener al menos 3 caracteres.</p>
 							</div>
 
 							<div class="space-y-3 md:col-span-2">
@@ -1859,7 +1891,7 @@
 					disabled={procesando}
 				/>
 				<span>
-					Declaro haber leído y acepto los
+					He leído y acepto los
 					<a
 						href="/terminos"
 						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
@@ -1873,7 +1905,7 @@
 						target="_blank"
 						rel="noopener noreferrer">política de privacidad</a
 					>
-					de la plataforma. <span class="text-red-600">*</span>
+					de Conectando Corazones. <span class="text-red-600">*</span>
 				</span>
 			</label>
 			{#if intentoEnvio && errores.terminos_privacidad}

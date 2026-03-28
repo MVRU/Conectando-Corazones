@@ -4,37 +4,36 @@
 
 export const MENSAJES_ERROR = {
 	obligatorio: 'Este campo es obligatorio',
-	correoInvalido: 'Por favor, ingresá un correo electrónico válido',
-	requisitosContrasena:
-		'La contraseña debe contener al menos una letra mayúscula, una letra minúscula, un número y un carácter especial',
-	usuarioInvalido:
-		'El nombre de usuario debe tener entre 3 y 30 caracteres y solo puede contener letras, números, puntos, guiones bajos o guiones',
+	correoInvalido: 'Ingresá un correo electrónico válido (ej: tu@correo.com)',
+	requisitosContrasena: 'La contraseña debe tener al menos: 1 mayúscula, 1 minúscula y 1 número',
+	usuarioInvalido: 'Usá entre 3 y 30 caracteres (letras, números, puntos, guiones bajos o guiones)',
 	contrasenasNoCoinciden: 'Las contraseñas no coinciden',
-	requisitoEdad: 'Debés tener al menos 18 años',
-	tipoInstitucionObligatorio: 'Especificá el tipo de institución',
-	nombreInvalido: 'Nombre inválido. Solo se permiten letras y espacios.',
-	apellidoInvalido: 'Apellido inválido. Solo se permiten letras y espacios.',
-	calleInvalida: 'Calle inválida. Ingresá una dirección válida.',
-	numeroCalleInvalido: 'Número inválido. Tiene que ser un número positivo.',
-	provinciaInvalida: 'Provincia inválida. Seleccioná una opción.',
-	ciudadNoPerteneceProvincia: 'La ciudad seleccionada no pertenece a la provincia elegida.',
-	otroContactoObligatorio: 'Especificá el tipo de contacto',
-	telefonoInvalido: 'Número de teléfono inválido',
-	urlInvalida: 'URL inválida',
-	contactoDuplicado: 'Método de contacto duplicado',
-	fechaFutura: 'La fecha no puede ser futura',
+	requisitoEdad: 'Debés ser mayor de 18 años para registrarte',
+	tipoInstitucionObligatorio: 'Debés seleccionar un tipo de institución',
+	nombreInvalido: 'Ingresá un nombre válido (solo letras y espacios)',
+	apellidoInvalido: 'Ingresá un apellido válido (solo letras y espacios)',
+	calleInvalida: 'Ingresá una dirección válida',
+	numeroCalleInvalido: 'Ingresá un número válido',
+	provinciaInvalida: 'Seleccioná una provincia',
+	ciudadNoPerteneceProvincia: 'La ciudad seleccionada no coincide con la provincia',
+	otroContactoObligatorio: 'Seleccioná un método de contacto',
+	telefonoInvalido: 'Ingresá un número de teléfono válido',
+	urlInvalida: 'Ingresá una URL válida (ej: https://ejemplo.com)',
+	contactoDuplicado: 'Este método de contacto ya existe',
+	fechaInvalida: 'Fecha inválida',
+	fechaFutura: 'La fecha no puede ser en el futuro',
 	fechaMuyAntigua: 'La fecha es demasiado antigua',
 	nombreLegalDuplicado: 'El nombre legal ya se encuentra registrado',
 	nombreCorto: 'El nombre debe tener al menos 3 caracteres',
 	razonSocialDuplicada: 'La razón social ya se encuentra registrada',
-	fechaFinObligatoria: 'La fecha de fin es obligatoria.',
-	fechaFinFutura: 'La fecha de fin tiene que ser futura.',
-	fechaLejana: 'La fecha es demasiado lejana.',
-	imagenUrlInvalida: 'La URL debe apuntar a una imagen (.jpg, .jpeg, .png, .webp, .gif)',
-	especieObligatoria: 'Especificá el ítem.',
-	beneficiariosNoReducir: 'El número de beneficiarios no puede reducirse.',
-	objetivoNoReducir: 'El objetivo no puede ser menor al actual.',
-	fechaNoAnterior: 'Solo podés extender la fecha.'
+	fechaFinObligatoria: 'La fecha de fin es obligatoria',
+	fechaFinFutura: 'La fecha de fin debe ser en el futuro',
+	fechaLejana: 'La fecha es demasiado lejana',
+	imagenUrlInvalida: 'La imagen debe ser: JPG, PNG, WebP o GIF',
+	especieObligatoria: 'Seleccioná un ítem',
+	beneficiariosNoReducir: 'El número de beneficiarios no puede reducirse',
+	objetivoNoReducir: 'El objetivo no puede ser menor al actual',
+	fechaNoAnterior: 'Solo podés extender la fecha'
 };
 
 /**
@@ -178,4 +177,58 @@ export function validarCoherenciaTemporal(
 	} catch {
 		return false;
 	}
+}
+
+/**
+ * Parsea una fecha en formato DD/MM/YYYY a un objeto Date
+ * Retorna null si el formato es inválido
+ */
+export function parsearFechaDDMMYYYY(input: string): Date | null {
+	const trimmed = input.trim();
+	const parts = trimmed.split('/');
+
+	if (parts.length !== 3) return null;
+
+	const day = parseInt(parts[0], 10);
+	const month = parseInt(parts[1], 10);
+	const year = parseInt(parts[2], 10);
+
+	if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+
+	// Crear la fecha
+	const date = new Date(year, month - 1, day);
+
+	// Validar que sea una fecha válida (month y day correctos)
+	if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+		return null;
+	}
+
+	return date;
+}
+
+/**
+ * Valida una fecha de nacimiento con reglas estrictas
+ * Retorna el error específico o empty string si es válido
+ */
+export function validarFechaNacimiento(fecha: Date | null): string {
+	if (!fecha || !(fecha instanceof Date) || isNaN(fecha.getTime())) {
+		return MENSAJES_ERROR.fechaInvalida;
+	}
+
+	// No permitir fechas futuras
+	const ahora = new Date();
+	ahora.setHours(0, 0, 0, 0);
+	const fechaCopia = new Date(fecha);
+	fechaCopia.setHours(0, 0, 0, 0);
+
+	if (fechaCopia > ahora) {
+		return MENSAJES_ERROR.fechaFutura;
+	}
+
+	// Validar que sea mayor de 18 años
+	if (!esAdulto(fecha)) {
+		return MENSAJES_ERROR.requisitoEdad;
+	}
+
+	return '';
 }

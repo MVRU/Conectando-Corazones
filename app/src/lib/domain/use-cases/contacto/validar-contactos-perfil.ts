@@ -1,4 +1,4 @@
-import { esTipoContactoCanonico } from '$lib/domain/types/Contacto';
+import { esTipoContactoCanonico, esEtiquetaContactoCanonica } from '$lib/domain/types/Contacto';
 import {
 	MENSAJES_ERROR,
 	validarCorreo,
@@ -16,6 +16,9 @@ export function validarListaContactosPerfil(contactos: Contacto[]): void {
 	for (const c of contactos) {
 		if (!esTipoContactoCanonico(c.tipo_contacto)) {
 			throw new Error(`Tipo de contacto no válido: ${c.tipo_contacto}`);
+		}
+		if (c.etiqueta && !esEtiquetaContactoCanonica(c.etiqueta)) {
+			throw new Error(`Etiqueta de contacto no válida: ${c.etiqueta}`);
 		}
 	}
 
