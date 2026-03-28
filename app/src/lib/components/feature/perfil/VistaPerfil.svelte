@@ -360,6 +360,7 @@
 			aria-labelledby="modal-eliminar-resena-titulo"
 			tabindex="-1"
 			on:click|stopPropagation
+			on:keydown|stopPropagation
 		>
 			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
 				<h3

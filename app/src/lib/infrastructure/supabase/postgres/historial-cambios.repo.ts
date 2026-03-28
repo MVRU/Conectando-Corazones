@@ -1,6 +1,9 @@
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { Prisma } from '@prisma/client';
-import type { HistorialDeCambiosRepository, FiltrosHistorial } from '$lib/domain/repositories/HistorialDeCambiosRepository';
+import type {
+	HistorialDeCambiosRepository,
+	FiltrosHistorial
+} from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 
 export class PostgresHistorialDeCambiosRepository implements HistorialDeCambiosRepository {
@@ -100,3 +103,6 @@ export class PostgresHistorialDeCambiosRepository implements HistorialDeCambiosR
 		return cambios.map(this.mapear.bind(this));
 	}
 }
+
+// TODO (Tomás): Implementar API Endpoint GET /api/admin/historial (solo Admin) para consulta global (tiene que ser INMUTABLE)
+// TODO (Tomás): Implementar vista de Administración para navegar el historial de cambios (tiene que ser INMUTABLE)

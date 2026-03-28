@@ -59,15 +59,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let evaluacionUsuario = null;
 	if (solicitud) {
 		evaluacionUsuario = await evaluacionRepo.findBySolicitudAndColaborador(
-			solicitud.id_solicitud,
-			user.id_usuario
+			solicitud.id_solicitud!,
+			user.id_usuario!
 		);
 	}
 
 	// 5. Contadores
 	const totalColaboradores = colaboraciones.filter((c) => c.estado === 'aprobada').length;
 	const votosRealizados = solicitud
-		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud)).total
+		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud!)).total
 		: 0;
 
 	return {
@@ -97,7 +97,7 @@ export const actions: Actions = {
 			await registrarEvaluacion.execute({
 				proyectoId,
 				solicitudId,
-				colaboradorId: user.id_usuario,
+				colaboradorId: user.id_usuario!,
 				voto: 'aprobado',
 				justificacion
 			});
@@ -123,7 +123,7 @@ export const actions: Actions = {
 			await registrarEvaluacion.execute({
 				proyectoId,
 				solicitudId,
-				colaboradorId: user.id_usuario,
+				colaboradorId: user.id_usuario!,
 				voto: 'rechazado',
 				justificacion
 			});
@@ -133,7 +133,7 @@ export const actions: Actions = {
 		}
 	},
 
-	reportar: async ({ request, params }) => {
+	reportar: async () => {
 		return {
 			success: true,
 			message: 'Irregularidad reportada correctamente. El equipo de auditoría revisará el caso.'

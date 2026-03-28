@@ -38,6 +38,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// 3. Obtener Reseñas
 		const obtenerResenas = new ObtenerResenasPorObjeto(resenaRepo);
+		if (!perfilUsuario.id_usuario) {
+			throw error(500, 'Usuario sin ID válido');
+		}
 		const resenas = await obtenerResenas.execute('usuario', perfilUsuario.id_usuario);
 
 		// 4. Verificar si es mi perfil
@@ -55,7 +58,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.error('Error loading profile:', err);
 
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
+		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
 			throw err;
 		}
 

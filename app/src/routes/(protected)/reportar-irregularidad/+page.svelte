@@ -12,7 +12,7 @@
 	let errorEnvio = '';
 
 	$: queryParams = $page.url.searchParams;
-	$: tipoObjeto = queryParams.get('type') || 'Sistema';
+	$: tipoObjeto = (queryParams.get('type') as 'Usuario' | 'Proyecto') || 'Proyecto';
 	$: idObjeto = parseInt(queryParams.get('id') || '0');
 	$: nombreObjeto = queryParams.get('name') || '';
 

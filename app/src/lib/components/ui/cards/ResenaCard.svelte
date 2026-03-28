@@ -56,8 +56,8 @@
 
 	$: roleLabel = autor ? obtenerEtiquetaRol(autor.rol) : obtenerEtiquetaRol(resena.rol);
 	$: roleClass = autor
-		? obtenerColorRol(autor.rol)
-		: obtenerColorRol(resena.rol) || 'bg-gray-100 text-gray-800';
+		? obtenerColorRol(autor.rol || '')
+		: obtenerColorRol(resena.rol || '') || 'bg-gray-100 text-gray-800';
 </script>
 
 <div
@@ -67,7 +67,7 @@
 		: ''} flex h-full flex-col"
 >
 	<div class="mb-3 flex items-center gap-1">
-		{#each Array(5).keys() as i}
+		{#each Array(5).keys() as i (i)}
 			<svg
 				class="h-4 w-4 {i < resena.puntaje ? 'text-amber-400' : 'text-gray-200'}"
 				fill="currentColor"

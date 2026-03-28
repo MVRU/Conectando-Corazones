@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Resena } from '$lib/domain/types/Resena';
+	import type { Resena, TipoObjetoResena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let mostrar: boolean = false;
@@ -29,7 +29,7 @@
 		const resena: Resena = {
 			contenido: nuevaResena.contenido.trim(),
 			puntaje: nuevaResena.puntaje,
-			tipo_objeto: tipoObjeto,
+			tipo_objeto: tipoObjeto as TipoObjetoResena,
 			id_objeto: idObjeto
 		};
 		dispatch('guardar', resena);
@@ -79,7 +79,7 @@
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>
 						<div class="flex items-center gap-1">
-							{#each Array(5).keys() as i}
+							{#each Array(5).keys() as i (i)}
 								<button
 									type="button"
 									on:click={() => (nuevaResena.puntaje = i + 1)}
