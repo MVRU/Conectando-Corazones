@@ -1,5 +1,6 @@
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
 import type { Usuario } from '$lib/domain/entities/Usuario';
+import { normalizeName } from '$lib/utils/normalizeName';
 
 export class ActualizarUsuario {
 	constructor(private usuarioRepository: UsuarioRepository) {}
@@ -41,9 +42,9 @@ export class ActualizarUsuario {
 			throw new Error('No se permite cambiar el rol del usuario.');
 		}
 
-		// Campos requeridos
-		if (cambios.nombre) usuarioExistente.nombre = cambios.nombre;
-		if (cambios.apellido) usuarioExistente.apellido = cambios.apellido;
+		// Campos requeridos (con normalización)
+		if (cambios.nombre) usuarioExistente.nombre = normalizeName(cambios.nombre) || cambios.nombre;
+		if (cambios.apellido) usuarioExistente.apellido = normalizeName(cambios.apellido) || cambios.apellido;
 		if (cambios.url_foto) usuarioExistente.url_foto = cambios.url_foto;
 
 		// Campos opcionales
@@ -63,15 +64,15 @@ export class ActualizarUsuario {
 		if (cambios.tipos_participacion_preferidas)
 			usuarioExistente.tipos_participacion_preferidas = cambios.tipos_participacion_preferidas;
 
-		// Campos específicos opcionales
+		// Campos específicos opcionales (con normalización)
 		if (cambios.nombre_legal !== undefined)
-			usuarioExistente.nombre_legal = cambios.nombre_legal || '';
+			usuarioExistente.nombre_legal = cambios.nombre_legal ? normalizeName(cambios.nombre_legal) || cambios.nombre_legal : '';
 		if (cambios.tipo_institucion !== undefined)
 			usuarioExistente.tipo_institucion = cambios.tipo_institucion || '';
 		if (cambios.tipo_colaborador !== undefined)
 			usuarioExistente.tipo_colaborador = cambios.tipo_colaborador || '';
 		if (cambios.razon_social !== undefined)
-			usuarioExistente.razon_social = cambios.razon_social || '';
+			usuarioExistente.razon_social = cambios.razon_social ? normalizeName(cambios.razon_social) || cambios.razon_social : '';
 		if (cambios.con_fines_de_lucro !== undefined)
 			usuarioExistente.con_fines_de_lucro = cambios.con_fines_de_lucro;
 
