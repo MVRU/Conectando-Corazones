@@ -318,7 +318,7 @@
 						in:fly={{ y: 20, duration: 350, delay: 200, easing: cubicOut }}
 					>
 						<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-							<PerfilSeccionProyectos proyectos={proyectosUsuario} rol={perfilUsuario.rol} />
+							<PerfilSeccionProyectos proyectos={proyectosUsuario} rol={perfilUsuario.rol} {estadoVerificacion} />
 						</div>
 					</div>
 

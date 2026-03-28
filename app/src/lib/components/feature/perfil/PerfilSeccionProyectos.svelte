@@ -5,9 +5,10 @@
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 
-	let { proyectos, rol } = $props<{
+	let { proyectos, rol, estadoVerificacion } = $props<{
 		proyectos: Proyecto[];
 		rol: 'institucion' | 'colaborador' | 'administrador';
+		estadoVerificacion?: string;
 	}>();
 
 	const LIMITE_INICIAL = 4;
@@ -78,13 +79,27 @@
 			</p>
 
 			{#if rol === 'institucion'}
-				<a
-					href="/proyectos/nuevo"
-					class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-100 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95 text-center"
-				>
-					<Layers2 class="h-4 w-4" />
-					Crear mi primer proyecto
-				</a>
+				{#if estadoVerificacion === 'aprobada'}
+					<a
+						href="/proyectos/nuevo"
+						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-100 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95 text-center"
+					>
+						<Layers2 class="h-4 w-4" />
+						Crear mi primer proyecto
+					</a>
+				{:else}
+					<button
+						disabled
+						title="Tu institución debe estar verificada para publicar proyectos"
+						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-gray-300 px-5 py-2.5 text-xs font-bold text-gray-500 cursor-not-allowed opacity-60 text-center"
+					>
+						<Layers2 class="h-4 w-4" />
+						Crear mi primer proyecto
+					</button>
+					<p class="mt-3 text-xs text-rose-600 font-medium">
+						Tu institución debe estar verificada para publicar proyectos
+					</p>
+				{/if}
 			{/if}
 		</div>
 	{/if}
