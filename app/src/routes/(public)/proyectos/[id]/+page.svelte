@@ -106,7 +106,6 @@
 
 	$: if (proyecto) {
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			BREADCRUMB_ROUTES.proyectos,
 			{ label: proyecto.titulo }
 		]);

@@ -12,7 +12,6 @@
 
 	$effect(() => {
 		setBreadcrumbs([
-			{ label: 'Inicio', href: '/' },
 			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
 			{ label: 'Aportes', href: `/institucion/proyectos/${projectId}/aportes` },
 			{ label: 'Colaborador' }

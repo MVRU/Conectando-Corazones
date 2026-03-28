@@ -29,7 +29,6 @@
 
 	$: if (proyecto) {
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			BREADCRUMB_ROUTES.proyectos,
 			{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
 			{ label: 'Evaluación de Cierre' }

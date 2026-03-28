@@ -6,7 +6,6 @@
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	setBreadcrumbs([
-		{ label: 'Inicio', href: '/' },
 		{ label: 'Proyectos', href: '/proyectos' },
 		{ label: 'Crear Proyecto' }
 	]);

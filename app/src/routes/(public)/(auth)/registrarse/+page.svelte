@@ -3,7 +3,7 @@
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
 	import Loader from '\$lib/components/ui/feedback/Loader.svelte';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	// import ValidacionRenaper from '\$lib/validation/components/ValidacionRenaper.svelte';
@@ -65,7 +65,7 @@
 	}
 
 	onMount(() => {
-		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
+		setBreadcrumbs([{ label: 'Registro' }]);
 		if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
 			storageRegistroDisponible = true;
 			const snapshot = leerProgresoRegistro();

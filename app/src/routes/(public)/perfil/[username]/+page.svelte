@@ -24,8 +24,7 @@
 		if (from === 'solicitudes') {
 			if (proyectoContexto) {
 				setBreadcrumbs([
-					{ label: 'Inicio', href: '/' },
-					{ label: 'Proyectos', href: '/proyectos' },
+										{ label: 'Proyectos', href: '/proyectos' },
 					{
 						label: proyectoContexto.titulo,
 						href: `/proyectos/${proyectoContexto.id_proyecto}`
@@ -38,16 +37,14 @@
 				]);
 			} else {
 				setBreadcrumbs([
-					{ label: 'Inicio', href: '/' },
-					{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+										{ label: 'Mi Panel', href: '/institucion/mi-panel' },
 					{ label: 'Solicitudes', href: '/institucion/solicitudes-colaboracion' },
 					{ label: nombrePerfil }
 				]);
 			}
 		} else if (from === 'proyecto' && proyectoContexto) {
 			setBreadcrumbs([
-				{ label: 'Inicio', href: '/' },
-				{ label: 'Proyectos', href: '/proyectos' },
+								{ label: 'Proyectos', href: '/proyectos' },
 				{
 					label: proyectoContexto.titulo,
 					href: `/proyectos/${proyectoContexto.id_proyecto}`
@@ -55,7 +52,7 @@
 				{ label: nombrePerfil }
 			]);
 		} else {
-			setBreadcrumbs([{ label: 'Inicio', href: '/' }, { label: nombrePerfil }]);
+			setBreadcrumbs([{ label: nombrePerfil }]);
 		}
 	}
 

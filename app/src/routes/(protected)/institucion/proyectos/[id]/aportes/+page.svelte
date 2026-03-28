@@ -9,7 +9,6 @@
 	$effect(() => {
 		const nombre = data.projectName || data.proyecto?.titulo || 'Proyecto';
 		setBreadcrumbs([
-			{ label: 'Inicio', href: '/' },
 			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
 			{ label: nombre, href: `/proyectos/${projectId}` },
 			{ label: 'Aportes' }

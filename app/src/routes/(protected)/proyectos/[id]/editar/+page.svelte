@@ -9,7 +9,6 @@
 
 	$: if (data.form?.titulo) {
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			BREADCRUMB_ROUTES.proyectos,
 			{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
 			{ label: 'Editar' }

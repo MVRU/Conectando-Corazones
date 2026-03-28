@@ -29,7 +29,6 @@
 	$effect(() => {
 		const titulo = data.proyecto?.titulo || 'Proyecto';
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			BREADCRUMB_ROUTES.proyectos,
 			{ label: titulo, href: `/proyectos/${projectIdUrl}` },
 			{ label: 'Mis Aportes' }
