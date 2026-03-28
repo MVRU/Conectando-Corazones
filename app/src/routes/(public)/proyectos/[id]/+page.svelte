@@ -16,7 +16,7 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { goto, pushState } from '$app/navigation';
+	import { goto, pushState, invalidateAll } from '$app/navigation';
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
@@ -278,6 +278,39 @@
 	let justificacionCancelacion = '';
 	let cancelando = false;
 
+	let mostrarModalCeseActividades = false;
+	let ceseActividades = false;
+
+	async function confirmarCeseActividades() {
+		if (ceseActividades) return;
+		ceseActividades = true;
+		try {
+			const res = await fetch(`/api/proyectos/${proyecto.id_proyecto}/solicitar-cierre`, {
+				method: 'POST'
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.message || 'Error al finalizar actividades');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				message: 'Actividades finalizadas. El proyecto está pendiente de solicitud de cierre.'
+			});
+
+			await invalidateAll();
+		} catch (err: any) {
+			toastStore.show({
+				variant: 'error',
+				message: err.message
+			});
+		} finally {
+			ceseActividades = false;
+			mostrarModalCeseActividades = false;
+		}
+	}
+
 	async function confirmarCancelacion() {
 		if (cancelando) return;
 		cancelando = true;
@@ -499,6 +532,14 @@
 			acc.push({ divider: true } as any);
 
 			if (esCreador) {
+				if (estadoCodigo === 'en_curso') {
+					acc.push({
+						label: 'Finalizar actividades',
+						icon: CheckCircle,
+						onclick: () => (mostrarModalCeseActividades = true)
+					});
+				}
+
 				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
 
 				if (estadoCodigo === 'en_curso') {
@@ -1773,6 +1814,68 @@
 					>
 						Cerrar
 					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	{#if mostrarModalCeseActividades}
+		<!-- Overlay -->
+		<div
+			class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
+			onclick={() => (mostrarModalCeseActividades = false)}
+			aria-hidden="true"
+		></div>
+
+		<!-- Modal de Cese de Actividades -->
+		<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+			<div
+				class="animate-fade-up pointer-events-auto relative mx-auto w-full max-w-md scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 transition-all duration-300"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-cese-titulo"
+				tabindex="-1"
+				onclick={(e) => e.stopPropagation()}
+				onkeydown={(e) => {
+					if (e.key === 'Escape') mostrarModalCeseActividades = false;
+				}}
+			>
+				<div class="p-6">
+					<div class="mb-4 flex items-center justify-center">
+						<div
+							class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 ring-1 ring-blue-100"
+						>
+							<Icon src={CheckCircle} class="h-6 w-6 text-blue-600" aria-hidden="true" />
+						</div>
+					</div>
+					<h3 id="modal-cese-titulo" class="mb-2 text-center text-xl font-bold text-gray-900">
+						¿Finalizar actividades del proyecto?
+					</h3>
+					<p class="mb-4 text-center text-sm text-gray-600">
+						A partir de este momento el proyecto no aceptará nuevos colaboradores y pasará al estado
+						<span class="font-semibold text-gray-800">Pendiente de solicitud de cierre</span>.
+					</p>
+					<p class="mb-6 text-center text-sm text-gray-500">
+						Podés continuar cargando evidencias hasta que estés listo para iniciar el cierre formal.
+					</p>
+
+					<div class="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
+						<button
+							type="button"
+							class="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 sm:flex-none"
+							onclick={() => (mostrarModalCeseActividades = false)}
+						>
+							Cancelar
+						</button>
+						<button
+							type="button"
+							disabled={ceseActividades}
+							class="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50 sm:flex-none"
+							onclick={confirmarCeseActividades}
+						>
+							{ceseActividades ? 'Finalizando...' : 'Sí, finalizar actividades'}
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>

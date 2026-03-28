@@ -5,9 +5,13 @@ import type { Proyecto } from '../../entities/Proyecto';
 export class GestionarEstadoProyecto {
 	constructor(private proyectoRepo: ProyectoRepository) {}
 
-	async solicitarCierre(proyectoId: number): Promise<Proyecto> {
+	async solicitarCierre(proyectoId: number, usuarioId: number): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
+
+		if (proyecto.institucion_id !== usuarioId) {
+			throw new Error('No tenés permiso para finalizar las actividades de este proyecto');
+		}
 
 		if (!proyecto.puedeCambiarA('pendiente_solicitud_cierre')) {
 			throw new Error(`No se puede solicitar cierre desde el estado ${proyecto.estado}`);
