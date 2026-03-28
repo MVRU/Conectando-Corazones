@@ -447,7 +447,7 @@
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
 				});
-				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado') {
+				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado' && estadoCodigo !== 'en_curso') {
 					acc.push({
 						label: 'Solicitudes de cierre',
 						icon: ClipboardDocumentCheck,
