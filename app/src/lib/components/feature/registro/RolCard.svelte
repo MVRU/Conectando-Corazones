@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let seleccionado: boolean = false;
 	export let icono: 'institucion' | 'colaborador' | 'usuario' = 'usuario';
@@ -13,91 +12,65 @@
 	role="button"
 	tabindex="0"
 	aria-pressed={seleccionado}
-	on:click={onSelect}
-	on:keydown={(e) => {
+	onclick={onSelect}
+	onkeydown={(e) => {
 		if (e.key === 'Enter' || e.key === ' ') {
 			e.preventDefault();
 			onSelect();
 		}
 	}}
 	class={clsx(
-		'group flex flex-col items-start rounded-2xl border bg-white p-6 transition-all duration-300 hover:scale-105',
-		'hover:border-blue-500 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400',
-		seleccionado ? 'border-blue-500 bg-blue-50/30' : 'border-gray-200 ',
-		'aspect-w-1 aspect-h-1 w-full'
+		'group relative flex w-full flex-col items-center overflow-hidden rounded-[2rem] border p-10 transition-all duration-700 hover:-translate-y-2',
+		seleccionado
+			? 'border-[rgb(var(--color-primary))] bg-blue-50/10 ring-1 ring-[rgb(var(--color-primary))]/30 shadow-2xl shadow-blue-500/10'
+			: 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-2xl hover:shadow-slate-200/50'
 	)}
 >
+	<!-- Círculo del Icono / Número -->
 	<div
-		class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-[#00A9FF]"
+		class={clsx(
+			'mb-10 flex h-24 w-24 items-center justify-center rounded-full shadow-lg transition-all duration-700 group-hover:scale-110 group-hover:rotate-3',
+			seleccionado 
+				? 'bg-[rgb(var(--color-primary))] text-white shadow-blue-500/30' 
+				: 'bg-white border border-slate-100 text-slate-400 group-hover:border-[rgb(var(--color-primary))]/20 group-hover:text-[rgb(var(--color-primary))]'
+		)}
 	>
 		{#if icono === 'institucion'}
-			<!-- ! Icono para Institución -->
-			<svg
-				width="64px"
-				height="64px"
-				viewBox="-512 -512 2048.00 2048.00"
-				class="icon"
-				version="1.1"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="#000000"
-				><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
-					id="SVGRepo_tracerCarrier"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				></g><g id="SVGRepo_iconCarrier"
-					><path
-						d="M981.4 502.3c-9.1 0-18.3-2.9-26-8.9L539 171.7c-15.3-11.8-36.7-11.8-52 0L70.7 493.4c-18.6 14.4-45.4 10.9-59.7-7.7-14.4-18.6-11-45.4 7.7-59.7L435 104.3c46-35.5 110.2-35.5 156.1 0L1007.5 426c18.6 14.4 22 41.1 7.7 59.7-8.5 10.9-21.1 16.6-33.8 16.6z"
-						fill="#5F6379"
-					></path><path
-						d="M810.4 981.3H215.7c-70.8 0-128.4-57.6-128.4-128.4V534.2c0-23.5 19.1-42.6 42.6-42.6s42.6 19.1 42.6 42.6v318.7c0 23.8 19.4 43.2 43.2 43.2h594.8c23.8 0 43.2-19.4 43.2-43.2V534.2c0-23.5 19.1-42.6 42.6-42.6s42.6 19.1 42.6 42.6v318.7c-0.1 70.8-57.7 128.4-128.5 128.4z"
-						fill="#007fff"
-					></path></g
-				></svg
-			>
+			<svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+			</svg>
 		{:else}
-			<!-- ! Icono para Colaborador -->
-			<svg
-				width="64px"
-				height="64px"
-				viewBox="-512 -512 2048.00 2048.00"
-				class="icon"
-				version="1.1"
-				xmlns="http://www.w3.org/2000/svg"
-				fill="#000000"
-				stroke="#000000"
-				stroke-width="0.01024"
-				><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g
-					id="SVGRepo_tracerCarrier"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke="#CCCCCC"
-					stroke-width="38.912"
-				></g><g id="SVGRepo_iconCarrier"
-					><path
-						d="M388.9 597.4c-135.2 0-245.3-110-245.3-245.3s110-245.3 245.3-245.3 245.3 110 245.3 245.3-110.1 245.3-245.3 245.3z m0-405.3c-88.2 0-160 71.8-160 160s71.8 160 160 160 160-71.8 160-160-71.8-160-160-160z"
-						fill="#3688FF"
-					></path><path
-						d="M591.3 981.3H186.5c-76.6 0-138.8-62.3-138.8-138.8V749c0-130.6 106.2-236.9 236.9-236.9h208.8c130.6 0 236.9 106.3 236.9 236.9v93.5c-0.2 76.5-62.4 138.8-139 138.8zM284.5 597.4c-83.6 0-151.5 68-151.5 151.5v93.5c0 29.5 24 53.5 53.5 53.5h404.8c29.5 0 53.5-24 53.5-53.5v-93.5c0-83.6-68-151.5-151.6-151.5H284.5z"
-						fill="#3688FF"
-					></path><path
-						d="M847.2 938.6c-23.6 0-42.7-19.1-42.7-42.7s19.1-42.7 42.7-42.7c29.5 0 53.5-24 53.5-53.5v-93.5c0-83.6-68-151.5-151.6-151.5h-14.3c-19.8 0-37-13.6-41.5-32.9-4.5-19.3 4.8-39.1 22.5-48 54.8-27.3 88.9-82.1 88.9-143.1 0-88.2-71.8-160-160-160-23.6 0-42.7-19.1-42.7-42.7s19.1-42.7 42.7-42.7c135.2 0 245.3 110 245.3 245.3 0 57.8-19.9 111.9-54.9 154.8 88.3 34.6 151 120.6 151 220.9v93.5c0 76.6-62.3 138.8-138.9 138.8z"
-						fill="#5F6379"
-					></path></g
-				></svg
-			>
+			<svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+			</svg>
 		{/if}
 	</div>
 
-	<div class="space-y-1 text-left">
-		<h3 class="text-center text-base font-semibold text-gray-800">{titulo}</h3>
-		<p class="mb-4 text-center text-sm text-gray-600">{descripcion}</p>
+	<div class="space-y-4 text-center">
+		<h3
+			class={clsx(
+				'text-2xl font-black tracking-tight transition-colors duration-300',
+				seleccionado ? 'text-slate-900' : 'text-slate-800'
+			)}
+		>
+			{titulo}
+		</h3>
+		<p class="text-base leading-relaxed text-slate-500 line-clamp-3">
+			{descripcion}
+		</p>
 	</div>
-	<!-- ! Botón CTA (Call to Action) -->
-	<Button
-		customClass="mt-4 w-full"
-		variant="secondary"
-		label="Seleccionar"
-		size="sm"
-		onclick={onSelect}
-	></Button>
+
+	<!-- Indicador de Selección sutil -->
+	<div class="mt-10 flex items-center gap-2">
+		<span class={clsx(
+			'text-xs font-bold uppercase tracking-widest transition-all duration-300',
+			seleccionado ? 'text-[rgb(var(--color-primary))] scale-110' : 'text-slate-400 opacity-0 group-hover:opacity-100'
+		)}>
+			{seleccionado ? 'Seleccionado' : 'Seleccionar'}
+		</span>
+		<div class={clsx(
+			'h-1.5 w-1.5 rounded-full transition-all duration-300',
+			seleccionado ? 'bg-[rgb(var(--color-primary))] scale-150' : 'bg-slate-300 group-hover:bg-[rgb(var(--color-primary))]/40'
+		)}></div>
+	</div>
 </div>

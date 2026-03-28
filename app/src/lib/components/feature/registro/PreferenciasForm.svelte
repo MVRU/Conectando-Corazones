@@ -58,20 +58,16 @@
 
 <div
 	class={clsx(
-		'mx-auto w-full max-w-2xl transition-all duration-700 ease-out',
+		'mx-auto w-full max-w-4xl transition-all duration-700 ease-out',
 		animarEntrada ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
 	)}
 >
-	<div class="mb-8 text-center">
-		<h2 class="text-3xl font-bold tracking-tight text-slate-900">Personalizá tu experiencia</h2>
-		<p class="mt-2 text-lg text-slate-600">
-			Contanos qué te interesa para mostrarte proyectos que te inspiren.
-		</p>
-	</div>
-
-	<div class="space-y-8 rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/50 md:p-10">
-		<section>
-			<h3 class="mb-4 text-lg font-semibold text-slate-800">Causas que te mueven</h3>
+	<div class="space-y-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-100 md:p-10">
+		<section class="space-y-6">
+			<header>
+				<h3 class="text-lg font-semibold text-slate-800">Causas que te mueven</h3>
+				<p class="text-xs text-slate-500">Seleccioná una o más categorías de interés.</p>
+			</header>
 			<div class="flex flex-wrap gap-3">
 				{#each categorias as categoria (categoria.id_categoria)}
 					<button
@@ -96,8 +92,11 @@
 
 		<hr class="border-slate-100" />
 
-		<section>
-			<h3 class="mb-4 text-lg font-semibold text-slate-800">¿Cómo te gustaría ayudar?</h3>
+		<section class="space-y-6">
+			<header>
+				<h3 class="text-lg font-semibold text-slate-800 text-left">¿Cómo te gustaría ayudar?</h3>
+				<p class="text-xs text-slate-500 text-left">Indicanos tus preferencias de participación.</p>
+			</header>
 			<div class="flex flex-wrap gap-3">
 				{#each tiposParticipacion as tipo (tipo.id_tipo_participacion)}
 					<button

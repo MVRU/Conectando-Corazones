@@ -31,7 +31,7 @@
 	let cargandoProvincias = $state(true);
 	let cargandoLocalidades = $state(false);
 
-	type DireccionPayload = {
+	export type DireccionPayload = {
 		provinciaId: number | null;
 		provinciaNombre: string;
 		localidadId: number | null;
@@ -186,12 +186,8 @@
 
 <form
 	onsubmit={manejarEnvio}
-	class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-200 sm:p-8 md:p-12"
+	class="space-y-10 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-10"
 >
-	<header class="mx-auto max-w-3xl text-center">
-		<h3 class="text-2xl font-semibold text-gray-900 md:text-3xl">Definí tu ubicación principal</h3>
-	</header>
-
 	<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
 		<div class="space-y-2">
 			<label for="provincia" class="block text-sm font-semibold text-gray-800">
@@ -293,31 +289,24 @@
 			</div>
 
 			{#if googleMapsPreview && !editandoUrlMapaGoogle}
-				<section class="md:col-span-2">
-					<div class="mx-auto w-full max-w-3xl text-center">
-						<h4 class="text-lg font-semibold text-gray-900">Vista previa del mapa</h4>
-						<p class="mt-2 text-sm text-gray-600 md:text-base">
-							Confirmá que el marcador se ubique donde esperás. Podés abrirlo en una nueva pestaña
-							para ajustar detalles si lo necesitás.
-						</p>
+				<section class="space-y-6 md:col-span-2">
+					<div class="space-y-2 text-center lg:text-left">
+						<h4 class="text-lg font-semibold text-slate-900">Vista previa del mapa</h4>
+						<p class="text-sm text-slate-500">Confirmá que el marcador se ubique correctamente.</p>
 					</div>
-					<div class="mx-auto mt-6 w-full max-w-3xl">
-						<div
-							class="rounded-[28px] bg-gradient-to-r from-blue-100 via-purple-100 to-blue-50 p-[1px] shadow-lg"
-						>
-							<div class="rounded-[26px] bg-white p-3 sm:p-4">
-								<div class="relative overflow-hidden rounded-3xl">
-									<iframe
-										src={googleMapsPreview.urlInsertar}
-										class="h-[320px] w-full border-0 sm:h-[360px] md:h-[420px] lg:h-[460px] xl:h-[500px]"
-										title="Vista previa del mapa"
-										aria-label="Vista previa de la ubicación seleccionada en Google Maps"
-										allowfullscreen
-										loading="lazy"
-										referrerpolicy="no-referrer-when-downgrade"
-									></iframe>
-								</div>
-							</div>
+					<div
+						class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-50 p-2 shadow-inner"
+					>
+						<div class="relative overflow-hidden rounded-2xl bg-white">
+							<iframe
+								src={googleMapsPreview.urlInsertar}
+								class="h-[320px] w-full border-0 sm:h-[400px]"
+								title="Vista previa del mapa"
+								aria-label="Vista previa de la ubicación seleccionada en Google Maps"
+								allowfullscreen
+								loading="lazy"
+								referrerpolicy="no-referrer-when-downgrade"
+							></iframe>
 						</div>
 					</div>
 				</section>

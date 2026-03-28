@@ -32,7 +32,7 @@
 		etiquetaOpcional = '(opcional)',
 		placeholder = 'https://...',
 		textoAyuda = 'Podés pegar un enlace o arrastrar una imagen en formato JPG, PNG o WebP.',
-		descripcion = 'Subí una imagen cuadrada o tu isologotipo para personalizar tu perfil.',
+		descripcion = 'Subí una imagen o logo para personalizar tu perfil.',
 		accept = 'image/*',
 		error = '',
 		enlace = $bindable(''),
@@ -78,7 +78,9 @@
 	});
 
 	let errorParaInput = $derived(modoActivo === 'enlace' ? error : '');
-	let mensajeErrorGlobal = $derived(modoActivo === 'archivo' ? errorInterno || error : errorInterno);
+	let mensajeErrorGlobal = $derived(
+		modoActivo === 'archivo' ? errorInterno || error : errorInterno
+	);
 	let mensajeEstado = $derived(
 		archivo?.name
 			? `Imagen cargada: ${archivo.name}`

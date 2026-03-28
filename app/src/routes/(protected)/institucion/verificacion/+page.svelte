@@ -56,8 +56,6 @@
 	</div>
 
 	<ValidacionInstitucion
-		pasoActual={1}
-		pasosTotales={1}
 		permitirOmitir={false}
 		onsubmit={manejarSubida}
 		oncancel={() => goto('/institucion/mi-panel')}

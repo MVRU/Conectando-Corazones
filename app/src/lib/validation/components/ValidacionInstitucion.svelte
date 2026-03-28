@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { X } from 'lucide-svelte';
@@ -7,9 +6,6 @@
 	type MetodoVerificacion = 'manual' | 'renaper' | 'omitido';
 
 	interface Props {
-		pasoActual?: number;
-		pasosTotales?: number;
-
 		permitirOmitir?: boolean;
 		onsubmit: (detail: { files: File[] }) => void;
 		onskip?: () => void;
@@ -17,8 +13,6 @@
 	}
 
 	let {
-		pasoActual = 3,
-		pasosTotales = 5,
 		permitirOmitir = true,
 		onsubmit,
 		onskip = () => {},
@@ -139,226 +133,206 @@
 	}
 </script>
 
-<section class="flex min-h-screen flex-col bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-	<div class="mb-12 sm:mb-16">
-		<Stepper {pasoActual} {pasosTotales} />
-	</div>
+<div class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8">
+	<fieldset
+		class="space-y-6 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-10"
+		aria-describedby="metodo-ayuda"
+	>
+		<legend class="sr-only">Métodos de verificación</legend>
+		<div class="grid gap-4 md:grid-cols-3" id="metodo-ayuda">
+			<label
+				class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'manual' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
+			>
+				<div class="flex items-center justify-between">
+					<div>
+						<span class="text-base font-semibold text-gray-900"> Revisión documental manual </span>
+						<p class="mt-1 text-sm text-gray-600">
+							Subí documentación respaldatoria para que nuestro equipo la revise.
+						</p>
+					</div>
+					<input
+						type="radio"
+						name="metodo"
+						value="manual"
+						class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
+						bind:group={metodoSeleccionado}
+						aria-label="Seleccionar revisión documental manual"
+					/>
+				</div>
+				<span class="text-xs font-medium tracking-wide text-blue-700 uppercase"> Recomendado </span>
+			</label>
 
-	<div class="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8">
-		<header class="space-y-4 text-center">
-			<h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">
-				Verificá la identidad de tu institución
-			</h1>
-			<p class="mx-auto max-w-2xl text-sm text-gray-600 sm:text-base">
-				Elegí el método que prefieras para validar tu institución. Podés cargar documentos ahora o
-				dejarlo para más adelante.
-			</p>
-		</header>
+			<label
+				class={`group relative flex cursor-not-allowed flex-col gap-3 rounded-2xl border p-5 text-left opacity-60 sm:p-6 ${metodoSeleccionado === 'renaper' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
+				aria-disabled="true"
+			>
+				<div class="flex items-center justify-between">
+					<div>
+						<span class="text-base font-semibold text-gray-900">RENAPER (próximamente)</span>
+						<p class="mt-1 text-sm text-gray-600">Validación con organismos estatales.</p>
+					</div>
+					<input
+						type="radio"
+						name="metodo"
+						value="renaper"
+						class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
+						bind:group={metodoSeleccionado}
+						aria-label="RENAPER disponible próximamente"
+						disabled={!renaperDisponible}
+					/>
+				</div>
+				<span class="text-xs font-medium tracking-wide text-gray-500 uppercase"> Bloqueado </span>
+			</label>
 
-		<fieldset
-			class="space-y-6 rounded-3xl bg-white p-6 shadow-xl sm:p-10"
-			aria-describedby="metodo-ayuda"
-		>
-			<legend class="sr-only">Métodos de verificación</legend>
-			<div class="grid gap-4 md:grid-cols-3" id="metodo-ayuda">
+			{#if permitirOmitir}
 				<label
-					class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'manual' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
+					class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'omitido' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
 				>
 					<div class="flex items-center justify-between">
 						<div>
-							<span class="text-base font-semibold text-gray-900">
-								Revisión documental manual
-							</span>
+							<span class="text-base font-semibold text-gray-900">Omitir por ahora</span>
 							<p class="mt-1 text-sm text-gray-600">
-								Subí documentación respaldatoria para que nuestro equipo la revise.
+								Podrás completar la verificación cuando lo necesites.
 							</p>
 						</div>
 						<input
 							type="radio"
 							name="metodo"
-							value="manual"
+							value="omitido"
 							class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
 							bind:group={metodoSeleccionado}
-							aria-label="Seleccionar revisión documental manual"
+							aria-label="Omitir verificación por ahora"
 						/>
 					</div>
-					<span class="text-xs font-medium tracking-wide text-blue-700 uppercase">
-						Recomendado
+					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+						Sin validación inmediata
 					</span>
 				</label>
-
-				<label
-					class={`group relative flex cursor-not-allowed flex-col gap-3 rounded-2xl border p-5 text-left opacity-60 sm:p-6 ${metodoSeleccionado === 'renaper' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
-					aria-disabled="true"
-				>
-					<div class="flex items-center justify-between">
-						<div>
-							<span class="text-base font-semibold text-gray-900">RENAPER (próximamente)</span>
-							<p class="mt-1 text-sm text-gray-600">Validación con organismos estatales.</p>
-						</div>
-						<input
-							type="radio"
-							name="metodo"
-							value="renaper"
-							class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
-							bind:group={metodoSeleccionado}
-							aria-label="RENAPER disponible próximamente"
-							disabled={!renaperDisponible}
-						/>
-					</div>
-					<span class="text-xs font-medium tracking-wide text-gray-500 uppercase"> Bloqueado </span>
-				</label>
-
-				{#if permitirOmitir}
-					<label
-						class={`group relative flex cursor-pointer flex-col gap-3 rounded-2xl border p-5 text-left transition-all focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2 sm:p-6 ${metodoSeleccionado === 'omitido' ? 'border-blue-600 bg-blue-50/60 shadow-lg' : 'border-gray-200 bg-white'}`}
-					>
-						<div class="flex items-center justify-between">
-							<div>
-								<span class="text-base font-semibold text-gray-900">Omitir por ahora</span>
-								<p class="mt-1 text-sm text-gray-600">
-									Podrás completar la verificación cuando lo necesites.
-								</p>
-							</div>
-							<input
-								type="radio"
-								name="metodo"
-								value="omitido"
-								class="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
-								bind:group={metodoSeleccionado}
-								aria-label="Omitir verificación por ahora"
-							/>
-						</div>
-						<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
-							Sin validación inmediata
-						</span>
-					</label>
-				{/if}
-			</div>
-
-			{#if metodoSeleccionado === 'manual'}
-				<div
-					class="mt-10 space-y-6 rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-6 sm:p-8"
-				>
-					<p class="text-sm text-gray-700 sm:text-base">
-						Subí documentos que respalden la existencia y legitimidad de tu institución. Solo los
-						revisará nuestro equipo de validación.
-					</p>
-					<div class="space-y-3 text-sm text-gray-700">
-						<p class="font-semibold text-gray-900">Lista de documentos aceptados:</p>
-						<ul class="list-disc space-y-1 pl-6">
-							<li>Estatuto social o acta constitutiva</li>
-							<li>Constancia de CUIT o registro impositivo</li>
-							<li>Certificación oficial emitida por organismo estatal</li>
-						</ul>
-					</div>
-
-					<div class="space-y-2">
-						<label class="block text-sm font-medium text-gray-900" for="documentos">
-							Documentación respaldatoria
-						</label>
-						<input
-							id="documentos"
-							name="documentos"
-							type="file"
-							class="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-							accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-							multiple
-							onchange={actualizarArchivos}
-							aria-describedby="ayuda-documentos"
-						/>
-						<p id="ayuda-documentos" class="text-xs text-gray-500">
-							Podés adjuntar varios archivos en formatos PDF, JPG o DOC.
-						</p>
-
-						{#if archivosSeleccionados.length}
-							<ul
-								class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
-							>
-								{#each archivosSeleccionados as archivo, i}
-									<li class="flex items-center justify-between px-4 py-2">
-										<span class="truncate pr-4" title={archivo.name}>{archivo.name}</span>
-										<div class="flex items-center gap-4">
-											<span class="text-xs whitespace-nowrap text-gray-500"
-												>{Math.ceil(archivo.size / 1024)} KB</span
-											>
-											<button
-												type="button"
-												class="text-gray-400 transition hover:text-red-500 focus:text-red-500 focus:outline-none"
-												onclick={() => removerArchivo(i)}
-												aria-label={`Quitar archivo ${archivo.name}`}
-											>
-												<X class="h-4 w-4" />
-											</button>
-										</div>
-									</li>
-								{/each}
-							</ul>
-						{/if}
-					</div>
-
-					<div class="flex items-start gap-3">
-						<input
-							id="declaracion"
-							type="checkbox"
-							bind:checked={aceptoDeclaracion}
-							class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-						/>
-						<label for="declaracion" class="text-sm text-gray-700">
-							Declaro que la información es veraz y autorizo su tratamiento para la verificación de
-							identidad
-						</label>
-					</div>
-
-					{#if errorFormulario}
-						<p
-							role="alert"
-							class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
-						>
-							{errorFormulario}
-						</p>
-					{/if}
-
-					<div class="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
-						<Button
-							type="button"
-							variant="secondary"
-							label="Cancelar"
-							onclick={cancelar}
-							customClass="w-full sm:w-auto"
-						/>
-						<Button
-							type="button"
-							label="Enviar"
-							onclick={enviarDocumentos}
-							customClass="w-full sm:w-auto"
-							disabled={botonEnviarDeshabilitado}
-							ariaDisabled={botonEnviarDeshabilitado}
-						/>
-					</div>
-				</div>
-			{:else if metodoSeleccionado === 'renaper'}
-				<div
-					class="mt-10 space-y-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-600 sm:p-8"
-				>
-					<p>
-						Estamos trabajando para habilitar la verificación automática con RENAPER. Te avisaremos
-						cuando esté disponible.
-					</p>
-				</div>
-			{:else if permitirOmitir}
-				<div
-					class="mt-10 space-y-6 rounded-2xl border border-dashed border-yellow-200 bg-yellow-50 p-6 text-center text-sm text-gray-700 sm:p-8"
-				>
-					<p>
-						Podés continuar sin verificar tu institución por ahora. Recordá que necesitarás
-						completar este paso antes de publicar proyectos.
-					</p>
-					<div class="flex justify-center">
-						<Button type="button" label="Omitir verificación" onclick={omitirRevision} />
-					</div>
-				</div>
 			{/if}
-		</fieldset>
-	</div>
-</section>
+		</div>
+
+		{#if metodoSeleccionado === 'manual'}
+			<div
+				class="mt-10 space-y-6 rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-6 sm:p-8"
+			>
+				<p class="text-sm text-gray-700 sm:text-base">
+					Subí documentos que respalden la existencia y legitimidad de tu institución. Solo los
+					revisará nuestro equipo de validación.
+				</p>
+				<div class="space-y-3 text-sm text-gray-700">
+					<p class="font-semibold text-gray-900">Lista de documentos aceptados:</p>
+					<ul class="list-disc space-y-1 pl-6">
+						<li>Estatuto social o acta constitutiva</li>
+						<li>Constancia de CUIT o registro impositivo</li>
+						<li>Certificación oficial emitida por organismo estatal</li>
+					</ul>
+				</div>
+
+				<div class="space-y-2">
+					<label class="block text-sm font-medium text-gray-900" for="documentos">
+						Documentación respaldatoria
+					</label>
+					<input
+						id="documentos"
+						name="documentos"
+						type="file"
+						class="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+						accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+						multiple
+						onchange={actualizarArchivos}
+						aria-describedby="ayuda-documentos"
+					/>
+					<p id="ayuda-documentos" class="text-xs text-gray-500">
+						Podés adjuntar varios archivos en formatos PDF, JPG o DOC.
+					</p>
+
+					{#if archivosSeleccionados.length}
+						<ul
+							class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
+						>
+							{#each archivosSeleccionados as archivo, i (archivo.name + archivo.size)}
+								<li class="flex items-center justify-between px-4 py-2">
+									<span class="truncate pr-4" title={archivo.name}>{archivo.name}</span>
+									<div class="flex items-center gap-4">
+										<span class="text-xs whitespace-nowrap text-gray-500"
+											>{Math.ceil(archivo.size / 1024)} KB</span
+										>
+										<button
+											type="button"
+											class="text-gray-400 transition hover:text-red-500 focus:text-red-500 focus:outline-none"
+											onclick={() => removerArchivo(i)}
+											aria-label={`Quitar archivo ${archivo.name}`}
+										>
+											<X class="h-4 w-4" />
+										</button>
+									</div>
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</div>
+
+				<div class="flex items-start gap-3">
+					<input
+						id="declaracion"
+						type="checkbox"
+						bind:checked={aceptoDeclaracion}
+						class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+					/>
+					<label for="declaracion" class="text-sm text-gray-700">
+						Declaro que la información es veraz y autorizo su tratamiento para la verificación de
+						identidad
+					</label>
+				</div>
+
+				{#if errorFormulario}
+					<p
+						role="alert"
+						class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+					>
+						{errorFormulario}
+					</p>
+				{/if}
+
+				<div class="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
+					<Button
+						type="button"
+						variant="secondary"
+						label="Cancelar"
+						onclick={cancelar}
+						customClass="w-full sm:w-auto"
+					/>
+					<Button
+						type="button"
+						label="Enviar"
+						onclick={enviarDocumentos}
+						customClass="w-full sm:w-auto"
+						disabled={botonEnviarDeshabilitado}
+						ariaDisabled={botonEnviarDeshabilitado}
+					/>
+				</div>
+			</div>
+		{:else if metodoSeleccionado === 'renaper'}
+			<div
+				class="mt-10 space-y-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-600 sm:p-8"
+			>
+				<p>
+					Estamos trabajando para habilitar la verificación automática con RENAPER. Te avisaremos
+					cuando esté disponible.
+				</p>
+			</div>
+		{:else if permitirOmitir}
+			<div
+				class="mt-10 space-y-6 rounded-2xl border border-dashed border-yellow-200 bg-yellow-50 p-6 text-center text-sm text-gray-700 sm:p-8"
+			>
+				<p>
+					Podés continuar sin verificar tu institución por ahora. Recordá que necesitarás completar
+					este paso antes de publicar proyectos.
+				</p>
+				<div class="flex justify-center">
+					<Button type="button" label="Omitir verificación" onclick={omitirRevision} />
+				</div>
+			</div>
+		{/if}
+	</fieldset>
+</div>
