@@ -57,7 +57,20 @@ export class CancelarProyecto {
 			}
 		}
 
-		// 4. Proceder a la cancelación en infraestructura (transaccional)
-		await this.proyectoRepo.cancel(proyectoId, usuarioId, justificacion);
+		// 4. Proceder a la cancelación en infraestructura (transaccional, incluye historial)
+		await this.proyectoRepo.cancel(proyectoId, usuarioId, justificacion, {
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'cancelacion',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoActual ?? 'desconocido',
+			valor_nuevo: 'cancelado',
+			justificacion:
+				justificacion ||
+				(rol === 'administrador'
+					? 'Cancelación administrativa por irregularidad'
+					: 'Cancelación manual por la institución'),
+			usuario_id: usuarioId
+		});
 	}
 }

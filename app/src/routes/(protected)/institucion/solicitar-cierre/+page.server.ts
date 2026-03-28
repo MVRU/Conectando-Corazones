@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgres/evidencia.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
 import { redirect, fail } from '@sveltejs/kit';
 
@@ -99,7 +100,9 @@ export const actions: Actions = {
 		const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 		const evidenciaRepo = new PostgresEvidenciaRepository();
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+ 
+		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo, historialRepo);
 
 		try {
 			if (typeof user.id_usuario !== 'number') {

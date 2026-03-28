@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearProyecto } from '$lib/domain/use-cases/proyectos/crearProyecto';
 import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 
@@ -42,7 +43,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// 2. Preparar los repositorios y caso de uso
 		const proyectoRepo = new PostgresProyectoRepository();
 		const usuarioRepo = new PostgresUsuarioRepository();
-		const crearProyecto = new CrearProyecto(proyectoRepo, usuarioRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const crearProyecto = new CrearProyecto(proyectoRepo, usuarioRepo, historialRepo);
 
 		// 3. Ejecutar con el ID de la institución de la sesión (o el provisto si es admin)
 		const payload: ProyectoCreate = {

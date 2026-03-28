@@ -1,11 +1,15 @@
 import type { ProyectoRepository } from '../../repositories/ProyectoRepository';
+import type { HistorialDeCambiosRepository } from '../../repositories/HistorialDeCambiosRepository';
 import type { EstadoDescripcion } from '../../types/Estado';
 import type { Proyecto } from '../../entities/Proyecto';
 
 export class GestionarEstadoProyecto {
-	constructor(private proyectoRepo: ProyectoRepository) {}
+	constructor(
+		private proyectoRepo: ProyectoRepository,
+		private historialRepo: HistorialDeCambiosRepository
+	) {}
 
-	async solicitarCierre(proyectoId: number): Promise<Proyecto> {
+	async solicitarCierre(proyectoId: number, usuarioId: number): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
@@ -13,19 +17,27 @@ export class GestionarEstadoProyecto {
 			throw new Error(`No se puede solicitar cierre desde el estado ${proyecto.estado}`);
 		}
 
-		// Validar condiciones adicionales
 		if (!proyecto.objetivosAlcanzados()) {
-			// Dependiendo de la regla estricta: "Objetivos alcanzados total o parcialmente, o institución finaliza ejecución"
-			// Si es manual (institución finaliza), permitimos. Si es automático, validamos.
-			// Asumimos accion manual aquí:
 			console.warn('Advertencia: objetivos no completados al 100%');
 		}
 
-		return this.proyectoRepo.updateEstado(proyectoId, 'pendiente_solicitud_cierre');
+		const estadoAnterior = proyecto.estado ?? 'desconocido';
+		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'pendiente_solicitud_cierre');
+
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'solicitar_cierre',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: 'pendiente_solicitud_cierre',
+			usuario_id: usuarioId
+		});
+
+		return proyectoActualizado;
 	}
 
-	async enviarASolicitudCierreConEvidencias(proyectoId: number): Promise<Proyecto> {
-		// En preparación de cierre -> En revisión
+	async enviarASolicitudCierreConEvidencias(proyectoId: number, usuarioId: number): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
@@ -33,12 +45,23 @@ export class GestionarEstadoProyecto {
 			throw new Error(`Transición inválida a En Revisión desde ${proyecto.estado}`);
 		}
 
-		// Acá se debería validar que existan evidencias cargadas (lógica adicional)
+		const estadoAnterior = proyecto.estado ?? 'desconocido';
+		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'en_revision');
 
-		return this.proyectoRepo.updateEstado(proyectoId, 'en_revision');
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'enviar_solicitud_cierre',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: 'en_revision',
+			usuario_id: usuarioId
+		});
+
+		return proyectoActualizado;
 	}
 
-	async aprobarCierre(proyectoId: number): Promise<Proyecto> {
+	async aprobarCierre(proyectoId: number, usuarioId: number): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
@@ -46,10 +69,23 @@ export class GestionarEstadoProyecto {
 			throw new Error(`No se puede completar el proyecto desde ${proyecto.estado}`);
 		}
 
-		return this.proyectoRepo.updateEstado(proyectoId, 'completado');
+		const estadoAnterior = proyecto.estado ?? 'desconocido';
+		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'completado');
+
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'aprobar_cierre',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: 'completado',
+			usuario_id: usuarioId
+		});
+
+		return proyectoActualizado;
 	}
 
-	async rechazarCierre(proyectoId: number, escalar: boolean = false): Promise<Proyecto> {
+	async rechazarCierre(proyectoId: number, usuarioId: number, escalar: boolean = false): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
@@ -59,10 +95,23 @@ export class GestionarEstadoProyecto {
 			throw new Error(`No se puede cambiar a ${nuevoEstado} desde ${proyecto.estado}`);
 		}
 
-		return this.proyectoRepo.updateEstado(proyectoId, nuevoEstado);
+		const estadoAnterior = proyecto.estado ?? 'desconocido';
+		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, nuevoEstado);
+
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'rechazar_cierre',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: nuevoEstado,
+			usuario_id: usuarioId
+		});
+
+		return proyectoActualizado;
 	}
 
-	async cancelarProyecto(proyectoId: number): Promise<Proyecto> {
+	async cancelarProyecto(proyectoId: number, usuarioId: number): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
@@ -70,6 +119,19 @@ export class GestionarEstadoProyecto {
 			throw new Error('No se puede cancelar un proyecto completado');
 		}
 
-		return this.proyectoRepo.updateEstado(proyectoId, 'cancelado');
+		const estadoAnterior = proyecto.estado ?? 'desconocido';
+		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'cancelado');
+
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoId,
+			accion: 'cancelacion',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: 'cancelado',
+			usuario_id: usuarioId
+		});
+
+		return proyectoActualizado;
 	}
 }

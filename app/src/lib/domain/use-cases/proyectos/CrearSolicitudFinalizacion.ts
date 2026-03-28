@@ -1,13 +1,15 @@
 import type { SolicitudFinalizacionRepository } from '$lib/domain/repositories/SolicitudFinalizacionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { EvidenciaRepository } from '$lib/domain/repositories/EvidenciaRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import type { SolicitudFinalizacion } from '$lib/domain/types/SolicitudFinalizacion';
 
 export class CrearSolicitudFinalizacion {
 	constructor(
 		private readonly solicitudRepo: SolicitudFinalizacionRepository,
 		private readonly proyectoRepo: ProyectoRepository,
-		private readonly evidenciaRepo: EvidenciaRepository
+		private readonly evidenciaRepo: EvidenciaRepository,
+		private readonly historialRepo: HistorialDeCambiosRepository
 	) {}
 
 	/**
@@ -73,7 +75,19 @@ export class CrearSolicitudFinalizacion {
 			estado: 'pendiente'
 		};
 
-		return this.solicitudRepo.create(solicitud);
+		const solicitudCreada = await this.solicitudRepo.create(solicitud);
+
+		await this.historialRepo.create({
+			tipo_objeto: 'solicitud_finalizacion',
+			id_objeto: solicitudCreada.id_solicitud ?? 0,
+			accion: 'creacion',
+			atributo_afectado: 'registro',
+			valor_anterior: '-',
+			valor_nuevo: String(solicitudCreada.id_solicitud ?? 0),
+			usuario_id: idInstitucion
+		});
+
+		return solicitudCreada;
 	}
 }
 
