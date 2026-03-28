@@ -55,13 +55,10 @@
 		XCircle,
 		Pencil,
 		ShieldCheck,
-		Trash,
 		ChevronDown,
 		ChatBubbleLeftRight,
 		ClipboardDocumentList,
 		Photo,
-		LockClosed,
-		Star,
 		Flag,
 		Plus,
 		ClipboardDocumentCheck
@@ -446,14 +443,30 @@
 
 			if (esCreador) {
 				acc.push({
-					label: 'Ver solicitudes',
+					label: 'Solicitudes de colaboración',
 					icon: ClipboardDocumentList,
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
 				});
+				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado') {
+					acc.push({
+						label: 'Solicitudes de cierre',
+						icon: ClipboardDocumentCheck,
+						onclick: () =>
+							goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+					});
+				}
+				if (estadoCodigo === 'pendiente_solicitud_cierre') {
+					acc.push({
+						label: 'Solicitar cierre',
+						icon: CheckCircle,
+						onclick: () =>
+							goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
+					});
+				}
 			} else {
 				acc.push({
-					label: 'Ver solicitud',
+					label: 'Solicitudes de colaboración',
 					icon: ClipboardDocumentList,
 					onclick: () =>
 						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
@@ -499,15 +512,14 @@
 
 				const esCancelable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
 
-				acc.push({
-					label: esCancelable ? 'Cancelar proyecto' : 'Cerrar proyecto',
-					icon: esCancelable ? XCircle : LockClosed,
-					onclick: esCancelable
-						? () => (mostrarModalCancelar = true)
-						: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`),
-					variant: 'danger',
-					disabled: !esCancelable && estadoCodigo !== 'pendiente_solicitud_cierre'
-				});
+				if (esCancelable) {
+					acc.push({
+						label: 'Cancelar proyecto',
+						icon: XCircle,
+						onclick: () => (mostrarModalCancelar = true),
+						variant: 'danger'
+					});
+				}
 			} else if (esColaboradorAprobado) {
 				acc.push({
 					label: 'Reportar irregularidad',
@@ -828,6 +840,26 @@
 							</div>
 
 							<ProyectoProgreso {proyecto} variant="extended" />
+
+							{#if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
+								<div
+									class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:p-5"
+									role="region"
+									aria-label="Solicitud de cierre"
+								>
+									<p class="text-sm font-semibold text-sky-900">¿Listo para cerrar el proyecto?</p>
+									<p class="mt-1 text-sm text-sky-800">
+										Enviá la solicitud de cierre con tus evidencias para que los colaboradores la
+										revisen.
+									</p>
+									<a
+										href={`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`}
+										class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+									>
+										Solicitar cierre
+									</a>
+								</div>
+							{/if}
 
 							<div class="mt-6 sm:mt-8">
 								<h3

@@ -1,26 +1,61 @@
 <script lang="ts">
 	import type { Archivo } from '$lib/domain/types/Archivo';
-	import { obtenerNombreUsuario } from '$lib/utils/util-usuarios';
-	import {
-		formatearTamaño,
-		obtenerExtension,
-		esImagen,
-		esPDF,
-		descargarArchivo as descargarArchivoUtil,
-		abrirArchivo as abrirArchivoUtil
-	} from '$lib/utils/util-archivos';
+	import { env } from '$lib/infrastructure/config/env';
+	import { page } from '$app/stores';
+	import { formatearTamaño, obtenerExtension, esImagen, esPDF } from '$lib/utils/util-archivos';
 
 	export let archivo: Archivo;
 
 	$: esImagenArchivo = esImagen(archivo.tipo_mime);
 	$: esPDFArchivo = esPDF(archivo.tipo_mime);
 
-	function descargarArchivo() {
-		descargarArchivoUtil(archivo);
+	// Username del usuario que subió el archivo
+	$: nombreUsuario = archivo.usuario?.username ?? null;
+
+	// URL completa del archivo
+	function resolverUrl(url: string): string {
+		if (url.startsWith('http://') || url.startsWith('https://')) return url;
+		return `${env.SUPABASE_URL}/storage/v1/object/authenticated/${url}`;
 	}
 
-	function abrirArchivo() {
-		abrirArchivoUtil(archivo);
+	function getAuthHeaders(): Record<string, string> {
+		const session = $page.data.session;
+		return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+	}
+
+	async function descargarArchivo() {
+		const url = resolverUrl(archivo.url);
+		try {
+			const response = await fetch(url, { headers: getAuthHeaders() });
+			if (!response.ok) throw new Error('Error al obtener el archivo');
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = blobUrl;
+			link.download =
+				archivo.nombre_original || archivo.descripcion || `archivo_${archivo.id_archivo}`;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+		} catch (error) {
+			console.warn('No se pudo descargar, abriendo en nueva pestaña:', error);
+			window.open(url, '_blank');
+		}
+	}
+
+	async function abrirArchivo() {
+		const url = resolverUrl(archivo.url);
+		try {
+			const response = await fetch(url, { headers: getAuthHeaders() });
+			if (!response.ok) throw new Error('Error al obtener el archivo');
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			window.open(blobUrl, '_blank');
+		} catch (error) {
+			console.warn('No se pudo abrir el archivo:', error);
+			window.open(url, '_blank');
+		}
 	}
 </script>
 
@@ -88,23 +123,25 @@
 
 			<!-- Metadatos -->
 			<div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-gray-500">
-				<span class="inline-flex items-center gap-1">
-					<svg
-						class="h-3 w-3"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-						/>
-					</svg>
-					{obtenerNombreUsuario(archivo.usuario_id || 0)}
-				</span>
-				<span>•</span>
+				{#if nombreUsuario}
+					<span class="inline-flex items-center gap-1">
+						<svg
+							class="h-3 w-3"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+							/>
+						</svg>
+						{nombreUsuario}
+					</span>
+					<span>•</span>
+				{/if}
 				<span>{obtenerExtension(archivo.tipo_mime, archivo.url)}</span>
 				{#if archivo.tamanio_bytes}
 					<span>•</span>

@@ -1,6 +1,9 @@
 <!--
 * Página: Solicitudes de colaboracion de una institucion
 * Descripción: Gestión de colaboraciones recibidas para proyectos de la institución
+
+TODO: este componente está roto, no muestra nada
+
 -->
 
 <script lang="ts">

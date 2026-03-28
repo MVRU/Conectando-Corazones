@@ -6,8 +6,8 @@
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 
 	const logos = [
-		{ src: '/instituciones/rotary.png', href: '/perfil/rotary_club' },
-		{ src: '/instituciones/unicef.png', href: '/perfil/unicef_arg' },
+		{ src: '/instituciones/rotary.png', href: '/perfil/rotary_arrecifes' },
+		{ src: '/instituciones/unicef.png', href: '/perfil/unicef_argentina' },
 		{ src: '/instituciones/cruz-roja.png', href: '/perfil/cruz_roja_arg' }
 	];
 

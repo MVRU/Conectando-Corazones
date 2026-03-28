@@ -19,7 +19,11 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		participacion_permitida: {
 			include: {
 				tipo_participacion: true,
-				colaboraciones_tipo_participacion: true
+				colaboraciones_tipo_participacion: {
+					include: {
+						colaboracion: true
+					}
+				}
 			}
 		},
 		proyecto_ubicaciones: {
@@ -625,6 +629,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					usuario_id: usuarioEjecutorId
 				}
 			});
+		});
+	}
+
+	async countSolicitudesRechazadas(id: number): Promise<number> {
+		return await prisma.solicitudFinalizacion.count({
+			where: {
+				proyecto_id: id,
+				estado: 'rechazada'
+			}
 		});
 	}
 }
