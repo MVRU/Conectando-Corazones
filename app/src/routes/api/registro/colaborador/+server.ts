@@ -3,11 +3,31 @@ import type { RequestHandler } from './$types';
 import type { RegisterColaboradorInput } from '$lib/stores/auth';
 import type { Organizacion } from '$lib/domain/types/Usuario';
 import { RegistrationService } from '$lib/server/registration.service';
+import { RateLimitService, AUTH_RATE_LIMITS } from '$lib/server/rate-limit.service';
+import { getClientIp } from '$lib/server/request.helper';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request } = event;
+	const clientIp = getClientIp(event);
+	let input: RegisterColaboradorInput | null = null;
+
 	try {
-		const input = (await request.json()) as RegisterColaboradorInput;
-		// TODO (Marina Milo): Validar esquema de entrada con Zod antes de procesar
+		input = (await request.json()) as RegisterColaboradorInput;
+
+		// Limitación de velocidad: verificar antes de procesar
+		const limitCheck = RateLimitService.check(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+
+		if (!limitCheck.allowed) {
+			const retryAfterSeconds = Math.ceil(AUTH_RATE_LIMITS.REGISTER.windowMs / 1000);
+			return json(
+				{ error: 'Demasiados intentos. Intenta más tarde.' },
+				{
+					status: 429,
+					headers: { 'Retry-After': retryAfterSeconds.toString() }
+				}
+			);
+		}
+
 		const service = new RegistrationService();
 
 		const orgMetadata = input.metadata?.organizacion as Partial<Organizacion> | undefined;
@@ -34,9 +54,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		});
 
+		// Reiniciar límite de velocidad en registro exitoso
+		RateLimitService.reset(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+
 		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registrando colaborador:', error);
+		if (input) {
+			RateLimitService.record(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+		}
 		if (error instanceof Error) {
 			if (error.message.includes('P2002') || error.message.includes('unique constraint')) {
 				return json(

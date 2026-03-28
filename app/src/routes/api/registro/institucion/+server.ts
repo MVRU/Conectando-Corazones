@@ -2,11 +2,31 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { RegisterInstitucionInput } from '$lib/stores/auth';
 import { RegistrationService } from '$lib/server/registration.service';
+import { RateLimitService, AUTH_RATE_LIMITS } from '$lib/server/rate-limit.service';
+import { getClientIp } from '$lib/server/request.helper';
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async (event) => {
+	const { request } = event;
+	const clientIp = getClientIp(event);
+	let input: RegisterInstitucionInput | null = null;
+
 	try {
-		const input = (await request.json()) as RegisterInstitucionInput;
-		// TODO (Marina Milo): Validar esquema de entrada con Zod antes de procesar
+		input = (await request.json()) as RegisterInstitucionInput;
+
+		// Limitación de velocidad: verificar antes de procesar
+		const limitCheck = RateLimitService.check(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+
+		if (!limitCheck.allowed) {
+			const retryAfterSeconds = Math.ceil(AUTH_RATE_LIMITS.REGISTER.windowMs / 1000);
+			return json(
+				{ error: 'Demasiados intentos. Intenta más tarde.' },
+				{
+					status: 429,
+					headers: { 'Retry-After': retryAfterSeconds.toString() }
+				}
+			);
+		}
+
 		const service = new RegistrationService();
 
 		const usuarioCreado = await service.registrar({
@@ -27,9 +47,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			metadata: input.metadata
 		});
 
+		// Reiniciar límite de velocidad en registro exitoso
+		RateLimitService.reset(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+
 		return json({ usuario: usuarioCreado });
 	} catch (error) {
 		console.error('Error registrando institución:', error);
+		if (input) {
+			RateLimitService.record(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+		}
 		if (error instanceof Error) {
 			if (error.message.includes('P2002') || error.message.includes('unique constraint')) {
 				return json(

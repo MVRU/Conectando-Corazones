@@ -6,7 +6,6 @@ import { ObtenerUsuario } from '$lib/domain/use-cases/usuarios/ObtenerUsuario';
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const { username, email } = await request.json();
-		// TODO (Marina Milo): Implementar Rate Limiting para evitar enumeración de usuarios
 		const repo = new PostgresUsuarioRepository();
 		const obtenerUsuario = new ObtenerUsuario(repo);
 		const errores: Record<string, string> = {};

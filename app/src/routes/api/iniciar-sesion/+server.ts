@@ -3,14 +3,31 @@ import type { RequestHandler } from './$types';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 import { validarCorreo } from '$lib/utils/validaciones';
+import { RateLimitService, AUTH_RATE_LIMITS } from '$lib/server/rate-limit.service';
+import { getClientIp } from '$lib/server/request.helper';
 
-export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+export const POST: RequestHandler = async (event) => {
 	try {
+		const { request, locals, cookies } = event;
 		const { identificador, password, rememberMe } = await request.json();
 
-		// TODO (Marina Milo): Implementar Rate Limiting para prevenir ataques de fuerza bruta
 		if (!identificador || !password) {
 			return json({ error: 'Credenciales incompletas' }, { status: 400 });
+		}
+
+		// Limitación de velocidad: verificar antes de procesar
+		const clientIp = getClientIp(event);
+		const limitCheck = RateLimitService.check(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
+
+		if (!limitCheck.allowed) {
+			const retryAfterSeconds = Math.ceil(AUTH_RATE_LIMITS.LOGIN.windowMs / 1000);
+			return json(
+				{ error: 'Demasiados intentos. Intenta más tarde.' },
+				{
+					status: 429,
+					headers: { 'Retry-After': retryAfterSeconds.toString() }
+				}
+			);
 		}
 
 		const repo = new PostgresUsuarioRepository();
@@ -19,6 +36,7 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 		if (!validarCorreo(identificador)) {
 			const usuarioDb = await repo.findByUsername(identificador);
 			if (!usuarioDb) {
+				RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 				return json({ error: 'Credenciales inválidas' }, { status: 401 });
 			}
 
@@ -32,10 +50,12 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 
 				if (authLookupError || !authUserData.user?.email) {
 					console.error('No se pudo obtener el email desde Supabase Auth:', authLookupError);
+					RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 					return json({ error: 'Credenciales inválidas' }, { status: 401 });
 				}
 				email = authUserData.user.email;
 			} else {
+				RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 				return json({ error: 'Credenciales inválidas' }, { status: 401 });
 			}
 		}
@@ -47,16 +67,20 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 
 		if (error) {
 			console.error('Supabase Auth Login Error:', error);
+			// Registrar intento fallido
+			RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 			return json({ error: 'Credenciales inválidas' }, { status: 401 });
 		}
 
 		if (!data.user) {
+			RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 			return json({ error: 'Error al iniciar sesión' }, { status: 500 });
 		}
 
 		const usuario = await repo.findByAuthId(data.user.id);
 
 		if (!usuario) {
+			RateLimitService.record(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 			return json({ error: 'Usuario no registrado en el sistema' }, { status: 401 });
 		}
 
@@ -71,6 +95,9 @@ export const POST: RequestHandler = async ({ request, locals, cookies }) => {
 
 			return json({ error: mensaje }, { status: 403 });
 		}
+
+		// Reiniciar límite de velocidad en login exitoso
+		RateLimitService.reset(clientIp, identificador, AUTH_RATE_LIMITS.LOGIN);
 
 		const maxAge = rememberMe ? 60 * 60 * 24 * 30 : undefined;
 
