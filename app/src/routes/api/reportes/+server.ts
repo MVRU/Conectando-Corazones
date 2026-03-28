@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresReporteRepository } from '$lib/infrastructure/supabase/postgres/reporte.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearReporte } from '$lib/domain/use-cases/reportes/CrearReporte';
 import { ListarReportes } from '$lib/domain/use-cases/reportes/ListarReportes';
 import { MotivoReporte } from '$lib/domain/types/Reporte';
@@ -41,7 +42,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const repo = new PostgresReporteRepository();
 		const proyRepo = new PostgresProyectoRepository();
-		const crearReporte = new CrearReporte(repo, proyRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const crearReporte = new CrearReporte(repo, historialRepo, proyRepo);
 
 		const reporte = await crearReporte.execute({
 			tipo_objeto: data.tipo_objeto as 'Usuario' | 'Proyecto',
