@@ -1,7 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { PostgresArchivoRepository } from '$lib/infrastructure/supabase/postgres/archivo.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
-import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { EliminarArchivo } from '$lib/domain/use-cases/EliminarArchivo';
 import { ActualizarArchivo } from '$lib/domain/use-cases/ActualizarArchivo';
 

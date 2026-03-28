@@ -6,7 +6,7 @@ import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgr
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresParticipacionPermitidaRepository } from '$lib/infrastructure/supabase/postgres/participacion-permitida.repo';
 import { PostgresArchivoRepository } from '$lib/infrastructure/supabase/postgres/archivo.repo';
-import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { SubirEvidencia } from '$lib/domain/use-cases/SubirEvidencia';
 import { EliminarArchivo } from '$lib/domain/use-cases/EliminarArchivo';
 import { ListarEvidencias } from '$lib/domain/use-cases/ListarEvidencias';

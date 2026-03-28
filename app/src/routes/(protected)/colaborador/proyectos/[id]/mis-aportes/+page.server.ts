@@ -3,7 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresArchivoRepository } from '$lib/infrastructure/supabase/postgres/archivo.repo';
-import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { ObtenerMisAportes } from '$lib/domain/use-cases/colaboraciones/ObtenerMisAportes';
 import { ActualizarArchivo } from '$lib/domain/use-cases/ActualizarArchivo';
 import { EliminarArchivo } from '$lib/domain/use-cases/EliminarArchivo';

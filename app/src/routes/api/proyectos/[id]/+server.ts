@@ -3,8 +3,7 @@ import type { RequestHandler } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { CancelarProyecto } from '$lib/domain/use-cases/proyectos/CancelarProyecto';
 import { EditarProyecto } from '$lib/domain/use-cases/proyectos/EditarProyecto';
-import { Proyecto } from '$lib/domain/entities/Proyecto';
-import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 
 const repo = new PostgresProyectoRepository();
 const historialDeCambiosRepo = new PostgresHistorialDeCambiosRepository();
