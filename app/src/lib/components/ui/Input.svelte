@@ -99,12 +99,15 @@
 					'border-red-400 bg-red-50/80 text-red-900 placeholder:text-red-400 focus:border-red-500 focus:ring-red-300 focus:ring-offset-0',
 				'disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500 disabled:opacity-80 disabled:shadow-none',
 				prefixIcon && 'pl-12',
+				suffix && 'pr-12',
 				customClass
 			)}
 			aria-describedby={error ? `${id}-error` : undefined}
 		/>
 		{#if suffix}
-			{@render suffix()}
+			<span class="pointer-events-auto absolute top-1/2 right-4 -translate-y-1/2">
+				{@render suffix()}
+			</span>
 		{/if}
 	</div>
 
