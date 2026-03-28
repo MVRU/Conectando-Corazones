@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
 	import Loader from '$lib/components/ui/feedback/Loader.svelte';
@@ -48,16 +48,16 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { env } from '$lib/infrastructure/config/env';
 
-	export let data;
+	let { data } = $props();
 
-	let cargada = false; // para saber si la página terminó de cargar
+	let cargada = $state(false); // para saber si la página terminó de cargar
 
 	const TOTAL_PASOS = 5;
-	let etapa: RegistroEtapa = 'seleccion';
+	let etapa: RegistroEtapa = $state('seleccion');
 
-	let rol: RegistroRol = 'institucion';
-	let registrando = false;
-	let errorRegistro: string | null = null;
+	let rol: RegistroRol = $state('institucion');
+	let registrando = $state(false);
+	let errorRegistro: string | null = $state(null);
 
 	type RegistroPageSnapshot = {
 		version: number;
@@ -67,23 +67,24 @@
 		usuarioId?: number;
 	};
 
-	let storageRegistroDisponible = false;
-	let persistenciaPaginaLista = false;
-	let notificacionEtapaMostrada = false;
-	let usuarioRegistradoId: number | null = null;
+	let storageRegistroDisponible = $state(false);
+	let persistenciaPaginaLista = $state(false);
+	let notificacionEtapaMostrada = $state(false);
+	let usuarioRegistradoId: number | null = $state(null);
 
-	$: procesandoFormulario = registrando;
+	let procesandoFormulario = $derived(registrando);
 
-	// Redirección si ya está autenticado y en el paso inicial
-	$: if ($isAuthenticated && etapa === 'seleccion' && $usuario?.rol) {
-		if (typeof window !== 'undefined') {
-			toastStore.show({
-				variant: 'info',
-				message: 'Ya iniciaste sesión. Te redirigimos a tu panel.'
-			});
-			goto(urlPanelPorRolRegistro($usuario.rol));
+	$effect(() => {
+		if ($isAuthenticated && etapa === 'seleccion' && $usuario?.rol) {
+			if (typeof window !== 'undefined') {
+				toastStore.show({
+					variant: 'info',
+					message: 'Ya iniciaste sesión. Te redirigimos a tu panel.'
+				});
+				goto(urlPanelPorRolRegistro($usuario.rol));
+			}
 		}
-	}
+	});
 
 	onMount(() => {
 		setBreadcrumbs([BREADCRUMB_ROUTES.home, { label: 'Registro' }]);
@@ -124,13 +125,12 @@
 		return fallback;
 	}
 
-	async function manejarRegistroCuenta(event: CustomEvent<RegistroCuentaSubmitDetail>) {
+	async function manejarRegistroCuenta(detalle: RegistroCuentaSubmitDetail) {
 		if (procesandoFormulario) {
 			return;
 		}
 		resetFeedback();
 
-		const detalle = event.detail;
 		rol = detalle.rol;
 
 		registrando = true;
@@ -149,7 +149,6 @@
 				}
 			}
 
-			// Subir foto de perfil si existe
 			if (detalle.archivoFoto) {
 				await subirFotoPerfil(detalle.archivoFoto);
 			}
@@ -216,9 +215,9 @@
 		}
 	}
 
-	async function manejarSubidaVerificacion(event: CustomEvent<{ files: File[] }>) {
+	async function manejarSubidaVerificacion(detail: { files: File[] }) {
 		try {
-			const files = event.detail.files;
+			const files = detail.files;
 			const formData = new FormData();
 			files.forEach((f) => formData.append('files', f));
 
@@ -252,7 +251,7 @@
 
 	function manejarFormularioInvalido() {
 		errorRegistro = 'Revisá los campos marcados en rojo antes de continuar.';
-		// Scroll al tope para ver errores
+
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
@@ -349,7 +348,6 @@
 		nueva: RegistroEtapa,
 		opciones: { limpiarFormulario?: boolean; limpiarTodo?: boolean } = {}
 	) {
-		// Animación suave de scroll al cambiar de etapa
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 
 		etapa = nueva;
@@ -419,12 +417,11 @@
 		}
 	}
 
-	async function manejarEnvioContactos(event: CustomEvent<any>) {
+	async function manejarEnvioContactos(contactos: any) {
 		if (!usuarioRegistradoId) {
 			toastStore.show({ variant: 'error', message: 'No se identificó al usuario.' });
 			return;
 		}
-		const contactos = event.detail;
 		try {
 			const res = await fetch('/api/registro/completar-perfil', {
 				method: 'POST',
@@ -443,12 +440,11 @@
 		}
 	}
 
-	async function manejarEnvioDireccion(event: CustomEvent<any>) {
+	async function manejarEnvioDireccion(direccion: any) {
 		if (!usuarioRegistradoId) {
 			toastStore.show({ variant: 'error', message: 'No se identificó al usuario.' });
 			return;
 		}
-		const direccion = event.detail;
 		try {
 			const res = await fetch('/api/registro/completar-perfil', {
 				method: 'POST',
@@ -467,9 +463,10 @@
 		}
 	}
 
-	async function manejarPreferencias(
-		event: CustomEvent<{ categorias: number[]; tiposParticipacion: number[] }>
-	) {
+	async function manejarPreferencias(detail: {
+		categorias: number[];
+		tiposParticipacion: number[];
+	}) {
 		if (!usuarioRegistradoId) return;
 		procesandoFormulario = true;
 		try {
@@ -478,8 +475,8 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					id_usuario: usuarioRegistradoId,
-					categorias: event.detail.categorias,
-					tiposParticipacion: event.detail.tiposParticipacion
+					categorias: detail.categorias,
+					tiposParticipacion: detail.tiposParticipacion
 				})
 			});
 
@@ -515,15 +512,12 @@
 <div
 	class="fixed inset-0 -z-50 min-h-screen w-full overflow-hidden bg-white selection:bg-blue-100 selection:text-blue-900"
 >
-	<!-- Gradient Mesh Background -->
 	<div
 		class="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_100%_0%,rgba(168,85,247,0.08),transparent_25%),radial-gradient(circle_at_100%_100%,rgba(59,130,246,0.08),transparent_25%),radial-gradient(circle_at_0%_100%,rgba(168,85,247,0.08),transparent_25%)]"
 	></div>
 
-	<!-- Subtle grid pattern -->
 	<div class="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.02]"></div>
 
-	<!-- Floating orbs -->
 	<div
 		class="animate-float-slow absolute top-20 -left-20 hidden h-96 w-96 rounded-full bg-blue-200/20 blur-3xl filter lg:block"
 	></div>
@@ -535,7 +529,6 @@
 <main
 	class="relative z-10 mx-auto flex min-h-screen w-full flex-col justify-center px-4 py-8 sm:px-6 lg:px-8"
 >
-	<!-- Logo / Header Mobile-First -->
 	<header class="mb-8 text-center sm:mb-12">
 		<h1 class="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl lg:text-5xl">
 			<span class="block">Unite a</span>
@@ -555,7 +548,6 @@
 		{/if}
 	</header>
 
-	<!-- Main Content Card -->
 	<section class="mx-auto w-full max-w-4xl transition-all duration-500 ease-out">
 		{#if etapa === 'seleccion'}
 			<div in:fly={{ y: 20, duration: 500, easing: cubicOut }} out:fade={{ duration: 200 }}>
@@ -606,7 +598,7 @@
 					<button
 						class="group flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
 						type="button"
-						on:click={volverASeleccion}
+						onclick={volverASeleccion}
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -631,9 +623,9 @@
 						{rol}
 						procesando={procesandoFormulario}
 						errorGeneral={errorRegistro}
-						on:submit={manejarRegistroCuenta}
-						on:invalid={manejarFormularioInvalido}
-						on:back={() => retrocederEtapa('formulario')}
+						onsubmit={manejarRegistroCuenta}
+						oninvalid={manejarFormularioInvalido}
+						onback={() => retrocederEtapa('formulario')}
 					/>
 				</div>
 			</div>
@@ -642,9 +634,9 @@
 				<ValidacionInstitucion
 					pasoActual={3}
 					pasosTotales={TOTAL_PASOS}
-					on:submit={manejarSubidaVerificacion}
-					on:skip={() => setEtapaConPersistencia('contacto')}
-					on:cancel={() => {
+					onsubmit={manejarSubidaVerificacion}
+					onskip={() => setEtapaConPersistencia('contacto')}
+					oncancel={() => {
 						resetFeedback();
 						setEtapaConPersistencia('formulario');
 					}}
@@ -660,7 +652,7 @@
 					<button
 						type="button"
 						class="group inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-						on:click={() => retrocederEtapa('contacto')}
+						onclick={() => retrocederEtapa('contacto')}
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -691,8 +683,8 @@
 					<MetodosContactoForm
 						mostrarOmitir
 						bloquearPrimerContacto={false}
-						on:skip={() => setEtapaConPersistencia('direccion')}
-						on:submit={manejarEnvioContactos}
+						onskip={() => setEtapaConPersistencia('direccion')}
+						onsubmit={manejarEnvioContactos}
 					/>
 				</div>
 			</div>
@@ -706,7 +698,7 @@
 					<button
 						type="button"
 						class="group inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
-						on:click={() => retrocederEtapa('direccion')}
+						onclick={() => retrocederEtapa('direccion')}
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -736,8 +728,8 @@
 
 					<DireccionForm
 						mostrarOmitir
-						on:skip={() => setEtapaConPersistencia('preferencias')}
-						on:submit={manejarEnvioDireccion}
+						onskip={() => setEtapaConPersistencia('preferencias')}
+						onsubmit={manejarEnvioDireccion}
 					/>
 				</div>
 			</div>
@@ -752,8 +744,8 @@
 						categorias={data.categorias}
 						tiposParticipacion={data.tiposParticipacion}
 						procesando={procesandoFormulario}
-						on:submit={manejarPreferencias}
-						on:skip={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
+						onsubmit={manejarPreferencias}
+						onskip={() => setEtapaConPersistencia('exito', { limpiarTodo: true })}
 					/>
 				</div>
 			</div>

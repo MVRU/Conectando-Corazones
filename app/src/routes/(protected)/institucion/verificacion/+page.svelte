@@ -13,10 +13,10 @@
 		]);
 	});
 
-	async function manejarSubida(event: CustomEvent<{ files: File[] }>) {
+	async function manejarSubida(detail: { files: File[] }) {
 		try {
 			const formData = new FormData();
-			event.detail.files.forEach((f) => formData.append('files', f));
+			detail.files.forEach((f) => formData.append('files', f));
 			const res = await fetch('/api/registro/verificacion', {
 				method: 'POST',
 				body: formData
@@ -59,7 +59,7 @@
 		pasoActual={1}
 		pasosTotales={1}
 		permitirOmitir={false}
-		on:submit={manejarSubida}
-		on:cancel={() => goto('/institucion/mi-panel')}
+		onsubmit={manejarSubida}
+		oncancel={() => goto('/institucion/mi-panel')}
 	/>
 </div>

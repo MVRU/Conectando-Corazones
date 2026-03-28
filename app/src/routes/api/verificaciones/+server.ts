@@ -40,11 +40,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const repo = new PostgresVerificacionRepository();
 		const useCase = new SolicitarVerificacion(repo);
-		const row = await useCase.execute(
-			locals.usuario.id_usuario,
-			locals.usuario.id_usuario,
-			tipo
-		);
+		const row = await useCase.execute(locals.usuario.id_usuario, locals.usuario.id_usuario, tipo);
 		return json(row, { status: 201 });
 	} catch (e: unknown) {
 		const msg = e instanceof Error ? e.message : 'Error interno';

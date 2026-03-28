@@ -14,7 +14,10 @@ function toDomain(row: PrismaVerificacion): Verificacion {
 	};
 }
 
-async function recomputarEstadoVerificacionUsuario(tx: Prisma.TransactionClient, usuarioId: number) {
+async function recomputarEstadoVerificacionUsuario(
+	tx: Prisma.TransactionClient,
+	usuarioId: number
+) {
 	const list = await tx.verificacion.findMany({ where: { usuario_id: usuarioId } });
 	const hasAprobada = list.some((v) => v.estado === 'aprobada');
 	const hasPendiente = list.some((v) => v.estado === 'pendiente');

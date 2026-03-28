@@ -111,8 +111,7 @@ export function mapearFormularioColaboradorAInputRegistro(
 		fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
 	});
 
-	const aceptaLegales =
-		'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
+	const aceptaLegales = 'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
 
 	const datosRegistro: RegisterColaboradorInput = {
 		email: normalizarEmail(email),
@@ -152,8 +151,7 @@ export function mapearFormularioInstitucionAInputRegistro(
 
 	const tipoInstitucion =
 		sanitizarCadenaOpcional(normalizado.institucion.tipo_institucion) ?? 'otro';
-	const aceptaLegales =
-		'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
+	const aceptaLegales = 'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
 
 	const datosRegistro: RegisterInstitucionInput = {
 		email: normalizarEmail(email),

@@ -31,9 +31,7 @@ export class ActualizarContacto {
 		}
 
 		const tieneCambios =
-			data.tipo_contacto !== undefined ||
-			data.valor !== undefined ||
-			data.etiqueta !== undefined;
+			data.tipo_contacto !== undefined || data.valor !== undefined || data.etiqueta !== undefined;
 		if (!tieneCambios) {
 			throw new Error('No se indicaron campos a actualizar.');
 		}

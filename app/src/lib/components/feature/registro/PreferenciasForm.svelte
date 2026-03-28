@@ -1,24 +1,28 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { clsx } from 'clsx';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Check } from 'lucide-svelte';
 
-	export let categorias: { id_categoria: number; descripcion: string }[] = [];
-	export let tiposParticipacion: { id_tipo_participacion: number; descripcion: string }[] = [];
-	export let procesando = false;
+	interface Props {
+		categorias?: { id_categoria: number; descripcion: string }[];
+		tiposParticipacion?: { id_tipo_participacion: number; descripcion: string }[];
+		procesando?: boolean;
+		onsubmit: (data: { categorias: number[]; tiposParticipacion: number[] }) => void;
+		onskip?: () => void;
+	}
 
-	const dispatch = createEventDispatcher<{
-		submit: {
-			categorias: number[];
-			tiposParticipacion: number[];
-		};
-		skip: void;
-	}>();
+	let {
+		categorias = [],
+		tiposParticipacion = [],
+		procesando = false,
+		onsubmit,
+		onskip
+	}: Props = $props();
 
-	let categoriasSeleccionadas: number[] = [];
-	let tiposSeleccionados: number[] = [];
-	let animarEntrada = false;
+	let categoriasSeleccionadas: number[] = $state([]);
+	let tiposSeleccionados: number[] = $state([]);
+	let animarEntrada = $state(false);
 
 	onMount(() => {
 		setTimeout(() => (animarEntrada = true), 100);
@@ -41,14 +45,14 @@
 	}
 
 	function finalizar() {
-		dispatch('submit', {
+		onsubmit({
 			categorias: categoriasSeleccionadas,
 			tiposParticipacion: tiposSeleccionados
 		});
 	}
 
 	function omitir() {
-		dispatch('skip');
+		onskip?.();
 	}
 </script>
 
@@ -66,11 +70,10 @@
 	</div>
 
 	<div class="space-y-8 rounded-3xl bg-white p-6 shadow-xl shadow-slate-200/50 md:p-10">
-		<!-- Categorías -->
 		<section>
 			<h3 class="mb-4 text-lg font-semibold text-slate-800">Causas que te mueven</h3>
 			<div class="flex flex-wrap gap-3">
-				{#each categorias as categoria}
+				{#each categorias as categoria (categoria.id_categoria)}
 					<button
 						type="button"
 						onclick={() => toggleCategoria(categoria.id_categoria)}
@@ -93,11 +96,10 @@
 
 		<hr class="border-slate-100" />
 
-		<!-- Tipos de Participación -->
 		<section>
 			<h3 class="mb-4 text-lg font-semibold text-slate-800">¿Cómo te gustaría ayudar?</h3>
 			<div class="flex flex-wrap gap-3">
-				{#each tiposParticipacion as tipo}
+				{#each tiposParticipacion as tipo (tipo.id_tipo_participacion)}
 					<button
 						type="button"
 						onclick={() => toggleTipo(tipo.id_tipo_participacion)}

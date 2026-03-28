@@ -45,8 +45,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		return json(updated);
 	} catch (e: unknown) {
 		const msg = e instanceof Error ? e.message : 'Error interno';
-		const status =
-			msg.includes('administrador') || msg.includes('no encontrada') ? 403 : 400;
+		const status = msg.includes('administrador') || msg.includes('no encontrada') ? 403 : 400;
 		return json({ error: msg }, { status });
 	}
 };

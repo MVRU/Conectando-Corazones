@@ -8,7 +8,6 @@
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	// Estado para provincias cargadas desde API
 	let provincias: Provincia[] = [];
 	let cargandoProvincias = true;
 	let subiendoFoto = false;
@@ -28,7 +27,6 @@
 		const file = input.files?.[0];
 		if (!file) return;
 
-		// Validaciones
 		const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
 		if (!tiposPermitidos.includes(file.type)) {
 			toastStore.show({
@@ -50,7 +48,6 @@
 
 		subiendoFoto = true;
 		try {
-			// 1. Obtener URL firmada
 			const response = await fetch('/api/storage/upload-url', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -64,7 +61,6 @@
 			const { uploadUrl, fullPath, error } = await response.json();
 			if (error) throw new Error(error);
 
-			// 2. Subir archivo
 			const uploadRes = await fetch(uploadUrl, {
 				method: 'PUT',
 				body: file,
@@ -73,14 +69,10 @@
 
 			if (!uploadRes.ok) throw new Error('Error al subir la imagen');
 
-			// 3. Construir URL pública
-			// Supabase Storage URL convention
 			const publicUrl = `${env.SUPABASE_URL}/storage/v1/object/public/${fullPath}`;
 
-			// 4. Actualizar estado
 			onActualizarCampo('url_foto', publicUrl);
 
-			// 5. Guardar metadata para persistencia
 			pendingUploadMetadata = {
 				url: publicUrl,
 				nombreArchivo: file.name,
@@ -133,7 +125,6 @@
 		dispatch('cerrar');
 	}
 
-	// Cargar provincias desde API
 	onMount(async () => {
 		try {
 			const response = await fetch('/api/ubicaciones/provincias');
@@ -165,7 +156,6 @@
 			edicion.actualizarCampo('contactos', formContactos.getValues());
 		}
 
-		// Subida de foto (si aplica)
 		if (pendingUploadMetadata) {
 			try {
 				const response = await fetch('/api/usuarios/me/foto', {
@@ -178,7 +168,6 @@
 					throw new Error('Error al guardar la foto en el sistema');
 				}
 
-				// Limpiar metadata tras éxito
 				pendingUploadMetadata = null;
 			} catch (e) {
 				console.error('Error persistiendo foto:', e);
@@ -237,7 +226,6 @@
 		role="presentation"
 		tabindex="-1"
 	>
-		<!-- Modal container -->
 		<div
 			class="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl focus:outline-none"
 			on:click|stopPropagation
@@ -247,7 +235,6 @@
 			aria-labelledby="modal-title"
 			tabindex="-1"
 		>
-			<!-- Header -->
 			<div
 				class="z-20 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4"
 			>
@@ -344,7 +331,6 @@
 
 				<div class="col-span-1 flex flex-col overflow-hidden bg-white md:col-span-9">
 					<div class="scrollbar-hide flex-1 overflow-y-auto px-6 pb-6 sm:px-8">
-						<!-- Información personal -->
 						<section class="space-y-4">
 							<h4 class="border-b border-gray-100 pb-2 text-lg font-bold text-gray-900">
 								{tituloSeccionNombre}
@@ -410,7 +396,6 @@
 							</div>
 						</section>
 
-						<!-- Ubicación -->
 						<section class="space-y-4">
 							<h4 class="border-b border-gray-100 pb-2 text-lg font-bold text-gray-900">
 								Ubicación
@@ -458,7 +443,6 @@
 							</div>
 						</section>
 
-						<!-- Descripción -->
 						<section class="space-y-4">
 							<div class="flex items-baseline justify-between border-b border-gray-100 pb-2">
 								<h4 class="text-lg font-bold text-gray-900">Descripción</h4>
@@ -507,7 +491,6 @@
 							</div>
 						</section>
 
-						<!-- Información de contacto -->
 						<section class="space-y-4 pb-4">
 							<h4 class="border-b border-gray-100 pb-2 text-lg font-bold text-gray-900">
 								Métodos de contacto
@@ -519,12 +502,12 @@
 									mostrarOmitir={false}
 									bloquearPrimerContacto={true}
 									ocultarBotones={true}
+									onsubmit={() => {}}
 								/>
 							</div>
 						</section>
 					</div>
 
-					<!-- Footer con botones -->
 					<div class="z-10 border-t border-gray-100 bg-gray-50/50 px-6 py-4 sm:px-8">
 						<div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 							<button

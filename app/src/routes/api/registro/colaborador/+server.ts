@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					razon_social: orgMetadata?.razon_social,
 					con_fines_de_lucro: orgMetadata?.con_fines_de_lucro ? 'true' : 'false'
 				}
-			},
+			}
 		});
 
 		return json({ usuario: usuarioCreado });

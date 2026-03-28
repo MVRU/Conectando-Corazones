@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { ComponentType } from 'svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
@@ -56,17 +56,27 @@
 	} from '$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
 
-	const dispatch = createEventDispatcher<{
-		submit: RegistroCuentaSubmitDetail;
-		invalid: { campos: string[] };
-		processing: { value: boolean };
-		back: void;
-		selectMethod: { metodo: MetodoAcceso };
-	}>();
+	interface Props {
+		rol?: RegistroRol;
+		procesando?: boolean;
+		errorGeneral?: string | null;
+		onsubmit: (detail: RegistroCuentaSubmitDetail) => void;
+		oninvalid?: (detail: { campos: string[] }) => void;
+		onprocessing?: (detail: { value: boolean }) => void;
+		onback?: () => void;
+		onselectMethod?: (detail: { metodo: MetodoAcceso }) => void;
+	}
 
-	export let rol: RegistroRol = 'institucion';
-	export let procesando = false;
-	export let errorGeneral: string | null = null;
+	let {
+		rol = 'institucion',
+		procesando = false,
+		errorGeneral = null,
+		onsubmit,
+		oninvalid,
+		onprocessing,
+		onback = () => {},
+		onselectMethod
+	}: Props = $props();
 
 	const opcionesTipoColaborador: Array<{
 		value: TipoColaborador;
@@ -282,50 +292,49 @@
 		}
 	];
 
-	let storageDisponible = false;
-	let persistenciaHabilitada = false;
-	let puedeReiniciarPorCambioRol = false;
-	let notificacionGuardadoMostrada = false;
-	let mostrarModalPassword = false;
-	let modalPassword = '';
-	let modalPasswordConfirm = '';
-	let modalPasswordError = '';
-	let modalPasswordConfirmError = '';
-	let username = '';
-	let email = '';
-	let password = '';
-	let passwordConfirm = '';
-	let nombrePersona = '';
-	let apellidoPersona = '';
-	let fechaNacimiento: Date | null = null;
-	let urlFoto = '';
-	let razonSocial = '';
-	let conFinesDeLucroSeleccion: '' | 'true' | 'false' = '';
-	let nombreLegal = '';
-	let tipoInstitucionSeleccion = TIPO_INSTITUCION_POR_DEFECTO;
-	let tipoInstitucionPersonalizado = '';
-	let tipoColaborador: TipoColaborador = 'unipersonal';
-	let archivoFoto: File | null = null;
-	let aceptaTerminosYPrivacidad = false;
-	let intentoEnvio = false;
-	let errores: ErroresFormulario = crearErroresIniciales();
-	let tieneErrores = false;
-	let pasoFormulario: 'credenciales' | 'detalles' = 'credenciales';
-	let formularioRef: HTMLFormElement | null = null;
-	let mostrarPassword = false;
-	let mostrarPasswordConfirm = false;
-	let mostrarModalPasswordTexto = false;
-	let mostrarModalPasswordConfirmTexto = false;
-	let metodoAcceso: MetodoAcceso | null = null;
-	let verificando = false;
-	let verificandoUsername = false;
-	let verificandoEmail = false;
-	let erroresDisponibilidad = {
+	let storageDisponible = $state(false);
+	let persistenciaHabilitada = $state(false);
+	let puedeReiniciarPorCambioRol = $state(false);
+	let notificacionGuardadoMostrada = $state(false);
+	let mostrarModalPassword = $state(false);
+	let modalPassword = $state('');
+	let modalPasswordConfirm = $state('');
+	let modalPasswordError = $state('');
+	let modalPasswordConfirmError = $state('');
+	let username = $state('');
+	let email = $state('');
+	let password = $state('');
+	let passwordConfirm = $state('');
+	let nombrePersona = $state('');
+	let apellidoPersona = $state('');
+	let fechaNacimiento: Date | null = $state(null);
+	let urlFoto = $state('');
+	let razonSocial = $state('');
+	let conFinesDeLucroSeleccion: '' | 'true' | 'false' = $state('');
+	let nombreLegal = $state('');
+	let tipoInstitucionSeleccion = $state(TIPO_INSTITUCION_POR_DEFECTO);
+	let tipoInstitucionPersonalizado = $state('');
+	let tipoColaborador: TipoColaborador = $state('unipersonal');
+	let archivoFoto: File | null = $state(null);
+	let aceptaTerminosYPrivacidad = $state(false);
+	let intentoEnvio = $state(false);
+
+	let pasoFormulario: 'credenciales' | 'detalles' = $state('credenciales');
+	let formularioRef: HTMLFormElement | null = $state(null);
+	let mostrarPassword = $state(false);
+	let mostrarPasswordConfirm = $state(false);
+	let mostrarModalPasswordTexto = $state(false);
+	let mostrarModalPasswordConfirmTexto = $state(false);
+	let metodoAcceso: MetodoAcceso | null = $state(null);
+	let verificando = $state(false);
+	let verificandoUsername = $state(false);
+	let verificandoEmail = $state(false);
+	let erroresDisponibilidad = $state({
 		username: '',
 		email: ''
-	};
+	});
 
-	let rolInterno: RegistroRol = rol;
+	let rolInterno: RegistroRol = $state(rol);
 
 	onMount(() => {
 		if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {
@@ -341,46 +350,52 @@
 		persistenciaHabilitada = true;
 	});
 
-	$: if (rol !== rolInterno) {
-		rolInterno = rol;
-		if (puedeReiniciarPorCambioRol) {
-			resetFormulario();
+	$effect(() => {
+		if (rol !== rolInterno) {
+			rolInterno = rol;
+			if (puedeReiniciarPorCambioRol) {
+				resetFormulario();
+			}
 		}
-	}
+	});
 
-	$: if (persistenciaHabilitada) {
-		if (formularioTieneDatosPersistibles()) {
-			guardarFormularioPersistido({
-				version: VERSION_INSTANTANEA_FORMULARIO,
-				timestamp: Date.now(),
-				rol: rolInterno,
-				pasoFormulario,
-				metodoAcceso,
-				username,
-				email,
-				nombrePersona,
-				apellidoPersona,
-				fechaNacimiento: fechaNacimiento ? fechaNacimiento.toISOString() : null,
-				urlFoto,
-				razonSocial,
-				conFinesDeLucroSeleccion,
-				nombreLegal,
-				tipoInstitucionSeleccion,
-				tipoInstitucionPersonalizado,
-				tipoColaborador
-			});
-			notificarGuardarTemporal();
-		} else {
-			limpiarFormularioPersistido();
-			notificacionGuardadoMostrada = false;
+	$effect(() => {
+		if (persistenciaHabilitada) {
+			if (formularioTieneDatosPersistibles()) {
+				guardarFormularioPersistido({
+					version: VERSION_INSTANTANEA_FORMULARIO,
+					timestamp: Date.now(),
+					rol: rolInterno,
+					pasoFormulario,
+					metodoAcceso,
+					username,
+					email,
+					nombrePersona,
+					apellidoPersona,
+					fechaNacimiento: fechaNacimiento ? fechaNacimiento.toISOString() : null,
+					urlFoto,
+					razonSocial,
+					conFinesDeLucroSeleccion,
+					nombreLegal,
+					tipoInstitucionSeleccion,
+					tipoInstitucionPersonalizado,
+					tipoColaborador
+				});
+				notificarGuardarTemporal();
+			} else {
+				limpiarFormularioPersistido();
+				notificacionGuardadoMostrada = false;
+			}
 		}
-	}
+	});
 
-	let ultimoProcesando: boolean | null = null;
-	$: if (ultimoProcesando !== procesando) {
-		ultimoProcesando = procesando;
-		dispatch('processing', { value: procesando });
-	}
+	let ultimoProcesando: boolean | null = $state(null);
+	$effect(() => {
+		if (ultimoProcesando !== procesando) {
+			ultimoProcesando = procesando;
+			onprocessing?.({ value: procesando });
+		}
+	});
 
 	const metadatosRol = {
 		institucion: {
@@ -421,7 +436,7 @@
 		tipoInstitucionPersonalizado: string;
 	}
 
-	$: errores =
+	let erroresCalculados = $derived(
 		rolInterno === 'colaborador'
 			? calcularErroresColaborador({
 					username,
@@ -437,7 +452,7 @@
 					razonSocial,
 					conFinesDeLucro: conFinesDeLucroSeleccion,
 					aceptaTerminosYPrivacidad,
-					validarLegales: pasoFormulario === 'detalles'
+					validarLegales: (pasoFormulario as string) === 'detalles'
 				})
 			: calcularErroresInstitucion({
 					username,
@@ -453,20 +468,17 @@
 					tipoInstitucionSeleccion,
 					tipoInstitucionPersonalizado,
 					aceptaTerminosYPrivacidad,
-					validarLegales: pasoFormulario === 'detalles'
-				});
+					validarLegales: (pasoFormulario as string) === 'detalles'
+				})
+	);
 
-	// Combinar errores locales con errores de disponibilidad
-	$: {
-		if (erroresDisponibilidad.username && !errores.username) {
-			errores.username = erroresDisponibilidad.username;
-		}
-		if (erroresDisponibilidad.email && !errores.email) {
-			errores.email = erroresDisponibilidad.email;
-		}
-	}
+	let errores = $derived({
+		...erroresCalculados,
+		username: erroresCalculados.username || erroresDisponibilidad.username,
+		email: erroresCalculados.email || erroresDisponibilidad.email
+	});
 
-	$: tieneErrores = Object.values(errores).some((error) => error);
+	let tieneErrores = $derived(Object.values(errores).some((error) => error));
 
 	function resetFormulario() {
 		username = '';
@@ -670,7 +682,7 @@
 		metodoAcceso = metodo;
 		intentoEnvio = false;
 		pasoFormulario = 'credenciales';
-		dispatch('selectMethod', { metodo });
+		onselectMethod?.({ metodo });
 	}
 
 	function manejarKeydownMetodo(event: KeyboardEvent, metodoId: MetodoAcceso, disponible: boolean) {
@@ -810,7 +822,7 @@
 
 		if (camposConErrores.length) {
 			enfocarPrimerCampoConError();
-			dispatch('invalid', { campos: camposConErrores });
+			oninvalid?.({ campos: camposConErrores });
 			return;
 		}
 
@@ -860,6 +872,7 @@
 	function volverAPasoCredenciales() {
 		pasoFormulario = 'credenciales';
 		mostrarModalPassword = false;
+		onback?.();
 		if (typeof window !== 'undefined') {
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
@@ -1037,7 +1050,7 @@
 			const campos = Object.entries(errores)
 				.filter(([, valor]) => valor)
 				.map(([campo]) => campo);
-			dispatch('invalid', { campos });
+			oninvalid?.({ campos });
 			if (
 				campos.length &&
 				campos.every((campo) => campo === 'password' || campo === 'passwordConfirm')
@@ -1068,7 +1081,7 @@
 				con_fines_de_lucro: normalizarSeleccionBoolean(conFinesDeLucroSeleccion)
 			};
 
-			dispatch('submit', {
+			onsubmit({
 				rol: 'colaborador',
 				payload: {
 					colaborador,
@@ -1098,7 +1111,7 @@
 			tipo_institucion: tipoInstitucion
 		};
 
-		dispatch('submit', {
+		onsubmit({
 			rol: 'institucion',
 			payload: { institucion },
 			archivoFoto,
@@ -1125,7 +1138,7 @@
 
 <form
 	class="mx-auto max-w-4xl space-y-10"
-	on:submit={manejarSubmit}
+	onsubmit={manejarSubmit}
 	bind:this={formularioRef}
 	novalidate
 >
@@ -1173,8 +1186,8 @@
 						aria-checked={metodoAcceso === metodo.id}
 						aria-disabled={!metodo.disponible}
 						tabindex={obtenerTabIndexMetodo(metodo.id, metodo.disponible)}
-						on:click={() => seleccionarMetodoAcceso(metodo.id)}
-						on:keydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
+						onclick={() => seleccionarMetodoAcceso(metodo.id)}
+						onkeydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
 						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none ${
 							metodo.disponible
 								? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]'
@@ -1266,14 +1279,13 @@
 							class={`group flex flex-col gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]/30 focus-visible:ring-offset-2 ${proveedor.cardClass} cursor-not-allowed`}
 							aria-disabled="true"
 							title="Integración disponible pronto"
-							on:click={() => manejarRegistroProveedor(proveedor.id)}
+							onclick={() => manejarRegistroProveedor(proveedor.id)}
 						>
 							<div class="flex items-center gap-4">
 								<span
 									class={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/50  ${proveedor.iconClass}`}
 									aria-hidden="true"
 								>
-									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									{@html iconosFederados[proveedor.id]}
 								</span>
 								<div>
@@ -1308,7 +1320,7 @@
 					<button
 						type="button"
 						class="font-semibold text-[rgb(var(--color-primary))] underline-offset-2 hover:underline"
-						on:click={() => seleccionarMetodoAcceso('manual')}
+						onclick={() => seleccionarMetodoAcceso('manual')}
 					>
 						Crear cuenta manualmente
 					</button>
@@ -1381,7 +1393,7 @@
 							<button
 								type="button"
 								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								on:click={() => (mostrarPassword = !mostrarPassword)}
+								onclick={() => (mostrarPassword = !mostrarPassword)}
 								aria-pressed={mostrarPassword}
 								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 								disabled={procesando}
@@ -1417,7 +1429,7 @@
 							<button
 								type="button"
 								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								on:click={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
+								onclick={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
 								aria-pressed={mostrarPasswordConfirm}
 								aria-label={mostrarPasswordConfirm
 									? 'Ocultar confirmación de contraseña'
@@ -1457,7 +1469,7 @@
 			<button
 				type="button"
 				class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold tracking-wide text-slate-600 uppercase transition hover:border-slate-400 hover:text-slate-900"
-				on:click={volverAPasoCredenciales}
+				onclick={volverAPasoCredenciales}
 			>
 				<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path
@@ -1557,6 +1569,7 @@
 
 					<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 						{#each opcionesTipoInstitucion as opcion (opcion.value)}
+							{@const Icon = opcion.icon}
 							<div class="relative">
 								<input
 									id={`tipo-institucion-${opcion.value}`}
@@ -1565,14 +1578,12 @@
 									name="tipo_institucion"
 									value={opcion.value}
 									checked={tipoInstitucionSeleccion === opcion.value}
-									on:change={() => actualizarTipoInstitucion(opcion.value)}
+									onchange={() => actualizarTipoInstitucion(opcion.value)}
 									disabled={opcion.disabled}
 								/>
 								<label
 									for={`tipo-institucion-${opcion.value}`}
-									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-left text-sm transition ${
-										opcion.disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-									} ${
+									class={`group relative flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] ${
 										tipoInstitucionSeleccion === opcion.value
 											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
 											: 'border-slate-200 hover:border-sky-300'
@@ -1586,7 +1597,7 @@
 										}`}
 										aria-hidden="true"
 									>
-										<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+										<Icon class="h-5 w-5" strokeWidth={1.7} />
 									</span>
 									<div>
 										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
@@ -1713,33 +1724,33 @@
 					</div>
 					<div class="grid gap-4 md:grid-cols-2">
 						{#each opcionesTipoColaborador as opcion (opcion.value)}
-							<div class="relative">
-								<input
-									id={`tipo-colaborador-${opcion.value}`}
-									type="radio"
-									class="peer sr-only"
-									name="tipo_colaborador"
-									value={opcion.value}
-									checked={tipoColaborador === opcion.value}
-									on:change={() => alternarTipoColaborador(opcion.value)}
-								/>
+							{@const Icon = opcion.icon}
+							<div>
 								<label
-									for={`tipo-colaborador-${opcion.value}`}
-									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-sm transition ${
+									class={`relative flex cursor-pointer items-center gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] ${
 										tipoColaborador === opcion.value
-											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
+											? 'border-sky-500 bg-sky-50/20 shadow-[0_8px_20px_rgba(14,165,233,0.06)]'
 											: 'border-slate-200 hover:border-sky-300'
-									} cursor-pointer peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+									}`}
 								>
+									<input
+										id={`tipo-colaborador-${opcion.value}`}
+										type="radio"
+										class="peer sr-only"
+										name="tipo_colaborador"
+										value={opcion.value}
+										checked={tipoColaborador === opcion.value}
+										onchange={() => alternarTipoColaborador(opcion.value)}
+									/>
 									<span
-										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
+										class={`flex h-12 w-12 items-center justify-center rounded-xl text-lg ${
 											tipoColaborador === opcion.value
-												? 'bg-sky-50 text-sky-600'
-												: 'bg-slate-50 text-slate-600'
+												? 'bg-sky-100 text-sky-600'
+												: 'bg-slate-100 text-slate-500'
 										}`}
 										aria-hidden="true"
 									>
-										<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+										<Icon class="h-6 w-6" strokeWidth={1.7} />
 									</span>
 									<div>
 										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
@@ -1776,12 +1787,13 @@
 									<span class="text-red-600">*</span>
 								</p>
 								<div class="grid gap-3 sm:grid-cols-2">
-									{#each [{ value: 'true', label: 'Sí, con fines de lucro', descripcion: 'Opera como empresa o entidad mixta.', icon: Building2 }, { value: 'false', label: 'No, sin fines de lucro', descripcion: 'Asociación civil o fundación.', icon: ShieldCheck }] as opcion (opcion.value)}
+									{#each [{ value: 'true', label: 'Con fines de lucro', descripcion: 'Ej: Empresa, SRL', icon: Building2 }, { value: 'false', label: 'Sin fines de lucro', descripcion: 'Ej: Cooperativa, Mutual', icon: ShieldCheck }] as opcion (opcion.value)}
+										{@const Icon = opcion.icon}
 										<label
-											class={`flex h-full cursor-pointer flex-col gap-2 rounded-2xl border p-4 transition ${
+											class={`relative flex cursor-pointer rounded-2xl border p-5 transition-all ${
 												conFinesDeLucroSeleccion === opcion.value
-													? 'border-sky-500 bg-white shadow-sm'
-													: 'border-slate-200 bg-white hover:border-sky-300'
+													? 'border-sky-500 bg-sky-50/20 shadow-[0_8px_20px_rgba(14,165,233,0.06)]'
+													: 'border-slate-200 bg-white hover:border-sky-100'
 											}`}
 										>
 											<input
@@ -1801,7 +1813,7 @@
 													}`}
 													aria-hidden="true"
 												>
-													<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+													<Icon class="h-5 w-5" strokeWidth={1.7} />
 												</span>
 												<div>
 													<p class="font-semibold text-slate-900">{opcion.label}</p>
@@ -1812,7 +1824,7 @@
 									{/each}
 								</div>
 								{#if intentoEnvio && errores.con_fines_de_lucro}
-									<p class="text-sm text-red-600">{errores.con_fines_de_lucro}</p>
+									<p class="mt-2 text-sm text-red-600">{errores.con_fines_de_lucro}</p>
 								{/if}
 							</div>
 						</div>
@@ -1835,13 +1847,15 @@
 						href="/terminos"
 						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
 						target="_blank"
-						rel="noopener noreferrer">términos y condiciones</a>
+						rel="noopener noreferrer">términos y condiciones</a
+					>
 					y la
 					<a
 						href="/privacidad"
 						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
 						target="_blank"
-						rel="noopener noreferrer">política de privacidad</a>
+						rel="noopener noreferrer">política de privacidad</a
+					>
 					de la plataforma. <span class="text-red-600">*</span>
 				</span>
 			</label>
@@ -1907,7 +1921,7 @@
 						<button
 							type="button"
 							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-							on:click={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
+							onclick={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
 							aria-pressed={mostrarModalPasswordTexto}
 							aria-label={mostrarModalPasswordTexto ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 						>
@@ -1940,8 +1954,7 @@
 						<button
 							type="button"
 							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-							on:click={() =>
-								(mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
+							onclick={() => (mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
 							aria-pressed={mostrarModalPasswordConfirmTexto}
 							aria-label={mostrarModalPasswordConfirmTexto
 								? 'Ocultar confirmación de contraseña'

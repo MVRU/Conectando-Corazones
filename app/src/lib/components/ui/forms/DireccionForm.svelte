@@ -5,20 +5,31 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
 	import { MENSAJES_ERROR } from '$lib/utils/validaciones';
-	import {
-		construirUrlsVistaPreviaGoogleMaps,
-		type UrlsVistaPreviaGoogleMaps
-	} from '$lib/utils/googleMaps';
+	import { construirUrlsVistaPreviaGoogleMaps } from '$lib/utils/googleMaps';
 
 	import type { Provincia } from '$lib/domain/entities/Provincia';
 	import type { Localidad } from '$lib/domain/entities/Localidad';
-	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
 
-	// Estado para datos cargados desde API
-	let provincias: Provincia[] = [];
-	let cargandoProvincias = true;
-	let cargandoLocalidades = false;
+	interface Props {
+		mostrarOmitir?: boolean;
+		etiquetaOmitir?: string;
+		solicitarSoloUbicacion?: boolean;
+		onsubmit: (payload: DireccionPayload | undefined) => void;
+		onskip?: () => void;
+	}
+
+	let {
+		mostrarOmitir = false,
+		etiquetaOmitir = 'Omitir',
+		solicitarSoloUbicacion = false,
+		onsubmit,
+		onskip
+	}: Props = $props();
+
+	let provincias: Provincia[] = $state([]);
+	let cargandoProvincias = $state(true);
+	let cargandoLocalidades = $state(false);
 
 	type DireccionPayload = {
 		provinciaId: number | null;
@@ -29,42 +40,33 @@
 		url_google_maps?: string;
 	};
 
-	let enviando = false;
-	let editandoUrlMapaGoogle = false;
-	let idProvincia = '';
-	let idLocalidad = '';
-	let provincia: Provincia | undefined;
-	let localidad: Localidad | undefined;
-	let localidadesProvincia: Localidad[] = [];
-	let urlGoogleMaps = '';
-	let googleMapsPreview: UrlsVistaPreviaGoogleMaps | null = null;
-	let urlGoogleMapsLegible = '';
-	let referencia = '';
+	let enviando = $state(false);
+	let editandoUrlMapaGoogle = $state(false);
+	let idProvincia = $state('');
+	let idLocalidad = $state('');
+	let localidadesProvincia: Localidad[] = $state([]);
+	let urlGoogleMaps = $state('');
+	let referencia = $state('');
+	let intentoEnvio = $state(false);
 
 	function decodeUrlForDisplay(url: string): string {
 		try {
 			return decodeURI(url);
-		} catch (_error) {
+		} catch {
 			return url;
 		}
 	}
 
-	$: urlGoogleMapsLegible = urlGoogleMaps ? decodeUrlForDisplay(urlGoogleMaps) : '';
-	let intentoEnvio = false;
-
-	export let mostrarOmitir = false;
-	export let etiquetaOmitir = 'Omitir';
-	export let solicitarSoloUbicacion = false;
-
-	const dispatch = createEventDispatcher<{ submit: DireccionPayload | undefined; skip: void }>();
+	let urlGoogleMapsLegible = $derived(urlGoogleMaps ? decodeUrlForDisplay(urlGoogleMaps) : '');
 
 	const convertirAString = (n?: number) => (n == null ? '' : String(n));
 
-	$: requiereGeolocalizacion = !solicitarSoloUbicacion;
+	let requiereGeolocalizacion = $derived(!solicitarSoloUbicacion);
 
-	$: provincia = provincias.find((p) => convertirAString(p.id_provincia) === idProvincia);
+	let provincia = $derived(
+		provincias.find((p) => convertirAString(p.id_provincia) === idProvincia)
+	);
 
-	// Cargar provincias
 	onMount(async () => {
 		try {
 			const response = await fetch('/api/ubicaciones/provincias');
@@ -78,7 +80,6 @@
 		}
 	});
 
-	// Cargar localidades cuando cambia la provincia
 	async function cargarLocalidades(idProv: number) {
 		cargandoLocalidades = true;
 		localidadesProvincia = [];
@@ -94,53 +95,60 @@
 		}
 	}
 
-	// Reactivo: cargar localidades cuando cambia la provincia
-	$: if (provincia?.id_provincia) {
-		cargarLocalidades(provincia.id_provincia);
-	} else {
-		localidadesProvincia = [];
-	}
+	$effect(() => {
+		if (provincia?.id_provincia) {
+			cargarLocalidades(provincia.id_provincia);
+		} else {
+			localidadesProvincia = [];
+		}
+	});
 
-	$: if (
-		provincia &&
-		idLocalidad &&
-		!localidadesProvincia.some((l) => convertirAString(l.id_localidad) === idLocalidad)
-	) {
-		idLocalidad = '';
-	}
+	$effect(() => {
+		if (
+			provincia &&
+			idLocalidad &&
+			!localidadesProvincia.some((l) => convertirAString(l.id_localidad) === idLocalidad)
+		) {
+			idLocalidad = '';
+		}
+	});
 
-	$: localidad = localidadesProvincia.find((l) => convertirAString(l.id_localidad) === idLocalidad);
+	let localidad = $derived(
+		localidadesProvincia.find((l) => convertirAString(l.id_localidad) === idLocalidad)
+	);
 
-	// Genera la URL automáticamente
-	$: {
+	let googleMapsPreview = $derived.by(() => {
+		if (!requiereGeolocalizacion || !provincia || !localidad) return null;
+		if (localidad.id_provincia !== provincia.id_provincia) return null;
+
+		return construirUrlsVistaPreviaGoogleMaps({
+			localidad: localidad.nombre,
+			provincia: provincia.nombre
+		});
+	});
+
+	$effect(() => {
 		if (!requiereGeolocalizacion) {
 			urlGoogleMaps = '';
-			googleMapsPreview = null;
 			editandoUrlMapaGoogle = false;
-		} else if (localidad?.id_provincia === provincia?.id_provincia) {
-			googleMapsPreview = construirUrlsVistaPreviaGoogleMaps({
-				localidad: localidad?.nombre,
-				provincia: provincia?.nombre
-			});
-
-			urlGoogleMaps = googleMapsPreview?.urlLugar ?? '';
+		} else if (googleMapsPreview) {
+			urlGoogleMaps = googleMapsPreview.urlLugar ?? '';
 		} else {
-			googleMapsPreview = null;
 			urlGoogleMaps = '';
 		}
-	}
+	});
 
-	$: errores = {
+	let errores = $derived({
 		provincia: provincia ? '' : MENSAJES_ERROR.provinciaInvalida,
 		localidad:
 			localidad?.id_provincia === provincia?.id_provincia
 				? ''
 				: MENSAJES_ERROR.ciudadNoPerteneceProvincia
-	};
+	});
 
-	$: tieneErrores = Object.values(errores).some((mensajeError) => mensajeError !== '');
+	let tieneErrores = $derived(Object.values(errores).some((mensajeError) => mensajeError !== ''));
 
-	function manejarEnvio(event: Event) {
+	function manejarEnvio(event: SubmitEvent) {
 		event.preventDefault();
 		intentoEnvio = true;
 		if (tieneErrores) return;
@@ -157,7 +165,7 @@
 				referencia: referencia?.trim() || undefined,
 				url_google_maps: requiereGeolocalizacion && urlGoogleMaps ? urlGoogleMaps : undefined
 			};
-			dispatch('submit', payload);
+			onsubmit(payload);
 			toastStore.show({
 				variant: 'success',
 				title: 'Ubicación guardada',
@@ -172,12 +180,12 @@
 			title: 'Paso omitido',
 			message: 'Podés completar tu ubicación más adelante desde el panel de la institución.'
 		});
-		dispatch('skip');
+		onskip?.();
 	}
 </script>
 
 <form
-	on:submit={manejarEnvio}
+	onsubmit={manejarEnvio}
 	class="rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-200 sm:p-8 md:p-12"
 >
 	<header class="mx-auto max-w-3xl text-center">
@@ -185,7 +193,6 @@
 	</header>
 
 	<div class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
-		<!-- Provincia -->
 		<div class="space-y-2">
 			<label for="provincia" class="block text-sm font-semibold text-gray-800">
 				Provincia <span class="text-red-600">*</span>
@@ -204,7 +211,6 @@
 			/>
 		</div>
 
-		<!-- Localidad -->
 		<div class="space-y-2">
 			<label for="localidad" class="block text-sm font-semibold text-gray-800">
 				Localidad <span class="text-red-600">*</span>
@@ -224,14 +230,12 @@
 		</div>
 
 		{#if requiereGeolocalizacion}
-			<!-- Campo URL Google Maps -->
 			<div class="md:col-span-2">
 				<label for="urlGoogleMaps" class="mb-2 block text-sm font-semibold text-gray-800">
 					URL de Google Maps
 				</label>
 				<div class="relative">
 					{#if editandoUrlMapaGoogle}
-						<!-- Modo edición: Input -->
 						<Input
 							id="urlGoogleMaps"
 							bind:value={urlGoogleMaps}
@@ -239,7 +243,6 @@
 							customClass="w-full rounded-2xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100"
 						/>
 					{:else if urlGoogleMaps}
-						<!-- Modo lectura: Enlace clickeable -->
 						<a
 							href={urlGoogleMaps}
 							target="_blank"
@@ -249,7 +252,6 @@
 							{urlGoogleMapsLegible}
 						</a>
 					{:else}
-						<!-- Sin URL: solo texto informativo -->
 						<p
 							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-500 italic"
 						>
@@ -257,10 +259,9 @@
 						</p>
 					{/if}
 
-					<!-- Botón de edición -->
 					<button
 						type="button"
-						on:click={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
+						onclick={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
 						class="absolute top-0 right-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 						aria-pressed={editandoUrlMapaGoogle}
@@ -291,7 +292,6 @@
 				</div>
 			</div>
 
-			<!-- Vista previa del mapa -->
 			{#if googleMapsPreview && !editandoUrlMapaGoogle}
 				<section class="md:col-span-2">
 					<div class="mx-auto w-full max-w-3xl text-center">
@@ -325,19 +325,17 @@
 		{/if}
 	</div>
 
-	<!-- Botones de acción -->
 	<div
 		class="mt-12 flex flex-col-reverse gap-4 text-center md:flex-row md:items-center md:justify-end"
 	>
 		{#if mostrarOmitir}
-			<Button
+			<button
 				type="button"
-				label={etiquetaOmitir}
-				variant="secondary"
-				size="md"
+				class="flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-200"
 				onclick={omitirDireccion}
-				customClass="w-full md:w-auto"
-			/>
+			>
+				{etiquetaOmitir}
+			</button>
 		{/if}
 		<Button
 			type="submit"

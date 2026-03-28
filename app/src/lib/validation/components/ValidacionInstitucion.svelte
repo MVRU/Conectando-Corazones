@@ -1,38 +1,46 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { X } from 'lucide-svelte';
 
-	const dispatch = createEventDispatcher<{
-		submit: { files: File[] };
-		skip: void;
-		cancel: void;
-	}>();
-
-	export let pasoActual = 3;
-	export let pasosTotales = 5;
-	/** En el registro se puede omitir; desde el panel conviene exigir documentación o volver atrás. */
-	export let permitirOmitir = true;
-
 	type MetodoVerificacion = 'manual' | 'renaper' | 'omitido';
 
-	let metodoSeleccionado: MetodoVerificacion = 'manual';
-	let archivosSeleccionados: File[] = [];
-	let aceptoDeclaracion = false;
-	let errorFormulario: string | null = null;
-	let avisoArchivosMostrado = false;
+	interface Props {
+		pasoActual?: number;
+		pasosTotales?: number;
 
-	$: botonEnviarDeshabilitado = !aceptoDeclaracion;
+		permitirOmitir?: boolean;
+		onsubmit: (detail: { files: File[] }) => void;
+		onskip?: () => void;
+		oncancel?: () => void;
+	}
+
+	let {
+		pasoActual = 3,
+		pasosTotales = 5,
+		permitirOmitir = true,
+		onsubmit,
+		onskip = () => {},
+		oncancel = () => {}
+	}: Props = $props();
+
+	let metodoSeleccionado: MetodoVerificacion = $state('manual');
+	let archivosSeleccionados: File[] = $state([]);
+	let aceptoDeclaracion = $state(false);
+	let errorFormulario: string | null = $state(null);
+	let avisoArchivosMostrado = $state(false);
+
+	let botonEnviarDeshabilitado = $derived(!aceptoDeclaracion);
 
 	const renaperDisponible = false;
-
 	const MAX_FILES = 5;
 
-	$: if (!permitirOmitir && metodoSeleccionado === 'omitido') {
-		metodoSeleccionado = 'manual';
-	}
+	$effect(() => {
+		if (!permitirOmitir && metodoSeleccionado === 'omitido') {
+			metodoSeleccionado = 'manual';
+		}
+	});
 
 	function actualizarArchivos(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -83,7 +91,6 @@
 				});
 			}
 
-			// Si no se había mostrado el aviso y se agregaron archivos, mostrarlo ahora
 			if (!avisoArchivosMostrado && archivosAgregados > 0) {
 				toastStore.show({
 					variant: 'info',
@@ -94,7 +101,6 @@
 			}
 		}
 
-		// Resetear el valor del input para permitir seleccionar los mismos archivos nuevamente si fuera necesario
 		input.value = '';
 	}
 
@@ -118,18 +124,18 @@
 		}
 
 		errorFormulario = null;
-		dispatch('submit', { files: archivosSeleccionados });
+		onsubmit({ files: archivosSeleccionados });
 	}
 
 	function omitirRevision() {
 		metodoSeleccionado = 'omitido';
 		errorFormulario = null;
-		dispatch('skip');
+		onskip?.();
 	}
 
 	function cancelar() {
 		errorFormulario = null;
-		dispatch('cancel');
+		oncancel?.();
 	}
 </script>
 
@@ -258,7 +264,7 @@
 							class="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 							accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
 							multiple
-							on:change={actualizarArchivos}
+							onchange={actualizarArchivos}
 							aria-describedby="ayuda-documentos"
 						/>
 						<p id="ayuda-documentos" class="text-xs text-gray-500">
@@ -279,7 +285,7 @@
 											<button
 												type="button"
 												class="text-gray-400 transition hover:text-red-500 focus:text-red-500 focus:outline-none"
-												on:click={() => removerArchivo(i)}
+												onclick={() => removerArchivo(i)}
 												aria-label={`Quitar archivo ${archivo.name}`}
 											>
 												<X class="h-4 w-4" />

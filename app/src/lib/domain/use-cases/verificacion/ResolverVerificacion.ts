@@ -23,7 +23,9 @@ export class ResolverVerificacion {
 			throw new Error(`Estado no válido: ${nuevoEstado}`);
 		}
 		if (nuevoEstado === 'pendiente') {
-			throw new Error('No se puede dejar una verificación en pendiente desde la resolución administrativa.');
+			throw new Error(
+				'No se puede dejar una verificación en pendiente desde la resolución administrativa.'
+			);
 		}
 
 		const actual = await this.verificacionRepo.findById(idVerificacion);

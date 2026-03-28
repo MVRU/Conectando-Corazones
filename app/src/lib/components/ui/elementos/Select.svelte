@@ -1,34 +1,48 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { clsx } from 'clsx';
 	import { onMount, onDestroy } from 'svelte';
 
-	export let options: Array<{ value: string; label: string }> = [];
-	export let value: string = '';
-	export let placeholder: string = 'Seleccionar opción';
-	export let label: string = '';
-	export let required = false;
-	export let disabled = false;
-	export let error: string = '';
-	export let size: 'sm' | 'md' | 'lg' = 'md';
-	export let name: string = '';
-	export let id: string = '';
-	export let searchable = true;
-	export let ariaDescribedBy: string | undefined = undefined;
+	interface Props {
+		options?: Array<{ value: string; label: string }>;
+		value?: string;
+		placeholder?: string;
+		label?: string;
+		required?: boolean;
+		disabled?: boolean;
+		error?: string;
+		size?: 'sm' | 'md' | 'lg';
+		name?: string;
+		id?: string;
+		searchable?: boolean;
+		ariaDescribedBy?: string;
+		onchange?: (option: { value: string; label: string }) => void;
+		onfocus?: () => void;
+		onblur?: () => void;
+	}
 
-	let isOpen = false;
-	let selectRef: HTMLElement;
-	let inputRef: HTMLInputElement;
-	let searchValue = '';
-	let isTyping = false;
+	let {
+		options = [],
+		value = $bindable(''),
+		placeholder = 'Seleccionar opción',
+		label = '',
+		required = false,
+		disabled = false,
+		error = '',
+		size = 'md',
+		name = '',
+		id = '',
+		searchable = true,
+		ariaDescribedBy = undefined,
+		onchange,
+		onfocus,
+		onblur
+	}: Props = $props();
 
-	const dispatch = createEventDispatcher<{
-		change: { value: string; label: string };
-		focus: void;
-		blur: void;
-	}>();
+	let isOpen = $state(false);
+	let selectRef: HTMLElement | undefined = $state();
+	let inputRef: HTMLInputElement | undefined = $state();
+	let isTyping = $state(false);
 
-	// Mapeo de tamaños
 	const sizeClasses = {
 		sm: 'px-3 py-2 text-sm',
 		md: 'px-4 py-3 text-base',
@@ -41,37 +55,37 @@
 		lg: 'text-base'
 	};
 
-	$: selectedOption = options.find((opt) => opt.value === value);
+	let selectedOption = $derived(options.find((opt) => opt.value === value));
 
-	$: filteredOptions = (() => {
-		if (!isOpen) return [];
+	let searchValue = $state('');
 
-		if (!searchable) return options;
-
-		if (!searchValue.trim() || searchValue === placeholder) {
-			return options;
+	$effect(() => {
+		if (!isTyping) {
+			searchValue = selectedOption ? selectedOption.label : '';
 		}
+	});
+
+	let filteredOptions = $derived.by(() => {
+		if (!isOpen) return [];
+		if (!searchable) return options;
+		if (!searchValue.trim() || searchValue === placeholder) return options;
 
 		return options.filter((option) =>
 			option.label.toLowerCase().includes(searchValue.toLowerCase())
 		);
-	})();
-
-	$: if (!isTyping) {
-		searchValue = selectedOption ? selectedOption.label : '';
-	}
+	});
 
 	function handleSelect(option: { value: string; label: string }) {
 		value = option.value;
-		searchValue = selectedOption?.label || '';
+		searchValue = option.label;
 		isTyping = false;
 		isOpen = false;
-		dispatch('change', option);
+		onchange?.(option);
 	}
 
 	function handleInput(event: Event) {
-		const value = (event.target as HTMLInputElement).value;
-		searchValue = value;
+		const target = event.target as HTMLInputElement;
+		searchValue = target.value;
 		isTyping = true;
 		if (!isOpen) isOpen = true;
 	}
@@ -122,13 +136,13 @@
 	function handleFocus() {
 		if (!disabled) {
 			isTyping = true;
-			dispatch('focus');
+			onfocus?.();
 		}
 	}
 
 	function handleBlur() {
 		isTyping = false;
-		dispatch('blur');
+		onblur?.();
 	}
 
 	onMount(() => {
@@ -159,11 +173,11 @@
 		<input
 			type="text"
 			bind:this={inputRef}
-			bind:value={searchValue}
-			on:input={handleInput}
-			on:keydown={handleKeydown}
-			on:focus={handleFocus}
-			on:blur={handleBlur}
+			value={searchValue}
+			oninput={handleInput}
+			onkeydown={handleKeydown}
+			onfocus={handleFocus}
+			onblur={handleBlur}
 			{disabled}
 			{id}
 			{name}
@@ -194,8 +208,8 @@
 				'text-slate-400 transition-colors duration-200 group-focus-within:text-[rgb(var(--color-primary))] hover:text-slate-600'
 			)}
 			aria-label="Toggle dropdown"
-			on:click={toggleDropdown}
-			on:keydown={handleKeydown}
+			onclick={toggleDropdown}
+			onkeydown={handleKeydown}
 			{disabled}
 		>
 			<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -217,7 +231,7 @@
 									? 'bg-[rgb(var(--color-primary))] text-white'
 									: 'text-slate-600 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none'
 							)}
-							on:click={() => handleSelect(option)}
+							onclick={() => handleSelect(option)}
 							role="option"
 							aria-selected={option.value === value}
 						>
@@ -234,7 +248,6 @@
 	</div>
 </div>
 
-<!-- Mensaje de error -->
 {#if error}
 	<p class="mt-1 px-1 text-sm text-red-600">{error}</p>
 {/if}
