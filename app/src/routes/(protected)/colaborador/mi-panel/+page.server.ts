@@ -1,20 +1,15 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { ObtenerDashboardColaborador } from '$lib/domain/use-cases/colaboraciones/ObtenerDashboardColaborador';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 
+/**
+ * Carga de datos para el dashboard del colaborador.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
-
-	if (!usuario) {
-		throw redirect(303, '/iniciar-sesion');
-	}
-
-	if (usuario.rol !== 'colaborador') {
-		throw redirect(303, '/');
-	}
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	try {
 		const colaboracionRepo = new PostgresColaboracionRepository();

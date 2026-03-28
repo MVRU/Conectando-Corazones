@@ -1,6 +1,5 @@
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { LocalidadRepoPrisma } from '$lib/infrastructure/supabase/postgres/localidad.repo';
-// import { MockResenaRepository } from '$lib/infrastructure/repositories/mock/MockResenaRepository';
 import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { ObtenerResenasPerfil } from '$lib/domain/use-cases/perfil/ObtenerResenasPerfil';

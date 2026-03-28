@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { isSafeHref } from '$lib/utils/sanitize';
 
-	let { 
+	let {
 		label = 'Hacé clic!',
 		disabled = false,
 		loading = false,

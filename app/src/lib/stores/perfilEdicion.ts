@@ -139,10 +139,12 @@ export function usePerfilEdicion() {
 		let localidadExpandida: Localidad | undefined;
 		if (datos.localidad_id) {
 			try {
-				const response = await fetch(`/api/ubicaciones/provincias/${get(provinciaSeleccionada)}/localidades`);
+				const response = await fetch(
+					`/api/ubicaciones/provincias/${get(provinciaSeleccionada)}/localidades`
+				);
 				if (response.ok) {
 					const localidades: Localidad[] = await response.json();
-					localidadExpandida = localidades.find(l => l.id_localidad === datos.localidad_id);
+					localidadExpandida = localidades.find((l) => l.id_localidad === datos.localidad_id);
 				}
 			} catch (e) {
 				console.error('Error buscando localidad:', e);

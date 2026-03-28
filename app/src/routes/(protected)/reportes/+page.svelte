@@ -2,7 +2,7 @@
 	import { usuario as user, isAdmin, isInstitucion, isColaborador } from '$lib/stores/auth';
 	import type { Reporte } from '$lib/domain/types/Reporte';
 	import { fly } from 'svelte/transition';
-	import { User, Folder, Trash2, AlertCircle } from 'lucide-svelte';
+	import { User, Folder, Trash2, AlertCircle, CheckCircle, FileX } from 'lucide-svelte';
 
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
@@ -390,20 +390,7 @@
 													on:click={() => abrirModalResolucion(reporte)}
 													class="mt-3 flex items-center gap-1 rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-blue-600 shadow-sm transition-colors hover:bg-blue-50"
 												>
-													<svg
-														xmlns="http://www.w3.org/2000/svg"
-														class="h-4 w-4"
-														fill="none"
-														viewBox="0 0 24 24"
-														stroke="currentColor"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															stroke-width="2"
-															d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-														/>
-													</svg>
+													<CheckCircle class="h-4 w-4" />
 													Resolver reporte
 												</button>
 											{/if}
@@ -458,20 +445,7 @@
 		{:else}
 			<div class="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
 				<div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-50">
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						class="h-8 w-8 text-gray-400"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-						/>
-					</svg>
+					<FileX class="h-8 w-8 text-gray-400" />
 				</div>
 				<h3 class="text-lg font-medium text-gray-900">No se encontraron reportes</h3>
 				<p class="mt-1 text-gray-500">

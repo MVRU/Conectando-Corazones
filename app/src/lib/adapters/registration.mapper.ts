@@ -13,6 +13,7 @@ import type {
 	RegistroCuentaSubmitDetail
 } from '$lib/domain/types/forms/registro';
 import type { RegisterColaboradorInput, RegisterInstitucionInput } from '$lib/stores/auth';
+import { payloadConsentimientosRegistro } from '$lib/domain/types/constants/consentimiento-registro';
 
 interface RegistroMapeado<TInput> {
 	input: TInput;
@@ -110,6 +111,8 @@ export function mapearFormularioColaboradorAInputRegistro(
 		fotoPerfilPendiente: normalizado.archivoFoto ? true : undefined
 	});
 
+	const aceptaLegales = 'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
+
 	const datosRegistro: RegisterColaboradorInput = {
 		email: normalizarEmail(email),
 		password: normalizado.colaborador.password,
@@ -122,7 +125,8 @@ export function mapearFormularioColaboradorAInputRegistro(
 			contactos,
 			tipo_colaborador: normalizado.colaborador.tipo_colaborador
 		},
-		metadata: metadatos
+		metadata: metadatos,
+		...(aceptaLegales ? { consentimientos: payloadConsentimientosRegistro() } : {})
 	};
 
 	return {
@@ -147,6 +151,8 @@ export function mapearFormularioInstitucionAInputRegistro(
 
 	const tipoInstitucion =
 		sanitizarCadenaOpcional(normalizado.institucion.tipo_institucion) ?? 'otro';
+	const aceptaLegales = 'rol' in detalle ? detalle.aceptaTerminosYPrivacidad : false;
+
 	const datosRegistro: RegisterInstitucionInput = {
 		email: normalizarEmail(email),
 		password: normalizado.institucion.password,
@@ -162,7 +168,8 @@ export function mapearFormularioInstitucionAInputRegistro(
 				sanitizarCadena(normalizado.institucion.nombre),
 			tipo_institucion: tipoInstitucion
 		},
-		metadata: metadatos
+		metadata: metadatos,
+		...(aceptaLegales ? { consentimientos: payloadConsentimientosRegistro() } : {})
 	};
 
 	return {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { fade } from 'svelte/transition';
+	import { Check } from 'lucide-svelte';
 
 	export let pasoActual = 1;
 	export let pasosTotales = 4;
@@ -58,20 +59,9 @@
 						}`}
 					>
 						{#if isCompleted}
-							<svg
-								in:fade={{ duration: 200 }}
-								class="h-6 w-6"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2.5"
-									d="M5 13l4 4L19 7"
-								/>
-							</svg>
+							<span in:fade={{ duration: 200 }}>
+								<Check class="h-6 w-6" />
+							</span>
 						{:else}
 							<span>{i + 1}</span>
 						{/if}

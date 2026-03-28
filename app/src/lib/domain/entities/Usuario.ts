@@ -91,4 +91,59 @@ export class Usuario {
 		}
 		return 'Ubicación no disponible';
 	}
+
+	esMayorDeEdad(): boolean {
+		if (!this.fecha_nacimiento) return false;
+		const hoy = new Date();
+		const nacimiento = new Date(this.fecha_nacimiento);
+		let edad = hoy.getFullYear() - nacimiento.getFullYear();
+		const m = hoy.getMonth() - nacimiento.getMonth();
+		if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+			edad--;
+		}
+		return edad >= 18;
+	}
+
+	validarInvariantes(): void {
+		if (!this.username?.trim()) {
+			throw new Error('El username no puede estar vacío.');
+		}
+		if (!this.nombre?.trim()) {
+			throw new Error('El nombre no puede estar vacío.');
+		}
+		if (!this.apellido?.trim()) {
+			throw new Error('El apellido no puede estar vacío.');
+		}
+		if (!this.rol) {
+			throw new Error('El usuario debe tener un rol asignado.');
+		}
+		const estadosValidos = ['activo', 'inactivo'];
+		if (!estadosValidos.includes(this.estado)) {
+			throw new Error(`Estado inválido: "${this.estado}". Debe ser activo o inactivo.`);
+		}
+		if (this.fecha_nacimiento && !this.esMayorDeEdad()) {
+			throw new Error('El usuario debe ser mayor de 18 años.');
+		}
+		if (this.rol === 'institucion' && !this.nombre_legal?.trim()) {
+			throw new Error('Una institución debe tener un nombre legal.');
+		}
+	}
+
+	/**
+	 * Convierte la instancia a un objeto plano (POJO) para serialización en SvelteKit.
+	 * Elimina métodos y asegura que las propiedades anidadas sean serializables.
+	 */
+	toPOJO() {
+		return {
+			...this,
+			fecha_nacimiento: this.fecha_nacimiento ? this.fecha_nacimiento.toISOString() : undefined,
+			created_at: this.created_at ? this.created_at.toISOString() : undefined,
+			categorias_preferidas: this.categorias_preferidas?.map((c) => ({ ...c })),
+			tipos_participacion_preferidas: this.tipos_participacion_preferidas?.map((t) => ({ ...t })),
+			localidad: this.localidad ? { ...this.localidad } : undefined,
+			contactos: this.contactos?.map((c) => ({ ...c })),
+			verificaciones: this.verificaciones?.map((v) => ({ ...v })),
+			consentimientos: this.consentimientos?.map((c) => ({ ...c }))
+		};
+	}
 }

@@ -59,5 +59,6 @@ export function clearBreadcrumbs() {
 }
 
 export const BREADCRUMB_ROUTES = {
-	proyectos: { label: 'Proyectos', href: '/proyectos' }
+	proyectos: { label: 'Proyectos', href: '/proyectos' },
+	personas: { label: 'Personas', href: '/perfil' }
 };
