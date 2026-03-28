@@ -4,7 +4,29 @@
  *    -*- Permite habilitarlas sin alterar la lógica del store.
  */
 
-export const ENABLED_BREADCRUMB_PATHS = ['/projects/:id'];
+export const ENABLED_BREADCRUMB_PATHS = [
+	// Público
+	'/proyectos/:id',
+	'/perfil/:username',
+
+	// Proyectos
+	'/proyectos/:id/editar',
+	'/proyectos/crear',
+
+	// Institución
+	'/institucion/solicitudes-colaboracion',
+	'/institucion/proyectos/:id/aportes',
+	'/institucion/proyectos/:id/aportes/colaborador/:colaboradorId',
+	'/institucion/proyectos/:id/aportes/evidencias/nueva',
+
+	// Colaborador
+	'/colaborador/proyectos/:id/mis-aportes',
+	'/colaborador/proyectos/:id/mis-aportes/nuevo',
+	'/colaborador/proyectos/:id/evaluar-cierre',
+
+	// Mensajes
+	'/mensajes/:proyecto_id'
+];
 
 /**
  * -!- Verifica si la ruta actual está habilitada para mostrar Breadcrumbs.
