@@ -1,9 +1,6 @@
 <!--
-* Componente: GestionColaboraciones  
+* Componente: GestionColaboraciones
 * Descripción: Gestión completa de colaboraciones con diseño responsive mejorado
-
-TODO: corregir este componente, está roto
-
 -->
 
 <script lang="ts">
@@ -184,7 +181,7 @@ TODO: corregir este componente, está roto
 	}
 
 	// Estadísticas del proyecto seleccionado
-	$: colaboraciones = proyectoSeleccionado.colaboraciones || [];
+	$: colaboraciones = proyectoSeleccionado?.colaboraciones || [];
 	$: pendientes = colaboraciones.filter((c) => c.estado === 'pendiente');
 	$: aprobadas = colaboraciones.filter((c) => c.estado === 'aprobada');
 

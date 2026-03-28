@@ -1,9 +1,6 @@
 <!--
 * Página: Solicitudes de colaboracion de una institucion
 * Descripción: Gestión de colaboraciones recibidas para proyectos de la institución
-
-TODO: este componente está roto, no muestra nada
-
 -->
 
 <script lang="ts">
@@ -24,14 +21,12 @@ TODO: este componente está roto, no muestra nada
 
 		if (proyecto) {
 			setBreadcrumbs([
-				{ label: 'Inicio', href: '/' },
 				{ label: 'Proyectos', href: '/proyectos' },
 				{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
 				{ label: 'Solicitudes' }
 			]);
 		} else {
 			setBreadcrumbs([
-				{ label: 'Inicio', href: '/' },
 				{ label: 'Mi Panel', href: '/institucion/mi-panel' },
 				{ label: 'Solicitudes' }
 			]);
