@@ -433,36 +433,57 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					});
 				}
 
-				// 3. Sincronizar participaciones permitidas
-				// Eliminar existentes
+				// 3. Sincronizar participaciones permitidas (upsert)
+				const participacionesEnPayload = proyecto.participacion_permitida || [];
+				const idsPayload = participacionesEnPayload
+					.map((p) => p.id_participacion_permitida)
+					.filter(Boolean) as number[];
+
+				// a. Eliminar las que ya no están en el payload
 				await tx.participacionPermitida.deleteMany({
-					where: { id_proyecto: proyecto.id_proyecto }
+					where: {
+						id_proyecto: proyecto.id_proyecto,
+						...(idsPayload.length > 0
+							? { id_participacion_permitida: { notIn: idsPayload } }
+							: {})
+					}
 				});
 
-				// Crear nuevas
-				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
-					for (const p of proyecto.participacion_permitida) {
-						let tipoId = p.id_tipo_participacion;
+				// b. Procesar cada participación del payload
+				for (const p of participacionesEnPayload) {
+					let tipoId = p.id_tipo_participacion;
 
-						// Si no tiene ID pero sí descripción, buscarlo (caso de creación/edición rápida)
-						if (!tipoId && p.tipo_participacion?.descripcion) {
-							const tipos = await tx.tipoParticipacion.findMany({
-								where: { descripcion: p.tipo_participacion.descripcion }
-							});
-							tipoId = tipos[0]?.id_tipo_participacion;
-						}
+					// Si no tiene ID pero sí descripción, buscarlo
+					if (!tipoId && p.tipo_participacion?.descripcion) {
+						const tipos = await tx.tipoParticipacion.findMany({
+							where: { descripcion: p.tipo_participacion.descripcion }
+						});
+						tipoId = tipos[0]?.id_tipo_participacion;
+					}
 
-						if (tipoId) {
-							await tx.participacionPermitida.create({
-								data: {
-									id_proyecto: proyecto.id_proyecto!,
-									id_tipo_participacion: tipoId,
-									objetivo: p.objetivo,
-									unidad_medida: p.unidad_medida,
-									especie: p.especie
-								}
-							});
-						}
+					if (!tipoId) continue;
+
+					if (p.id_participacion_permitida) {
+						// UPDATE existente — preservar el ID y el campo actual
+						await tx.participacionPermitida.update({
+							where: { id_participacion_permitida: p.id_participacion_permitida },
+							data: {
+								objetivo: p.objetivo,
+								unidad_medida: p.unidad_medida,
+								especie: p.especie ?? null
+							}
+						});
+					} else {
+						// CREATE nueva
+						await tx.participacionPermitida.create({
+							data: {
+								proyecto: { connect: { id_proyecto: proyecto.id_proyecto! } },
+								tipo_participacion: { connect: { id_tipo_participacion: tipoId } },
+								objetivo: p.objetivo,
+								unidad_medida: p.unidad_medida,
+								especie: p.especie ?? null
+							}
+						});
 					}
 				}
 
