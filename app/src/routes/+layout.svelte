@@ -9,14 +9,9 @@
 	import { page } from '$app/stores';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
-	import {
-		authActions,
-		canAccessRoute,
-		isLoading,
-		authStore,
-		unauthenticatedState
-	} from '$lib/stores/auth';
+	import { canAccessRoute, isLoading, authStore, unauthenticatedState } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 	import { goto } from '$app/navigation';
@@ -46,8 +41,8 @@
 		);
 
 		// Inicializar estado global de auth con datos del servidor
-		if (data.user) {
-			const usuarioInstance = new Usuario(data.user);
+		if (data.usuario) {
+			const usuarioInstance = new Usuario(data.usuario);
 			authStore.update((s) => ({
 				...s,
 				usuario: usuarioInstance,
@@ -74,7 +69,7 @@
 		}
 	}
 
-	$: {
+	$: if (browser) {
 		const error = $page.url.searchParams.get('error');
 		if (error === 'already_logged_in') {
 			setTimeout(() => {
@@ -86,6 +81,33 @@
 
 				const newUrl = new URL($page.url);
 				newUrl.searchParams.delete('error');
+				window.history.replaceState({}, '', newUrl.toString());
+			}, 0);
+		}
+
+		const reason = $page.url.searchParams.get('reason');
+		if (reason === 'unauthenticated') {
+			setTimeout(() => {
+				toastStore.show({
+					title: 'Acceso restringido',
+					message: 'Necesitás iniciar sesión para acceder a esa página.',
+					variant: 'warning'
+				});
+
+				const newUrl = new URL($page.url);
+				newUrl.searchParams.delete('reason');
+				window.history.replaceState({}, '', newUrl.toString());
+			}, 0);
+		} else if (reason === 'forbidden') {
+			setTimeout(() => {
+				toastStore.show({
+					title: 'Sin permisos',
+					message: 'No tenés permisos para acceder a esa sección.',
+					variant: 'error'
+				});
+
+				const newUrl = new URL($page.url);
+				newUrl.searchParams.delete('reason');
 				window.history.replaceState({}, '', newUrl.toString());
 			}, 0);
 		}

@@ -2,9 +2,10 @@ name: PR Reminder Bot
 
 on:
   schedule:
-    # 08:00 Argentina (UTC-3 → 11:00 UTC)
-    - cron: "0 11 * * *"
+    - cron: "0 */2 * * *"
   workflow_dispatch:
+  pull_request:
+    types: [labeled]
 
 jobs:
   remind:
@@ -17,8 +18,14 @@ jobs:
     permissions:
       pull-requests: write
       issues: write
+      contents: write
 
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Run PR Reminder
         uses: actions/github-script@v7
         with:
@@ -26,16 +33,16 @@ jobs:
             const { owner, repo } = context.repo;
             const now = new Date();
 
+            const DEMO_DEADLINE = new Date("2026-03-30T16:00:00-03:00");
+            const hoursToDeadline = (DEMO_DEADLINE - now) / (1000 * 60 * 60);
+
+            if (hoursToDeadline <= 0) {
+              console.log("Deadline alcanzado. Bot detenido.");
+              return;
+            }
+
             const CORE_TEAM = JSON.parse(process.env.CORE_TEAM);
             const TARGET_LABEL = process.env.TARGET_LABEL;
-
-            const REMINDER_LABELS = [
-              'reminder-24h',
-              'reminder-48h',
-              'reminder-72h'
-            ];
-
-            console.log(`Iniciando análisis de PRs...`);
 
             const prs = await github.paginate(github.rest.pulls.list, {
               owner,
@@ -44,88 +51,54 @@ jobs:
               per_page: 100
             });
 
-            console.log(`Total PRs encontrados: ${prs.length}`);
-
             for (const pr of prs) {
               if (!pr || pr.draft || pr.user?.type === 'Bot') continue;
 
+              if (pr.state !== "open" || pr.merged) continue;
+
               const prNumber = pr.number;
               const author = pr.user.login.toLowerCase();
-
               const labels = (pr.labels || []).map(l => l.name);
 
+              // ================================
+              // AUTO-READY-FOR-REVIEW
+              // ================================
               if (!labels.includes(TARGET_LABEL)) {
-                console.log(`PR #${prNumber} ignorado (sin ${TARGET_LABEL})`);
-                continue;
-              }
+                console.log(`PR #${prNumber} sin ready-for-review → asignando automáticamente`);
 
-              // ================================
-              // Obtener evento de label (IMPORTANTE)
-              // ================================
-              const events = await github.paginate(
-                github.rest.issues.listEvents,
-                {
-                  owner,
-                  repo,
-                  issue_number: prNumber,
-                  per_page: 100
-                }
-              );
+                try {
+                  await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    labels: [TARGET_LABEL]
+                  });
 
-              const labelEvent = events
-                .filter(e =>
-                  e.event === 'labeled' &&
-                  e.label?.name === TARGET_LABEL
-                )
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    body: `🤖 Este PR estaba abierto y no marcado como \`ready-for-review\`.
 
-              const startDate = labelEvent
-                ? new Date(labelEvent.created_at)
-                : new Date(pr.created_at);
+            Se asume listo para revisión y se activa el flujo automáticamente.`
+                  });
 
-              const diffHours = (now - startDate) / (1000 * 60 * 60);
-
-              console.log(`PR #${prNumber} → ${diffHours.toFixed(2)}h desde ready-for-review`);
-
-              // ================================
-              // LIMPIEZA: si el label es reciente (<24h)
-              // ================================
-              if (diffHours <= 24) {
-                console.log(`PR #${prNumber} fresco (<24h), limpiando labels viejos si existen`);
-
-                for (const label of REMINDER_LABELS) {
-                  if (labels.includes(label)) {
-                    try {
-                      await github.rest.issues.removeLabel({
-                        owner,
-                        repo,
-                        issue_number: prNumber,
-                        name: label
-                      });
-                    } catch (e) {
-                      console.log(`No se pudo remover ${label}: ${e.message}`);
-                    }
-                  }
+                } catch (e) {
+                  console.error(`Error asignando label en PR #${prNumber}: ${e.message}`);
                 }
 
                 continue;
               }
 
               // ================================
-              // Obtener reviews
+              // REVIEWS
               // ================================
               const reviews = await github.paginate(
                 github.rest.pulls.listReviews,
-                {
-                  owner,
-                  repo,
-                  pull_number: prNumber,
-                  per_page: 100
-                }
+                { owner, repo, pull_number: prNumber }
               );
 
               const latestReviewByUser = {};
-
               for (const review of reviews) {
                 if (!review.user) continue;
 
@@ -141,20 +114,24 @@ jobs:
               }
 
               const reviewersWhoCompleted = Object.values(latestReviewByUser)
-                .filter(r =>
-                  r.state === 'APPROVED' ||
-                  r.state === 'CHANGES_REQUESTED' ||
-                  r.state === 'COMMENTED'
-                )
                 .map(r => r.user.login.toLowerCase());
 
-              let pendingReviewers = (pr.requested_reviewers || [])
-                .map(r => r.login)
-                .filter(r =>
-                  !reviewersWhoCompleted.includes(r.toLowerCase())
+              const hasBlockingReview = Object.values(latestReviewByUser)
+                .some(r => r.state === 'CHANGES_REQUESTED');
+
+              const hasMVRUApproval = Object.values(latestReviewByUser)
+                .some(r =>
+                  r.user.login.toLowerCase() === 'mvru' &&
+                  r.state === 'APPROVED'
                 );
 
-              // fallback al core team
+              // ================================
+              // REVIEWERS PENDIENTES
+              // ================================
+              let pendingReviewers = (pr.requested_reviewers || [])
+                .map(r => r.login)
+                .filter(r => !reviewersWhoCompleted.includes(r.toLowerCase()));
+
               if (pendingReviewers.length === 0) {
                 pendingReviewers = CORE_TEAM.filter(u =>
                   u.toLowerCase() !== author &&
@@ -162,108 +139,170 @@ jobs:
                 );
               }
 
-              if (pendingReviewers.length === 0) {
-                console.log(`PR #${prNumber} sin reviewers pendientes`);
-                continue;
-              }
+              if (pendingReviewers.length === 0) continue;
 
-              const reviewersStr = pendingReviewers
-                .map(u => `@${u}`)
-                .join(" ");
+              const reviewersStr = pendingReviewers.map(u => `@${u}`).join(" ");
 
               // ================================
-              // Determinar ventana de tiempo
+              // EVENTO INMEDIATO
               // ================================
-              let body = "";
-              let newLabel = "";
-              let oldLabelToRemove = "";
+              const justLabeled =
+                context.eventName === "pull_request" &&
+                context.payload.action === "labeled" &&
+                context.payload.label?.name === TARGET_LABEL &&
+                context.payload.pull_request?.number === prNumber;
 
-              if (diffHours > 72) {
-                if (labels.includes('reminder-72h')) {
-                  console.log(`PR #${prNumber} ya tiene reminder-72h`);
-                  continue;
-                }
-
-                newLabel = 'reminder-72h';
-                oldLabelToRemove = 'reminder-48h';
-
-                body = `🚨 **Atención ${reviewersStr}: este PR lleva más de 72h esperando review.**
-
-                Esto ya es prioridad. Si no pueden revisarlo, avisen para redistribuir.
-
-                Se marca como \`needs-attention\`.`;
-
-              } else if (diffHours > 48 && diffHours <= 72) {
-                if (labels.includes('reminder-48h')) {
-                  console.log(`PR #${prNumber} ya tiene reminder-48h`);
-                  continue;
-                }
-
-                newLabel = 'reminder-48h';
-                oldLabelToRemove = 'reminder-24h';
-
-                body = `⚠️ **Buenas ${reviewersStr} 👋**
-
-                Este PR ya supera las 48h en revisión. Si hay bloqueos, levántenlos; si no, denle prioridad.`;
-
-              } else if (diffHours > 24 && diffHours <= 48) {
-                if (labels.includes('reminder-24h')) {
-                  console.log(`PR #${prNumber} ya tiene reminder-24h`);
-                  continue;
-                }
-
-                newLabel = 'reminder-24h';
-
-                body = `⏰ **Hola ${reviewersStr} 👋**
-
-                Este PR lleva más de 24h listo para review. Cuando puedan, denle una mirada.`;
-              }
-
-              if (!body) continue;
-
-              // ================================
-              // Escritura (Protegida)
-              // ================================
-              try {
-                // 1. Crear comentario
+              if (justLabeled) {
                 await github.rest.issues.createComment({
                   owner,
                   repo,
                   issue_number: prNumber,
-                  body
+                  body: `🚀 PR listo para review\n\n${reviewersStr}`
                 });
 
-                // 2. Manejar labels
-                const labelsToAdd = [newLabel];
-                if (diffHours > 72 && !labels.includes('needs-attention')) {
-                  labelsToAdd.push('needs-attention');
-                }
+                continue;
+              }
 
-                await github.rest.issues.addLabels({
+              // ================================
+              // COOLDOWN
+              // ================================
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: prNumber }
+              );
+
+              const lastBotComment = comments
+                .filter(c => c.user.type === 'Bot')
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+              const hoursSinceLastComment = lastBotComment
+                ? (now - new Date(lastBotComment.created_at)) / (1000 * 60 * 60)
+                : Infinity;
+
+              // ================================
+              // MERGE STATUS (con retry)
+              // ================================
+              let prDetails = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: prNumber
+              });
+
+              let isMergeable = prDetails.data.mergeable;
+
+              if (isMergeable === null) {
+                console.log(`Recalculando mergeable para PR #${prNumber}...`);
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                const retry = await github.rest.pulls.get({
                   owner,
                   repo,
-                  issue_number: prNumber,
-                  labels: labelsToAdd
+                  pull_number: prNumber
                 });
 
-                if (oldLabelToRemove && labels.includes(oldLabelToRemove)) {
-                  try {
-                    await github.rest.issues.removeLabel({
-                      owner,
-                      repo,
-                      issue_number: prNumber,
-                      name: oldLabelToRemove
-                    });
-                  } catch (e) {
-                    console.log(`Error removiendo label previo en PR #${prNumber}: ${e.message}`);
-                  }
-                }
-
-                console.log(`Reminder ${newLabel} enviado con éxito a PR #${prNumber}`);
-              } catch (error) {
-                console.error(`ERROR FATAL procesando escritura para PR #${prNumber}: ${error.message}`);
-                // No lanzamos el error para que el 'for' continúe con el siguiente PR
+                isMergeable = retry.data.mergeable;
               }
+
+              isMergeable = isMergeable === true;
+
+              // ================================
+              // STATUS CHECKS (CI real)
+              // ================================
+              const checks = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha
+              });
+
+              const checkRuns = checks.data.check_runs;
+
+              const allChecksPassed =
+                checkRuns.length > 0 &&
+                checkRuns.every(
+                  c => c.status === "completed" && c.conclusion === "success"
+                );
+
+              // ================================
+              // AUTO-MERGE CRÍTICO
+              // ================================
+              if (
+                hoursToDeadline < 12 &&
+                hasMVRUApproval &&
+                !hasBlockingReview &&
+                isMergeable &&
+                allChecksPassed
+              ) {
+                try {
+                  await github.rest.issues.createComment({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    body: `🤖 Auto-merge ejecutado
+
+            Condiciones cumplidas:
+            - Sin cambios solicitados
+            - Sin conflictos
+            - CI exitoso
+            - Ventana crítica pre-demo`
+                  });
+
+                  await github.rest.pulls.merge({
+                    owner,
+                    repo,
+                    pull_number: prNumber,
+                    merge_method: "squash"
+                  });
+
+                  console.log(`PR #${prNumber} mergeado automáticamente`);
+                  continue;
+
+                } catch (e) {
+                  console.error(`Error auto-merge PR #${prNumber}: ${e.message}`);
+                }
+              }
+
+              // ================================
+              // RECORDATORIOS
+              // ================================
+              if (hoursSinceLastComment < 6 && hoursToDeadline >= 12) continue;
+
+              let body = "";
+
+              if (hoursToDeadline < 12) {
+                body = `🚨 CRÍTICO
+
+            ${reviewersStr}
+
+            Escalado a @MVRU`;
+              } else if (hoursToDeadline < 36) {
+                body = `⚠️ PRIORITARIO
+
+            ${reviewersStr}`;
+              } else {
+                body = `⏰ Reminder
+
+            ${reviewersStr}`;
+              }
+
+              if (hoursToDeadline < 36 && !labels.includes("needs-focus")) {
+                try {
+                  await github.rest.issues.addLabels({
+                    owner,
+                    repo,
+                    issue_number: prNumber,
+                    labels: ["needs-focus"]
+                  });
+                } catch (e) {
+                  console.error(`Error agregando labels en PR #${prNumber}: ${e.message}`);
+                }
+              }
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body
+              });
             }
 
-            console.log("Ejecución finalizada.");
+            console.log("Finalizado.");

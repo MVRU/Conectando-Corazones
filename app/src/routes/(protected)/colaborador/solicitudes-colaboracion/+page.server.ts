@@ -1,13 +1,12 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { prisma } from '$lib/infrastructure/prisma/client';
 
+/**
+ * Carga de solicitudes de colaboración del colaborador autenticado.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
-
-	if (!usuario || !usuario.id_usuario) {
-		throw redirect(303, '/login');
-	}
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	const colaboraciones = await prisma.colaboracion.findMany({
 		where: {

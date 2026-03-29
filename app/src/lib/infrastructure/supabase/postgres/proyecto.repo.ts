@@ -1,6 +1,7 @@
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
+import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
@@ -610,46 +611,33 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
-	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string): Promise<void> {
+	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string, historialData?: HistorialDeCambios): Promise<void> {
 		const estadoCancelado = await prisma.estado.findUnique({
 			where: { descripcion: 'cancelado' }
 		});
 
 		if (!estadoCancelado) throw new Error('Estado "cancelado" no encontrado');
 
-		const proyectoAnterior = await prisma.proyecto.findUnique({
-			where: { id_proyecto: id },
-			include: { estado: true }
-		});
-
-		if (!proyectoAnterior) throw new Error('Proyecto no encontrado');
-
 		await prisma.$transaction(async (tx) => {
-			// 1. Actualizar el estado del proyecto
 			await tx.proyecto.update({
 				where: { id_proyecto: id },
-				data: {
-					estado_id: estadoCancelado.id_estado
-				}
+				data: { estado_id: estadoCancelado.id_estado }
 			});
 
-			// 2. Registrar en el historial de cambios
-			await tx.historialDeCambios.create({
-				data: {
-					tipo_objeto: 'proyecto',
-					id_objeto: id,
-					accion: 'cancelacion',
-					atributo_afectado: 'estado',
-					valor_anterior: proyectoAnterior.estado?.descripcion || 'desconocido',
-					valor_nuevo: 'cancelado',
-					justificacion:
-						justificacion ||
-						(usuarioEjecutorId === proyectoAnterior.institucion_id
-							? 'Cancelación manual por la institución'
-							: 'Cancelación administrativa por irregularidad'),
-					usuario_id: usuarioEjecutorId
-				}
-			});
+			if (historialData) {
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: historialData.tipo_objeto,
+						id_objeto: historialData.id_objeto,
+						accion: historialData.accion,
+						atributo_afectado: historialData.atributo_afectado,
+						valor_anterior: historialData.valor_anterior,
+						valor_nuevo: historialData.valor_nuevo,
+						justificacion: historialData.justificacion,
+						usuario_id: historialData.usuario_id
+					}
+				});
+			}
 		});
 	}
 

@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearProyecto } from '$lib/domain/use-cases/proyectos/crearProyecto';
 import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 
@@ -39,12 +40,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
 		const data = await request.json();
 
-		// 2. Preparar los repositorios y caso de uso
+		// 2. Verificar que la institución esté verificada para publicar
+		// Las instituciones no verificadas pueden crear borradores pero no publicar
+		if (usuario.rol === 'institucion' && usuario.estado_verificacion !== 'aprobada') {
+			const estadoSolicitado = data.estado || 'en_curso';
+			if (estadoSolicitado === 'en_curso') {
+				return json(
+					{ error: 'Tu institución debe estar verificada para publicar proyectos.' },
+					{ status: 403 }
+				);
+			}
+		}
+
+		// 3. Preparar los repositorios y caso de uso
 		const proyectoRepo = new PostgresProyectoRepository();
 		const usuarioRepo = new PostgresUsuarioRepository();
-		const crearProyecto = new CrearProyecto(proyectoRepo, usuarioRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const crearProyecto = new CrearProyecto(proyectoRepo, usuarioRepo, historialRepo);
 
-		// 3. Ejecutar con el ID de la institución de la sesión (o el provisto si es admin)
+		// 4. Ejecutar con el ID de la institución de la sesión (o el provisto si es admin)
 		const payload: ProyectoCreate = {
 			...data,
 			institucion_id:

@@ -5,13 +5,18 @@ import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabas
 import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { redirect } from '@sveltejs/kit';
+import { AuthGuard } from '$lib/infrastructure/auth/AuthGuard';
 
+/**
+ * Carga de datos para la creación de proyectos.
+ * Requiere rol 'institucion' verificada. La protección base se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 
-	// 1. Protección de ruta (institución solamente)
-	if (!usuario || usuario.rol !== 'institucion') {
-		throw redirect(303, '/');
+	// Verificación adicional de rol (defensa en profundidad)
+	if (usuario.rol !== 'institucion') {
+		throw redirect(303, AuthGuard.getPanelRedirect(usuario));
 	}
 
 	// 2. Instanciar repositorios

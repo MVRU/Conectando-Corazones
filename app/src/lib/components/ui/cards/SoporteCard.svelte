@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
+	import { User, Headphones, ShieldAlert } from 'lucide-svelte';
 
 	export let icon: 'user' | 'support' | 'alert' = 'user';
 	export let title = '';
@@ -15,40 +16,15 @@
 		class="icon-wrapper mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-400/10 transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-400/20 sm:h-16 sm:w-16"
 	>
 		{#if icon === 'user'}
-			<svg
-				class="h-7 w-7 stroke-gray-300 transition-all group-hover:stroke-gray-200 sm:h-8 sm:w-8"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				viewBox="0 0 24 24"
-			>
-				<circle cx="12" cy="8" r="4" />
-				<path d="M4 20c0-3.31 3.58-6 8-6s8 2.69 8 6" />
-			</svg>
+			<User class="h-7 w-7 text-gray-300 transition-all group-hover:text-gray-200 sm:h-8 sm:w-8" />
 		{:else if icon === 'support'}
-			<svg
-				class="h-7 w-7 stroke-blue-400 transition-all group-hover:stroke-blue-300 sm:h-8 sm:w-8"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path d="M4 13v-2a8 8 0 0 1 16 0v2" />
-				<rect x="2" y="13" width="4" height="6" rx="2" />
-				<rect x="18" y="13" width="4" height="6" rx="2" />
-				<path d="M8 21h8" />
-			</svg>
+			<Headphones
+				class="h-7 w-7 text-blue-400 transition-all group-hover:text-blue-300 sm:h-8 sm:w-8"
+			/>
 		{:else if icon === 'alert'}
-			<svg
-				class="h-7 w-7 stroke-red-400 transition-all group-hover:stroke-red-300 sm:h-8 sm:w-8"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke="currentColor"
-				stroke-width="2"
-			>
-				<path d="M12 3l8 4v5c0 5-4 9-8 9s-8-4-8-9V7z" />
-				<path d="M12 8v4m0 4h.01" />
-			</svg>
+			<ShieldAlert
+				class="h-7 w-7 text-red-400 transition-all group-hover:text-red-300 sm:h-8 sm:w-8"
+			/>
 		{/if}
 	</div>
 	<h3 class="mb-1 text-base font-bold text-white sm:text-lg">{title}</h3>

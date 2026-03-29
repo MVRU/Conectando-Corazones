@@ -1,11 +1,3 @@
-<!--
-TODO:
-	- [ ] Conectar formulario con backend
-	- [ ] Agregar validación de campos
-	- [ ] Implementar envío de emails
-	- [ ] Agregar reCAPTCHA para seguridad
--->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -29,8 +21,8 @@ TODO:
 		{ value: 'otro', label: 'Otro' }
 	];
 
-	function handleAsuntoChange(event: CustomEvent) {
-		asunto = event.detail.value;
+	function handleAsuntoChange(option: { value: string; label: string }) {
+		asunto = option.value;
 	}
 
 	async function enviarFormulario(event: Event) {
@@ -55,7 +47,6 @@ TODO:
 
 		enviandoFormulario = true;
 
-		// Simulación de envío
 		setTimeout(() => {
 			enviandoFormulario = false;
 			formularioEnviado = true;
@@ -81,7 +72,6 @@ TODO:
 </svelte:head>
 
 <main class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
-	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h1 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Contacto</h1>
 		<p class="mx-auto mt-8 max-w-2xl text-lg text-gray-500">
@@ -89,12 +79,10 @@ TODO:
 		</p>
 	</div>
 
-	<!-- Contenedor del formulario -->
 	<section class="animate-fade-in-up mx-auto w-full max-w-3xl">
 		<div
 			class="rounded-3xl border border-gray-100 bg-white p-8 shadow-lg ring-1 ring-gray-100 transition hover:shadow-xl sm:p-10"
 		>
-			<!-- Título -->
 			<div class="mb-8 flex items-center justify-center gap-3">
 				<svg
 					class="h-6 w-6 text-blue-500"
@@ -112,7 +100,6 @@ TODO:
 				<h2 class="text-xl font-medium text-gray-800">Envianos un mensaje</h2>
 			</div>
 
-			<!-- Errores -->
 			{#if validationErrors.length > 0}
 				<div class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4">
 					<p class="mb-2 text-sm font-semibold text-red-600">Faltan datos:</p>
@@ -124,7 +111,6 @@ TODO:
 				</div>
 			{/if}
 
-			<!-- Éxito -->
 			{#if formularioEnviado}
 				<div
 					class="mb-6 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-700"
@@ -141,7 +127,7 @@ TODO:
 					Tu mensaje fue enviado. ¡Gracias por contactarte!
 				</div>
 			{:else}
-				<form on:submit={enviarFormulario} class="space-y-6">
+				<form onsubmit={enviarFormulario} class="space-y-6">
 					<div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
 						<div>
 							<label for="nombre" class="block text-sm font-medium text-gray-700">
@@ -182,7 +168,7 @@ TODO:
 							options={opcionesAsunto}
 							bind:value={asunto}
 							placeholder="Seleccioná un asunto"
-							on:change={handleAsuntoChange}
+							onchange={handleAsuntoChange}
 						/>
 					</div>
 

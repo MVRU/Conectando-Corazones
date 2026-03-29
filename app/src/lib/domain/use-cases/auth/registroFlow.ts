@@ -9,6 +9,7 @@ export type RegistroEtapa =
 	| 'verificacion'
 	| 'contacto'
 	| 'direccion'
+	| 'preferencias'
 	| 'exito'
 	| 'error';
 

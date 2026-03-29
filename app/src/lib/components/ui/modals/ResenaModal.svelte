@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import type { Resena } from '$lib/domain/types/Resena';
+	import type { Resena, TipoObjetoResena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	export let mostrar: boolean = false;
@@ -8,6 +8,7 @@
 	export let placeholder: string = 'Compartí tu experiencia...';
 	export let tipoObjeto: string = 'usuario';
 	export let idObjeto: number | undefined = undefined;
+	export let maxCaracteres: number = 500;
 
 	const dispatch = createEventDispatcher<{
 		guardar: Resena;
@@ -28,7 +29,7 @@
 		const resena: Resena = {
 			contenido: nuevaResena.contenido.trim(),
 			puntaje: nuevaResena.puntaje,
-			tipo_objeto: tipoObjeto,
+			tipo_objeto: tipoObjeto as TipoObjetoResena,
 			id_objeto: idObjeto
 		};
 		dispatch('guardar', resena);
@@ -78,7 +79,7 @@
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>
 						<div class="flex items-center gap-1">
-							{#each Array(5).keys() as i}
+							{#each Array(5).keys() as i (i)}
 								<button
 									type="button"
 									on:click={() => (nuevaResena.puntaje = i + 1)}
@@ -106,9 +107,19 @@
 						bind:value={nuevaResena.contenido}
 						rows="4"
 						{placeholder}
+						maxlength={maxCaracteres}
 						class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
 						required
 					></textarea>
+					<div class="mt-1 flex justify-end">
+						<span
+							class="text-xs {nuevaResena.contenido.length >= maxCaracteres
+								? 'font-bold text-red-500'
+								: 'text-gray-500'}"
+						>
+							{nuevaResena.contenido.length} / {maxCaracteres}
+						</span>
+					</div>
 				</div>
 
 				<!-- Botones de acción -->

@@ -40,9 +40,11 @@ export type RegistroCuentaSubmitDetail =
 			rol: 'colaborador';
 			payload: Pick<ColaboradorFormSubmitDetail, 'colaborador' | 'organizacion'>;
 			archivoFoto: File | null;
+			aceptaTerminosYPrivacidad: boolean;
 	  }
 	| {
 			rol: 'institucion';
 			payload: Pick<InstitucionFormSubmitDetail, 'institucion'>;
 			archivoFoto: File | null;
+			aceptaTerminosYPrivacidad: boolean;
 	  };

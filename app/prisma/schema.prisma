@@ -19,10 +19,12 @@ model Archivo {
   usuario_id   Int?
   evidencia_id Int?
   proyecto_id  Int?
+  verificacion_id Int?
 
   usuario   Usuario?   @relation(fields: [usuario_id], references: [id_usuario])
   evidencia Evidencia? @relation(fields: [evidencia_id], references: [id_evidencia])
   proyecto  Proyecto?  @relation(fields: [proyecto_id], references: [id_proyecto])
+  verificacion Verificacion? @relation(fields: [verificacion_id], references: [id_verificacion])
 
   @@map("archivos")
 }
@@ -288,14 +290,18 @@ model Reporte {
 }
 
 model Resena {
-  id_resena   Int      @id @default(autoincrement())
+  id_resena   Int       @id @default(autoincrement())
   tipo_objeto String?
   id_objeto   Int?
   contenido   String
   puntaje     Int
-  aprobado    Boolean?
+  aprobado    Boolean?  @default(true)
   rol         String?
   username    String?
+  autor_id    Int?
+  created_at  DateTime? @default(now())
+
+  autor Usuario? @relation(fields: [autor_id], references: [id_usuario], onDelete: Cascade)
 
   @@unique([username, tipo_objeto, id_objeto]) // Un usuario solo debería opinar una vez por entidad
   @@map("resenas")
@@ -403,6 +409,7 @@ model Usuario {
   reportes_resueltos             Reporte[]                      @relation("AdminResolutor")
   tipos_participacion_preferidos TiposParticipacionPreferidos[]
   verificaciones                 Verificacion[]
+  resenas_escritas               Resena[]
 
   @@map("usuarios")
 }
@@ -416,6 +423,7 @@ model Verificacion {
   usuario_id        Int?
 
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
+  documentos Archivo[]
 
   @@map("verificaciones")
 }
