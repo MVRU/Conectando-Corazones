@@ -4,8 +4,11 @@
 
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	export let estado: number;
-	export let mensaje: string | undefined = undefined;
+
+	let { estado, mensaje = undefined } = $props<{
+		estado: number;
+		mensaje?: string;
+	}>();
 
 	const defaults = {
 		401: {

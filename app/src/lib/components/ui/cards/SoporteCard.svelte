@@ -2,11 +2,19 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { User, Headphones, ShieldAlert } from 'lucide-svelte';
 
-	export let icon: 'user' | 'support' | 'alert' = 'user';
-	export let title = '';
-	export let description = '';
-	export let link = '';
-	export let linkText = '';
+	let {
+		icon = 'user',
+		title = '',
+		description = '',
+		link = '',
+		linkText = ''
+	} = $props<{
+		icon?: 'user' | 'support' | 'alert';
+		title?: string;
+		description?: string;
+		link?: string;
+		linkText?: string;
+	}>();
 </script>
 
 <div
