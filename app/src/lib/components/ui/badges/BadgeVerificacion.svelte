@@ -9,7 +9,9 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 
-	export let estado: EstadoVerificacionDisplay;
+	let { estado } = $props<{
+		estado: EstadoVerificacionDisplay;
+	}>();
 
 	const badgeConfig = {
 		sin_verificacion: {
@@ -39,7 +41,7 @@
 		}
 	};
 
-	$: config = badgeConfig[estado];
+	let config = $derived(badgeConfig[estado]);
 
 	// Textos cortos para mobile
 	const textosMobile = {
