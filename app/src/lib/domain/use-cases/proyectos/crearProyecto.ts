@@ -1,6 +1,7 @@
 import { Proyecto } from '../../entities/Proyecto';
 import type { ProyectoRepository } from '../../repositories/ProyectoRepository';
 import type { UsuarioRepository } from '../../repositories/UsuarioRepository';
+import type { HistorialDeCambiosRepository } from '../../repositories/HistorialDeCambiosRepository';
 import type { ProyectoCreate } from '../../types/dto/ProyectoCreate';
 import { Categoria } from '../../entities/Categoria';
 import { ParticipacionPermitida } from '../../entities/ParticipacionPermitida';
@@ -9,7 +10,8 @@ import { Ubicacion } from '../../entities/Ubicacion';
 export class CrearProyecto {
 	constructor(
 		private proyectoRepo: ProyectoRepository,
-		private usuarioRepo: UsuarioRepository
+		private usuarioRepo: UsuarioRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
 	async execute(data: ProyectoCreate): Promise<Proyecto> {
@@ -85,6 +87,18 @@ export class CrearProyecto {
 			}))
 		});
 
-		return this.proyectoRepo.create(proyecto);
+		const proyectoCreado = await this.proyectoRepo.create(proyecto);
+
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: proyectoCreado.id_proyecto ?? 0,
+			accion: 'creacion',
+			atributo_afectado: 'registro',
+			valor_anterior: '-',
+			valor_nuevo: String(proyectoCreado.id_proyecto ?? 0),
+			usuario_id: data.institucion_id
+		});
+
+		return proyectoCreado;
 	}
 }

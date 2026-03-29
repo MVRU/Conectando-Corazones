@@ -71,8 +71,8 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 			return json({ error: 'No autorizado' }, { status: 403 });
 		}
 
-		const useCase = new AnularColaboracion(colaboracionRepo);
-		await useCase.execute(id);
+		const useCase = new AnularColaboracion(colaboracionRepo, historialRepo);
+		await useCase.execute(id, usuario.id_usuario!);
 
 		return new Response(null, { status: 204 });
 	} catch (error: any) {

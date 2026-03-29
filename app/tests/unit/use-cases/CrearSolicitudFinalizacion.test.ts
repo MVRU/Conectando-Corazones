@@ -3,8 +3,13 @@ import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/Crea
 import type { EvidenciaRepository } from '$lib/domain/repositories/EvidenciaRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { SolicitudFinalizacionRepository } from '$lib/domain/repositories/SolicitudFinalizacionRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 
 describe('CrearSolicitudFinalizacion', () => {
+	const historialRepo = {
+		create: vi.fn().mockResolvedValue({})
+	} as unknown as HistorialDeCambiosRepository;
+
 	it('lanza error si el proyecto no existe', async () => {
 		const proyectoRepo = {
 			findById: vi.fn().mockResolvedValue(null)
@@ -20,7 +25,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [1])).rejects.toThrow('Proyecto no encontrado.');
 	});
@@ -46,7 +56,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [1])).rejects.toThrow(
 			'No tiene permisos para solicitar el cierre de este proyecto.'
@@ -74,7 +89,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [1])).rejects.toThrow(
 			'El proyecto debe estar en estado "pendiente_solicitud_cierre" para solicitar el cierre.'
@@ -102,7 +122,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [1])).rejects.toThrow(
 			'Ya existe una solicitud de finalización pendiente para este proyecto.'
@@ -130,7 +155,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }])
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [1])).rejects.toThrow(
 			'Este proyecto alcanzó el límite de 3 solicitudes de finalización rechazadas.'
@@ -158,7 +188,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [])).rejects.toThrow(
 			'Debe seleccionar al menos una evidencia para respaldar la solicitud.'
@@ -186,7 +221,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }])
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		await expect(useCase.execute(10, 123, [999])).rejects.toThrow(
 			'Alguna de las evidencias seleccionadas no pertenece a este proyecto.'
@@ -223,7 +263,12 @@ describe('CrearSolicitudFinalizacion', () => {
 			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }, { id_evidencia: 2 }])
 		} as unknown as EvidenciaRepository;
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const useCase = new CrearSolicitudFinalizacion(
+			solicitudRepo,
+			proyectoRepo,
+			evidenciaRepo,
+			historialRepo
+		);
 
 		const result = await useCase.execute(idInstitucion, idProyecto, evidenciaIds);
 

@@ -1,30 +1,21 @@
 <script lang="ts">
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
-	import { Plus, MessageSquare, Info } from 'lucide-svelte';
-	import { fly } from 'svelte/transition';
-	import { cubicOut } from 'svelte/easing';
+	import { usuario as usuarioStore } from '$lib/stores/auth';
+	import { MessageSquare, Plus, Info } from 'lucide-svelte';
 
-	let {
-		resenas,
-		esMiPerfil,
-		puedeAgregarResena,
-		yaResenoUsuario,
-		onAgregarResenaClick,
-		limiteMostrar = 4
-	} = $props<{
-		resenas: Resena[];
-		esMiPerfil: boolean;
-		puedeAgregarResena: boolean;
-		yaResenoUsuario: boolean;
-		onAgregarResenaClick: () => void;
-		limiteMostrar?: number;
-	}>();
+	export let resenas: Resena[];
+	export let esMiPerfil: boolean;
+	export let puedeAgregarResena: boolean;
+	export let yaResenoUsuario: boolean;
+	export let onAgregarResenaClick: () => void;
+	export let onEliminar: (resena: Resena) => void = () => {};
+	export let limiteMostrar: number = 4;
 
-	let resenasMostradas = $derived(resenas.slice(0, limiteMostrar));
-	let tieneResenas = $derived(resenas.length > 0);
-	let mostrarBotonAgregar = $derived(!esMiPerfil && puedeAgregarResena && !yaResenoUsuario);
-	let mostrarMensajeNoPermitido = $derived(!esMiPerfil && !yaResenoUsuario && !puedeAgregarResena);
+	$: resenasMostradas = resenas.slice(0, limiteMostrar);
+	$: tieneResenas = resenas.length > 0;
+	$: mostrarBotonAgregar = !esMiPerfil && puedeAgregarResena && !yaResenoUsuario;
+	$: mostrarMensajeNoPermitido = !esMiPerfil && !yaResenoUsuario && !puedeAgregarResena;
 </script>
 
 <section>
@@ -56,10 +47,16 @@
 	</div>
 
 	{#if tieneResenas}
-		<div class="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
-			{#each resenasMostradas as resena, i (resena.id_resena || resena.contenido)}
-				<div in:fly={{ y: 16, duration: 300, delay: i * 80, easing: cubicOut }}>
-					<ResenaCard {resena} />
+		<div class="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
+			{#each resenasMostradas as resena (resena.id_resena || resena.contenido)}
+				<div class="w-full">
+					<ResenaCard
+						{resena}
+						autor={resena.autor}
+						onEliminar={resena.autor_id === $usuarioStore?.id_usuario || $usuarioStore?.rol === 'administrador'
+							? () => onEliminar(resena)
+							: null}
+					/>
 				</div>
 			{/each}
 		</div>

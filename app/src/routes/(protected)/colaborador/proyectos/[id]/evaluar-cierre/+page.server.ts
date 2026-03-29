@@ -4,18 +4,21 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
 import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postgres/evaluacion.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
 const evaluacionRepo = new PostgresEvaluacionRepository();
 const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
+const historialRepo = new PostgresHistorialDeCambiosRepository();
 
 const registrarEvaluacion = new RegistrarEvaluacion(
 	evaluacionRepo,
 	proyectoRepo,
 	colaboracionRepo,
-	solicitudRepo
+	solicitudRepo,
+	historialRepo
 );
 
 /**
@@ -58,15 +61,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let evaluacionUsuario = null;
 	if (solicitud && solicitud.id_solicitud !== undefined && user.id_usuario !== undefined) {
 		evaluacionUsuario = await evaluacionRepo.findBySolicitudAndColaborador(
-			solicitud.id_solicitud,
-			user.id_usuario
+			solicitud.id_solicitud!,
+			user.id_usuario!
 		);
 	}
 
 	// 5. Contadores
 	const totalColaboradores = colaboraciones.filter((c) => c.estado === 'aprobada').length;
-	const votosRealizados = solicitud?.id_solicitud
-		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud)).total
+	const votosRealizados = solicitud
+		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud!)).total
 		: 0;
 
 	return {

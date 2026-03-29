@@ -2,8 +2,9 @@ import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgres/evidencia.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
-import { fail } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 
 const ESTADOS_SOLICITUD_ACTIVA = new Set(['', 'pendiente', 'en_revision']);
 
@@ -21,7 +22,12 @@ function esSolicitudActiva(estado: string | null | undefined): boolean {
  * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
  */
 export const load: PageServerLoad = async ({ locals, url }) => {
-	const user = locals.usuario!; // Garantizado por AuthGuard en hooks
+	const user = locals.usuario;
+
+	if (!user) throw redirect(302, '/iniciar-sesion');
+	if (user.rol !== 'institucion') {
+		throw redirect(303, '/mi-panel');
+	}
 
 	const proyectoRepo = new PostgresProyectoRepository();
 	const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
@@ -97,7 +103,9 @@ export const actions: Actions = {
 		const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 		const evidenciaRepo = new PostgresEvidenciaRepository();
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+ 
+		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo, historialRepo);
 
 		try {
 			if (typeof user.id_usuario !== 'number') {

@@ -7,9 +7,12 @@ import { ListarColaboracionesPorProyecto } from '$lib/domain/use-cases/colaborac
 import { ListarColaboracionesPorColaborador } from '$lib/domain/use-cases/colaboraciones/ListarColaboracionesPorColaborador';
 import { CrearColaboracion } from '$lib/domain/use-cases/colaboraciones/CrearColaboracion';
 
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
+ 
 const repo = new PostgresColaboracionRepository();
 const proyectoRepo = new PostgresProyectoRepository();
 const usuarioRepo = new PostgresUsuarioRepository();
+const historialRepo = new PostgresHistorialDeCambiosRepository();
 
 export const GET: RequestHandler = async ({ url }) => {
 	try {
@@ -51,7 +54,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Se requiere proyecto_id' }, { status: 400 });
 		}
 
-		const useCase = new CrearColaboracion(repo, proyectoRepo, usuarioRepo);
+		const useCase = new CrearColaboracion(repo, proyectoRepo, usuarioRepo, historialRepo);
 		const colaboracion = await useCase.execute({
 			proyecto_id: data.proyecto_id,
 			colaborador_id: usuario.id_usuario!,

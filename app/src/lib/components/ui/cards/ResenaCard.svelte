@@ -21,20 +21,44 @@
 	export let autor: UsuarioCompleto | undefined = undefined;
 
 	function obtenerNombreAutor(usuario: UsuarioCompleto): string {
-		if (usuario.rol === 'institucion') {
-			return (usuario as Institucion).nombre_legal || usuario.nombre;
-		} else if (usuario.rol === 'colaborador') {
-			if ('razon_social' in usuario) {
-				return (usuario as Organizacion).razon_social;
-			}
-			return `${usuario.nombre} ${usuario.apellido}`;
+		if ('nombre_legal' in usuario && usuario.nombre_legal) {
+			return usuario.nombre_legal as string;
+		} else if ('razon_social' in usuario && usuario.razon_social) {
+			return usuario.razon_social as string;
 		}
-		return `${usuario.nombre} ${usuario.apellido}`;
+
+		const partes = [];
+		if (usuario.nombre) partes.push(usuario.nombre);
+		if (usuario.apellido) partes.push(usuario.apellido);
+
+		if (partes.length > 0) return partes.join(' ');
+
+		return usuario.username || 'Usuario Desconocido';
 	}
 
 	$: nombreMostrar = autor ? obtenerNombreAutor(autor) : resena.username;
-	$: roleLabel = autor?.rol === 'institucion' ? 'Institución' : 'Colaborador';
-	$: roleClass = autor ? obtenerColorRol(autor.rol) : 'bg-gray-100 text-gray-800';
+
+	function obtenerEtiquetaRol(r: string | undefined): string {
+		if (!r) return 'Colaborador';
+		switch (r.toLowerCase()) {
+			case 'institucion':
+				return 'Institución';
+			case 'organizacion':
+				return 'Organización';
+			case 'unipersonal':
+				return 'Voluntario';
+			case 'admin':
+			case 'administrador':
+				return 'Administración';
+			default:
+				return 'Colaborador';
+		}
+	}
+
+	$: roleLabel = autor ? obtenerEtiquetaRol(autor.rol) : obtenerEtiquetaRol(resena.rol);
+	$: roleClass = autor
+		? obtenerColorRol(autor.rol || '')
+		: obtenerColorRol(resena.rol || '') || 'bg-gray-100 text-gray-800';
 </script>
 
 <div
@@ -44,10 +68,16 @@
 		: ''} flex h-full flex-col"
 >
 	<div class="mb-3 flex items-center gap-1">
-		{#each Array(5).keys() as i}
-			<Star
-				class="h-4 w-4 {i < resena.puntaje ? 'fill-amber-400 text-amber-400' : 'text-gray-200'}"
-			/>
+		{#each Array(5).keys() as i (i)}
+			<svg
+				class="h-4 w-4 {i < resena.puntaje ? 'text-amber-400' : 'text-gray-200'}"
+				fill="currentColor"
+				viewBox="0 0 20 20"
+			>
+				<path
+					d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.955a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.955c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.197-1.54-1.118l1.287-3.955a1 1 0 00-.364-1.118l-3.385-2.46c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.955z"
+				/>
+			</svg>
 		{/each}
 	</div>
 

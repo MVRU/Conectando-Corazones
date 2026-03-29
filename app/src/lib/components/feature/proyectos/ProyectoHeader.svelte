@@ -7,18 +7,25 @@
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { pushState } from '$app/navigation';
 	import { clickOutside } from '$lib/utils/util-click-outside';
-	import { haReportado } from '$lib/utils/util-reportes';
+	import { haReportado, limpiarReporteLog } from '$lib/utils/util-reportes';
 	import { usuario } from '$lib/stores/auth';
 
 	export let proyecto: Proyecto;
 	export let esAdministrador: boolean = false;
 	export let esCreador: boolean = false;
+	export let tieneReportePendiente: boolean = false;
 
 	let mostrarMenuReportar = false;
-	let yaReporto = false;
 
+	// Sincronizar log local con SSR: si el SSR dice que no hay pendiente, limpiamos el log local.
+	$: if ($usuario && proyecto?.id_proyecto && tieneReportePendiente === false) {
+		limpiarReporteLog($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
+	}
+
+	let yaReporto = false;
 	$: if ($usuario && proyecto?.id_proyecto) {
-		yaReporto = haReportado($usuario.id_usuario, proyecto.id_proyecto);
+		const reportoLocal = haReportado($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
+		yaReporto = tieneReportePendiente || reportoLocal;
 	}
 
 	function reportarIrregularidad() {

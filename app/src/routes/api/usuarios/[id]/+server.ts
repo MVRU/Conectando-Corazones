@@ -64,7 +64,11 @@ export const PUT: RequestHandler = async ({ params, request, locals }) => {
 };
 
 export const DELETE: RequestHandler = async ({ params, locals }) => {
-	if (locals.usuario?.rol !== 'administrador') {
+	if (!locals.usuario) {
+		return json({ error: 'No autenticado' }, { status: 401 });
+	}
+
+	if (locals.usuario.rol !== 'administrador') {
 		return json({ error: 'No autorizado' }, { status: 403 });
 	}
 

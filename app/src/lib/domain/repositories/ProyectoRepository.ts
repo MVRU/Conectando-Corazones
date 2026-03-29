@@ -1,6 +1,7 @@
 import type { Proyecto } from '../entities/Proyecto';
 import type { EstadoDescripcion } from '../types/Estado';
 import type { ProyectoSearchCriteria } from '../types/dto/ProyectoSearchCriteria';
+import type { HistorialDeCambios } from '../types/HistorialDeCambios';
 
 export interface ProyectoRepository {
 	findAll(): Promise<Proyecto[]>;
@@ -12,6 +13,6 @@ export interface ProyectoRepository {
 	create(proyecto: Proyecto): Promise<Proyecto>;
 	update(proyecto: Proyecto): Promise<Proyecto>;
 	updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto>;
-	cancel(id: number, usuarioEjecutorId: number, justificacion?: string): Promise<void>;
+	cancel(id: number, usuarioEjecutorId: number, justificacion?: string, historialData?: HistorialDeCambios): Promise<void>;
 	countSolicitudesRechazadas(id: number): Promise<number>;
 }

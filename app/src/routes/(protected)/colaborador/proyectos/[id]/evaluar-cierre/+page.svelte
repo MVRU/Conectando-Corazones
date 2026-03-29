@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { invalidateAll } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
 	import type { PageData } from './$types';
 	import {
@@ -45,11 +46,12 @@
 
 	const MIN_CARACTERES_JUSTIFICACION = 20;
 
-	function handleReportSuccess() {
+	async function handleReportSuccess() {
 		toastStore.show({
 			message: 'Reporte enviado correctamente. El equipo de administración lo revisará.',
 			variant: 'success'
 		});
+		await invalidateAll();
 		showReportModal = false;
 	}
 

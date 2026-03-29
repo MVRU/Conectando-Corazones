@@ -5,6 +5,8 @@ import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProy
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
 import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
+import { PostgresResenaRepository } from '$lib/infrastructure/supabase/postgres/resena.repo';
+import { ObtenerResenasPorObjeto } from '$lib/domain/use-cases/resenas/ObtenerResenasPorObjeto';
 import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
@@ -22,6 +24,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		const obtenerUsuario = new ObtenerUsuario(usuarioRepo);
 		const proyectoRepo = new PostgresProyectoRepository();
 		const categoriaRepo = new PostgresCategoriaRepository();
+		const resenaRepo = new PostgresResenaRepository();
 
 		// 1. Obtener Usuario
 		const perfilUsuario = await obtenerUsuario.porUsername(username);
@@ -40,8 +43,12 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 			proyectoContextoId ? proyectoRepo.findById(Number(proyectoContextoId)) : Promise.resolve(null)
 		]);
 
-		// 3. Obtener Reseñas (Backend no implementado aún)
-		const resenas: any[] = [];
+		// 3. Obtener Reseñas
+		const obtenerResenas = new ObtenerResenasPorObjeto(resenaRepo);
+		if (!perfilUsuario.id_usuario) {
+			throw error(500, 'Usuario sin ID válido');
+		}
+		const resenas = await obtenerResenas.execute('usuario', perfilUsuario.id_usuario);
 
 		// 4. Verificar si es mi perfil
 		const esMiPerfil = locals.usuario?.id_usuario === perfilUsuario.id_usuario;
@@ -60,7 +67,7 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		console.error('Error loading profile:', err);
 
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
+		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
 			throw err;
 		}
 
