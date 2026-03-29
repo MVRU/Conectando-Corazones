@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		usuario as usuarioStore,
-		isAuthenticated,
-		authActions,
-		isAdmin
-	} from '$lib/stores/auth';
+	import { usuario as usuarioStore, isAuthenticated, authActions, isAdmin } from '$lib/stores/auth';
 	import { invalidateAll } from '$app/navigation';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
@@ -42,7 +37,14 @@
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 	import { Settings, Flag, ShieldAlert, BarChart3 } from 'lucide-svelte';
 
-	let { perfilUsuario, esMiPerfil, proyectos = [], resenas = [], categorias = [], tiposParticipacion = [] } = $props<{
+	let {
+		perfilUsuario,
+		esMiPerfil,
+		proyectos = [],
+		resenas = [],
+		categorias = [],
+		tiposParticipacion = []
+	} = $props<{
 		perfilUsuario: UsuarioCompleto;
 		esMiPerfil: boolean;
 		proyectos: Proyecto[];
@@ -59,16 +61,18 @@
 		return () => clearTimeout(t);
 	});
 
-	let puedeVerContactosPerfil = $derived(puedeVerContactos($usuarioStore, perfilUsuario, proyectos));
+	let puedeVerContactosPerfil = $derived(
+		puedeVerContactos($usuarioStore, perfilUsuario, proyectos)
+	);
 	let puedeResenar = $derived(puedeDejarResena($usuarioStore, perfilUsuario, proyectos));
 	let proyectosUsuario = $derived(proyectos);
 
 	const resenasStore = writable<Resena[]>(resenas);
 
-	let resenaAEliminar: Resena | null = null;
-	let mostrarConfirmarEliminar = false;
+	let resenaAEliminar: Resena | null = $state(null);
+	let mostrarConfirmarEliminar = $state(false);
 
-	$: yaResenoUsuario =
+	let yaResenoUsuario = $derived(
 		$usuarioStore && !esMiPerfil
 			? $resenasStore.some(
 					(r) =>
@@ -76,7 +80,8 @@
 						r.id_objeto === perfilUsuario.id_usuario &&
 						r.tipo_objeto === 'usuario'
 				)
-			: false;
+			: false
+	);
 
 	let reseñasUsuario = $derived(
 		$resenasStore.filter(
@@ -84,8 +89,12 @@
 		)
 	);
 
-	let verificacionesUsuario = $derived((perfilUsuario as Record<string, unknown>).verificaciones as unknown[] || []);
-	let estadoVerificacion = $derived(determinarEstadoVerificacion(verificacionesUsuario as never, perfilUsuario));
+	let verificacionesUsuario = $derived(
+		((perfilUsuario as Record<string, unknown>).verificaciones as unknown[]) || []
+	);
+	let estadoVerificacion = $derived(
+		determinarEstadoVerificacion(verificacionesUsuario as never, perfilUsuario)
+	);
 
 	const modales = usePerfilModales();
 	const edicion = usePerfilEdicion();
@@ -97,15 +106,25 @@
 		if (!$usuarioStore || !$usuarioStore.id_usuario) return;
 		guardando = true;
 		try {
-			await authActions.actualizarPerfil($usuarioStore.id_usuario, parcial as Parameters<typeof authActions.actualizarPerfil>[1]);
+			await authActions.actualizarPerfil(
+				$usuarioStore.id_usuario,
+				parcial as Parameters<typeof authActions.actualizarPerfil>[1]
+			);
 			await invalidateAll();
-			toastStore.show({ variant: 'success', title: 'Perfil actualizado', message: 'Los cambios se guardaron correctamente.' });
+			toastStore.show({
+				variant: 'success',
+				title: 'Perfil actualizado',
+				message: 'Los cambios se guardaron correctamente.'
+			});
 			if (cerrarModal) cerrarModal();
 		} catch (error) {
 			toastStore.show({
 				variant: 'error',
 				title: 'Error al actualizar',
-				message: error instanceof Error ? error.message : 'No se pudieron guardar los cambios en el perfil.'
+				message:
+					error instanceof Error
+						? error.message
+						: 'No se pudieron guardar los cambios en el perfil.'
 			});
 		} finally {
 			guardando = false;
@@ -180,7 +199,7 @@
 			toastStore.show({
 				variant: 'success',
 				title: 'Reseña publicada correctamente',
-				message: '¡Gracias por tu Reseña! Tu aporte ayuda a mejorar la comunidad.'
+				message: '¡Gracias por tu reseña! Tu aporte ayuda a mejorar la comunidad.'
 			});
 			modales.cerrar('resena');
 		} catch (err: any) {
@@ -230,11 +249,15 @@
 	const abrirModalTiposParticipacion = crearAbrirModal('tiposParticipacion');
 
 	function handleGuardarCategorias(event: CustomEvent<Categoria[]>) {
-		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () => modales.cerrar('categorias'));
+		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () =>
+			modales.cerrar('categorias')
+		);
 	}
 
 	function handleGuardarTiposParticipacion(event: CustomEvent<TipoParticipacion[]>) {
-		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () => modales.cerrar('tiposParticipacion'));
+		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () =>
+			modales.cerrar('tiposParticipacion')
+		);
 	}
 
 	let mostrarModalReporte = $state(false);
@@ -254,10 +277,15 @@
 
 <main class="min-h-screen bg-gray-50">
 	<!-- Fondo decorativo absoluto (no afecta el flujo del contenido) -->
-	<div class="pointer-events-none absolute inset-x-0 top-0 h-36 overflow-hidden sm:h-44" aria-hidden="true">
-		<div class="absolute inset-0 bg-gradient-to-br from-[#007FFF]/20 via-[#42A1FF]/10 to-transparent"></div>
+	<div
+		class="pointer-events-none absolute inset-x-0 top-0 h-36 overflow-hidden sm:h-44"
+		aria-hidden="true"
+	>
+		<div
+			class="absolute inset-0 bg-gradient-to-br from-[#007FFF]/20 via-[#42A1FF]/10 to-transparent"
+		></div>
 		<div class="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-[#007FFF]/8 blur-3xl"></div>
-		<div class="absolute -right-10 top-0 h-56 w-56 rounded-full bg-[#42A1FF]/12 blur-2xl"></div>
+		<div class="absolute top-0 -right-10 h-56 w-56 rounded-full bg-[#42A1FF]/12 blur-2xl"></div>
 	</div>
 
 	<div class="relative mx-auto max-w-7xl px-4 pt-6 sm:px-6 sm:pt-8 lg:px-8">
@@ -296,12 +324,10 @@
 				class="mb-6 grid grid-cols-3 gap-3 sm:gap-4"
 				in:fly={{ y: 20, duration: 400, delay: 100, easing: cubicOut }}
 			>
-				{#each [
-					{ label: 'Proyectos', valor: statsUsuario.proyectos, color: 'text-[#007FFF]' },
-					{ label: 'Categorías', valor: statsUsuario.categorias, color: 'text-emerald-600' },
-					{ label: 'Reseñas', valor: statsUsuario.resenas, color: 'text-amber-600' }
-				] as stat (stat.label)}
-					<div class="rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md">
+				{#each [{ label: 'Proyectos', valor: statsUsuario.proyectos, color: 'text-[#007FFF]' }, { label: 'Categorías', valor: statsUsuario.categorias, color: 'text-emerald-600' }, { label: 'Reseñas', valor: statsUsuario.resenas, color: 'text-amber-600' }] as stat (stat.label)}
+					<div
+						class="rounded-2xl border border-gray-100 bg-white p-4 text-center shadow-sm transition-shadow hover:shadow-md"
+					>
 						<p class="text-2xl font-bold {stat.color} sm:text-3xl">{stat.valor}</p>
 						<p class="mt-0.5 text-xs font-medium text-gray-500 sm:text-sm">{stat.label}</p>
 					</div>
@@ -315,7 +341,8 @@
 				{#each tabs as tab (tab.id)}
 					<button
 						onclick={() => (tabActiva = tab.id)}
-						class="flex-1 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 sm:text-sm {tabActiva === tab.id
+						class="flex-1 rounded-lg px-3 py-2 text-xs font-medium whitespace-nowrap transition-all duration-200 sm:text-sm {tabActiva ===
+						tab.id
 							? 'bg-[#007FFF] text-white shadow-sm'
 							: 'text-gray-500 hover:bg-gray-100 hover:text-gray-800'}"
 					>
@@ -327,9 +354,12 @@
 
 		<!-- Layout de dos columnas en desktop -->
 		<div class="flex flex-col gap-6 pb-12 lg:flex-row lg:items-start lg:gap-8">
-
 			<!-- Sidebar izquierdo (desktop) / Tab "info" (mobile) -->
-			<div class="lg:sticky lg:top-6 lg:w-80 lg:shrink-0 {tabActiva !== 'info' ? 'hidden lg:block' : ''}">
+			<div
+				class="lg:sticky lg:top-6 lg:w-80 lg:shrink-0 {tabActiva !== 'info'
+					? 'hidden lg:block'
+					: ''}"
+			>
 				{#if montado}
 					<div in:fly={{ x: -20, duration: 400, delay: 150, easing: cubicOut }}>
 						<div class="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
@@ -340,12 +370,18 @@
 								</h3>
 							</div>
 							<div class="p-5">
-								<PerfilSeccionCategorias {perfilUsuario} {esMiPerfil} onEditarClick={abrirModalCategorias} />
+								<PerfilSeccionCategorias
+									{perfilUsuario}
+									{esMiPerfil}
+									onEditarClick={abrirModalCategorias}
+								/>
 							</div>
 						</div>
 
 						{#if perfilUsuario.rol === 'colaborador'}
-							<div class="mt-4 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+							<div
+								class="mt-4 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+							>
 								<div class="p-5">
 									<PerfilSeccionTiposParticipacion
 										{perfilUsuario}
@@ -356,25 +392,31 @@
 							</div>
 						{/if}
 
-		<PerfilSeccionResenas
-			resenas={reseñasUsuario}
-			{esMiPerfil}
-			puedeAgregarResena={puedeResenar}
-			{yaResenoUsuario}
-			onAgregarResenaClick={abrirModalResena}
-			onEliminar={solicitarEliminarResena}
-		/>
-
-		<!-- Reportar perfil -->
-		{#if !esMiPerfil && $isAuthenticated}
-			<div class="mt-12 border-t border-gray-200 pt-8 pb-4 text-center">
-				{#if $isAdmin}
-					<div class="mb-4 text-center">
-						<span
-							class="inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-gray-500/10 ring-inset"
-						>
-							ID: {perfilUsuario.id_usuario}
-						</span>
+						<!-- Acciones de perfil (reportar, auditar) -->
+						{#if !esMiPerfil && $isAuthenticated}
+							<div class="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+								{#if $isAdmin}
+									<p class="mb-2 text-center text-xs text-gray-400">
+										ID: {perfilUsuario.id_usuario}
+									</p>
+									<button
+										onclick={() => console.log('Auditar perfil:', perfilUsuario.username)}
+										class="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700 transition-all duration-200 hover:bg-amber-100"
+									>
+										<ShieldAlert class="h-4 w-4" />
+										Auditar perfil
+									</button>
+								{:else}
+									<button
+										onclick={() => (mostrarModalReporte = true)}
+										class="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-[#DE1C38] transition-all duration-200 hover:bg-red-100"
+									>
+										<Flag class="h-4 w-4" />
+										Reportar perfil
+									</button>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -382,30 +424,43 @@
 			<!-- Contenido principal derecho -->
 			<div class="min-w-0 flex-1">
 				{#if montado}
-
-
 					<!-- Proyectos -->
 					<div
-						class="{tabActiva !== 'proyectos' && tabActiva !== 'info' ? 'hidden' : tabActiva === 'info' ? 'hidden lg:block' : ''}"
+						class={tabActiva !== 'proyectos' && tabActiva !== 'info'
+							? 'hidden'
+							: tabActiva === 'info'
+								? 'hidden lg:block'
+								: ''}
 						in:fly={{ y: 20, duration: 350, delay: 200, easing: cubicOut }}
 					>
 						<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-							<PerfilSeccionProyectos proyectos={proyectosUsuario} rol={perfilUsuario.rol} {estadoVerificacion} />
+							<PerfilSeccionProyectos
+								proyectos={proyectosUsuario}
+								rol={perfilUsuario.rol}
+								{estadoVerificacion}
+							/>
 						</div>
 					</div>
 
 					<!-- Reseñas -->
 					<div
-						class="{tabActiva !== 'resenas' && tabActiva !== 'info' ? 'hidden' : tabActiva === 'info' ? 'hidden lg:block' : ''}"
+						class={tabActiva !== 'resenas' && tabActiva !== 'info'
+							? 'hidden'
+							: tabActiva === 'info'
+								? 'hidden lg:block'
+								: ''}
 						in:fly={{ y: 20, duration: 350, delay: 300, easing: cubicOut }}
 					>
-						<div class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:mt-6">
+						<div
+							class="mt-6 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6 lg:mt-6"
+						>
 							<PerfilSeccionResenas
 								resenas={reseñasUsuario}
 								{esMiPerfil}
 								puedeAgregarResena={puedeResenar}
 								{yaResenoUsuario}
 								onAgregarResenaClick={abrirModalResena}
+								onEliminar={solicitarEliminarResena}
 							/>
 						</div>
 					</div>
@@ -451,11 +506,9 @@
 {/if}
 
 {#if mostrarConfirmarEliminar}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={cancelarEliminarResena}
+		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
@@ -466,8 +519,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-eliminar-resena-titulo"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown|stopPropagation
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="flex flex-col gap-3 px-6 pt-6 pb-4 text-center">
 				<h3
@@ -483,14 +536,14 @@
 				<button
 					type="button"
 					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={cancelarEliminarResena}
+					onclick={cancelarEliminarResena}
 				>
 					Cancelar
 				</button>
 				<button
 					type="button"
 					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
-					on:click={confirmarEliminarResena}
+					onclick={confirmarEliminarResena}
 				>
 					Eliminar
 				</button>

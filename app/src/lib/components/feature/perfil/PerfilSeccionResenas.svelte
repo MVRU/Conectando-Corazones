@@ -2,6 +2,7 @@
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import { usuario as usuarioStore } from '$lib/stores/auth';
+	import { MessageSquare, Plus, Info } from 'lucide-svelte';
 
 	export let resenas: Resena[];
 	export let esMiPerfil: boolean;

@@ -1,15 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { isAuthenticated, isLoading } from '$lib/stores/auth';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
 	import type { PageData } from './$types';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
-	export let data: PageData;
+	let { data } = $props<{ data: PageData }>();
 
-	$: ({
+	const {
 		perfilUsuario,
 		proyectos,
 		resenas,
@@ -17,15 +16,17 @@
 		tiposParticipacion,
 		esMiPerfil,
 		proyectoContexto
-	} = data);
+	} = $derived.by(() => data);
 
 	// Redirección si es mi perfil y no está autenticado
-	$: if (esMiPerfil && !$isLoading && !$isAuthenticated) {
-		goto('/iniciar-sesion');
-	}
+	$effect(() => {
+		if (esMiPerfil && !$isLoading && !$isAuthenticated) {
+			goto('/iniciar-sesion');
+		}
+	});
 
 	// Breadcrumbs contextuales
-	$: {
+	$effect(() => {
 		const from = $page.url.searchParams.get('from');
 		const nombrePerfil = perfilUsuario
 			? perfilUsuario.rol === 'institucion'
@@ -65,12 +66,6 @@
 			]);
 		} else {
 			setBreadcrumbs([BREADCRUMB_ROUTES.personas, { label: nombrePerfil }]);
-		}
-	}
-
-	onMount(() => {
-		if (esMiPerfil && !$isAuthenticated && !$isLoading) {
-			goto('/iniciar-sesion');
 		}
 	});
 </script>
