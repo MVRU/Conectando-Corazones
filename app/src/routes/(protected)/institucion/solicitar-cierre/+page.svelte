@@ -11,10 +11,8 @@
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
 
-	// Props
 	export let data: PageData;
 
-	// Estado derivado de la URL
 	$: proyectoSeleccionado = $page.url.searchParams.get('proyecto') || '';
 
 	let enviandoSolicitud = false;
@@ -22,7 +20,6 @@
 	let mounted = false;
 	let objetivosExpandidos: Record<number, boolean> = {};
 
-	// Estado de acceso
 	let accesoDenegado = false;
 	let mensajeErrorAcceso = '';
 
@@ -30,9 +27,7 @@
 		mounted = true;
 	});
 
-	// Protección de ruta y validación de usuario
 	$: if (browser && mounted && !$isLoading) {
-		// Resetear estados de error en cada evaluación para evitar falsos positivos persistentes
 		accesoDenegado = false;
 		mensajeErrorAcceso = '';
 
@@ -51,7 +46,6 @@
 				accesoDenegado = true;
 				mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
 			} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
-				// Validación de institucion creadora usando variable derivada
 				accesoDenegado = true;
 				mensajeErrorAcceso =
 					'Este proyecto no pertenece a tu institución. Solo podés solicitar el cierre de tus propios proyectos.';
@@ -59,7 +53,6 @@
 		}
 	}
 
-	// Checklist items
 	let checks = {
 		evidenciasSuficientes: false,
 		archivosLegibles: false,
@@ -68,39 +61,30 @@
 		conformidadRevision: false
 	};
 
-	// Proyectos PENDIENTES DE CIERRE de la institución actual y VERIFICADA
 	$: proyectosDisponibles = data.proyectosDisponibles.map((p: any) => ({
 		value: String(p.id_proyecto),
 		label: p.titulo
 	}));
 
-	// Validar si tiene proyectos disponibles para mostrar alerta específica
 	$: sinProyectosPendientes =
 		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0;
 
-	// Obtener proyecto completo seleccionado
 	$: proyectoActual = data.proyectoActual;
 
-	// Verificar si ya existe una solicitud de finalización pendiente
 	$: solicitudPendienteExistente = data.solicitudPendiente;
 
-	// Variable booleana derivada para validaciones
 	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
 
-	//  Validar si es el dueño del proyecto
 	$: proyectoPerteneceAInstitucion = proyectoActual
 		? proyectoActual.institucion_id === $usuario?.id_usuario
 		: false;
 
-	// Contar solicitudes rechazadas calculadas en server
 	$: solicitudesRechazadas = data.solicitudesRechazadas;
 
 	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
 	$: muchosRechazos = solicitudesRechazadas.length >= 3;
-	$: formularioBloqueadoPorAuditoria =
-		muchosRechazos && proyectoActual?.estado === 'en_auditoria';
+	$: formularioBloqueadoPorAuditoria = muchosRechazos && proyectoActual?.estado === 'en_auditoria';
 
-	// Evidencias del proyecto seleccionado agrupadas por objetivo
 	$: evidenciasPorObjetivo = proyectoActual
 		? proyectoActual.participacion_permitida?.map((objetivo: any) => {
 				const evidenciasObjetivo = (data.evidencias || []).filter(
@@ -124,11 +108,10 @@
 		(item: any) => item.evidencias.length > 0
 	);
 
-	// Validar que todos los checks estén marcados
 	$: todosLosChecksCompletos = Object.values(checks).every((check) => check === true);
 
-	function handleProyectoChange(event: CustomEvent) {
-		const nuevoId = event.detail.value;
+	function handleProyectoChange(option: { value: string; label: string }) {
+		const nuevoId = option.value;
 		const url = new URL(window.location.href);
 		if (nuevoId) {
 			url.searchParams.set('proyecto', nuevoId);
@@ -141,7 +124,6 @@
 	async function enviarSolicitud(event: Event) {
 		event.preventDefault();
 
-		// Validación antes de enviar usando variable derivada
 		if (!proyectoPerteneceAInstitucion) {
 			console.error('[SEGURIDAD] Intento de solicitar cierre de proyecto ajeno');
 			return;
@@ -152,7 +134,6 @@
 			return;
 		}
 
-		// Validación previa: no continuar si falta algún requisito o ya existe solicitud pendiente
 		if (
 			!proyectoSeleccionado ||
 			!todosLosChecksCompletos ||
@@ -224,7 +205,6 @@
 
 <main class="min-h-screen bg-slate-50 px-4 py-8 font-sans sm:px-6 lg:px-8">
 	<div class="mx-auto max-w-6xl space-y-8">
-		<!-- Encabezado -->
 		<header class="text-center">
 			<h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
 				Solicitar cierre de proyecto
@@ -248,7 +228,6 @@
 		</header>
 
 		{#if accesoDenegado}
-			<!-- Alerta de Acceso Denegado -->
 			<div class="rounded-2xl border border-red-200 bg-white p-12 text-center shadow-sm" in:fade>
 				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-red-100 p-3">
 					<ShieldAlert class="h-8 w-8 text-red-600" />
@@ -263,7 +242,6 @@
 				</button>
 			</div>
 		{:else if sinProyectosPendientes}
-			<!-- Mensaje: Sin proyectos pendientes -->
 			<div class="rounded-2xl border border-blue-200 bg-white p-12 text-center shadow-sm" in:fade>
 				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-blue-100 p-3">
 					<CheckCircle class="h-8 w-8 text-blue-600" />
@@ -293,11 +271,8 @@
 				</p>
 			</div>
 		{:else}
-			<!-- Grid Layout -->
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-				<!-- Main Content: Selection and Evidences -->
 				<div class="space-y-6 lg:col-span-2">
-					<!-- Project Selection -->
 					<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
 						<label for="proyecto" class="mb-2 block text-sm font-semibold text-slate-700">
 							Seleccioná el proyecto <span class="text-red-500">*</span>
@@ -310,7 +285,7 @@
 									options={proyectosDisponibles}
 									value={proyectoSeleccionado}
 									placeholder="Elegí un proyecto para solicitar cierre"
-									on:change={handleProyectoChange}
+									onchange={handleProyectoChange}
 									required
 								/>
 							</div>
@@ -382,7 +357,6 @@
 						{/if}
 					</div>
 
-					<!-- Evidences List -->
 					{#if proyectoSeleccionado && evidenciasPorObjetivo.length > 0}
 						<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 							<div class="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
@@ -433,7 +407,6 @@
 					{/if}
 				</div>
 
-				<!-- Sidebar: Checklist -->
 				<aside class="space-y-6 lg:col-span-1">
 					{#if proyectoSeleccionado}
 						<div class="sticky top-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -472,7 +445,6 @@
 								</p>
 							{/if}
 
-							<!-- Botón Reportar Irregularidad -->
 							<div class="mt-8 border-t border-slate-100 pt-6">
 								<button
 									type="button"

@@ -3,10 +3,10 @@ import type { LocalidadRepository } from '$lib/domain/repositories/LocalidadRepo
 import type { Localidad } from '$lib/domain/entities/Localidad';
 
 export class GetLocalidadByCodigoPostal {
-    constructor(private readonly repository: LocalidadRepository) { }
+	constructor(private readonly repository: LocalidadRepository) {}
 
-    async execute(codigoPostal: string): Promise<Localidad | null> {
-        if (!codigoPostal || codigoPostal.trim() === '') return null;
-        return this.repository.findByCodigoPostal(codigoPostal);
-    }
+	async execute(codigoPostal: string): Promise<Localidad | null> {
+		if (!codigoPostal || codigoPostal.trim() === '') return null;
+		return this.repository.findByCodigoPostal(codigoPostal);
+	}
 }

@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { ComponentType } from 'svelte';
-	import Input from '$lib/components/ui/Input.svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import FotoPerfilUploader from '$lib/components/feature/registro/FotoPerfilUploader.svelte';
@@ -53,21 +52,30 @@
 		REGISTRO_STORAGE_KEY,
 		REGISTRO_STORAGE_TTL_MS,
 		REGISTRO_STORAGE_VERSION
-	} from '\$lib/domain/types/constants/registro';
+	} from '$lib/domain/types/constants/registro';
 	import { toastStore } from '$lib/stores/toast';
-	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
-	const dispatch = createEventDispatcher<{
-		submit: RegistroCuentaSubmitDetail;
-		invalid: { campos: string[] };
-		processing: { value: boolean };
-		back: void;
-		selectMethod: { metodo: MetodoAcceso };
-	}>();
+	interface Props {
+		rol?: RegistroRol | null;
+		procesando?: boolean;
+		errorGeneral?: string | null;
+		onsubmit: (detail: RegistroCuentaSubmitDetail) => void;
+		oninvalid?: (detail: { campos: string[] }) => void;
+		onprocessing?: (detail: { value: boolean }) => void;
+		onselectMethod?: (detail: { metodo: MetodoAcceso }) => void;
+		onchange?: () => void;
+	}
 
-	export let rol: RegistroRol = 'institucion';
-	export let procesando = false;
-	export let errorGeneral: string | null = null;
+	let {
+		rol = 'institucion',
+		procesando = false,
+		errorGeneral = null,
+		onsubmit,
+		oninvalid,
+		onprocessing,
+		onselectMethod,
+		onchange
+	}: Props = $props();
 
 	const opcionesTipoColaborador: Array<{
 		value: TipoColaborador;
@@ -180,28 +188,6 @@
 		}
 	];
 
-	const iconosFederados: Record<IdProveedorFederado, string> = {
-		google: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" preserveAspectRatio="xMidYMid" viewBox="0 0 256 262" id="google">
-		<path fill="#4285F4" d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"></path>
-		<path fill="#34A853" d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"></path>
-		<path fill="#FBBC05" d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"></path>
-		<path fill="#EB4335" d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"></path>
-		</svg>`,
-		facebook: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 1024 1024" id="facebook">
-		<path fill="#1877f2" d="M1024,512C1024,229.23016,794.76978,0,512,0S0,229.23016,0,512c0,255.554,187.231,467.37012,432,505.77777V660H302V512H432V399.2C432,270.87982,508.43854,200,625.38922,200,681.40765,200,740,210,740,210V336H675.43713C611.83508,336,592,375.46667,592,415.95728V512H734L711.3,660H592v357.77777C836.769,979.37012,1024,767.554,1024,512Z"></path>
-		<path fill="#fff" d="M711.3,660,734,512H592V415.95728C592,375.46667,611.83508,336,675.43713,336H740V210s-58.59235-10-114.61078-10C508.43854,200,432,270.87982,432,399.2V512H302V660H432v357.77777a517.39619,517.39619,0,0,0,160,0V660Z"></path>
-		</svg>`,
-		microsoft: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" xml:space="preserve" viewBox="0 0 16 16" id="microsoft">
-		<path fill="#4CAF50" d="M8.5 7.5H16v-7a.5.5 0 0 0-.5-.5h-7v7.5z"></path>
-		<path fill="#F44336" d="M7.5 7.5V0h-7a.5.5 0 0 0-.5.5v7h7.5z"></path>
-		<path fill="#2196F3" d="M7.5 8.5H0v7a.5.5 0 0 0 .5.5h7V8.5z"></path>
-		<path fill="#FFC107" d="M8.5 8.5V16h7a.5.5 0 0 0 .5-.5v-7H8.5z"></path>
-		</svg>`,
-		apple: `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 128 128" id="apple">
-		<path d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"></path>
-		</svg>`
-	};
-
 	type InstantaneaFormulario = {
 		version: number;
 		timestamp: number;
@@ -237,6 +223,7 @@
 		con_fines_de_lucro: string;
 		nombre_legal: string;
 		tipo_institucion: string;
+		terminos_privacidad: string;
 	}
 
 	type MetodoAcceso = 'manual' | 'federado';
@@ -253,7 +240,8 @@
 		razon_social: '',
 		con_fines_de_lucro: '',
 		nombre_legal: '',
-		tipo_institucion: ''
+		tipo_institucion: '',
+		terminos_privacidad: ''
 	});
 
 	const TIPO_INSTITUCION_POR_DEFECTO = 'escuela';
@@ -274,49 +262,55 @@
 		},
 		{
 			id: 'federado',
-			label: 'Iniciar con Google, Microsoft, Apple o Facebook',
+			label: 'Registrarme con Google, Microsoft, Apple o Facebook',
 			description: 'Muy pronto vas a poder ingresar con tus cuentas favoritas de manera segura.',
 			chip: 'Próximamente',
 			disponible: false
 		}
 	];
 
-	let storageDisponible = false;
-	let persistenciaHabilitada = false;
-	let puedeReiniciarPorCambioRol = false;
-	let notificacionGuardadoMostrada = false;
-	let mostrarModalPassword = false;
-	let modalPassword = '';
-	let modalPasswordConfirm = '';
-	let modalPasswordError = '';
-	let modalPasswordConfirmError = '';
-	let username = '';
-	let email = '';
-	let password = '';
-	let passwordConfirm = '';
-	let nombrePersona = '';
-	let apellidoPersona = '';
-	let fechaNacimiento: Date | null = null;
-	let urlFoto = '';
-	let razonSocial = '';
-	let conFinesDeLucroSeleccion: '' | 'true' | 'false' = '';
-	let nombreLegal = '';
-	let tipoInstitucionSeleccion = TIPO_INSTITUCION_POR_DEFECTO;
-	let tipoInstitucionPersonalizado = '';
-	let tipoColaborador: TipoColaborador = 'unipersonal';
-	let archivoFoto: File | null = null;
-	let intentoEnvio = false;
-	let errores: ErroresFormulario = crearErroresIniciales();
-	let tieneErrores = false;
-	let pasoFormulario: 'credenciales' | 'detalles' = 'credenciales';
-	let formularioRef: HTMLFormElement | null = null;
-	let mostrarPassword = false;
-	let mostrarPasswordConfirm = false;
-	let mostrarModalPasswordTexto = false;
-	let mostrarModalPasswordConfirmTexto = false;
-	let metodoAcceso: MetodoAcceso | null = null;
+	let storageDisponible = $state(false);
+	let persistenciaHabilitada = $state(false);
+	let puedeReiniciarPorCambioRol = $state(false);
+	let notificacionGuardadoMostrada = $state(false);
+	let mostrarModalPassword = $state(false);
+	let modalPassword = $state('');
+	let modalPasswordConfirm = $state('');
+	let modalPasswordError = $state('');
+	let modalPasswordConfirmError = $state('');
+	let username = $state('');
+	let email = $state('');
+	let password = $state('');
+	let passwordConfirm = $state('');
+	let nombrePersona = $state('');
+	let apellidoPersona = $state('');
+	let fechaNacimiento: Date | null = $state(null);
+	let urlFoto = $state('');
+	let razonSocial = $state('');
+	let conFinesDeLucroSeleccion: '' | 'true' | 'false' = $state('');
+	let nombreLegal = $state('');
+	let tipoInstitucionSeleccion = $state(TIPO_INSTITUCION_POR_DEFECTO);
+	let tipoInstitucionPersonalizado = $state('');
+	let tipoColaborador: TipoColaborador = $state('unipersonal');
+	let archivoFoto: File | null = $state(null);
+	let aceptaTerminosYPrivacidad = $state(false);
+	let intentoEnvio = $state(false);
 
-	let rolInterno: RegistroRol = rol;
+	let pasoFormulario: 'credenciales' | 'detalles' = $state('credenciales');
+	let formularioRef: HTMLFormElement | null = $state(null);
+	let mostrarPassword = $state(false);
+	let mostrarModalPasswordTexto = $state(false);
+	let mostrarModalPasswordConfirmTexto = $state(false);
+	let metodoAcceso: MetodoAcceso | null = $state(null);
+	let verificando = $state(false);
+	let verificandoUsername = $state(false);
+	let verificandoEmail = $state(false);
+	let erroresDisponibilidad = $state({
+		username: '',
+		email: ''
+	});
+
+	let rolInterno: RegistroRol | null = $state(rol);
 
 	onMount(() => {
 		if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {
@@ -332,59 +326,52 @@
 		persistenciaHabilitada = true;
 	});
 
-	$: if (rol !== rolInterno) {
-		rolInterno = rol;
-		if (puedeReiniciarPorCambioRol) {
-			resetFormulario();
+	$effect(() => {
+		if (rol !== rolInterno) {
+			rolInterno = rol ?? 'institucion';
+			if (puedeReiniciarPorCambioRol) {
+				resetFormulario();
+			}
 		}
-	}
+	});
 
-	$: if (persistenciaHabilitada) {
-		if (formularioTieneDatosPersistibles()) {
-			guardarFormularioPersistido({
-				version: VERSION_INSTANTANEA_FORMULARIO,
-				timestamp: Date.now(),
-				rol: rolInterno,
-				pasoFormulario,
-				metodoAcceso,
-				username,
-				email,
-				nombrePersona,
-				apellidoPersona,
-				fechaNacimiento: fechaNacimiento ? fechaNacimiento.toISOString() : null,
-				urlFoto,
-				razonSocial,
-				conFinesDeLucroSeleccion,
-				nombreLegal,
-				tipoInstitucionSeleccion,
-				tipoInstitucionPersonalizado,
-				tipoColaborador
-			});
-			notificarGuardarTemporal();
-		} else {
-			limpiarFormularioPersistido();
-			notificacionGuardadoMostrada = false;
+	$effect(() => {
+		if (persistenciaHabilitada) {
+			if (formularioTieneDatosPersistibles()) {
+				guardarFormularioPersistido({
+					version: VERSION_INSTANTANEA_FORMULARIO,
+					timestamp: Date.now(),
+					rol: rolInterno as RegistroRol,
+					pasoFormulario,
+					metodoAcceso,
+					username,
+					email,
+					nombrePersona,
+					apellidoPersona,
+					fechaNacimiento: fechaNacimiento ? fechaNacimiento.toISOString() : null,
+					urlFoto,
+					razonSocial,
+					conFinesDeLucroSeleccion,
+					nombreLegal,
+					tipoInstitucionSeleccion,
+					tipoInstitucionPersonalizado,
+					tipoColaborador
+				});
+				notificarGuardarTemporal();
+			} else {
+				limpiarFormularioPersistido();
+				notificacionGuardadoMostrada = false;
+			}
 		}
-	}
+	});
 
-	let ultimoProcesando: boolean | null = null;
-	$: if (ultimoProcesando !== procesando) {
-		ultimoProcesando = procesando;
-		dispatch('processing', { value: procesando });
-	}
-
-	const metadatosRol = {
-		institucion: {
-			titulo: 'Registro de institución',
-			descripcion:
-				'Ingresá los datos del representante legal y la información básica de la institución.'
-		},
-		colaborador: {
-			titulo: 'Registro de colaborador/a',
-			descripcion:
-				'Elegí si actuás como persona física o representando a una organización y completá tus datos.'
+	let ultimoProcesando: boolean | null = $state(null);
+	$effect(() => {
+		if (ultimoProcesando !== procesando) {
+			ultimoProcesando = procesando;
+			onprocessing?.({ value: procesando });
 		}
-	} satisfies Record<RegistroRol, { titulo: string; descripcion: string }>;
+	});
 
 	interface DatosValidacionBase {
 		username: string;
@@ -396,6 +383,8 @@
 		fechaNacimiento: Date | null;
 		urlFoto: string;
 		archivoFoto: File | null;
+		aceptaTerminosYPrivacidad: boolean;
+		validarLegales: boolean;
 	}
 
 	interface DatosValidacionColaborador extends DatosValidacionBase {
@@ -410,7 +399,7 @@
 		tipoInstitucionPersonalizado: string;
 	}
 
-	$: errores =
+	let erroresCalculados = $derived(
 		rolInterno === 'colaborador'
 			? calcularErroresColaborador({
 					username,
@@ -424,7 +413,9 @@
 					archivoFoto,
 					tipoColaborador,
 					razonSocial,
-					conFinesDeLucro: conFinesDeLucroSeleccion
+					conFinesDeLucro: conFinesDeLucroSeleccion,
+					aceptaTerminosYPrivacidad,
+					validarLegales: (pasoFormulario as string) === 'detalles'
 				})
 			: calcularErroresInstitucion({
 					username,
@@ -438,9 +429,45 @@
 					archivoFoto,
 					nombreLegal,
 					tipoInstitucionSeleccion,
-					tipoInstitucionPersonalizado
-				});
-	$: tieneErrores = Object.values(errores).some((error) => error);
+					tipoInstitucionPersonalizado,
+					aceptaTerminosYPrivacidad,
+					validarLegales: (pasoFormulario as string) === 'detalles'
+				})
+	);
+
+	let errores = $derived({
+		...erroresCalculados,
+		username: erroresCalculados.username || erroresDisponibilidad.username,
+		email: erroresCalculados.email || erroresDisponibilidad.email
+	});
+
+	let tieneErrores = $derived(Object.values(errores).some((v) => v !== ''));
+
+	$effect(() => {
+		void username;
+		erroresDisponibilidad.username = '';
+	});
+
+	$effect(() => {
+		void email;
+		erroresDisponibilidad.email = '';
+	});
+
+	$effect(() => {
+		void username;
+		void email;
+		void password;
+		void passwordConfirm;
+		void nombrePersona;
+		void apellidoPersona;
+		void fechaNacimiento;
+		void nombreLegal;
+		void razonSocial;
+		void tipoInstitucionSeleccion;
+		void tipoColaborador;
+		void aceptaTerminosYPrivacidad;
+		onchange?.();
+	});
 
 	function resetFormulario() {
 		username = '';
@@ -458,6 +485,7 @@
 		tipoInstitucionPersonalizado = '';
 		tipoColaborador = 'unipersonal';
 		archivoFoto = null;
+		aceptaTerminosYPrivacidad = false;
 		intentoEnvio = false;
 		errores = crearErroresIniciales();
 		pasoFormulario = 'credenciales';
@@ -468,6 +496,7 @@
 		modalPasswordConfirm = '';
 		modalPasswordError = '';
 		modalPasswordConfirmError = '';
+		erroresDisponibilidad = { username: '', email: '' };
 		limpiarFormularioPersistido();
 	}
 
@@ -642,7 +671,7 @@
 		metodoAcceso = metodo;
 		intentoEnvio = false;
 		pasoFormulario = 'credenciales';
-		dispatch('selectMethod', { metodo });
+		onselectMethod?.({ metodo });
 	}
 
 	function manejarKeydownMetodo(event: KeyboardEvent, metodoId: MetodoAcceso, disponible: boolean) {
@@ -696,25 +725,132 @@
 		elemento?.focus();
 	}
 
-	function continuarConDetalles() {
+	async function verificarDisponibilidad(campo: 'username' | 'email', valor: string) {
+		if (!valor) return;
+
+		const erroresLocales =
+			rolInterno === 'colaborador'
+				? calcularErroresColaborador({
+						username,
+						email,
+						password,
+						passwordConfirm,
+						nombre: nombrePersona,
+						apellido: apellidoPersona,
+						fechaNacimiento,
+						urlFoto,
+						archivoFoto,
+						tipoColaborador,
+						razonSocial,
+						conFinesDeLucro: conFinesDeLucroSeleccion,
+						aceptaTerminosYPrivacidad,
+						validarLegales: false
+					})
+				: calcularErroresInstitucion({
+						username,
+						email,
+						password,
+						passwordConfirm,
+						nombre: nombrePersona,
+						apellido: apellidoPersona,
+						fechaNacimiento,
+						urlFoto,
+						archivoFoto,
+						nombreLegal,
+						tipoInstitucionSeleccion,
+						tipoInstitucionPersonalizado,
+						aceptaTerminosYPrivacidad,
+						validarLegales: false
+					});
+
+		if (erroresLocales[campo]) {
+			erroresDisponibilidad[campo] = '';
+			return;
+		}
+
+		if (campo === 'username') verificandoUsername = true;
+		if (campo === 'email') verificandoEmail = true;
+
+		try {
+			const res = await fetch('/api/usuarios/verificar-disponibilidad', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ [campo]: valor })
+			});
+
+			const data = await res.json();
+
+			if (data.errores && data.errores[campo]) {
+				erroresDisponibilidad[campo] = data.errores[campo];
+			} else {
+				erroresDisponibilidad[campo] = '';
+			}
+		} catch (error) {
+			console.error(`Error verificando disponibilidad de ${campo}:`, error);
+		} finally {
+			if (campo === 'username') verificandoUsername = false;
+			if (campo === 'email') verificandoEmail = false;
+		}
+	}
+
+	async function continuarConDetalles() {
+		intentoEnvio = true;
 		if (metodoAcceso !== 'manual') {
 			seleccionarMetodoAcceso('manual');
 			return;
 		}
 
-		intentoEnvio = true;
 		const camposCredenciales: Array<keyof ErroresFormulario> = [
 			'username',
 			'email',
 			'password',
 			'passwordConfirm'
 		];
+
 		const camposConErrores = camposCredenciales.filter((campo) => errores[campo]);
 
 		if (camposConErrores.length) {
 			enfocarPrimerCampoConError();
-			dispatch('invalid', { campos: camposConErrores });
+			oninvalid?.({ campos: camposConErrores });
 			return;
+		}
+
+		verificando = true;
+
+		try {
+			const res = await fetch('/api/usuarios/verificar-disponibilidad', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, email })
+			});
+
+			const data = await res.json();
+
+			if (data.errores) {
+				if (data.errores.username) {
+					erroresDisponibilidad.username = data.errores.username;
+				}
+				if (data.errores.email) {
+					erroresDisponibilidad.email = data.errores.email;
+				}
+
+				if (Object.keys(data.errores).length > 0) {
+					enfocarPrimerCampoConError();
+					return;
+				}
+			} else {
+				erroresDisponibilidad.username = '';
+				erroresDisponibilidad.email = '';
+			}
+		} catch (error) {
+			console.error('Error verificando disponibilidad:', error);
+			toastStore.show({
+				variant: 'warning',
+				message: 'No pudimos verificar la disponibilidad. Intenta nuevamente.'
+			});
+			return;
+		} finally {
+			verificando = false;
 		}
 
 		intentoEnvio = false;
@@ -723,14 +859,11 @@
 
 	function volverAPasoCredenciales() {
 		pasoFormulario = 'credenciales';
+		intentoEnvio = false;
 		mostrarModalPassword = false;
 		if (typeof window !== 'undefined') {
 			window.scrollTo({ top: 0, behavior: 'smooth' });
 		}
-	}
-
-	function solicitarRetroceso() {
-		dispatch('back');
 	}
 
 	function calcularErroresBase({
@@ -742,7 +875,9 @@
 		apellido,
 		fechaNacimiento,
 		urlFoto,
-		archivoFoto
+		archivoFoto,
+		aceptaTerminosYPrivacidad,
+		validarLegales
 	}: DatosValidacionBase): Pick<
 		ErroresFormulario,
 		| 'username'
@@ -753,6 +888,7 @@
 		| 'apellido'
 		| 'fecha_nacimiento'
 		| 'url_foto'
+		| 'terminos_privacidad'
 	> {
 		const emailNormalizado = email.trim();
 		const usernameNormalizado = username.trim();
@@ -763,31 +899,12 @@
 		return {
 			username: !usernameNormalizado
 				? MENSAJES_ERROR.obligatorio
-				: /*
 				: !validarUsername(usernameNormalizado)
-					? MENSAJES_ERROR.usuarioInvalido
-					: // TODO: Reemplazar validación contra mockUsuarios por llamada a API real
-						Object.values(mockUsuarios).some((u) => u.username === usernameNormalizado)
-						? `El nombre de usuario "${usernameNormalizado}" ya está en uso`
-						: '',
-				*/
-					!validarUsername(usernameNormalizado)
 					? MENSAJES_ERROR.usuarioInvalido
 					: '',
 			email: !emailNormalizado
 				? MENSAJES_ERROR.obligatorio
-				: /*
 				: !validarCorreo(emailNormalizado)
-					? MENSAJES_ERROR.correoInvalido
-					: Object.values(mockUsuarios).some((u) =>
-								u.contactos?.some(
-									(c) => c.tipo_contacto === 'email' && c.valor === emailNormalizado
-								)
-						  )
-						? `El correo electrónico "${emailNormalizado}" ya está en uso`
-						: '',
-				*/
-					!validarCorreo(emailNormalizado)
 					? MENSAJES_ERROR.correoInvalido
 					: '',
 			password: !password
@@ -825,6 +942,10 @@
 					? validarUrl(urlNormalizada)
 						? ''
 						: MENSAJES_ERROR.urlInvalida
+					: '',
+			terminos_privacidad:
+				validarLegales && !aceptaTerminosYPrivacidad
+					? 'Debés aceptar los términos y condiciones y la política de privacidad para continuar.'
 					: ''
 		};
 	}
@@ -917,7 +1038,7 @@
 			const campos = Object.entries(errores)
 				.filter(([, valor]) => valor)
 				.map(([campo]) => campo);
-			dispatch('invalid', { campos });
+			oninvalid?.({ campos });
 			if (
 				campos.length &&
 				campos.every((campo) => campo === 'password' || campo === 'passwordConfirm')
@@ -948,13 +1069,14 @@
 				con_fines_de_lucro: normalizarSeleccionBoolean(conFinesDeLucroSeleccion)
 			};
 
-			dispatch('submit', {
+			onsubmit({
 				rol: 'colaborador',
 				payload: {
 					colaborador,
 					organizacion
 				},
-				archivoFoto
+				archivoFoto,
+				aceptaTerminosYPrivacidad
 			});
 			return;
 		}
@@ -977,10 +1099,11 @@
 			tipo_institucion: tipoInstitucion
 		};
 
-		dispatch('submit', {
+		onsubmit({
 			rol: 'institucion',
 			payload: { institucion },
-			archivoFoto
+			archivoFoto,
+			aceptaTerminosYPrivacidad
 		});
 	}
 
@@ -1002,18 +1125,11 @@
 </script>
 
 <form
-	class="mx-auto max-w-4xl space-y-10"
-	on:submit={manejarSubmit}
+	class="mx-auto w-full space-y-10"
+	onsubmit={manejarSubmit}
 	bind:this={formularioRef}
 	novalidate
 >
-	<header class="space-y-3 text-center">
-		<h2 class="text-3xl font-extrabold tracking-tight text-[rgb(var(--base-color))]">
-			{metadatosRol[rolInterno].titulo}
-		</h2>
-		<p class="mx-auto max-w-2xl text-base text-gray-600">{metadatosRol[rolInterno].descripcion}</p>
-	</header>
-
 	{#if errorGeneral}
 		<div
 			class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
@@ -1043,7 +1159,7 @@
 				aria-label="Seleccioná el método de registro"
 				class="grid gap-4 md:grid-cols-2"
 			>
-				{#each metodosRegistro as metodo}
+				{#each metodosRegistro as metodo (metodo.id)}
 					<button
 						type="button"
 						data-metodo={metodo.id}
@@ -1051,8 +1167,8 @@
 						aria-checked={metodoAcceso === metodo.id}
 						aria-disabled={!metodo.disponible}
 						tabindex={obtenerTabIndexMetodo(metodo.id, metodo.disponible)}
-						on:click={() => seleccionarMetodoAcceso(metodo.id)}
-						on:keydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
+						onclick={() => seleccionarMetodoAcceso(metodo.id)}
+						onkeydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
 						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none ${
 							metodo.disponible
 								? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]'
@@ -1120,7 +1236,7 @@
 
 		{#if metodoAcceso === null}
 			<div class="rounded-2xl bg-slate-50/80 p-8 text-center text-slate-500">
-				Seleccioná una de las opciones superiores para continuar con el formulario.
+				Seleccioná una de las opciones para continuar con el formulario.
 			</div>
 		{:else if metodoAcceso === 'federado'}
 			<section class="rounded-2xl bg-white/95 p-6 ring-1 ring-slate-100/80">
@@ -1138,20 +1254,93 @@
 				</header>
 
 				<div class="grid gap-4 md:grid-cols-2">
-					{#each proveedoresFederados as proveedor}
+					{#snippet IconoFederado(id: IdProveedorFederado)}
+						{#if id === 'google'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								preserveAspectRatio="xMidYMid"
+								viewBox="0 0 256 262"
+								id="google"
+							>
+								<path
+									fill="#4285F4"
+									d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+								></path>
+								<path
+									fill="#34A853"
+									d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+								></path>
+								<path
+									fill="#FBBC05"
+									d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+								></path>
+								<path
+									fill="#EB4335"
+									d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+								></path>
+							</svg>
+						{:else if id === 'facebook'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								viewBox="0 0 1024 1024"
+								id="facebook"
+							>
+								<path
+									fill="#1877f2"
+									d="M1024,512C1024,229.23016,794.76978,0,512,0S0,229.23016,0,512c0,255.554,187.231,467.37012,432,505.77777V660H302V512H432V399.2C432,270.87982,508.43854,200,625.38922,200,681.40765,200,740,210,740,210V336H675.43713C611.83508,336,592,375.46667,592,415.95728V512H734L711.3,660H592v357.77777C836.769,979.37012,1024,767.554,1024,512Z"
+								></path>
+								<path
+									fill="#fff"
+									d="M711.3,660,734,512H592V415.95728C592,375.46667,611.83508,336,675.43713,336H740V210s-58.59235-10-114.61078-10C508.43854,200,432,270.87982,432,399.2V512H302V660H432v357.77777a517.39619,517.39619,0,0,0,160,0V660Z"
+								></path>
+							</svg>
+						{:else if id === 'microsoft'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								xml:space="preserve"
+								viewBox="0 0 16 16"
+								id="microsoft"
+							>
+								<path fill="#4CAF50" d="M8.5 7.5H16v-7a.5.5 0 0 0-.5-.5h-7v7.5z"></path>
+								<path fill="#F44336" d="M7.5 7.5V0h-7a.5.5 0 0 0-.5.5v7h7.5z"></path>
+								<path fill="#2196F3" d="M7.5 8.5H0v7a.5.5 0 0 0 .5.5h7V8.5z"></path>
+								<path fill="#FFC107" d="M8.5 8.5V16h7a.5.5 0 0 0 .5-.5v-7H8.5z"></path>
+							</svg>
+						{:else if id === 'apple'}
+							<svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="30"
+								height="30"
+								viewBox="0 0 128 128"
+								id="apple"
+							>
+								<path
+									d="M97.905 67.885c.174 18.8 16.494 25.057 16.674 25.137-.138.44-2.607 8.916-8.597 17.669-5.178 7.568-10.553 15.108-19.018 15.266-8.318.152-10.993-4.934-20.504-4.934-9.508 0-12.479 4.776-20.354 5.086-8.172.31-14.395-8.185-19.616-15.724-10.668-15.424-18.821-43.585-7.874-62.594 5.438-9.44 15.158-15.417 25.707-15.571 8.024-.153 15.598 5.398 20.503 5.398 4.902 0 14.106-6.676 23.782-5.696 4.051.169 15.421 1.636 22.722 12.324-.587.365-13.566 7.921-13.425 23.639m-15.633-46.166c4.338-5.251 7.258-12.563 6.462-19.836-6.254.251-13.816 4.167-18.301 9.416-4.02 4.647-7.54 12.087-6.591 19.216 6.971.54 14.091-3.542 18.43-8.796"
+								></path>
+							</svg>
+						{/if}
+					{/snippet}
+
+					{#each proveedoresFederados as proveedor (proveedor.id)}
 						<button
 							type="button"
 							class={`group flex flex-col gap-4 rounded-2xl border p-5 text-left transition-all duration-300 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]/30 focus-visible:ring-offset-2 ${proveedor.cardClass} cursor-not-allowed`}
 							aria-disabled="true"
 							title="Integración disponible pronto"
-							on:click={() => manejarRegistroProveedor(proveedor.id)}
+							onclick={() => manejarRegistroProveedor(proveedor.id)}
 						>
 							<div class="flex items-center gap-4">
 								<span
 									class={`flex h-11 w-11 items-center justify-center rounded-xl border border-white/50  ${proveedor.iconClass}`}
 									aria-hidden="true"
 								>
-									{@html iconosFederados[proveedor.id]}
+									{@render IconoFederado(proveedor.id)}
 								</span>
 								<div>
 									<p class="text-base font-semibold text-slate-900">
@@ -1185,7 +1374,7 @@
 					<button
 						type="button"
 						class="font-semibold text-[rgb(var(--color-primary))] underline-offset-2 hover:underline"
-						on:click={() => seleccionarMetodoAcceso('manual')}
+						onclick={() => seleccionarMetodoAcceso('manual')}
 					>
 						Crear cuenta manualmente
 					</button>
@@ -1206,6 +1395,24 @@
 				</div>
 
 				<div class="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+					{#snippet togglePassword(isConfirm = false)}
+						<button
+							type="button"
+							class="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 transition-colors hover:text-[rgb(var(--color-primary))]"
+							onclick={() => (mostrarPassword = !mostrarPassword)}
+							aria-label={mostrarPassword
+								? `Ocultar ${isConfirm ? 'confirmación de ' : ''}contraseña`
+								: `Mostrar ${isConfirm ? 'confirmación de ' : ''}contraseña`}
+							disabled={procesando}
+						>
+							{#if mostrarPassword}
+								<EyeOff class="h-5 w-5" strokeWidth={1.5} />
+							{:else}
+								<Eye class="h-5 w-5" strokeWidth={1.5} />
+							{/if}
+						</button>
+					{/snippet}
+
 					<CampoFormulario
 						id="username"
 						name="username"
@@ -1214,107 +1421,76 @@
 						placeholder="ej: solidario123"
 						autocomplete="username"
 						bind:value={username}
-						error={intentoEnvio ? errores.username : ''}
+						error={intentoEnvio || erroresDisponibilidad.username ? errores.username : ''}
 						disabled={procesando}
+						cargando={verificandoUsername}
+						onblur={() => verificarDisponibilidad('username', username)}
 					/>
+
 					<CampoFormulario
 						id="email"
 						name="email"
 						label="Correo electrónico"
 						required
 						placeholder={rolInterno === 'institucion'
-							? 'ej: contacto@institucion.org'
-							: 'ej: persona@correo.com'}
+							? 'contacto@institucion.org'
+							: 'tu@correo.com'}
 						type="email"
 						autocomplete="email"
 						bind:value={email}
-						error={intentoEnvio ? errores.email : ''}
+						error={intentoEnvio || erroresDisponibilidad.email ? errores.email : ''}
 						disabled={procesando}
+						cargando={verificandoEmail}
+						onblur={() => verificarDisponibilidad('email', email)}
 					/>
-					<div class="space-y-2">
-						<label
-							for="password"
-							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
-						>
-							Contraseña <span class="text-red-500">*</span>
-						</label>
-						<div class="relative">
-							<Input
-								id="password"
-								name="password"
-								placeholder="Ingresá una contraseña segura"
-								autocomplete="new-password"
-								type={mostrarPassword ? 'text' : 'password'}
-								bind:value={password}
-								error={intentoEnvio ? errores.password : ''}
-								disabled={procesando}
-								customClass="pr-12"
-								required
-							/>
-							<button
-								type="button"
-								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								on:click={() => (mostrarPassword = !mostrarPassword)}
-								aria-pressed={mostrarPassword}
-								aria-label={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-								disabled={procesando}
-							>
-								{#if mostrarPassword}
-									<EyeOff class="h-4 w-4" strokeWidth={1.7} />
-								{:else}
-									<Eye class="h-4 w-4" strokeWidth={1.7} />
-								{/if}
-							</button>
-						</div>
-					</div>
-					<div class="space-y-2">
-						<label
-							for="passwordConfirm"
-							class="inline-flex items-center gap-1 text-sm font-semibold text-slate-700"
-						>
-							Confirmá la contraseña <span class="text-red-500">*</span>
-						</label>
-						<div class="relative">
-							<Input
-								id="passwordConfirm"
-								name="passwordConfirm"
-								placeholder="Repetí la contraseña"
-								autocomplete="new-password"
-								type={mostrarPasswordConfirm ? 'text' : 'password'}
-								bind:value={passwordConfirm}
-								error={intentoEnvio ? errores.passwordConfirm : ''}
-								disabled={procesando}
-								customClass="pr-12"
-								required
-							/>
-							<button
-								type="button"
-								class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-								on:click={() => (mostrarPasswordConfirm = !mostrarPasswordConfirm)}
-								aria-pressed={mostrarPasswordConfirm}
-								aria-label={mostrarPasswordConfirm
-									? 'Ocultar confirmación de contraseña'
-									: 'Mostrar confirmación de contraseña'}
-								disabled={procesando}
-							>
-								{#if mostrarPasswordConfirm}
-									<EyeOff class="h-4 w-4" strokeWidth={1.7} />
-								{:else}
-									<Eye class="h-4 w-4" strokeWidth={1.7} />
-								{/if}
-							</button>
-						</div>
-					</div>
+
+					{#snippet passwordSuffix()}
+						{@render togglePassword(false)}
+					{/snippet}
+
+					{#snippet passwordConfirmSuffix()}
+						{@render togglePassword(true)}
+					{/snippet}
+
+					<CampoFormulario
+						id="password"
+						name="password"
+						label="Contraseña"
+						required
+						placeholder="Min. 8 caracteres: mayúscula, minúscula y número"
+						autocomplete="new-password"
+						type={mostrarPassword ? 'text' : 'password'}
+						bind:value={password}
+						error={intentoEnvio ? errores.password : ''}
+						disabled={procesando}
+						icon={LockKeyhole}
+						suffix={passwordSuffix}
+					/>
+
+					<CampoFormulario
+						id="passwordConfirm"
+						name="passwordConfirm"
+						label="Confirmar contraseña"
+						required
+						placeholder="Repetí la contraseña"
+						autocomplete="new-password"
+						type={mostrarPassword ? 'text' : 'password'}
+						bind:value={passwordConfirm}
+						error={intentoEnvio ? errores.passwordConfirm : ''}
+						disabled={procesando}
+						icon={ShieldCheck}
+						suffix={passwordConfirmSuffix}
+					/>
 				</div>
 			</section>
 
 			<div class="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-end">
 				<Button
 					type="submit"
-					label="Continuar"
+					label={verificando ? 'Verificando...' : 'Continuar'}
 					variant="primary"
 					customClass="w-full sm:w-auto"
-					disabled={procesando}
+					disabled={procesando || verificando}
 					customAriaLabel="Pasar al siguiente paso del registro"
 				/>
 			</div>
@@ -1330,7 +1506,7 @@
 			<button
 				type="button"
 				class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold tracking-wide text-slate-600 uppercase transition hover:border-slate-400 hover:text-slate-900"
-				on:click={volverAPasoCredenciales}
+				onclick={volverAPasoCredenciales}
 			>
 				<svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 					<path
@@ -1346,58 +1522,56 @@
 
 		{#if rolInterno === 'institucion'}
 			<section
-				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm"
+				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm lg:px-10"
 			>
-				<header class="space-y-2">
-					<p
-						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
-					>
-						Paso 2 · Perfil institucional
-					</p>
-					<h3 class="text-2xl font-semibold text-slate-900">Datos de la institución</h3>
-					<p class="text-sm text-slate-500">
-						Cargá los datos que harán que tu perfil sea reconocible y transparente.
-					</p>
-				</header>
-
 				<FotoPerfilUploader
 					id="foto"
 					nombre="foto"
-					etiqueta="Foto o avatar"
+					etiqueta="Logo o imagen"
 					etiquetaOpcional="(opcional)"
-					descripcion="Subí un logo o imagen cuadrada para que la comunidad identifique tu institución."
-					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					descripcion="Subí un logo o imagen para que la comunidad identifique tu institución."
+					textoAyuda="Formatos: JPG, PNG, WebP. Tamaño máximo recomendado: 5 MB. Podés pegar un enlace o subir una imagen."
 					bind:enlace={urlFoto}
 					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 
 				<div class="grid gap-5 md:grid-cols-2">
-					<CampoFormulario
-						id="nombre"
-						name="nombre"
-						label={obtenerEtiquetaNombre()}
-						required
-						placeholder="Nombre de la persona referente"
-						bind:value={nombrePersona}
-						error={intentoEnvio ? errores.nombre : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre"
+							name="nombre"
+							label={obtenerEtiquetaNombre()}
+							required
+							placeholder="Nombre"
+							bind:value={nombrePersona}
+							error={intentoEnvio ? errores.nombre : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Nombre completo tal como figura en documentos legales.
+						</p>
+					</div>
 
-					<CampoFormulario
-						id="apellido"
-						name="apellido"
-						label={obtenerEtiquetaApellido()}
-						required
-						placeholder="Apellido de la persona referente"
-						bind:value={apellidoPersona}
-						error={intentoEnvio ? errores.apellido : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="apellido"
+							name="apellido"
+							label={obtenerEtiquetaApellido()}
+							required
+							placeholder="Apellido"
+							bind:value={apellidoPersona}
+							error={intentoEnvio ? errores.apellido : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Apellido completo tal como figura en documentos legales.
+						</p>
+					</div>
 				</div>
 
 				<div class="grid gap-5 md:grid-cols-2">
@@ -1412,24 +1586,29 @@
 							error={intentoEnvio ? errores.fecha_nacimiento : ''}
 							prefixIcon={Calendar}
 							prefixIconClass="text-sky-500"
+							validateBirthdate={true}
 						/>
+						<p class="mt-1 text-xs text-slate-500">Debés ser mayor de 18 años.</p>
 					</div>
 					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
-						Esta fecha nos ayuda a validar la idoneidad legal y operativa de la institución en la
-						red.
+						Usamos esta información únicamente para validar que cumplís con los requisitos legales.
 					</p>
 				</div>
 
 				<div class="space-y-6 rounded-2xl bg-white p-6">
 					<div class="space-y-1">
-						<h4 class="text-lg font-semibold text-slate-900">Tipo de institución</h4>
+						<h4 class="text-lg font-semibold text-slate-900">
+							Tipo de institución <span class="text-red-600">*</span>
+						</h4>
 						<p class="text-sm text-slate-500">
-							Seleccioná la categoría que mejor describe tu misión.
+							Seleccioná la categoría que mejor describe tu misión. Esto nos ayuda a conectarte con
+							colaboradores y proyectos relevantes.
 						</p>
 					</div>
 
-					<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-						{#each opcionesTipoInstitucion as opcion}
+					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
+						{#each opcionesTipoInstitucion as opcion (opcion.value)}
+							{@const Icon = opcion.icon}
 							<div class="relative">
 								<input
 									id={`tipo-institucion-${opcion.value}`}
@@ -1438,32 +1617,34 @@
 									name="tipo_institucion"
 									value={opcion.value}
 									checked={tipoInstitucionSeleccion === opcion.value}
-									on:change={() => actualizarTipoInstitucion(opcion.value)}
+									onchange={() => actualizarTipoInstitucion(opcion.value)}
 									disabled={opcion.disabled}
 								/>
 								<label
 									for={`tipo-institucion-${opcion.value}`}
-									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-left text-sm transition ${
-										opcion.disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
-									} ${
+									class={`group relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] ${
 										tipoInstitucionSeleccion === opcion.value
-											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
-											: 'border-slate-200 hover:border-sky-300'
+											? 'border-sky-500 bg-sky-50/10 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
+											: 'border-slate-200 bg-white hover:border-sky-300'
 									} peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
 								>
 									<span
-										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
+										class={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-lg transition-colors ${
 											tipoInstitucionSeleccion === opcion.value
-												? 'bg-sky-50 text-sky-600'
-												: 'bg-slate-50 text-slate-600'
+												? 'bg-sky-100 text-sky-600'
+												: 'bg-slate-50 text-slate-500 group-hover:bg-sky-50 group-hover:text-sky-400'
 										}`}
 										aria-hidden="true"
 									>
-										<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+										<Icon class="h-5 w-5" strokeWidth={1.8} />
 									</span>
-									<div>
-										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
-										<p class="text-sm text-slate-500">{opcion.descripcion}</p>
+									<div class="min-w-0 flex-1 space-y-1.5">
+										<p class="text-base leading-snug font-bold text-slate-900">{opcion.label}</p>
+										<p
+											class="line-clamp-3 text-xs leading-relaxed text-slate-500 transition-all group-hover:line-clamp-none"
+										>
+											{opcion.descripcion}
+										</p>
 									</div>
 								</label>
 							</div>
@@ -1485,74 +1666,78 @@
 						/>
 					{/if}
 
-					<CampoFormulario
-						id="nombre_legal"
-						name="nombre_legal"
-						label="Nombre legal de la institución"
-						required
-						placeholder="Razón social registrada"
-						bind:value={nombreLegal}
-						error={intentoEnvio ? errores.nombre_legal : ''}
-						disabled={procesando}
-						icon={Building2}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre_legal"
+							name="nombre_legal"
+							label="Nombre legal de la institución"
+							required
+							placeholder="Razón social registrada"
+							bind:value={nombreLegal}
+							error={intentoEnvio ? errores.nombre_legal : ''}
+							disabled={procesando}
+							icon={Building2}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Debe coincidir exactamente con el nombre en documentos legales (inscripción,
+							estatutos, etc).
+						</p>
+					</div>
 				</div>
 			</section>
 		{:else}
 			<section
-				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm"
+				class="space-y-8 rounded-2xl border border-slate-200 bg-white/95 px-6 py-8 shadow-sm lg:px-10"
 			>
-				<header class="space-y-2">
-					<p
-						class="text-xs font-semibold tracking-[0.35em] text-[rgb(var(--color-primary))]/70 uppercase"
-					>
-						Paso 2 · Perfil de colaborador/a
-					</p>
-					<h3 class="text-2xl font-semibold text-slate-900">Datos personales</h3>
-					<p class="text-sm text-slate-500">
-						Esta información es visible para las instituciones que contactes.
-					</p>
-				</header>
-
 				<FotoPerfilUploader
 					id="foto"
 					nombre="foto"
-					etiqueta="Foto o avatar"
+					etiqueta="Foto de perfil"
 					etiquetaOpcional="(opcional)"
 					descripcion="Mostrá quién estará en contacto con las instituciones para generar mayor confianza."
-					textoAyuda="Podés pegar un enlace o subir una imagen para personalizar tu cuenta."
+					textoAyuda="Formatos: JPG, PNG, WebP. Tamaño máximo recomendado: 5 MB. Podés pegar un enlace o subir una imagen."
 					bind:enlace={urlFoto}
 					bind:archivo={archivoFoto}
 					error={intentoEnvio ? errores.url_foto : ''}
 				/>
 
 				<div class="grid gap-5 md:grid-cols-2">
-					<CampoFormulario
-						id="nombre"
-						name="nombre"
-						label={obtenerEtiquetaNombre()}
-						required
-						placeholder="Nombre"
-						bind:value={nombrePersona}
-						error={intentoEnvio ? errores.nombre : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="nombre"
+							name="nombre"
+							label={obtenerEtiquetaNombre()}
+							required
+							placeholder="Nombre"
+							bind:value={nombrePersona}
+							error={intentoEnvio ? errores.nombre : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Tu nombre completo tal como figura en documentos.
+						</p>
+					</div>
 
-					<CampoFormulario
-						id="apellido"
-						name="apellido"
-						label={obtenerEtiquetaApellido()}
-						required
-						placeholder="Apellido"
-						bind:value={apellidoPersona}
-						error={intentoEnvio ? errores.apellido : ''}
-						disabled={procesando}
-						icon={UserRound}
-						iconClass="text-sky-500"
-					/>
+					<div>
+						<CampoFormulario
+							id="apellido"
+							name="apellido"
+							label={obtenerEtiquetaApellido()}
+							required
+							placeholder="Apellido"
+							bind:value={apellidoPersona}
+							error={intentoEnvio ? errores.apellido : ''}
+							disabled={procesando}
+							icon={UserRound}
+							iconClass="text-sky-500"
+						/>
+						<p class="mt-1 text-xs text-slate-500">
+							Tu apellido completo tal como figura en documentos.
+						</p>
+					</div>
 				</div>
 
 				<div class="grid gap-5 md:grid-cols-2">
@@ -1566,53 +1751,54 @@
 							bind:value={fechaNacimiento}
 							error={intentoEnvio ? errores.fecha_nacimiento : ''}
 							prefixIcon={Calendar}
-							prefixIconClass="text-slate-500"
+							prefixIconClass="text-sky-500"
+							validateBirthdate={true}
 						/>
+						<p class="mt-1 text-xs text-slate-500">Debés ser mayor de 18 años.</p>
 					</div>
 					<p class="rounded-2xl bg-slate-50/80 p-4 text-sm text-slate-500">
-						Usamos esta información únicamente para validar la edad mínima requerida por la
-						plataforma.
+						Usamos esta información únicamente para validar que cumplís con los requisitos legales.
 					</p>
 				</div>
 
 				<div class="space-y-4">
 					<div>
 						<p class="text-sm font-semibold text-slate-800">
-							Tipo de colaborador/a <span class="text-red-600">*</span>
+							Tipo de colaborador <span class="text-red-600">*</span>
 						</p>
 						<p class="text-sm text-slate-500">
-							Elegí cómo vas a contribuir dentro de Conectando Corazones.
+							Elegí cómo vas a contribuir. Podés cambiar esto luego en tu perfil.
 						</p>
 					</div>
-					<div class="grid gap-4 md:grid-cols-2">
-						{#each opcionesTipoColaborador as opcion}
-							<div class="relative">
-								<input
-									id={`tipo-colaborador-${opcion.value}`}
-									type="radio"
-									class="peer sr-only"
-									name="tipo_colaborador"
-									value={opcion.value}
-									checked={tipoColaborador === opcion.value}
-									on:change={() => alternarTipoColaborador(opcion.value)}
-								/>
+					<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{#each opcionesTipoColaborador as opcion (opcion.value)}
+							{@const Icon = opcion.icon}
+							<div>
 								<label
-									for={`tipo-colaborador-${opcion.value}`}
-									class={`flex h-full flex-col gap-3 rounded-2xl border bg-white p-5 text-sm transition ${
+									class={`relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] lg:flex-row lg:items-center ${
 										tipoColaborador === opcion.value
-											? 'border-sky-500 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
-											: 'border-slate-200 hover:border-sky-300'
-									} cursor-pointer peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
+											? 'border-sky-500 bg-sky-50/20 shadow-[0_8px_20px_rgba(14,165,233,0.06)]'
+											: 'border-slate-200 bg-white hover:border-sky-300'
+									}`}
 								>
+									<input
+										id={`tipo-colaborador-${opcion.value}`}
+										type="radio"
+										class="peer sr-only"
+										name="tipo_colaborador"
+										value={opcion.value}
+										checked={tipoColaborador === opcion.value}
+										onchange={() => alternarTipoColaborador(opcion.value)}
+									/>
 									<span
-										class={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${
+										class={`flex h-12 w-12 items-center justify-center rounded-xl text-lg ${
 											tipoColaborador === opcion.value
-												? 'bg-sky-50 text-sky-600'
-												: 'bg-slate-50 text-slate-600'
+												? 'bg-sky-100 text-sky-600'
+												: 'bg-slate-100 text-slate-500'
 										}`}
 										aria-hidden="true"
 									>
-										<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+										<Icon class="h-6 w-6" strokeWidth={1.7} />
 									</span>
 									<div>
 										<p class="text-base font-semibold text-slate-900">{opcion.label}</p>
@@ -1632,15 +1818,16 @@
 								<CampoFormulario
 									id="razon_social"
 									name="razon_social"
-									label="Razón social"
+									label="Razón social de la organización"
 									required
-									placeholder="Nombre legal de la organización"
+									placeholder="Nombre legal registrado"
 									bind:value={razonSocial}
 									error={intentoEnvio ? errores.razon_social : ''}
 									disabled={procesando}
 									icon={Building2}
 									iconClass="text-sky-500"
 								/>
+								<p class="mt-1 text-xs text-slate-500">Debe tener al menos 3 caracteres.</p>
 							</div>
 
 							<div class="space-y-3 md:col-span-2">
@@ -1649,12 +1836,13 @@
 									<span class="text-red-600">*</span>
 								</p>
 								<div class="grid gap-3 sm:grid-cols-2">
-									{#each [{ value: 'true', label: 'Sí, con fines de lucro', descripcion: 'Opera como empresa o entidad mixta.', icon: Building2 }, { value: 'false', label: 'No, sin fines de lucro', descripcion: 'Asociación civil o fundación.', icon: ShieldCheck }] as opcion}
+									{#each [{ value: 'true', label: 'Con fines de lucro', descripcion: 'Ej: Empresa, SRL', icon: Building2 }, { value: 'false', label: 'Sin fines de lucro', descripcion: 'Ej: Cooperativa, Mutual', icon: ShieldCheck }] as opcion (opcion.value)}
+										{@const Icon = opcion.icon}
 										<label
-											class={`flex h-full cursor-pointer flex-col gap-2 rounded-2xl border p-4 transition ${
+											class={`relative flex cursor-pointer rounded-2xl border p-5 transition-all ${
 												conFinesDeLucroSeleccion === opcion.value
-													? 'border-sky-500 bg-white shadow-sm'
-													: 'border-slate-200 bg-white hover:border-sky-300'
+													? 'border-sky-500 bg-sky-50/20 shadow-[0_8px_20px_rgba(14,165,233,0.06)]'
+													: 'border-slate-200 bg-white hover:border-sky-100'
 											}`}
 										>
 											<input
@@ -1674,7 +1862,7 @@
 													}`}
 													aria-hidden="true"
 												>
-													<svelte:component this={opcion.icon} class="h-5 w-5" strokeWidth={1.7} />
+													<Icon class="h-5 w-5" strokeWidth={1.7} />
 												</span>
 												<div>
 													<p class="font-semibold text-slate-900">{opcion.label}</p>
@@ -1685,7 +1873,7 @@
 									{/each}
 								</div>
 								{#if intentoEnvio && errores.con_fines_de_lucro}
-									<p class="text-sm text-red-600">{errores.con_fines_de_lucro}</p>
+									<p class="mt-2 text-sm text-red-600">{errores.con_fines_de_lucro}</p>
 								{/if}
 							</div>
 						</div>
@@ -1693,6 +1881,37 @@
 				{/if}
 			</section>
 		{/if}
+
+		<div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+			<label class="flex cursor-pointer gap-3 text-sm text-slate-700">
+				<input
+					type="checkbox"
+					class="mt-1 h-4 w-4 shrink-0 rounded border-slate-300"
+					bind:checked={aceptaTerminosYPrivacidad}
+					disabled={procesando}
+				/>
+				<span>
+					He leído y acepto los
+					<a
+						href="/terminos"
+						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
+						target="_blank"
+						rel="noopener noreferrer">términos y condiciones</a
+					>
+					y la
+					<a
+						href="/privacidad"
+						class="font-semibold text-sky-700 underline-offset-2 hover:underline"
+						target="_blank"
+						rel="noopener noreferrer">política de privacidad</a
+					>
+					de Conectando Corazones. <span class="text-red-600">*</span>
+				</span>
+			</label>
+			{#if intentoEnvio && errores.terminos_privacidad}
+				<p class="mt-2 text-sm text-red-600">{errores.terminos_privacidad}</p>
+			{/if}
+		</div>
 
 		<div class="mt-10 flex justify-end">
 			<Button
@@ -1751,7 +1970,7 @@
 						<button
 							type="button"
 							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-							on:click={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
+							onclick={() => (mostrarModalPasswordTexto = !mostrarModalPasswordTexto)}
 							aria-pressed={mostrarModalPasswordTexto}
 							aria-label={mostrarModalPasswordTexto ? 'Ocultar contraseña' : 'Mostrar contraseña'}
 						>
@@ -1784,8 +2003,7 @@
 						<button
 							type="button"
 							class="absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-sky-200"
-							on:click={() =>
-								(mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
+							onclick={() => (mostrarModalPasswordConfirmTexto = !mostrarModalPasswordConfirmTexto)}
 							aria-pressed={mostrarModalPasswordConfirmTexto}
 							aria-label={mostrarModalPasswordConfirmTexto
 								? 'Ocultar confirmación de contraseña'
@@ -1811,7 +2029,7 @@
 					variant="secondary"
 					size="sm"
 					customClass="w-full sm:w-auto"
-					on:click={() => cerrarModalPassword({ regresarACredenciales: true })}
+					onclick={() => cerrarModalPassword({ regresarACredenciales: true })}
 				/>
 				<Button
 					type="button"
@@ -1819,7 +2037,7 @@
 					variant="primary"
 					size="sm"
 					customClass="w-full sm:w-auto"
-					on:click={confirmarModalPassword}
+					onclick={confirmarModalPassword}
 				/>
 			</div>
 		</div>

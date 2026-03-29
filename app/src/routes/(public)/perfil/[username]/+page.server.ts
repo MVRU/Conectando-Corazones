@@ -1,29 +1,34 @@
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { ObtenerUsuario } from '$lib/domain/use-cases/usuarios/ObtenerUsuario';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
+import { PostgresTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/tipo-participacion.repo';
 import { GetAllCategorias } from '$lib/domain/use-cases/maestros/GetAllCategorias';
 import { PostgresResenaRepository } from '$lib/infrastructure/supabase/postgres/resena.repo';
 import { ObtenerResenasPorObjeto } from '$lib/domain/use-cases/resenas/ObtenerResenasPorObjeto';
+import { GetAllTiposParticipacion } from '$lib/domain/use-cases/maestros/GetAllTiposParticipacion';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, url }) => {
 	try {
 		const username = params.username;
+		const proyectoContextoId = url.searchParams.get('proyecto');
 
 		if (!username) {
 			throw error(404, 'Usuario no encontrado');
 		}
 
 		const usuarioRepo = new PostgresUsuarioRepository();
+		const obtenerUsuario = new ObtenerUsuario(usuarioRepo);
 		const proyectoRepo = new PostgresProyectoRepository();
 		const categoriaRepo = new PostgresCategoriaRepository();
 		const resenaRepo = new PostgresResenaRepository();
 
 		// 1. Obtener Usuario
-		const perfilUsuario = await usuarioRepo.findByUsername(username);
-		if (!perfilUsuario) {
+		const perfilUsuario = await obtenerUsuario.porUsername(username);
+		if (!perfilUsuario || perfilUsuario.estado === 'inactivo') {
 			throw error(404, 'Usuario no encontrado');
 		}
 
@@ -31,9 +36,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const obtenerProyectos = new ObtenerProyectosPerfil(proyectoRepo);
 		const getAllCategorias = new GetAllCategorias(categoriaRepo);
 
-		const [proyectos, categorias] = await Promise.all([
+		const [proyectos, categorias, tiposParticipacion, proyectoContexto] = await Promise.all([
 			obtenerProyectos.execute(perfilUsuario.id_usuario, perfilUsuario.rol),
-			getAllCategorias.execute()
+			getAllCategorias.execute(),
+			new GetAllTiposParticipacion(new PostgresTipoParticipacionRepository()).execute(),
+			proyectoContextoId ? proyectoRepo.findById(Number(proyectoContextoId)) : Promise.resolve(null)
 		]);
 
 		// 3. Obtener Reseñas
@@ -48,11 +55,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Serializar todas las entidades de dominio
 		return {
-			perfilUsuario: JSON.parse(JSON.stringify(perfilUsuario)),
+			perfilUsuario: perfilUsuario.toPOJO(),
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			resenas: JSON.parse(JSON.stringify(resenas)),
 			categorias: categorias.map((c) => ({ ...c })),
-			esMiPerfil
+			tiposParticipacion: tiposParticipacion.map((t) => ({ ...t })),
+			esMiPerfil,
+			proyectoContexto: proyectoContexto ? JSON.parse(JSON.stringify(proyectoContexto)) : null
 		};
 	} catch (err) {
 		console.error('Error loading profile:', err);

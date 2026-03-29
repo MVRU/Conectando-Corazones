@@ -17,6 +17,10 @@ function esSolicitudActiva(estado: string | null | undefined): boolean {
 	return e === '' || ESTADOS_SOLICITUD_ACTIVA.has(e);
 }
 
+/**
+ * Carga de datos para solicitar cierre de proyecto.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = locals.usuario;
 
@@ -50,8 +54,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			proyectoActual = p;
 
 			const solicitud = await solicitudRepo.findByProyectoId(idProyecto);
-			solicitudPendiente =
-				solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
+			solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
 
 			solicitudesRechazadas = await solicitudRepo.findRechazadasByProyectoId(idProyecto);
 
@@ -115,10 +118,9 @@ export const actions: Actions = {
 				success: true,
 				solicitud
 			};
-		} catch (error: any) {
-			return fail(400, {
-				message: error.message || 'No se pudo crear la solicitud de finalización'
-			});
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : 'No se pudo crear la solicitud de finalización';
+			return fail(400, { message });
 		}
 	}
 };

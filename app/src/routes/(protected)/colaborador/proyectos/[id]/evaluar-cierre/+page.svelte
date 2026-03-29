@@ -19,6 +19,7 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { agruparEvidenciasPorObjetivo } from '$lib/utils/util-evidencias';
 	import { formatearFecha } from '$lib/utils/validaciones';
+	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	export let data: PageData;
 
@@ -26,6 +27,14 @@
 	$: solicitud = data.solicitud as any;
 	$: evaluacion = data.evaluacion;
 	$: yaVote = data.yaVote;
+
+	$: if (proyecto) {
+		setBreadcrumbs([
+			BREADCRUMB_ROUTES.proyectos,
+			{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
+			{ label: 'Evaluación de Cierre' }
+		]);
+	}
 
 	let showReportModal = false;
 
