@@ -1,0 +1,36 @@
+import { json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { ServicioPanelAdmin } from '$lib/server/servicio-panel-admin';
+
+const service = new ServicioPanelAdmin();
+
+export const GET: RequestHandler = async ({ locals, url }) => {
+	if (locals.usuario?.rol !== 'administrador') {
+		return json({ error: 'No autorizado' }, { status: 403 });
+	}
+
+	const idObjetoRaw = url.searchParams.get('id_objeto');
+	const usuarioIdRaw = url.searchParams.get('usuario_id');
+	const pageRaw = url.searchParams.get('page');
+	const pageSizeRaw = url.searchParams.get('pageSize');
+	const idObjeto = idObjetoRaw ? Number(idObjetoRaw) : undefined;
+	const usuarioId = usuarioIdRaw ? Number(usuarioIdRaw) : undefined;
+	const page = pageRaw ? Number(pageRaw) : 1;
+	const pageSize = pageSizeRaw ? Number(pageSizeRaw) : 100;
+
+	if (idObjetoRaw && (idObjeto === undefined || Number.isNaN(idObjeto))) {
+		return json({ error: 'id_objeto debe ser numérico' }, { status: 400 });
+	}
+	if (usuarioIdRaw && (usuarioId === undefined || Number.isNaN(usuarioId))) {
+		return json({ error: 'usuario_id debe ser numérico' }, { status: 400 });
+	}
+	if (Number.isNaN(page) || page < 1) {
+		return json({ error: 'page debe ser un número positivo' }, { status: 400 });
+	}
+	if (Number.isNaN(pageSize) || pageSize < 1) {
+		return json({ error: 'pageSize debe ser un número positivo' }, { status: 400 });
+	}
+
+	const rows = await service.getAuditoria({ idObjeto, usuarioId, page, pageSize });
+	return json(rows);
+};

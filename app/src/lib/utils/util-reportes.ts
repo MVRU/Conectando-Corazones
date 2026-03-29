@@ -1,13 +1,12 @@
 import type { Reporte } from '$lib/domain/types/Reporte';
-// import { mockReportes } from '$lib/infrastructure/mocks/mock-reportes';
 
 /**
- * Utilidad para simular la persistencia de reportes en el frontend.
- * Permite "recordar" si un usuario ya reportó un proyecto para deshabilitar el botón.
+ * Utilidad para reportes en frontend.
+ * Mantiene un log local para deshabilitar duplicados de reportes en UI.
  */
 
 const STORAGE_KEY = 'cc:reportes:mock';
-const LOCAL_REPORTES_KEY = 'cc:reportes:data'; // Persistencia de los reportes creados
+const LOCAL_REPORTES_KEY = 'cc:reportes:data';
 
 interface ReporteLog {
 	userId: number;
@@ -49,42 +48,35 @@ export function guardarReporteLog(userId: number, proyectoId: number): void {
 	}
 }
 
-/**
- * Crea un nuevo reporte y lo guarda simulando un backend.
- * Actualiza tanto el mock en memoria (para la sesión actual) como localStorage (para persistencia simple).
- */
 export async function crearReporte(
 	datosReporte: Omit<Reporte, 'id_reporte' | 'created_at' | 'estado'>
 ): Promise<Reporte> {
-	await new Promise((resolve) => setTimeout(resolve, 800));
+	const response = await fetch('/api/reportes', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(datosReporte)
+	});
 
-	// Crear el objeto Reporte completo
-	const nuevoId = Math.floor(Date.now() / 1000);
+	const payload = await response.json().catch(() => null);
+	if (!response.ok) {
+		throw new Error(payload?.error || 'No se pudo crear el reporte.');
+	}
 
-	const nuevoReporte: Reporte = {
-		...datosReporte,
-		id_reporte: nuevoId,
-		created_at: new Date(),
-		estado: 'pendiente'
-	};
+	const creado: Reporte = payload;
 
-	// Persistir en localStorage para que sobreviva recargas (para demos)
 	try {
 		const storedReportes = localStorage.getItem(LOCAL_REPORTES_KEY);
 		const reportesPersistidos: Reporte[] = storedReportes ? JSON.parse(storedReportes) : [];
-		reportesPersistidos.push(nuevoReporte);
+		reportesPersistidos.push(creado);
 		localStorage.setItem(LOCAL_REPORTES_KEY, JSON.stringify(reportesPersistidos));
-
-		// También registrar que el usuario ya reportó este objeto (para deshabilitar botón)
 		if (datosReporte.tipo_objeto === 'Proyecto') {
 			guardarReporteLog(datosReporte.reportante_id, datosReporte.id_objeto);
 		}
-	} catch (e) {
-		console.error('Error persistiendo reporte en localStorage', e);
+	} catch {
+		// Persistencia local opcional: si falla, no frena el flujo principal.
 	}
 
-	console.log('Reporte creado exitosamente (Simulado):', nuevoReporte);
-	return nuevoReporte;
+	return creado;
 }
 
 // Función auxiliar para cargar reportes persistidos al iniciar la app
