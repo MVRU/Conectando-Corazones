@@ -68,13 +68,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	// 5. Contadores
 	const totalColaboradores = colaboraciones.filter((c) => c.estado === 'aprobada').length;
-<<<<<<< HEAD
 	const votosRealizados = solicitud
 		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud!)).total
-=======
-	const votosRealizados = solicitud?.id_solicitud
-		? (await evaluacionRepo.countVotosBySolicitud(solicitud.id_solicitud)).total
->>>>>>> origin/main
 		: 0;
 
 	return {

@@ -478,7 +478,6 @@
 				</div>
 			{/if}
 		{:else}
-<<<<<<< HEAD
 			<div
 				class="rounded-2xl border-2 border-dashed border-gray-200 bg-white py-24 text-center shadow-sm"
 			>
@@ -499,11 +498,6 @@
 							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 						/>
 					</svg>
-=======
-			<div class="rounded-xl border border-dashed border-gray-300 bg-white py-16 text-center">
-				<div class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-50">
-					<FileX class="h-8 w-8 text-gray-400" />
->>>>>>> origin/main
 				</div>
 				<h3 class="text-2xl font-bold text-gray-900">
 					{#if $isAdmin}

@@ -46,7 +46,6 @@ export const GET: RequestHandler = async ({ url }) => {
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-<<<<<<< HEAD
 	if (!locals.usuario || !locals.usuario.id_usuario) {
 		return json({ error: 'Debes iniciar sesión para dejar una reseña.' }, { status: 401 });
 	}
@@ -101,24 +100,5 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 		const message = error instanceof Error ? error.message : 'Error al eliminar la reseña';
 		const esErrorDePermiso = message.startsWith('No tenés permiso');
 		return json({ error: message }, { status: esErrorDePermiso ? 403 : 400 });
-=======
-	if (!locals.usuario) {
-		return json({ error: 'No autenticado' }, { status: 401 });
-	}
-
-	try {
-		const data = await request.json();
-		const agregarResena = new AgregarResena(repository);
-		const resena = await agregarResena.execute({
-			...data,
-			username: locals.usuario.username
-		});
-		return json(resena, { status: 201 });
-	} catch (error) {
-		if (error instanceof Error) {
-			return json({ error: error.message }, { status: 400 });
-		}
-		return json({ error: 'Error interno del servidor' }, { status: 500 });
->>>>>>> origin/main
 	}
 };
