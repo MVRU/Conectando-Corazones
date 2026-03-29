@@ -3,9 +3,9 @@ import type { ProvinciaRepository } from '$lib/domain/repositories/ProvinciaRepo
 import type { Provincia } from '$lib/domain/entities/Provincia';
 
 export class GetAllProvincias {
-    constructor(private readonly repository: ProvinciaRepository) { }
+	constructor(private readonly repository: ProvinciaRepository) {}
 
-    async execute(): Promise<Provincia[]> {
-        return this.repository.findAll();
-    }
+	async execute(): Promise<Provincia[]> {
+		return this.repository.findAll();
+	}
 }

@@ -10,14 +10,14 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		return {
 			proyectos: JSON.parse(JSON.stringify(proyectos)),
 			session: locals.session,
-			user: locals.usuario ? JSON.parse(JSON.stringify(locals.usuario)) : null
+			usuario: locals.usuario ? locals.usuario.toPOJO() : null
 		};
 	} catch (error) {
 		console.error('Error en LayoutServerLoad:', error);
 		return {
 			proyectos: [],
 			session: locals.session,
-			user: locals.usuario ? JSON.parse(JSON.stringify(locals.usuario)) : null,
+			usuario: locals.usuario ? locals.usuario.toPOJO() : null,
 			error: 'No se pudieron cargar algunos datos globales.'
 		};
 	}

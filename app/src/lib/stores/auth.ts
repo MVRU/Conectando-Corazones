@@ -10,13 +10,8 @@ import type {
 } from '$lib/domain/types/Usuario';
 import type { Contacto } from '$lib/domain/types/Contacto';
 import { validarCorreo, validarUsername } from '$lib/utils/validaciones';
+import { cumpleConsentimientosRegistro } from '$lib/domain/types/constants/consentimiento-registro';
 
-/**
- * * DECISIÓN DE DISEÑO:
- *     -*- Se centralizó la lógica de autenticación en un store para facilitar el acceso global a la sesión y mantener un único origen de verdad.
- */
-
-// Tipo uniión para todos los tipos de usuario posibles
 type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
 interface RegisterPerfilBase
@@ -39,29 +34,13 @@ interface RegisterInputBase<TPerfil extends RegisterPerfilBase> {
 	password: string;
 	perfil: TPerfil;
 	metadata?: RegistroMetadata;
+	/** Consentimientos a registrar tras crear el usuario (tipo canónico + versión del documento). */
+	consentimientos?: Array<{ tipo: string; version: string }>;
 }
 
 export type RegisterColaboradorInput = RegisterInputBase<RegisterColaboradorPerfil>;
 export type RegisterInstitucionInput = RegisterInputBase<RegisterInstitucionPerfil>;
 
-type RegistroResultado = 'api' | 'simulado';
-
-interface StorageLike {
-	getItem(key: string): string | null;
-	setItem(key: string, value: string): void;
-}
-
-interface RegistroSimulado {
-	tipo: 'colaborador' | 'institucion';
-	email: string;
-	timestamp: string;
-	perfil: Record<string, unknown>;
-	metadata: RegistroMetadata | null;
-}
-
-const CLAVE_REGISTROS_SIMULADOS = 'cc:registro:simulado';
-
-// Estado de autenticación
 interface AuthState {
 	usuario: UsuarioCompleto | null;
 	isAuthenticated: boolean;
@@ -69,17 +48,13 @@ interface AuthState {
 	error: string | null;
 }
 
-// TODO: corregir la lógica de autenticación
-
-// Estado inicial
 const initialState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
-	isLoading: true, // Estado de carga inicial verdadero para evitar destellos/condiciones de carrera
+	isLoading: true,
 	error: null
 };
 
-// Estado para usuario no autenticado (cargado pero no conectado)
 export const unauthenticatedState: AuthState = {
 	usuario: null,
 	isAuthenticated: false,
@@ -87,30 +62,24 @@ export const unauthenticatedState: AuthState = {
 	error: null
 };
 
-// Store principal de autenticación
 export const authStore = writable<AuthState>(initialState);
 
-// Stores derivados para facilitar el acceso
 export const usuario = derived(authStore, ($auth) => $auth.usuario);
 export const isAuthenticated = derived(authStore, ($auth) => $auth.isAuthenticated);
 export const isLoading = derived(authStore, ($auth) => $auth.isLoading);
 export const authError = derived(authStore, ($auth) => $auth.error);
 
-// Store derivado para el rol del usuario
 export const usuarioRol = derived(authStore, ($auth) => $auth.usuario?.rol ?? null);
 
-// Store derivado para verificar rol
 export const isAdmin = derived(authStore, ($auth) => $auth.usuario?.rol === 'administrador');
 export const isInstitucion = derived(authStore, ($auth) => $auth.usuario?.rol === 'institucion');
 export const isColaborador = derived(authStore, ($auth) => $auth.usuario?.rol === 'colaborador');
 
-// Store derivado para verificar estado
 export const isVerified = derived(authStore, ($auth) => $auth.usuario?.estado === 'activo');
 export const isInstitucionVerificada = derived(authStore, ($auth) =>
 	esInstitucionVerificada($auth.usuario)
 );
 
-// Funciones para manejar la autenticación
 export const authActions = {
 	/**
 	 * Iniciar sesión (acepta email o username como "identificador")
@@ -121,12 +90,13 @@ export const authActions = {
 		recordarSesion: boolean = false
 	): Promise<UsuarioCompleto | null> {
 		const credencial = identificador?.trim();
-		if (
-			!credencial ||
-			!password?.trim() ||
-			(!validarCorreo(credencial) && !validarUsername(credencial))
-		) {
-			authStore.update((s) => ({ ...s, error: 'Credenciales inválidas', isLoading: false }));
+		const esCorreo = credencial?.includes('@');
+		if (!credencial || !password?.trim() || (esCorreo && !validarCorreo(credencial))) {
+			authStore.update((s) => ({
+				...s,
+				error: esCorreo ? 'Ingresá un correo electrónico válido' : 'Credenciales inválidas',
+				isLoading: false
+			}));
 			return null;
 		}
 
@@ -179,6 +149,9 @@ export const authActions = {
 			console.error('Error al cerrar sesión:', error);
 		} finally {
 			authStore.set(unauthenticatedState);
+			if (typeof window !== 'undefined') {
+				window.sessionStorage.clear(); // Limpiar todo el sessionStorage
+			}
 		}
 	},
 
@@ -215,7 +188,7 @@ export const authActions = {
 	},
 
 	/**
-	 * Actualizar datos del usuario
+	 * Actualizar datos del usuario localmente
 	 */
 	updateUsuario(usuarioData: Partial<Usuario>) {
 		authStore.update((state) => ({
@@ -224,14 +197,55 @@ export const authActions = {
 		}));
 	},
 
-	async registerColaborador(input: RegisterColaboradorInput): Promise<void> {
+	/**
+	 * Actualizar perfil del usuario y persistir en la base de datos
+	 */
+	async actualizarPerfil(id: number, cambios: Partial<Usuario>): Promise<UsuarioCompleto | null> {
+		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
+		try {
+			const response = await fetch(`/api/usuarios/${id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(cambios)
+			});
+
+			if (!response.ok) {
+				const { error } = await response.json().catch(() => ({ error: null }));
+				throw new Error(error ?? 'Error al actualizar el perfil');
+			}
+
+			const usuarioActualizado = (await response.json()) as UsuarioCompleto;
+
+			authStore.update((state) => ({
+				...state,
+				usuario: usuarioActualizado,
+				isLoading: false,
+				error: null
+			}));
+
+			return usuarioActualizado;
+		} catch (error) {
+			authStore.update((state) => ({
+				...state,
+				isLoading: false,
+				error: error instanceof Error ? error.message : 'Error al actualizar el perfil'
+			}));
+			throw error;
+		}
+	},
+
+	async registerColaborador(input: RegisterColaboradorInput): Promise<Usuario | void> {
 		validarRegistroColaborador(input);
 		const endpoint = '/api/registro/colaborador';
 		const fallbackError = 'No pudimos registrar tu cuenta de colaborador. Intentá nuevamente.';
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
-			await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			await this.login(input.email, input.password);
+			if (data.usuario) {
+				return data.usuario;
+			}
 		} catch (error) {
 			const message = obtenerMensajeError(error, fallbackError);
 			authStore.update((state) => ({ ...state, error: message }));
@@ -241,15 +255,19 @@ export const authActions = {
 		}
 	},
 
-	async registerInstitucion(input: RegisterInstitucionInput): Promise<void> {
+	async registerInstitucion(input: RegisterInstitucionInput): Promise<Usuario | void> {
 		validarRegistroInstitucion(input);
 		const endpoint = '/api/registro/institucion';
 		const fallbackError =
-			'No pudimos registrar la cuenta institucional. Revisa los datos e intentá más tarde.';
+			'No pudimos registrar la cuenta institucional. Revisá los datos e intentá más tarde.';
 
 		authStore.update((state) => ({ ...state, isLoading: true, error: null }));
 		try {
-			await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			const data = await enviarSolicitudRegistro(endpoint, input, fallbackError);
+			if (data.usuario) {
+				await this.login(input.email, input.password);
+				return data.usuario;
+			}
 		} catch (error) {
 			const message = obtenerMensajeError(error, fallbackError);
 			authStore.update((state) => ({ ...state, error: message }));
@@ -288,9 +306,6 @@ export const authActions = {
 	}
 };
 
-/**
- * Verificar permisos por rol
- */
 export function hasPermission(permission: string): boolean {
 	const state = get(authStore);
 	if (state.usuario?.rol === 'administrador') return true;
@@ -308,9 +323,6 @@ export function hasPermission(permission: string): boolean {
 	return false;
 }
 
-/**
- * Verificar acceso a rutas por rol
- */
 export function canAccessRoute(route: string): boolean {
 	const routePermissions: Record<string, string[]> = {
 		'/admin': ['administrador'],
@@ -375,12 +387,7 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un correo electrónico válido.');
 	}
 
-	/*
-	const emailExistente = Object.values(mockUsuarios).some((u) =>
-		u.contactos?.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)
-	);
-	*/
-	const emailExistente = false; // Validación se realiza en backend
+	const emailExistente = false;
 
 	if (emailExistente) {
 		throw new Error(`El correo electrónico "${input.email}" ya está en uso`);
@@ -394,12 +401,7 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 		throw new Error('Ingresá un nombre de usuario válido.');
 	}
 
-	/*
-	const usuarioExistente = Object.values(mockUsuarios).some(
-		(u) => u.username === input.perfil.username
-	);
-	*/
-	const usuarioExistente = false; // Validación se realiza en backend
+	const usuarioExistente = false;
 
 	if (usuarioExistente) {
 		throw new Error(`El nombre de usuario "${input.perfil.username}" ya está en uso`);
@@ -415,6 +417,12 @@ function validarRegistroBase<TPerfil extends RegisterPerfilBase>(
 
 	if (!validarMetadata(input.metadata)) {
 		throw new Error('La metadata enviada no tiene el formato correcto.');
+	}
+
+	if (!cumpleConsentimientosRegistro(input.consentimientos)) {
+		throw new Error(
+			'Debés aceptar los términos y condiciones y la política de privacidad para registrarte.'
+		);
 	}
 }
 
@@ -438,41 +446,28 @@ function validarRegistroInstitucion(input: RegisterInstitucionInput): void {
 	}
 }
 
-async function enviarSolicitudRegistro(
+async function enviarSolicitudRegistro<T = { usuario: Usuario }>(
 	endpoint: string,
 	input: RegisterColaboradorInput | RegisterInstitucionInput,
 	fallbackError: string
-): Promise<RegistroResultado> {
+): Promise<T> {
 	const payload =
 		typeof structuredClone === 'function'
 			? structuredClone(input)
 			: JSON.parse(JSON.stringify(input));
 
-	try {
-		const response = await fetch(endpoint, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
+	const response = await fetch(endpoint, {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload)
+	});
 
-		if (response.ok) {
-			return 'api';
-		}
-
-		if (esCodigoSimulable(response.status)) {
-			simularRegistroLocal(endpoint, input);
-			return 'simulado';
-		}
-
-		const mensaje = await extraerMensajeDeRespuesta(response, fallbackError);
-		throw new Error(mensaje);
-	} catch (error) {
-		if (esErrorDeConectividad(error)) {
-			simularRegistroLocal(endpoint, input);
-			return 'simulado';
-		}
-		throw error;
+	if (response.ok) {
+		return response.json();
 	}
+
+	const mensaje = await extraerMensajeDeRespuesta(response, fallbackError);
+	throw new Error(mensaje);
 }
 
 async function enviarSolicitudOAuth(
@@ -517,124 +512,5 @@ async function extraerMensajeDeRespuesta(response: Response, fallback: string): 
 	} catch (error) {
 		console.warn('No se pudo interpretar la respuesta de error del registro.', error);
 		return fallback;
-	}
-}
-
-function esCodigoSimulable(status: number): boolean {
-	return status === 404 || status === 501;
-}
-
-function esErrorDeConectividad(error: unknown): boolean {
-	if (error instanceof TypeError) {
-		return true;
-	}
-	if (error instanceof Error) {
-		const mensaje = error.message.toLowerCase();
-		return mensaje.includes('fetch') || mensaje.includes('network');
-	}
-	return false;
-}
-
-// ? Riesgo: los registros simulados se almacenan sin cifrado y deben eliminarse al habilitar la integración real.
-function simularRegistroLocal(
-	endpoint: string,
-	input: RegisterColaboradorInput | RegisterInstitucionInput
-): void {
-	const storage = obtenerAlmacenamientoSeguro();
-	if (!storage) {
-		return;
-	}
-
-	const registro: RegistroSimulado = {
-		tipo: tipoRegistroDesdeEndpoint(endpoint),
-		email: input.email,
-		timestamp: new Date().toISOString(),
-		perfil: serializarPerfilSimulado(input.perfil),
-		metadata: clonarMetadata(input.metadata)
-	};
-
-	try {
-		const existentes = JSON.parse(
-			storage.getItem(CLAVE_REGISTROS_SIMULADOS) ?? '[]'
-		) as RegistroSimulado[];
-		const actualizados = [...existentes.slice(-9), registro];
-		storage.setItem(CLAVE_REGISTROS_SIMULADOS, JSON.stringify(actualizados));
-		console.info('Registro simulado almacenado localmente hasta completar la integración real.');
-	} catch (error) {
-		console.warn('No fue posible persistir el registro simulado.', error);
-	}
-}
-
-function obtenerAlmacenamientoSeguro(): StorageLike | null {
-	try {
-		if (typeof window !== 'undefined' && window.localStorage) {
-			return window.localStorage;
-		}
-	} catch (error) {
-		console.warn('Acceso a localStorage restringido en window.', error);
-	}
-
-	try {
-		if (typeof globalThis !== 'undefined') {
-			const posible = (globalThis as { localStorage?: StorageLike }).localStorage;
-			if (posible) {
-				return posible;
-			}
-		}
-	} catch (error) {
-		console.warn('Acceso a localStorage restringido en globalThis.', error);
-	}
-
-	return null;
-}
-
-function tipoRegistroDesdeEndpoint(endpoint: string): 'colaborador' | 'institucion' {
-	return endpoint.includes('institucion') ? 'institucion' : 'colaborador';
-}
-
-function serializarPerfilSimulado(
-	perfil: RegisterColaboradorPerfil | RegisterInstitucionPerfil
-): Record<string, unknown> {
-	const { contactos, fecha_nacimiento, ...resto } = perfil;
-	return {
-		...resto,
-		fecha_nacimiento: normalizarFecha(fecha_nacimiento),
-		contactos: serializarContactos(contactos)
-	};
-}
-
-function serializarContactos(contactos: Contacto[]): Array<Record<string, string>> {
-	return contactos.filter(Boolean).map((contacto) => ({
-		tipo_contacto: contacto.tipo_contacto ?? '',
-		etiqueta: contacto.etiqueta ?? '',
-		valor: contacto.valor ?? ''
-	}));
-}
-
-function normalizarFecha(fecha: unknown): string | null {
-	if (fecha instanceof Date) {
-		return fecha.toISOString();
-	}
-	if (typeof fecha === 'string') {
-		const parseada = new Date(fecha);
-		if (!Number.isNaN(parseada.getTime())) {
-			return parseada.toISOString();
-		}
-		return fecha;
-	}
-	return null;
-}
-
-function clonarMetadata(metadata: RegistroMetadata | undefined): RegistroMetadata | null {
-	if (metadata === undefined) {
-		return null;
-	}
-	try {
-		return typeof structuredClone === 'function'
-			? structuredClone(metadata)
-			: JSON.parse(JSON.stringify(metadata));
-	} catch (error) {
-		console.warn('No se pudo clonar la metadata para el modo simulado.', error);
-		return null;
 	}
 }

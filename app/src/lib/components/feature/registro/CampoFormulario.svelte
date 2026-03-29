@@ -1,21 +1,53 @@
-<!-- * DECISIÓN DE DISEÑO: se encapsula la estructura repetitiva de campos de texto para aplicar bindings seguros con Input y mantener consistencia de estilos y accesibilidad -->
-
 <script lang="ts">
 	import Input from '$lib/components/ui/Input.svelte';
 	import type { ComponentType } from 'svelte';
+	import { Loader2 } from 'lucide-svelte';
 
-	export let id: string;
-	export let label: string;
-	export let value: string = '';
-	export let placeholder = '';
-	export let type: string = 'text';
-	export let autocomplete: string | undefined = undefined;
-	export let required = false;
-	export let error: string = '';
-	export let disabled = false;
-	export let name: string | undefined = undefined;
-	export let icon: ComponentType | null = null;
-	export let iconClass = '';
+	interface Props {
+		id: string;
+		label: string;
+		value?: string;
+		placeholder?: string;
+		type?: string;
+		autocomplete?: string;
+		required?: boolean;
+		error?: string;
+		disabled?: boolean;
+		name?: string;
+		icon?: ComponentType | null;
+		iconClass?: string;
+		cargando?: boolean;
+		suffix?: import('svelte').Snippet;
+		onblur?: (e: FocusEvent) => void;
+		onfocus?: (e: FocusEvent) => void;
+		oninput?: (e: Event) => void;
+		onchange?: (e: Event) => void;
+		onkeydown?: (e: KeyboardEvent) => void;
+		[key: string]: unknown;
+	}
+
+	let {
+		id,
+		label,
+		value = $bindable(''),
+		placeholder = '',
+		type = 'text',
+		autocomplete,
+		required = false,
+		error = '',
+		disabled = false,
+		name,
+		icon = null,
+		iconClass = '',
+		cargando = false,
+		suffix,
+		onblur,
+		onfocus,
+		oninput,
+		onchange,
+		onkeydown,
+		...rest
+	}: Props = $props();
 </script>
 
 <div class="group space-y-2">
@@ -23,7 +55,12 @@
 		for={id}
 		class="inline-flex items-center gap-2 text-sm font-semibold text-slate-700 transition-colors group-focus-within:text-[rgb(var(--color-primary))]"
 	>
-		<span>{label}</span>
+		<div class="flex items-center gap-2">
+			<span>{label}</span>
+			{#if cargando}
+				<Loader2 class="h-3.5 w-3.5 animate-spin text-[rgb(var(--color-primary))]" />
+			{/if}
+		</div>
 		{#if required}
 			<span class="text-base leading-none font-semibold text-red-500" aria-hidden="true">*</span>
 		{/if}
@@ -40,5 +77,12 @@
 		{disabled}
 		prefixIcon={icon}
 		prefixIconClass={iconClass}
+		{suffix}
+		{onblur}
+		{onfocus}
+		{oninput}
+		{onchange}
+		{onkeydown}
+		{...rest}
 	/>
 </div>

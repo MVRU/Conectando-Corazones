@@ -2,9 +2,14 @@ import type { Usuario } from '../entities/Usuario';
 
 export interface UsuarioRepository {
 	create(usuario: Usuario): Promise<Usuario>;
-	findById(id: number): Promise<Usuario | null>;
-	findByUsername(username: string): Promise<Usuario | null>;
-	findByUsernameBasic(username: string): Promise<Usuario | null>; // Versión optimizada para auth
-	// findByEmail(email: string): Promise<Usuario | null>; // TODO: implementar este método para que obtenga de relación con Contacto
+	findById(id: number, includeInactive?: boolean): Promise<Usuario | null>;
+	findByUsername(username: string, includeInactive?: boolean): Promise<Usuario | null>;
+	findByUsernameBasic(username: string, includeInactive?: boolean): Promise<Usuario | null>;
+	findByEmail(email: string, includeInactive?: boolean): Promise<Usuario | null>;
+	findByAuthId(authId: string, includeInactive?: boolean): Promise<Usuario | null>;
+	findAll(filtros?: { rol?: string; estado?: string; includeInactive?: boolean }): Promise<Usuario[]>;
 	update(usuario: Usuario): Promise<Usuario>;
+	delete(id: number): Promise<void>;
+	hasActiveProjects(id: number): Promise<boolean>;
+	hasActiveCollaborations(id: number): Promise<boolean>;
 }

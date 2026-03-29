@@ -382,23 +382,27 @@ export class ObtenerDashboardInstitucion {
 		await Promise.all(
 			Array.from(colaboradoresUnicosIds).map(async (id) => {
 				if (!id) return;
-				const usuario = await this.usuarioRepo.findById(id);
-				if (!usuario) return;
+				try {
+					const usuario = await this.usuarioRepo.findById(id);
+					if (!usuario) return;
 
-				// Contar categorías preferidas
-				if (usuario.categorias_preferidas) {
-					usuario.categorias_preferidas.forEach((catPref: any) => {
-						const categoria = catPref.categoria?.descripcion || 'Otra';
-						categoriasCount.set(categoria, (categoriasCount.get(categoria) || 0) + 1);
-					});
-				}
+					// Contar categorías preferidas
+					if (usuario.categorias_preferidas) {
+						usuario.categorias_preferidas.forEach((catPref: any) => {
+							const categoria = catPref.categoria?.descripcion || 'Otra';
+							categoriasCount.set(categoria, (categoriasCount.get(categoria) || 0) + 1);
+						});
+					}
 
-				// Contar ubicación (Localidad, Provincia)
-				if (usuario.localidad) {
-					const loc = usuario.localidad.nombre;
-					const prov = usuario.localidad.provincia?.nombre;
-					const ubicacion = prov ? `${loc}, ${prov}` : loc;
-					ubicacionCount.set(ubicacion, (ubicacionCount.get(ubicacion) || 0) + 1);
+					// Contar ubicación (Localidad, Provincia)
+					if (usuario.localidad) {
+						const loc = usuario.localidad.nombre;
+						const prov = usuario.localidad.provincia?.nombre;
+						const ubicacion = prov ? `${loc}, ${prov}` : loc;
+						ubicacionCount.set(ubicacion, (ubicacionCount.get(ubicacion) || 0) + 1);
+					}
+				} catch (e) {
+					console.error(`Error al cargar datos del colaborador ${id}:`, e);
 				}
 			})
 		);

@@ -14,6 +14,14 @@
 			goto('/proyectos');
 		}
 	}
+
+	async function handleSuccess() {
+		if (proyecto) {
+			await goto(`/proyectos/${proyecto.id_proyecto}`, { invalidateAll: true });
+		} else {
+			goto('/proyectos');
+		}
+	}
 </script>
 
 {#if proyecto}
@@ -23,5 +31,6 @@
 		id_objeto={proyecto.id_proyecto ?? 0}
 		nombre_objeto={proyecto.titulo}
 		onclose={handleClose}
+		onsuccess={handleSuccess}
 	/>
 {/if}

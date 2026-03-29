@@ -2,6 +2,7 @@ import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgres/evidencia.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
 import { redirect, fail } from '@sveltejs/kit';
 
@@ -16,12 +17,16 @@ function esSolicitudActiva(estado: string | null | undefined): boolean {
 	return e === '' || ESTADOS_SOLICITUD_ACTIVA.has(e);
 }
 
+/**
+ * Carga de datos para solicitar cierre de proyecto.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const user = locals.usuario;
 
-	if (!user) throw redirect(302, '/login');
+	if (!user) throw redirect(302, '/iniciar-sesion');
 	if (user.rol !== 'institucion') {
-		throw redirect(302, '/');
+		throw redirect(303, '/mi-panel');
 	}
 
 	const proyectoRepo = new PostgresProyectoRepository();
@@ -49,8 +54,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			proyectoActual = p;
 
 			const solicitud = await solicitudRepo.findByProyectoId(idProyecto);
-			solicitudPendiente =
-				solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
+			solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
 
 			solicitudesRechazadas = await solicitudRepo.findRechazadasByProyectoId(idProyecto);
 
@@ -99,7 +103,9 @@ export const actions: Actions = {
 		const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 		const evidenciaRepo = new PostgresEvidenciaRepository();
 
-		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+ 
+		const useCase = new CrearSolicitudFinalizacion(solicitudRepo, proyectoRepo, evidenciaRepo, historialRepo);
 
 		try {
 			if (typeof user.id_usuario !== 'number') {
@@ -112,10 +118,9 @@ export const actions: Actions = {
 				success: true,
 				solicitud
 			};
-		} catch (error: any) {
-			return fail(400, {
-				message: error.message || 'No se pudo crear la solicitud de finalización'
-			});
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : 'No se pudo crear la solicitud de finalización';
+			return fail(400, { message });
 		}
 	}
 };

@@ -1,8 +1,9 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { PostgresReporteRepository } from '$lib/infrastructure/supabase/postgres/reporte.repo';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	try {
 		const id = Number(params.id);
 		if (isNaN(id)) {
@@ -16,14 +17,27 @@ export const load: PageServerLoad = async ({ params }) => {
 			throw error(404, 'Proyecto no encontrado');
 		}
 
+		// Verificar si el usuario actual tiene un reporte pendiente para este proyecto
+		let tieneReportePendiente = false;
+		if (locals.usuario && proyecto.id_proyecto) {
+			const repRepo = new PostgresReporteRepository();
+			const reporteExistente = await repRepo.findByReportanteAndObjeto(
+				locals.usuario.id_usuario!,
+				'Proyecto',
+				proyecto.id_proyecto
+			);
+			tieneReportePendiente = reporteExistente?.estado === 'pendiente';
+		}
+
 		return {
-			proyecto: JSON.parse(JSON.stringify(proyecto))
+			proyecto: JSON.parse(JSON.stringify(proyecto)),
+			tieneReportePendiente
 		};
-	} catch (err: any) {
+	} catch (err: unknown) {
 		console.error('Error loading project:', err);
 
 		// Si es un error 404 (provocado por throw error(404)), lo dejamos pasar a la página de error de SvelteKit
-		if (err?.status === 404) {
+		if (err && typeof err === 'object' && 'status' in err && err.status === 404) {
 			throw err;
 		}
 

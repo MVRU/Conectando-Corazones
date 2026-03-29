@@ -3,9 +3,9 @@ import type { ProvinciaRepository } from '$lib/domain/repositories/ProvinciaRepo
 import type { Provincia } from '$lib/domain/entities/Provincia';
 
 export class GetProvinciaById {
-    constructor(private readonly repository: ProvinciaRepository) { }
+	constructor(private readonly repository: ProvinciaRepository) {}
 
-    async execute(id: number): Promise<Provincia | null> {
-        return this.repository.findById(id);
-    }
+	async execute(id: number): Promise<Provincia | null> {
+		return this.repository.findById(id);
+	}
 }

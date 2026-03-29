@@ -1,17 +1,12 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { prisma } from '$lib/infrastructure/prisma/client';
 
+/**
+ * Carga de aportes y evidencias del colaborador.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ */
 export const load: PageServerLoad = async ({ locals }) => {
-	const usuario = locals.usuario;
-	if (!usuario) {
-		throw redirect(303, '/iniciar-sesion');
-	}
-
-	if (usuario.rol !== 'colaborador') {
-		throw redirect(303, '/mi-panel');
-	}
-
+	const usuario = locals.usuario!; // Garantizado por AuthGuard en hooks
 	const id_usuario = usuario.id_usuario;
 
 	// 1. Obtener todas las colaboraciones aprobadas del usuario con sus compromisos
@@ -65,7 +60,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 	});
 
 	// 3. Agrupar por proyecto
-	const dataPorProyecto: Record<number, any> = {};
+	const dataPorProyecto: Record<
+		number,
+		{ proyecto: unknown; compromisos: unknown[]; evidencias: unknown[] }
+	> = {};
 
 	// Procesar colaboraciones para asegurar que los proyectos aparezcan incluso sin evidencias aún
 	colaboraciones.forEach((colab) => {
@@ -104,7 +102,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	return JSON.parse(
 		JSON.stringify({
-			usuario,
+			usuario: usuario.toPOJO ? usuario.toPOJO() : usuario,
 			evidenciasPorProyecto: Object.values(dataPorProyecto),
 			totalEvidencias: evidencias.length
 		})

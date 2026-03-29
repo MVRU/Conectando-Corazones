@@ -5,7 +5,7 @@ import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/pos
 import { PostgresColaboracionTipoParticipacionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion-tipo-participacion.repo';
 import { PostgresParticipacionPermitidaRepository } from '$lib/infrastructure/supabase/postgres/participacion-permitida.repo';
 import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgres/evidencia.repo';
-import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-de-cambios.repo';
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarAporte } from '$lib/domain/use-cases/colaboracion-tipo-participacion/RegistrarAporte';
 import { SubirEvidencia } from '$lib/domain/use-cases/SubirEvidencia';
 

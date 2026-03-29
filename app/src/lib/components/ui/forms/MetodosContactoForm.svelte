@@ -2,7 +2,6 @@
 	import Input from '$lib/components/ui/Input.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
-	import { createEventDispatcher } from 'svelte';
 	import { toastStore } from '$lib/stores/toast';
 
 	import {
@@ -19,13 +18,36 @@
 		validarUrl,
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
+	import { onMount, type Snippet } from 'svelte';
 
-	let contactos: Contacto[] = [{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
-	let enviando = false;
-	let intentoEnvio = false;
-	let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = [
+	interface Props {
+		mostrarOmitir?: boolean;
+		etiquetaOmitir?: string;
+		valoresIniciales?: Contacto[];
+		bloquearPrimerContacto?: boolean;
+		ocultarBotones?: boolean;
+		children?: Snippet;
+		onsubmit: (contactos: Contacto[]) => void;
+		onskip?: () => void;
+	}
+
+	let {
+		mostrarOmitir = false,
+		etiquetaOmitir = 'Omitir',
+		valoresIniciales = [],
+		bloquearPrimerContacto = true,
+		ocultarBotones = false,
+		children,
+		onsubmit,
+		onskip
+	}: Props = $props();
+
+	let contactos: Contacto[] = $state([{ tipo_contacto: 'telefono', valor: '', etiqueta: '' }]);
+	let enviando = $state(false);
+	let intentoEnvio = $state(false);
+	let camposTocados: Array<{ valor: boolean; etiqueta: boolean }> = $state([
 		{ valor: false, etiqueta: false }
-	];
+	]);
 
 	const etiquetasTipoContacto: Record<TipoContacto, string> = {
 		telefono: 'Teléfono',
@@ -51,25 +73,15 @@
 		label: etiquetasEtiqueta[e]
 	}));
 
-	const dispatch = createEventDispatcher<{
-		submit: Contacto[];
-		skip: void;
-	}>();
-
-	export let mostrarOmitir = false;
-	export let etiquetaOmitir = 'Omitir';
-	export let valoresIniciales: Contacto[] = [];
-	export let bloquearPrimerContacto = true;
-	export let ocultarBotones = false;
-
-	// Si vienen valores iniciales y el formulario está "vacío", precargamos
-	$: if (valoresIniciales && valoresIniciales.length > 0) {
-		const formularioVacio =
-			contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
-		if (formularioVacio) {
-			contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+	$effect(() => {
+		if (valoresIniciales && valoresIniciales.length > 0) {
+			const formularioVacio =
+				contactos.length === 1 && !contactos[0].valor && contactos[0].tipo_contacto === 'telefono';
+			if (formularioVacio) {
+				contactos = valoresIniciales.map((c: Contacto) => ({ ...c }));
+			}
 		}
-	}
+	});
 
 	function getPlaceholder(tipo: TipoContacto | string): string {
 		switch (tipo) {
@@ -88,40 +100,41 @@
 		}
 	}
 
-	$: camposTocados =
-		camposTocados.length === contactos.length
-			? camposTocados
-			: contactos.map((_, idx) => camposTocados[idx] ?? { valor: false, etiqueta: false });
+	let errors = $derived(
+		contactos.map((contacto, index) => {
+			const { tipo_contacto, valor, etiqueta } = contacto;
 
-	$: errors = contactos.map((contacto, index) => {
-		const { tipo_contacto, valor, etiqueta } = contacto;
+			if (!valor.trim()) return MENSAJES_ERROR.obligatorio;
 
-		if (!valor.trim()) return MENSAJES_ERROR.obligatorio;
+			if (tipo_contacto === 'telefono' && !validarTelefonoInternacional(valor))
+				return MENSAJES_ERROR.telefonoInvalido;
 
-		if (tipo_contacto === 'telefono' && !validarTelefonoInternacional(valor))
-			return MENSAJES_ERROR.telefonoInvalido;
+			if (tipo_contacto === 'email' && !validarCorreo(valor)) return MENSAJES_ERROR.correoInvalido;
 
-		if (tipo_contacto === 'email' && !validarCorreo(valor)) return MENSAJES_ERROR.correoInvalido;
+			if (tipo_contacto === 'web' && !validarUrl(valor)) return MENSAJES_ERROR.urlInvalida;
 
-		if (tipo_contacto === 'web' && !validarUrl(valor)) return MENSAJES_ERROR.urlInvalida;
+			if (tipo_contacto === 'otro' && !etiqueta?.trim())
+				return MENSAJES_ERROR.otroContactoObligatorio;
 
-		if (tipo_contacto === 'otro' && !etiqueta?.trim())
-			return MENSAJES_ERROR.otroContactoObligatorio;
+			const isDuplicate = contactos.some(
+				(c, i) => i !== index && c.tipo_contacto === tipo_contacto && c.valor === valor
+			);
 
-		const isDuplicate = contactos.some(
-			(c, i) => i !== index && c.tipo_contacto === tipo_contacto && c.valor === valor
-		);
+			if (isDuplicate) return MENSAJES_ERROR.contactoDuplicado;
 
-		if (isDuplicate) return MENSAJES_ERROR.contactoDuplicado;
-
-		return '';
-	});
-
-	$: telefonoValido = contactos.some(
-		(c) => c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)
+			return '';
+		})
 	);
 
-	$: tieneErrores = !telefonoValido || contactos.some((_, i) => errors[i]);
+	let algunContactoValido = $derived(
+		contactos.some(
+			(c) =>
+				(c.tipo_contacto === 'telefono' && validarTelefonoInternacional(c.valor)) ||
+				(c.tipo_contacto === 'email' && validarCorreo(c.valor))
+		)
+	);
+
+	let tieneErrores = $derived(!algunContactoValido || contactos.some((_, i) => errors[i]));
 
 	function agregarContacto() {
 		contactos = [...contactos, { tipo_contacto: 'telefono', valor: '', etiqueta: '' }];
@@ -143,6 +156,14 @@
 		manejarEnvio();
 	}
 
+	export function getValues(): Contacto[] {
+		return contactos;
+	}
+
+	export function isValid(): boolean {
+		return !tieneErrores;
+	}
+
 	function manejarEnvio(event?: SubmitEvent) {
 		if (event) event.preventDefault();
 		intentoEnvio = true;
@@ -152,7 +173,7 @@
 
 		setTimeout(() => {
 			enviando = false;
-			dispatch('submit', contactos);
+			onsubmit(contactos);
 		}, 0);
 	}
 
@@ -162,17 +183,16 @@
 			title: 'Paso omitido',
 			message: 'Podés agregar formas de contacto más adelante desde tu panel de registro.'
 		});
-		dispatch('skip');
+		onskip?.();
 	}
 </script>
 
-<form on:submit={manejarEnvio}>
+<form onsubmit={manejarEnvio}>
 	<div class="space-y-6">
 		{#each contactos as contacto, i (contacto)}
 			<div
 				class="group relative rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md sm:flex sm:items-start sm:gap-4"
 			>
-				<!-- Indicador para mobile -->
 				<div
 					class="absolute -top-2 -left-2 flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600 sm:hidden"
 				>
@@ -180,7 +200,6 @@
 				</div>
 
 				<div class="flex flex-1 flex-col gap-4 sm:flex-row sm:items-start">
-					<!-- Tipo de contacto -->
 					<div class="w-full sm:w-1/3 md:w-1/4">
 						<label for={'tipo-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
 							Tipo <span class="sr-only">de contacto</span>
@@ -194,7 +213,6 @@
 						/>
 					</div>
 
-					<!-- Valor del contacto -->
 					<div class="w-full sm:flex-1">
 						<label for={'valor-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
 							Valor <span class="text-red-600">*</span>
@@ -204,12 +222,11 @@
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
 							error={contacto.valor.trim() ? errors[i] : ''}
-							on:blur={() => marcarCampoComoTocado(i, 'valor')}
+							onblur={() => marcarCampoComoTocado(i, 'valor')}
 							disabled={i === 0 && bloquearPrimerContacto}
 						/>
 					</div>
 
-					<!-- Etiqueta -->
 					<div class="w-full sm:w-1/3 md:w-1/4">
 						<label for={'etiqueta-' + i} class="mb-1 block text-sm font-semibold text-gray-700">
 							{contacto.tipo_contacto === 'otro' ? 'Especificar' : 'Etiqueta'}
@@ -226,14 +243,14 @@
 									...redesSociales.map((r) => ({ value: r, label: r }))
 								]}
 								searchable={false}
-								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								onblur={() => marcarCampoComoTocado(i, 'etiqueta')}
 							/>
 						{:else if contacto.tipo_contacto === 'otro'}
 							<Input
 								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								placeholder="Ej: Telegram..."
-								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								onblur={() => marcarCampoComoTocado(i, 'etiqueta')}
 							/>
 						{:else}
 							<Select
@@ -247,19 +264,18 @@
 									...opcionesEtiqueta
 								]}
 								searchable={false}
-								on:blur={() => marcarCampoComoTocado(i, 'etiqueta')}
+								onblur={() => marcarCampoComoTocado(i, 'etiqueta')}
 								disabled={i === 0 && bloquearPrimerContacto}
 							/>
 						{/if}
 					</div>
 				</div>
 
-				<!-- Botón eliminar -->
 				{#if i > 0}
 					<div class="mt-4 flex justify-end sm:mt-6 sm:w-auto">
 						<button
 							type="button"
-							on:click={() => eliminarContacto(i)}
+							onclick={() => eliminarContacto(i)}
 							title="Eliminar contacto"
 							aria-label="Eliminar contacto"
 							class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-200 focus:outline-none"
@@ -275,17 +291,15 @@
 						</button>
 					</div>
 				{:else}
-					<!-- Espaciador para alinear con filas que tienen botón de eliminar (solo desktop) -->
 					<div class="hidden sm:mt-6 sm:block sm:w-[36px]"></div>
 				{/if}
 			</div>
 		{/each}
 
-		<!-- Botón agregar contacto -->
 		<div class="mt-4 flex justify-center">
 			<button
 				type="button"
-				on:click={agregarContacto}
+				onclick={agregarContacto}
 				class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-blue-300 bg-blue-50/50 px-6 py-3 text-sm font-medium text-blue-600 transition-all hover:border-blue-400 hover:bg-blue-50 hover:shadow-sm"
 			>
 				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -296,23 +310,23 @@
 		</div>
 	</div>
 
-	<!-- Botones de acción -->
 	{#if !ocultarBotones}
 		<div class="mt-8 flex justify-end gap-4">
 			{#if mostrarOmitir}
 				<Button
+					type="button"
 					label={etiquetaOmitir}
 					variant="secondary"
 					size="sm"
-					on:click={omitirContactos}
+					onclick={omitirContactos}
 					customClass="w-full md:w-auto"
 				/>
 			{/if}
-			<slot name="botones-extra" />
+			{@render children?.()}
 			<Button
+				type="submit"
 				label={enviando ? 'Guardando...' : 'Continuar'}
 				variant="primary"
-				size="sm"
 				disabled={tieneErrores || enviando}
 				customClass="w-full md:w-auto"
 			/>

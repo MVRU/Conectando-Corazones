@@ -1,13 +1,15 @@
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import { Colaboracion } from '$lib/domain/entities/Colaboracion';
 
 export class CrearColaboracion {
 	constructor(
 		private colaboracionRepository: ColaboracionRepository,
 		private proyectoRepository: ProyectoRepository,
-		private usuarioRepository: UsuarioRepository
+		private usuarioRepository: UsuarioRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
 	async execute(data: {
@@ -59,6 +61,18 @@ export class CrearColaboracion {
 			created_at: new Date()
 		});
 
-		return await this.colaboracionRepository.create(colaboracion);
+		const colaboracionCreada = await this.colaboracionRepository.create(colaboracion);
+
+		await this.historialRepo.create({
+			tipo_objeto: 'colaboracion',
+			id_objeto: colaboracionCreada.id_colaboracion ?? 0,
+			accion: 'creacion',
+			atributo_afectado: 'registro',
+			valor_anterior: '-',
+			valor_nuevo: String(colaboracionCreada.id_colaboracion ?? 0),
+			usuario_id: data.colaborador_id
+		});
+
+		return colaboracionCreada;
 	}
 }

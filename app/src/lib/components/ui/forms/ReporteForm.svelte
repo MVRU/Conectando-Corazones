@@ -80,8 +80,8 @@
 		} else if (descripcionTrimmed.length < 20) {
 			errorDescripcion = 'La descripción debe tener al menos 20 caracteres';
 			esValido = false;
-		} else if (descripcionTrimmed.length > 1200) {
-			errorDescripcion = 'La descripción no puede exceder los 1200 caracteres';
+		} else if (descripcionTrimmed.length > 800) {
+			errorDescripcion = 'La descripción no puede exceder los 800 caracteres';
 			esValido = false;
 		}
 
@@ -218,6 +218,7 @@
 			bind:value={descripcion}
 			rows="6"
 			disabled={isLoading}
+			maxlength="800"
 			placeholder="Describí en detalle la irregularidad observada. Incluí fechas, nombres, montos o cualquier evidencia que ayude a la investigación..."
 			class="mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorDescripcion
 				? 'border-red-300 focus:border-red-500 focus:ring-red-200'
@@ -238,11 +239,11 @@
 		<p
 			class="mt-2 text-xs transition-colors duration-200 {descripcion.length < 20
 				? 'text-amber-600'
-				: descripcion.length > 1200
+				: descripcion.length > 800
 					? 'text-red-600'
 					: 'text-gray-500'}"
 		>
-			Mínimo 20 caracteres • Caracteres: {descripcion.length}
+			Mínimo 20 caracteres • Máximo 800 • Caracteres: {descripcion.length}
 		</p>
 	</div>
 

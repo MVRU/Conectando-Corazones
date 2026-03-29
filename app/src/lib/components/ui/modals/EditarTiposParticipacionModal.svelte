@@ -12,6 +12,8 @@
 
 	export let mostrar: boolean = false;
 	export let tiposSeleccionados: TipoParticipacion[] = [];
+	export let tiposParticipacion: TipoParticipacion[] = [];
+	export let guardando: boolean = false;
 
 	const dispatch = createEventDispatcher<{
 		guardar: TipoParticipacion[];
@@ -19,7 +21,6 @@
 	}>();
 
 	let tiposMarcados: Set<TipoParticipacionDescripcion> = new Set();
-	let guardando = false;
 
 	// Inicializar tipos marcados cuando cambian los seleccionados
 	$: if (tiposSeleccionados && tiposSeleccionados.length > 0) {
@@ -46,27 +47,22 @@
 	}
 
 	function guardar() {
-		guardando = true;
+		const tiposFinales: TipoParticipacion[] = Array.from(tiposMarcados)
+			.map((descripcion) => {
+				const encontrado = tiposParticipacion.find((t) => t.descripcion === descripcion);
+				return {
+					id_tipo_participacion: encontrado?.id_tipo_participacion,
+					descripcion
+				};
+			})
+			.filter((t) => t.id_tipo_participacion !== undefined);
 
-		setTimeout(() => {
-			const tiposFinales: TipoParticipacion[] = Array.from(tiposMarcados).map((descripcion) => ({
-				descripcion
-			}));
-			console.log('Guardando tipos de participación:', tiposFinales);
-			dispatch('guardar', tiposFinales);
-
-			toastStore.show({
-				variant: 'success',
-				title: 'Cambios guardados',
-				message: 'Tus tipos de participación favoritos se guardaron correctamente.'
-			});
-
-			guardando = false;
-			cerrar();
-		}, 500);
+		console.log('Guardando tipos de participación:', tiposFinales);
+		dispatch('guardar', tiposFinales);
 	}
 
 	function abrir() {
+		guardando = false;
 		// Reinicializar cuando se abre el modal
 		if (tiposSeleccionados && tiposSeleccionados.length > 0) {
 			tiposMarcados = new Set(tiposSeleccionados.map((tipo) => tipo.descripcion));
@@ -120,14 +116,20 @@
 			<!-- Lista de tipos de participación -->
 			<div class="mb-6">
 				<div class="grid gap-3">
-					{#each TIPOS_PARTICIPACION_DESCRIPCION as tipo}
-						{@const seleccionado = tiposMarcados.has(tipo)}
+					{#each tiposParticipacion as tipo}
+						{@const descripcion = tipo.descripcion}
+						{@const seleccionado = tiposMarcados.has(descripcion)}
 						{@const _ = tiposMarcadosArray}
 						<!-- Force reactivity -->
-						{@const info = INFO_TIPOS_PARTICIPACION[tipo]}
+						{@const info = INFO_TIPOS_PARTICIPACION[descripcion] || {
+							titulo: descripcion,
+							descripcion: 'Participación',
+							icon: null,
+							color: 'gray'
+						}}
 						<button
 							type="button"
-							on:click={() => toggleTipo(tipo)}
+							on:click={() => toggleTipo(descripcion)}
 							class="group relative flex items-center gap-4 rounded-lg border p-4 text-left transition-all {seleccionado
 								? 'border-blue-500 bg-blue-50'
 								: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}"
@@ -189,16 +191,16 @@
 					variant="secondary"
 					size="md"
 					type="button"
-					on:click={cerrar}
+					onclick={cerrar}
 					customClass="w-full md:w-auto"
 				/>
 				<Button
-					label={guardando ? 'Guardando...' : 'Continuar'}
+					label={guardando ? 'Guardando...' : 'Guardar'}
 					variant="primary"
 					size="md"
 					type="button"
-					disabled={tiposMarcados.size === 0 || guardando}
-					on:click={guardar}
+					disabled={guardando}
+					onclick={guardar}
 					customClass="w-full md:w-auto"
 				/>
 			</div>

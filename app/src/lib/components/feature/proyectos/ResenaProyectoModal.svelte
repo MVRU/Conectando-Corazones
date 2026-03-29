@@ -51,7 +51,9 @@
 			class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
 			on:click|stopPropagation
 		>
-			<div class="relative mb-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 p-4 text-white">
+			<div
+				class="relative mb-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 p-4 text-white"
+			>
 				<button
 					on:click={cerrar}
 					aria-label="Cerrar modal"
@@ -59,11 +61,11 @@
 				>
 					<X class="h-5 w-5" />
 				</button>
-				<p class="text-xs font-semibold uppercase tracking-wide text-white/80">Reseñas del proyecto</p>
-				<h3 class="mt-1 text-xl font-semibold">{titulo}</h3>
-				<p class="mt-1 text-sm text-white/80">
-					Tu opinión ayuda a mejorar futuras colaboraciones.
+				<p class="text-xs font-semibold tracking-wide text-white/80 uppercase">
+					Reseñas del proyecto
 				</p>
+				<h3 class="mt-1 text-xl font-semibold">{titulo}</h3>
+				<p class="mt-1 text-sm text-white/80">Tu opinión ayuda a mejorar futuras colaboraciones.</p>
 			</div>
 
 			<div class="rounded-xl bg-slate-50 p-4 text-sm text-gray-600">

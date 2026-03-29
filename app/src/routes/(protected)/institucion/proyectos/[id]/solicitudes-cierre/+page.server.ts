@@ -1,12 +1,15 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { prisma } from '$lib/infrastructure/prisma/client';
 
+/**
+ * Carga de solicitudes de cierre para proyectos institucionales.
+ * La protección de acceso se maneja en hooks.server.ts via AuthGuard.
+ * La verificación de propiedad del proyecto es lógica de negocio adicional.
+ */
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const user = locals.usuario;
-	if (!user) throw redirect(302, '/login');
-	if (user.rol !== 'institucion') throw redirect(302, '/');
+	const user = locals.usuario!; // Garantizado por AuthGuard en hooks
 
 	const proyectoId = Number(params.id);
 	if (Number.isNaN(proyectoId)) throw error(404, 'Proyecto no encontrado');

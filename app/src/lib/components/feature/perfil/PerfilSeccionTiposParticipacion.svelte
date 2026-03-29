@@ -2,91 +2,93 @@
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
+	import { Pencil, Plus, HandHelping } from 'lucide-svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-	export let perfilUsuario: UsuarioCompleto;
-	export let esMiPerfil: boolean;
-	export let onEditarClick: () => void;
+	let { perfilUsuario, esMiPerfil, onEditarClick } = $props<{
+		perfilUsuario: UsuarioCompleto;
+		esMiPerfil: boolean;
+		onEditarClick: () => void;
+	}>();
 
-	$: tiposParticipacion = perfilUsuario.tipos_participacion_preferidas || [];
-	$: tieneTipos = tiposParticipacion.length > 0;
+	let tiposParticipacion = $derived(perfilUsuario.tipos_participacion_preferidas || []);
+	let tieneTipos = $derived(tiposParticipacion.length > 0);
+
+	const coloresChip: Record<string, string> = {
+		'verde':   'border-emerald-100 bg-gradient-to-r from-emerald-50 to-emerald-50/60 text-emerald-700 hover:border-emerald-200 hover:from-emerald-100',
+		'azul':    'border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50/60 text-[#007FFF] hover:border-[#007FFF]/30 hover:from-blue-100',
+		'morado':  'border-purple-100 bg-gradient-to-r from-purple-50 to-purple-50/60 text-purple-700 hover:border-purple-200 hover:from-purple-100',
+		'naranja': 'border-orange-100 bg-gradient-to-r from-orange-50 to-orange-50/60 text-orange-700 hover:border-orange-200 hover:from-orange-100',
+		'rojo':    'border-red-100 bg-gradient-to-r from-red-50 to-red-50/60 text-red-700 hover:border-red-200 hover:from-red-100',
+		'gray':    'border-gray-100 bg-gradient-to-r from-gray-50 to-gray-50/60 text-gray-700 hover:border-gray-200 hover:from-gray-100'
+	};
+
+	function obtenerClaseChip(color: string): string {
+		return coloresChip[color] ?? coloresChip['gray'];
+	}
 </script>
 
 {#if perfilUsuario.rol === 'colaborador'}
-	<section class="mb-8">
+	<section>
 		<div class="mb-4 flex items-center justify-between">
-			<h3 class="text-xl font-semibold text-gray-900">
-				{esMiPerfil ? 'Mis tipos de participación favoritas' : 'Tipos de participación favoritas'}
+			<h3 class="flex items-center gap-2 text-sm font-bold text-gray-800">
+				<HandHelping class="h-4 w-4 text-emerald-600" />
+				{esMiPerfil ? 'Mis formas de participar' : 'Formas de participar'}
 			</h3>
 			{#if esMiPerfil}
 				<button
-					on:click={onEditarClick}
-					class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+					onclick={onEditarClick}
+					class="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition-all duration-200 hover:bg-emerald-100 hover:shadow-sm"
+					aria-label="Editar tipos de participación preferidos"
 				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-						/>
-					</svg>
+					<Pencil class="h-3 w-3" />
 					Editar
 				</button>
 			{/if}
 		</div>
 
 		{#if tieneTipos}
-			<div class="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each tiposParticipacion as tipoParticipacion}
-					{@const info = INFO_TIPOS_PARTICIPACION[tipoParticipacion.descripcion]}
+			<div class="flex flex-wrap gap-2">
+				{#each tiposParticipacion as tipo, i (tipo.descripcion)}
+				{@const key = tipo.descripcion as keyof typeof INFO_TIPOS_PARTICIPACION}
+				{@const info = INFO_TIPOS_PARTICIPACION[key] ?? { titulo: tipo.descripcion, color: 'gray', icon: null }}
 					<div
-						class="w-full overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+						class="group flex cursor-default items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:shadow-sm {obtenerClaseChip(info.color)}"
+						in:fly={{ y: 8, duration: 250, delay: i * 50, easing: cubicOut }}
 					>
-						<div class="flex w-full items-center gap-3">
-							<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-{info.color}-50">
-								<Icon src={info.icon} class="h-6 w-6 text-{info.color}-600" />
-							</div>
-							<h4 class="font-medium text-gray-900">{info.titulo}</h4>
-						</div>
+						{#if info.icon}
+							<Icon src={info.icon} class="h-3.5 w-3.5 transition-transform duration-200 group-hover:scale-110" />
+						{/if}
+						{info.titulo}
 					</div>
 				{/each}
 			</div>
 		{:else}
-			<div class="rounded-xl border border-gray-200 bg-white py-12 text-center">
-				<div class="mx-auto h-12 w-12 text-gray-400">
-					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-						/>
-					</svg>
+			<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:shadow-sm">
+				<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:text-emerald-600">
+					<HandHelping class="h-7 w-7" />
 				</div>
-				<h3 class="mt-4 text-lg font-medium text-gray-900">
-					No hay tipos de participación favoritas
-				</h3>
-				<p class="mt-2 text-gray-500">
-					{esMiPerfil
-						? 'Seleccioná tus formas favoritas de participar en proyectos.'
-						: 'Este colaborador aún no ha seleccionado tipos de participación favoritas.'}
+				
+				<h4 class="mb-1 text-sm font-semibold text-gray-800">
+					{esMiPerfil ? 'Sin formas de participar' : 'No hay preferencias de participación'}
+				</h4>
+				
+				<p class="max-w-[200px] text-xs leading-relaxed text-gray-500">
+					{esMiPerfil 
+						? 'Definí cómo te gustaría colaborar para que podamos recomendarte los mejores proyectos.' 
+						: 'Este colaborador aún no ha definido sus formas preferidas de participar.'}
 				</p>
+
 				{#if esMiPerfil}
 					<button
-						on:click={onEditarClick}
-						class="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+						onclick={onEditarClick}
+						class="mt-5 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-emerald-100 transition-all duration-200 hover:bg-emerald-500 hover:shadow-lg active:scale-95"
 					>
-						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M12 4v16m8-8H4"
-							/>
-						</svg>
-						Agregar tipos de participación
+						<Plus class="h-3.5 w-3.5" />
+						Configurar participación
 					</button>
 				{/if}
 			</div>

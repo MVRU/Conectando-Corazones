@@ -6,8 +6,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return json({ usuario: null });
 	}
 
-	// locals.usuario ya está poblado en hooks.server.ts desde la BD
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { password, ...usuarioSafe } = locals.usuario;
+	const { password: _pwd, ...usuarioSafe } = locals.usuario.toPOJO();
 	return json({ usuario: usuarioSafe });
 };

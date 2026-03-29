@@ -9,6 +9,7 @@
 	import { chatStore } from '$lib/stores/chatStore';
 	import type { Mensaje, Chat } from '$lib/domain/types/Chat';
 	import type { PageData } from './$types';
+	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	// Obtener ID del proyecto desde la URL
 	$: proyectoId = Number($page.params.proyecto_id);
@@ -18,6 +19,13 @@
 
 	$: chat = data.chat;
 	$: proyecto = data.proyecto;
+
+	$: if (chat) {
+		setBreadcrumbs([
+			{ label: 'Mensajes', href: '/mensajes' },
+			{ label: chat.titulo || 'Chat' }
+		]);
+	}
 
 	// Validar acceso
 	$: hasAccess =

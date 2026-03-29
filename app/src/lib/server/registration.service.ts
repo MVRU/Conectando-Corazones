@@ -1,0 +1,197 @@
+import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
+import { prisma } from '$lib/infrastructure/prisma/client';
+import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
+import { PostgresConsentimientoRepository } from '$lib/infrastructure/supabase/postgres/consentimiento.repo';
+import { CrearUsuario } from '$lib/domain/use-cases/usuarios/CrearUsuario';
+import { RegistrarConsentimiento } from '$lib/domain/use-cases/consentimiento/RegistrarConsentimiento';
+import { validarListaContactosPerfil } from '$lib/domain/use-cases/contacto/validar-contactos-perfil';
+import { Contacto as ContactoEntidad } from '$lib/domain/entities/Contacto';
+import type { Contacto } from '$lib/domain/types/Contacto';
+import { cumpleConsentimientosRegistro } from '$lib/domain/types/constants/consentimiento-registro';
+
+export interface RegistroInput {
+	email: string;
+	password: string;
+	rol: 'colaborador' | 'institucion';
+	consentimientos: Array<{ tipo: string; version: string }>;
+	perfil: {
+		username: string;
+		nombre: string;
+		apellido: string;
+		fecha_nacimiento?: string | null;
+		url_foto?: string;
+		contactos: Contacto[];
+
+		// Campos específicos
+		tipo_colaborador?: string;
+		nombre_legal?: string;
+		tipo_institucion?: string;
+	};
+	metadata?: {
+		organizacion?: {
+			razon_social?: string;
+			con_fines_de_lucro?: '' | 'true' | 'false';
+		};
+		[key: string]: any;
+	};
+}
+
+function traducirErrorAuth(mensaje: string): string {
+	const m = mensaje.toLowerCase();
+
+	if (
+		m.includes('already been registered') ||
+		m.includes('already registered') ||
+		m.includes('already exists') ||
+		m.includes('user already')
+	) {
+		return 'Este correo electrónico ya está registrado. Intentá iniciar sesión o usá otro correo.';
+	}
+	if (m.includes('invalid email') || m.includes('email is invalid')) {
+		return 'El formato del correo electrónico es inválido.';
+	}
+	if (
+		m.includes('password') &&
+		(m.includes('weak') || m.includes('short') || m.includes('length'))
+	) {
+		return 'La contraseña no cumple los requisitos mínimos de seguridad (mínimo 8 caracteres).';
+	}
+	if (
+		m.includes('rate limit') ||
+		m.includes('too many requests') ||
+		m.includes('over_email_send_rate_limit')
+	) {
+		return 'Demasiados intentos. Esperá unos minutos antes de volver a intentar.';
+	}
+	if (m.includes('email not confirmed')) {
+		return 'El correo electrónico no fue confirmado. Revisá tu bandeja de entrada.';
+	}
+	if (m.includes('signup disabled') || m.includes('signups not allowed')) {
+		return 'El registro de nuevos usuarios está temporalmente deshabilitado. Intentá más tarde.';
+	}
+
+	return 'No pudimos crear tu cuenta. Revisá los datos ingresados o intentá nuevamente.';
+}
+
+export class RegistrationService {
+	private usuarioRepo: PostgresUsuarioRepository;
+	private crearUsuarioUseCase: CrearUsuario;
+
+	constructor() {
+		this.usuarioRepo = new PostgresUsuarioRepository();
+		this.crearUsuarioUseCase = new CrearUsuario(this.usuarioRepo);
+	}
+
+	async registrar(input: RegistroInput) {
+		let authUserId: string | null = null;
+
+		try {
+			if (!cumpleConsentimientosRegistro(input.consentimientos)) {
+				throw new Error(
+					'Debés aceptar los términos y condiciones y la política de privacidad para registrarte.'
+				);
+			}
+
+			// 1. Crear usuario en Supabase Auth
+			const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+				email: input.email,
+				password: input.password,
+				email_confirm: true,
+				user_metadata: {
+					username: input.perfil.username,
+					nombre: input.perfil.nombre,
+					apellido: input.perfil.apellido,
+					rol: input.rol
+				}
+			});
+
+			if (authError) {
+				console.error('Error creando usuario en Supabase Auth:', authError);
+				throw new Error(traducirErrorAuth(authError.message));
+			}
+
+			if (!authData.user) {
+				throw new Error('No se pudo crear el usuario. Intentá nuevamente en unos instantes.');
+			}
+
+			authUserId = authData.user.id;
+
+			// 2. Crear usuario en Base de Datos Local
+			// Asegurar que el email esté en contactos con valores canónicos
+			const contactos = [...input.perfil.contactos];
+			if (!contactos.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)) {
+				contactos.push({
+					tipo_contacto: 'email',
+					valor: input.email,
+					etiqueta: 'principal'
+				});
+			}
+
+			const contactosParaValidar = contactos.map(
+				(c) =>
+					new ContactoEntidad({
+						tipo_contacto: c.tipo_contacto,
+						valor: c.valor,
+						etiqueta: c.etiqueta
+					})
+			);
+			validarListaContactosPerfil(contactosParaValidar);
+
+			const usuarioCreado = await this.crearUsuarioUseCase.execute({
+				username: input.perfil.username,
+				auth_user_id: authUserId,
+				password: input.password,
+
+				nombre: input.perfil.nombre,
+				apellido: input.perfil.apellido,
+				fecha_nacimiento: input.perfil.fecha_nacimiento
+					? new Date(input.perfil.fecha_nacimiento)
+					: undefined,
+				estado: 'activo',
+				rol: input.rol,
+				url_foto: input.perfil.url_foto ?? '',
+				contactos: contactos,
+
+				// Específicos Colaborador
+				tipo_colaborador: input.perfil.tipo_colaborador,
+				razon_social: input.metadata?.organizacion?.razon_social,
+				con_fines_de_lucro: input.metadata?.organizacion?.con_fines_de_lucro === 'true',
+
+				// Específicos Institución
+				nombre_legal: input.perfil.nombre_legal,
+				tipo_institucion: input.perfil.tipo_institucion
+			});
+
+			const uid = usuarioCreado.id_usuario;
+			if (uid) {
+				try {
+					const consentRepo = new PostgresConsentimientoRepository();
+					const registrarConsent = new RegistrarConsentimiento(consentRepo);
+					for (const item of input.consentimientos) {
+						await registrarConsent.execute(uid, uid, item.tipo, item.version);
+					}
+				} catch (consentErr) {
+					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => {});
+					throw consentErr;
+				}
+			}
+
+			// Eliminar password del objeto retornado
+			const { password: _, ...usuarioSafe } = usuarioCreado;
+
+			return usuarioSafe;
+		} catch (error) {
+			console.error('Error en servicio de registro:', error);
+
+			// Rollback: Si se creó en Auth pero falló en DB, borrar de Auth
+			if (authUserId) {
+				console.warn(`Realizando rollback de usuario Auth ${authUserId}...`);
+				await supabaseAdmin.auth.admin
+					.deleteUser(authUserId)
+					.catch((e) => console.error('CRÍTICO: Falló el rollback en Auth:', e));
+			}
+
+			throw error;
+		}
+	}
+}

@@ -24,23 +24,21 @@
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	// import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
-	// import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
+	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
+	import ResenaCard from '$lib/components/ui/cards/ResenaCard.svelte';
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
-	// import { mockColaboraciones } from '$lib/infrastructure/mocks/mock-colaboraciones';
-	// import { mockColaboracionTipoParticipacion } from '$lib/infrastructure/mocks/mock-colaboracion-tipo-participacion';
-	// import { mockResenas } from '$lib/infrastructure/mocks/mock-resenas';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
+	import type { Resena } from '$lib/domain/types/Resena';
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
-	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb } from 'lucide-svelte';
+	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 
 	import {
 		CheckCircle,
@@ -61,7 +59,8 @@
 		Photo,
 		Flag,
 		Plus,
-		ClipboardDocumentCheck
+		ClipboardDocumentCheck,
+		Star
 	} from '@steeze-ui/heroicons';
 
 	let proyecto: Proyecto;
@@ -69,14 +68,12 @@
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 	let misAportes: ColaboracionTipoParticipacion[] = [];
-	// TODO: Falta implementar endpoint para obtener reseñas desde la DB
-	// let resenasLocal: Resena[] = [...mockResenas];
-	// let resenaEnEdicion: Resena | null = null;
-	// let resenaAEliminar: Resena | null = null;
-	// let mostrarModalResena = false;
-	// let mostrarConfirmarEliminar = false;
-	// let modoResena: 'crear' | 'editar' = 'crear';
-	// const maxCaracteresResena = 500;
+	
+	let resenasProyecto: Resena[] = [];
+	let resenaAEliminar: Resena | null = null;
+	let mostrarModalResena = false;
+	let mostrarConfirmarEliminar = false;
+	const maxCaracteresResena = 500;
 
 	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
 	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
@@ -95,18 +92,15 @@
 	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
-	// $: puedeVerResenas = true;
+	$: puedeVerResenas = true;
 
 	$: proyecto = data.proyecto;
-	// $: resenasProyecto = resenasLocal.filter(
-	// 	(r) => r.tipo_objeto === 'proyecto' && r.id_objeto === proyecto?.id_proyecto
-	// );
-	// $: resenaUsuarioActual = resenasProyecto.find((r) => r.username === $usuario?.username);
-	// $: tieneResenaUsuario = Boolean(resenaUsuarioActual);
+	
+	$: resenaUsuarioActual = resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario);
+	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
 
 	$: if (proyecto) {
 		setBreadcrumbs([
-			BREADCRUMB_ROUTES.home,
 			BREADCRUMB_ROUTES.proyectos,
 			{ label: proyecto.titulo }
 		]);
@@ -175,10 +169,10 @@
 
 	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
 	$: clasesChipEstado = clasesEstado(estadoCodigo);
-	// $: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
-	// $: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	// $: mensajeResenaBloqueada =
-	// 	'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	// Las reseñas se hacen a los proyectos que están listos
+	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
+	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
+	$: mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 	$: resumenTexto = (proyecto?.resumen || '').trim();
 	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
 	$: listadoAprendizajes = (aprendizajesTexto || '')
@@ -583,21 +577,16 @@
 		return acc;
 	})();
 
-	let yaReporto = false;
-
-	$: if ($usuario && proyecto?.id_proyecto) {
-		yaReporto = haReportado($usuario.id_usuario, proyecto.id_proyecto);
-	}
-
-	function handleReportSuccess() {
+	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
-			guardarReporteLog($usuario.id_usuario, proyecto.id_proyecto);
-			yaReporto = true;
+			guardarReporteLog($usuario.id_usuario, 'Proyecto', proyecto.id_proyecto);
 			toastStore.show({
 				variant: 'success',
 				message:
 					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
 			});
+			// Refrescar datos antes de volver
+			await invalidateAll();
 			history.back();
 		}
 	}
@@ -610,101 +599,123 @@
 		}
 	}
 
-	// function abrirModalResena() {
-	// 	if (!puedeRedactarResena) {
-	// 		toastStore.show({
-	// 			variant: 'warning',
-	// 			message: mensajeResenaBloqueada
-	// 		});
-	// 		return;
-	// 	}
-	// 	if (resenaUsuarioActual) {
-	// 		editarResena(resenaUsuarioActual);
-	// 		return;
-	// 	}
-	// 	modoResena = 'crear';
-	// 	resenaEnEdicion = null;
-	// 	mostrarModalResena = true;
-	// }
+	function abrirModalResena() {
+		if (!puedeRedactarResena) {
+			toastStore.show({
+				variant: 'warning',
+				message: mensajeResenaBloqueada
+			});
+			return;
+		}
+		if (tieneResenaUsuario) {
+			return;
+		}
+		mostrarModalResena = true;
+	}
 
-	// function editarResena(resena: Resena) {
-	// 	if (!puedeRedactarResena) {
-	// 		toastStore.show({
-	// 			variant: 'warning',
-	// 			message: mensajeResenaBloqueada
-	// 		});
-	// 		return;
-	// 	}
-	// 	modoResena = 'editar';
-	// 	resenaEnEdicion = resena;
-	// 	mostrarModalResena = true;
-	// }
+	function solicitarEliminarResena(resena: Resena) {
+		resenaAEliminar = resena;
+		mostrarConfirmarEliminar = true;
+	}
 
-	// function solicitarEliminarResena(resena: Resena) {
-	// 	resenaAEliminar = resena;
-	// 	mostrarConfirmarEliminar = true;
-	// }
+	async function confirmarEliminarResena() {
+		if (resenaAEliminar?.id_resena) {
+			try {
+				const res = await fetch('/api/resenas', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id_resena: resenaAEliminar.id_resena })
+				});
 
-	// function confirmarEliminarResena() {
-	// 	if (resenaAEliminar?.id_resena) {
-	// 		resenasLocal = resenasLocal.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
-	// 		toastStore.show({
-	// 			variant: 'success',
-	// 			message: 'La reseña fue eliminada.'
-	// 		});
-	// 	}
-	// 	resenaAEliminar = null;
-	// 	mostrarConfirmarEliminar = false;
-	// }
+				if (!res.ok) {
+					const data = await res.json();
+					throw new Error(data.error || 'Error al eliminar reseña.');
+				}
 
-	// function cancelarEliminarResena() {
-	// 	resenaAEliminar = null;
-	// 	mostrarConfirmarEliminar = false;
-	// }
+				resenasProyecto = resenasProyecto.filter((r) => r.id_resena !== resenaAEliminar?.id_resena);
+				toastStore.show({
+					variant: 'success',
+					message: 'La reseña fue eliminada.'
+				});
+			} catch (err: any) {
+				toastStore.show({ variant: 'error', message: err.message });
+			}
+		}
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
 
-	// function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
-	// 	if (!proyecto?.id_proyecto || !$usuario) return;
+	function cancelarEliminarResena() {
+		resenaAEliminar = null;
+		mostrarConfirmarEliminar = false;
+	}
 
-	// 	if (modoResena === 'crear' && tieneResenaUsuario) {
-	// 		toastStore.show({
-	// 			variant: 'warning',
-	// 			message: 'Ya dejaste una reseña. Podés editarla si necesitás cambiar algo.'
-	// 		});
-	// 		return;
-	// 	}
+	async function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+		if (!proyecto?.id_proyecto || !$usuario) return;
 
-	// 	if (modoResena === 'editar' && resenaEnEdicion?.id_resena) {
-	// 		resenasLocal = resenasLocal.map((r) =>
-	// 			r.id_resena === resenaEnEdicion?.id_resena
-	// 				? { ...r, contenido: event.detail.contenido, puntaje: event.detail.puntaje }
-	// 				: r
-	// 		);
-	// 		toastStore.show({
-	// 			variant: 'success',
-	// 			message: 'Reseña actualizada correctamente.'
-	// 		});
-	// 		return;
-	// 	}
+		if (tieneResenaUsuario) {
+			toastStore.show({
+				variant: 'warning',
+				message: 'Ya dejaste una reseña.'
+			});
+			return;
+		}
 
-	// 	const nuevaResena: Resena = {
-	// 		id_resena: Date.now(),
-	// 		tipo_objeto: 'proyecto',
-	// 		id_objeto: proyecto.id_proyecto,
-	// 		contenido: event.detail.contenido,
-	// 		puntaje: event.detail.puntaje,
-	// 		username: $usuario.username,
-	// 		rol: $usuario.rol,
-	// 		aprobado: true
-	// 	};
-	// 	resenasLocal = [nuevaResena, ...resenasLocal];
-	// 	toastStore.show({
-	// 		variant: 'success',
-	// 		message: 'Reseña publicada correctamente.'
-	// 	});
-	// }
+		try {
+			const res = await fetch('/api/resenas', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					tipo_objeto: 'proyecto',
+					id_objeto: proyecto.id_proyecto,
+					contenido: event.detail.contenido,
+					puntaje: event.detail.puntaje
+				})
+			});
 
-	onMount(() => {
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.error || 'Error al guardar reseña.');
+			}
+			const nuevaResenaStr = await res.json();
+
+			const reseñaConAutor = {
+				...nuevaResenaStr,
+				autor: {
+					...$usuario,
+					rol: $usuario.rol,
+					nombre: $usuario.nombre,
+					apellido: $usuario.apellido,
+					url_foto: $usuario.url_foto,
+					
+					nombre_legal: ($usuario as any).nombre_legal,
+					razon_social: ($usuario as any).razon_social
+				}
+			};
+
+			resenasProyecto = [reseñaConAutor, ...resenasProyecto];
+			mostrarModalResena = false;
+			toastStore.show({
+				variant: 'success',
+				message: 'Reseña publicada correctamente.'
+			});
+		} catch (err: any) {
+			toastStore.show({ variant: 'error', message: err.message });
+		}
+	}
+
+	onMount(async () => {
 		layoutStore.showStickyBottomBar();
+		if (proyecto?.id_proyecto) {
+			try {
+				const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+				if (res.ok) {
+					resenasProyecto = await res.json();
+				}
+			} catch (e) {
+				console.error('Error cargando reseñas', e);
+			}
+		}
 	});
 
 	onDestroy(() => {
@@ -855,7 +866,12 @@
 			<div
 				class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 			>
-				<ProyectoHeader {proyecto} {esAdministrador} {esCreador} />
+				<ProyectoHeader
+					{proyecto}
+					{esAdministrador}
+					{esCreador}
+					tieneReportePendiente={data.tieneReportePendiente ?? false}
+				/>
 
 				<div class="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-10">
 					<!-- Columna principal -->
@@ -1134,7 +1150,7 @@
 							<DetallesProyecto {proyecto} formatearFecha={formatearFechaLocal} />
 						</section>
 
-						<!-- {#if puedeVerResenas}
+						{#if puedeVerResenas}
 							<section
 								class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 								aria-labelledby="titulo-resenas-proyecto"
@@ -1147,8 +1163,6 @@
 										<p class="mt-2 text-sm text-gray-600">
 											{#if puedeRedactarResena && !tieneResenaUsuario}
 												Compartí tu experiencia y ayudá a mejorar futuros proyectos.
-											{:else if tieneResenaUsuario}
-												Ya publicaste tu reseña. Podés editarla o eliminarla si necesitás cambios.
 											{:else if esCreador || esColaboradorAprobado}
 												{mensajeResenaBloqueada}
 											{:else}
@@ -1173,10 +1187,8 @@
 											<div class="flex h-full flex-col gap-3">
 												<ResenaCard
 													{resena}
-													onEditar={resena.username && resena.username === $usuario?.username
-														? () => editarResena(resena)
-														: null}
-													onEliminar={resena.username && resena.username === $usuario?.username
+													autor={resena.autor}
+													onEliminar={resena.autor_id && resena.autor_id === $usuario?.id_usuario || esAdministrador
 														? () => solicitarEliminarResena(resena)
 														: null}
 												/>
@@ -1189,7 +1201,7 @@
 									</div>
 								{/if}
 							</section>
-						{/if} -->
+						{/if}
 					</div>
 
 					<!-- Columna lateral -->
@@ -1296,7 +1308,9 @@
 								<div class="flex items-center justify-between">
 									{#if obtenerUrlPerfil(proyecto.institucion)}
 										<a
-											href={obtenerUrlPerfil(proyecto.institucion)}
+											href="{obtenerUrlPerfil(
+												proyecto.institucion
+											)}?from=proyecto&proyecto={proyecto.id_proyecto}"
 											class="flex min-w-0 flex-1 items-center gap-3 transition-opacity hover:opacity-80"
 										>
 											<div
@@ -1495,7 +1509,9 @@
 										>
 											{#if obtenerUrlPerfil(colab.colaborador)}
 												<a
-													href={obtenerUrlPerfil(colab.colaborador)}
+													href="{obtenerUrlPerfil(
+														colab.colaborador
+													)}?from=proyecto&proyecto={proyecto.id_proyecto}"
 													class="block flex-1 truncate text-sm text-gray-700 transition-colors hover:text-blue-600 hover:underline"
 													title={obtenerNombreColaborador(colab.colaborador)}
 												>
@@ -1533,12 +1549,12 @@
 									</p>
 									<button
 										type="button"
-										disabled={yaReporto}
+										disabled={data.tieneReportePendiente}
 										onclick={() => pushState('', { showReportModal: true })}
 										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{yaReporto ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>
@@ -2011,26 +2027,7 @@
 					>
 						{#if anulando}
 							<span class="flex items-center justify-center gap-2">
-								<svg
-									class="h-4 w-4 animate-spin"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<circle
-										class="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										stroke-width="4"
-									></circle>
-									<path
-										class="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
+								<Loader2 class="h-4 w-4 animate-spin" />
 								Anulando...
 							</span>
 						{:else}
@@ -2043,10 +2040,10 @@
 	</div>
 {/if}
 
-<!-- <ResenaProyectoModal
+	<ResenaProyectoModal
 	mostrar={mostrarModalResena}
-	modo={modoResena}
-	resenaInicial={resenaEnEdicion}
+	modo="crear"
+	resenaInicial={null}
 	maxCaracteres={maxCaracteresResena}
 	on:guardar={guardarResena}
 	on:cerrar={() => (mostrarModalResena = false)}
@@ -2101,7 +2098,7 @@
 			</div>
 		</div>
 	</div>
-{/if} -->
+{/if}
 
 <style>
 	@keyframes fade-up {
