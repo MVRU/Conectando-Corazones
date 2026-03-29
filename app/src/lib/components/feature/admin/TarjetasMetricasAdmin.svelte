@@ -1,49 +1,264 @@
 <script lang="ts">
 	import type { KpisPanelAdminDto } from '$lib/domain/types/dto/PanelAdmin';
+	import {
+		Users,
+		FolderOpen,
+		ShieldAlert,
+		ClipboardCheck,
+		UserCog,
+		Activity,
+		CheckCircle2
+	} from 'lucide-svelte';
+	import { tweened } from 'svelte/motion';
+	import { cubicOut } from 'svelte/easing';
+	import { onMount } from 'svelte';
+
 	export let kpis: KpisPanelAdminDto;
+
+	// Animaciones para los números principales
+	const tUsuarios = tweened(0, { duration: 2000, easing: cubicOut });
+	const tProyectos = tweened(0, { duration: 2000, easing: cubicOut });
+	const tReportes = tweened(0, { duration: 2000, easing: cubicOut });
+	const tOnboarding = tweened(0, { duration: 2000, easing: cubicOut });
+
+	onMount(() => {
+		tUsuarios.set(kpis.totalUsuarios);
+		tProyectos.set(kpis.proyectosEnCurso);
+		tReportes.set(kpis.reportesPendientes);
+		tOnboarding.set(kpis.onboardingPendiente);
+	});
+
+	// Reactividad para cuando cambian los KPIs (ej: filtros)
+	$: {
+		tUsuarios.set(kpis.totalUsuarios);
+		tProyectos.set(kpis.proyectosEnCurso);
+		tReportes.set(kpis.reportesPendientes);
+		tOnboarding.set(kpis.onboardingPendiente);
+	}
 </script>
 
-<section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-	<div class="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm" title="Total de usuarios con cuenta creada">
-		<p class="text-xs font-semibold tracking-wide text-blue-700 uppercase">Usuarios</p>
-		<p class="mt-2 text-2xl font-bold text-[#0f1029]">{kpis.totalUsuarios}</p>
-		<p class="mt-1 text-xs text-blue-700">Activos {kpis.usuariosActivos} · Pendientes {kpis.usuariosPendientes}</p>
+<!-- KPIs Principales -->
+<div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+	<!-- Usuarios -->
+	<div
+		class="group relative overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
+	>
+		<div
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-[40px] transition-all duration-700 group-hover:bg-blue-500/20"
+		></div>
+		<div class="relative z-10 flex h-full flex-col justify-between">
+			<div class="flex items-start justify-between">
+				<div>
+					<p class="text-xs font-bold tracking-widest text-blue-400 uppercase">Usuarios Totales</p>
+					<h3 class="mt-3 text-4xl font-black tracking-tighter text-white">
+						{Math.floor($tUsuarios)}
+					</h3>
+				</div>
+				<div class="rounded-2xl bg-blue-500/20 p-3 text-blue-400 shadow-inner">
+					<Users size={24} />
+				</div>
+			</div>
+			<div class="mt-5 flex items-center gap-3">
+				<span
+					class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30"
+				>
+					{kpis.usuariosActivos} Activos
+				</span>
+				<span
+					class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30"
+				>
+					{kpis.usuariosPendientes} Pendientes
+				</span>
+			</div>
+		</div>
 	</div>
 
-	<div class="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm" title="Proyectos con estado en curso">
-		<p class="text-xs font-semibold tracking-wide text-emerald-700 uppercase">Proyectos en curso</p>
-		<p class="mt-2 text-2xl font-bold text-emerald-800">{kpis.proyectosEnCurso}</p>
-		<p class="mt-1 text-xs text-emerald-700">Finalizados {kpis.proyectosFinalizados}</p>
+	<!-- Proyectos -->
+	<div
+		class="group relative overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
+	>
+		<div
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-[40px] transition-all duration-700 group-hover:bg-emerald-500/20"
+		></div>
+		<div class="relative z-10 flex h-full flex-col justify-between">
+			<div class="flex items-start justify-between">
+				<div>
+					<p class="text-xs font-bold tracking-widest text-emerald-400 uppercase">
+						Proyectos en curso
+					</p>
+					<h3 class="mt-3 text-4xl font-black tracking-tighter text-white">
+						{Math.floor($tProyectos)}
+					</h3>
+				</div>
+				<div class="rounded-2xl bg-emerald-500/20 p-3 text-emerald-400 shadow-inner">
+					<FolderOpen size={24} />
+				</div>
+			</div>
+			<div class="mt-5">
+				<p class="text-xs font-medium text-slate-400">
+					<span class="text-emerald-400 font-bold">{kpis.proyectosFinalizados}</span> finalizados exitosamente
+				</p>
+			</div>
+		</div>
 	</div>
 
-	<div class="rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-4 shadow-sm" title="Reportes pendientes de resolución administrativa">
-		<p class="text-xs font-semibold tracking-wide text-amber-700 uppercase">Reportes</p>
-		<p class="mt-2 text-2xl font-bold text-amber-800">{kpis.reportesPendientes}</p>
-		<p class="mt-1 text-xs text-amber-700">Pendientes de resolución</p>
+	<!-- Reportes -->
+	<div
+		class="group relative overflow-hidden rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10"
+	>
+		<div
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-[40px] transition-all duration-700 group-hover:bg-rose-500/20"
+		></div>
+		<div class="relative z-10 flex h-full flex-col justify-between">
+			<div class="flex items-start justify-between">
+				<div>
+					<p class="text-xs font-bold tracking-widest text-rose-400 uppercase">Reportes</p>
+					<h3 class="mt-3 text-4xl font-black tracking-tighter text-white">
+						{Math.floor($tReportes)}
+					</h3>
+				</div>
+				<div class="rounded-2xl bg-rose-500/20 p-3 text-rose-400 shadow-inner">
+					<ShieldAlert size={24} />
+				</div>
+			</div>
+			<div class="mt-5">
+				<span
+					class="inline-flex items-center gap-1 text-xs font-bold {kpis.reportesPendientes > 0
+						? 'text-rose-400 animate-pulse'
+						: 'text-slate-400'}"
+				>
+					{#if kpis.reportesPendientes > 0}
+						Atención requerida
+					{:else}
+						Todo al día
+					{/if}
+				</span>
+			</div>
+		</div>
 	</div>
 
-	<div class="rounded-2xl border border-purple-100 bg-gradient-to-br from-purple-50 to-white p-4 shadow-sm" title="Solicitudes de validación documental en estado pendiente">
-		<p class="text-xs font-semibold tracking-wide text-purple-700 uppercase">Validación documental</p>
-		<p class="mt-2 text-2xl font-bold text-purple-800">{kpis.onboardingPendiente}</p>
-		<p class="mt-1 text-xs text-purple-700">Solicitudes documentales pendientes</p>
+	<!-- Validación -->
+	<div
+		class="group relative overflow-hidden rounded-[2rem] border border-purple-500/20 bg-purple-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10"
+	>
+		<div
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-purple-500/10 blur-[40px] transition-all duration-700 group-hover:bg-purple-500/20"
+		></div>
+		<div class="relative z-10 flex h-full flex-col justify-between">
+			<div class="flex items-start justify-between">
+				<div>
+					<p class="text-xs font-bold tracking-widest text-purple-400 uppercase">Validación</p>
+					<h3 class="mt-3 text-4xl font-black tracking-tighter text-white">
+						{Math.floor($tOnboarding)}
+					</h3>
+				</div>
+				<div class="rounded-2xl bg-purple-500/20 p-3 text-purple-400 shadow-inner">
+					<ClipboardCheck size={24} />
+				</div>
+			</div>
+			<div class="mt-5">
+				<p class="text-xs font-medium text-slate-400">Solicitudes pendientes de revisión</p>
+			</div>
+		</div>
 	</div>
-</section>
+</div>
 
-<section class="grid gap-4 sm:grid-cols-3">
-	<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" title="Distribución total por tipo de cuenta">
-		<p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Roles</p>
-		<p class="mt-2 text-sm text-gray-700">
-			Admin: {kpis.usuariosPorRol.administrador ?? 0} · Instituciones: {kpis.usuariosPorRol.institucion ?? 0}
-			· Colaboradores: {kpis.usuariosPorRol.colaborador ?? 0}
-		</p>
+<!-- Resumen Secundario -->
+<div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+	<!-- Roles -->
+	<div
+		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+	>
+		<div class="mb-4 flex items-center gap-2">
+			<UserCog size={18} class="text-slate-400" />
+			<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Distribución de Roles</p>
+		</div>
+		<div class="flex flex-col gap-3">
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-medium text-slate-300">Administradores</span>
+				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.administrador ?? 0}</span>
+			</div>
+			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+				<div
+					class="h-full bg-blue-500"
+					style="width: {((kpis.usuariosPorRol.administrador || 0) / kpis.totalUsuarios) * 100}%"
+				></div>
+			</div>
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-medium text-slate-300">Instituciones</span>
+				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.institucion ?? 0}</span>
+			</div>
+			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+				<div
+					class="h-full bg-emerald-500"
+					style="width: {((kpis.usuariosPorRol.institucion || 0) / kpis.totalUsuarios) * 100}%"
+				></div>
+			</div>
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-medium text-slate-300">Colaboradores</span>
+				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.colaborador ?? 0}</span>
+			</div>
+			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+				<div
+					class="h-full bg-purple-500"
+					style="width: {((kpis.usuariosPorRol.colaborador || 0) / kpis.totalUsuarios) * 100}%"
+				></div>
+			</div>
+		</div>
 	</div>
-	<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" title="Resumen de cuentas inhabilitadas y pendientes de validación">
-		<p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Estado de cuentas</p>
-		<p class="mt-2 text-xl font-bold text-red-700">Inhabilitados: {kpis.usuariosInhabilitados}</p>
-		<p class="mt-1 text-sm font-semibold text-amber-700">Pendientes: {kpis.usuariosPendientes}</p>
+
+	<!-- Estado General -->
+	<div
+		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+	>
+		<div class="mb-4 flex items-center gap-2">
+			<Activity size={18} class="text-slate-400" />
+			<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Estado General</p>
+		</div>
+		<div class="space-y-4">
+			<div class="flex items-center justify-between rounded-xl bg-rose-500/10 p-4 border border-rose-500/20">
+				<div>
+					<p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Inhabilitados</p>
+					<p class="text-2xl font-black text-white">{kpis.usuariosInhabilitados}</p>
+				</div>
+                <div class="h-10 w-10 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 font-bold">
+                    !
+                </div>
+			</div>
+			<div class="flex items-center justify-between rounded-xl bg-amber-500/10 p-4 border border-amber-500/20">
+				<div>
+					<p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Pendientes</p>
+					<p class="text-2xl font-black text-white">{kpis.usuariosPendientes}</p>
+				</div>
+                <div class="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold italic">
+                    ?
+                </div>
+			</div>
+		</div>
 	</div>
-	<div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm" title="Incluye reportes desestimados y resueltos en los últimos 30 días">
-		<p class="text-xs font-semibold tracking-wide text-gray-500 uppercase">Reportes resueltos (30 días)</p>
-		<p class="mt-2 text-xl font-bold text-blue-700">{kpis.reportesResueltosMes}</p>
+
+	<!-- Rendimiento -->
+	<div
+		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 flex flex-col justify-between"
+	>
+		<div>
+			<div class="mb-4 flex items-center gap-2">
+				<CheckCircle2 size={18} class="text-emerald-400" />
+				<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Resolución mensual</p>
+			</div>
+			<div class="mt-6 flex flex-col items-center justify-center text-center">
+				<p class="text-6xl font-black text-white tracking-tighter">{kpis.reportesResueltosMes}</p>
+				<p class="mt-2 text-sm font-bold text-emerald-400 uppercase tracking-widest">
+					Reportes resueltos
+				</p>
+			</div>
+		</div>
+		<div class="mt-6">
+			<p class="text-center text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em]">
+				Últimos 30 días
+			</p>
+		</div>
 	</div>
-</section>
+</div>
+
+

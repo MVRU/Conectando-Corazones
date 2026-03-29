@@ -1,27 +1,41 @@
 <script lang="ts">
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { XMark } from '@steeze-ui/heroicons';
-	import { createEventDispatcher } from 'svelte';
 	import { scale } from 'svelte/transition';
 
-	export let abierto = false;
-	export let titulo = '';
-	export let cerrarAlClickearFondo = true;
-	export let ocultarEncabezado = false;
-	export let anchoMaximo = 'max-w-lg';
+	let {
+		abierto = $bindable(false),
+		titulo = '',
+		cerrarAlClickearFondo = true,
+		ocultarEncabezado = false,
+		anchoMaximo = 'max-w-lg',
+		onCerrar = undefined,
+		children,
+		footer
+	} = $props<{
+		abierto?: boolean;
+		titulo?: string;
+		cerrarAlClickearFondo?: boolean;
+		ocultarEncabezado?: boolean;
+		anchoMaximo?: string;
+		onCerrar?: () => void;
+		children?: any;
+		footer?: any;
+	}>();
 
-	const dispatch = createEventDispatcher();
 	let dialogo: HTMLDialogElement;
 
-	$: if (dialogo && abierto) {
-		dialogo.showModal();
-	} else if (dialogo && !abierto) {
-		dialogo.close();
-	}
+	$effect(() => {
+		if (dialogo && abierto) {
+			dialogo.showModal();
+		} else if (dialogo && !abierto) {
+			dialogo.close();
+		}
+	});
 
 	function cerrar() {
 		abierto = false;
-		dispatch('cerrar');
+		if (onCerrar) onCerrar();
 	}
 
 	function manejarClickFondo(e: MouseEvent) {
@@ -33,9 +47,9 @@
 
 <dialog
 	bind:this={dialogo}
-	on:close={cerrar}
-	on:click={manejarClickFondo}
-	on:keydown={(e) => {
+	onclose={cerrar}
+	onclick={manejarClickFondo}
+	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();
 	}}
 	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-none backdrop:bg-black/30 backdrop:backdrop-blur-sm"
@@ -58,7 +72,7 @@
 					<button
 						type="button"
 						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-						on:click={cerrar}
+						onclick={cerrar}
 						aria-label="Cerrar modal"
 					>
 						<Icon src={XMark} class="h-5 w-5" />
@@ -68,18 +82,20 @@
 
 			<!-- Contenido -->
 			<div class="px-4 py-5 sm:p-6">
-				<slot />
+				{@render children?.()}
 			</div>
 
 			<!-- Footer (Opcional) -->
-			{#if $$slots.footer}
+			{#if footer}
 				<div class="gap-2 bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-					<slot name="footer" />
+					{@render footer()}
 				</div>
 			{/if}
 		</div>
 	{/if}
 </dialog>
+
+
 
 <style>
 	dialog::backdrop {
