@@ -4,18 +4,28 @@
 	import { usuario as usuarioStore } from '$lib/stores/auth';
 	import { MessageSquare, Plus, Info } from 'lucide-svelte';
 
-	export let resenas: Resena[];
-	export let esMiPerfil: boolean;
-	export let puedeAgregarResena: boolean;
-	export let yaResenoUsuario: boolean;
-	export let onAgregarResenaClick: () => void;
-	export let onEliminar: (resena: Resena) => void = () => {};
-	export let limiteMostrar: number = 4;
+	let {
+		resenas,
+		esMiPerfil,
+		puedeAgregarResena,
+		yaResenoUsuario,
+		onAgregarResenaClick,
+		onEliminar = () => {},
+		limiteMostrar = 4
+	} = $props<{
+		resenas: Resena[];
+		esMiPerfil: boolean;
+		puedeAgregarResena: boolean;
+		yaResenoUsuario: boolean;
+		onAgregarResenaClick: () => void;
+		onEliminar?: (resena: Resena) => void;
+		limiteMostrar?: number;
+	}>();
 
-	$: resenasMostradas = resenas.slice(0, limiteMostrar);
-	$: tieneResenas = resenas.length > 0;
-	$: mostrarBotonAgregar = !esMiPerfil && puedeAgregarResena && !yaResenoUsuario;
-	$: mostrarMensajeNoPermitido = !esMiPerfil && !yaResenoUsuario && !puedeAgregarResena;
+	let resenasMostradas = $derived(resenas.slice(0, limiteMostrar));
+	let tieneResenas = $derived(resenas.length > 0);
+	let mostrarBotonAgregar = $derived(!esMiPerfil && puedeAgregarResena && !yaResenoUsuario);
+	let mostrarMensajeNoPermitido = $derived(!esMiPerfil && !yaResenoUsuario && !puedeAgregarResena);
 </script>
 
 <section>

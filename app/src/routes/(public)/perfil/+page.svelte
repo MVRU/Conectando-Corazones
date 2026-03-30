@@ -1,19 +1,16 @@
 <script lang="ts">
 	import { usuario as usuarioStore, isAuthenticated, isLoading } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 
-	onMount(() => {
-		// La lógica se maneja reactivamente para esperar a que termine carga
-	});
-
-	$: if (!$isLoading) {
-		if ($isAuthenticated && $usuarioStore) {
-			goto(`/perfil/${$usuarioStore.username}`);
-		} else {
-			goto('/iniciar-sesion');
+	$effect(() => {
+		if (!$isLoading) {
+			if ($isAuthenticated && $usuarioStore) {
+				goto(`/perfil/${$usuarioStore.username}`);
+			} else {
+				goto('/iniciar-sesion');
+			}
 		}
-	}
+	});
 </script>
 
 <svelte:head>

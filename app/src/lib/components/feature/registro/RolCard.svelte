@@ -1,11 +1,21 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
 
-	export let seleccionado: boolean = false;
-	export let icono: 'institucion' | 'colaborador' | 'usuario' = 'usuario';
-	export let titulo: string = '';
-	export let descripcion: string = '';
-	export let onSelect: () => void;
+	interface Props {
+		seleccionado?: boolean;
+		icono?: 'institucion' | 'colaborador' | 'usuario';
+		titulo?: string;
+		descripcion?: string;
+		onSelect: () => void;
+	}
+
+	let {
+		seleccionado = false,
+		icono = 'usuario',
+		titulo = '',
+		descripcion = '',
+		onSelect
+	}: Props = $props();
 </script>
 
 <div

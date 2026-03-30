@@ -2,9 +2,7 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { XMark } from '@steeze-ui/heroicons';
 	import { scale } from 'svelte/transition';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
+	import type { Snippet } from 'svelte';
 
 	let {
 		abierto = $bindable(false),
@@ -12,7 +10,7 @@
 		cerrarAlClickearFondo = true,
 		ocultarEncabezado = false,
 		anchoMaximo = 'max-w-lg',
-		onCerrar = undefined,
+		oncerrar,
 		children,
 		footer
 	} = $props<{
@@ -21,12 +19,12 @@
 		cerrarAlClickearFondo?: boolean;
 		ocultarEncabezado?: boolean;
 		anchoMaximo?: string;
-		onCerrar?: () => void;
-		children?: any;
-		footer?: any;
+		oncerrar?: () => void;
+		children?: Snippet;
+		footer?: Snippet;
 	}>();
 
-	let dialogo: HTMLDialogElement;
+	let dialogo: HTMLDialogElement | undefined = $state();
 
 	$effect(() => {
 		if (dialogo && abierto) {
@@ -40,14 +38,7 @@
 		// Solo ejecutar una vez: idempotente
 		if (!abierto) return;
 		abierto = false;
-		// Soportar ambas APIs: callback Svelte 5 y evento Svelte 4
-		if (onCerrar) onCerrar();
-		dispatch('cerrar');
-	}
-
-	function sincronizarEstado() {
-		// Solo sincronizar estado sin ejecutar callbacks (se llama desde onclose)
-		abierto = false;
+		oncerrar?.();
 	}
 
 	function manejarClickFondo(e: MouseEvent) {
@@ -59,7 +50,7 @@
 
 <dialog
 	bind:this={dialogo}
-	onclose={sincronizarEstado}
+	onclose={cerrar}
 	onclick={manejarClickFondo}
 	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import Ticker from '$lib/components/ui/Ticker.svelte';
@@ -11,14 +10,12 @@
 		{ src: '/instituciones/cruz-roja.png', href: '/perfil/cruz_roja_arg' }
 	];
 
-	let mostrarHero = false;
-	let mostrarImagenes = false;
-	let sectionRef: HTMLElement;
+	let mostrarHero = $state(false);
+	let mostrarImagenes = $state(false);
+	let sectionRef: HTMLElement | undefined = $state();
 
-	let observer: IntersectionObserver;
-
-	onMount(() => {
-		observer = new IntersectionObserver(
+	$effect.pre(() => {
+		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {

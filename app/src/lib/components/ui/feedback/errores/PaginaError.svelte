@@ -4,8 +4,11 @@
 
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	export let estado: number;
-	export let mensaje: string | undefined = undefined;
+
+	let { estado, mensaje = undefined } = $props<{
+		estado: number;
+		mensaje?: string;
+	}>();
 
 	const defaults = {
 		401: {
@@ -28,12 +31,14 @@
 		}
 	} as const;
 
-	const fallback = {
+	let fallback = $derived({
 		titulo: 'Ocurrió un error inesperado',
 		descripcion: mensaje ?? 'Intenta recargar la página o volver al inicio.'
-	};
+	});
 
-	const { titulo, descripcion } = defaults[estado as keyof typeof defaults] ?? fallback;
+	let info = $derived(defaults[estado as keyof typeof defaults] ?? fallback);
+	let titulo = $derived(info.titulo);
+	let descripcion = $derived(info.descripcion);
 </script>
 
 <main

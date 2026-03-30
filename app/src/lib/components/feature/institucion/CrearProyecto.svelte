@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { usuario } from '$lib/stores/auth';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -16,7 +15,6 @@
 
 	import {
 		MENSAJES_ERROR,
-		validarUrl,
 		validarCalle,
 		validarNumeroCalle,
 		esFechaFutura
@@ -25,12 +23,13 @@
 		validarBeneficiariosValor,
 		validarTituloProyecto,
 		validarDescripcionProyecto,
-		validarUrlImagen,
 		esFechaDemasiadoLejana,
 		validarUnidadLibre,
 		validarReferencia,
 		validarPiso,
-		crearValidadorCategoria
+		crearValidadorCategoria,
+		validarAumentoObjetivo,
+		validarAumentoBeneficiarios
 	} from '$lib/utils/util-proyecto-form';
 	import type { Categoria } from '$lib/domain/types/Categoria';
 	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
@@ -39,91 +38,165 @@
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 
-	export let limiteProyectosAlcanzado: boolean = false;
-	export let categorias: Categoria[] = [];
-	export let tiposParticipacion: TipoParticipacion[] = [];
-	export let estaVerificado: boolean = false;
+	let {
+		limiteProyectosAlcanzado = false,
+		categorias = [],
+		tiposParticipacion = [],
+		estaVerificado = false,
+		edicion = false,
+		esEdicionRestringida = false,
+		tieneColaboradoresAprobados = false,
+		proyectoId = undefined,
+		initialData = null,
+		esAdmin = initialData?.esAdmin || false
+	} = $props();
 
-	// Props para edición
-	export let edicion: boolean = false;
-	export let esEdicionRestringida: boolean = false;
-	export let proyectoId: number | undefined = undefined;
-	export let initialData: any = null;
-	export let esAdmin: boolean = initialData?.esAdmin || false;
+	let titulo = $state('');
+	let descripcion = $state('');
+	let urlPortada = $state('');
+	let fechaFinTentativa = $state('');
+	let beneficiarios = $state<number | undefined>(undefined);
 
-	let titulo = initialData?.titulo || '';
-	let descripcion = initialData?.descripcion || '';
-	let urlPortada = initialData?.urlPortada || '';
-	let fechaFinTentativa = initialData?.fechaFinTentativa || '';
-	let beneficiarios: number | undefined = initialData?.beneficiarios;
+	let categoriasSeleccionadas = $state<number[]>([]);
+	let categoriaOtraDescripcion = $state('');
 
-	let categoriasSeleccionadas: number[] = initialData?.categoriasSeleccionadas || [];
-	let categoriaOtraDescripcion = initialData?.categoriaOtraDescripcion || '';
+	let ubicaciones = $state<UbicacionFormulario[]>([]);
 
-	let ubicaciones: UbicacionFormulario[] = initialData?.ubicaciones || [
-		{
-			tipo_ubicacion: 'principal',
-			modalidad: '',
-			direccion_presencial: {
-				calle: '',
-				numero: '',
-				referencia: '',
-				localidad_id: undefined,
-				provincia: '',
-				localidad_nombre: ''
-			},
-			url_virtual: ''
-		}
-	];
+	let tiposParticipacionSeleccionados = $state<TipoParticipacionDescripcion[]>([]);
+	let participacionesPermitidas = $state<ParticipacionForm[]>([]);
 
-	let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] =
-		initialData?.tiposParticipacionSeleccionados || [];
-	let participacionesPermitidas: ParticipacionForm[] = initialData?.participacionesPermitidas || [];
+	import { untrack } from 'svelte';
 
-	let errores: Record<string, string> = {};
+	$effect(() => {
+		untrack(() => {
+			if (initialData) {
+				titulo = initialData.titulo || '';
+				descripcion = initialData.descripcion || '';
+				urlPortada = initialData.urlPortada || '';
+				fechaFinTentativa = initialData.fechaFinTentativa || '';
+				beneficiarios = initialData.beneficiarios;
+				categoriasSeleccionadas = initialData.categoriasSeleccionadas || [];
+				categoriaOtraDescripcion = initialData.categoriaOtraDescripcion || '';
+				ubicaciones = initialData.ubicaciones || [
+					{
+						tipo_ubicacion: 'principal',
+						modalidad: '',
+						direccion_presencial: {
+							calle: '',
+							numero: '',
+							referencia: '',
+							localidad_id: undefined,
+							provincia: '',
+							localidad_nombre: ''
+						},
+						url_virtual: ''
+					}
+				];
+				tiposParticipacionSeleccionados = initialData.tiposParticipacionSeleccionados || [];
+				participacionesPermitidas = initialData.participacionesPermitidas || [];
+			} else {
+				// Valores por defecto si no hay initialData
+				ubicaciones = [
+					{
+						tipo_ubicacion: 'principal',
+						modalidad: '',
+						direccion_presencial: {
+							calle: '',
+							numero: '',
+							referencia: '',
+							localidad_id: undefined,
+							provincia: '',
+							localidad_nombre: ''
+						},
+						url_virtual: ''
+					}
+				];
+			}
+		});
+	});
+
+	let errores = $state<Record<string, string>>({});
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
-	$: descripcionesCategorias = categorias.map((c) => c.descripcion || '');
+	let descripcionesCategorias = $derived(categorias.map((c) => c.descripcion || ''));
 
-	$: validadorCategoria = crearValidadorCategoria(descripcionesCategorias);
+	let validadorCategoria = $derived(crearValidadorCategoria(descripcionesCategorias));
 
-	$: idCategoriaOtra = categorias.find(
-		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
-	)?.id_categoria;
+	let idCategoriaOtra = $derived(
+		categorias.find(
+			(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+		)?.id_categoria
+	);
 
-	$: seleccionoOtra =
-		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1);
-
-	$: if (seleccionoOtra) {
-		const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
-		if (err) {
-			errores.categoria_otra = err;
-			errores = { ...errores };
-		} else {
-			limpiarError('categoria_otra');
-		}
-	} else if (!seleccionoOtra && errores.categoria_otra) {
-		limpiarError('categoria_otra');
-	}
+	let seleccionoOtra = $derived(
+		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1)
+	);
 
 	function limpiarError(campo: string) {
 		if (errores[campo]) {
 			delete errores[campo];
-			errores = { ...errores };
 		}
 	}
 
-	$: if (validarTituloProyecto(titulo) === null) limpiarError('titulo');
-	$: if (validarDescripcionProyecto(descripcion) === null) limpiarError('descripcion');
-	$: if (urlPortada && validarUrl(urlPortada) && !validarUrlImagen(urlPortada))
-		limpiarError('urlPortada');
-	$: if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
-		limpiarError('fechaFinTentativa');
-	$: if (beneficiarios && beneficiarios > 0) limpiarError('beneficiarios');
-	$: if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
-	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
-	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
+	$effect(() => {
+		if (seleccionoOtra) {
+			const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+			if (err) {
+				errores.categoria_otra = err;
+			} else {
+				limpiarError('categoria_otra');
+			}
+		} else {
+			limpiarError('categoria_otra');
+		}
+	});
+
+	$effect(() => {
+		if (validarTituloProyecto(titulo) === null) limpiarError('titulo');
+	});
+
+	$effect(() => {
+		if (validarDescripcionProyecto(descripcion) === null) limpiarError('descripcion');
+	});
+
+	$effect(() => {
+		// Portada es opcional - solo limpiar error si se carga o se elimina
+		if (!urlPortada) {
+			limpiarError('urlPortada');
+		}
+	});
+
+	$effect(() => {
+		if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
+			limpiarError('fechaFinTentativa');
+	});
+
+	$effect(() => {
+		if (beneficiarios != null && beneficiarios > 0) {
+			const errBenReact =
+				esEdicionRestringida && !esAdmin
+					? validarAumentoBeneficiarios(beneficiarios, initialData?.originales?.beneficiarios)
+					: null;
+			if (errBenReact) {
+				errores.beneficiarios = errBenReact;
+			} else {
+				limpiarError('beneficiarios');
+			}
+		}
+	});
+
+	$effect(() => {
+		if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
+	});
+
+	$effect(() => {
+		if (ubicaciones.length > 0) limpiarError('ubicaciones');
+	});
+
+	$effect(() => {
+		if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
+	});
 
 	// --- Lógica de Borradores Locales ---
 	const DRAFT_KEY = `proyecto_borrador_local`;
@@ -186,7 +259,11 @@
 		}
 	}
 
-	onMount(() => {
+	function eliminarBorradorLocal() {
+		localStorage.removeItem(DRAFT_KEY);
+	}
+
+	$effect(() => {
 		if (edicion || initialData) return;
 
 		const saved = localStorage.getItem(DRAFT_KEY);
@@ -194,10 +271,6 @@
 			cargarBorradorLocal();
 		}
 	});
-
-	function eliminarBorradorLocal() {
-		localStorage.removeItem(DRAFT_KEY);
-	}
 
 	function validarFormulario(): boolean {
 		errores = {};
@@ -207,13 +280,7 @@
 		if (errTitulo) errores.titulo = errTitulo;
 		const errDesc = validarDescripcionProyecto(descripcion);
 		if (errDesc) errores.descripcion = errDesc;
-		if (urlPortada) {
-			if (!validarUrl(urlPortada)) errores.urlPortada = MENSAJES_ERROR.urlInvalida;
-			else {
-				const errImg = validarUrlImagen(urlPortada);
-				if (errImg) errores.urlPortada = errImg;
-			}
-		}
+		// Portada: opcional, se valida solo por tamaño y tipo en el componente
 		if (!fechaFinTentativa) {
 			errores.fechaFinTentativa = 'La fecha de fin tentativa es obligatoria.';
 		} else if (!edicion && !esFechaFutura(fechaFinTentativa)) {
@@ -223,7 +290,15 @@
 			errores.fechaFinTentativa = 'La fecha es demasiado lejana (máximo 2 años).';
 		}
 		const errBen = beneficiarios != null ? validarBeneficiariosValor(beneficiarios) : null;
-		if (errBen) errores.beneficiarios = errBen;
+		if (errBen) {
+			errores.beneficiarios = errBen;
+		} else if (esEdicionRestringida && !esAdmin) {
+			const errAumento = validarAumentoBeneficiarios(
+				beneficiarios,
+				initialData?.originales?.beneficiarios
+			);
+			if (errAumento) errores.beneficiarios = errAumento;
+		}
 		if (categoriasSeleccionadas.length === 0)
 			errores.categorias = 'Debe seleccionar al menos una categoría.';
 
@@ -370,9 +445,21 @@
 		}
 
 		// Validar objetivos de participación
+		const originalesData: any[] = initialData?.originales?.participacionesOriginales || [];
 		participacionesPermitidas.forEach((participacion, index) => {
 			const tipo = participacion.tipo_participacion?.descripcion;
 			const objetivo = participacion.objetivo;
+
+			// En edición restringida, validar que el objetivo no se reduzca
+			if (esEdicionRestringida && !esAdmin && participacion.id_participacion_permitida) {
+				const original = originalesData.find(
+					(p: any) => p.id_participacion_permitida === participacion.id_participacion_permitida
+				);
+				const errAumento = validarAumentoObjetivo(objetivo, original?.objetivo);
+				if (errAumento) {
+					errores[`participacion_${index}_objetivo`] = errAumento;
+				}
+			}
 
 			if (tipo === 'Monetaria' && (objetivo == null || objetivo <= 0)) {
 				errores[`participacion_${index}_objetivo`] =
@@ -408,7 +495,9 @@
 			}
 
 			// Validar unidad_medida_otra cuando se selecciona "Otra"
-			if (participacion.unidad_medida === 'Otra') {
+			// Solo para participaciones nuevas: las originales tienen la unidad bloqueada y no pueden editarla
+			const esOriginalItem = esEdicionRestringida && !!participacion.id_participacion_permitida;
+			if (participacion.unidad_medida === 'Otra' && !esOriginalItem) {
 				const unidadOtra = participacion.unidad_medida_otra || '';
 				const esMonetaria = participacion.tipo_participacion?.descripcion === 'Monetaria';
 				const errorUnidad = validarUnidadLibre(unidadOtra, { allowUpperCase: esMonetaria });
@@ -421,13 +510,18 @@
 		return Object.keys(errores).length === 0;
 	}
 
-	let enviando = false;
+	let enviando = $state(false);
 
 	async function enviarFormulario(estado: 'borrador' | 'en_curso' = 'en_curso') {
 		if (limiteProyectosAlcanzado && !edicion && estado === 'en_curso') return;
 
 		if (!validarFormulario()) {
 			console.log('Formulario inválido', errores);
+			toastStore.show({
+				variant: 'error',
+				title: 'Formulario incompleto',
+				message: 'Revisá los campos marcados en rojo antes de continuar.'
+			});
 			return;
 		}
 
@@ -480,7 +574,7 @@
 			fecha_fin_tentativa: new Date(fechaFinTentativa),
 			beneficiarios: beneficiarios ? Number(beneficiarios) : undefined,
 			institucion_id: 0, // Se inyecta en el servidor
-			categoria_ids: categoriasSeleccionadas.filter((id) => Number.isFinite(id) && id > 0),
+			categoria_ids: categoriasSeleccionadas.filter((id: number) => Number.isFinite(id) && id > 0),
 			participaciones: participaciones,
 			ubicaciones: ubicacionesCargadas,
 			estado: edicion ? undefined : estado
@@ -575,7 +669,7 @@
 		{/if}
 
 		<form
-			on:submit|preventDefault={() => enviarFormulario(estaVerificado ? 'en_curso' : 'borrador')}
+			onsubmit={(e) => { e.preventDefault(); enviarFormulario(estaVerificado ? 'en_curso' : 'borrador'); }}
 			class="space-y-8"
 		>
 			<ProyectoInfoBasica
@@ -604,9 +698,7 @@
 				{esEdicionRestringida}
 				{esAdmin}
 				participacionesOriginales={initialData?.originales?.participacionesOriginales || []}
-				tieneColaboradoresAprobados={initialData?.colaboraciones?.some(
-					(c: any) => c.estado === 'aprobada'
-				) || false}
+				tieneColaboradoresAprobados={tieneColaboradoresAprobados}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} {esEdicionRestringida} {esAdmin} />

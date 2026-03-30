@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import AportesList from '$lib/components/feature/aportes/AportesList.svelte';
@@ -7,7 +7,7 @@
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	let { data } = $props();
-	let projectId = $derived($page.params.id);
+	let projectId = $derived(page.params.id);
 	let isMobile = $state(false);
 
 	$effect(() => {

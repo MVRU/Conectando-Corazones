@@ -10,7 +10,10 @@
 		Tag
 	} from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	export let contactos: Contacto[] = [];
+
+	let { contactos = [] } = $props<{
+		contactos?: Contacto[];
+	}>();
 </script>
 
 {#if contactos.length}

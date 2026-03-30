@@ -1,17 +1,23 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount, onDestroy } from 'svelte';
 	import { chatStore } from '$lib/stores/chatStore';
 
-	export let deshabilitado: boolean = false;
-	export let placeholder: string = 'Escribe un mensaje...';
-	export let chatId: number | undefined = undefined;
+	let {
+		deshabilitado = false,
+		placeholder = 'Escribe un mensaje...',
+		chatId = undefined,
+		onSend
+	} = $props<{
+		deshabilitado?: boolean;
+		placeholder?: string;
+		chatId?: number | undefined;
+		onSend?: (event: { contenido: string }) => void;
+	}>();
 
-	let mensaje = '';
+	let mensaje = $state('');
 	let textareaElement: HTMLTextAreaElement;
-	const dispatch = createEventDispatcher();
 
 	// Cargar borrador al montar si existe
-	onMount(() => {
+	$effect(() => {
 		if (chatId !== undefined) {
 			const draft = $chatStore.draftMessages.get(chatId);
 			if (draft) {
@@ -22,24 +28,28 @@
 	});
 
 	// Guardar borrador al desmontar si hay contenido
-	onDestroy(() => {
-		if (chatId !== undefined && mensaje.trim()) {
-			chatStore.saveDraft(chatId, mensaje);
-		}
+	$effect(() => {
+		return () => {
+			if (chatId !== undefined && mensaje.trim()) {
+				chatStore.saveDraft(chatId, mensaje);
+			}
+		};
 	});
 
 	// Guardar borrador cuando cambia el chatId
-	$: if (chatId !== undefined) {
-		const draft = $chatStore.draftMessages.get(chatId);
-		if (draft !== undefined && draft !== mensaje) {
-			mensaje = draft;
-			setTimeout(autoExpand, 0);
+	$effect(() => {
+		if (chatId !== undefined) {
+			const draft = $chatStore.draftMessages.get(chatId);
+			if (draft !== undefined && draft !== mensaje) {
+				mensaje = draft;
+				setTimeout(autoExpand, 0);
+			}
 		}
-	}
+	});
 
 	function enviar() {
 		if (!mensaje.trim() || deshabilitado) return;
-		dispatch('send', { contenido: mensaje });
+		onSend?.({ contenido: mensaje });
 		mensaje = '';
 		if (textareaElement) {
 			textareaElement.style.height = 'auto';
@@ -65,9 +75,11 @@
 		}
 	}
 
-	$: if (mensaje !== undefined) {
-		setTimeout(autoExpand, 0);
-	}
+	$effect(() => {
+		if (mensaje !== undefined) {
+			setTimeout(autoExpand, 0);
+		}
+	});
 </script>
 
 <div class="flex-shrink-0 border-t border-gray-200 bg-white p-3 shadow-lg md:p-4">
@@ -75,8 +87,8 @@
 		<textarea
 			bind:this={textareaElement}
 			bind:value={mensaje}
-			on:keydown={handleKeydown}
-			on:input={autoExpand}
+			onkeydown={handleKeydown}
+			oninput={autoExpand}
 			disabled={deshabilitado}
 			{placeholder}
 			rows="1"
@@ -84,7 +96,7 @@
 			style="min-height: 44px; max-height: 200px;"
 		></textarea>
 		<button
-			on:click={enviar}
+			onclick={enviar}
 			disabled={!mensaje.trim() || deshabilitado}
 			class="flex items-center justify-center self-end rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none md:px-5"
 			style="min-height: 44px;"

@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import RegistroCuentaForm from '$lib/components/feature/registro/RegistroCuentaForm.svelte';
 	import RolCard from '$lib/components/feature/registro/RolCard.svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
@@ -144,7 +143,7 @@
 		}
 	});
 
-	onMount(() => {
+	$effect(() => {
 		// No breadcrumbs on registration page
 		if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
 			storageRegistroDisponible = true;

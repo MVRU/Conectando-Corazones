@@ -9,9 +9,11 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 
-	export let estado: EstadoVerificacionDisplay;
-export let href: string | null = null;
-	export let textoAccion: string | null = null;
+	let { estado = $bindable(), href = null, textoAccion = null } = $props<{
+		estado: EstadoVerificacionDisplay;
+		href?: string | null;
+		textoAccion?: string | null;
+	}>();
 
 	const badgeConfig = {
 		sin_verificacion: {
@@ -44,13 +46,15 @@ export let href: string | null = null;
 			icon: ShieldExclamation,
 			label: 'Verificado por RENAPER/SID'
 		}
-	};
+	} as const;
 
-	$: config = badgeConfig[estado];
-	$: labelMostrado = textoAccion ?? config.label;
+	type EstadoKey = keyof typeof badgeConfig;
+
+	let config = $derived(badgeConfig[estado as EstadoKey]);
+	let labelMostrado = $derived(textoAccion ?? config.label);
 
 	// Textos cortos para mobile
-	const textosMobile = {
+	const textosMobile: Record<EstadoKey, string> = {
 		sin_verificacion: 'Sin verificar',
 		verificacion_pendiente: 'Pendiente',
 		verificacion_rechazada: 'Rechazada',

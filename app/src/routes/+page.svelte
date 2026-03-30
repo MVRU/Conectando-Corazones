@@ -8,13 +8,12 @@
 	import SoporteSection from '$lib/components/feature/home/SoporteSection.svelte';
 	import ProyectosDestacadosSection from '$lib/components/feature/home/ProyectosDestacadosSection.svelte';
 	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	onMount(() => {
-		clearBreadcrumbs(); // Limpia los breadcrumbs
+	$effect(() => {
+		clearBreadcrumbs();
 	});
 </script>
 

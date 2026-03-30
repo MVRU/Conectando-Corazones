@@ -1,16 +1,28 @@
 <script lang="ts">
-	export let src: string = '';
-	export let alt: string = '';
-	export let variant: 'default' | 'circle' | 'card' | 'none' = 'default';
-	export let animate: 'none' | 'heartbeat' | 'zoom' = 'none';
-	export let width: string = '100%';
-	export let height: string = 'auto';
-	export let href: string = '';
-	export let aspectRatio: string = '';
-	/**
-	 * * Propiedades para imágenes responsivas */
-	export let srcset: string = '';
-	export let sizes: string = '';
+	let {
+		src = '',
+		alt = '',
+		variant = 'default',
+		animate = 'none',
+		width = '100%',
+		height = 'auto',
+		href = '',
+		aspectRatio = '',
+		/** Propiedades para imágenes responsivas */
+		srcset = '',
+		sizes = ''
+	} = $props<{
+		src?: string;
+		alt?: string;
+		variant?: 'default' | 'circle' | 'card' | 'none';
+		animate?: 'none' | 'heartbeat' | 'zoom';
+		width?: string;
+		height?: string;
+		href?: string;
+		aspectRatio?: string;
+		srcset?: string;
+		sizes?: string;
+	}>();
 </script>
 
 {#if href}

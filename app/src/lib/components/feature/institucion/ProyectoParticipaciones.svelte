@@ -27,16 +27,28 @@
 	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus, Lock } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
-	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
-	export let participacionesPermitidas: ParticipacionForm[] = [];
-	export let errores: Record<string, string> = {};
-	export let limpiarError: (campo: string) => void;
 
-	// Modo edición
-	export let esEdicionRestringida = false;
-	export let participacionesOriginales: ParticipacionPermitida[] = [];
-	export let esAdmin = false;
-	export let tieneColaboradoresAprobados = false;
+	let {
+		tiposParticipacionSeleccionados = $bindable([]),
+		participacionesPermitidas = $bindable([]),
+		errores = $bindable({}),
+		limpiarError,
+		esEdicionRestringida = false,
+		participacionesOriginales = [],
+		esAdmin = false,
+		tieneColaboradoresAprobados = false,
+		tiposParticipacion = []
+	} = $props<{
+		tiposParticipacionSeleccionados?: TipoParticipacionDescripcion[];
+		participacionesPermitidas?: ParticipacionForm[];
+		errores?: Record<string, string>;
+		limpiarError: (campo: string) => void;
+		esEdicionRestringida?: boolean;
+		participacionesOriginales?: ParticipacionPermitida[];
+		esAdmin?: boolean;
+		tieneColaboradoresAprobados?: boolean;
+		tiposParticipacion?: TipoParticipacion[];
+	}>();
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -52,15 +64,15 @@
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
 			// No se puede quitar un tipo que ya existe en el proyecto original en modo edición
 			const esOriginal = participacionesOriginales.some(
-				(p) => p.tipo_participacion?.descripcion === tipo
+				(p: ParticipacionPermitida) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (esEdicionRestringida && esOriginal && !esAdmin) {
 				return;
 			}
 
-			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
+			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
 			participacionesPermitidas = participacionesPermitidas.filter(
-				(p) => p.tipo_participacion?.descripcion !== tipo
+				(p: ParticipacionForm) => p.tipo_participacion?.descripcion !== tipo
 			);
 		} else {
 			tiposParticipacionSeleccionados = [...tiposParticipacionSeleccionados, tipo];
@@ -95,7 +107,7 @@
 		} else if (field === 'objetivo') {
 			const valNum = value as number | undefined;
 			const original = participacionesOriginales.find(
-				(p) =>
+				(p: ParticipacionPermitida) =>
 					p.id_participacion_permitida ===
 					participacionesPermitidas[index].id_participacion_permitida
 			);
@@ -157,13 +169,13 @@
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
-		participacionesPermitidas = participacionesPermitidas.filter((_, i) => i !== index);
+		participacionesPermitidas = participacionesPermitidas.filter((_: any, i: number) => i !== index);
 		if (tipo) {
 			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(
-				(p) => p.tipo_participacion?.descripcion === tipo
+				(p: ParticipacionForm) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (!tieneOtrosDelMismoTipo) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
 			}
 		}
 	}
@@ -181,16 +193,15 @@
 		];
 	}
 
-	export let tiposParticipacion: TipoParticipacion[] = [];
+	let tiposDisponibles = $derived(tiposParticipacion.filter(
+		(t: TipoParticipacion) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+	));
 
-	$: tiposDisponibles = tiposParticipacion.filter(
-		(t) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
-	);
+	let cantidadDonacionesEspecie = $derived(participacionesPermitidas.filter(
+		(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
+	).length);
 
-	$: cantidadDonacionesEspecie = participacionesPermitidas.filter(
-		(p) => p.tipo_participacion?.descripcion === 'Especie'
-	).length;
-	$: limiteEspecieAlcanzado = cantidadDonacionesEspecie >= 10;
+	let limiteEspecieAlcanzado = $derived(cantidadDonacionesEspecie >= 10);
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -220,12 +231,9 @@
 					{@const clases = obtenerClasesColor(info.color, false)}
 					<button
 						type="button"
-						on:click={() => toggleTipoParticipacion(tipo)}
-						disabled={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin}
-						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover} disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
-						title={esEdicionRestringida && tieneColaboradoresAprobados && !esAdmin
-							? 'No se pueden añadir tipos si ya hay colaboradores aprobados'
-							: 'Seleccionar'}
+						onclick={() => toggleTipoParticipacion(tipo)}
+						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
+						title="Seleccionar"
 					>
 						<div class="mb-3 text-3xl {clases.iconColor}">
 							<Icon src={info.icon} class="h-8 w-8" />
@@ -249,7 +257,7 @@
 		{@const esOriginal = esEdicionRestringida && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
 			? participacionesOriginales.find(
-					(p) => p.id_participacion_permitida === participacion.id_participacion_permitida
+					(p: ParticipacionPermitida) => p.id_participacion_permitida === participacion.id_participacion_permitida
 				)
 			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
@@ -259,7 +267,7 @@
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
 					{TIPO_PARTICIPACION_LABELS[
-						participacion.tipo_participacion?.descripcion || 'Voluntariado'
+						(participacion.tipo_participacion?.descripcion || 'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
 					]}
 					{#if esOriginal && esEdicionRestringida && !esAdmin}
 						<span
@@ -272,7 +280,7 @@
 				</h4>
 				<button
 					type="button"
-					on:click={() => eliminarParticipacion(index)}
+					onclick={() => eliminarParticipacion(index)}
 					disabled={esOriginal && esEdicionRestringida && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
 					class:opacity-50={esOriginal && esEdicionRestringida && !esAdmin}
@@ -295,7 +303,7 @@
 							id="especie_{index}"
 							type="text"
 							value={participacion.especie || ''}
-							on:input={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
+							oninput={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal || esAdmin}
@@ -330,15 +338,14 @@
 							id="objetivo_{index}"
 							type="number"
 							value={participacion.objetivo ?? ''}
-							on:input={(e) => {
+							oninput={(e) => {
 								const val = e.currentTarget.value;
 								updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
 							}}
 							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							placeholder="100"
-							disabled={esOriginal && esEdicionRestringida && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
@@ -362,13 +369,13 @@
 						<select
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
-							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
+							onchange={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esEdicionRestringida || esAdmin}
-							class:cursor-not-allowed={esEdicionRestringida && !esAdmin}
-							class:bg-gray-50={esEdicionRestringida && !esAdmin}
-							class:text-gray-600={esEdicionRestringida && !esAdmin}
+							class:cursor-not-allowed={esOriginal && !esAdmin}
+							class:bg-gray-50={esOriginal && !esAdmin}
+							class:text-gray-600={esOriginal && !esAdmin}
 						>
 							{#each [...UNIDADES_POR_TIPO[(participacion.tipo_participacion?.descripcion as TipoParticipacionDescripcion) || 'Voluntariado'], 'Otra'] as unidad (unidad)}
 								<option value={unidad}>{unidad}</option>
@@ -383,7 +390,7 @@
 									id="unidad_otra_{index}"
 									type="text"
 									value={participacion.unidad_medida_otra || ''}
-									on:input={(e) =>
+									oninput={(e) =>
 										updateParticipacion(index, 'unidad_medida_otra', e.currentTarget.value)}
 									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
@@ -423,7 +430,7 @@
 			<div class="mt-4 flex justify-center">
 				<button
 					type="button"
-					on:click={agregarItemEspecie}
+					onclick={agregarItemEspecie}
 					class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
 				>
 					<Plus class="mr-2 h-4 w-4" />

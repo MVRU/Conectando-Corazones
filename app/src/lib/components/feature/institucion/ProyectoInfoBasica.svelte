@@ -18,19 +18,39 @@
 	import { env } from '$lib/infrastructure/config/env';
 	import { toastStore } from '$lib/stores/toast';
 
-	export let titulo = '';
-	export let descripcion = '';
-	export let urlPortada = '';
-	export let fechaFinTentativa = '';
-	export let fechaMinima = '';
-	export let beneficiarios: number | undefined;
-	export let categoriasSeleccionadas: number[] = [];
-	export let categoriaOtraDescripcion = '';
-	export let errores: Record<string, string> = {};
-	export let limpiarError: (campo: string) => void;
-	export let categorias: Categoria[] = [];
+	let {
+		titulo = $bindable(''),
+		descripcion = $bindable(''),
+		urlPortada = $bindable(''),
+		fechaFinTentativa = $bindable(''),
+		fechaMinima = '',
+		beneficiarios = $bindable(undefined),
+		categoriasSeleccionadas = $bindable([]),
+		categoriaOtraDescripcion = $bindable(''),
+		errores = $bindable({}),
+		limpiarError,
+		categorias = [],
+		esEdicionRestringida = false,
+		esAdmin = false,
+		originales = undefined
+	} = $props<{
+		titulo?: string;
+		descripcion?: string;
+		urlPortada?: string;
+		fechaFinTentativa?: string;
+		fechaMinima?: string;
+		beneficiarios?: number | undefined;
+		categoriasSeleccionadas?: number[];
+		categoriaOtraDescripcion?: string;
+		errores?: Record<string, string>;
+		limpiarError: (campo: string) => void;
+		categorias?: Categoria[];
+		esEdicionRestringida?: boolean;
+		esAdmin?: boolean;
+		originales?: any;
+	}>();
 
-	let subiendoPortada = false;
+	let subiendoPortada = $state(false);
 
 	async function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -104,14 +124,14 @@
 		}
 	}
 
-	// Modo edición
-	export let esEdicionRestringida = false;
-	export let esAdmin = false;
-	export let originales: any = undefined;
+	function descartarPortada() {
+		urlPortada = '';
+		limpiarError('urlPortada');
+	}
 
-	$: beneficiariosOriginales = originales?.beneficiarios;
-	$: fechaOriginal = originales?.fechaFin;
-	$: categoriaIdsOriginales = originales?.categoriasSeleccionadas || [];
+	let beneficiariosOriginales = $derived(originales?.beneficiarios);
+	let fechaOriginal = $derived(originales?.fechaFin);
+	let categoriaIdsOriginales = $derived(originales?.categoriasSeleccionadas || []);
 
 	function normalizarBeneficiarios() {
 		if (beneficiarios == null || Number.isNaN(beneficiarios)) return;
@@ -136,16 +156,12 @@
 		if (esEdicionRestringida && !esAdmin) return;
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
-			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);
-			if (idCategoriaOtra != null && categoriaId === idCategoriaOtra) {
+			categoriasSeleccionadas = categoriasSeleccionadas.filter((id: number) => id !== categoriaId);
+			if (categoriaId === idCategoriaOtra) {
 				categoriaOtraDescripcion = '';
-				limpiarError('categoria_otra');
 			}
 		} else {
-			// Prevenir seleccionar más de 5 categorías
-			if (categoriasSeleccionadas.length >= 5) {
-				return;
-			}
+			if (categoriasSeleccionadas.length >= 5) return;
 			categoriasSeleccionadas = [...categoriasSeleccionadas, categoriaId];
 		}
 	}
@@ -154,12 +170,15 @@
 		categoriaOtraDescripcion = capitalizarPrimera(categoriaOtraDescripcion);
 	}
 
-	$: idCategoriaOtra = categorias.find(
-		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
-	)?.id_categoria;
+	let idCategoriaOtra = $derived(
+		categorias.find(
+			(c: Categoria) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+		)?.id_categoria
+	);
 
-	$: seleccionoOtra =
-		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1);
+	let seleccionoOtra = $derived(
+		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1)
+	);
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -183,7 +202,7 @@
 				type="text"
 				bind:value={titulo}
 				maxlength="60"
-				on:blur={() => normalizarTitulo(titulo)}
+				onblur={() => normalizarTitulo(titulo)}
 				disabled={esEdicionRestringida && !esAdmin}
 				class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-gray-300={!esEdicionRestringida || esAdmin}
@@ -217,9 +236,7 @@
 		</div>
 
 		<div>
-			<label for="urlPortada" class="mb-2 block text-sm font-medium text-gray-700"
-				>Imagen de portada</label
-			>
+			<div class="mb-2 block text-sm font-medium text-gray-700">Imagen de portada</div>
 
 			{#if urlPortada}
 				<div
@@ -234,7 +251,7 @@
 							<button
 								type="button"
 								class="rounded-full bg-white/90 px-4 py-2 text-sm font-medium text-gray-900 shadow-sm hover:bg-white"
-								on:click={() => document.getElementById('portada-upload')?.click()}
+								onclick={() => document.getElementById('portada-upload')?.click()}
 							>
 								Cambiar imagen
 							</button>
@@ -247,10 +264,7 @@
 						<button
 							type="button"
 							class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
-							on:click={() => {
-								urlPortada = '';
-								limpiarError('urlPortada');
-							}}
+							onclick={descartarPortada}
 						>
 							Eliminar imagen
 						</button>
@@ -262,8 +276,8 @@
 					disabled={esEdicionRestringida && !esAdmin}
 					class="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 py-8 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
 					class:border-red-300={errores.urlPortada}
-					on:click={() => document.getElementById('portada-upload')?.click()}
-					on:keydown={(e) =>
+					onclick={() => document.getElementById('portada-upload')?.click()}
+					onkeydown={(e) =>
 						(e.key === 'Enter' || e.key === ' ') &&
 						document.getElementById('portada-upload')?.click()}
 				>
@@ -317,7 +331,7 @@
 				accept="image/jpeg,image/png,image/webp,image/gif"
 				class="sr-only"
 				disabled={subiendoPortada || (esEdicionRestringida && !esAdmin)}
-				on:change={handleFileUpload}
+				onchange={handleFileUpload}
 			/>
 
 			{#if errores.urlPortada}
@@ -368,9 +382,9 @@
 						: 1}
 					step="1"
 					inputmode="numeric"
-					on:blur={normalizarBeneficiarios}
-					on:input={validarBeneficiariosInput}
-					on:keydown={(e) => {
+					onblur={normalizarBeneficiarios}
+					oninput={validarBeneficiariosInput}
+					onkeydown={(e) => {
 						if (e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '-') {
 							e.preventDefault();
 						}
@@ -420,7 +434,7 @@
 			{@const clases = obtenerClasesColor(color, seleccionado)}
 			<button
 				type="button"
-				on:click={() => toggleCategoria(categoria.id_categoria)}
+				onclick={() => toggleCategoria(categoria.id_categoria)}
 				disabled={esEdicionRestringida && !esAdmin}
 				class="group relative flex items-center rounded-lg border-2 p-3 transition-all duration-200 {clases.border} {clases.bg} {clases.hover} {esEdicionRestringida &&
 				!esAdmin
@@ -484,7 +498,7 @@
 				type="text"
 				bind:value={categoriaOtraDescripcion}
 				maxlength="60"
-				on:blur={normalizarCategoriaOtra}
+				onblur={normalizarCategoriaOtra}
 				disabled={esEdicionRestringida && !esAdmin}
 				class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 				class:border-red-300={errores.categoria_otra}

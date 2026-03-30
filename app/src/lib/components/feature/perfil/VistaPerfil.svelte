@@ -32,7 +32,6 @@
 	import { usePerfilEdicion } from '$lib/stores/perfilEdicion';
 	import { toastStore } from '$lib/stores/toast';
 	import { determinarEstadoVerificacion } from '$lib/utils/util-verificacion';
-	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 	import { Settings, Flag, ShieldAlert, BarChart3, ShieldCheck } from 'lucide-svelte';
@@ -65,16 +64,18 @@
 		puedeVerContactos($usuarioStore, perfilUsuario, proyectos)
 	);
 	let puedeResenar = $derived(puedeDejarResena($usuarioStore, perfilUsuario, proyectos));
-	let proyectosUsuario = $derived(proyectos);
+	let listaResenas = $state<Resena[]>([]);
 
-	const resenasStore = writable<Resena[]>(resenas);
+	$effect(() => {
+		listaResenas = resenas; // Sincronización reactiva
+	});
 
 	let resenaAEliminar: Resena | null = $state(null);
 	let mostrarConfirmarEliminar = $state(false);
 
 	let yaResenoUsuario = $derived(
 		$usuarioStore && !esMiPerfil
-			? $resenasStore.some(
+			? listaResenas.some(
 					(r) =>
 						r.username === ($usuarioStore.username || '') &&
 						r.id_objeto === perfilUsuario.id_usuario &&
@@ -84,7 +85,7 @@
 	);
 
 	let reseñasUsuario = $derived(
-		$resenasStore.filter(
+		listaResenas.filter(
 			(r) => r.id_objeto === perfilUsuario.id_usuario && r.tipo_objeto === 'usuario'
 		)
 	);
@@ -182,7 +183,7 @@
 		modales.abrir('resena');
 	}
 
-	async function handleGuardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	async function handleGuardarResena(resena: Resena) {
 		if (!$usuarioStore) return;
 
 		try {
@@ -192,8 +193,8 @@
 				body: JSON.stringify({
 					tipo_objeto: 'usuario',
 					id_objeto: perfilUsuario.id_usuario,
-					contenido: event.detail.contenido,
-					puntaje: event.detail.puntaje
+					contenido: resena.contenido,
+					puntaje: resena.puntaje
 				})
 			});
 
@@ -218,8 +219,8 @@
 				}
 			};
 
-			// Agregar reseña al store local
-			resenasStore.update((resenas) => [reseñaConAutor, ...resenas]);
+			// Agregar reseña a la lista local
+			listaResenas = [reseñaConAutor, ...listaResenas];
 
 			toastStore.show({
 				variant: 'success',
@@ -258,7 +259,7 @@
 			}
 
 			const idEliminado = resenaAEliminar.id_resena;
-			resenasStore.update((actuales) => actuales.filter((r) => r.id_resena !== idEliminado));
+			listaResenas = listaResenas.filter((r) => r.id_resena !== idEliminado);
 			toastStore.show({
 				variant: 'success',
 				message: 'Reseña eliminada correctamente.'
@@ -273,14 +274,14 @@
 	const abrirModalCategorias = crearAbrirModal('categorias');
 	const abrirModalTiposParticipacion = crearAbrirModal('tiposParticipacion');
 
-	function handleGuardarCategorias(event: CustomEvent<Categoria[]>) {
-		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () =>
+	function handleGuardarCategorias(cats: Categoria[]) {
+		actualizarUsuarioCon({ categorias_preferidas: cats }, () =>
 			modales.cerrar('categorias')
 		);
 	}
 
-	function handleGuardarTiposParticipacion(event: CustomEvent<TipoParticipacion[]>) {
-		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () =>
+	function handleGuardarTiposParticipacion(tipos: TipoParticipacion[]) {
+		actualizarUsuarioCon({ tipos_participacion_preferidas: tipos }, () =>
 			modales.cerrar('tiposParticipacion')
 		);
 	}
@@ -294,7 +295,7 @@
 	] as const;
 
 	let statsUsuario = $derived({
-		proyectos: proyectosUsuario.length,
+		proyectos: proyectos.length,
 		categorias: (perfilUsuario.categorias_preferidas || []).length,
 		resenas: reseñasUsuario.length
 	});
@@ -477,7 +478,7 @@
 					>
 						<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
 							<PerfilSeccionProyectos
-								proyectos={proyectosUsuario}
+								proyectos={proyectos}
 								rol={perfilUsuario.rol}
 								{estadoVerificacion}
 							/>
@@ -542,8 +543,8 @@
 		tipoObjeto="usuario"
 		idObjeto={perfilUsuario.id_usuario}
 		maxCaracteres={500}
-		on:guardar={handleGuardarResena}
-		on:cerrar={() => modales.cerrar('resena')}
+		onguardar={handleGuardarResena}
+		oncerrar={() => modales.cerrar('resena')}
 	/>
 {/if}
 
@@ -601,8 +602,8 @@
 		categoriasSeleccionadas={perfilUsuario.categorias_preferidas || []}
 		{categorias}
 		{guardando}
-		on:guardar={handleGuardarCategorias}
-		on:cerrar={() => modales.cerrar('categorias')}
+		onguardar={handleGuardarCategorias}
+		oncerrar={() => modales.cerrar('categorias')}
 	/>
 {/if}
 
@@ -612,8 +613,8 @@
 		tiposSeleccionados={perfilUsuario.tipos_participacion_preferidas || []}
 		{tiposParticipacion}
 		{guardando}
-		on:guardar={handleGuardarTiposParticipacion}
-		on:cerrar={() => modales.cerrar('tiposParticipacion')}
+		onguardar={handleGuardarTiposParticipacion}
+		oncerrar={() => modales.cerrar('tiposParticipacion')}
 	/>
 {/if}
 

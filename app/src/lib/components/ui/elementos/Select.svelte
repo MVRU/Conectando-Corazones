@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { clsx } from 'clsx';
-	import { onMount, onDestroy } from 'svelte';
 
 	interface Props {
 		options?: Array<{ value: string; label: string }>;
@@ -145,12 +144,12 @@
 		onblur?.();
 	}
 
-	onMount(() => {
+	$effect(() => {
 		document.addEventListener('click', handleClickOutside);
-	});
 
-	onDestroy(() => {
-		document.removeEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
 	});
 </script>
 

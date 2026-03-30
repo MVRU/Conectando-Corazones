@@ -10,15 +10,17 @@
 	import { Heart, QuestionMarkCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
-	export let proyecto: Proyecto;
-	export let mostrarFormulario: () => void;
+	let { proyecto, mostrarFormulario } = $props<{
+		proyecto: Proyecto;
+		mostrarFormulario: () => void;
+	}>();
 
-	let showCompartirModal = false;
+	let showCompartirModal = $state(false);
 
-	const participaciones = ordenarPorProgreso(proyecto.participacion_permitida ?? []);
-	const tieneUnSoloObjetivo = participaciones.length === 1;
-	const multiplesObjetivos = participaciones.length > 1;
-	const unicoObjetivo = tieneUnSoloObjetivo ? participaciones[0] : null;
+	let participaciones = $derived(ordenarPorProgreso(proyecto.participacion_permitida ?? []));
+	let tieneUnSoloObjetivo = $derived(participaciones.length === 1);
+	let multiplesObjetivos = $derived(participaciones.length > 1);
+	let unicoObjetivo = $derived(tieneUnSoloObjetivo ? participaciones[0] : null);
 
 	type UnidadInfo = {
 		bg: string;
@@ -109,7 +111,7 @@
 		};
 	}
 
-	const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
+	let unidadInfo = $derived(getUnidadInfo(unicoObjetivo, multiplesObjetivos));
 
 	function ProyectoAbierto() {
 		return getEstadoCodigo(proyecto.estado, proyecto.estado_id) === 'en_curso';
@@ -152,7 +154,7 @@
 	{#if ProyectoAbierto()}
 		<Button
 			label={unidadInfo.button}
-			on:click={mostrarFormulario}
+			onclick={mostrarFormulario}
 			variant="primary"
 			size="sm"
 			customClass="mb-4 w-full"
@@ -168,13 +170,13 @@
 		variant="secondary"
 		size="sm"
 		customClass="w-full"
-		on:click={() => (showCompartirModal = true)}
+		onclick={() => (showCompartirModal = true)}
 	/>
 
 	<CompartirModal
 		{proyecto}
 		bind:show={showCompartirModal}
-		on:close={() => (showCompartirModal = false)}
+		onclose={() => (showCompartirModal = false)}
 	/>
 </div>
 

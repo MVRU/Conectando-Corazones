@@ -10,15 +10,23 @@
 	} from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 
-	export let resena: Resena;
-	export let mostrarAutor: boolean = true;
-	export let variante: 'default' | 'compacta' = 'default';
-	export let onEditar: (() => void) | null = null;
-	export let onEliminar: (() => void) | null = null;
-
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
-	export let autor: UsuarioCompleto | undefined = undefined;
+	let {
+		resena,
+		mostrarAutor = true,
+		variante = 'default',
+		onEditar = null,
+		onEliminar = null,
+		autor = undefined
+	} = $props<{
+		resena: Resena;
+		mostrarAutor?: boolean;
+		variante?: 'default' | 'compacta';
+		onEditar?: (() => void) | null;
+		onEliminar?: (() => void) | null;
+		autor?: UsuarioCompleto;
+	}>();
 
 	function obtenerNombreAutor(usuario: UsuarioCompleto): string {
 		if ('nombre_legal' in usuario && usuario.nombre_legal) {
@@ -36,7 +44,7 @@
 		return usuario.username || 'Usuario Desconocido';
 	}
 
-	$: nombreMostrar = autor ? obtenerNombreAutor(autor) : resena.username;
+	let nombreMostrar = $derived(autor ? obtenerNombreAutor(autor) : resena.username);
 
 	function obtenerEtiquetaRol(r: string | undefined): string {
 		if (!r) return 'Colaborador';
@@ -55,10 +63,12 @@
 		}
 	}
 
-	$: roleLabel = autor ? obtenerEtiquetaRol(autor.rol) : obtenerEtiquetaRol(resena.rol);
-	$: roleClass = autor
-		? obtenerColorRol(autor.rol || '')
-		: obtenerColorRol(resena.rol || '') || 'bg-gray-100 text-gray-800';
+	let roleLabel = $derived(autor ? obtenerEtiquetaRol(autor.rol) : obtenerEtiquetaRol(resena.rol));
+	let roleClass = $derived(
+		autor
+			? obtenerColorRol(autor.rol || '')
+			: obtenerColorRol(resena.rol || '') || 'bg-gray-100 text-gray-800'
+	);
 </script>
 
 <div
@@ -131,7 +141,7 @@
 				<button
 					type="button"
 					class="text-sm font-medium text-sky-600 hover:text-sky-700"
-					on:click={onEditar}
+					onclick={onEditar}
 				>
 					Editar
 				</button>
@@ -140,7 +150,7 @@
 				<button
 					type="button"
 					class="text-sm font-medium text-red-600 hover:text-red-700"
-					on:click={onEliminar}
+					onclick={onEliminar}
 				>
 					Eliminar
 				</button>

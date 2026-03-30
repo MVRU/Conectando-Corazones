@@ -1,43 +1,53 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
 	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 	import { ChevronRight } from 'lucide-svelte';
 
-	export let useIconSeparator = true;
+	import { untrack } from 'svelte';
+
+	let {
+		useIconSeparator = true
+	} = $props<{
+		useIconSeparator?: boolean;
+	}>();
 
 	const MOBILE_MAX_LABEL = 14;
 	const MIN_ITEM_WIDTH = 110;
 	const MIN_LAST_ITEM_WIDTH = 120;
 	const SEPARATOR_WIDTH = 32;
 
-	let breadcrumbs: BreadcrumbItem[] = [];
-	let showPopover = false;
+	let breadcrumbs = $derived($breadcrumbsStore); // Directamente reactivo al store
+	let showPopover = $state(false);
+	let navRef: HTMLElement | undefined = $state();
+	let containerWidth = $state(0);
 
-	let lastBreadcrumbs: BreadcrumbItem[] = [];
-	let navRef: HTMLElement | null = null;
-	let containerWidth = 0;
-	let visibleCrumbsCount = 0;
+	// visibleCrumbsCount ahora es un DERIVADO puro
+	let visibleCrumbsCount = $derived.by(() => {
+		if (!breadcrumbs.length) return 0;
+		if (containerWidth === 0) return 3; // Default razonable antes del primer measure
 
-	$: breadcrumbs = $breadcrumbsStore;
-	$: if (breadcrumbs !== lastBreadcrumbs) {
-		lastBreadcrumbs = breadcrumbs;
-		showPopover = false;
-	}
+		let remaining = containerWidth;
+
+		// Siempre muestra primero y último
+		remaining -= MIN_ITEM_WIDTH; // primero
+		remaining -= MIN_LAST_ITEM_WIDTH; // último
+		remaining -= SEPARATOR_WIDTH * (breadcrumbs.length - 1);
+
+		const possibleMiddle = Math.max(breadcrumbs.length - 2, 0);
+		let maxMiddle = 0;
+
+		while (remaining > 0 && maxMiddle < possibleMiddle) {
+			remaining -= MIN_ITEM_WIDTH;
+			if (remaining >= 0) maxMiddle++;
+		}
+
+		return breadcrumbs.length <= 3
+			? breadcrumbs.length
+			: Math.min(2 + maxMiddle, breadcrumbs.length);
+	});
 
 	const truncate = (label: string, max: number) =>
 		label && label.length > max ? label.slice(0, max - 1).trimEnd() + '…' : (label ?? '');
-
-	function observeNavWidth() {
-		if (!navRef) return;
-		const ro = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				containerWidth = entry.contentRect.width;
-			}
-		});
-		ro.observe(navRef);
-		onDestroy(() => ro.disconnect());
-	}
 
 	function closePopoverOnClickOutside(event: MouseEvent) {
 		if (
@@ -48,41 +58,30 @@
 		}
 	}
 
-	onMount(() => {
-		observeNavWidth();
+	$effect(() => {
+		if (!navRef) return;
+
+		const ro = new ResizeObserver((entries) => {
+			// Usamos requestAnimationFrame para asegurar que el cálculo
+			// ocurra fuera del ciclo de renderizado actual del navegador
+			requestAnimationFrame(() => {
+				for (const entry of entries) {
+					const width = entry.contentRect.width;
+					if (Math.abs(width - untrack(() => containerWidth)) > 1) {
+						containerWidth = width;
+					}
+				}
+			});
+		});
+		ro.observe(navRef);
 		window.addEventListener('click', closePopoverOnClickOutside);
-		return () => window.removeEventListener('click', closePopoverOnClickOutside);
+
+		return () => {
+			ro.disconnect();
+			window.removeEventListener('click', closePopoverOnClickOutside);
+		};
 	});
 
-	$: {
-		visibleCrumbsCount = 0;
-
-		if (breadcrumbs && breadcrumbs.length) {
-			let remaining = containerWidth;
-
-			// Siempre muestra primero y último
-			remaining -= MIN_ITEM_WIDTH; // primero
-			remaining -= MIN_LAST_ITEM_WIDTH; // último
-			remaining -= SEPARATOR_WIDTH * (breadcrumbs.length - 1);
-
-			const possibleMiddle = Math.max(breadcrumbs.length - 2, 0);
-			let maxMiddle = 0;
-
-			while (remaining > 0 && maxMiddle < possibleMiddle) {
-				remaining -= MIN_ITEM_WIDTH;
-				if (remaining >= 0) maxMiddle++;
-			}
-			visibleCrumbsCount = 2 + maxMiddle; // primero + último + los del medio
-
-			if (breadcrumbs.length <= 3) {
-				visibleCrumbsCount = breadcrumbs.length;
-			}
-
-			if (visibleCrumbsCount > breadcrumbs.length) {
-				visibleCrumbsCount = breadcrumbs.length;
-			}
-		}
-	}
 </script>
 
 {#if breadcrumbs && breadcrumbs.length >= 2}
@@ -120,7 +119,10 @@
 						title="Ver rutas intermedias"
 						aria-haspopup="dialog"
 						aria-expanded={showPopover}
-						on:click|stopPropagation={() => (showPopover = !showPopover)}
+						onclick={(e) => {
+							e.stopPropagation();
+							showPopover = !showPopover;
+						}}
 					>
 						<span class="text-lg font-bold">…</span>
 					</button>
@@ -134,7 +136,7 @@
 									href={middleItem.href}
 									class="block truncate rounded-lg px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
 									title={middleItem.label}
-									on:click={() => (showPopover = false)}
+									onclick={() => (showPopover = false)}
 								>
 									{truncate(middleItem.label, MOBILE_MAX_LABEL + 6)}
 								</a>
@@ -224,7 +226,10 @@
 							title="Ver rutas intermedias"
 							aria-haspopup="dialog"
 							aria-expanded={showPopover}
-							on:click|stopPropagation={() => (showPopover = !showPopover)}
+							onclick={(e) => {
+								e.stopPropagation();
+								showPopover = !showPopover;
+							}}
 						>
 							<span class="text-lg font-bold">…</span>
 						</button>
@@ -238,7 +243,7 @@
 										href={middleItem.href}
 										class="block truncate rounded-lg px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600"
 										title={middleItem.label}
-										on:click={() => (showPopover = false)}
+										onclick={() => (showPopover = false)}
 									>
 										{middleItem.label}
 									</a>

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import AportesList from '$lib/components/feature/aportes/AportesList.svelte';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	let { data } = $props();
 
-	const projectId = $derived($page.params.id);
+	const projectId = $derived(page.params.id);
 
 	$effect(() => {
 		const nombre = data.projectName || data.proyecto?.titulo || 'Proyecto';

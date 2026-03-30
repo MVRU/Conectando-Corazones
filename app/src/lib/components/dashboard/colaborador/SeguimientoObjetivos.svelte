@@ -2,23 +2,25 @@
 	import { ChevronRight } from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
 
-	export let objetivos: {
-		id: string;
-		nombre: string;
-		fechaFin: string;
-		objetivos: {
+	let { objetivos = [] } = $props<{
+		objetivos?: {
 			id: string;
-			descripcion: string;
-			tipo: 'monetaria' | 'voluntariado' | 'especie';
-			progreso: number;
-			actual: number;
-			meta: number;
-			unidad: string;
-			especie?: string;
+			nombre: string;
+			fechaFin: string;
+			objetivos: {
+				id: string;
+				descripcion: string;
+				tipo: 'monetaria' | 'voluntariado' | 'especie';
+				progreso: number;
+				actual: number;
+				meta: number;
+				unidad: string;
+				especie?: string;
+			}[];
 		}[];
-	}[] = [];
+	}>();
 
-	let revealed = false;
+	let revealed = $state(false);
 
 	const formatCompactNumber = (val: number): string => {
 		if (val >= 1_000_000_000) {
@@ -77,7 +79,7 @@
 
 <div
 	use:reveal
-	on:reveal={() => (revealed = true)}
+	onreveal={() => (revealed = true)}
 	class="reveal-hidden h-full rounded-[2rem] border border-emerald-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-8 flex items-center justify-between">

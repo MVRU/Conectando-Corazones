@@ -7,15 +7,24 @@
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 
-	export let usuario: Usuario | null = null;
-	export let proyectos: Proyecto[] = [];
-	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: { value: string; label: string }[] = [];
-	export let categoriasDisponibles: string[] = [];
-	export let tiposParticipacionDisponibles: string[] = [];
+	let {
+		usuario = null,
+		proyectos = [],
+		provinciasDisponibles = [],
+		estadosDisponibles = [],
+		categoriasDisponibles = [],
+		tiposParticipacionDisponibles = []
+	} = $props<{
+		usuario?: Usuario | null;
+		proyectos?: Proyecto[];
+		provinciasDisponibles?: string[];
+		estadosDisponibles?: { value: string; label: string }[];
+		categoriasDisponibles?: string[];
+		tiposParticipacionDisponibles?: string[];
+	}>();
 
 	// Inicializar composable de filtros
 	const filtros = createProyectosFiltros();
@@ -42,27 +51,39 @@
 		restablecerFiltros
 	} = filtros;
 
-	$: if (provinciasDisponibles.length > 0) {
-		provinciasDisponiblesStore.set(provinciasDisponibles);
-	}
-	$: if (estadosDisponibles.length > 0) {
-		estadosDisponiblesStore.set(estadosDisponibles);
-	}
-	$: if (categoriasDisponibles.length > 0) {
-		categoriasDisponiblesStore.set(categoriasDisponibles);
-	}
-	$: if (tiposParticipacionDisponibles.length > 0) {
-		tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
-	}
+	$effect(() => {
+		if (provinciasDisponibles.length > 0) {
+			provinciasDisponiblesStore.set(provinciasDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (estadosDisponibles.length > 0) {
+			estadosDisponiblesStore.set(estadosDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (categoriasDisponibles.length > 0) {
+			categoriasDisponiblesStore.set(categoriasDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (tiposParticipacionDisponibles.length > 0) {
+			tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
+		}
+	});
 
 	// Sincronizar filtros con URL
 	useProyectosFiltrosUrl(filtros);
 
-	let pestanaActiva: 'todos' | 'activos' | 'completados' =
-		($page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos';
+	let pestanaActiva = $state<'todos' | 'activos' | 'completados'>(
+		(page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos'
+	);
 
-	$: {
-		const estadoUrl = $page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados';
+	$effect(() => {
+		const estadoUrl = page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados';
 		if (
 			estadoUrl &&
 			['todos', 'activos', 'completados'].includes(estadoUrl) &&
@@ -70,49 +91,18 @@
 		) {
 			pestanaActiva = estadoUrl;
 		}
-	}
+	});
 
 	function cambiarPestana(nuevaPestana: 'todos' | 'activos' | 'completados') {
 		pestanaActiva = nuevaPestana;
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 		url.searchParams.set('estado', nuevaPestana);
 		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 	}
 
-	$: proyectosUsuario = filtrarProyectosPorUsuario(proyectos, usuario);
-	$: proyectosFiltradosPestana = filtroCustom(proyectosUsuario);
-	$: proyectosStore.set(proyectosFiltradosPestana);
+	let proyectosUsuario = $derived(filtrarProyectosPorUsuario(proyectos, usuario));
 
-	// Textos dinámicos
-	$: tituloSeccion =
-		pestanaActiva === 'todos'
-			? 'Todos mis proyectos'
-			: pestanaActiva === 'activos'
-				? 'Mis proyectos activos'
-				: 'Mis proyectos completados';
-
-	// Verificar estado de la institución
-	// TODO: Usar dato real de verificación. Por ahora asume 'activo' = verificado.
-	$: verificationAprobada = usuario?.estado === 'activo';
-	$: esInstitucion = usuario?.rol === 'institucion';
-
-	$: tituloVacio =
-		pestanaActiva === 'activos'
-			? 'No tenés proyectos activos'
-			: pestanaActiva === 'completados'
-				? 'No tenés proyectos completados'
-				: 'No hay proyectos';
-
-	$: descripcionVacia =
-		esInstitucion && !verificationAprobada
-			? 'No podés crear proyectos hasta que verifiques exitosamente la identidad de tu institución.'
-			: pestanaActiva === 'activos'
-				? 'Los proyectos en curso o pendientes aparecerán acá.'
-				: pestanaActiva === 'completados'
-					? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
-					: 'No tenés ningún proyecto asociado a tu cuenta.';
-
-	$: filtroCustom = (proyectosInput: Proyecto[]) => {
+	let filtroCustom = $derived.by(() => (proyectosInput: Proyecto[]) => {
 		if (pestanaActiva === 'todos') return proyectosInput;
 		if (pestanaActiva === 'activos') {
 			return proyectosInput.filter((p) => p.estado !== 'completado' && p.estado !== 'cancelado');
@@ -121,7 +111,45 @@
 			return proyectosInput.filter((p) => p.estado === 'completado' || p.estado === 'cancelado');
 		}
 		return proyectosInput;
-	};
+	});
+
+	let proyectosFiltradosPestana = $derived(filtroCustom(proyectosUsuario));
+
+	$effect(() => {
+		proyectosStore.set(proyectosFiltradosPestana);
+	});
+
+	// Textos dinámicos
+	let tituloSeccion = $derived(
+		pestanaActiva === 'todos'
+			? 'Todos mis proyectos'
+			: pestanaActiva === 'activos'
+				? 'Mis proyectos activos'
+				: 'Mis proyectos completados'
+	);
+
+	// Verificar estado de la institución
+	// TODO: Usar dato real de verificación. Por ahora asume 'activo' = verificado.
+	let verificationAprobada = $derived(usuario?.estado === 'activo');
+	let esInstitucion = $derived(usuario?.rol === 'institucion');
+
+	let tituloVacio = $derived(
+		pestanaActiva === 'activos'
+			? 'No tenés proyectos activos'
+			: pestanaActiva === 'completados'
+				? 'No tenés proyectos completados'
+				: 'No hay proyectos'
+	);
+
+	let descripcionVacia = $derived(
+		esInstitucion && !verificationAprobada
+			? 'No podés crear proyectos hasta que verifiques exitosamente la identidad de tu institución.'
+			: pestanaActiva === 'activos'
+				? 'Los proyectos en curso o pendientes aparecerán acá.'
+				: pestanaActiva === 'completados'
+					? 'Los proyectos que finalicen o se cancelen aparecerán acá.'
+					: 'No tenés ningún proyecto asociado a tu cuenta.'
+	);
 </script>
 
 <section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
@@ -149,48 +177,50 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
-	>
-		<svelte:fragment slot="header-actions">
-			<div class="mb-4 flex flex-wrap justify-center gap-3">
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'todos'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					on:click={() => cambiarPestana('todos')}
-				>
-					Todos
-				</button>
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'activos'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					on:click={() => cambiarPestana('activos')}
-				>
-					Activos
-				</button>
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'completados'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					on:click={() => cambiarPestana('completados')}
-				>
-					Completados
-				</button>
-			</div>
-		</svelte:fragment>
+		headerActions={headerActionsSnippet}
+		card={cardSnippet}
+	/>
 
-		<svelte:fragment slot="card" let:proyecto>
-			<ProyectoCard
-				{proyecto}
-				{usuario}
-				variante="mis-proyectos"
-				esInstitucion={usuario?.rol === 'institucion'}
-			/>
-		</svelte:fragment>
-	</ProyectosBase>
+	{#snippet headerActionsSnippet()}
+		<div class="mb-4 flex flex-wrap justify-center gap-3">
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'todos'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('todos')}
+			>
+				Todos
+			</button>
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'activos'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('activos')}
+			>
+				Activos
+			</button>
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'completados'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('completados')}
+			>
+				Completados
+			</button>
+		</div>
+	{/snippet}
+
+	{#snippet cardSnippet({ proyecto }: { proyecto: Proyecto })}
+		<ProyectoCard
+			{proyecto}
+			{usuario}
+			variante="mis-proyectos"
+			esInstitucion={usuario?.rol === 'institucion'}
+		/>
+	{/snippet}
 
 	{#if usuario?.rol === 'institucion'}
 		{#if verificationAprobada}

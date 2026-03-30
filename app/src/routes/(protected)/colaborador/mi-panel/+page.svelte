@@ -1,13 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import DashboardColaborador from '$lib/components/dashboard/DashboardColaborador.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let animate = false;
+	let animate = $state(false);
 
-	onMount(() => {
+	$effect(() => {
 		animate = true;
 	});
 </script>

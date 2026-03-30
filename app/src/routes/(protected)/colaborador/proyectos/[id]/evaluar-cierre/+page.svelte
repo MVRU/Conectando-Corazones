@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
@@ -21,28 +23,34 @@
 	import { formatearFecha } from '$lib/utils/validaciones';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
-	export let data: PageData;
-
-	$: proyecto = data.proyecto;
-	$: solicitud = data.solicitud as any;
-	$: evaluacion = data.evaluacion;
-	$: yaVote = data.yaVote;
-
-	$: if (proyecto) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
-			{ label: 'Evaluación de Cierre' }
-		]);
+	interface Props {
+		data: PageData;
 	}
 
-	let showReportModal = false;
+	let { data }: Props = $props();
 
-	let showRejectModal = false;
-	let loading = false;
-	let declarationChecked = false;
-	let objetivosExpandidos: Record<number, boolean> = {};
-	let justificacionRechazo = '';
+	let proyecto = $derived(data.proyecto);
+	let solicitud = $derived(data.solicitud as any);
+	let evaluacion = $derived(data.evaluacion);
+	let yaVote = $derived(data.yaVote);
+
+	run(() => {
+		if (proyecto) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
+				{ label: 'Evaluación de Cierre' }
+			]);
+		}
+	});
+
+	let showReportModal = $state(false);
+
+	let showRejectModal = $state(false);
+	let loading = $state(false);
+	let declarationChecked = $state(false);
+	let objetivosExpandidos: Record<number, boolean> = $state({});
+	let justificacionRechazo = $state('');
 
 	const MIN_CARACTERES_JUSTIFICACION = 20;
 
@@ -56,10 +64,10 @@
 	}
 
 	// Agrupar evidencias por objetivo
-	$: evidenciasPorObjetivo = agruparEvidenciasPorObjetivo(
+	let evidenciasPorObjetivo = $derived(agruparEvidenciasPorObjetivo(
 		data.proyecto.participacion_permitida ?? [],
 		(data.solicitud as any)?.evidencias ?? []
-	);
+	));
 </script>
 
 <svelte:head>
@@ -285,7 +293,7 @@
 								<button
 									type="button"
 									disabled={loading}
-									on:click={() => (showRejectModal = true)}
+									onclick={() => (showRejectModal = true)}
 									class="flex w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-6 py-4 font-bold text-slate-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:ring-4 focus:ring-red-50"
 								>
 									<XCircle class="mr-2 h-5 w-5" />
@@ -299,7 +307,7 @@
 							<button
 								type="button"
 								class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-red-600"
-								on:click={() => (showReportModal = true)}
+								onclick={() => (showReportModal = true)}
 							>
 								<AlertTriangle class="mr-2 h-4 w-4" />
 								Reportar irregularidad
@@ -391,7 +399,7 @@
 								<button
 									type="button"
 									class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50"
-									on:click={() => (showRejectModal = false)}
+									onclick={() => (showRejectModal = false)}
 								>
 									Cancelar
 								</button>

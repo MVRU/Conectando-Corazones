@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { isAuthenticated, isLoading } from '$lib/stores/auth';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
@@ -27,7 +27,7 @@
 
 	// Breadcrumbs contextuales
 	$effect(() => {
-		const from = $page.url.searchParams.get('from');
+		const from = page.url.searchParams.get('from');
 		const nombrePerfil = perfilUsuario
 			? perfilUsuario.rol === 'institucion'
 				? (perfilUsuario as { nombre_legal?: string; nombre: string }).nombre_legal || perfilUsuario.nombre

@@ -397,7 +397,7 @@
 	titulo="Eliminar cuenta"
 	anchoMaximo="max-w-sm"
 	cerrarAlClickearFondo={!isLoadingDelete}
-	on:cerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+	oncerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
 >
 	<div class="flex flex-col items-center py-2 text-center">
 		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
@@ -408,19 +408,19 @@
 			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados permanentemente.
 		</p>
 	</div>
-	<svelte:fragment slot="footer">
-		<Button
-			label="Sí, eliminar"
-			loadingLabel="Eliminando..."
-			variant="danger"
-			loading={isLoadingDelete}
-			onclick={confirmarEliminarCuenta}
-		/>
-		<Button
-			label="Cancelar"
-			variant="secondary"
-			disabled={isLoadingDelete}
-			onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
-		/>
-	</svelte:fragment>
+	{#snippet footer()}
+			<Button
+				label="Sí, eliminar"
+				loadingLabel="Eliminando..."
+				variant="danger"
+				loading={isLoadingDelete}
+				onclick={confirmarEliminarCuenta}
+			/>
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				disabled={isLoadingDelete}
+				onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+			/>
+	{/snippet}
 </Modal>

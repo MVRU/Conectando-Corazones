@@ -10,24 +10,46 @@
 		ChevronDown,
 		ChevronUp
 	} from 'lucide-svelte';
+	import type { ComponentType } from 'svelte';
 	import { slide } from 'svelte/transition';
 
-	let showAllActions = false;
+	let showAllActions = $state(false);
 
-	export let solicitudesPendientes = 0;
-	export let mensajesNoLeidos = 0;
-	export let proyectosPendienteCierre = 0;
-	export let estaVerificado = false;
-export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = null;
-	export let requiereVerificacionDocumental = false;
-	export let documentacionVerificacionEnRevision = false;
+	let {
+		solicitudesPendientes = 0,
+		mensajesNoLeidos = 0,
+		proyectosPendienteCierre = 0,
+		estaVerificado = false,
+		estadoVerificacion = null,
+		requiereVerificacionDocumental = false,
+		documentacionVerificacionEnRevision = false,
+		showEvidenceModal = $bindable(false),
+		onExportPDF = () => {}
+	} = $props<{
+		solicitudesPendientes?: number;
+		mensajesNoLeidos?: number;
+		proyectosPendienteCierre?: number;
+		estaVerificado?: boolean;
+		estadoVerificacion?: 'aprobada' | 'pendiente' | 'rechazada' | null;
+		requiereVerificacionDocumental?: boolean;
+		documentacionVerificacionEnRevision?: boolean;
+		showEvidenceModal?: boolean;
+		onExportPDF?: () => void;
+	}>();
 
-	export let showEvidenceModal = false;
-	export let onExportPDF: () => void = () => {};
+	interface Accion {
+		label: string;
+		icon: ComponentType;
+		href?: string;
+		onClick?: () => void;
+		primary?: boolean;
+		secondary?: boolean;
+		color?: string;
+		disabled?: boolean;
+		title?: string;
+	}
 
-	// Configuracion de indicadores y color para los botones de acción rápida
-	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
-	$: badgeConfig = {
+	const badgeConfig = $derived.by(() => ({
 		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
@@ -48,89 +70,84 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 			color: 'bg-amber-500',
 			shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]'
 		}
-	};
+	}));
 
-	interface Accion {
-		label: string;
-		icon: any;
-		href?: string;
-		onClick?: () => void;
-		primary?: boolean;
-		secondary?: boolean;
-		color?: string;
-		disabled?: boolean;
-		title?: string;
-	}
+const acciones = $derived.by(
+	() =>
+		[
+			{
+				label: 'Crear proyecto',
+				icon: Plus,
+				href: estaVerificado ? '/proyectos/crear' : undefined,
+				primary: true,
+				disabled: !estaVerificado,
+				title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
+			},
+			{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
+			{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
+			{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
+			{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
+			{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' },
+			...(estadoVerificacion === 'rechazada'
+				? [
+						{
+							label: 'Reenviar verificación',
+							icon: UploadCloud,
+							href: '/institucion/verificacion',
+							secondary: true,
+							color: 'amber'
+						}
+					]
+				: []),
+			...(requiereVerificacionDocumental
+				? [
+						{
+							label: 'Verificar',
+							icon: UploadCloud,
+							href: '/institucion/verificacion',
+							secondary: true,
+							color: 'amber'
+						}
+					]
+				: []),
+			...(documentacionVerificacionEnRevision
+				? [
+						{
+							label: 'Gestionar verificación',
+							icon: Clock3,
+							href: '/institucion/verificacion',
+							secondary: true,
+							color: 'sky',
+							title: 'Tu documentación está en revisión'
+						}
+					]
+				: [])
+		] as Accion[]
+);
 
-	$: acciones = [
-		{
-			label: 'Crear proyecto',
-			icon: Plus,
-			href: estaVerificado ? '/proyectos/crear' : undefined,
-			primary: true,
-			disabled: !estaVerificado,
-			title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
-		},
-		{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
-		{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
-		{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
-		{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
-		{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' },
-		...(estadoVerificacion === 'rechazada'
-			? [
-					{
-						label: 'Reenviar verificación',
-						icon: UploadCloud,
-						href: '/institucion/verificacion',
-						secondary: true,
-						color: 'amber'
-					}
-				]
-			: []),
-		...(requiereVerificacionDocumental
-			? [
-					{
-						label: 'Verificar',
-						icon: UploadCloud,
-						href: '/institucion/verificacion',
-						secondary: true,
-						color: 'amber'
-					}
-				]
-			: []),
-		...(documentacionVerificacionEnRevision
-			? [
-					{
-						label: 'Gestionar verificación',
-						icon: Clock3,
-						href: '/institucion/verificacion',
-						secondary: true,
-						color: 'sky',
-						title: 'Tu documentación está en revisión'
-					}
-				]
-			: [])
-	] as Accion[];
+	const accionesExtras = $derived.by(
+		() =>
+			[
+				{
+					label: 'Exportar reporte',
+					icon: FileText,
+					onClick: onExportPDF,
+					secondary: true,
+					color: 'rose'
+				}
+			] as Accion[]
+	);
 
-	const accionesExtras: Accion[] = [
-		{
-			label: 'Exportar reporte',
-			icon: FileText,
-			onClick: onExportPDF,
-			secondary: true,
-			color: 'rose'
-		}
-	];
-
-	$: todasLasAcciones = [...acciones, ...accionesExtras];
+	const todasLasAcciones = $derived([...acciones, ...accionesExtras]);
 </script>
 
 <div class="relative mb-12">
 	<!-- Desktop Layout (Grid) -->
 	<div class="hidden sm:grid sm:grid-cols-2 sm:gap-4 md:grid-cols-4 xl:grid-cols-7">
-		{#each todasLasAcciones as accion}
+		{#each todasLasAcciones as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						title={accion.title}
@@ -158,13 +175,14 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						disabled={accion.disabled}
 						title={accion.title}
 						class="group flex h-full w-full items-center justify-center gap-3 rounded-full px-5 py-3 backdrop-blur-md transition-all duration-300
@@ -191,20 +209,20 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</button>
 				{/if}
 
 				<!-- Dinamically rendered Badges -->
-				{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+				{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 					<div
 						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {badgeConfig[
-							accion.label
-						].color} {badgeConfig[accion.label].shadow}"
+							accion.label as keyof typeof badgeConfig
+						].color} {badgeConfig[accion.label as keyof typeof badgeConfig].shadow}"
 					>
-						{badgeConfig[accion.label].count}
+						{badgeConfig[accion.label as keyof typeof badgeConfig].count}
 					</div>
 				{/if}
 			</div>
@@ -217,6 +235,7 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						title={accion.title}
@@ -235,12 +254,13 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
 						{accion.primary
 							? 'border border-blue-500/30 bg-gradient-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
@@ -255,7 +275,7 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</button>
 				{/if}
@@ -268,29 +288,31 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion}
 					<div class="relative w-full">
 						{#if accion.href}
+							{@const Icono = accion.icon}
 							<a
 								href={accion.href}
-								class="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
+								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</a>
 						{:else}
+							{@const Icono = accion.icon}
 							<button
-								on:click={accion.onClick}
+								onclick={accion.onClick}
 								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</button>
 						{/if}
 
 						<!-- Badges -->
-						{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+						{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 							<div
 								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {badgeConfig[
-									accion.label
-								].color} {badgeConfig[accion.label].shadow}"
+									accion.label as keyof typeof badgeConfig
+								].color} {badgeConfig[accion.label as keyof typeof badgeConfig].shadow}"
 							></div>
 						{/if}
 					</div>
@@ -300,7 +322,7 @@ export let estadoVerificacion: 'aprobada' | 'pendiente' | 'rechazada' | null = n
 
 		<!-- Toggle Button -->
 		<button
-			on:click={() => (showAllActions = !showAllActions)}
+			onclick={() => (showAllActions = !showAllActions)}
 			class="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium text-slate-400 transition-colors hover:text-white"
 		>
 			<span>{showAllActions ? 'Ver menos acciones' : 'Ver más acciones'}</span>

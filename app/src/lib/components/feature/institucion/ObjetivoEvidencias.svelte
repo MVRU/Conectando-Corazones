@@ -5,12 +5,21 @@
 	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import ArchivoPreview from './ArchivoPreview.svelte';
 
-	export let objetivo: ParticipacionPermitida;
-	export let evidencias: Evidencia[];
-	export let evidenciasEntrada: Evidencia[];
-	export let evidenciasSalida: Evidencia[];
-	export let totalArchivos: number;
-	export let expandido: boolean = false;
+	let {
+		objetivo,
+		evidencias = [],
+		evidenciasEntrada = [],
+		evidenciasSalida = [],
+		totalArchivos = 0,
+		expandido = $bindable(false)
+	} = $props<{
+		objetivo: ParticipacionPermitida;
+		evidencias?: Evidencia[];
+		evidenciasEntrada?: Evidencia[];
+		evidenciasSalida?: Evidencia[];
+		totalArchivos?: number;
+		expandido?: boolean;
+	}>();
 
 	function toggleExpansion() {
 		expandido = !expandido;
@@ -20,7 +29,7 @@
 <div class="rounded-lg border border-gray-200 bg-gray-50">
 	<!-- Header del objetivo -->
 	<button
-		on:click={toggleExpansion}
+		onclick={toggleExpansion}
 		class="flex w-full items-center justify-between p-4 text-left transition hover:bg-gray-100"
 	>
 		<div class="flex-1">
@@ -175,7 +184,7 @@
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}
 											<div class="space-y-2">
-												{#each evidencia.archivos as archivo}
+												{#each evidencia.archivos as archivo}	
 													<ArchivoPreview {archivo} />
 												{/each}
 											</div>
