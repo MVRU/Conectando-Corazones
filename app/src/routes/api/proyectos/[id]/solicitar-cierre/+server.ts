@@ -3,6 +3,8 @@ import type { RequestHandler } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { GestionarEstadoProyecto } from '$lib/domain/use-cases/proyectos/GestionarEstadoProyecto';
 
+import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
+
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const session = locals.usuario;
 	if (!session) {
@@ -20,7 +22,8 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 
 	try {
 		const proyectoRepo = new PostgresProyectoRepository();
-		const useCase = new GestionarEstadoProyecto(proyectoRepo);
+		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const useCase = new GestionarEstadoProyecto(proyectoRepo, historialRepo);
 		await useCase.solicitarCierre(id, session.id_usuario!);
 
 		return json({

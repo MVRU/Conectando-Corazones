@@ -451,3 +451,16 @@ export function generarUrlGoogleMaps(u: UbicacionPresencial): string {
 
 	return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
+
+/**
+ * Calcula los días restantes desde hoy hasta una fecha dada
+ */
+export function calcularDiasRestantes(fecha: Date | string | null | undefined): number {
+	if (!fecha) return 999;
+	const fin = new Date(fecha);
+	const hoy = new Date();
+	hoy.setHours(0, 0, 0, 0);
+	fin.setHours(0, 0, 0, 0);
+	const diferencia = fin.getTime() - hoy.getTime();
+	return Math.ceil(diferencia / (1000 * 60 * 60 * 24));
+}

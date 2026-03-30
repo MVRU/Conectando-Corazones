@@ -22,6 +22,7 @@
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
+	import ProjectActionCard from '$lib/components/proyectos/ProjectActionCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
@@ -37,7 +38,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
+	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 
 	import {
@@ -68,7 +69,7 @@
 	let participacionesOrdenadas: ParticipacionPermitida[] = [];
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
 	let misAportes: ColaboracionTipoParticipacion[] = [];
-	
+
 	let resenasProyecto: Resena[] = [];
 	let resenaAEliminar: Resena | null = null;
 	let mostrarModalResena = false;
@@ -92,18 +93,15 @@
 	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
 	$: esAdministrador = $usuario?.rol === 'administrador';
 	$: esInstitucion = $usuario?.rol === 'institucion';
-	$: puedeVerResenas = true;
-
+	const puedeVerResenas = true;
 	$: proyecto = data.proyecto;
-	
+
 	$: resenaUsuarioActual = resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario);
 	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
 
 	$: if (proyecto) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: proyecto.titulo }
-		]);
+		const titulo = proyecto.titulo ?? proyecto.id_proyecto?.toString() ?? 'Proyecto';
+		setBreadcrumbs([BREADCRUMB_ROUTES.proyectos, { label: titulo }]);
 	}
 
 	function aFecha(fecha: string | Date | undefined | null): Date | null {
@@ -172,7 +170,8 @@
 	// Las reseñas se hacen a los proyectos que están listos
 	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
 	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	$: mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	const mensajeResenaBloqueada =
+		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 	$: resumenTexto = (proyecto?.resumen || '').trim();
 	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
 	$: listadoAprendizajes = (aprendizajesTexto || '')
@@ -210,8 +209,8 @@
 		return [...ubs].sort((a, b) => {
 			const ta = a.ubicacion?.tipo_ubicacion ?? '';
 			const tb = b.ubicacion?.tipo_ubicacion ?? '';
-			const pa = prioridad.get(ta as any) ?? Number.MAX_SAFE_INTEGER;
-			const pb = prioridad.get(tb as any) ?? Number.MAX_SAFE_INTEGER;
+			const pa = prioridad.get(ta as string) ?? Number.MAX_SAFE_INTEGER;
+			const pb = prioridad.get(tb as string) ?? Number.MAX_SAFE_INTEGER;
 			if (pa !== pb) return pa - pb;
 			const ma = a.ubicacion?.modalidad === 'presencial' ? 0 : 1;
 			const mb = b.ubicacion?.modalidad === 'presencial' ? 0 : 1;
@@ -275,6 +274,19 @@
 	let mostrarModalCeseActividades = false;
 	let ceseActividades = false;
 
+	// Lógica para mostrar la acción de finalizar actividades
+	$: progresoTotalCalculado = proyecto ? calcularProgresoTotal(proyecto) : 0;
+	$: diasFaltantes = proyecto?.fecha_fin_tentativa
+		? diasRestantes(proyecto.fecha_fin_tentativa)
+		: 999;
+	$: mostrarAccionFinalizar =
+		esCreador &&
+		estadoCodigo === 'en_curso' &&
+		(progresoTotalCalculado >= 80 || diasFaltantes <= 0);
+
+	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
+	import Modal from '$lib/components/ui/overlays/Modal.svelte';
+
 	async function confirmarCeseActividades() {
 		if (ceseActividades) return;
 		ceseActividades = true;
@@ -294,10 +306,11 @@
 			});
 
 			await invalidateAll();
-		} catch (err: any) {
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
 			toastStore.show({
 				variant: 'error',
-				message: err.message
+				message: errorMsg
 			});
 		} finally {
 			ceseActividades = false;
@@ -326,10 +339,11 @@
 			});
 
 			goto('/mi-panel');
-		} catch (err: any) {
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
 			toastStore.show({
 				variant: 'error',
-				message: err.message
+				message: errorMsg
 			});
 		} finally {
 			cancelando = false;
@@ -384,14 +398,19 @@
 
 			// Actualizar estado reactivo
 			if (colaboracionUsuario) {
-				colaboracionUsuario.estado = 'anulada';
+				proyecto.colaboraciones = proyecto.colaboraciones?.map((c) =>
+					c.id_colaboracion === colaboracionUsuario.id_colaboracion
+						? { ...c, estado: 'anulada' }
+						: c
+				);
 			}
 
 			mostrarModalAnular = false;
-		} catch (err: any) {
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
 			toastStore.show({
 				variant: 'error',
-				message: err.message
+				message: errorMsg
 			});
 		} finally {
 			anulando = false;
@@ -431,7 +450,7 @@
 	$: accionesMenu = (() => {
 		const acc: {
 			label: string;
-			icon: any;
+			icon: typeof Plus;
 			onclick: () => void;
 			variant?: 'danger' | 'default';
 			disabled?: boolean;
@@ -469,35 +488,59 @@
 			});
 
 			if (esCreador) {
-				acc.push({
-					label: 'Solicitudes de colaboración',
-					icon: ClipboardDocumentList,
-					onclick: () =>
-						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
-				});
-				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado') {
+				if (estadoCodigo === 'en_curso') {
 					acc.push({
-						label: 'Solicitudes de cierre',
-						icon: ClipboardDocumentCheck,
-						onclick: () =>
-							goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+						label: 'Finalizar actividades',
+						icon: CheckCircle,
+						onclick: () => (mostrarModalCeseActividades = true)
 					});
-				}
-				if (estadoCodigo === 'pendiente_solicitud_cierre') {
+				} else if (estadoCodigo === 'pendiente_solicitud_cierre') {
 					acc.push({
 						label: 'Solicitar cierre',
 						icon: CheckCircle,
+						onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
+					});
+				}
+
+				if (estadoCodigo !== 'pendiente_solicitud_cierre' && estadoCodigo !== 'en_revision') {
+					acc.push({
+						label: 'Solicitudes de colaboración',
+						icon: ClipboardDocumentList,
 						onclick: () =>
-							goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
+							goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+					});
+				}
+
+				if (
+					estadoCodigo !== 'borrador' &&
+					estadoCodigo !== 'cancelado' &&
+					estadoCodigo !== 'en_curso'
+				) {
+					acc.push({
+						label: 'Solicitudes de cierre',
+						icon: ClipboardDocumentCheck,
+						onclick: () => goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+					});
+				}
+
+				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+				if (estadoCodigo === 'en_curso') {
+					acc.push({
+						label: 'Editar proyecto',
+						icon: Pencil,
+						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
+						disabled: !esEditable
 					});
 				}
 			} else {
-				acc.push({
-					label: 'Solicitudes de colaboración',
-					icon: ClipboardDocumentList,
-					onclick: () =>
-						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
-				});
+				if (estadoCodigo !== 'pendiente_solicitud_cierre' && estadoCodigo !== 'en_revision') {
+					acc.push({
+						label: 'Solicitudes de colaboración',
+						icon: ClipboardDocumentList,
+						onclick: () =>
+							goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+					});
+				}
 			}
 
 			if (esColaboradorAprobado) {
@@ -525,28 +568,9 @@
 
 			acc.push({ divider: true } as any);
 
+			// 4. Acciones de Peligro / Reporte
 			if (esCreador) {
-				if (estadoCodigo === 'en_curso') {
-					acc.push({
-						label: 'Finalizar actividades',
-						icon: CheckCircle,
-						onclick: () => (mostrarModalCeseActividades = true)
-					});
-				}
-
-				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
-
-				if (estadoCodigo === 'en_curso') {
-					acc.push({
-						label: 'Editar proyecto',
-						icon: Pencil,
-						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
-						disabled: !esEditable
-					});
-				}
-
 				const esCancelable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
-
 				if (esCancelable) {
 					acc.push({
 						label: 'Cancelar proyecto',
@@ -637,8 +661,9 @@
 					variant: 'success',
 					message: 'La reseña fue eliminada.'
 				});
-			} catch (err: any) {
-				toastStore.show({ variant: 'error', message: err.message });
+			} catch (err) {
+				const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+				toastStore.show({ variant: 'error', message: errorMsg });
 			}
 		}
 		resenaAEliminar = null;
@@ -687,9 +712,9 @@
 					nombre: $usuario.nombre,
 					apellido: $usuario.apellido,
 					url_foto: $usuario.url_foto,
-					
-					nombre_legal: ($usuario as any).nombre_legal,
-					razon_social: ($usuario as any).razon_social
+
+					nombre_legal: ($usuario as Record<string, any>).nombre_legal,
+					razon_social: ($usuario as Record<string, any>).razon_social
 				}
 			};
 
@@ -699,8 +724,9 @@
 				variant: 'success',
 				message: 'Reseña publicada correctamente.'
 			});
-		} catch (err: any) {
-			toastStore.show({ variant: 'error', message: err.message });
+		} catch (err) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+			toastStore.show({ variant: 'error', message: errorMsg });
 		}
 	}
 
@@ -708,7 +734,9 @@
 		layoutStore.showStickyBottomBar();
 		if (proyecto?.id_proyecto) {
 			try {
-				const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+				const res = await fetch(
+					`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`
+				);
 				if (res.ok) {
 					resenasProyecto = await res.json();
 				}
@@ -782,7 +810,7 @@
 							role="menu"
 							tabindex="-1"
 						>
-							{#each accionesMenu as accion}
+							{#each accionesMenu as accion (accion.label)}
 								{#if accion.divider}
 									<div class="my-1 border-t border-gray-100"></div>
 								{:else}
@@ -898,24 +926,22 @@
 
 							<ProyectoProgreso {proyecto} variant="extended" />
 
-							{#if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
-								<div
-									class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:p-5"
-									role="region"
-									aria-label="Solicitud de cierre"
-								>
-									<p class="text-sm font-semibold text-sky-900">¿Listo para cerrar el proyecto?</p>
-									<p class="mt-1 text-sm text-sky-800">
-										Enviá la solicitud de cierre con tus evidencias para que los colaboradores la
-										revisen.
-									</p>
-									<a
-										href={`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`}
-										class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
-									>
-										Solicitar cierre
-									</a>
-								</div>
+							{#if mostrarAccionFinalizar}
+								<ProjectActionCard
+									title="Finalizá las actividades"
+									description="El proyecto dejará de aceptar nuevos colaboradores. Podrás seguir subiendo evidencias antes del cierre formal."
+									buttonLabel="Finalizar actividades"
+									onClick={() => (mostrarModalCeseActividades = true)}
+								/>
+							{:else if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
+								<ProjectActionCard
+									title="¿Todo listo para el cierre?"
+									description="Enviá la solicitud formal con las evidencias recolectadas para que los colaboradores validen el impacto logrado."
+									buttonLabel="Solicitar cierre"
+									variant="secondary"
+									onClick={() =>
+										goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
+								/>
 							{/if}
 
 							<div class="mt-6 sm:mt-8">
@@ -1007,7 +1033,7 @@
 
 								{#if misAportes.length > 0}
 									<ul class="space-y-3">
-										{#each misAportes as aporte}
+										{#each misAportes as aporte (aporte.id_colaboracion_tipo_participacion)}
 											<li
 												class="flex items-center justify-between rounded-lg border border-gray-100 p-3"
 											>
@@ -1072,7 +1098,7 @@
 										{#if mostrarResumenIA}
 											<div class="border-t border-gray-100 bg-sky-50/30 px-4 pt-4 pb-6">
 												<div class="space-y-4">
-													{#each listadoResumen as parrafo}
+													{#each listadoResumen as parrafo, i (i)}
 														<p class="text-base leading-relaxed text-gray-700">
 															{parrafo}
 														</p>
@@ -1113,7 +1139,7 @@
 												<div class="border-t border-gray-100 bg-amber-50/30 px-4 pt-4 pb-6">
 													{#if listadoAprendizajes.length > 0}
 														<ul class="flex flex-col gap-4">
-															{#each listadoAprendizajes as item}
+															{#each listadoAprendizajes as item, i (i)}
 																<li class="flex gap-4">
 																	<div class="relative mt-2 flex-shrink-0">
 																		<div
@@ -1188,7 +1214,9 @@
 												<ResenaCard
 													{resena}
 													autor={resena.autor}
-													onEliminar={resena.autor_id && resena.autor_id === $usuario?.id_usuario || esAdministrador
+													onEliminar={(resena.autor_id &&
+														resena.autor_id === $usuario?.id_usuario) ||
+													esAdministrador
 														? () => solicitarEliminarResena(resena)
 														: null}
 												/>
@@ -1554,7 +1582,9 @@
 										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+										{data.tieneReportePendiente
+											? 'Ya tenés un reporte pendiente'
+											: 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>
@@ -1646,7 +1676,7 @@
 
 	<ModalColaboracion
 		bind:open={mostrarModalColaborar}
-		onsubmit={async ({ mensaje }) => {
+		onsubmit={async ({ mensaje }: { mensaje: string }) => {
 			try {
 				const res = await fetch('/api/colaboraciones', {
 					method: 'POST',
@@ -1678,10 +1708,11 @@
 					variant: 'success',
 					message: '¡Tu solicitud fue enviada correctamente!'
 				});
-			} catch (err: any) {
+			} catch (err) {
+				const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
 				toastStore.show({
 					variant: 'error',
-					message: err.message
+					message: errorMsg
 				});
 			}
 		}}
@@ -2040,7 +2071,7 @@
 	</div>
 {/if}
 
-	<ResenaProyectoModal
+<ResenaProyectoModal
 	mostrar={mostrarModalResena}
 	modo="crear"
 	resenaInicial={null}
@@ -2050,14 +2081,12 @@
 />
 
 {#if mostrarConfirmarEliminar}
-	
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
 		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
-	
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
@@ -2099,6 +2128,68 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Modal de Cese de Actividades -->
+<Modal
+	abierto={mostrarModalCeseActividades}
+	titulo="Finalizar actividades"
+	on:cerrar={() => (mostrarModalCeseActividades = false)}
+>
+	<div class="space-y-6">
+		<div class="flex flex-col items-center justify-center text-center">
+			<div
+				class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 ring-8 ring-blue-50/50"
+			>
+				<Icon src={CheckCircle} class="h-8 w-8 text-blue-600" />
+			</div>
+			<h3 class="text-xl font-bold text-gray-900">¿Finalizar las actividades?</h3>
+			<p class="mt-2 text-sm text-gray-500">Estás a un paso de completar una gran etapa.</p>
+		</div>
+
+		<div class="rounded-2xl border border-sky-100 bg-sky-50/50 p-5">
+			<h4 class="mb-3 flex items-center gap-2 text-sm font-bold text-sky-900">
+				<Icon src={Clock} class="h-4 w-4" />
+				¿Qué sucede al finalizar?
+			</h4>
+			<ul class="space-y-3 text-sm text-sky-800/80">
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>El proyecto dejará de ser visible para nuevas postulaciones.</span>
+				</li>
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>Podrás subir fotos y documentos como evidencia del impacto.</span>
+				</li>
+			</ul>
+		</div>
+
+		<div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+			<p class="text-xs leading-relaxed text-amber-800">
+				<strong class="mb-1 block">Nota importante:</strong>
+				Esta acción no cierra legalmente el proyecto, pero es necesaria para prepararlo para la auditoría
+				y validación final de los colaboradores.
+			</p>
+		</div>
+	</div>
+
+	<div slot="footer" class="mt-6 flex w-full flex-col-reverse gap-3 sm:flex-row">
+		<Button
+			label="Todavía no"
+			variant="secondary"
+			size="sm"
+			customClass="flex-1"
+			onclick={() => (mostrarModalCeseActividades = false)}
+		/>
+		<Button
+			label="Sí, finalizar actividades"
+			variant="primary"
+			size="sm"
+			customClass="flex-1"
+			loading={ceseActividades}
+			onclick={confirmarCeseActividades}
+		/>
+	</div>
+</Modal>
 
 <style>
 	@keyframes fade-up {

@@ -6,9 +6,9 @@
 	const usuarioPorDefecto = '/users/user-default.png';
 
 	import {
-		getParticipacionVisual,
 		getUbicacionCorta,
-		formatearFechaBadge
+		formatearFechaBadge,
+		calcularDiasRestantes
 	} from '$lib/utils/util-proyectos';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -58,6 +58,15 @@
 			mostrarJustificacion = true;
 		}
 	}
+
+	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
+
+	$: progresoTotal = proyecto ? calcularProgresoTotal(proyecto) : 0;
+	$: diasFaltantes = proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999;
+	$: listoParaFinalizar = 
+		esCreador && 
+		proyecto.estado === 'en_curso' && 
+		(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7));
 
 	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro || esAnulada;
 	$: ubicacionCorta = getUbicacionCorta(proyecto);
@@ -194,12 +203,12 @@
 			<div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
 				{#if esInstitucion && proyecto.estado === 'en_curso'}
 					<Button
-						label="Editar"
-						href={`/proyectos/${proyecto.id_proyecto}/editar`}
+						label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
+						href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
-						customAriaLabel="Editar proyecto"
+						customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
 					/>
 					<Button
 						label="Ver detalles"
@@ -223,12 +232,12 @@
 				{#if esCreador}
 					{#if proyecto.estado === 'en_curso'}
 						<Button
-							label="Editar"
-							href={`/proyectos/${proyecto.id_proyecto}/editar`}
+							label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
+							href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
 							variant="secondary"
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Editar proyecto"
+							customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
 						/>
 					{/if}
 					<Button
