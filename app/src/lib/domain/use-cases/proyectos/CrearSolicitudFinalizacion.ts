@@ -76,7 +76,12 @@ export class CrearSolicitudFinalizacion {
 		};
 
 		const solicitudCreada = await this.solicitudRepo.create(solicitud);
+		const estadoAnterior = proyecto.estado || 'pendiente_solicitud_cierre';
 
+		// Cambiar el estado del proyecto a 'en_revision'
+		await this.proyectoRepo.updateEstado(idProyecto, 'en_revision');
+
+		// Registrar la creación de la solicitud
 		await this.historialRepo.create({
 			tipo_objeto: 'solicitud_finalizacion',
 			id_objeto: solicitudCreada.id_solicitud ?? 0,
@@ -84,6 +89,17 @@ export class CrearSolicitudFinalizacion {
 			atributo_afectado: 'registro',
 			valor_anterior: '-',
 			valor_nuevo: String(solicitudCreada.id_solicitud ?? 0),
+			usuario_id: idInstitucion
+		});
+
+		// Registrar el cambio de estado del proyecto
+		await this.historialRepo.create({
+			tipo_objeto: 'proyecto',
+			id_objeto: idProyecto,
+			accion: 'enviar_solicitud_cierre',
+			atributo_afectado: 'estado',
+			valor_anterior: estadoAnterior,
+			valor_nuevo: 'en_revision',
 			usuario_id: idInstitucion
 		});
 
