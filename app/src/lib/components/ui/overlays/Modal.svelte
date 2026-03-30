@@ -35,6 +35,8 @@
 	});
 
 	function cerrar() {
+		// Solo ejecutar una vez: idempotente
+		if (!abierto) return;
 		abierto = false;
 		oncerrar?.();
 	}

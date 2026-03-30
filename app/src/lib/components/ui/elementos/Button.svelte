@@ -18,6 +18,7 @@
 		type = 'button' as 'submit' | 'button' | 'reset',
 		ariaDisabled = undefined,
 		onclick = undefined,
+		class: extraClass = '',
 		...restProps
 	} = $props<{
 		label?: string;
@@ -30,6 +31,7 @@
 		variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
 		size?: 'md' | 'sm';
 		customClass?: string;
+		class?: string;
 		customAriaLabel?: string | null;
 		type?: 'submit' | 'button' | 'reset';
 		ariaDisabled?: boolean;
@@ -73,7 +75,8 @@
 			rootSize[size],
 			'bg-primary hover:bg-primary-hover text-white',
 			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50 ',
-			customClass
+			customClass,
+			extraClass
 		)}
 		{type}
 		role="link"
@@ -143,7 +146,8 @@
 			rootSize[size],
 			'bg-[#eff6ff] text-[rgb(var(--color-primary))] hover:bg-[#dbeafe]',
 			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50',
-			customClass
+			customClass,
+			extraClass
 		)}
 		{type}
 		role="link"
@@ -152,6 +156,7 @@
 		aria-busy={loading || undefined}
 		aria-disabled={computedAriaDisabled}
 		disabled={isDisabled}
+		{...restProps}
 	>
 		<span class="background-animation absolute inset-0 z-0 origin-bottom bg-current"></span>
 		{#if loading}
@@ -212,7 +217,8 @@
 			rootSize[size],
 			'bg-red-600 text-white hover:bg-red-700',
 			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50 ',
-			customClass
+			customClass,
+			extraClass
 		)}
 		{type}
 		role="link"
@@ -284,7 +290,8 @@
 				? 'h-12 min-w-[140px] px-8 py-3 md:h-14'
 				: 'h-9 min-w-[100px]  px-5 py-2 md:h-10',
 			isDisabled && 'pointer-events-none cursor-not-allowed opacity-50',
-			customClass
+			customClass,
+			extraClass
 		)}
 		{type}
 		role="link"
