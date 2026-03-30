@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ComponentType } from 'svelte';
+	import { untrack, type ComponentType } from 'svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import FotoPerfilUploader from '$lib/components/feature/registro/FotoPerfilUploader.svelte';
@@ -309,7 +309,7 @@
 		email: ''
 	});
 
-	let rolInterno: RegistroRol | null = $state(rol);
+	let rolInterno: RegistroRol | null = $state(untrack(() => rol));
 
 	$effect(() => {
 		if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {

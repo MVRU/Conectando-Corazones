@@ -32,7 +32,6 @@
 	import { usePerfilEdicion } from '$lib/stores/perfilEdicion';
 	import { toastStore } from '$lib/stores/toast';
 	import { determinarEstadoVerificacion } from '$lib/utils/util-verificacion';
-	import { writable } from 'svelte/store';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
 	import { Settings, Flag, ShieldAlert, BarChart3 } from 'lucide-svelte';
@@ -65,16 +64,18 @@
 		puedeVerContactos($usuarioStore, perfilUsuario, proyectos)
 	);
 	let puedeResenar = $derived(puedeDejarResena($usuarioStore, perfilUsuario, proyectos));
-	let proyectosUsuario = $derived(proyectos);
+	let listaResenas = $state<Resena[]>([]);
 
-	const resenasStore = writable<Resena[]>(resenas);
+	$effect(() => {
+		listaResenas = resenas; // Sincronización reactiva
+	});
 
 	let resenaAEliminar: Resena | null = $state(null);
 	let mostrarConfirmarEliminar = $state(false);
 
 	let yaResenoUsuario = $derived(
 		$usuarioStore && !esMiPerfil
-			? $resenasStore.some(
+			? listaResenas.some(
 					(r) =>
 						r.username === ($usuarioStore.username || '') &&
 						r.id_objeto === perfilUsuario.id_usuario &&
@@ -84,7 +85,7 @@
 	);
 
 	let reseñasUsuario = $derived(
-		$resenasStore.filter(
+		listaResenas.filter(
 			(r) => r.id_objeto === perfilUsuario.id_usuario && r.tipo_objeto === 'usuario'
 		)
 	);
@@ -193,8 +194,8 @@
 				}
 			};
 
-			// Agregar reseña al store local
-			resenasStore.update((resenas) => [reseñaConAutor, ...resenas]);
+			// Agregar reseña a la lista local
+			listaResenas = [reseñaConAutor, ...listaResenas];
 
 			toastStore.show({
 				variant: 'success',
@@ -233,7 +234,7 @@
 			}
 
 			const idEliminado = resenaAEliminar.id_resena;
-			resenasStore.update((actuales) => actuales.filter((r) => r.id_resena !== idEliminado));
+			listaResenas = listaResenas.filter((r) => r.id_resena !== idEliminado);
 			toastStore.show({
 				variant: 'success',
 				message: 'Reseña eliminada correctamente.'
@@ -269,7 +270,7 @@
 	] as const;
 
 	let statsUsuario = $derived({
-		proyectos: proyectosUsuario.length,
+		proyectos: proyectos.length,
 		categorias: (perfilUsuario.categorias_preferidas || []).length,
 		resenas: reseñasUsuario.length
 	});
@@ -435,7 +436,7 @@
 					>
 						<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
 							<PerfilSeccionProyectos
-								proyectos={proyectosUsuario}
+								proyectos={proyectos}
 								rol={perfilUsuario.rol}
 								{estadoVerificacion}
 							/>

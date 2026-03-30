@@ -42,7 +42,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		).filter(Boolean) as string[];
 
 		// Obtener todos los proyectos disponibles (en curso o pendiente de cierre)
-		// Usar findAllSummary() para reducir datos transferidos
 		const allProjects = await proyectoRepo.findAllSummary();
 		const proyectosDisponibles = allProjects
 			.filter(
@@ -58,72 +57,76 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Obtener datos de la institución
 		let nombreInstitucion = 'Institución';
-		if (project.institucion_id) {
-			const institucion = await usuarioRepo.findById(project.institucion_id);
-			if (institucion && institucion.nombre_legal) {
-				nombreInstitucion = institucion.nombre_legal;
-			}
+		const institucion = await usuarioRepo.findById(usuario.id_usuario);
+		if (institucion && institucion.nombre_legal) {
+			nombreInstitucion = institucion.nombre_legal;
 		}
 
-		// 4. Cargar Evidencias Existentes
+		// 4. Cargar Evidencias y Participaciones de TODOS los proyectos disponibles
 		const evidenciaRepo = new PostgresEvidenciaRepository();
 		const colaboracionRepo = new PostgresColaboracionRepository();
 		const listarEvidencias = new ListarEvidencias(evidenciaRepo, proyectoRepo, colaboracionRepo);
 
-		let evidencias: any[] = [];
-		try {
-			if (locals.usuario) {
-				const evidenciasDominio = await listarEvidencias.execute(
-					projectId,
-					locals.usuario.id_usuario!,
-					locals.usuario.rol
-				);
+		const dataProyectos = await Promise.all(
+			proyectosDisponibles.map(async (p) => {
+				const id = p.id_proyecto!;
+				try {
+					// Obtener proyecto completo para sus participaciones
+					const fullProject = await proyectoRepo.findById(id);
+					const evidenciasDominio = await listarEvidencias.execute(
+						id,
+						usuario.id_usuario!,
+						usuario.rol
+					);
 
-				// Mapear y generar URLs firmadas para visualización
-				evidencias = await Promise.all(
-					evidenciasDominio.map(async (ev) => {
-						const archivosConUrl = await Promise.all(
-							ev.archivos.map(async (archivo: any) => {
-								// Si la URL ya es http (antiguos) o data, la dejamos. Si es relativa (storage), firmamos.
-								let urlFirmada = archivo.url;
-								if (
-									archivo.url &&
-									!archivo.url.startsWith('http') &&
-									!archivo.url.startsWith('data:')
-								) {
-									const partes = archivo.url.split('/');
-									const bucketName = partes[0] === 'evidencias' ? 'evidencias' : 'avatars';
-									const path = partes.slice(1).join('/');
+					// Mapear y generar URLs firmadas
+					const evidenciasConUrl = await Promise.all(
+						evidenciasDominio.map(async (ev) => {
+							const archivosConUrl = await Promise.all(
+								ev.archivos.map(async (archivo: any) => {
+									let urlFirmada = archivo.url;
+									if (
+										archivo.url &&
+										!archivo.url.startsWith('http') &&
+										!archivo.url.startsWith('data:')
+									) {
+										const partes = archivo.url.split('/');
+										const bucketName = partes[0] === 'evidencias' ? 'evidencias' : 'avatars';
+										const path = partes.slice(1).join('/');
 
-									if (path) {
-										const { data } = await supabaseAdmin.storage
-											.from(bucketName)
-											.createSignedUrl(path, 3600); // 1 hora de validez
+										if (path) {
+											const { data: signedData } = await supabaseAdmin.storage
+												.from(bucketName)
+												.createSignedUrl(path, 3600);
 
-										if (data?.signedUrl) {
-											urlFirmada = data.signedUrl;
+											if (signedData?.signedUrl) {
+												urlFirmada = signedData.signedUrl;
+											}
 										}
 									}
-								}
+									return { ...archivo, url: urlFirmada };
+								})
+							);
+							return { ...ev, id_proyecto: id, archivos: archivosConUrl };
+						})
+					);
 
-								return {
-									...archivo,
-									url: urlFirmada
-								};
-							})
-						);
+					return {
+						id_proyecto: id,
+						participaciones: fullProject?.participacion_permitida || [],
+						evidencias: evidenciasConUrl
+					};
+				} catch (e) {
+					console.error(`Error cargando datos para proyecto ${id}:`, e);
+					return { id_proyecto: id, participaciones: [], evidencias: [] };
+				}
+			})
+		);
 
-						return {
-							...ev,
-							archivos: archivosConUrl
-						};
-					})
-				);
-			}
-		} catch (e) {
-			console.error('Error cargando evidencias:', e);
-			// No bloqueamos la carga de la página si fallan las evidencias
-		}
+		const todasLasEvidencias = dataProyectos.flatMap((dp) => dp.evidencias);
+		const todasLasParticipaciones = dataProyectos.flatMap((dp) =>
+			dp.participaciones.map((p) => ({ ...p, id_proyecto: dp.id_proyecto }))
+		);
 
 		return {
 			proyecto: JSON.parse(
@@ -137,16 +140,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			),
 			proyectosDisponibles: JSON.parse(JSON.stringify(proyectosDisponibles)),
 			tiposParticipacion: tiposUnicos,
-			participacionesPermitidas: JSON.parse(JSON.stringify(project.participacion_permitida || [])),
-			evidencias: JSON.parse(JSON.stringify(evidencias))
+			participacionesPermitidas: JSON.parse(JSON.stringify(todasLasParticipaciones)),
+			evidencias: JSON.parse(JSON.stringify(todasLasEvidencias))
 		};
 	} catch (err) {
 		console.error('Error loading evidencias page:', err);
-		// Si es un error 404, lo re-lanzamos
 		if (err && typeof err === 'object' && 'status' in err && (err as any).status === 404) {
 			throw err;
 		}
-		// Para otros errores, retornamos datos vacíos en lugar de 500
 		return {
 			proyecto: {
 				id_proyecto: 0,
@@ -157,7 +158,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			},
 			proyectosDisponibles: [],
 			tiposParticipacion: [],
-			participacionesPermitidas: []
+			participacionesPermitidas: [],
+			evidencias: []
 		};
 	}
 };

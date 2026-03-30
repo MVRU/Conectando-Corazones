@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { goto, beforeNavigate } from '$app/navigation';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -16,6 +16,7 @@
 	import type { Archivo } from '$lib/domain/types/Archivo';
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 
 	let { data } = $props();
 
@@ -44,16 +45,14 @@
 
 	let selectedParticipacion = $derived(
 		data.participacionesPermitidas.find(
-			(p: any) => p.id_participacion_permitida === selectedParticipacionPermitidaId
+			(p: ParticipacionPermitida) => p.id_participacion_permitida === selectedParticipacionPermitidaId
 		)
 	);
 
 	let esMonetaria = $derived(
 		selectedParticipacion?.tipo_participacion?.descripcion === 'Monetaria'
 	);
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	let esEspecie = $derived(selectedParticipacion?.tipo_participacion?.descripcion === 'Especie');
-
+	
 	let mostrarModalSubirArchivos = $state(false);
 	let archivosTemporales: (Archivo & { file: File })[] = $state([]);
 	let evidenciasNuevas: EvidenciaEntradaNueva[] = $state([]);
@@ -81,17 +80,19 @@
 
 	onMount(() => {
 		// Pre-selección por query param (desde el botón "Subir evidencias" de Mis Aportes)
-		const participacionId = page.url.searchParams.get('participacion');
-		if (participacionId) {
-			const id = Number(participacionId);
-			if (data.participacionesPermitidas.some((p: any) => p.id_participacion_permitida === id)) {
-				selectedParticipacionPermitidaId = id;
-				// Si ya existe una contribución de este tipo, sugerimos cantidad 0 para solo evidencias
-				if (data.existingContributions?.some((c: any) => c.participacion_permitida_id === id)) {
-					cantidadAporte = 0;
+		untrack(() => {
+			const participacionId = page.url.searchParams.get('participacion');
+			if (participacionId) {
+				const id = Number(participacionId);
+				if (data.participacionesPermitidas.some((p: ParticipacionPermitida) => p.id_participacion_permitida === id)) {
+					selectedParticipacionPermitidaId = id;
+					// Si ya existe una contribución de este tipo, sugerimos cantidad 0 para solo evidencias
+					if (data.existingContributions?.some((c: any) => c.participacion_permitida_id === id)) {
+						cantidadAporte = 0;
+					}
 				}
 			}
-		}
+		});
 
 		const mql = window.matchMedia('(max-width: 640px)');
 		isMobile = mql.matches;
@@ -286,11 +287,11 @@
 			})
 		});
 
-		const { uploadUrl, fullPath, error } = await response.json();
-		if (error) throw new Error(error);
+		const dataUpload = await response.json();
+		if (dataUpload.error) throw new Error(dataUpload.error);
 
 		// 2. Subir archivo
-		const uploadRes = await fetch(uploadUrl, {
+		const uploadRes = await fetch(dataUpload.uploadUrl, {
 			method: 'PUT',
 			body: archivo.file,
 			headers: { 'Content-Type': archivo.tipo_mime! }
@@ -300,7 +301,7 @@
 
 		return {
 			...archivo,
-			url: fullPath,
+			url: dataUpload.fullPath,
 			proyecto_id: Number(projectIdUrl)
 		};
 	}
@@ -566,13 +567,13 @@
 							<div class="grid grid-cols-1 gap-3">
 								{#each evidenciasNuevas as evidencia, i}
 									{#each evidencia.archivos as archivo}
-										{@const Icon = getIconForFile(archivo.tipo_mime)}
+										{@const IconArchivo = getIconForFile(archivo.tipo_mime)}
 										<div
 											class="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3"
 										>
 											<div class="flex items-center gap-3 overflow-hidden">
 												<div class="shrink-0 rounded-lg bg-white p-2 text-slate-400">
-													<Icon size={20} />
+													<IconArchivo size={20} />
 												</div>
 												<div class="min-w-0">
 													<p class="truncate text-sm font-bold text-slate-700">
@@ -776,7 +777,7 @@
 						</h4>
 
 						{#each archivosTemporales as archivo (archivo.id_archivo)}
-							{@const Icon = getIconForFile(archivo.tipo_mime)}
+							{@const IconArchivoItem = getIconForFile(archivo.tipo_mime)}
 							<div
 								class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4"
 								transition:slide={{ duration: 200 }}
@@ -784,7 +785,7 @@
 								<!-- Archivo info -->
 								<div class="flex items-start gap-3">
 									<div class="shrink-0 rounded-xl bg-white p-2.5 text-slate-400">
-										<Icon size={20} />
+										<IconArchivoItem size={20} />
 									</div>
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-bold text-slate-800" title={archivo.file.name}>

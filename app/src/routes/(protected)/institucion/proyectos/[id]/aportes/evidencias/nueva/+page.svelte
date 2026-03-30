@@ -5,15 +5,17 @@
 	import { ChevronLeft, Plus, Upload, X, AlertCircle, FileStack, History } from 'lucide-svelte';
 	import ArchivoCard from '$lib/components/ui/cards/ArchivoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { obtenerIconoArchivo, formatearBytes } from '$lib/utils/archivos';
+	import { obtenerIconoArchivo } from '$lib/utils/archivos';
 	import { fade, slide } from 'svelte/transition';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import type { Archivo } from '$lib/domain/types/Archivo';
+	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import { SvelteSet, SvelteURL } from 'svelte/reactivity';
 
-	import { applyAction, deserialize } from '$app/forms';
+	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import type { ActionResult } from '@sveltejs/kit';
 
@@ -44,18 +46,56 @@
 		archivos: (Archivo & { file: File })[];
 	};
 
-	let selectedProyectoId = $state<number>(data.proyecto.id_proyecto ?? 0);
-let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
-	(data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || ''
-);
+	let selectedProyectoId = $state<number>(0);
+	let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>('');
 	let selectedParticipacionPermitidaId = $state<number | null>(null);
 
-	// Filtrar participaciones por tipo seleccionado
+	$effect(() => {
+		// Inicialización reactiva basada en data
+		if (selectedProyectoId === 0) {
+			selectedProyectoId = data.proyecto.id_proyecto ?? 0;
+		}
+		if (selectedTipoParticipacion === '') {
+			selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
+		}
+	});
+
+	let proyectoActual = $derived(
+		data.proyectosDisponibles.find((p: { id_proyecto: number }) => p.id_proyecto === selectedProyectoId) || data.proyecto
+	);
+
+	// Sincronizar URL y Breadcrumbs cuando cambia el proyecto seleccionado
+	$effect(() => {
+		if (selectedProyectoId && selectedProyectoId !== Number(page.params.id)) {
+			// Actualizar URL sin recargar la página (Shallow Routing parcial)
+			const newUrl = new SvelteURL(window.location.href);
+			newUrl.pathname = newUrl.pathname.replace(`/${page.params.id}/`, `/${selectedProyectoId}/`);
+			window.history.replaceState({}, '', newUrl.toString());
+		}
+
+		setBreadcrumbs([
+			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
+			{ label: 'Aportes', href: `/institucion/proyectos/${selectedProyectoId}/aportes` },
+			{ label: 'Nueva Evidencia' }
+		]);
+	});
+
+	// Filtro de evidencias por proyecto seleccionado (Reactividad pura Svelte 5)
+	const evidenciasDelProyecto = $derived(
+		(data.evidencias as (Evidencia & { id_proyecto: number })[]).filter(
+			(e) => e.id_proyecto === selectedProyectoId
+		)
+	);
+
+	// Filtrar participaciones por proyecto y tipo seleccionado
 	let filteredParticipaciones = $derived(
-		data.participacionesPermitidas.filter((p: any) => {
-			if (!selectedTipoParticipacion) return false;
-			return p.tipo_participacion?.descripcion === selectedTipoParticipacion;
-		})
+		(data.participacionesPermitidas as (ParticipacionPermitida & { id_proyecto: number })[]).filter(
+			(p) => {
+				if (p.id_proyecto !== selectedProyectoId) return false;
+				if (!selectedTipoParticipacion) return false;
+				return p.tipo_participacion?.descripcion === selectedTipoParticipacion;
+			}
+		)
 	);
 
 	// Mostrar selector de meta solo si es "Especie" Y hay más de una opción
@@ -64,14 +104,13 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 	);
 
 	// Función para obtener el nombre del colaborador
-	// TODO: considerar centralizar esta función ya que se usa en varios lugares
-	function getNombreColaborador(usuarioId: number): string {
+	function getNombreColaborador(_usuario_id: number): string {
 		return 'Colaborador';
 	}
 
 	let evidenciasEntrada = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? (data.evidencias as any[])
+			? evidenciasDelProyecto
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -80,7 +119,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 					.flatMap((e) => e.archivos || [])
 					.map((a) => ({
 						...a,
-						url: a.url, // Asegurar que url es string (en mock siempre está pero en type Archivo también)
+						url: a.url,
 						uploader_nombre: getNombreColaborador(a.usuario_id ?? 0),
 						fecha_formateada: new Date(a.created_at ?? new Date()).toLocaleDateString('es-AR'),
 						tipo_visual: (a.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
@@ -93,7 +132,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 
 	let evidenciasSalidaExistentes = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? (data.evidencias as any[])
+			? evidenciasDelProyecto
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -118,7 +157,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 	let mostrarModalSubirArchivos = $state(false);
 	let archivosTemporales: (Archivo & { file: File })[] = $state([]);
 
-	let evidenciasEliminadas: Set<number> = $state(new Set());
+	let evidenciasEliminadas = new SvelteSet<number>();
 
 	let mostrarModalEliminar = $state(false);
 	let archivoAEliminarId = $state<number | null>(null);
@@ -128,7 +167,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		...evidenciasSalidaNuevas.flatMap((ev) =>
 			ev.archivos.map((archivo) => ({
 				...archivo,
-				uploader_nombre: data.proyecto.nombreInstitucion || 'Institución',
+				uploader_nombre: proyectoActual.nombreInstitucion || 'Institución',
 				fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
 				tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
 				tamanio_formateado: archivo.tamanio_bytes
@@ -146,9 +185,8 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 	);
 
 	let isMobile = $state(false);
-
 	let mostrarModalConfirmacion = $state(false);
-	let navegacionPendiente: (() => void) | null = null;
+	let navegacionPendiente: (() => void) | null = $state(null);
 	let estaGuardando = $state(false);
 
 	onMount(() => {
@@ -157,7 +195,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		const listener = (e: MediaQueryListEvent) => (isMobile = e.matches);
 		mql.addEventListener('change', listener);
 
-		// Prevenir salida del navegador si hay cambios
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			if (hayaCambios && !estaGuardando) {
 				e.preventDefault();
@@ -173,15 +210,14 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		};
 	});
 
-	// Interceptar navegación interna de SvelteKit
 	beforeNavigate((navigation) => {
 		if (hayaCambios && !mostrarModalConfirmacion && !estaGuardando) {
 			navigation.cancel();
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
-				evidenciasEliminadas = new Set();
+				evidenciasEliminadas = new SvelteSet();
 				navigation.cancel();
-				goto(navigation.to?.url.pathname || `/institucion/proyectos/${projectIdUrl}/aportes`);
+				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		}
@@ -191,8 +227,8 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		if (hayaCambios) {
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
-				evidenciasEliminadas = new Set();
-				goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
+				evidenciasEliminadas = new SvelteSet();
+				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		} else {
@@ -215,7 +251,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 
 	async function subirArchivoASupabase(archivo: ArchivoUI): Promise<string> {
 		try {
-			// 1. Obtener URL firmada
 			const response = await fetch('/api/storage/upload-url', {
 				method: 'POST',
 				body: JSON.stringify({
@@ -233,7 +268,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 
 			const { uploadUrl, fullPath } = await response.json();
 
-			// 2. Subir archivo a Storage
 			const uploadResponse = await fetch(uploadUrl, {
 				method: 'PUT',
 				body: archivo.file,
@@ -265,7 +299,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		});
 
 		try {
-			// 1. Subir archivos nuevos a Supabase Storage
 			const evidenciasProcesadas = await Promise.all(
 				evidenciasSalidaNuevas.map(async (evidencia) => {
 					const archivosSubidos = await Promise.all(
@@ -285,7 +318,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 				})
 			);
 
-			// 2. Enviar datos al servidor
 			const formData = new FormData();
 			formData.append('evidencias', JSON.stringify(evidenciasProcesadas));
 			formData.append('eliminadas', JSON.stringify(Array.from(evidenciasEliminadas)));
@@ -306,9 +338,8 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 					message: 'Evidencias guardadas correctamente'
 				});
 
-				// Limpiar estado
 				evidenciasSalidaNuevas = [];
-				evidenciasEliminadas = new Set();
+				evidenciasEliminadas = new SvelteSet();
 
 				await invalidateAll();
 				goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
@@ -357,7 +388,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 			for (let i = 0; i < input.files.length; i++) {
 				const file = input.files[i];
 
-				// Validar tamaño
 				if (file.size > MAX_FILE_SIZE) {
 					toastStore.show({
 						variant: 'error',
@@ -367,7 +397,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 					continue;
 				}
 
-				// Validar tipo MIME
 				if (!ALLOWED_MIME_TYPES.includes(file.type)) {
 					toastStore.show({
 						variant: 'error',
@@ -377,7 +406,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 					continue;
 				}
 
-				// Validar extensión
 				const extension = file.name.split('.').pop()?.toLowerCase();
 				if (
 					extension &&
@@ -395,9 +423,9 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 				const url = isImage ? URL.createObjectURL(file) : '';
 
 				nuevosArchivos.push({
-					id_archivo: Date.now() + i, // ID temporal
+					id_archivo: Date.now() + i,
 					file,
-					descripcion: file.name, // Descripción inicial: nombre del archivo
+					descripcion: file.name,
 					tipo_mime: file.type,
 					tamanio_bytes: file.size,
 					url,
@@ -464,7 +492,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 			}
 		} else {
 			evidenciasEliminadas.add(id);
-			evidenciasEliminadas = new Set(evidenciasEliminadas);
 		}
 
 		mostrarModalEliminar = false;
@@ -475,12 +502,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		mostrarModalEliminar = false;
 		archivoAEliminarId = null;
 	}
-
-	$effect(() => {
-		if (selectedProyectoId !== data.proyecto.id_proyecto) {
-			goto(`/institucion/proyectos/${selectedProyectoId}/aportes/evidencias/nueva`);
-		}
-	});
 
 	$effect(() => {
 		if (selectedTipoParticipacion) {
@@ -536,7 +557,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 						bind:value={selectedProyectoId}
 						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
-						{#each data.proyectosDisponibles as proyecto}
+						{#each data.proyectosDisponibles as proyecto (proyecto.id_proyecto)}
 							<option value={proyecto.id_proyecto}>{proyecto.titulo}</option>
 						{/each}
 					</select>
@@ -556,7 +577,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						<option value="" disabled>Seleccionar tipo</option>
-						{#each data.tiposParticipacion as tipo}
+						{#each data.tiposParticipacion as tipo (tipo)}
 							<option value={tipo}>{tipo === 'Especie' ? 'En especie' : tipo}</option>
 						{/each}
 					</select>
@@ -577,7 +598,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 							class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 						>
 							<option value={null} disabled>Seleccionar meta</option>
-							{#each filteredParticipaciones as p}
+							{#each filteredParticipaciones as p (p.id_participacion_permitida)}
 								<option value={p.id_participacion_permitida}>
 									{p.especie ? p.especie : 'Donación en especie'} ({p.objetivo}
 									{p.unidad_medida})
@@ -632,7 +653,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 						</div>
 					{:else}
 						<div class="space-y-3">
-							{#each evidenciasEntrada as file}
+							{#each evidenciasEntrada as file (file.id_archivo)}
 								<ArchivoCard archivo={file} showUploader={true} />
 							{/each}
 						</div>
@@ -814,7 +835,7 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 	</div>
 {/if}
 
-<!-- Modal de Confirmación de Eliminación -->
+<!-- Modal de Eliminación -->
 {#if mostrarModalEliminar}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
@@ -831,49 +852,40 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 		}}
 	>
 		<div
-			class="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
+			class="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
 			transition:slide={{ duration: 300 }}
 		>
-			<!-- Header -->
-			<div class="border-b border-slate-100 bg-gradient-to-br from-red-50 to-orange-50 p-6 md:p-8">
-				<div class="flex items-start gap-4">
-					<div class="shrink-0 rounded-xl bg-red-100 p-3 text-red-600">
-						<AlertCircle size={24} />
-					</div>
-					<div>
-						<h3 id="modal-delete-title" class="mb-2 text-xl font-black text-slate-900">
-							¿Eliminar evidencia?
-						</h3>
-						<p class="text-sm leading-relaxed text-slate-600">
-							Esta acción eliminará el archivo permanentemente. Tendrás que guardar los cambios para
-							completar la operación.
-						</p>
-					</div>
+			<div class="bg-gradient-to-br from-red-50 to-white p-8 text-center">
+				<div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+					<X size={28} />
 				</div>
+				<h3 id="modal-delete-title" class="mb-2 text-lg font-black text-slate-900">
+					¿Eliminar archivo?
+				</h3>
+				<p class="text-xs leading-relaxed text-slate-500">
+					Esta acción quitará el archivo de la lista. No es permanente hasta que guardes los cambios.
+				</p>
 			</div>
 
-			<!-- Actions -->
-			<div class="bg-slate-50/50 p-6 md:p-8">
-				<div class="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
-					<button
-						onclick={cancelarEliminacion}
-						class="flex-1 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-600 transition-all hover:border-slate-300 hover:text-slate-800"
-					>
-						Cancelar
-					</button>
-					<button
-						onclick={confirmarEliminacion}
-						class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
-					>
-						Eliminar
-					</button>
-				</div>
+			<div class="flex gap-3 bg-slate-50 p-6">
+				<button
+					onclick={cancelarEliminacion}
+					class="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-600 hover:bg-slate-50"
+				>
+					No, dejar
+				</button>
+				<button
+					onclick={confirmarEliminacion}
+					class="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white shadow-lg shadow-red-100 hover:bg-red-700"
+				>
+					Sí, eliminar
+				</button>
 			</div>
 		</div>
 	</div>
 {/if}
 
-<!-- Modal de Subir Archivos -->
+<!-- Modal de Subida de Archivos -->
 {#if mostrarModalSubirArchivos}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
@@ -893,7 +905,6 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 			class="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
 			transition:slide={{ duration: 300 }}
 		>
-			<!-- Header -->
 			<div class="border-b border-slate-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 md:p-8">
 				<div class="flex items-start justify-between">
 					<div class="flex items-start gap-4">
@@ -905,184 +916,73 @@ let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>(
 								Subir evidencia de salida
 							</h3>
 							<p class="text-sm leading-relaxed text-slate-600">
-								Seleccioná uno o más archivos y agregá una descripción para cada uno
+								Elegí un archivo y describilo brevemente
 							</p>
 						</div>
 					</div>
 					<button
 						onclick={cerrarModalSubirArchivos}
-						class="rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-100 hover:text-slate-600"
-						aria-label="Cerrar modal"
+						class="rounded-lg p-2 text-slate-400 hover:bg-blue-100/50 hover:text-blue-600"
 					>
 						<X size={20} />
 					</button>
 				</div>
 			</div>
 
-			<!-- Content -->
 			<div class="custom-scrollbar flex-1 overflow-y-auto p-6 md:p-8">
-				<!-- File selector -->
-				<div class="mb-6">
+				<div class="mb-8">
 					<label class="block w-full cursor-pointer">
-						<div
-							class="rounded-2xl border-2 border-dashed border-slate-300 p-8 text-center transition-all hover:border-blue-400 hover:bg-blue-50/30"
-						>
-							<div class="flex flex-col items-center gap-3">
-								<div class="rounded-full bg-blue-100 p-4 text-blue-600">
-									<FileStack size={32} />
-								</div>
-								<div>
-									<p class="text-base font-bold text-slate-700">
-										Hacé clic para seleccionar archivos
-									</p>
-									<p class="mt-1 text-sm text-slate-500">PDF, JPG, PNG (máx. 10MB por archivo)</p>
-								</div>
+						<div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10 transition-all hover:border-blue-400 hover:bg-blue-50/50">
+							<div class="mb-3 rounded-2xl bg-white p-4 text-blue-600 shadow-sm">
+								<Plus size={32} />
 							</div>
+							<p class="text-sm font-black text-slate-700">Seleccionar archivo</p>
+							<p class="mt-1 text-xs text-slate-400">PDF o imágenes hasta 10MB</p>
 						</div>
-						<input
-							type="file"
-							multiple
-							class="hidden"
-							accept="image/*,.pdf"
-							onchange={handleFileSelection}
-						/>
+						<input type="file" multiple class="hidden" accept="image/*,.pdf" onchange={handleFileSelection} />
 					</label>
 				</div>
 
-				<!-- Lista de archivos seleccionados -->
 				{#if archivosTemporales.length > 0}
 					<div class="space-y-4">
-						<h4 class="text-sm font-black tracking-wider text-slate-400 uppercase">
+						<h4 class="text-[10px] font-black tracking-widest text-slate-400 uppercase">
 							Archivos seleccionados ({archivosTemporales.length})
 						</h4>
-
 						{#each archivosTemporales as archivo (archivo.id_archivo)}
 							{@const Icon = obtenerIconoArchivo(archivo.tipo_mime)}
-							<div
-								class="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4"
-								transition:slide={{ duration: 200 }}
-							>
-								<!-- Archivo info -->
-								<div class="flex items-start gap-3">
-									<div class="shrink-0 rounded-xl bg-white p-2.5 text-slate-400">
-										<Icon size={20} />
+							<div class="space-y-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-3 overflow-hidden">
+										<div class="shrink-0 rounded-xl bg-white p-2 text-slate-400 shadow-sm">
+											<Icon size={20} />
+										</div>
+										<p class="truncate text-sm font-bold text-slate-700">{archivo.nombre_original}</p>
 									</div>
-									<div class="min-w-0 flex-1">
-										<p class="truncate text-sm font-bold text-slate-800" title={archivo.file.name}>
-											{archivo.file.name}
-										</p>
-										<p class="mt-0.5 text-xs text-slate-500">
-											{formatearBytes(archivo.tamanio_bytes)}
-										</p>
-									</div>
-									<button
-										onclick={() => eliminarArchivoTemporal(archivo.id_archivo!)}
-										class="rounded-lg p-2 text-slate-400 transition-all hover:bg-red-50 hover:text-red-500"
-										aria-label="Eliminar archivo"
-									>
+									<button onclick={() => eliminarArchivoTemporal(archivo.id_archivo!)} class="p-2 text-slate-400 hover:text-red-500">
 										<X size={18} />
 									</button>
 								</div>
-
-								<!-- Descripción input -->
-								<div>
-									<label
-										for="desc-{archivo.id_archivo}"
-										class="mb-2 block text-xs font-bold tracking-wider text-slate-500 uppercase"
-									>
-										Descripción del archivo
-									</label>
-									<input
-										id="desc-{archivo.id_archivo}"
-										type="text"
-										value={archivo.descripcion}
-										oninput={(e) =>
-											actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
-										placeholder="Ej: Factura de compra de materiales"
-										class="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition-all outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
-									/>
-								</div>
-
-								<!-- Preview para imágenes -->
-								{#if archivo.tipo_mime?.startsWith('image/') && archivo.url}
-									<div class="overflow-hidden rounded-lg border border-slate-200">
-										<img
-											src={archivo.url}
-											alt={archivo.descripcion}
-											class="h-48 w-full object-cover"
-										/>
-									</div>
-								{/if}
+								<input 
+									type="text" 
+									value={archivo.descripcion} 
+									oninput={(e) => actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
+									placeholder="Descripción breve (ej: Factura de compra)" 
+									class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+								/>
 							</div>
 						{/each}
-					</div>
-				{:else}
-					<div class="py-8 text-center text-slate-400">
-						<p class="text-sm font-medium">No hay archivos seleccionados</p>
 					</div>
 				{/if}
 			</div>
 
-			<!-- Footer -->
-			<div class="border-t border-slate-100 bg-slate-50/50 p-6 md:p-8">
-				<div class="flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
-					<button
-						onclick={cerrarModalSubirArchivos}
-						class="flex-1 rounded-xl border-2 border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-600 transition-all hover:border-slate-300 hover:text-slate-800"
-					>
-						Cancelar
-					</button>
-					<button
-						onclick={agregarArchivosAEvidencia}
-						disabled={archivosTemporales.length === 0}
-						class="flex-1 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-blue-200 transition-all hover:from-blue-600 hover:to-blue-700 hover:shadow-blue-300 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
-					>
-						Agregar {archivosTemporales.length > 0 ? `(${archivosTemporales.length})` : ''}
-					</button>
-				</div>
+			<div class="flex justify-center border-t border-slate-100 bg-slate-50/50 p-8">
+				<Button 
+					label="Confirmar archivos" 
+					disabled={archivosTemporales.length === 0}
+					customClass="px-12 shadow-lg shadow-blue-200" 
+					onclick={agregarArchivosAEvidencia} 
+				/>
 			</div>
 		</div>
 	</div>
 {/if}
-
-<style>
-	@keyframes fade-in-up {
-		from {
-			opacity: 0;
-			transform: translateY(20px);
-		}
-		to {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-	.animate-fade-in-up {
-		animation: fade-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-	}
-
-	select {
-		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8' stroke-width='3'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7' /%3E%3C/svg%3E");
-		background-repeat: no-repeat;
-		background-position: right 1rem center;
-		background-size: 1.25rem;
-		padding-right: 3rem;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar {
-		width: 6px;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-track {
-		background: #f1f5f9;
-		border-radius: 10px;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb {
-		background: #cbd5e1;
-		border-radius: 10px;
-	}
-
-	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-		background: #94a3b8;
-	}
-</style>

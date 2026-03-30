@@ -60,7 +60,7 @@
 		color?: string;
 	}
 
-	const acciones: Accion[] = [
+	const acciones: Accion[] = $derived([
 		{
 			label: 'Ver proyectos',
 			icon: FolderKanban,
@@ -82,7 +82,7 @@
 			secondary: true,
 			color: 'rose'
 		}
-	];
+	]);
 </script>
 
 <div class="relative mb-12">

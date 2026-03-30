@@ -152,15 +152,11 @@
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
 			categoriasSeleccionadas = categoriasSeleccionadas.filter((id: number) => id !== categoriaId);
-			if (idCategoriaOtra != null && categoriaId === idCategoriaOtra) {
+			if (categoriaId === idCategoriaOtra) {
 				categoriaOtraDescripcion = '';
-				limpiarError('categoria_otra');
 			}
 		} else {
-			// Prevenir seleccionar más de 5 categorías
-			if (categoriasSeleccionadas.length >= 5) {
-				return;
-			}
+			if (categoriasSeleccionadas.length >= 5) return;
 			categoriasSeleccionadas = [...categoriasSeleccionadas, categoriaId];
 		}
 	}

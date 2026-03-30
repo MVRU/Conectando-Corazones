@@ -4,7 +4,11 @@
 		answer: string;
 		initiallyOpen?: boolean;
 	}>();
-	let open = $state(initiallyOpen);
+	let open = $state(false);
+
+	$effect(() => {
+		open = initiallyOpen;
+	});
 </script>
 
 <div

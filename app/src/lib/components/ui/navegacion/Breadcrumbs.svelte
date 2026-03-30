@@ -16,21 +16,34 @@
 	const MIN_LAST_ITEM_WIDTH = 120;
 	const SEPARATOR_WIDTH = 32;
 
-	let breadcrumbs = $state<BreadcrumbItem[]>([]);
+	let breadcrumbs = $derived($breadcrumbsStore); // Directamente reactivo al store
 	let showPopover = $state(false);
-	let lastBreadcrumbs = $state<BreadcrumbItem[]>([]);
 	let navRef: HTMLElement | undefined = $state();
 	let containerWidth = $state(0);
-	let visibleCrumbsCount = $state(0);
 
-	// Efecto para sincronizar el store con el estado local
-	$effect(() => {
-		const storeItems = $breadcrumbsStore;
-		if (storeItems !== untrack(() => lastBreadcrumbs)) {
-			breadcrumbs = storeItems;
-			lastBreadcrumbs = storeItems;
-			showPopover = false;
+	// visibleCrumbsCount ahora es un DERIVADO puro
+	let visibleCrumbsCount = $derived.by(() => {
+		if (!breadcrumbs.length) return 0;
+		if (containerWidth === 0) return 3; // Default razonable antes del primer measure
+
+		let remaining = containerWidth;
+
+		// Siempre muestra primero y último
+		remaining -= MIN_ITEM_WIDTH; // primero
+		remaining -= MIN_LAST_ITEM_WIDTH; // último
+		remaining -= SEPARATOR_WIDTH * (breadcrumbs.length - 1);
+
+		const possibleMiddle = Math.max(breadcrumbs.length - 2, 0);
+		let maxMiddle = 0;
+
+		while (remaining > 0 && maxMiddle < possibleMiddle) {
+			remaining -= MIN_ITEM_WIDTH;
+			if (remaining >= 0) maxMiddle++;
 		}
+
+		return breadcrumbs.length <= 3
+			? breadcrumbs.length
+			: Math.min(2 + maxMiddle, breadcrumbs.length);
 	});
 
 	const truncate = (label: string, max: number) =>
@@ -49,12 +62,16 @@
 		if (!navRef) return;
 
 		const ro = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const width = entry.contentRect.width;
-				if (width !== untrack(() => containerWidth)) {
-					containerWidth = width;
+			// Usamos requestAnimationFrame para asegurar que el cálculo
+			// ocurra fuera del ciclo de renderizado actual del navegador
+			requestAnimationFrame(() => {
+				for (const entry of entries) {
+					const width = entry.contentRect.width;
+					if (Math.abs(width - untrack(() => containerWidth)) > 1) {
+						containerWidth = width;
+					}
 				}
-			}
+			});
 		});
 		ro.observe(navRef);
 		window.addEventListener('click', closePopoverOnClickOutside);
@@ -65,39 +82,6 @@
 		};
 	});
 
-	$effect(() => {
-		// Dependencia explícita de breadcrumbs y containerWidth
-		const currentCrumbs = breadcrumbs;
-		const currentWidth = containerWidth;
-		
-		if (!currentCrumbs || !currentCrumbs.length) {
-			visibleCrumbsCount = 0;
-			return;
-		}
-
-		let remaining = currentWidth;
-
-		// Siempre muestra primero y último
-		remaining -= MIN_ITEM_WIDTH; // primero
-		remaining -= MIN_LAST_ITEM_WIDTH; // último
-		remaining -= SEPARATOR_WIDTH * (currentCrumbs.length - 1);
-
-		const possibleMiddle = Math.max(currentCrumbs.length - 2, 0);
-		let maxMiddle = 0;
-
-		while (remaining > 0 && maxMiddle < possibleMiddle) {
-			remaining -= MIN_ITEM_WIDTH;
-			if (remaining >= 0) maxMiddle++;
-		}
-		
-		const calculatedCount = currentCrumbs.length <= 3 
-			? currentCrumbs.length 
-			: Math.min(2 + maxMiddle, currentCrumbs.length);
-
-		if (calculatedCount !== untrack(() => visibleCrumbsCount)) {
-			visibleCrumbsCount = calculatedCount;
-		}
-	});
 </script>
 
 {#if breadcrumbs && breadcrumbs.length >= 2}

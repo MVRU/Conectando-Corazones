@@ -1,3 +1,5 @@
+<!-- TODO: corregir esta ruta -->
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
@@ -19,38 +21,33 @@
 	let mounted = $state(false);
 	let objetivosExpandidos = $state<Record<number, boolean>>({});
 
-	let accesoDenegado = $state(false);
-	let mensajeErrorAcceso = $state('');
+	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
+	let accesoEstado = $derived.by(() => {
+		if (!mounted || $isLoading) return { denegado: false, mensaje: '' };
+		
+		if (!$isAuthenticated || !$usuario) return { denegado: true, mensaje: 'Redirigiendo...' };
+		if (!$isInstitucion) return { denegado: true, mensaje: 'Acceso exclusivo para instituciones.' };
+
+		const verificacion = data.verificacion;
+		if (!verificacion) return { denegado: true, mensaje: 'No se encontró información de verificación.' };
+		if (verificacion.estado !== 'aprobada') {
+			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
+		}
+
+		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
+			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
+		}
+
+		return { denegado: false, mensaje: '' };
+	});
 
 	$effect(() => {
 		mounted = true;
 	});
 
 	$effect(() => {
-		if (browser && mounted && !$isLoading) {
-			accesoDenegado = false;
-			mensajeErrorAcceso = '';
-
-			if (!$isAuthenticated || !$usuario) {
-				goto('/iniciar-sesion');
-			} else if (!$isInstitucion) {
-				accesoDenegado = true;
-				mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';
-			} else {
-				const verificacion = data.verificacion;
-
-				if (!verificacion) {
-					accesoDenegado = true;
-					mensajeErrorAcceso = 'No se encontró la información de verificación de tu institución.';
-				} else if (verificacion.estado !== 'aprobada') {
-					accesoDenegado = true;
-					mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
-				} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
-					accesoDenegado = true;
-					mensajeErrorAcceso =
-						'Este proyecto no pertenece a tu institución. Solo podés solicitar el cierre de tus propios proyectos.';
-				}
-			}
+		if (mounted && !$isLoading && (!$isAuthenticated || !$usuario)) {
+			goto('/iniciar-sesion');
 		}
 	});
 
@@ -62,13 +59,15 @@
 		conformidadRevision: false
 	});
 
-	let proyectosDisponibles = $derived(data.proyectosDisponibles.map((p: any) => ({
-		value: String(p.id_proyecto),
-		label: p.titulo
-	})));
+	let proyectosDisponibles = $derived(
+		(data.proyectos || []).map((p: { id_proyecto: number; titulo: string }) => ({
+			value: String(p.id_proyecto),
+			label: p.titulo
+		}))
+	);
 
 	let sinProyectosPendientes = $derived(
-		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0
+		mounted && !accesoEstado.denegado && $usuario && proyectosDisponibles.length === 0
 	);
 
 	let proyectoActual = $derived(data.proyectoActual);
@@ -89,29 +88,35 @@
 	let muchosRechazos = $derived(solicitudesRechazadas.length >= 3);
 	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
 
-	let evidenciasPorObjetivo = $derived.by(() => {
-		if (!proyectoActual) return [];
-		return proyectoActual.participacion_permitida?.map((objetivo: any) => {
-			const evidenciasObjetivo = (data.evidencias || []).filter(
-				(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
+	let objetivosDelProyecto = $derived(data.objetivos || []);
+	let evidenciasPorObjetivo = $derived(
+		objetivosDelProyecto.map((obj: { id_participacion_permitida: number }) => {
+			// Objetivos con progreso calculado dinámicamente en el servidor
+			const evidenciasRelacionadas = (data.evidencias || []).filter(
+				(ev: { id_participacion_permitida: number | null }) =>
+					ev.id_participacion_permitida === obj.id_participacion_permitida
 			);
-			// Separar evidencias de entrada y salida
-			const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
-			const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
-
+			const totalArch = evidenciasRelacionadas.reduce(
+				(sum: number, ev: { archivos?: unknown[] }) => sum + (ev.archivos?.length || 0),
+				0
+			);
 			return {
-				objetivo,
-				evidencias: evidenciasObjetivo,
-				evidenciasEntrada,
-				evidenciasSalida,
-				totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
+				objetivo: obj,
+				evidencias: evidenciasRelacionadas,
+				evidenciasEntrada: evidenciasRelacionadas.filter(
+					(ev: { tipo_evidencia: string }) => ev.tipo_evidencia === 'entrada'
+				),
+				evidenciasSalida: evidenciasRelacionadas.filter(
+					(ev: { tipo_evidencia: string }) => ev.tipo_evidencia === 'salida'
+				),
+				totalArchivos: totalArch
 			};
-		}) || [];
-	});
+		})
+	);
 
-	let todosLosObjetivosTienenEvidencias = $derived(evidenciasPorObjetivo.every(
-		(item: any) => item.evidencias.length > 0
-	));
+	let todosLosObjetivosTienenEvidencias = $derived(
+		evidenciasPorObjetivo.every((item: { evidencias: unknown[] }) => item.evidencias.length > 0)
+	);
 
 	let todosLosChecksCompletos = $derived(Object.values(checks).every((check) => check === true));
 
@@ -232,13 +237,13 @@
 			</div>
 		</header>
 
-		{#if accesoDenegado}
+		{#if accesoEstado.denegado}
 			<div class="rounded-2xl border border-red-200 bg-white p-12 text-center shadow-sm" in:fade>
 				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-red-100 p-3">
 					<ShieldAlert class="h-8 w-8 text-red-600" />
 				</div>
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
-				<p class="text-slate-600">{mensajeErrorAcceso}</p>
+				<p class="text-slate-600">{accesoEstado.mensaje}</p>
 				<button
 					onclick={() => goto('/')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"

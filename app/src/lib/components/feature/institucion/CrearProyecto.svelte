@@ -53,37 +53,69 @@
 		esAdmin = initialData?.esAdmin || false
 	} = $props();
 
-	let titulo = $state(initialData?.titulo || '');
-	let descripcion = $state(initialData?.descripcion || '');
-	let urlPortada = $state(initialData?.urlPortada || '');
-	let fechaFinTentativa = $state(initialData?.fechaFinTentativa || '');
-	let beneficiarios = $state<number | undefined>(initialData?.beneficiarios);
+	let titulo = $state('');
+	let descripcion = $state('');
+	let urlPortada = $state('');
+	let fechaFinTentativa = $state('');
+	let beneficiarios = $state<number | undefined>(undefined);
 
-	let categoriasSeleccionadas = $state(initialData?.categoriasSeleccionadas || []);
-	let categoriaOtraDescripcion = $state(initialData?.categoriaOtraDescripcion || '');
+	let categoriasSeleccionadas = $state<number[]>([]);
+	let categoriaOtraDescripcion = $state('');
 
-	let ubicaciones = $state<UbicacionFormulario[]>(initialData?.ubicaciones || [
-		{
-			tipo_ubicacion: 'principal',
-			modalidad: '',
-			direccion_presencial: {
-				calle: '',
-				numero: '',
-				referencia: '',
-				localidad_id: undefined,
-				provincia: '',
-				localidad_nombre: ''
-			},
-			url_virtual: ''
-		}
-	]);
+	let ubicaciones = $state<UbicacionFormulario[]>([]);
 
-	let tiposParticipacionSeleccionados = $state<TipoParticipacionDescripcion[]>(
-		initialData?.tiposParticipacionSeleccionados || []
-	);
-	let participacionesPermitidas = $state<ParticipacionForm[]>(
-		initialData?.participacionesPermitidas || []
-	);
+	let tiposParticipacionSeleccionados = $state<TipoParticipacionDescripcion[]>([]);
+	let participacionesPermitidas = $state<ParticipacionForm[]>([]);
+
+	import { untrack } from 'svelte';
+
+	$effect(() => {
+		untrack(() => {
+			if (initialData) {
+				titulo = initialData.titulo || '';
+				descripcion = initialData.descripcion || '';
+				urlPortada = initialData.urlPortada || '';
+				fechaFinTentativa = initialData.fechaFinTentativa || '';
+				beneficiarios = initialData.beneficiarios;
+				categoriasSeleccionadas = initialData.categoriasSeleccionadas || [];
+				categoriaOtraDescripcion = initialData.categoriaOtraDescripcion || '';
+				ubicaciones = initialData.ubicaciones || [
+					{
+						tipo_ubicacion: 'principal',
+						modalidad: '',
+						direccion_presencial: {
+							calle: '',
+							numero: '',
+							referencia: '',
+							localidad_id: undefined,
+							provincia: '',
+							localidad_nombre: ''
+						},
+						url_virtual: ''
+					}
+				];
+				tiposParticipacionSeleccionados = initialData.tiposParticipacionSeleccionados || [];
+				participacionesPermitidas = initialData.participacionesPermitidas || [];
+			} else {
+				// Valores por defecto si no hay initialData
+				ubicaciones = [
+					{
+						tipo_ubicacion: 'principal',
+						modalidad: '',
+						direccion_presencial: {
+							calle: '',
+							numero: '',
+							referencia: '',
+							localidad_id: undefined,
+							provincia: '',
+							localidad_nombre: ''
+						},
+						url_virtual: ''
+					}
+				];
+			}
+		});
+	});
 
 	let errores = $state<Record<string, string>>({});
 
@@ -106,7 +138,6 @@
 	function limpiarError(campo: string) {
 		if (errores[campo]) {
 			delete errores[campo];
-			errores = { ...errores };
 		}
 	}
 
@@ -115,11 +146,10 @@
 			const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
 			if (err) {
 				errores.categoria_otra = err;
-				errores = { ...errores };
 			} else {
 				limpiarError('categoria_otra');
 			}
-		} else if (!seleccionoOtra && errores.categoria_otra) {
+		} else {
 			limpiarError('categoria_otra');
 		}
 	});
@@ -150,7 +180,6 @@
 					: null;
 			if (errBenReact) {
 				errores.beneficiarios = errBenReact;
-				errores = { ...errores };
 			} else {
 				limpiarError('beneficiarios');
 			}

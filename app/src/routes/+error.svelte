@@ -8,8 +8,8 @@
 
 	let { data }: { data: { error: Error; estado: number } } = $props();
 
-	const error = data.error;
-	const estado = data.estado;
+	let error = $derived(data.error);
+	let estado = $derived(data.estado);
 </script>
 
 <PaginaError {estado} mensaje={error?.message} />

@@ -3,7 +3,8 @@
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
-	const { usuario, dashboardData } = data;
+	let dashboardData = $derived(data.dashboardData);
+	let error = $derived(data.error);
 
 	let animate = $state(false);
 

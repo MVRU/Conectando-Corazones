@@ -15,7 +15,12 @@
 	import { cubicOut } from 'svelte/easing';
 	import type { ComponentType } from 'svelte';
 
-	let { metricas, onclickProyectos = () => {}, onclickInstituciones = () => {}, onclickAgenda = () => {} } = $props<{
+	let { 
+		metricas, 
+		onclickProyectos = () => {}, 
+		onclickInstituciones = () => {}, 
+		onclickAgenda = () => {} 
+	} = $props<{
 		metricas: {
 			proyectosActivos: number;
 			institucionesAlcanzadas: number;
@@ -44,56 +49,57 @@
 	// Función para generar mensaje contextual según días restantes
 	function getMensajeCierre(dias: number): {
 		texto: string;
-		icono: ComponentType;
+		Icono: ComponentType;
 		colorTexto: string;
 		colorIcono: string;
 	} {
 		if (dias === 0) {
 			return {
 				texto: '¡Hoy es el día!',
-				icono: Flame,
+				Icono: Flame,
 				colorTexto: 'text-amber-300',
 				colorIcono: 'text-amber-400'
 			};
 		} else if (dias <= 3) {
 			return {
 				texto: '¡Fecha límite inminente!',
-				icono: AlertTriangle,
+				Icono: AlertTriangle,
 				colorTexto: 'text-amber-300',
 				colorIcono: 'text-amber-400'
 			};
 		} else if (dias <= 7) {
 			return {
 				texto: 'Fecha límite cercana',
-				icono: Clock,
+				Icono: Clock,
 				colorTexto: 'text-amber-400',
 				colorIcono: 'text-amber-500'
 			};
 		} else if (dias <= 14) {
 			return {
 				texto: 'Aún hay tiempo',
-				icono: Calendar,
+				Icono: Calendar,
 				colorTexto: 'text-amber-400',
 				colorIcono: 'text-amber-500'
 			};
 		} else if (dias <= 30) {
 			return {
 				texto: 'Todo bajo control',
-				icono: CheckCircle2,
+				Icono: CheckCircle2,
 				colorTexto: 'text-amber-400/80',
 				colorIcono: 'text-amber-500/80'
 			};
 		} else {
 			return {
 				texto: 'Sin urgencias',
-				icono: Smile,
+				Icono: Smile,
 				colorTexto: 'text-amber-400/60',
 				colorIcono: 'text-amber-500/60'
 			};
 		}
 	}
 
-	let mensajeCierre = $derived(getMensajeCierre(metricas.proximoCierre));
+	let infoCierre = $derived(getMensajeCierre(metricas.proximoCierre));
+	let IconoCierre = $derived(infoCierre.Icono);
 </script>
 
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -185,9 +191,9 @@
 				</div>
 			</div>
 			<div class="mt-4">
-				<span class="flex items-center gap-1.5 text-sm {mensajeCierre.colorTexto}">
-					<mensajeCierre.icono size={16} class={mensajeCierre.colorIcono} />
-					{mensajeCierre.texto}
+				<span class="flex items-center gap-1.5 text-sm {infoCierre.colorTexto}">
+					<IconoCierre size={16} class={infoCierre.colorIcono} />
+					{infoCierre.texto}
 				</span>
 			</div>
 		</div>
