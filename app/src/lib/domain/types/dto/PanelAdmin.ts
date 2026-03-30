@@ -81,6 +81,12 @@ export interface RegistroAuditoriaAdminDto {
 	justificacion: string | null;
 	created_at: Date | null;
 	usuario_id: number | null;
+	admin: {
+		id_usuario: number;
+		username: string;
+		nombre: string;
+		apellido: string;
+	} | null;
 }
 
 export interface AuditoriaPaginadaAdminDto {

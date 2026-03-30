@@ -39,6 +39,19 @@
 			sortDir = key === 'created_at' ? 'desc' : 'asc';
 		}
 	}
+
+	function confirmarCambioEstado(user: UsuarioAdminItemDto) {
+		const habilitar = user.estado_gestion === 'inhabilitado';
+		const accion = habilitar ? 'habilitar' : 'inhabilitar';
+		const nombreCompleto = `${user.nombre} ${user.apellido}`.trim();
+		const mensaje = `¿Confirmás ${accion} la cuenta de ${nombreCompleto} (@${user.username})?`;
+		if (!window.confirm(mensaje)) return;
+
+		onToggleEstado?.({
+			idUsuario: user.id_usuario,
+			habilitar
+		});
+	}
 </script>
 
 <section class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md shadow-sm">
@@ -159,11 +172,7 @@
 										label={user.estado_gestion === 'inhabilitado' ? 'Habilitar' : 'Inhabilitar'}
 										size="sm"
 										variant={user.estado_gestion === 'inhabilitado' ? 'primary' : 'danger'}
-										onclick={() =>
-											onToggleEstado?.({
-												idUsuario: user.id_usuario,
-												habilitar: user.estado_gestion === 'inhabilitado'
-											})}
+										onclick={() => confirmarCambioEstado(user)}
 										disabled={loading}
 										class={user.estado_gestion === 'inhabilitado'
 											? '!bg-emerald-600 !hover:bg-emerald-700 !text-white !rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40'
