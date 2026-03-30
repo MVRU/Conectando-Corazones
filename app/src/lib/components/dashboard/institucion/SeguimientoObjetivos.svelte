@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ChevronRight } from 'lucide-svelte';
+	import { ChevronRight, CheckCircle2 } from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
 
 	export let objetivos: {
@@ -56,6 +56,12 @@
 		}
 		return obj.unidad;
 	}
+
+	function obtenerProgresoPromedio(objetivosArr: { progreso: number }[]): number {
+		if (!objetivosArr.length) return 0;
+		const suma = objetivosArr.reduce((acc, obj) => acc + obj.progreso, 0);
+		return Math.round(suma / objetivosArr.length);
+	}
 </script>
 
 <div
@@ -74,22 +80,35 @@
 	</div>
 
 	<div class="space-y-8">
-		{#each objetivos as proyecto}
+		{#each objetivos as proyecto (proyecto.id)}
 			<div class="border-b border-white/5 pb-6 last:border-0 last:pb-0">
 				<div class="mb-4 flex items-center justify-between">
-					<a
-						href="/proyectos/{proyecto.id}"
-						class="text-base font-medium text-white transition-colors hover:text-emerald-400 hover:underline"
-					>
-						{proyecto.nombre}
-					</a>
-					<span class="text-xs font-medium tracking-wide text-slate-500 uppercase"
-						>Cierre: {new Date(proyecto.fechaFin).toLocaleDateString()}</span
-					>
+					<div class="flex flex-col gap-1">
+						<a
+							href="/proyectos/{proyecto.id}"
+							class="text-base font-medium text-white transition-colors hover:text-emerald-400 hover:underline"
+						>
+							{proyecto.nombre}
+						</a>
+						<span class="text-[10px] font-medium tracking-wide text-slate-500 uppercase"
+							>Cierre: {new Date(proyecto.fechaFin).toLocaleDateString()}</span
+						>
+					</div>
+
+					{#if obtenerProgresoPromedio(proyecto.objetivos) >= 80}
+						<a
+							href="/proyectos/{proyecto.id}"
+							class="flex items-center gap-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs font-bold text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white"
+							title="Finalizar actividades"
+						>
+							<CheckCircle2 size={14} />
+							<span class="hidden sm:inline">Finalizar</span>
+						</a>
+					{/if}
 				</div>
 
 				<div class="space-y-5">
-					{#each proyecto.objetivos as obj}
+					{#each proyecto.objetivos as obj (obj.id)}
 						<div>
 							<div class="mb-2 flex items-end justify-between text-sm">
 								<span class="text-slate-400">{obtenerEtiquetaObjetivo(obj)}</span>
