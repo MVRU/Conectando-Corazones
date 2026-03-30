@@ -48,7 +48,7 @@
 		});
 		if (sectionRef) io.observe(sectionRef);
 
-		fetch('/api/resenas')
+		fetch('/api/resenas/publicas')
 			.then((res) => (res.ok ? res.json() : []))
 			.then((data) => {
 				testimonios = data;
