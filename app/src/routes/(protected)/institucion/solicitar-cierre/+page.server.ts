@@ -5,6 +5,8 @@ import { PostgresEvidenciaRepository } from '$lib/infrastructure/supabase/postgr
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/CrearSolicitudFinalizacion';
 import { redirect, fail } from '@sveltejs/kit';
+import { GestionarEstadoProyecto } from '$lib/domain/use-cases/proyectos/GestionarEstadoProyecto';
+import { prisma } from '$lib/infrastructure/prisma/client';
 
 const ESTADOS_SOLICITUD_ACTIVA = new Set(['', 'pendiente', 'en_revision']);
 
@@ -44,7 +46,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectosDisponibles = allProyectos.filter(
 		(p) =>
 			p.institucion_id === user.id_usuario &&
-			(p.estado === 'pendiente_solicitud_cierre' || p.estado === 'en_curso')
+			p.estado === 'pendiente_solicitud_cierre'
 	);
 
 	let proyectoActual = null;
@@ -56,41 +58,139 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	if (proyectoId) {
 		const idProyecto = Number(proyectoId);
 
-		// Carga paralela de todo el grafo de datos del proyecto seleccionado
-		const [p, solicitud, rechazadas, evs] = await Promise.all([
-			proyectoRepo.findById(idProyecto),
-			solicitudRepo.findByProyectoId(idProyecto),
-			solicitudRepo.findRechazadasByProyectoId(idProyecto),
-			evidenciaRepo.findAllByProyecto(idProyecto)
-		]);
+		if (idProyecto && !isNaN(idProyecto)) {
+			// CARGA MASIVA Y PROFUNDA (Relaciones completas de Proyecto y Evidencias)
+			const [p, solicitud, rechazadas, evs] = await Promise.all([
+				prisma.proyecto.findUnique({
+					where: { id_proyecto: idProyecto },
+					include: {
+						estado: true,
+						institucion: true,
+						proyecto_categorias: { include: { categoria: true } },
+						participacion_permitida: {
+							include: {
+								tipo_participacion: true,
+								colaboraciones_tipo_participacion: {
+									include: {
+										colaboracion: {
+											include: { colaborador: true }
+										}
+									}
+								}
+							}
+						}
+					}
+				}),
+				solicitudRepo.findByProyectoId(idProyecto),
+				solicitudRepo.findRechazadasByProyectoId(idProyecto),
+				prisma.evidencia.findMany({
+					where: {
+						participacion_permitida: { id_proyecto: idProyecto }
+					},
+					include: {
+						archivos: {
+							include: {
+								usuario: true
+							}
+						},
+						participacion_permitida: {
+							include: {
+								tipo_participacion: true
+							}
+						}
+					}
+				})
+			]);
 
-		if (p && p.institucion_id === user.id_usuario) {
-			proyectoActual = p;
-			solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
-			solicitudesRechazadas = rechazadas;
-
-			// Filtrar evidencias para asegurar que pertenecen a objetivos válidos del proyecto
-			const objetivosIds = new Set((p.participacion_permitida || []).map((obj: any) => obj.id_participacion_permitida));
-			evidencias = evs.filter((ev: any) => {
-				const hasValidObjectiveId = ev.id_participacion_permitida != null && objetivosIds.has(ev.id_participacion_permitida);
-				return hasValidObjectiveId;
+			// DIAGNÓSTICO PROFUNDO
+			console.log(`[solicitar-cierre:load] Proyecto ID=${idProyecto}:`, {
+				encontrado: !!p,
+				estado: p?.estado?.descripcion,
+				countObjetivos: p?.participacion_permitida?.length ?? 0,
+				countEvidenciasTotal: evs.length,
+				detalleEvidencias: evs.map(ev => ({
+					id: ev.id_evidencia,
+					tipo: ev.tipo_evidencia,
+					obj: ev.participacion_permitida?.tipo_participacion?.descripcion,
+					archivos: ev.archivos?.length ?? 0,
+					usuarios: ev.archivos?.map(a => a.usuario?.username).filter(Boolean) || []
+				}))
 			});
 
-			// Objetivos con progreso calculado dinámicamente en el servidor
-			objetivos = (p.participacion_permitida || []).map(obj => ({
-				...obj,
-				porcentaje: (obj.objetivo || 0) > 0 ? ((obj.actual || 0) / (obj.objetivo || 1)) * 100 : 0
-			}));
+			if (p && p.id_proyecto === idProyecto) {
+				proyectoActual = p;
+				solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
+				solicitudesRechazadas = rechazadas;
+
+				const participacionesPermitidas = p.participacion_permitida || [];
+				const objetivosIds = new Set(participacionesPermitidas.map((obj: any) => Number(obj.id_participacion_permitida)));
+				
+				evidencias = evs.filter((ev: any) => {
+					const evObjId = Number(ev.id_participacion_permitida);
+					return evObjId != null && objetivosIds.has(evObjId);
+				});
+
+				objetivos = participacionesPermitidas.map(obj => ({
+					...obj,
+					id_participacion_permitida: Number(obj.id_participacion_permitida),
+					porcentaje: (Number(obj.objetivo) || 0) > 0 ? ((Number(obj.actual) || 0) / (Number(obj.objetivo) || 1)) * 100 : 0
+				}));
+			}
 		}
 	}
 
+	// Mapeo exhaustivo a POJO antes de enviar al cliente
+	// Esto asegura que Svelte/Kit reciba datos limpios, tipados y con relaciones anidadas
+	const pActualMapped = proyectoActual ? {
+		...JSON.parse(JSON.stringify(proyectoActual)),
+		id_proyecto: Number(proyectoActual.id_proyecto),
+		participacion_permitida: (proyectoActual.participacion_permitida || []).map(p => ({
+			...JSON.parse(JSON.stringify(p)),
+			id_participacion_permitida: Number(p.id_participacion_permitida),
+			id_proyecto: Number(p.id_proyecto),
+			id_tipo_participacion: Number(p.id_tipo_participacion),
+			objetivo: Number(p.objetivo),
+			actual: Number(p.actual || 0),
+			tipo_participacion: p.tipo_participacion ? {
+				id_tipo_participacion: Number(p.tipo_participacion.id_tipo_participacion),
+				descripcion: p.tipo_participacion.descripcion
+			} : undefined
+		}))
+	} : null;
+
+	const evidenciasMapped = evidencias.map((ev: any) => ({
+		id_evidencia: Number(ev.id_evidencia),
+		tipo_evidencia: ev.tipo_evidencia,
+		id_participacion_permitida: Number(ev.id_participacion_permitida),
+		created_at: ev.created_at instanceof Date ? ev.created_at.toISOString() : ev.created_at,
+		archivos: (ev.archivos || []).map((a: any) => ({
+			id_archivo: Number(a.id_archivo),
+			nombre_original: a.nombre_original,
+			url: a.url,
+			descripcion: a.descripcion,
+			tipo_mime: a.tipo_mime,
+			tamanio_bytes: Number(a.tamanio_bytes || 0),
+			created_at: a.created_at instanceof Date ? a.created_at.toISOString() : a.created_at,
+			usuario: a.usuario ? {
+				nombre: a.usuario.nombre,
+				apellido: a.usuario.apellido,
+				username: a.usuario.username
+			} : undefined
+		}))
+	}));
+
 	return {
 		proyectos: JSON.parse(JSON.stringify(proyectosDisponibles)),
-		proyectoActual: JSON.parse(JSON.stringify(proyectoActual)),
-		objetivos: JSON.parse(JSON.stringify(objetivos)),
-		solicitudPendiente: JSON.parse(JSON.stringify(solicitudPendiente)),
+		proyectoActual: pActualMapped,
+		objetivos: objetivos.map(obj => ({
+			...JSON.parse(JSON.stringify(obj)),
+			id_participacion_permitida: Number(obj.id_participacion_permitida),
+			objetivo: Number(obj.objetivo),
+			actual: Number(obj.actual || 0)
+		})),
+		solicitudPendiente: solicitudPendiente ? JSON.parse(JSON.stringify(solicitudPendiente)) : null,
 		solicitudesRechazadas: JSON.parse(JSON.stringify(solicitudesRechazadas)),
-		evidencias: JSON.parse(JSON.stringify(evidencias)),
+		evidencias: evidenciasMapped,
 		verificacion: {
 			estado: user.estado_verificacion || 'pendiente',
 			usuario_id: user.id_usuario
@@ -120,6 +220,14 @@ export const actions: Actions = {
 
 		try {
 			const solicitud = await useCase.execute(user.id_usuario!, proyectoId, evidenciaIds);
+
+			// Transicionar el proyecto a en_revision
+			const gestionEstado = new GestionarEstadoProyecto(
+				new PostgresProyectoRepository(),
+				new PostgresHistorialDeCambiosRepository()
+			);
+			await gestionEstado.enviarASolicitudCierreConEvidencias(proyectoId, user.id_usuario!);
+
 			return { success: true, solicitud };
 		} catch (error: any) {
 			return fail(400, { message: error.message });

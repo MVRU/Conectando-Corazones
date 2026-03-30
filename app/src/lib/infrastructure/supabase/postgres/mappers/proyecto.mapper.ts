@@ -50,7 +50,24 @@ export class ProyectoMapper {
 
 			participacion_permitida: prismaProyecto.participacion_permitida
 				? prismaProyecto.participacion_permitida
-						.map((pp: any) => (pp ? ParticipacionPermitidaMapper.toDomain(pp) : null))
+						.map((pp: any) => {
+							if (!pp) return null;
+							try {
+								const pDomain = ParticipacionPermitidaMapper.toDomain(pp);
+								// Romper circularidad para serialización
+								if (pDomain) {
+									delete pDomain.proyecto;
+								}
+								return pDomain;
+							} catch (err) {
+								console.warn(
+									`[ParticipacionPermitida] Error mapeando ID=${pp.id_participacion_permitida}, objetivo=${pp.objetivo} (tipo: ${typeof pp.objetivo}):`,
+									err instanceof Error ? err.message : String(err)
+								);
+								// Devolver null para filtrar, pero loguear la advertencia
+								return null;
+							}
+						})
 						.filter((p) => p !== null)
 				: [],
 
