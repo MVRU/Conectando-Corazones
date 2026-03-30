@@ -124,6 +124,11 @@
 		}
 	}
 
+	function descartarPortada() {
+		urlPortada = '';
+		limpiarError('urlPortada');
+	}
+
 	let beneficiariosOriginales = $derived(originales?.beneficiarios);
 	let fechaOriginal = $derived(originales?.fechaFin);
 	let categoriaIdsOriginales = $derived(originales?.categoriasSeleccionadas || []);
@@ -231,9 +236,7 @@
 		</div>
 
 		<div>
-			<label for="urlPortada" class="mb-2 block text-sm font-medium text-gray-700"
-				>Imagen de portada</label
-			>
+			<div class="mb-2 block text-sm font-medium text-gray-700">Imagen de portada</div>
 
 			{#if urlPortada}
 				<div
@@ -261,10 +264,7 @@
 						<button
 							type="button"
 							class="text-sm font-medium text-red-600 hover:text-red-700 hover:underline"
-							onclick={() => {
-								urlPortada = '';
-								limpiarError('urlPortada');
-							}}
+							onclick={descartarPortada}
 						>
 							Eliminar imagen
 						</button>

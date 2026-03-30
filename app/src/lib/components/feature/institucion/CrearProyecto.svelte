@@ -15,7 +15,6 @@
 
 	import {
 		MENSAJES_ERROR,
-		validarUrl,
 		validarCalle,
 		validarNumeroCalle,
 		esFechaFutura
@@ -24,7 +23,6 @@
 		validarBeneficiariosValor,
 		validarTituloProyecto,
 		validarDescripcionProyecto,
-		validarUrlImagen,
 		esFechaDemasiadoLejana,
 		validarUnidadLibre,
 		validarReferencia,
@@ -163,8 +161,10 @@
 	});
 
 	$effect(() => {
-		if (urlPortada && validarUrl(urlPortada) && !validarUrlImagen(urlPortada))
+		// Portada es opcional - solo limpiar error si se carga o se elimina
+		if (!urlPortada) {
 			limpiarError('urlPortada');
+		}
 	});
 
 	$effect(() => {
@@ -280,13 +280,7 @@
 		if (errTitulo) errores.titulo = errTitulo;
 		const errDesc = validarDescripcionProyecto(descripcion);
 		if (errDesc) errores.descripcion = errDesc;
-		if (urlPortada) {
-			if (!validarUrl(urlPortada)) errores.urlPortada = MENSAJES_ERROR.urlInvalida;
-			else {
-				const errImg = validarUrlImagen(urlPortada);
-				if (errImg) errores.urlPortada = errImg;
-			}
-		}
+		// Portada: opcional, se valida solo por tamaño y tipo en el componente
 		if (!fechaFinTentativa) {
 			errores.fechaFinTentativa = 'La fecha de fin tentativa es obligatoria.';
 		} else if (!edicion && !esFechaFutura(fechaFinTentativa)) {
