@@ -27,10 +27,12 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { IconSource } from '@steeze-ui/svelte-icon';
 
-	export let proyecto!: Proyecto;
-	export let mostrarBotones = false;
-	export let variant: 'compact' | 'extended' = 'compact';
-	export let ocultarEtiquetaObjetivo = false;
+	let { proyecto, mostrarBotones = false, variant = 'compact', ocultarEtiquetaObjetivo = false } = $props<{
+		proyecto: Proyecto;
+		mostrarBotones?: boolean;
+		variant?: 'compact' | 'extended';
+		ocultarEtiquetaObjetivo?: boolean;
+	}>();
 
 	const especieEmoji: Record<string, IconSource> = {
 		libros: BookOpen,
@@ -47,9 +49,9 @@
 	const getEmojiEspecie = (especie?: string) =>
 		especieEmoji[especie?.toLowerCase() || ''] || ArchiveBox;
 
-	let step = 0;
+	let step = $state(0);
 	const steps = 4;
-	let icono: IconSource = Users;
+	let showModal = $state(false);
 
 	const hoy = new Date();
 	/**
@@ -67,8 +69,6 @@
 			purple: 'from-violet-300 via-violet-400 to-violet-500'
 		})[color] || 'from-slate-300 via-slate-400 to-slate-500';
 
-	let color: 'green' | 'blue' | 'purple' = 'blue';
-
 	const visualMap: Record<
 		string,
 		{ color: 'green' | 'blue' | 'purple'; icon: (u?: string) => IconSource }
@@ -80,28 +80,25 @@
 
 	const defaultVisual = { color: 'blue' as const, icon: () => Users };
 
-	let participaciones: ParticipacionPermitida[] = [];
+	let participaciones = $derived(ordenarPorProgreso(proyecto.participacion_permitida ?? []));
 
-	$: participaciones = ordenarPorProgreso(proyecto.participacion_permitida ?? []);
-
-	$: if (participaciones.length > 0) {
-		const { unidad_medida, tipo_participacion } = participaciones[0] || {};
-		const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
-		color = visual.color;
-		icono = visual.icon(unidad_medida);
-	}
+	let { color, icono } = $derived.by(() => {
+		let c: 'green' | 'blue' | 'purple' = 'blue';
+		let i: IconSource = Users;
+		if (participaciones.length > 0) {
+			const { unidad_medida, tipo_participacion } = participaciones[0] || {};
+			const visual = visualMap[tipo_participacion?.descripcion || ''] || defaultVisual;
+			c = visual.color;
+			i = visual.icon(unidad_medida);
+		}
+		return { color: c, icono: i };
+	});
 
 	const botonColaborarDeshabilitado = estadoCodigo !== 'en_curso';
 
-	let progresoCantidad = 0;
-	let progresoTiempo = 0;
-	let progresoTotal = 0;
-
-	$: progresoCantidad = calcularProgresoCantidad(participaciones);
-	$: progresoTiempo = calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa);
-	$: progresoTotal = Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo);
-
-	let showModal = false;
+	let progresoCantidad = $derived(calcularProgresoCantidad(participaciones));
+	let progresoTiempo = $derived(calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa));
+	let progresoTotal = $derived(Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo));
 
 	function getMensajeProgreso() {
 		if (progresoCantidad > 100) {
@@ -158,7 +155,7 @@
 				<button
 					type="button"
 					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:ring-2 focus:ring-sky-200 focus:outline-none"
-					on:click={() => (showModal = true)}
+					onclick={() => (showModal = true)}
 					aria-label="Ver cómo se calcula el progreso"
 				>
 					<svg class="mr-1 h-3.5 w-3.5 opacity-80" fill="currentColor" viewBox="0 0 20 20">
@@ -179,7 +176,7 @@
 	<!-- Overlay que cubre toda la página con blur -->
 	<div
 		class="fixed inset-0 z-40 backdrop-blur-sm transition-all duration-300"
-		on:click={() => {
+		onclick={() => {
 			showModal = false;
 			step = 0;
 		}}
@@ -194,8 +191,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-title"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
 				if (e.key === 'Escape') showModal = false;
 			}}
 		>
@@ -213,7 +210,7 @@
 				<button
 					type="button"
 					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={() => {
+					onclick={() => {
 						showModal = false;
 						step = 0;
 					}}
@@ -307,7 +304,7 @@
 					<button
 						type="button"
 						class="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-gray-600 transition-colors hover:text-gray-800 focus:ring-2 focus:ring-gray-200 focus:outline-none"
-						on:click={() => step--}
+						onclick={() => step--}
 					>
 						<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path

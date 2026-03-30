@@ -10,8 +10,7 @@
 
 <script lang="ts">
 	import { layoutStore } from '$lib/stores/layout';
-	import { onMount } from 'svelte';
-	let isVisible = false;
+	let isVisible = $state(false);
 
 	const handleScroll = () => {
 		isVisible = window.scrollY > 500;
@@ -21,7 +20,7 @@
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	};
 
-	onMount(() => {
+	$effect(() => {
 		window.addEventListener('scroll', handleScroll);
 		handleScroll();
 		return () => window.removeEventListener('scroll', handleScroll);
@@ -29,7 +28,7 @@
 </script>
 
 <button
-	on:click={scrollToTop}
+	onclick={scrollToTop}
 	aria-label="Volver arriba"
 	class="fixed right-5 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700 {$layoutStore.hasStickyBottomBar
 		? 'bottom-32 lg:bottom-7'

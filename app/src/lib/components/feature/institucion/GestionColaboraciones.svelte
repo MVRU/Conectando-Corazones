@@ -32,47 +32,51 @@
 	import { page } from '$app/stores';
 
 	// Prop recibida desde el padre
-	export let proyectos: Proyecto[] = [];
+	let { proyectos = [] }: { proyectos?: Proyecto[] } = $props();
 
-	let proyectoSeleccionado: Proyecto;
-	let proyectoSeleccionadoId: number | undefined;
+	let proyectoSeleccionado = $state<Proyecto | undefined>(undefined);
+	let proyectoSeleccionadoId = $state<number | undefined>(undefined);
 
 	// Para contexto de navegación
-	$: contextoProyectoId = $page.url.searchParams.get('proyecto');
+	const contextoProyectoId = $derived($page.url.searchParams.get('proyecto'));
 
-	$: if (proyectos.length > 0 && !proyectoSeleccionado) {
-		// Si hay contexto en URL, seleccionamos ese proyecto
-		if (contextoProyectoId) {
-			const p = proyectos.find((p) => String(p.id_proyecto) === contextoProyectoId);
-			if (p) {
-				proyectoSeleccionado = p;
-				proyectoSeleccionadoId = p.id_proyecto;
+	$effect(() => {
+		if (proyectos.length > 0 && !proyectoSeleccionado) {
+			// Si hay contexto en URL, seleccionamos ese proyecto
+			if (contextoProyectoId) {
+				const p = proyectos.find((p) => String(p.id_proyecto) === contextoProyectoId);
+				if (p) {
+					proyectoSeleccionado = p;
+					proyectoSeleccionadoId = p.id_proyecto;
+				} else {
+					proyectoSeleccionado = proyectos[0];
+					proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
+				}
 			} else {
 				proyectoSeleccionado = proyectos[0];
 				proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
 			}
-		} else {
-			proyectoSeleccionado = proyectos[0];
-			proyectoSeleccionadoId = proyectoSeleccionado.id_proyecto;
 		}
-	}
+	});
 
 	// Variables para el modal de rechazo
-	let mostrarModalRechazo = false;
-	let colaboracionARechazar: number | null = null;
-	let justificacionRechazo = '';
+	let mostrarModalRechazo = $state(false);
+	let colaboracionARechazar = $state<number | null>(null);
+	let justificacionRechazo = $state('');
 
 	// Estados de loading
-	let loadingAprobacion: number | null = null;
-	let loadingRechazo = false;
+	let loadingAprobacion = $state<number | null>(null);
+	let loadingRechazo = $state(false);
 
 	// cuando cambia el ID seleccionado, actualiza el proyecto
-	$: if (proyectoSeleccionadoId) {
-		const proyecto = proyectos.find((p) => p.id_proyecto === proyectoSeleccionadoId);
-		if (proyecto) {
-			proyectoSeleccionado = proyecto;
+	$effect(() => {
+		if (proyectoSeleccionadoId) {
+			const proyecto = proyectos.find((p) => p.id_proyecto === proyectoSeleccionadoId);
+			if (proyecto) {
+				proyectoSeleccionado = proyecto;
+			}
 		}
-	}
+	});
 
 	async function aceptarColaboracion(colaboracionId: number) {
 		loadingAprobacion = colaboracionId;
@@ -181,9 +185,9 @@
 	}
 
 	// Estadísticas del proyecto seleccionado
-	$: colaboraciones = proyectoSeleccionado?.colaboraciones || [];
-	$: pendientes = colaboraciones.filter((c) => c.estado === 'pendiente');
-	$: aprobadas = colaboraciones.filter((c) => c.estado === 'aprobada');
+	const colaboraciones = $derived(proyectoSeleccionado?.colaboraciones || []);
+	const pendientes = $derived(colaboraciones.filter((c) => c.estado === 'pendiente'));
+	const aprobadas = $derived(colaboraciones.filter((c) => c.estado === 'aprobada'));
 
 	// Función para obtener iniciales
 	function getIniciales(username: string | undefined): string {
@@ -583,8 +587,8 @@
 {#if mostrarModalRechazo}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0"
-		on:click={cerrarModalRechazo}
-		on:keydown={(e) => e.key === 'Escape' && cerrarModalRechazo()}
+		onclick={cerrarModalRechazo}
+		onkeydown={(e) => e.key === 'Escape' && cerrarModalRechazo()}
 		role="button"
 		tabindex="-1"
 		transition:fade={{ duration: 200 }}
@@ -593,7 +597,8 @@
 
 		<div
 			class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
-			on:click|stopPropagation
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="none"
 			transition:scale={{ start: 0.95, duration: 200 }}
 		>

@@ -2,7 +2,9 @@
 	import { Flame, Info } from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
 
-	export let data: { fecha: string; intensidad: number }[] = [];
+	let { data = [] } = $props<{
+		data?: { fecha: string; intensidad: number }[];
+	}>();
 
 	const weeksToShow = 26;
 	const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -36,7 +38,7 @@
 		return grid;
 	}
 
-	$: grid = generateGrid();
+	let grid = $derived(generateGrid());
 </script>
 
 <div

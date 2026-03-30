@@ -3,19 +3,14 @@
 	import type { Resena, TipoObjetoResena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	export let mostrar: boolean = false;
-	export let titulo: string = 'Agregar reseña';
-	export let placeholder: string = 'Compartí tu experiencia...';
-	export let tipoObjeto: string = 'usuario';
-	export let idObjeto: number | undefined = undefined;
-	export let maxCaracteres: number = 500;
+	let { mostrar = false, titulo = 'Agregar reseña', placeholder = 'Compartí tu experiencia...', tipoObjeto = 'usuario', idObjeto = undefined, maxCaracteres = 500 }: { mostrar?: boolean; titulo?: string; placeholder?: string; tipoObjeto?: string; idObjeto?: number; maxCaracteres?: number } = $props();
 
 	const dispatch = createEventDispatcher<{
 		guardar: Resena;
 		cerrar: void;
 	}>();
 
-	let nuevaResena = { contenido: '', puntaje: 5 };
+	let nuevaResena = $state({ contenido: '', puntaje: 5 });
 
 	function abrir() {
 		nuevaResena = { contenido: '', puntaje: 5 };
@@ -37,28 +32,34 @@
 	}
 
 	// Abrir modal cuando mostrar cambia a true
-	$: if (mostrar) {
-		abrir();
-	}
+	$effect(() => {
+		if (mostrar) {
+			abrir();
+		}
+	});
 </script>
 
 {#if mostrar}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-		on:click={cerrar}
+		role="presentation"
+		onclick={cerrar}
 	>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
-			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			tabindex="0"
+			onclick={(e) => e.stopPropagation()}
 		>
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="text-xl font-semibold text-gray-900">{titulo}</h3>
 				<button
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
@@ -73,7 +74,7 @@
 				</button>
 			</div>
 
-			<form on:submit|preventDefault={guardar} class="space-y-6">
+			<form onsubmit={(e) => { e.preventDefault(); guardar(); }} class="space-y-6">
 				<!-- Puntaje -->
 				<div>
 					<fieldset>
@@ -82,7 +83,7 @@
 							{#each Array(5).keys() as i (i)}
 								<button
 									type="button"
-									on:click={() => (nuevaResena.puntaje = i + 1)}
+									onclick={() => (nuevaResena.puntaje = i + 1)}
 									class="h-8 w-8 {i < nuevaResena.puntaje
 										? 'text-amber-400'
 										: 'text-gray-300'} transition-colors hover:text-amber-400"
@@ -129,7 +130,7 @@
 						variant="secondary"
 						size="md"
 						type="button"
-						on:click={cerrar}
+						onclick={cerrar}
 						customClass="w-full md:w-auto"
 					/>
 					<Button

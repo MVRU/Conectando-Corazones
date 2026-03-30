@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import DashboardInstitucion from '$lib/components/dashboard/DashboardInstitucion.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 	const { usuario, dashboardData } = data;
 
-	let animate = false;
+	let animate = $state(false);
 
-	onMount(() => {
+	$effect(() => {
 		animate = true;
 	});
 </script>

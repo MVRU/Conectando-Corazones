@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { History, Share2, PlusCircle, Settings } from 'lucide-svelte';
 
-	export let actividad: {
-		id: string;
-		titulo: string;
-		descripcion: string;
-		fecha: string;
-		tipo: 'proyecto' | 'colaboracion' | 'evidencia';
-	}[] = [];
+	let { actividad = [] } = $props<{
+		actividad?: {
+			id: string;
+			titulo: string;
+			descripcion: string;
+			fecha: string;
+			tipo: 'proyecto' | 'colaboracion' | 'evidencia';
+		}[];
+	}>();
 
 	const TIPO_LABELS = {
 		proyecto: 'Proyecto',

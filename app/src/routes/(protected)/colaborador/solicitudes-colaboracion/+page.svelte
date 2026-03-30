@@ -16,18 +16,18 @@
 	import type { PageData } from './$types';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let activeTab: 'pendiente' | 'aprobada' | 'rechazada' = 'pendiente';
-	let searchTerm = '';
+	let activeTab: 'pendiente' | 'aprobada' | 'rechazada' = $state('pendiente');
+	let searchTerm = $state('');
 
-	$: filteredColaboraciones = data.colaboraciones.filter((c) => {
+	let filteredColaboraciones = $derived(data.colaboraciones.filter((c) => {
 		const matchesTab = c.estado === activeTab;
 		const matchesSearch =
 			c.proyecto.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
 			c.proyecto.institucion.nombre_legal.toLowerCase().includes(searchTerm.toLowerCase());
 		return matchesTab && matchesSearch;
-	});
+	}));
 
 	const tabs = [
 		{

@@ -14,9 +14,11 @@
 	import type { EstadisticasInstituciones } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	export let show = false;
-	export let stats: EstadisticasInstituciones | undefined;
-	export let onClose: () => void;
+	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+		show?: boolean;
+		stats?: EstadisticasInstituciones;
+		onClose?: () => void;
+	}>();
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
@@ -25,9 +27,9 @@
 	}
 
 	// Calcular el máximo para escalar las barras
-	$: maxProyectos =
-		stats?.institucionesAyudadas.reduce((max, inst) => Math.max(max, inst.cantidadProyectos), 0) ||
-		1;
+	const maxProyectos = $derived(
+		stats?.institucionesAyudadas.reduce((max, inst) => Math.max(max, inst.cantidadProyectos), 0) || 1
+	);
 
 	// Función para obtener el icono de ranking
 	function getRankingIcon(ranking?: number) {
@@ -57,7 +59,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if show && stats}
 	<div
@@ -70,10 +72,10 @@
 			class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
 			in:fade={{ duration: 200 }}
 			out:fade={{ duration: 200 }}
-			on:click={onClose}
+			onclick={onClose}
 			role="button"
 			tabindex="-1"
-			on:keydown={(e) => e.key === 'Enter' && onClose()}
+			onkeydown={(e) => e.key === 'Enter' && onClose()}
 		></div>
 
 		<!-- Modal Content -->
@@ -98,7 +100,7 @@
 					</div>
 				</div>
 				<button
-					on:click={onClose}
+					onclick={onClose}
 					class="rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
 				>
 					<X size={20} />

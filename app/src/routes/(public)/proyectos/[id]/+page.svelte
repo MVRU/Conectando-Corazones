@@ -9,7 +9,7 @@
 	import { page } from '$app/stores';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 	import {
 		esUbicacionPresencial,
 		esUbicacionVirtual,
@@ -34,10 +34,8 @@
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import type { Resena } from '$lib/domain/types/Resena';
-	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 
 	import {
@@ -63,48 +61,43 @@
 		Star
 	} from '@steeze-ui/heroicons';
 
-	let proyecto: Proyecto;
-	let colaboracionesActivas: Colaboracion[] = [];
-	let participacionesOrdenadas: ParticipacionPermitida[] = [];
-	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
-	let misAportes: ColaboracionTipoParticipacion[] = [];
+	let proyecto: Proyecto = $derived(data.proyecto);
+	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
+	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
 	
-	let resenasProyecto: Resena[] = [];
-	let resenaAEliminar: Resena | null = null;
-	let mostrarModalResena = false;
-	let mostrarConfirmarEliminar = false;
+	let resenasProyecto: Resena[] = $state([]);
+	let resenaAEliminar: Resena | null = $state(null);
+	let mostrarModalResena = $state(false);
+	let mostrarConfirmarEliminar = $state(false);
 	const maxCaracteresResena = 500;
 
-	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
-	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
-
-	$: esCreador = $usuario?.id_usuario === proyecto?.institucion?.id_usuario;
-	$: colaboracionUsuario =
+	let esCreador = $derived(!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario);
+	let colaboracionUsuario = $derived(
 		$usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
-			: undefined;
+			: undefined
+	);
+	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
 
-	$: misAportes = colaboracionUsuario?.colaboraciones_tipo_participacion || [];
+	let esColaboradorAprobado = $derived(colaboracionUsuario?.estado === 'aprobada');
+	let esSolicitudRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
+	let tieneSolicitudPendiente = $derived(colaboracionUsuario?.estado === 'pendiente');
+	let tieneColaboracionAnulada = $derived(colaboracionUsuario?.estado === 'anulada');
+	let esAdministrador = $derived($usuario?.rol === 'administrador');
+	let esInstitucion = $derived($usuario?.rol === 'institucion');
 
-	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
-	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
-	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
-	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
-	$: esAdministrador = $usuario?.rol === 'administrador';
-	$: esInstitucion = $usuario?.rol === 'institucion';
-	$: puedeVerResenas = true;
+	let resenaUsuarioActual = $derived(resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario));
+	let tieneResenaUsuario = $derived(!!resenaUsuarioActual);
 
-	$: proyecto = data.proyecto;
-	
-	$: resenaUsuarioActual = resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario);
-	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
-
-	$: if (proyecto) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: proyecto.titulo }
-		]);
-	}
+	$effect(() => {
+		if (proyecto) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: proyecto.titulo }
+			]);
+		}
+	});
 
 	function aFecha(fecha: string | Date | undefined | null): Date | null {
 		if (!fecha) return null;
@@ -117,10 +110,8 @@
 		if (!fin) return 0;
 
 		const hoy = new Date();
-		// Normalizamos "hoy" a medianoche local para comparar solo días
 		const baseHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
 
-		// Si fin es a medianoche UTC, es una fecha de calendario pura. La tomamos como tal.
 		let baseFin: number;
 		if (fin.getUTCHours() === 0 && fin.getUTCMinutes() === 0) {
 			baseFin = new Date(fin.getUTCFullYear(), fin.getUTCMonth(), fin.getUTCDate()).getTime();
@@ -137,8 +128,6 @@
 		const d = aFecha(fecha);
 		if (!d) return 'Fecha no disponible';
 
-		// Si es una fecha a medianoche (ej: 2026-02-15T00:00:00.000Z),
-		// la formateamos en UTC para evitar el desfase por zona horaria (ej: Argentina -3h).
 		const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
 
 		if (esMedianocheUTC) {
@@ -167,32 +156,34 @@
 		);
 	}
 
-	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
-	$: clasesChipEstado = clasesEstado(estadoCodigo);
-	// Las reseñas se hacen a los proyectos que están listos
-	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
-	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	$: mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
-	$: resumenTexto = (proyecto?.resumen || '').trim();
-	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
-	$: listadoAprendizajes = (aprendizajesTexto || '')
+	let estadoCodigo = $derived(proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso');
+	let clasesChipEstado = $derived(clasesEstado(estadoCodigo));
+	let puedeVerResenas = $derived(
+		estadoCodigo === 'completado' || estadoCodigo === 'en_revision' || esCreador
+	);
+	let puedeRedactarResena = $derived((esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision');
+	let puedeCrearResena = $derived(puedeRedactarResena && !tieneResenaUsuario);
+	let mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let resumenTexto = $derived((proyecto?.resumen || '').trim());
+	let aprendizajesTexto = $derived((proyecto?.aprendizajes || '').trim());
+	let listadoAprendizajes = $derived((aprendizajesTexto || '')
 		.split('\n')
 		.map((l) => l.trim())
 		.filter((l) => l.length > 0)
-		.map((l) => l.replace(/^[-*•]\s*/, '')); // Remover viñetas "-" generadas por la IA
+		.map((l) => l.replace(/^[-*•]\s*/, '')));
 
-	// Dividimos el resumen en oraciones para que no sea un bloque de texto denso
-	$: listadoResumen = (resumenTexto || '')
+	let listadoResumen = $derived((resumenTexto || '')
 		.split('. ')
 		.map((s) => s.trim())
 		.filter((s) => s.length > 0)
-		.map((s) => (s.endsWith('.') ? s : s + '.'));
+		.map((s) => (s.endsWith('.') ? s : s + '.')));
 
-	$: tieneResumenIA = Boolean(resumenTexto);
-	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
-	$: mostrarSeccionResumenIA =
-		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
-	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
+	let tieneResumenIA = $derived(Boolean(resumenTexto));
+	let tieneAprendizajesIA = $derived(Boolean(aprendizajesTexto));
+	let mostrarSeccionResumenIA = $derived(
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA)
+	);
+	let puedeVerAprendizajesIA = $derived(esCreador || esColaboradorAprobado);
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -219,9 +210,7 @@
 		});
 	}
 
-	$: ubicacionesOrdenadas = ordenarUbicaciones(proyecto?.ubicaciones);
-
-	$: colaboradoresAprobados = (colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada');
+	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
 
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
@@ -267,10 +256,10 @@
 		}).format(valor);
 	}
 
-	let mostrarModalColaborar = false;
-	let mostrarModalCancelar = false;
-	let justificacionCancelacion = '';
-	let cancelando = false;
+	let mostrarModalColaborar = $state(false);
+	let mostrarModalCancelar = $state(false);
+	let justificacionCancelacion = $state('');
+	let cancelando = $state(false);
 
 	async function confirmarCancelacion() {
 		if (cancelando) return;
@@ -349,16 +338,15 @@
 				message: 'Solicitud anulada exitosamente'
 			});
 
-			// Actualizar estado reactivo
-			if (colaboracionUsuario) {
-				colaboracionUsuario.estado = 'anulada';
-			}
+			await invalidateAll();
 
 			mostrarModalAnular = false;
-		} catch (err: any) {
+		} catch (err: unknown) {
+			const error = err as Error;
+			console.error('Error al anular solicitud:', error);
 			toastStore.show({
 				variant: 'error',
-				message: err.message
+				message: error.message || 'Error al anular la solicitud'
 			});
 		} finally {
 			anulando = false;
@@ -385,20 +373,20 @@
 		irAColaborar();
 	}
 
-	let mostrarModalExito = false;
-	let mostrarModalJustificacion = false;
-	let mostrarModalPendiente = false;
-	let mostrarModalAnular = false;
-	let anulando = false;
-	let mostrarResumenIA = false;
-	let mostrarAprendizajesIA = false;
-	let mostrarMenuGestion = false;
-	let solicitudRecienEnviada = false;
+	let mostrarModalExito = $state(false);
+	let mostrarModalJustificacion = $state(false);
+	let mostrarModalPendiente = $state(false);
+	let mostrarModalAnular = $state(false);
+	let anulando = $state(false);
+	let mostrarResumenIA = $state(false);
+	let mostrarAprendizajesIA = $state(false);
+	let mostrarMenuGestion = $state(false);
+	let solicitudRecienEnviada = $state(false);
 
-	$: accionesMenu = (() => {
+	let accionesMenu = $derived.by(() => {
 		const acc: {
 			label: string;
-			icon: any;
+			icon: typeof CheckCircle;
 			onclick: () => void;
 			variant?: 'danger' | 'default';
 			disabled?: boolean;
@@ -417,7 +405,7 @@
 				icon: ShieldCheck,
 				onclick: () => {}
 			});
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 			acc.push({
 				label: 'Cancelar proyecto',
 				icon: XCircle,
@@ -490,7 +478,7 @@
 				onclick: irAAportes
 			});
 
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 
 			if (esCreador) {
 				const esEditable = estadoCodigo === 'en_curso';
@@ -534,17 +522,15 @@
 		}
 
 		return acc;
-	})();
+	});
 
 	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
-			guardarReporteLog($usuario.id_usuario, 'Proyecto', proyecto.id_proyecto);
 			toastStore.show({
 				variant: 'success',
 				message:
 					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
 			});
-			// Refrescar datos antes de volver
 			await invalidateAll();
 			history.back();
 		}
@@ -609,7 +595,7 @@
 		mostrarConfirmarEliminar = false;
 	}
 
-	async function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	async function guardarResena({ contenido, puntaje }: { contenido: string; puntaje: number }) {
 		if (!proyecto?.id_proyecto || !$usuario) return;
 
 		if (tieneResenaUsuario) {
@@ -627,8 +613,8 @@
 				body: JSON.stringify({
 					tipo_objeto: 'proyecto',
 					id_objeto: proyecto.id_proyecto,
-					contenido: event.detail.contenido,
-					puntaje: event.detail.puntaje
+					contenido,
+					puntaje
 				})
 			});
 
@@ -636,23 +622,9 @@
 				const data = await res.json();
 				throw new Error(data.error || 'Error al guardar reseña.');
 			}
-			const nuevaResenaStr = await res.json();
+			const nuevaResena = await res.json();
 
-			const reseñaConAutor = {
-				...nuevaResenaStr,
-				autor: {
-					...$usuario,
-					rol: $usuario.rol,
-					nombre: $usuario.nombre,
-					apellido: $usuario.apellido,
-					url_foto: $usuario.url_foto,
-					
-					nombre_legal: ($usuario as any).nombre_legal,
-					razon_social: ($usuario as any).razon_social
-				}
-			};
-
-			resenasProyecto = [reseñaConAutor, ...resenasProyecto];
+			resenasProyecto = [nuevaResena, ...resenasProyecto];
 			mostrarModalResena = false;
 			toastStore.show({
 				variant: 'success',
@@ -663,22 +635,27 @@
 		}
 	}
 
-	onMount(async () => {
+	$effect(() => {
 		layoutStore.showStickyBottomBar();
-		if (proyecto?.id_proyecto) {
-			try {
-				const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
-				if (res.ok) {
-					resenasProyecto = await res.json();
+		
+		async function cargarResenas() {
+			if (proyecto?.id_proyecto) {
+				try {
+					const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+					if (res.ok) {
+						resenasProyecto = await res.json();
+					}
+				} catch (e) {
+					console.error('Error cargando reseñas', e);
 				}
-			} catch (e) {
-				console.error('Error cargando reseñas', e);
 			}
 		}
-	});
 
-	onDestroy(() => {
-		layoutStore.hideStickyBottomBar();
+		cargarResenas();
+
+		return () => {
+			layoutStore.hideStickyBottomBar();
+		};
 	});
 </script>
 
@@ -741,7 +718,7 @@
 							role="menu"
 							tabindex="-1"
 						>
-							{#each accionesMenu as accion}
+							{#each accionesMenu as accion (accion.label || Math.random())}
 								{#if accion.divider}
 									<div class="my-1 border-t border-gray-100"></div>
 								{:else}
@@ -844,7 +821,6 @@
 									Progreso del proyecto
 								</h2>
 								{#if esCreador && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
-									<!-- TODO: implementar función para actualizar el progreso de un proyecto -->
 									<a
 										href={`/proyectos/${proyecto.id_proyecto}`}
 										class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -966,7 +942,7 @@
 
 								{#if misAportes.length > 0}
 									<ul class="space-y-3">
-										{#each misAportes as aporte}
+										{#each misAportes as aporte (aporte.id_colaboracion_tipo_participacion || Math.random())}
 											<li
 												class="flex items-center justify-between rounded-lg border border-gray-100 p-3"
 											>
@@ -1031,7 +1007,7 @@
 										{#if mostrarResumenIA}
 											<div class="border-t border-gray-100 bg-sky-50/30 px-4 pt-4 pb-6">
 												<div class="space-y-4">
-													{#each listadoResumen as parrafo}
+													{#each listadoResumen as parrafo (parrafo)}
 														<p class="text-base leading-relaxed text-gray-700">
 															{parrafo}
 														</p>
@@ -1072,7 +1048,7 @@
 												<div class="border-t border-gray-100 bg-amber-50/30 px-4 pt-4 pb-6">
 													{#if listadoAprendizajes.length > 0}
 														<ul class="flex flex-col gap-4">
-															{#each listadoAprendizajes as item}
+															{#each listadoAprendizajes as item (item)}
 																<li class="flex gap-4">
 																	<div class="relative mt-2 flex-shrink-0">
 																		<div
@@ -1938,13 +1914,13 @@
 {/if}
 
 	<ResenaProyectoModal
-	mostrar={mostrarModalResena}
-	modo="crear"
-	resenaInicial={null}
-	maxCaracteres={maxCaracteresResena}
-	on:guardar={guardarResena}
-	on:cerrar={() => (mostrarModalResena = false)}
-/>
+		mostrar={mostrarModalResena}
+		modo="crear"
+		resenaInicial={null}
+		maxCaracteres={maxCaracteresResena}
+		onguardar={guardarResena}
+		oncerrar={() => (mostrarModalResena = false)}
+	/>
 
 {#if mostrarConfirmarEliminar}
 	

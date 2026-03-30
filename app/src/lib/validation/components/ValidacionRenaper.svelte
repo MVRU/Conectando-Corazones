@@ -3,14 +3,20 @@
 	import Loader from '$lib/components/ui/feedback/Loader.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
 
-	const dispatch = createEventDispatcher();
+	let {
+		pasoActual = 3,
+		pasosTotales = 5,
+		onsuccess,
+		onback
+	} = $props<{
+		pasoActual?: number;
+		pasosTotales?: number;
+		onsuccess?: () => void;
+		onback?: () => void;
+	}>();
 
-	export let pasoActual = 3;
-	export let pasosTotales = 5;
-
-	let etapa: 'verificando' | 'error' = 'verificando';
+	let etapa = $state<'verificando' | 'error'>('verificando');
 
 	function validarConRenaper() {
 		return new Promise((resolve) => {
@@ -21,11 +27,11 @@
 		});
 	}
 
-	onMount(() => {
+	$effect(() => {
 		validarConRenaper()
 			.then((res) => {
 				if ((res as { valido: boolean }).valido) {
-					dispatch('success');
+					onsuccess?.();
 				} else {
 					etapa = 'error';
 				}
@@ -80,7 +86,7 @@
 						customClass="w-full sm:w-auto"
 						label="Volver al formulario"
 						variant="secondary"
-						onclick={() => dispatch('back')}
+						onclick={() => onback?.()}
 					/>
 				</div>
 			</div>

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { usuario } from '$lib/stores/auth';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -41,29 +40,29 @@
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 
-	export let limiteProyectosAlcanzado: boolean = false;
-	export let categorias: Categoria[] = [];
-	export let tiposParticipacion: TipoParticipacion[] = [];
-	export let estaVerificado: boolean = false;
+	let {
+		limiteProyectosAlcanzado = false,
+		categorias = [],
+		tiposParticipacion = [],
+		estaVerificado = false,
+		edicion = false,
+		esEdicionRestringida = false,
+		tieneColaboradoresAprobados = false,
+		proyectoId = undefined,
+		initialData = null,
+		esAdmin = initialData?.esAdmin || false
+	} = $props();
 
-	// Props para edición
-	export let edicion: boolean = false;
-	export let esEdicionRestringida: boolean = false;
-	export let tieneColaboradoresAprobados: boolean = false;
-	export let proyectoId: number | undefined = undefined;
-	export let initialData: any = null;
-	export let esAdmin: boolean = initialData?.esAdmin || false;
+	let titulo = $state(initialData?.titulo || '');
+	let descripcion = $state(initialData?.descripcion || '');
+	let urlPortada = $state(initialData?.urlPortada || '');
+	let fechaFinTentativa = $state(initialData?.fechaFinTentativa || '');
+	let beneficiarios = $state<number | undefined>(initialData?.beneficiarios);
 
-	let titulo = initialData?.titulo || '';
-	let descripcion = initialData?.descripcion || '';
-	let urlPortada = initialData?.urlPortada || '';
-	let fechaFinTentativa = initialData?.fechaFinTentativa || '';
-	let beneficiarios: number | undefined = initialData?.beneficiarios;
+	let categoriasSeleccionadas = $state(initialData?.categoriasSeleccionadas || []);
+	let categoriaOtraDescripcion = $state(initialData?.categoriaOtraDescripcion || '');
 
-	let categoriasSeleccionadas: number[] = initialData?.categoriasSeleccionadas || [];
-	let categoriaOtraDescripcion = initialData?.categoriaOtraDescripcion || '';
-
-	let ubicaciones: UbicacionFormulario[] = initialData?.ubicaciones || [
+	let ubicaciones = $state<UbicacionFormulario[]>(initialData?.ubicaciones || [
 		{
 			tipo_ubicacion: 'principal',
 			modalidad: '',
@@ -77,38 +76,32 @@
 			},
 			url_virtual: ''
 		}
-	];
+	]);
 
-	let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] =
-		initialData?.tiposParticipacionSeleccionados || [];
-	let participacionesPermitidas: ParticipacionForm[] = initialData?.participacionesPermitidas || [];
+	let tiposParticipacionSeleccionados = $state<TipoParticipacionDescripcion[]>(
+		initialData?.tiposParticipacionSeleccionados || []
+	);
+	let participacionesPermitidas = $state<ParticipacionForm[]>(
+		initialData?.participacionesPermitidas || []
+	);
 
-	let errores: Record<string, string> = {};
+	let errores = $state<Record<string, string>>({});
 
 	const fechaMinima = new Date().toISOString().split('T')[0];
 
-	$: descripcionesCategorias = categorias.map((c) => c.descripcion || '');
+	let descripcionesCategorias = $derived(categorias.map((c) => c.descripcion || ''));
 
-	$: validadorCategoria = crearValidadorCategoria(descripcionesCategorias);
+	let validadorCategoria = $derived(crearValidadorCategoria(descripcionesCategorias));
 
-	$: idCategoriaOtra = categorias.find(
-		(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
-	)?.id_categoria;
+	let idCategoriaOtra = $derived(
+		categorias.find(
+			(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+		)?.id_categoria
+	);
 
-	$: seleccionoOtra =
-		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1);
-
-	$: if (seleccionoOtra) {
-		const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
-		if (err) {
-			errores.categoria_otra = err;
-			errores = { ...errores };
-		} else {
-			limpiarError('categoria_otra');
-		}
-	} else if (!seleccionoOtra && errores.categoria_otra) {
-		limpiarError('categoria_otra');
-	}
+	let seleccionoOtra = $derived(
+		idCategoriaOtra != null && categoriasSeleccionadas.includes(idCategoriaOtra ?? -1)
+	);
 
 	function limpiarError(campo: string) {
 		if (errores[campo]) {
@@ -117,27 +110,64 @@
 		}
 	}
 
-	$: if (validarTituloProyecto(titulo) === null) limpiarError('titulo');
-	$: if (validarDescripcionProyecto(descripcion) === null) limpiarError('descripcion');
-	$: if (urlPortada && validarUrl(urlPortada) && !validarUrlImagen(urlPortada))
-		limpiarError('urlPortada');
-	$: if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
-		limpiarError('fechaFinTentativa');
-	$: if (beneficiarios != null && beneficiarios > 0) {
-		const errBenReact =
-			esEdicionRestringida && !esAdmin
-				? validarAumentoBeneficiarios(beneficiarios, initialData?.originales?.beneficiarios)
-				: null;
-		if (errBenReact) {
-			errores.beneficiarios = errBenReact;
-			errores = { ...errores };
-		} else {
-			limpiarError('beneficiarios');
+	$effect(() => {
+		if (seleccionoOtra) {
+			const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+			if (err) {
+				errores.categoria_otra = err;
+				errores = { ...errores };
+			} else {
+				limpiarError('categoria_otra');
+			}
+		} else if (!seleccionoOtra && errores.categoria_otra) {
+			limpiarError('categoria_otra');
 		}
-	}
-	$: if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
-	$: if (ubicaciones.length > 0) limpiarError('ubicaciones');
-	$: if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
+	});
+
+	$effect(() => {
+		if (validarTituloProyecto(titulo) === null) limpiarError('titulo');
+	});
+
+	$effect(() => {
+		if (validarDescripcionProyecto(descripcion) === null) limpiarError('descripcion');
+	});
+
+	$effect(() => {
+		if (urlPortada && validarUrl(urlPortada) && !validarUrlImagen(urlPortada))
+			limpiarError('urlPortada');
+	});
+
+	$effect(() => {
+		if (fechaFinTentativa && (edicion || esFechaFutura(fechaFinTentativa)))
+			limpiarError('fechaFinTentativa');
+	});
+
+	$effect(() => {
+		if (beneficiarios != null && beneficiarios > 0) {
+			const errBenReact =
+				esEdicionRestringida && !esAdmin
+					? validarAumentoBeneficiarios(beneficiarios, initialData?.originales?.beneficiarios)
+					: null;
+			if (errBenReact) {
+				errores.beneficiarios = errBenReact;
+				errores = { ...errores };
+			} else {
+				limpiarError('beneficiarios');
+			}
+		}
+	});
+
+	$effect(() => {
+		if (categoriasSeleccionadas.length > 0) limpiarError('categorias');
+	});
+
+	$effect(() => {
+		if (ubicaciones.length > 0) limpiarError('ubicaciones');
+	});
+
+	$effect(() => {
+		if (tiposParticipacionSeleccionados.length > 0) limpiarError('participacion');
+	});
 
 	// --- Lógica de Borradores Locales ---
 	const DRAFT_KEY = `proyecto_borrador_local`;
@@ -200,7 +230,11 @@
 		}
 	}
 
-	onMount(() => {
+	function eliminarBorradorLocal() {
+		localStorage.removeItem(DRAFT_KEY);
+	}
+
+	$effect(() => {
 		if (edicion || initialData) return;
 
 		const saved = localStorage.getItem(DRAFT_KEY);
@@ -208,10 +242,6 @@
 			cargarBorradorLocal();
 		}
 	});
-
-	function eliminarBorradorLocal() {
-		localStorage.removeItem(DRAFT_KEY);
-	}
 
 	function validarFormulario(): boolean {
 		errores = {};
@@ -457,7 +487,7 @@
 		return Object.keys(errores).length === 0;
 	}
 
-	let enviando = false;
+	let enviando = $state(false);
 
 	async function enviarFormulario(estado: 'borrador' | 'en_curso' = 'en_curso') {
 		if (limiteProyectosAlcanzado && !edicion && estado === 'en_curso') return;
@@ -616,7 +646,7 @@
 		{/if}
 
 		<form
-			on:submit|preventDefault={() => enviarFormulario(estaVerificado ? 'en_curso' : 'borrador')}
+			onsubmit={(e) => { e.preventDefault(); enviarFormulario(estaVerificado ? 'en_curso' : 'borrador'); }}
 			class="space-y-8"
 		>
 			<ProyectoInfoBasica

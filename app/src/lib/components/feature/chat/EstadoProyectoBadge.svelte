@@ -2,7 +2,9 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 
-	export let estado: EstadoDescripcion;
+	let { estado } = $props<{
+		estado: EstadoDescripcion;
+	}>();
 
 	const estadoConfig: Record<
 		EstadoDescripcion,
@@ -52,7 +54,7 @@
 		}
 	};
 
-	$: config = estadoConfig[estado] || estadoConfig.en_curso;
+	let config = $derived(estadoConfig[estado] || estadoConfig.en_curso);
 </script>
 
 <span

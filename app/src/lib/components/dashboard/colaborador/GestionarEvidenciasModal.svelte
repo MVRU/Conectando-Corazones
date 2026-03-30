@@ -3,9 +3,11 @@
 	import { quintOut } from 'svelte/easing';
 	import { X, FolderKanban, UploadCloud } from 'lucide-svelte';
 
-	export let show = false;
-	export let onClose: () => void;
-	export let proyectos: { id: string; titulo: string; estado: string }[] = [];
+	let { show = false, onClose = () => {}, proyectos = [] } = $props<{
+		show?: boolean;
+		onClose?: () => void;
+		proyectos?: { id: string; titulo: string; estado: string }[];
+	}>();
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
@@ -14,7 +16,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if show}
 	<div
@@ -27,10 +29,10 @@
 			class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
 			in:fade={{ duration: 200 }}
 			out:fade={{ duration: 200 }}
-			on:click={onClose}
+			onclick={onClose}
 			role="button"
 			tabindex="-1"
-			on:keydown={(e) => e.key === 'Enter' && onClose()}
+			onkeydown={(e) => e.key === 'Enter' && onClose()}
 		></div>
 
 		<!-- Modal Content -->
@@ -55,7 +57,7 @@
 					</div>
 				</div>
 				<button
-					on:click={onClose}
+					onclick={onClose}
 					class="rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
 				>
 					<X size={20} />

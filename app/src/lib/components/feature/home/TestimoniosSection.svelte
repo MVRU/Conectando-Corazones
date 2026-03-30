@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import TestimoniosCard from '$lib/components/ui/cards/TestimoniosCard.svelte';
 	import { swipe } from '$lib/utils/actions/swipe';
 	import type { Resena } from '$lib/domain/types/Resena';
 
-	let testimonios: Resena[] = [];
-	let centerIndex = 0;
-	let cantidadVisible = 3;
+	let testimonios = $state<Resena[]>([]);
+	let centerIndex = $state(0);
+	let cantidadVisible = $state(3);
 
 	function limitarCentro() {
 		const maxStart = Math.max(0, testimonios.length - cantidadVisible);
@@ -28,18 +27,19 @@
 		limitarCentro();
 	};
 
-	$: testimoniosVisibles =
+	let testimoniosVisibles = $derived(
 		testimonios.length > 0
 			? Array.from({ length: Math.min(cantidadVisible, testimonios.length) }, (_, i) => {
 					const index = (centerIndex + i) % testimonios.length;
 					return testimonios[(index + testimonios.length) % testimonios.length];
 				})
-			: [];
+			: []
+	);
 
-	let visible = false;
-	let sectionRef: HTMLElement;
+	let visible = $state(false);
+	let sectionRef: HTMLElement | undefined = $state();
 
-	onMount(() => {
+	$effect.pre(() => {
 		actualizarCantidadVisible();
 		window.addEventListener('resize', actualizarCantidadVisible);
 
@@ -97,8 +97,8 @@
 		<!-- ! Ignorar el error que aparece, está ok -->
 		<div
 			use:swipe={{}}
-			on:swipeleft={mostrarSiguiente}
-			on:swiperight={mostrarAnterior}
+			onswipeleft={mostrarSiguiente}
+			onswiperight={mostrarAnterior}
 			class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
 		>
 			<!-- Contenedor de tarjetas -->
@@ -115,7 +115,7 @@
 			<!-- Flechas únicas para todos los dispositivos -->
 			<div class="mt-6 flex w-full justify-between px-4">
 				<button
-					on:click={mostrarAnterior}
+					onclick={mostrarAnterior}
 					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
 					aria-label="Anterior testimonio"
 				>
@@ -130,7 +130,7 @@
 				</button>
 
 				<button
-					on:click={mostrarSiguiente}
+					onclick={mostrarSiguiente}
 					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
 					aria-label="Siguiente testimonio"
 				>

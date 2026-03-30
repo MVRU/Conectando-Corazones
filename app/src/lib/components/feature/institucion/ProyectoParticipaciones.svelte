@@ -27,16 +27,28 @@
 	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus, Lock } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
-	export let tiposParticipacionSeleccionados: TipoParticipacionDescripcion[] = [];
-	export let participacionesPermitidas: ParticipacionForm[] = [];
-	export let errores: Record<string, string> = {};
-	export let limpiarError: (campo: string) => void;
 
-	// Modo edición
-	export let esEdicionRestringida = false;
-	export let participacionesOriginales: ParticipacionPermitida[] = [];
-	export let esAdmin = false;
-	export let tieneColaboradoresAprobados = false;
+	let {
+		tiposParticipacionSeleccionados = [],
+		participacionesPermitidas = [],
+		errores = {},
+		limpiarError,
+		esEdicionRestringida = false,
+		participacionesOriginales = [],
+		esAdmin = false,
+		tieneColaboradoresAprobados = false,
+		tiposParticipacion = []
+	} = $props<{
+		tiposParticipacionSeleccionados?: TipoParticipacionDescripcion[];
+		participacionesPermitidas?: ParticipacionForm[];
+		errores?: Record<string, string>;
+		limpiarError: (campo: string) => void;
+		esEdicionRestringida?: boolean;
+		participacionesOriginales?: ParticipacionPermitida[];
+		esAdmin?: boolean;
+		tieneColaboradoresAprobados?: boolean;
+		tiposParticipacion?: TipoParticipacion[];
+	}>();
 
 	function esUnidadRepetida(
 		tipo: TipoParticipacionDescripcion | undefined,
@@ -181,16 +193,15 @@
 		];
 	}
 
-	export let tiposParticipacion: TipoParticipacion[] = [];
-
-	$: tiposDisponibles = tiposParticipacion.filter(
+	let tiposDisponibles = $derived(tiposParticipacion.filter(
 		(t) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
-	);
+	));
 
-	$: cantidadDonacionesEspecie = participacionesPermitidas.filter(
+	let cantidadDonacionesEspecie = $derived(participacionesPermitidas.filter(
 		(p) => p.tipo_participacion?.descripcion === 'Especie'
-	).length;
-	$: limiteEspecieAlcanzado = cantidadDonacionesEspecie >= 10;
+	).length);
+
+	let limiteEspecieAlcanzado = $derived(cantidadDonacionesEspecie >= 10);
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -220,7 +231,7 @@
 					{@const clases = obtenerClasesColor(info.color, false)}
 					<button
 						type="button"
-						on:click={() => toggleTipoParticipacion(tipo)}
+						onclick={() => toggleTipoParticipacion(tipo)}
 						class="relative rounded-lg border-2 p-4 text-left transition-all hover:shadow-md {clases.border} {clases.bg} {clases.hover}"
 						title="Seleccionar"
 					>
@@ -269,7 +280,7 @@
 				</h4>
 				<button
 					type="button"
-					on:click={() => eliminarParticipacion(index)}
+					onclick={() => eliminarParticipacion(index)}
 					disabled={esOriginal && esEdicionRestringida && !esAdmin}
 					class="text-gray-400 hover:text-gray-600"
 					class:opacity-50={esOriginal && esEdicionRestringida && !esAdmin}
@@ -292,7 +303,7 @@
 							id="especie_{index}"
 							type="text"
 							value={participacion.especie || ''}
-							on:input={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
+							oninput={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal || esAdmin}
@@ -327,7 +338,7 @@
 							id="objetivo_{index}"
 							type="number"
 							value={participacion.objetivo ?? ''}
-							on:input={(e) => {
+							oninput={(e) => {
 								const val = e.currentTarget.value;
 								updateParticipacion(index, 'objetivo', val ? Number(val) : undefined);
 							}}
@@ -358,7 +369,7 @@
 						<select
 							id="unidad_{index}"
 							value={participacion.unidad_medida}
-							on:change={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
+							onchange={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esEdicionRestringida || esAdmin}
@@ -379,7 +390,7 @@
 									id="unidad_otra_{index}"
 									type="text"
 									value={participacion.unidad_medida_otra || ''}
-									on:input={(e) =>
+									oninput={(e) =>
 										updateParticipacion(index, 'unidad_medida_otra', e.currentTarget.value)}
 									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
@@ -419,7 +430,7 @@
 			<div class="mt-4 flex justify-center">
 				<button
 					type="button"
-					on:click={agregarItemEspecie}
+					onclick={agregarItemEspecie}
 					class="flex items-center gap-2 rounded-lg border-2 border-dashed border-orange-300 bg-orange-50 px-3 py-2 text-sm font-medium text-orange-700 transition-colors hover:border-orange-400 hover:bg-orange-100"
 				>
 					<Plus class="mr-2 h-4 w-4" />

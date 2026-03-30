@@ -1,99 +1,83 @@
 <script lang="ts">
 	import { fade, fly } from 'svelte/transition';
 	import { ChevronDown, ChevronUp } from 'lucide-svelte';
-	import { createEventDispatcher } from 'svelte';
 
-	export let mostrar: boolean = false;
-	export let participacion: string[] = [];
-	export let categoria: string[] = [];
-	export let categoriasDisponibles: string[] = ['Todas'];
-	export let tipoUbicacion: 'Todas' | 'Presencial' | 'Virtual' = 'Todas';
-	export let provincia: string = 'Todas';
-	export let localidad: string = 'Todas';
-	export let fechaDesde: string = '';
-	export let fechaHasta: string = '';
-	export let prefijoId: string = 'filter';
-
-	// Filtro de Estado
-	export let mostrarEstado: boolean = false;
-	export let estado: string[] = [];
-	export let estadosDisponibles: { value: string; label: string }[] = [];
-
-	export let provinciasDisponibles: string[] = [];
-	export let localidadesDisponibles: string[] = [];
-	export let tiposParticipacion: string[] = [];
-
-	export let criterioOrden: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso' =
-		'recientes';
-
-	const dispatch = createEventDispatcher();
-
-	let localidadesCache: Record<string, string[]> = {};
-
-	async function cargarLocalidades(prov: string) {
-		if (prov === 'Todas') {
-			localidadesDisponibles = [];
-			return;
-		}
-
-		if (localidadesCache[prov]) {
-			localidadesDisponibles = localidadesCache[prov];
-			return;
-		}
-
-		try {
-			const resProv = await fetch('/api/ubicaciones/provincias');
-			if (resProv.ok) {
-				const provinciasData = await resProv.json();
-				const provinciaEncontrada = provinciasData.find((p: any) => p.nombre === prov);
-
-				if (provinciaEncontrada) {
-					const resLoc = await fetch(
-						`/api/ubicaciones/provincias/${provinciaEncontrada.id_provincia}/localidades`
-					);
-					if (resLoc.ok) {
-						const locs = await resLoc.json();
-						const nombresLocs = locs.map((l: any) => l.nombre).sort();
-						localidadesCache[prov] = ['Todas', ...nombresLocs];
-						localidadesDisponibles = localidadesCache[prov];
-					}
-				}
-			}
-		} catch (e) {
-			console.error('Error cargando localidades', e);
-		}
-	}
+	let {
+		mostrar = $bindable(false),
+		participacion = $bindable([]),
+		categoria = $bindable([]),
+		categoriasDisponibles = ['Todas'],
+		tipoUbicacion = $bindable('Todas'),
+		provincia = $bindable('Todas'),
+		localidad = $bindable('Todas'),
+		fechaDesde = $bindable(''),
+		fechaHasta = $bindable(''),
+		prefijoId = 'filter',
+		mostrarEstado = false,
+		estado = $bindable([]),
+		estadosDisponibles = [],
+		provinciasDisponibles = [],
+		localidadesDisponibles = [],
+		tiposParticipacion = [],
+		criterioOrden = $bindable('recientes'),
+		onreset,
+		onubicacionchange,
+		ontoggle
+	} = $props<{
+		mostrar?: boolean;
+		participacion?: string[];
+		categoria?: string[];
+		categoriasDisponibles?: string[];
+		tipoUbicacion?: 'Todas' | 'Presencial' | 'Virtual';
+		provincia?: string;
+		localidad?: string;
+		fechaDesde?: string;
+		fechaHasta?: string;
+		prefijoId?: string;
+		mostrarEstado?: boolean;
+		estado?: string[];
+		estadosDisponibles?: { value: string; label: string }[];
+		provinciasDisponibles?: string[];
+		localidadesDisponibles?: string[];
+		tiposParticipacion?: string[];
+		criterioOrden?: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso';
+		onreset?: () => void;
+		onubicacionchange?: () => void;
+		ontoggle?: () => void;
+	}>();
 
 	function alternarFiltros() {
-		dispatch('toggle');
+		ontoggle?.();
 	}
 
-	function restablecerFiltros() {
-		dispatch('reset');
+	function restablecerFiltrosLocal() {
+		onreset?.();
 	}
 
 	function manejarCambioUbicacion() {
-		dispatch('ubicacionChange');
+		onubicacionchange?.();
 	}
 
-	$: filtrosActivos = [
-		participacion.length > 0 && !participacion.includes('Todos'),
-		categoria.length > 0 && !categoria.includes('Todas'),
-		tipoUbicacion !== 'Todas',
-		provincia !== 'Todas',
-		localidad !== 'Todas',
-		fechaDesde !== '',
-		fechaHasta !== '',
-		mostrarEstado && estado.length > 0 && !estado.includes('Todos')
-	].filter(Boolean).length;
+	let filtrosActivos = $derived(
+		[
+			participacion.length > 0 && !participacion.includes('Todos'),
+			categoria.length > 0 && !categoria.includes('Todas'),
+			tipoUbicacion !== 'Todas',
+			provincia !== 'Todas',
+			localidad !== 'Todas',
+			fechaDesde !== '',
+			fechaHasta !== '',
+			mostrarEstado && estado.length > 0 && !estado.includes('Todos')
+		].filter(Boolean).length
+	);
 
-	let estadoDropdownOpen: boolean = false;
-	let categoriaDropdownOpen: boolean = false;
-	let participacionDropdownOpen: boolean = false;
-	let ubicacionDropdownOpen: boolean = false;
-	let provinciaDropdownOpen: boolean = false;
-	let localidadDropdownOpen: boolean = false;
-	let fechaDropdownOpen: boolean = false;
+	let estadoDropdownOpen = $state(false);
+	let categoriaDropdownOpen = $state(false);
+	let participacionDropdownOpen = $state(false);
+	let ubicacionDropdownOpen = $state(false);
+	let provinciaDropdownOpen = $state(false);
+	let localidadDropdownOpen = $state(false);
+	let fechaDropdownOpen = $state(false);
 </script>
 
 <div class="animate-fade-in-up mb-4 flex flex-wrap justify-center gap-3">
@@ -112,7 +96,7 @@
 	</div>
 
 	<button
-		on:click={alternarFiltros}
+		onclick={alternarFiltros}
 		class="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50"
 	>
 		{mostrar ? 'Ocultar filtros' : 'Mostrar filtros'}
@@ -141,7 +125,7 @@
 			<div class="mb-5 flex items-center justify-between">
 				<h4 class="text-base font-semibold text-gray-800">Filtrar proyectos</h4>
 				<button
-					on:click={restablecerFiltros}
+					onclick={restablecerFiltrosLocal}
 					class="text-xs font-medium text-red-500 hover:text-red-600 hover:underline disabled:opacity-50"
 				>
 					Limpiar todo
@@ -161,7 +145,7 @@
 						<button
 							type="button"
 							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-							on:click={() => (participacionDropdownOpen = !participacionDropdownOpen)}
+							onclick={() => (participacionDropdownOpen = !participacionDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={participacionDropdownOpen}
 							aria-labelledby="{prefijoId}-label-participacion"
@@ -186,7 +170,7 @@
 						{#if participacionDropdownOpen}
 							<div
 								class="fixed inset-0 z-10 cursor-default"
-								on:click={() => (participacionDropdownOpen = false)}
+								onclick={() => (participacionDropdownOpen = false)}
 								role="presentation"
 							></div>
 							<div
@@ -201,7 +185,7 @@
 										type="checkbox"
 										class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 										checked={participacion.length === 0 || participacion.includes('Todos')}
-										on:change={() => {
+										onchange={() => {
 											participacion = [];
 										}}
 									/>
@@ -209,7 +193,7 @@
 								</label>
 
 								<div class="space-y-0.5">
-									{#each tiposParticipacion.filter((t) => t !== 'Todos') as tipo (tipo)}
+									{#each tiposParticipacion.filter((t: string) => t !== 'Todos') as tipo (tipo)}
 										<label
 											class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
 										>
@@ -217,11 +201,11 @@
 												type="checkbox"
 												class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 												checked={participacion.includes(tipo)}
-												on:change={() => {
+												onchange={() => {
 													if (participacion.includes(tipo)) {
-														participacion = participacion.filter((t) => t !== tipo);
+														participacion = participacion.filter((t: string) => t !== tipo);
 													} else {
-														const clean = participacion.filter((t) => t !== 'Todos');
+														const clean = participacion.filter((t: string) => t !== 'Todos');
 														participacion = [...clean, tipo];
 													}
 												}}
@@ -248,7 +232,7 @@
 						<button
 							type="button"
 							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-							on:click={() => (categoriaDropdownOpen = !categoriaDropdownOpen)}
+							onclick={() => (categoriaDropdownOpen = !categoriaDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={categoriaDropdownOpen}
 							aria-labelledby="{prefijoId}-label-categoria"
@@ -275,7 +259,7 @@
 							<!-- Backdrop transparente -->
 							<div
 								class="fixed inset-0 z-10 cursor-default"
-								on:click={() => (categoriaDropdownOpen = false)}
+								onclick={() => (categoriaDropdownOpen = false)}
 								role="presentation"
 							></div>
 
@@ -292,7 +276,7 @@
 										class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 										checked={categoria.length === 0 ||
 											(categoria.length === 1 && categoria[0] === 'Todas')}
-										on:change={() => {
+										onchange={() => {
 											categoria = [];
 										}}
 									/>
@@ -301,7 +285,7 @@
 
 								<!-- Lista de Categorías -->
 								<div class="space-y-0.5">
-									{#each categoriasDisponibles.filter((c) => c !== 'Todas') as cat (cat)}
+									{#each categoriasDisponibles.filter((c: string) => c !== 'Todas') as cat (cat)}
 										<label
 											class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
 										>
@@ -309,11 +293,11 @@
 												type="checkbox"
 												class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 												checked={categoria.includes(cat)}
-												on:change={() => {
+												onchange={() => {
 													if (categoria.includes(cat)) {
-														categoria = categoria.filter((c) => c !== cat);
+														categoria = categoria.filter((c: string) => c !== cat);
 													} else {
-														const clean = categoria.filter((c) => c !== 'Todas');
+														const clean = categoria.filter((c: string) => c !== 'Todas');
 														categoria = [...clean, cat];
 													}
 												}}
@@ -339,7 +323,7 @@
 						<button
 							type="button"
 							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-							on:click={() => (ubicacionDropdownOpen = !ubicacionDropdownOpen)}
+							onclick={() => (ubicacionDropdownOpen = !ubicacionDropdownOpen)}
 						>
 							<span class="block truncate">{tipoUbicacion}</span>
 							<ChevronDown
@@ -353,7 +337,7 @@
 						{#if ubicacionDropdownOpen}
 							<div
 								class="fixed inset-0 z-10 cursor-default"
-								on:click={() => (ubicacionDropdownOpen = false)}
+								onclick={() => (ubicacionDropdownOpen = false)}
 								role="presentation"
 							></div>
 							<div
@@ -361,15 +345,15 @@
 								in:fly={{ y: -5, duration: 150 }}
 							>
 								<div class="space-y-0.5">
-									{#each ['Todas', 'Presencial', 'Virtual'] as tipo}
+									{#each ['Todas', 'Presencial', 'Virtual'] as tipo (tipo)}
 										<button
 											type="button"
 											class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {tipoUbicacion ===
 											tipo
 												? 'bg-blue-50 font-medium text-blue-700'
 												: 'text-gray-700'}"
-											on:click={() => {
-												tipoUbicacion = tipo as any;
+											onclick={() => {
+												tipoUbicacion = tipo as 'Todas' | 'Presencial' | 'Virtual';
 												manejarCambioUbicacion();
 												ubicacionDropdownOpen = false;
 											}}
@@ -397,7 +381,7 @@
 							<button
 								type="button"
 								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-								on:click={() => (provinciaDropdownOpen = !provinciaDropdownOpen)}
+								onclick={() => (provinciaDropdownOpen = !provinciaDropdownOpen)}
 							>
 								<span class="block truncate">{provincia}</span>
 								<ChevronDown
@@ -411,7 +395,7 @@
 							{#if provinciaDropdownOpen}
 								<div
 									class="fixed inset-0 z-10 cursor-default"
-									on:click={() => (provinciaDropdownOpen = false)}
+									onclick={() => (provinciaDropdownOpen = false)}
 									role="presentation"
 								></div>
 								<div
@@ -422,15 +406,14 @@
 										{#each provinciasDisponibles as prov (prov)}
 											<button
 												type="button"
-												class="flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {provincia ===
+												class="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-gray-50 {provincia ===
 												prov
 													? 'bg-blue-50 font-medium text-blue-700'
 													: 'text-gray-700'}"
-												on:click={() => {
+												onclick={() => {
 													provincia = prov;
 													provinciaDropdownOpen = false;
-													localidad = 'Todas'; // Reset localidad
-													cargarLocalidades(prov);
+													localidad = 'Todas';
 												}}
 											>
 												{prov}
@@ -454,7 +437,7 @@
 							<button
 								type="button"
 								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-								on:click={() => (localidadDropdownOpen = !localidadDropdownOpen)}
+								onclick={() => (localidadDropdownOpen = !localidadDropdownOpen)}
 								disabled={provincia === 'Todas'}
 							>
 								<span class="block truncate">{localidad}</span>
@@ -469,7 +452,7 @@
 							{#if localidadDropdownOpen}
 								<div
 									class="fixed inset-0 z-10 cursor-default"
-									on:click={() => (localidadDropdownOpen = false)}
+									onclick={() => (localidadDropdownOpen = false)}
 									role="presentation"
 								></div>
 								<div
@@ -484,7 +467,7 @@
 												loc
 													? 'bg-blue-50 font-medium text-blue-700'
 													: 'text-gray-700'}"
-												on:click={() => {
+												onclick={() => {
 													localidad = loc;
 													localidadDropdownOpen = false;
 												}}
@@ -514,7 +497,7 @@
 							<button
 								type="button"
 								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-								on:click={() => (estadoDropdownOpen = !estadoDropdownOpen)}
+								onclick={() => (estadoDropdownOpen = !estadoDropdownOpen)}
 								aria-haspopup="listbox"
 								aria-expanded={estadoDropdownOpen}
 								aria-labelledby="{prefijoId}-label-estado"
@@ -524,7 +507,7 @@
 										Todos
 									{:else if estado.length <= 2}
 										{estado
-											.map((e) => estadosDisponibles.find((ed) => ed.value === e)?.label || e)
+											.map((e: string) => estadosDisponibles.find((ed: { value: string; label: string }) => ed.value === e)?.label || e)
 											.join(', ')}
 									{:else}
 										{estado.length} seleccionados
@@ -543,7 +526,7 @@
 								<!-- Backdrop transparente para cerrar al hacer click afuera -->
 								<div
 									class="fixed inset-0 z-10 cursor-default"
-									on:click={() => (estadoDropdownOpen = false)}
+									onclick={() => (estadoDropdownOpen = false)}
 									role="presentation"
 								></div>
 
@@ -559,7 +542,7 @@
 											type="checkbox"
 											class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 											checked={estado.length === 0 || estado.includes('Todos')}
-											on:change={() => {
+											onchange={() => {
 												estado = [];
 											}}
 										/>
@@ -568,7 +551,7 @@
 
 									<!-- Lista de Estados -->
 									<div class="space-y-0.5">
-										{#each estadosDisponibles.filter((e) => e.value !== 'Todos') as est (est.value)}
+										{#each estadosDisponibles.filter((e: { value: string; label: string }) => e.value !== 'Todos') as est (est.value)}
 											<label
 												class="flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
 											>
@@ -576,11 +559,11 @@
 													type="checkbox"
 													class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
 													checked={estado.includes(est.value)}
-													on:change={() => {
+													onchange={() => {
 														if (estado.includes(est.value)) {
-															estado = estado.filter((e) => e !== est.value);
+															estado = estado.filter((e: string) => e !== est.value);
 														} else {
-															const clean = estado.filter((e) => e !== 'Todos');
+															const clean = estado.filter((e: string) => e !== 'Todos');
 															estado = [...clean, est.value];
 														}
 													}}
@@ -609,7 +592,7 @@
 						<button
 							type="button"
 							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
-							on:click={() => (fechaDropdownOpen = !fechaDropdownOpen)}
+							onclick={() => (fechaDropdownOpen = !fechaDropdownOpen)}
 							aria-haspopup="dialog"
 							aria-expanded={fechaDropdownOpen}
 							aria-labelledby="{prefijoId}-label-fecha"
@@ -654,7 +637,7 @@
 							<!-- Backdrop transparente -->
 							<div
 								class="fixed inset-0 z-10 cursor-default"
-								on:click={() => (fechaDropdownOpen = false)}
+								onclick={() => (fechaDropdownOpen = false)}
 								role="presentation"
 							></div>
 
@@ -694,7 +677,7 @@
 											<button
 												type="button"
 												class="text-xs font-medium text-red-500 hover:text-red-700"
-												on:click={() => {
+												onclick={() => {
 													fechaDesde = '';
 													fechaHasta = '';
 												}}

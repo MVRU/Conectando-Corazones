@@ -13,17 +13,23 @@
 	import { reveal } from '$lib/actions/reveal';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { createEventDispatcher } from 'svelte';
 	import type { ComponentType } from 'svelte';
 
-	const dispatch = createEventDispatcher();
+	let { metricas, onclickProyectos = () => {}, onclickInstituciones = () => {}, onclickAgenda = () => {} } = $props<{
+		metricas: {
+			proyectosActivos: number;
+			institucionesAlcanzadas: number;
+			nuevasInstituciones: number;
+			proximoCierre: number;
+		};
+		onclickProyectos?: () => void;
+		onclickInstituciones?: () => void;
+		onclickAgenda?: () => void;
+	}>();
 
-	export let metricas: {
-		proyectosActivos: number;
-		institucionesAlcanzadas: number;
-		nuevasInstituciones: number;
-		proximoCierre: number; // días pendientes
-	};
+	const handleClickProyectos = () => onclickProyectos?.();
+	const handleClickInstituciones = () => onclickInstituciones?.();
+	const handleClickAgenda = () => onclickAgenda?.();
 
 	const tProyectos = tweened(0, { duration: 2000, easing: cubicOut });
 	const tInstituciones = tweened(0, { duration: 2000, easing: cubicOut });
@@ -87,15 +93,15 @@
 		}
 	}
 
-	$: mensajeCierre = getMensajeCierre(metricas.proximoCierre);
+	let mensajeCierre = $derived(getMensajeCierre(metricas.proximoCierre));
 </script>
 
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 	<!-- Métrica 1: Proyectos Totales -->
 	<button
-		on:click={() => dispatch('clickProyectos')}
+		onclick={handleClickProyectos}
 		use:reveal={{ threshold: 0.2 }}
-		on:reveal={handleReveal}
+		onreveal={handleReveal}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
 	>
 		<div
@@ -126,7 +132,7 @@
 
 	<!-- Métrica 2: Instituciones Alcanzadas -->
 	<button
-		on:click={() => dispatch('clickInstituciones')}
+		onclick={handleClickInstituciones}
 		use:reveal={{ threshold: 0.2 }}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 text-left backdrop-blur-md transition-all delay-100 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
 	>
@@ -158,7 +164,7 @@
 
 	<!-- Métrica 3: Próximo Cierre -->
 	<button
-		on:click={() => dispatch('clickAgenda')}
+		onclick={handleClickAgenda}
 		use:reveal={{ threshold: 0.2 }}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-amber-500/20 bg-amber-500/10 p-6 text-left backdrop-blur-md transition-all delay-200 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10"
 	>

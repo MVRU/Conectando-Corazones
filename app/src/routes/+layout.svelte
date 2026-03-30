@@ -10,7 +10,6 @@
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
 	import { canAccessRoute, isLoading, authStore, unauthenticatedState } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
@@ -19,17 +18,18 @@
 	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 	import { Usuario } from '$lib/domain/entities/Usuario';
 
-	export let data: LayoutData;
+	let { data }: { data: LayoutData } = $props();
 
-	let { supabase, session } = data;
-	$: ({ supabase, session } = data);
+	let supabase = $derived(data.supabase);
+	let session = $derived(data.session);
 
-	let showBreadcrumbs = false;
-	$: showBreadcrumbs = shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2;
+	let showBreadcrumbs = $derived(
+		shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2
+	);
 
-	let mounted = false;
+	let mounted = $state(false);
 
-	onMount(() => {
+	$effect(() => {
 		beforeNavigate(clearBreadcrumbs);
 
 		const { data: subscription } = supabase.auth.onAuthStateChange(
@@ -63,55 +63,59 @@
 		return () => subscription.subscription.unsubscribe();
 	});
 
-	$: if (mounted && !$isLoading) {
-		if (!canAccessRoute($page.url.pathname)) {
-			goto('/iniciar-sesion');
+	$effect(() => {
+		if (mounted && !$isLoading) {
+			if (!canAccessRoute($page.url.pathname)) {
+				goto('/iniciar-sesion');
+			}
 		}
-	}
+	});
 
-	$: if (browser) {
-		const error = $page.url.searchParams.get('error');
-		if (error === 'already_logged_in') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Sesión activa',
-					message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
-					variant: 'info'
-				});
+	$effect(() => {
+		if (browser) {
+			const error = $page.url.searchParams.get('error');
+			if (error === 'already_logged_in') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Sesión activa',
+						message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
+						variant: 'info'
+					});
 
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('error');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
+					const newUrl = new URL($page.url);
+					newUrl.searchParams.delete('error');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			}
+
+			const reason = $page.url.searchParams.get('reason');
+			if (reason === 'unauthenticated') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Acceso restringido',
+						message: 'Necesitás iniciar sesión para acceder a esa página.',
+						variant: 'warning'
+					});
+
+					const newUrl = new URL($page.url);
+					newUrl.searchParams.delete('reason');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			} else if (reason === 'forbidden') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Sin permisos',
+						message: 'No tenés permisos para acceder a esa sección.',
+						variant: 'error'
+					});
+
+					const newUrl = new URL($page.url);
+					newUrl.searchParams.delete('reason');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			}
 		}
-
-		const reason = $page.url.searchParams.get('reason');
-		if (reason === 'unauthenticated') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Acceso restringido',
-					message: 'Necesitás iniciar sesión para acceder a esa página.',
-					variant: 'warning'
-				});
-
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('reason');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
-		} else if (reason === 'forbidden') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Sin permisos',
-					message: 'No tenés permisos para acceder a esa sección.',
-					variant: 'error'
-				});
-
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('reason');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
-		}
-	}
+	});
 </script>
 
 <Header proyectos={data.proyectos} />

@@ -5,110 +5,115 @@
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
 	import type { PageData } from './$types';
-	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	$: proyectoSeleccionado = $page.url.searchParams.get('proyecto') || '';
+	let proyectoSeleccionado = $derived($page.url.searchParams.get('proyecto') || '');
 
-	let enviandoSolicitud = false;
-	let solicitudEnviada = false;
-	let mounted = false;
-	let objetivosExpandidos: Record<number, boolean> = {};
+	let enviandoSolicitud = $state(false);
+	let solicitudEnviada = $state(false);
+	let mounted = $state(false);
+	let objetivosExpandidos = $state<Record<number, boolean>>({});
 
-	let accesoDenegado = false;
-	let mensajeErrorAcceso = '';
+	let accesoDenegado = $state(false);
+	let mensajeErrorAcceso = $state('');
 
-	onMount(() => {
+	$effect(() => {
 		mounted = true;
 	});
 
-	$: if (browser && mounted && !$isLoading) {
-		accesoDenegado = false;
-		mensajeErrorAcceso = '';
+	$effect(() => {
+		if (browser && mounted && !$isLoading) {
+			accesoDenegado = false;
+			mensajeErrorAcceso = '';
 
-		if (!$isAuthenticated || !$usuario) {
-			goto('/iniciar-sesion');
-		} else if (!$isInstitucion) {
-			accesoDenegado = true;
-			mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';
-		} else {
-			const verificacion = data.verificacion;
+			if (!$isAuthenticated || !$usuario) {
+				goto('/iniciar-sesion');
+			} else if (!$isInstitucion) {
+				accesoDenegado = true;
+				mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';
+			} else {
+				const verificacion = data.verificacion;
 
-			if (!verificacion) {
-				accesoDenegado = true;
-				mensajeErrorAcceso = 'No se encontró la información de verificación de tu institución.';
-			} else if (verificacion.estado !== 'aprobada') {
-				accesoDenegado = true;
-				mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
-			} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
-				accesoDenegado = true;
-				mensajeErrorAcceso =
-					'Este proyecto no pertenece a tu institución. Solo podés solicitar el cierre de tus propios proyectos.';
+				if (!verificacion) {
+					accesoDenegado = true;
+					mensajeErrorAcceso = 'No se encontró la información de verificación de tu institución.';
+				} else if (verificacion.estado !== 'aprobada') {
+					accesoDenegado = true;
+					mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
+				} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
+					accesoDenegado = true;
+					mensajeErrorAcceso =
+						'Este proyecto no pertenece a tu institución. Solo podés solicitar el cierre de tus propios proyectos.';
+				}
 			}
 		}
-	}
+	});
 
-	let checks = {
+	let checks = $state({
 		evidenciasSuficientes: false,
 		archivosLegibles: false,
 		evidenciasRespaldadas: false,
 		noRequiereMasEvidencias: false,
 		conformidadRevision: false
-	};
+	});
 
-	$: proyectosDisponibles = data.proyectosDisponibles.map((p: any) => ({
+	let proyectosDisponibles = $derived(data.proyectosDisponibles.map((p: any) => ({
 		value: String(p.id_proyecto),
 		label: p.titulo
-	}));
+	})));
 
-	$: sinProyectosPendientes =
-		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0;
-
-	$: proyectoActual = data.proyectoActual;
-
-	$: solicitudPendienteExistente = data.solicitudPendiente;
-
-	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
-
-	$: proyectoPerteneceAInstitucion = proyectoActual
-		? proyectoActual.institucion_id === $usuario?.id_usuario
-		: false;
-
-	$: solicitudesRechazadas = data.solicitudesRechazadas;
-
-	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
-	$: muchosRechazos = solicitudesRechazadas.length >= 3;
-	$: formularioBloqueadoPorAuditoria = muchosRechazos && proyectoActual?.estado === 'en_auditoria';
-
-	$: evidenciasPorObjetivo = proyectoActual
-		? proyectoActual.participacion_permitida?.map((objetivo: any) => {
-				const evidenciasObjetivo = (data.evidencias || []).filter(
-					(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
-				);
-				// Separar evidencias de entrada y salida
-				const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
-				const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
-
-				return {
-					objetivo,
-					evidencias: evidenciasObjetivo,
-					evidenciasEntrada,
-					evidenciasSalida,
-					totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
-				};
-			}) || []
-		: [];
-
-	$: todosLosObjetivosTienenEvidencias = evidenciasPorObjetivo.every(
-		(item: any) => item.evidencias.length > 0
+	let sinProyectosPendientes = $derived(
+		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0
 	);
 
-	$: todosLosChecksCompletos = Object.values(checks).every((check) => check === true);
+	let proyectoActual = $derived(data.proyectoActual);
+
+	let solicitudPendienteExistente = $derived(data.solicitudPendiente);
+
+	let tieneSolicitudPendiente = $derived(!!solicitudPendienteExistente);
+
+	let proyectoPerteneceAInstitucion = $derived(
+		proyectoActual
+			? proyectoActual.institucion_id === $usuario?.id_usuario
+			: false
+	);
+
+	let solicitudesRechazadas = $derived(data.solicitudesRechazadas);
+
+	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
+	let muchosRechazos = $derived(solicitudesRechazadas.length >= 3);
+	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
+
+	let evidenciasPorObjetivo = $derived.by(() => {
+		if (!proyectoActual) return [];
+		return proyectoActual.participacion_permitida?.map((objetivo: any) => {
+			const evidenciasObjetivo = (data.evidencias || []).filter(
+				(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
+			);
+			// Separar evidencias de entrada y salida
+			const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
+			const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
+
+			return {
+				objetivo,
+				evidencias: evidenciasObjetivo,
+				evidenciasEntrada,
+				evidenciasSalida,
+				totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
+			};
+		}) || [];
+	});
+
+	let todosLosObjetivosTienenEvidencias = $derived(evidenciasPorObjetivo.every(
+		(item: any) => item.evidencias.length > 0
+	));
+
+	let todosLosChecksCompletos = $derived(Object.values(checks).every((check) => check === true));
 
 	function handleProyectoChange(option: { value: string; label: string }) {
 		const nuevoId = option.value;

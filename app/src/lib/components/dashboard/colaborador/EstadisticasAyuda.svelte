@@ -3,18 +3,20 @@
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
-	export let estadisticas: {
-		voluntariado: number;
-		unidadVoluntariado: string;
-		monetaria: number;
-		especie: number;
-		totalProyectos: number;
-		distribucion: {
+	let { estadisticas } = $props<{
+		estadisticas: {
 			voluntariado: number;
+			unidadVoluntariado: string;
 			monetaria: number;
 			especie: number;
+			totalProyectos: number;
+			distribucion: {
+				voluntariado: number;
+				monetaria: number;
+				especie: number;
+			};
 		};
-	};
+	}>();
 
 	// Formateador compacto de números
 	const formatCompactNumber = (val: number): string => {
@@ -36,20 +38,21 @@
 	};
 
 	// Calculate target percentages for the donut chart based on PROJECT COUNT (distribucion)
-	$: totalDistribucion =
+	const totalDistribucion = $derived(
 		estadisticas.distribucion.voluntariado +
 		estadisticas.distribucion.monetaria +
-		estadisticas.distribucion.especie;
+		estadisticas.distribucion.especie
+	);
 
-	$: targetVol = totalDistribucion
+	const targetVol = $derived(totalDistribucion
 		? (estadisticas.distribucion.voluntariado / totalDistribucion) * 100
-		: 0;
-	$: targetMon = totalDistribucion
+		: 0);
+	const targetMon = $derived(totalDistribucion
 		? (estadisticas.distribucion.monetaria / totalDistribucion) * 100
-		: 0;
-	$: targetEsp = totalDistribucion
+		: 0);
+	const targetEsp = $derived(totalDistribucion
 		? (estadisticas.distribucion.especie / totalDistribucion) * 100
-		: 0;
+		: 0);
 
 	// Tweened stores
 	const tVol = tweened(0, { duration: 1500, easing: cubicOut });
@@ -65,16 +68,16 @@
 	}
 
 	// Dynamic gradient based on tweened values
-	$: gradient = `conic-gradient(
-        #3b82f6 0% ${$tVol}%, 
-        #10b981 ${$tVol}% ${$tVol + $tMon}%, 
+	const gradient = $derived(`conic-gradient(
+        #3b82f6 0% ${$tVol}%,
+        #10b981 ${$tVol}% ${$tVol + $tMon}%,
         #fbbf24 ${$tVol + $tMon}% 100%
-    )`;
+    )`);
 </script>
 
 <div
 	use:reveal
-	on:reveal={handleReveal}
+	onreveal={handleReveal}
 	class="reveal-hidden flex h-full flex-col rounded-[2rem] border border-amber-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
 >
 	<h2 class="mb-6 w-full text-center text-xl font-semibold tracking-tight text-white md:text-left">

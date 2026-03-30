@@ -10,19 +10,19 @@
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 
-	let showAllActions = false;
+	let showAllActions = $state(false);
 
-	export let solicitudesPendientes = 0;
-	export let mensajesNoLeidos = 0;
-	export let proyectosPendienteCierre = 0;
-
-	export let showEvidenceModal = false;
-	export let showClosureModal = false;
-	export let onExportPDF: () => void = () => {};
+	let { solicitudesPendientes = 0, mensajesNoLeidos = 0, proyectosPendienteCierre = 0, showEvidenceModal = false, showClosureModal = false, onExportPDF = () => {} } = $props<{
+		solicitudesPendientes?: number;
+		mensajesNoLeidos?: number;
+		proyectosPendienteCierre?: number;
+		showEvidenceModal?: boolean;
+		showClosureModal?: boolean;
+		onExportPDF?: () => void;
+	}>();
 
 	// Configuracion de indicadores y color para los botones de acción rápida
-	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
-	$: badgeConfig = {
+	const badgeConfig = $derived.by(() => ({
 		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
@@ -38,7 +38,7 @@
 			color: 'bg-emerald-500',
 			shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
 		}
-	};
+	}));
 
 	interface Accion {
 		label: string;
@@ -212,7 +212,7 @@
 
 		<!-- Botón para alternar vista -->
 		<button
-			on:click={() => (showAllActions = !showAllActions)}
+			onclick={() => (showAllActions = !showAllActions)}
 			class="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium text-slate-400 transition-colors hover:text-white"
 		>
 			<span>{showAllActions ? 'Ver menos acciones' : 'Ver más acciones'}</span>

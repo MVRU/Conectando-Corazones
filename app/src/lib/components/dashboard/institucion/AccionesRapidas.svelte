@@ -11,19 +11,30 @@
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 
-	let showAllActions = false;
+	let showAllActions = $state(false);
 
-	export let solicitudesPendientes = 0;
-	export let mensajesNoLeidos = 0;
-	export let proyectosPendienteCierre = 0;
-	export let estaVerificado = false;
+	let { solicitudesPendientes = 0, mensajesNoLeidos = 0, proyectosPendienteCierre = 0, estaVerificado = false, showEvidenceModal = false, onExportPDF = () => {} } = $props<{
+		solicitudesPendientes?: number;
+		mensajesNoLeidos?: number;
+		proyectosPendienteCierre?: number;
+		estaVerificado?: boolean;
+		showEvidenceModal?: boolean;
+		onExportPDF?: () => void;
+	}>();
 
-	export let showEvidenceModal = false;
-	export let onExportPDF: () => void = () => {};
+	interface Accion {
+		label: string;
+		icon: any;
+		href?: string;
+		onClick?: () => void;
+		primary?: boolean;
+		secondary?: boolean;
+		color?: string;
+		disabled?: boolean;
+		title?: string;
+	}
 
-	// Configuracion de indicadores y color para los botones de acción rápida
-	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
-	$: badgeConfig = {
+	const badgeConfig = $derived.by(() => ({
 		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
@@ -39,21 +50,9 @@
 			color: 'bg-emerald-500',
 			shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
 		}
-	};
+	}));
 
-	interface Accion {
-		label: string;
-		icon: any;
-		href?: string;
-		onClick?: () => void;
-		primary?: boolean;
-		secondary?: boolean;
-		color?: string;
-		disabled?: boolean;
-		title?: string;
-	}
-
-	$: acciones = [
+	const acciones = $derived.by(() => [
 		{
 			label: 'Crear proyecto',
 			icon: Plus,
@@ -67,9 +66,9 @@
 		{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
 		{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
 		{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' }
-	] as Accion[];
+	] as Accion[]);
 
-	const accionesExtras: Accion[] = [
+	const accionesExtras = $derived.by(() => [
 		{
 			label: 'Exportar reporte',
 			icon: FileText,
@@ -77,9 +76,9 @@
 			secondary: true,
 			color: 'rose'
 		}
-	];
+	] as Accion[]);
 
-	$: todasLasAcciones = [...acciones, ...accionesExtras];
+	const todasLasAcciones = $derived([...acciones, ...accionesExtras]);
 </script>
 
 <div class="relative mb-12">
@@ -113,7 +112,7 @@
 					</a>
 				{:else}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						disabled={accion.disabled}
 						title={accion.title}
 						class="group flex h-full w-full items-center justify-center gap-3 rounded-full px-5 py-3 backdrop-blur-md transition-all duration-300
@@ -177,7 +176,7 @@
 					</a>
 				{:else}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
 						{accion.primary
 							? 'border border-blue-500/30 bg-gradient-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
@@ -210,7 +209,7 @@
 							</a>
 						{:else}
 							<button
-								on:click={accion.onClick}
+								onclick={accion.onClick}
 								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
 								<svelte:component this={accion.icon} size={20} />
@@ -233,7 +232,7 @@
 
 		<!-- Toggle Button -->
 		<button
-			on:click={() => (showAllActions = !showAllActions)}
+			onclick={() => (showAllActions = !showAllActions)}
 			class="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium text-slate-400 transition-colors hover:text-white"
 		>
 			<span>{showAllActions ? 'Ver menos acciones' : 'Ver más acciones'}</span>

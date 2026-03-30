@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
-	export let percent = 0;
-	export let color: 'blue' | 'green' | 'purple' = 'blue';
+	let {
+		percent = 0,
+		color = 'blue' as 'blue' | 'green' | 'purple'
+	} = $props<{
+		percent?: number;
+		color?: 'blue' | 'green' | 'purple';
+	}>();
 
 	const track = 'bg-slate-100';
 
@@ -13,10 +16,12 @@
 				? 'from-violet-300 via-violet-400 to-violet-500'
 				: 'from-sky-300 via-sky-400 to-sky-500';
 
-	let show = false;
-	let root: HTMLDivElement;
+	let show = $state(false);
+	let root: HTMLDivElement | undefined = $state();
 
-	onMount(() => {
+	$effect(() => {
+		if (!root) return;
+
 		const obs = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting) {
@@ -27,6 +32,10 @@
 			{ threshold: 0.25 }
 		);
 		obs.observe(root);
+
+		return () => {
+			obs.disconnect();
+		};
 	});
 </script>
 

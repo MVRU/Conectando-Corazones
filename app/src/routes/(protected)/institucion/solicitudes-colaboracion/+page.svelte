@@ -10,10 +10,10 @@
 	import { page } from '$app/stores';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	// Breadcrumbs contextuales
-	$: {
+	$effect(() => {
 		const proyectoIdParam = $page.url.searchParams.get('proyecto');
 		const proyecto = proyectoIdParam
 			? data.proyectos.find((p: any) => String(p.id_proyecto) === proyectoIdParam)
@@ -31,7 +31,7 @@
 				{ label: 'Solicitudes' }
 			]);
 		}
-	}
+	});
 </script>
 
 <div in:fly={{ y: 20, duration: 400, delay: 100 }}>

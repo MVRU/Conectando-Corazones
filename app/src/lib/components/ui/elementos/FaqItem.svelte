@@ -1,8 +1,10 @@
 <script lang="ts">
-	export let question: string;
-	export let answer: string;
-	export let initiallyOpen = false;
-	let open = initiallyOpen;
+	let { question, answer, initiallyOpen = false } = $props<{
+		question: string;
+		answer: string;
+		initiallyOpen?: boolean;
+	}>();
+	let open = $state(initiallyOpen);
 </script>
 
 <div
@@ -12,7 +14,7 @@
 		type="button"
 		class="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none sm:px-6 sm:py-4"
 		aria-expanded={open}
-		on:click={() => (open = !open)}
+		onclick={() => (open = !open)}
 	>
 		<span class="text-base font-medium text-[#2e386b] sm:text-lg">{question}</span>
 		<span class="transition-transform duration-400" style="will-change: transform;">

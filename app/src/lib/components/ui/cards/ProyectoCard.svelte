@@ -15,41 +15,40 @@
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
-	export let proyecto: Proyecto;
-	export let usuario: Usuario | null = null;
-	export let mostrarBotones: boolean = false;
-	export let variante: 'default' | 'mis-proyectos' = 'default';
-	export let esInstitucion: boolean = false;
+	let { proyecto, usuario = null, mostrarBotones = false, variante = 'default', esInstitucion = false }: { proyecto: Proyecto; usuario?: Usuario | null; mostrarBotones?: boolean; variante?: 'default' | 'mis-proyectos'; esInstitucion?: boolean } = $props();
 
 	// Obtener colaboración del usuario
-	$: colaboracionUsuario =
+	const colaboracionUsuario = $derived(
 		usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === usuario?.id_usuario)
-			: null;
+			: null
+	);
 
 	// Detectar roles
-	$: esCreador = usuario?.id_usuario === proyecto.institucion_id;
+	const esCreador = $derived(usuario?.id_usuario === proyecto.institucion_id);
 
-	$: esParticipante =
+	const esParticipante = $derived(
 		!esCreador &&
 		!!usuario &&
 		usuario.rol === 'colaborador' &&
-		colaboracionUsuario?.estado === 'aprobada';
+		colaboracionUsuario?.estado === 'aprobada'
+	);
 
 	// Detectar si el usuario ya envió una solicitud (pendiente, rechazada, etc) pero NO está aprobada (ya cubierto por esParticipante)
-	$: yaColaboro =
+	const yaColaboro = $derived(
 		!esCreador &&
 		!esParticipante &&
 		!!usuario &&
 		usuario.rol === 'colaborador' &&
-		!!colaboracionUsuario;
+		!!colaboracionUsuario
+	);
 
-	$: esRechazada = colaboracionUsuario?.estado === 'rechazada';
-	$: esAnulada = colaboracionUsuario?.estado === 'anulada';
+	const esRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
+	const esAnulada = $derived(colaboracionUsuario?.estado === 'anulada');
 
-	$: esAdmin = usuario?.rol === 'administrador';
+	const esAdmin = $derived(usuario?.rol === 'administrador');
 
-	let mostrarJustificacion = false;
+	let mostrarJustificacion = $state(false);
 
 	function manejarClickColaborar(e: Event) {
 		if (esRechazada) {
@@ -59,10 +58,10 @@
 		}
 	}
 
-	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro || esAnulada;
-	$: ubicacionCorta = getUbicacionCorta(proyecto);
-	$: esVirtual = ubicacionCorta === 'Virtual';
-	$: estaInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
+	const botonColaborarDeshabilitado = $derived(proyecto.estado !== 'en_curso' || yaColaboro || esAnulada);
+	const ubicacionCorta = $derived(getUbicacionCorta(proyecto));
+	const esVirtual = $derived(ubicacionCorta === 'Virtual');
+	const estaInactivo = $derived(proyecto.estado === 'completado' || proyecto.estado === 'cancelado');
 </script>
 
 <div
@@ -301,7 +300,7 @@
 									: yaColaboro
 										? 'Solicitud de colaboración enviada'
 										: 'Colaborar en este proyecto'}
-							on:click={manejarClickColaborar}
+							onclick={manejarClickColaborar}
 						/>
 					{/if}
 				{/if}
@@ -341,7 +340,7 @@
 			<button
 				type="button"
 				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-				on:click={() => (mostrarJustificacion = false)}
+				onclick={() => (mostrarJustificacion = false)}
 			>
 				Cerrar
 			</button>

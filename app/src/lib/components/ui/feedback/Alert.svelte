@@ -2,9 +2,15 @@
 	import { Info, CircleCheck, TriangleAlert, CircleAlert } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
-	export let variant: 'info' | 'success' | 'warning' | 'error' = 'info';
-	export let title: string = '';
-	export let message: string = '';
+	let {
+		variant = 'info' as 'info' | 'success' | 'warning' | 'error',
+		title = '',
+		message = ''
+	} = $props<{
+		variant?: 'info' | 'success' | 'warning' | 'error';
+		title?: string;
+		message?: string;
+	}>();
 
 	const styles = {
 		info: {

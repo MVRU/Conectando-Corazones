@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { ComponentType } from 'svelte';
 	import DatePicker from '$lib/components/ui/elementos/DatePicker.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -312,7 +311,7 @@
 
 	let rolInterno: RegistroRol | null = $state(rol);
 
-	onMount(() => {
+	$effect(() => {
 		if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {
 			puedeReiniciarPorCambioRol = true;
 			return;

@@ -1,27 +1,42 @@
 <script lang="ts">
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { XMark } from '@steeze-ui/heroicons';
-	import { createEventDispatcher } from 'svelte';
 	import { scale } from 'svelte/transition';
+	import type { Snippet } from 'svelte';
 
-	export let abierto = false;
-	export let titulo = '';
-	export let cerrarAlClickearFondo = true;
-	export let ocultarEncabezado = false;
-	export let anchoMaximo = 'max-w-lg';
+	let {
+		abierto = $bindable(false),
+		titulo = '',
+		cerrarAlClickearFondo = true,
+		ocultarEncabezado = false,
+		anchoMaximo = 'max-w-lg',
+		oncerrar,
+		children,
+		footer
+	} = $props<{
+		abierto?: boolean;
+		titulo?: string;
+		cerrarAlClickearFondo?: boolean;
+		ocultarEncabezado?: boolean;
+		anchoMaximo?: string;
+		oncerrar?: () => void;
+		children?: Snippet;
+		footer?: Snippet;
+	}>();
 
-	const dispatch = createEventDispatcher();
-	let dialogo: HTMLDialogElement;
+	let dialogo: HTMLDialogElement | undefined = $state();
 
-	$: if (dialogo && abierto) {
-		dialogo.showModal();
-	} else if (dialogo && !abierto) {
-		dialogo.close();
-	}
+	$effect(() => {
+		if (dialogo && abierto) {
+			dialogo.showModal();
+		} else if (dialogo && !abierto) {
+			dialogo.close();
+		}
+	});
 
 	function cerrar() {
 		abierto = false;
-		dispatch('cerrar');
+		oncerrar?.();
 	}
 
 	function manejarClickFondo(e: MouseEvent) {
@@ -33,9 +48,9 @@
 
 <dialog
 	bind:this={dialogo}
-	on:close={cerrar}
-	on:click={manejarClickFondo}
-	on:keydown={(e) => {
+	onclose={cerrar}
+	onclick={manejarClickFondo}
+	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();
 	}}
 	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-none backdrop:bg-black/30 backdrop:backdrop-blur-sm"
@@ -58,7 +73,7 @@
 					<button
 						type="button"
 						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-						on:click={cerrar}
+						onclick={cerrar}
 						aria-label="Cerrar modal"
 					>
 						<Icon src={XMark} class="h-5 w-5" />
@@ -68,13 +83,13 @@
 
 			<!-- Contenido -->
 			<div class="px-4 py-5 sm:p-6">
-				<slot />
+				{@render children?.()}
 			</div>
 
 			<!-- Footer (Opcional) -->
-			{#if $$slots.footer}
+			{#if footer}
 				<div class="gap-2 bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-					<slot name="footer" />
+					{@render footer()}
 				</div>
 			{/if}
 		</div>

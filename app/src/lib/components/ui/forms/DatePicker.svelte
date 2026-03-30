@@ -4,15 +4,27 @@
 	-*- Soporta límites de fecha min/max.
 -->
 <script lang="ts">
-	export let id = '';
-	export let name = '';
-	export let required = false;
-	export let value = '';
-	export let error: string | undefined = undefined;
-	export let placeholder = '';
-	export let min: string | undefined = undefined;
-	export let max: string | undefined = undefined;
-	export let customClass = '';
+	let {
+		id = '',
+		name = '',
+		required = false,
+		value = $bindable(''),
+		error = undefined as string | undefined,
+		placeholder = '',
+		min = undefined as string | undefined,
+		max = undefined as string | undefined,
+		customClass = ''
+	} = $props<{
+		id?: string;
+		name?: string;
+		required?: boolean;
+		value?: string;
+		error?: string;
+		placeholder?: string;
+		min?: string;
+		max?: string;
+		customClass?: string;
+	}>();
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -26,7 +38,7 @@
 		{name}
 		type="date"
 		bind:value
-		on:input={handleInput}
+		oninput={handleInput}
 		{min}
 		{max}
 		{required}

@@ -4,7 +4,6 @@
  -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { Provincia } from '$lib/domain/entities/Provincia';
 	import type { Localidad } from '$lib/domain/entities/Localidad';
 	import { TIPO_UBICACION, MODALIDAD_UBICACION } from '$lib/domain/types/Ubicacion';
@@ -16,30 +15,37 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Lock } from 'lucide-svelte';
 
-	export let ubicaciones: UbicacionFormulario[] = [];
-	export let errores: Record<string, string> = {};
-
-	// Modo edición
-	export let esEdicionRestringida = false;
-	export let esAdmin = false;
+	let {
+		ubicaciones = [],
+		errores = {},
+		esEdicionRestringida = false,
+		esAdmin = false
+	} = $props<{
+		ubicaciones?: UbicacionFormulario[];
+		errores?: Record<string, string>;
+		esEdicionRestringida?: boolean;
+		esAdmin?: boolean;
+	}>();
 
 	// Estados locales para datos
-	let provinciasData: Provincia[] = [];
-	let localidadesCache: Record<string, Localidad[]> = {};
-	let cargandoProvincias = false;
+	let provinciasData = $state<Provincia[]>([]);
+	let localidadesCache = $state<Record<string, Localidad[]>>({});
+	let cargandoProvincias = $state(false);
 
-	onMount(async () => {
-		try {
-			cargandoProvincias = true;
-			const res = await fetch('/api/ubicaciones/provincias');
-			if (res.ok) {
-				provinciasData = await res.json();
+	$effect(() => {
+		(async () => {
+			try {
+				cargandoProvincias = true;
+				const res = await fetch('/api/ubicaciones/provincias');
+				if (res.ok) {
+					provinciasData = await res.json();
+				}
+			} catch (e) {
+				console.error('Error cargando provincias:', e);
+			} finally {
+				cargandoProvincias = false;
 			}
-		} catch (e) {
-			console.error('Error cargando provincias:', e);
-		} finally {
-			cargandoProvincias = false;
-		}
+		})();
 	});
 
 	async function cargarLocalidades(provinciaNombre: string) {
@@ -207,7 +213,7 @@
 		}
 	}
 
-	$: yaTienePrincipal = ubicaciones.some((u) => u.tipo_ubicacion?.toLowerCase() === 'principal');
+	let yaTienePrincipal = $derived(ubicaciones.some((u) => u.tipo_ubicacion?.toLowerCase() === 'principal'));
 
 	// Función para obtener tipos disponibles según el índice
 	function obtenerTiposDisponibles(index: number): readonly string[] {
@@ -254,7 +260,7 @@
 				{#if ubicaciones.length > 1 && index > 0}
 					<button
 						type="button"
-						on:click={() => eliminarUbicacion(index)}
+						onclick={() => eliminarUbicacion(index)}
 						disabled={esOriginal && !esAdmin}
 						class="text-sm font-medium text-red-600 hover:text-red-800"
 						class:opacity-50={esOriginal && !esAdmin}
@@ -278,7 +284,7 @@
 						<select
 							id="tipo_{index}"
 							value={ubicacion.tipo_ubicacion}
-							on:change={(e) => manejarCambioTipo(index, e.currentTarget.value)}
+							onchange={(e) => manejarCambioTipo(index, e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
 							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={!esOriginal || esAdmin}
@@ -311,7 +317,7 @@
 								value={ubicacion.tipo_ubicacion === 'personalizado_input'
 									? ''
 									: ubicacion.tipo_ubicacion}
-								on:input={(e) =>
+								oninput={(e) =>
 									actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
 								placeholder="Escribí el tipo de ubicación..."
 								class="focus:ring-opacity-20 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
@@ -319,7 +325,7 @@
 							/>
 							<button
 								type="button"
-								on:click={() => actualizarUbicacion(index, 'tipo_ubicacion', '')}
+								onclick={() => actualizarUbicacion(index, 'tipo_ubicacion', '')}
 								class="rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
 								title="Volver a opciones predefinidas"
 							>
@@ -339,7 +345,7 @@
 					<select
 						id="modalidad_{index}"
 						value={ubicacion.modalidad}
-						on:change={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
+						onchange={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
 						disabled={esOriginal && !esAdmin}
 						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 						class:border-gray-300={!esOriginal || esAdmin}
@@ -370,7 +376,7 @@
 							id="url_virtual_{index}"
 							type="text"
 							value={ubicacion.url_virtual || ''}
-							on:input={(e) => {
+							oninput={(e) => {
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
 							}}
 							disabled={esOriginal && !esAdmin}
@@ -403,7 +409,7 @@
 							<select
 								id="provincia_{index}"
 								value={ubicacion.direccion_presencial?.provincia}
-								on:change={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
+								onchange={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
@@ -434,7 +440,7 @@
 							<select
 								id="localidad_{index}"
 								value={ubicacion.direccion_presencial?.localidad_id || ''}
-								on:change={(e) => {
+								onchange={(e) => {
 									const localidadId = e.currentTarget.value
 										? parseInt(e.currentTarget.value)
 										: undefined;
@@ -485,7 +491,7 @@
 								id="calle_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.calle}
-								on:input={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
+								oninput={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
@@ -513,7 +519,7 @@
 								id="numero_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.numero}
-								on:input={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
+								oninput={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
@@ -538,7 +544,7 @@
 								id="piso_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.piso || ''}
-								on:input={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
+								oninput={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
@@ -563,7 +569,7 @@
 								id="departamento_{index}"
 								type="text"
 								value={ubicacion.direccion_presencial?.departamento || ''}
-								on:input={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
+								oninput={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
 								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 								class:border-gray-300={!esOriginal}
@@ -585,7 +591,7 @@
 						<textarea
 							id="referencia_{index}"
 							value={ubicacion.direccion_presencial?.referencia}
-							on:input={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
+							oninput={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
 							class="focus:ring-opacity-20 w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
 							class:border-gray-300={true}
@@ -602,7 +608,7 @@
 	<div class="flex justify-center">
 		<button
 			type="button"
-			on:click={agregarUbicacion}
+			onclick={agregarUbicacion}
 			class="flex items-center gap-2 rounded-lg border-2 border-dashed border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
 		>
 			<span class="text-xl">+</span>

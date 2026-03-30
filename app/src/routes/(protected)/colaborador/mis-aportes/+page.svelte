@@ -5,7 +5,7 @@
 	import { Package, Calendar, FileText } from 'lucide-svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	const { evidenciasPorProyecto, totalEvidencias } = data;
 

@@ -2,8 +2,10 @@
 	import type { Mensaje } from '$lib/domain/types/Chat';
 	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
-	export let mensaje: Mensaje;
-	export let esPropio: boolean;
+	let { mensaje, esPropio } = $props<{
+		mensaje: Mensaje;
+		esPropio: boolean;
+	}>();
 
 	// Obtener datos del remitente
 	// TODO: Obtener nombre real del remitente (store o prop)
