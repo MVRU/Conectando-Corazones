@@ -18,30 +18,29 @@
 	import ProyectosComunidad from './colaborador/ProyectosComunidad.svelte';
 	import type { ColaboradorDashboardData } from './colaborador/types';
 
-	export let data: ColaboradorDashboardData;
 
 	// Estado de los filtros
-	let filters = {
+	let filters = $state({
 		periodo: 'mes_actual',
 		categoria: 'todas',
 		estado: 'en_curso',
 		tipoParticipacion: 'todos',
 		ubicacion: 'todas'
-	};
+	});
 
 	// Animación y Scroll
 	let mounted = false;
-	let filterScrollContainer: HTMLDivElement;
+	let filterScrollContainer = $state<HTMLDivElement | undefined>(undefined);
 	let showFilterIndicator = false;
-	let showFilters = false;
-	let showLeftGradient = false;
-	let showRightGradient = false;
+	let showFilters = $state(false);
+	let showLeftGradient = $state(false);
+	let showRightGradient = $state(false);
 	let showCollaboratorStats = false;
-	let showProjectStats = false;
-	let showCalendarStats = false;
-	let showEvidenceModal = false;
-	let showInstitucionesModal = false;
-	let showClosureModal = false;
+	let showProjectStats = $state(false);
+	let showCalendarStats = $state(false);
+	let showEvidenceModal = $state(false);
+	let showInstitucionesModal = $state(false);
+	let showClosureModal = $state(false);
 
 	function checkFilterScroll() {
 		if (!filterScrollContainer) return;
@@ -73,6 +72,11 @@
 	}
 
 	import { PdfService } from '$lib/utils/pdf.service';
+	interface Props {
+		data: ColaboradorDashboardData;
+	}
+
+	let { data }: Props = $props();
 
 	async function generatePDF() {
 		const doc = new jsPDF();
@@ -259,7 +263,7 @@
 					<!-- Alternar Filtros (Escritorio: Alineado a la derecha) -->
 					<div class="flex items-center gap-3">
 						<button
-							on:click={() => (showFilters = !showFilters)}
+							onclick={() => (showFilters = !showFilters)}
 							class="group flex w-fit items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 transition-all hover:bg-white/10 active:scale-95"
 						>
 							<Filter
@@ -309,7 +313,7 @@
 
 				<div
 					bind:this={filterScrollContainer}
-					on:scroll={checkFilterScroll}
+					onscroll={checkFilterScroll}
 					class="grid w-full grid-cols-1 gap-3 pb-2 md:grid md:w-full md:grid-cols-3 md:pb-0 lg:w-auto xl:grid-cols-5"
 				>
 					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
@@ -419,9 +423,9 @@
 					nuevasInstituciones: data.metricas.nuevasInstituciones,
 					proximoCierre: data.metricas.diasProximoCierre
 				}}
-				on:clickInstituciones={() => (showInstitucionesModal = true)}
-				on:clickProyectos={() => (showProjectStats = true)}
-				on:clickAgenda={() => (showCalendarStats = true)}
+				onclickInstituciones={() => (showInstitucionesModal = true)}
+				onclickProyectos={() => (showProjectStats = true)}
+				onclickAgenda={() => (showCalendarStats = true)}
 			/>
 		</div>
 

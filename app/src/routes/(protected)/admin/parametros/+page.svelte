@@ -1,12 +1,18 @@
 <script lang="ts">
+	import { preventDefault } from 'svelte/legacy';
+
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	let editingId: number | null = null;
-	let editValue = '';
-	let saving = false;
+	let { data }: Props = $props();
+
+	let editingId: number | null = $state(null);
+	let editValue = $state('');
+	let saving = $state(false);
 
 	function startEditing(id: number, currentValue: string) {
 		editingId = id;
@@ -77,7 +83,7 @@
 							{#if editingId === parametro.id_parametro}
 								<form
 									class="flex gap-2"
-									on:submit|preventDefault={() => saveParametro(parametro.id_parametro)}
+									onsubmit={preventDefault(() => saveParametro(parametro.id_parametro))}
 								>
 									<input
 										type="text"
@@ -104,7 +110,7 @@
 							{#if editingId === parametro.id_parametro}
 								<div class="flex justify-end gap-2">
 									<button
-										on:click={() => saveParametro(parametro.id_parametro)}
+										onclick={() => saveParametro(parametro.id_parametro)}
 										class="font-medium text-green-600 hover:text-green-900"
 										disabled={saving}
 										type="button"
@@ -112,7 +118,7 @@
 										Guardar
 									</button>
 									<button
-										on:click={cancelEditing}
+										onclick={cancelEditing}
 										class="text-gray-500 hover:text-gray-700"
 										disabled={saving}
 										type="button"
@@ -122,7 +128,7 @@
 								</div>
 							{:else}
 								<button
-									on:click={() => startEditing(parametro.id_parametro, parametro.valor)}
+									onclick={() => startEditing(parametro.id_parametro, parametro.valor)}
 									class="font-medium text-blue-600 hover:text-blue-900"
 									type="button"
 								>

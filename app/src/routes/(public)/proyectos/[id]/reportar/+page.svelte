@@ -4,8 +4,12 @@
 	import { goto } from '$app/navigation';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
-	$: proyecto = data.proyecto;
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	let proyecto = $derived(data.proyecto);
 
 	function handleClose() {
 		if (proyecto) {

@@ -3,16 +3,17 @@
 	import { reveal } from '$lib/actions/reveal';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { createEventDispatcher } from 'svelte';
-
-	const dispatch = createEventDispatcher();
-
-	export let metricas: {
-		proyectosActivos: number;
-		colaboradores: number;
-		nuevosColaboradores: number;
-		proximoCierre: number; // días pendientes
-	};
+	let { metricas, onclickProyectos = () => {}, onclickColaboradores = () => {}, onclickAgenda = () => {} } = $props<{
+		metricas: {
+			proyectosActivos: number;
+			colaboradores: number;
+			nuevosColaboradores: number;
+			proximoCierre: number;
+		};
+		onclickProyectos?: () => void;
+		onclickColaboradores?: () => void;
+		onclickAgenda?: () => void;
+	}>();
 
 	const tProyectos = tweened(0, { duration: 2000, easing: cubicOut });
 	const tColaboradores = tweened(0, { duration: 2000, easing: cubicOut });
@@ -28,9 +29,9 @@
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 	<!-- Metric 1: Proyectos Totales -->
 	<button
-		on:click={() => dispatch('clickProyectos')}
+		onclick={() => onclickProyectos()}
 		use:reveal={{ threshold: 0.2 }}
-		on:reveal={handleReveal}
+		onreveal={handleReveal}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
 	>
 		<div
@@ -61,7 +62,7 @@
 
 	<!-- Metric 2: Colaboradores -->
 	<button
-		on:click={() => dispatch('clickColaboradores')}
+		onclick={() => onclickColaboradores()}
 		use:reveal={{ threshold: 0.2 }}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 text-left backdrop-blur-md transition-all delay-100 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
 	>
@@ -91,7 +92,7 @@
 
 	<!-- Metric 3: Próximo Cierre -->
 	<button
-		on:click={() => dispatch('clickAgenda')}
+		onclick={() => onclickAgenda()}
 		use:reveal={{ threshold: 0.2 }}
 		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-amber-500/20 bg-amber-500/10 p-6 text-left backdrop-blur-md transition-all delay-200 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10"
 	>

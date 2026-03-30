@@ -84,10 +84,10 @@ export class PdfService {
 			doc.setFontSize(10);
 			if (estaVerificado) {
 				doc.setTextColor(...this.COLORES.ESMERALDA_500);
-				doc.text('✓ Cuenta Verificada', tituloX, siguienteY);
+				doc.text('Cuenta Verificada', tituloX, siguienteY);
 			} else {
 				doc.setTextColor(234, 179, 8);
-				doc.text('⚠ Verificación Pendiente', tituloX, siguienteY);
+				doc.text('Verificación Pendiente', tituloX, siguienteY);
 			}
 			siguienteY += 6;
 		}

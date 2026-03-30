@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
 	import {
 		ChevronLeft,
@@ -22,9 +22,10 @@
 	import { fly } from 'svelte/transition';
 	import ObjetivosProyecto from '$lib/components/feature/proyectos/ObjetivosProyecto.svelte';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { untrack } from 'svelte';
 
 	let { data } = $props();
-	const projectIdUrl = $page.params.id;
+	const projectIdUrl = page.params.id;
 
 	$effect(() => {
 		const titulo = data.proyecto?.titulo || 'Proyecto';
@@ -35,7 +36,17 @@
 		]);
 	});
 
-	let misAportes = $state(data.aportes.map((a: any) => ({ ...a, expanded: false })));
+	let misAportes = $state(untrack(() => data.aportes.map((a: any) => ({ ...a, expanded: false }))));
+
+	$effect(() => {
+		// Actualizar estado local si data.aportes cambia (ej. tras invalidateAll)
+		// Pero preservamos el estado de 'expanded' si el ID coincide
+		const nuevosAportes = data.aportes.map((a: any) => {
+			const existente = misAportes.find((m: any) => m.id_colaboracion_tipo_participacion === a.id_colaboracion_tipo_participacion);
+			return { ...a, expanded: existente ? existente.expanded : false };
+		});
+		misAportes = nuevosAportes;
+	});
 
 	function toggleExpand(index: number) {
 		misAportes[index].expanded = !misAportes[index].expanded;

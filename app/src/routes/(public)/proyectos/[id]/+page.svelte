@@ -1,15 +1,12 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
-	// import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { page } from '$app/stores';
-	import type { PageData } from './$types';
-
-	export let data: PageData;
+	import { page } from '$app/state';
 	import {
 		esUbicacionPresencial,
 		esUbicacionVirtual,
@@ -17,6 +14,9 @@
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
 	import { goto, pushState, invalidateAll } from '$app/navigation';
+	import GestionarProyectoDropdown from '$lib/components/feature/proyectos/GestionarProyectoDropdown.svelte';
+
+	let { data }: { data: PageData } = $props();
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
@@ -30,13 +30,13 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
-	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+	import { ordenarPorProgreso, calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import type { Resena } from '$lib/domain/types/Resena';
-	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
+	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
@@ -64,45 +64,43 @@
 		Star
 	} from '@steeze-ui/heroicons';
 
-	let proyecto: Proyecto;
-	let colaboracionesActivas: Colaboracion[] = [];
-	let participacionesOrdenadas: ParticipacionPermitida[] = [];
-	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
-	let misAportes: ColaboracionTipoParticipacion[] = [];
-
-	let resenasProyecto: Resena[] = [];
-	let resenaAEliminar: Resena | null = null;
-	let mostrarModalResena = false;
-	let mostrarConfirmarEliminar = false;
+	let proyecto: Proyecto = $derived(data.proyecto);
+	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
+	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
+	
+	let resenasProyecto: Resena[] = $state([]);
+	let resenaAEliminar: Resena | null = $state(null);
+	let mostrarModalResena = $state(false);
+	let mostrarConfirmarEliminar = $state(false);
 	const maxCaracteresResena = 500;
 
-	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
-	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
-
-	$: esCreador = $usuario?.id_usuario === proyecto?.institucion?.id_usuario;
-	$: colaboracionUsuario =
+	let esCreador = $derived(!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario);
+	let colaboracionUsuario = $derived(
 		$usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
-			: undefined;
+			: undefined
+	);
+	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
 
-	$: misAportes = colaboracionUsuario?.colaboraciones_tipo_participacion || [];
+	let esColaboradorAprobado = $derived(colaboracionUsuario?.estado === 'aprobada');
+	let esSolicitudRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
+	let tieneSolicitudPendiente = $derived(colaboracionUsuario?.estado === 'pendiente');
+	let tieneColaboracionAnulada = $derived(colaboracionUsuario?.estado === 'anulada');
+	let esAdministrador = $derived($usuario?.rol === 'administrador');
+	let esInstitucion = $derived($usuario?.rol === 'institucion');
 
-	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
-	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
-	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
-	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
-	$: esAdministrador = $usuario?.rol === 'administrador';
-	$: esInstitucion = $usuario?.rol === 'institucion';
-	const puedeVerResenas = true;
-	$: proyecto = data.proyecto;
+	let resenaUsuarioActual = $derived(resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario));
+	let tieneResenaUsuario = $derived(!!resenaUsuarioActual);
 
-	$: resenaUsuarioActual = resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario);
-	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
-
-	$: if (proyecto) {
-		const titulo = proyecto.titulo ?? proyecto.id_proyecto?.toString() ?? 'Proyecto';
-		setBreadcrumbs([BREADCRUMB_ROUTES.proyectos, { label: titulo }]);
-	}
+	$effect(() => {
+		if (proyecto) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: proyecto.titulo }
+			]);
+		}
+	});
 
 	function aFecha(fecha: string | Date | undefined | null): Date | null {
 		if (!fecha) return null;
@@ -115,10 +113,8 @@
 		if (!fin) return 0;
 
 		const hoy = new Date();
-		// Normalizamos "hoy" a medianoche local para comparar solo días
 		const baseHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
 
-		// Si fin es a medianoche UTC, es una fecha de calendario pura. La tomamos como tal.
 		let baseFin: number;
 		if (fin.getUTCHours() === 0 && fin.getUTCMinutes() === 0) {
 			baseFin = new Date(fin.getUTCFullYear(), fin.getUTCMonth(), fin.getUTCDate()).getTime();
@@ -135,8 +131,6 @@
 		const d = aFecha(fecha);
 		if (!d) return 'Fecha no disponible';
 
-		// Si es una fecha a medianoche (ej: 2026-02-15T00:00:00.000Z),
-		// la formateamos en UTC para evitar el desfase por zona horaria (ej: Argentina -3h).
 		const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
 
 		if (esMedianocheUTC) {
@@ -165,33 +159,34 @@
 		);
 	}
 
-	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
-	$: clasesChipEstado = clasesEstado(estadoCodigo);
-	// Las reseñas se hacen a los proyectos que están listos
-	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
-	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	const mensajeResenaBloqueada =
-		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
-	$: resumenTexto = (proyecto?.resumen || '').trim();
-	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
-	$: listadoAprendizajes = (aprendizajesTexto || '')
+	let estadoCodigo = $derived(proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso');
+	let clasesChipEstado = $derived(clasesEstado(estadoCodigo));
+	let puedeVerResenas = $derived(
+		estadoCodigo === 'completado' || estadoCodigo === 'en_revision' || esCreador
+	);
+	let puedeRedactarResena = $derived((esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision');
+	let puedeCrearResena = $derived(puedeRedactarResena && !tieneResenaUsuario);
+	let mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let resumenTexto = $derived((proyecto?.resumen || '').trim());
+	let aprendizajesTexto = $derived((proyecto?.aprendizajes || '').trim());
+	let listadoAprendizajes = $derived((aprendizajesTexto || '')
 		.split('\n')
 		.map((l) => l.trim())
 		.filter((l) => l.length > 0)
-		.map((l) => l.replace(/^[-*•]\s*/, '')); // Remover viñetas "-" generadas por la IA
+		.map((l) => l.replace(/^[-*•]\s*/, '')));
 
-	// Dividimos el resumen en oraciones para que no sea un bloque de texto denso
-	$: listadoResumen = (resumenTexto || '')
+	let listadoResumen = $derived((resumenTexto || '')
 		.split('. ')
 		.map((s) => s.trim())
 		.filter((s) => s.length > 0)
-		.map((s) => (s.endsWith('.') ? s : s + '.'));
+		.map((s) => (s.endsWith('.') ? s : s + '.')));
 
-	$: tieneResumenIA = Boolean(resumenTexto);
-	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
-	$: mostrarSeccionResumenIA =
-		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
-	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
+	let tieneResumenIA = $derived(Boolean(resumenTexto));
+	let tieneAprendizajesIA = $derived(Boolean(aprendizajesTexto));
+	let mostrarSeccionResumenIA = $derived(
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA)
+	);
+	let puedeVerAprendizajesIA = $derived(esCreador || esColaboradorAprobado);
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -209,8 +204,8 @@
 		return [...ubs].sort((a, b) => {
 			const ta = a.ubicacion?.tipo_ubicacion ?? '';
 			const tb = b.ubicacion?.tipo_ubicacion ?? '';
-			const pa = prioridad.get(ta as string) ?? Number.MAX_SAFE_INTEGER;
-			const pb = prioridad.get(tb as string) ?? Number.MAX_SAFE_INTEGER;
+			const pa = prioridad.get(ta as any) ?? Number.MAX_SAFE_INTEGER;
+			const pb = prioridad.get(tb as any) ?? Number.MAX_SAFE_INTEGER;
 			if (pa !== pb) return pa - pb;
 			const ma = a.ubicacion?.modalidad === 'presencial' ? 0 : 1;
 			const mb = b.ubicacion?.modalidad === 'presencial' ? 0 : 1;
@@ -218,9 +213,15 @@
 		});
 	}
 
-	$: ubicacionesOrdenadas = ordenarUbicaciones(proyecto?.ubicaciones);
+	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
 
-	$: colaboradoresAprobados = (colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada');
+	let progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
+	let diasFaltantes = $derived(proyecto?.fecha_fin_tentativa ? diasRestantes(proyecto.fecha_fin_tentativa) : 999);
+	let mostrarAccionFinalizar = $derived(
+		esCreador &&
+		estadoCodigo === 'en_curso' &&
+		(progresoTotal >= 80 || diasFaltantes <= 0)
+	);
 
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
@@ -266,26 +267,13 @@
 		}).format(valor);
 	}
 
-	let mostrarModalColaborar = false;
-	let mostrarModalCancelar = false;
-	let justificacionCancelacion = '';
-	let cancelando = false;
+	let mostrarModalColaborar = $state(false);
+	let mostrarModalCancelar = $state(false);
+	let justificacionCancelacion = $state('');
+	let cancelando = $state(false);
 
-	let mostrarModalCeseActividades = false;
-	let ceseActividades = false;
-
-	// Lógica para mostrar la acción de finalizar actividades
-	$: progresoTotalCalculado = proyecto ? calcularProgresoTotal(proyecto) : 0;
-	$: diasFaltantes = proyecto?.fecha_fin_tentativa
-		? diasRestantes(proyecto.fecha_fin_tentativa)
-		: 999;
-	$: mostrarAccionFinalizar =
-		esCreador &&
-		estadoCodigo === 'en_curso' &&
-		(progresoTotalCalculado >= 80 || diasFaltantes <= 0);
-
-	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
-	import Modal from '$lib/components/ui/overlays/Modal.svelte';
+	let mostrarModalCeseActividades = $state(false);
+	let ceseActividades = $state(false);
 
 	async function confirmarCeseActividades() {
 		if (ceseActividades) return;
@@ -339,11 +327,10 @@
 			});
 
 			goto('/mi-panel');
-		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+		} catch (err: any) {
 			toastStore.show({
 				variant: 'error',
-				message: errorMsg
+				message: err.message
 			});
 		} finally {
 			cancelando = false;
@@ -396,21 +383,15 @@
 				message: 'Solicitud anulada exitosamente'
 			});
 
-			// Actualizar estado reactivo
-			if (colaboracionUsuario) {
-				proyecto.colaboraciones = proyecto.colaboraciones?.map((c) =>
-					c.id_colaboracion === colaboracionUsuario.id_colaboracion
-						? { ...c, estado: 'anulada' }
-						: c
-				);
-			}
+			await invalidateAll();
 
 			mostrarModalAnular = false;
 		} catch (err: unknown) {
-			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+			const error = err as Error;
+			console.error('Error al anular solicitud:', error);
 			toastStore.show({
 				variant: 'error',
-				message: errorMsg
+				message: error.message || 'Error al anular la solicitud'
 			});
 		} finally {
 			anulando = false;
@@ -437,20 +418,20 @@
 		irAColaborar();
 	}
 
-	let mostrarModalExito = false;
-	let mostrarModalJustificacion = false;
-	let mostrarModalPendiente = false;
-	let mostrarModalAnular = false;
-	let anulando = false;
-	let mostrarResumenIA = false;
-	let mostrarAprendizajesIA = false;
-	let mostrarMenuGestion = false;
-	let solicitudRecienEnviada = false;
+	let mostrarModalExito = $state(false);
+	let mostrarModalJustificacion = $state(false);
+	let mostrarModalPendiente = $state(false);
+	let mostrarModalAnular = $state(false);
+	let anulando = $state(false);
+	let mostrarResumenIA = $state(false);
+	let mostrarAprendizajesIA = $state(false);
+	let mostrarMenuGestion = $state(false);
+	let solicitudRecienEnviada = $state(false);
 
-	$: accionesMenu = (() => {
+	let accionesMenu = $derived.by(() => {
 		const acc: {
 			label: string;
-			icon: typeof Plus;
+			icon: typeof CheckCircle;
 			onclick: () => void;
 			variant?: 'danger' | 'default';
 			disabled?: boolean;
@@ -469,7 +450,7 @@
 				icon: ShieldCheck,
 				onclick: () => {}
 			});
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 			acc.push({
 				label: 'Cancelar proyecto',
 				icon: XCircle,
@@ -488,59 +469,35 @@
 			});
 
 			if (esCreador) {
-				if (estadoCodigo === 'en_curso') {
-					acc.push({
-						label: 'Finalizar actividades',
-						icon: CheckCircle,
-						onclick: () => (mostrarModalCeseActividades = true)
-					});
-				} else if (estadoCodigo === 'pendiente_solicitud_cierre') {
-					acc.push({
-						label: 'Solicitar cierre',
-						icon: CheckCircle,
-						onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
-					});
-				}
-
-				if (estadoCodigo !== 'pendiente_solicitud_cierre' && estadoCodigo !== 'en_revision') {
-					acc.push({
-						label: 'Solicitudes de colaboración',
-						icon: ClipboardDocumentList,
-						onclick: () =>
-							goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
-					});
-				}
-
-				if (
-					estadoCodigo !== 'borrador' &&
-					estadoCodigo !== 'cancelado' &&
-					estadoCodigo !== 'en_curso'
-				) {
+				acc.push({
+					label: 'Solicitudes de colaboración',
+					icon: ClipboardDocumentList,
+					onclick: () =>
+						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+				});
+				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado' && estadoCodigo !== 'en_curso') {
 					acc.push({
 						label: 'Solicitudes de cierre',
 						icon: ClipboardDocumentCheck,
-						onclick: () => goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+						onclick: () =>
+							goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
 					});
 				}
-
-				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
-				if (estadoCodigo === 'en_curso') {
+				if (estadoCodigo === 'pendiente_solicitud_cierre') {
 					acc.push({
-						label: 'Editar proyecto',
-						icon: Pencil,
-						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
-						disabled: !esEditable
+						label: 'Solicitar cierre',
+						icon: CheckCircle,
+						onclick: () =>
+							goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
 					});
 				}
 			} else {
-				if (estadoCodigo !== 'pendiente_solicitud_cierre' && estadoCodigo !== 'en_revision') {
-					acc.push({
-						label: 'Solicitudes de colaboración',
-						icon: ClipboardDocumentList,
-						onclick: () =>
-							goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
-					});
-				}
+				acc.push({
+					label: 'Solicitudes de colaboración',
+					icon: ClipboardDocumentList,
+					onclick: () =>
+						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
+				});
 			}
 
 			if (esColaboradorAprobado) {
@@ -566,11 +523,22 @@
 				onclick: irAAportes
 			});
 
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 
-			// 4. Acciones de Peligro / Reporte
 			if (esCreador) {
+				const esEditable = estadoCodigo === 'en_curso';
+
+				if (estadoCodigo === 'en_curso') {
+					acc.push({
+						label: 'Editar proyecto',
+						icon: Pencil,
+						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
+						disabled: !esEditable
+					});
+				}
+
 				const esCancelable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+
 				if (esCancelable) {
 					acc.push({
 						label: 'Cancelar proyecto',
@@ -599,17 +567,15 @@
 		}
 
 		return acc;
-	})();
+	});
 
 	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
-			guardarReporteLog($usuario.id_usuario, 'Proyecto', proyecto.id_proyecto);
 			toastStore.show({
 				variant: 'success',
 				message:
 					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
 			});
-			// Refrescar datos antes de volver
 			await invalidateAll();
 			history.back();
 		}
@@ -661,9 +627,8 @@
 					variant: 'success',
 					message: 'La reseña fue eliminada.'
 				});
-			} catch (err) {
-				const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
-				toastStore.show({ variant: 'error', message: errorMsg });
+			} catch (err: any) {
+				toastStore.show({ variant: 'error', message: err.message });
 			}
 		}
 		resenaAEliminar = null;
@@ -675,7 +640,7 @@
 		mostrarConfirmarEliminar = false;
 	}
 
-	async function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	async function guardarResena({ contenido, puntaje }: { contenido: string; puntaje: number }) {
 		if (!proyecto?.id_proyecto || !$usuario) return;
 
 		if (tieneResenaUsuario) {
@@ -693,8 +658,8 @@
 				body: JSON.stringify({
 					tipo_objeto: 'proyecto',
 					id_objeto: proyecto.id_proyecto,
-					contenido: event.detail.contenido,
-					puntaje: event.detail.puntaje
+					contenido,
+					puntaje
 				})
 			});
 
@@ -702,52 +667,40 @@
 				const data = await res.json();
 				throw new Error(data.error || 'Error al guardar reseña.');
 			}
-			const nuevaResenaStr = await res.json();
+			const nuevaResena = await res.json();
 
-			const reseñaConAutor = {
-				...nuevaResenaStr,
-				autor: {
-					...$usuario,
-					rol: $usuario.rol,
-					nombre: $usuario.nombre,
-					apellido: $usuario.apellido,
-					url_foto: $usuario.url_foto,
-
-					nombre_legal: ($usuario as Record<string, any>).nombre_legal,
-					razon_social: ($usuario as Record<string, any>).razon_social
-				}
-			};
-
-			resenasProyecto = [reseñaConAutor, ...resenasProyecto];
+			resenasProyecto = [nuevaResena, ...resenasProyecto];
 			mostrarModalResena = false;
 			toastStore.show({
 				variant: 'success',
 				message: 'Reseña publicada correctamente.'
 			});
-		} catch (err) {
-			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
-			toastStore.show({ variant: 'error', message: errorMsg });
+		} catch (err: any) {
+			toastStore.show({ variant: 'error', message: err.message });
 		}
 	}
 
-	onMount(async () => {
+	$effect(() => {
 		layoutStore.showStickyBottomBar();
-		if (proyecto?.id_proyecto) {
-			try {
-				const res = await fetch(
-					`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`
-				);
-				if (res.ok) {
-					resenasProyecto = await res.json();
+		
+		async function cargarResenas() {
+			if (proyecto?.id_proyecto) {
+				try {
+					const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+					if (res.ok) {
+						resenasProyecto = await res.json();
+					}
+				} catch (e) {
+					console.error('Error cargando reseñas', e);
 				}
-			} catch (e) {
-				console.error('Error cargando reseñas', e);
 			}
 		}
-	});
 
-	onDestroy(() => {
-		layoutStore.hideStickyBottomBar();
+		cargarResenas();
+
+		return () => {
+			layoutStore.hideStickyBottomBar();
+		};
 	});
 </script>
 
@@ -779,79 +732,12 @@
 	{#if proyecto}
 		{#snippet MenuGestion(isMobile = false)}
 			{#if accionesMenu.length > 0}
-				<div class="relative flex-1">
-					<button
-						type="button"
-						onclick={() => (mostrarMenuGestion = !mostrarMenuGestion)}
-						class={esAdministrador
-							? isMobile
-								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
-								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
-							: isMobile
-								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
-								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'}
-						aria-expanded={mostrarMenuGestion}
-						aria-haspopup="true"
-					>
-						<span>Gestionar proyecto</span>
-						<Icon
-							src={ChevronDown}
-							class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarMenuGestion
-								? 'rotate-180'
-								: ''}"
-						/>
-					</button>
-
-					{#if mostrarMenuGestion}
-						<div
-							class="animate-in {isMobile
-								? 'slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full text-left'
-								: 'fade-in zoom-in-95 absolute top-full right-0 left-0 z-10 mt-2 flex'} flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-							role="menu"
-							tabindex="-1"
-						>
-							{#each accionesMenu as accion (accion.label)}
-								{#if accion.divider}
-									<div class="my-1 border-t border-gray-100"></div>
-								{:else}
-									<button
-										class="flex w-full items-center gap-3 px-4 py-2.5 {isMobile
-											? 'text-base'
-											: 'text-sm'} font-medium transition-colors {accion.variant === 'danger'
-											? accion.disabled
-												? 'cursor-not-allowed text-gray-400 opacity-50'
-												: 'text-red-600 hover:bg-red-50'
-											: 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'} {accion.disabled
-											? 'cursor-not-allowed opacity-50'
-											: ''}"
-										role="menuitem"
-										disabled={accion.disabled}
-										onclick={() => {
-											accion.onclick();
-											mostrarMenuGestion = false;
-										}}
-									>
-										<Icon
-											src={accion.icon}
-											class="{isMobile ? 'h-5 w-5' : 'h-4 w-4'} {accion.variant === 'danger'
-												? accion.disabled
-													? 'text-gray-400'
-													: 'text-red-500'
-												: 'text-gray-500'}"
-										/>
-										{accion.label}
-									</button>
-								{/if}
-							{/each}
-						</div>
-
-						<div
-							class="fixed inset-0 z-[-1] {isMobile ? 'bg-black/50' : ''}"
-							onclick={() => (mostrarMenuGestion = false)}
-							aria-hidden="true"
-						></div>
-					{/if}
-				</div>
+				<GestionarProyectoDropdown
+					bind:isOpen={mostrarMenuGestion}
+					{accionesMenu}
+					{isMobile}
+					esAdministrador={esAdministrador}
+				/>
 			{/if}
 		{/snippet}
 		<main
@@ -913,7 +799,6 @@
 									Progreso del proyecto
 								</h2>
 								{#if esCreador && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
-									<!-- TODO: implementar función para actualizar el progreso de un proyecto -->
 									<a
 										href={`/proyectos/${proyecto.id_proyecto}`}
 										class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -934,14 +819,23 @@
 									onClick={() => (mostrarModalCeseActividades = true)}
 								/>
 							{:else if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
-								<ProjectActionCard
-									title="¿Todo listo para el cierre?"
-									description="Enviá la solicitud formal con las evidencias recolectadas para que los colaboradores validen el impacto logrado."
-									buttonLabel="Solicitar cierre"
-									variant="secondary"
-									onClick={() =>
-										goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)}
-								/>
+								<div
+									class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:p-5"
+									role="region"
+									aria-label="Solicitud de cierre"
+								>
+									<p class="text-sm font-semibold text-sky-900">¿Listo para cerrar el proyecto?</p>
+									<p class="mt-1 text-sm text-sky-800">
+										Enviá la solicitud de cierre con tus evidencias para que los colaboradores la
+										revisen.
+									</p>
+									<a
+										href={`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`}
+										class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+									>
+										Solicitar cierre
+									</a>
+								</div>
 							{/if}
 
 							<div class="mt-6 sm:mt-8">
@@ -1033,7 +927,7 @@
 
 								{#if misAportes.length > 0}
 									<ul class="space-y-3">
-										{#each misAportes as aporte (aporte.id_colaboracion_tipo_participacion)}
+										{#each misAportes as aporte (aporte.id_colaboracion_tipo_participacion || Math.random())}
 											<li
 												class="flex items-center justify-between rounded-lg border border-gray-100 p-3"
 											>
@@ -1098,7 +992,7 @@
 										{#if mostrarResumenIA}
 											<div class="border-t border-gray-100 bg-sky-50/30 px-4 pt-4 pb-6">
 												<div class="space-y-4">
-													{#each listadoResumen as parrafo, i (i)}
+													{#each listadoResumen as parrafo (parrafo)}
 														<p class="text-base leading-relaxed text-gray-700">
 															{parrafo}
 														</p>
@@ -1139,7 +1033,7 @@
 												<div class="border-t border-gray-100 bg-amber-50/30 px-4 pt-4 pb-6">
 													{#if listadoAprendizajes.length > 0}
 														<ul class="flex flex-col gap-4">
-															{#each listadoAprendizajes as item, i (i)}
+															{#each listadoAprendizajes as item (item)}
 																<li class="flex gap-4">
 																	<div class="relative mt-2 flex-shrink-0">
 																		<div
@@ -1214,9 +1108,7 @@
 												<ResenaCard
 													{resena}
 													autor={resena.autor}
-													onEliminar={(resena.autor_id &&
-														resena.autor_id === $usuario?.id_usuario) ||
-													esAdministrador
+													onEliminar={resena.autor_id && resena.autor_id === $usuario?.id_usuario || esAdministrador
 														? () => solicitarEliminarResena(resena)
 														: null}
 												/>
@@ -1582,9 +1474,7 @@
 										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{data.tieneReportePendiente
-											? 'Ya tenés un reporte pendiente'
-											: 'Reportar irregularidad'}
+										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>
@@ -1594,7 +1484,7 @@
 			</div>
 			<!-- Modal de reporte interceptado (Shallow Routing) -->
 			<ModalReportarIrregularidad
-				open={!!$page.state.showReportModal}
+				open={!!page.state.showReportModal}
 				tipo_objeto="Proyecto"
 				id_objeto={proyecto.id_proyecto ?? 0}
 				nombre_objeto={proyecto.titulo}
@@ -1676,7 +1566,7 @@
 
 	<ModalColaboracion
 		bind:open={mostrarModalColaborar}
-		onsubmit={async ({ mensaje }: { mensaje: string }) => {
+		onsubmit={async ({ mensaje }) => {
 			try {
 				const res = await fetch('/api/colaboraciones', {
 					method: 'POST',
@@ -1708,11 +1598,10 @@
 					variant: 'success',
 					message: '¡Tu solicitud fue enviada correctamente!'
 				});
-			} catch (err) {
-				const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+			} catch (err: any) {
 				toastStore.show({
 					variant: 'error',
-					message: errorMsg
+					message: err.message
 				});
 			}
 		}}
@@ -1866,68 +1755,6 @@
 		</div>
 	{/if}
 
-	{#if mostrarModalCeseActividades}
-		<!-- Overlay -->
-		<div
-			class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-			onclick={() => (mostrarModalCeseActividades = false)}
-			aria-hidden="true"
-		></div>
-
-		<!-- Modal de Cese de Actividades -->
-		<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-			<div
-				class="animate-fade-up pointer-events-auto relative mx-auto w-full max-w-md scale-100 rounded-2xl bg-white opacity-100 shadow-2xl ring-1 ring-gray-200/60 transition-all duration-300"
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby="modal-cese-titulo"
-				tabindex="-1"
-				onclick={(e) => e.stopPropagation()}
-				onkeydown={(e) => {
-					if (e.key === 'Escape') mostrarModalCeseActividades = false;
-				}}
-			>
-				<div class="p-6">
-					<div class="mb-4 flex items-center justify-center">
-						<div
-							class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 ring-1 ring-blue-100"
-						>
-							<Icon src={CheckCircle} class="h-6 w-6 text-blue-600" aria-hidden="true" />
-						</div>
-					</div>
-					<h3 id="modal-cese-titulo" class="mb-2 text-center text-xl font-bold text-gray-900">
-						¿Finalizar actividades del proyecto?
-					</h3>
-					<p class="mb-4 text-center text-sm text-gray-600">
-						A partir de este momento el proyecto no aceptará nuevos colaboradores y pasará al estado
-						<span class="font-semibold text-gray-800">Pendiente de solicitud de cierre</span>.
-					</p>
-					<p class="mb-6 text-center text-sm text-gray-500">
-						Podés continuar cargando evidencias hasta que estés listo para iniciar el cierre formal.
-					</p>
-
-					<div class="flex flex-col gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:justify-end">
-						<button
-							type="button"
-							class="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 sm:flex-none"
-							onclick={() => (mostrarModalCeseActividades = false)}
-						>
-							Cancelar
-						</button>
-						<button
-							type="button"
-							disabled={ceseActividades}
-							class="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50 sm:flex-none"
-							onclick={confirmarCeseActividades}
-						>
-							{ceseActividades ? 'Finalizando...' : 'Sí, finalizar actividades'}
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	{/if}
-
 	{#if mostrarModalCancelar}
 		<!-- Overlay -->
 		<div
@@ -2071,22 +1898,24 @@
 	</div>
 {/if}
 
-<ResenaProyectoModal
-	mostrar={mostrarModalResena}
-	modo="crear"
-	resenaInicial={null}
-	maxCaracteres={maxCaracteresResena}
-	on:guardar={guardarResena}
-	on:cerrar={() => (mostrarModalResena = false)}
-/>
+	<ResenaProyectoModal
+		mostrar={mostrarModalResena}
+		modo="crear"
+		resenaInicial={null}
+		maxCaracteres={maxCaracteresResena}
+		onguardar={guardarResena}
+		oncerrar={() => (mostrarModalResena = false)}
+	/>
 
 {#if mostrarConfirmarEliminar}
+	
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
 		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
+	
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
@@ -2131,9 +1960,9 @@
 
 <!-- Modal de Cese de Actividades -->
 <Modal
-	abierto={mostrarModalCeseActividades}
+	bind:abierto={mostrarModalCeseActividades}
 	titulo="Finalizar actividades"
-	on:cerrar={() => (mostrarModalCeseActividades = false)}
+	oncerrar={() => (mostrarModalCeseActividades = false)}
 >
 	<div class="space-y-6">
 		<div class="flex flex-col items-center justify-center text-center">
@@ -2172,23 +2001,25 @@
 		</div>
 	</div>
 
-	<div slot="footer" class="mt-6 flex w-full flex-col-reverse gap-3 sm:flex-row">
-		<Button
-			label="Todavía no"
-			variant="secondary"
-			size="sm"
-			customClass="flex-1"
-			onclick={() => (mostrarModalCeseActividades = false)}
-		/>
-		<Button
-			label="Sí, finalizar actividades"
-			variant="primary"
-			size="sm"
-			customClass="flex-1"
-			loading={ceseActividades}
-			onclick={confirmarCeseActividades}
-		/>
-	</div>
+	{#snippet footer()}
+		<div class="flex flex-col-reverse gap-3 sm:flex-row">
+			<Button
+				label="Todavía no"
+				variant="secondary"
+				size="sm"
+				customClass="flex-1"
+				onclick={() => (mostrarModalCeseActividades = false)}
+			/>
+			<Button
+				label="Sí, finalizar actividades"
+				variant="primary"
+				size="sm"
+				customClass="flex-1"
+				loading={ceseActividades}
+				onclick={confirmarCeseActividades}
+			/>
+		</div>
+	{/snippet}
 </Modal>
 
 <style>

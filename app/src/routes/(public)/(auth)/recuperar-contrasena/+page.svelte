@@ -8,7 +8,6 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { KeyRound, ArrowLeft, Mail, ShieldCheck, Clock, RefreshCw } from 'lucide-svelte';
 	import { fly, fade, scale } from 'svelte/transition';
-	import { onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 
 	let email = $state('');
@@ -18,8 +17,9 @@
 	let emailEnviado = $state(false);
 	let montado = $state(false);
 
-	onMount(() => {
-		setTimeout(() => (montado = true), 50);
+	$effect(() => {
+		const timer = setTimeout(() => (montado = true), 50);
+		return () => clearTimeout(timer);
 	});
 
 	$effect(() => {

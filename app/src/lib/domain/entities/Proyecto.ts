@@ -154,7 +154,7 @@ export class Proyecto {
 	}
 
 	esEditable(): boolean {
-		return this.esBorrador() || (this.estaActivo() && !this.tieneColaboradoresAprobados());
+		return this.esBorrador() || this.estaActivo();
 	}
 
 	// Máquina de Estados

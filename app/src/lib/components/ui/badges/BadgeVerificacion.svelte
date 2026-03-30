@@ -9,7 +9,9 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 
-	export let estado: EstadoVerificacionDisplay;
+	let { estado = $bindable() } = $props<{
+		estado: EstadoVerificacionDisplay;
+	}>();
 
 	const badgeConfig = {
 		sin_verificacion: {
@@ -37,12 +39,14 @@
 			icon: ShieldExclamation,
 			label: 'Verificado por RENAPER/SID'
 		}
-	};
+	} as const;
 
-	$: config = badgeConfig[estado];
+	type EstadoKey = keyof typeof badgeConfig;
+
+	let config = $derived(badgeConfig[estado as EstadoKey]);
 
 	// Textos cortos para mobile
-	const textosMobile = {
+	const textosMobile: Record<EstadoKey, string> = {
 		sin_verificacion: 'Sin verificar',
 		verificacion_pendiente: 'Pendiente',
 		verificado_email_institucional: 'Email',
@@ -57,5 +61,5 @@
 >
 	<Icon src={config.icon} class="h-4 w-4" />
 	<span class="hidden sm:inline">{config.label}</span>
-	<span class="sm:hidden">{textosMobile[estado]}</span>
+	<span class="sm:hidden">{textosMobile[estado as EstadoKey]}</span>
 </span>

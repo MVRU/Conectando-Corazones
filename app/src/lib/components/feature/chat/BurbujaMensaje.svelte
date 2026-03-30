@@ -1,37 +1,21 @@
 <script lang="ts">
 	import type { Mensaje } from '$lib/domain/types/Chat';
-	// import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 
-	export let mensaje: Mensaje;
-	export let esPropio: boolean;
-
-	// Obtener datos del remitente
-	// TODO: Obtener nombre real del remitente (store o prop)
-	// const remitente = Object.values(mockUsuarios).find((u) => u.id_usuario === mensaje.remitente_id);
+	let { mensaje, esPropio } = $props<{
+		mensaje: Mensaje;
+		esPropio: boolean;
+	}>();
 
 	// Determinar nombre a mostrar según rol
-	let nombreMostrar = `Usuario #${mensaje.remitente_id}`;
-	/*
-	if (remitente) {
-		if (remitente.rol === 'institucion') {
-			nombreMostrar = (remitente as any).nombre_legal || remitente.username;
-		} else if (remitente.rol === 'colaborador') {
-			if ((remitente as any).tipo_colaborador === 'organizacion') {
-				nombreMostrar = (remitente as any).razon_social || remitente.username;
-			} else {
-				nombreMostrar = `${remitente.nombre} ${remitente.apellido}`;
-			}
-		} else {
-			nombreMostrar = remitente.username;
-		}
-	}
-	*/
+	let nombreMostrar = $derived(`Usuario #${mensaje.remitente_id}`);
 
 	// Formatear hora
-	const hora = mensaje.created_at.toLocaleTimeString('es-AR', {
-		hour: '2-digit',
-		minute: '2-digit'
-	});
+	let hora = $derived(
+		mensaje.created_at.toLocaleTimeString('es-AR', {
+			hour: '2-digit',
+			minute: '2-digit'
+		})
+	);
 </script>
 
 <div class="mb-3 flex flex-col {esPropio ? 'items-end' : 'items-start'}">

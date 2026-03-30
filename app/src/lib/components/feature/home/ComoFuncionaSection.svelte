@@ -9,7 +9,7 @@ TODO:
 	import { steps } from '\$lib/domain/types/static-data/como-funciona';
 	import { inView } from '\$lib/utils/actions/inView';
 
-	let inViewSection = false;
+	let inViewSection = $state(false);
 </script>
 
 <section

@@ -1,31 +1,36 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type {
 		TipoParticipacion,
 		TipoParticipacionDescripcion
 	} from '$lib/domain/types/TipoParticipacion';
-	import { TIPOS_PARTICIPACION_DESCRIPCION } from '$lib/domain/types/TipoParticipacion';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { toastStore } from '$lib/stores/toast';
 
-	export let mostrar: boolean = false;
-	export let tiposSeleccionados: TipoParticipacion[] = [];
-	export let tiposParticipacion: TipoParticipacion[] = [];
-	export let guardando: boolean = false;
+	let { 
+		mostrar = $bindable(false), 
+		tiposSeleccionados = [], 
+		tiposParticipacion = [], 
+		guardando = false,
+		onguardar,
+		oncerrar
+	}: { 
+		mostrar?: boolean; 
+		tiposSeleccionados?: TipoParticipacion[]; 
+		tiposParticipacion?: TipoParticipacion[]; 
+		guardando?: boolean;
+		onguardar: (tipos: TipoParticipacion[]) => void;
+		oncerrar: () => void;
+	} = $props();
 
-	const dispatch = createEventDispatcher<{
-		guardar: TipoParticipacion[];
-		cerrar: void;
-	}>();
-
-	let tiposMarcados: Set<TipoParticipacionDescripcion> = new Set();
+	let tiposMarcados = $state<Set<TipoParticipacionDescripcion>>(new Set());
 
 	// Inicializar tipos marcados cuando cambian los seleccionados
-	$: if (tiposSeleccionados && tiposSeleccionados.length > 0) {
-		tiposMarcados = new Set(tiposSeleccionados.map((tipo) => tipo.descripcion));
-	}
+	$effect(() => {
+		if (tiposSeleccionados && tiposSeleccionados.length > 0) {
+			tiposMarcados = new Set(tiposSeleccionados.map((tipo) => tipo.descripcion));
+		}
+	});
 
 	function toggleTipo(tipo: TipoParticipacionDescripcion) {
 		const nuevoSet = new Set(tiposMarcados);
@@ -40,10 +45,10 @@
 	}
 
 	// Variable reactiva para forzar actualizaciones
-	$: tiposMarcadosArray = Array.from(tiposMarcados);
+	const tiposMarcadosArray = $derived(Array.from(tiposMarcados));
 
 	function cerrar() {
-		dispatch('cerrar');
+		oncerrar();
 	}
 
 	function guardar() {
@@ -58,11 +63,10 @@
 			.filter((t) => t.id_tipo_participacion !== undefined);
 
 		console.log('Guardando tipos de participación:', tiposFinales);
-		dispatch('guardar', tiposFinales);
+		onguardar(tiposFinales);
 	}
 
 	function abrir() {
-		guardando = false;
 		// Reinicializar cuando se abre el modal
 		if (tiposSeleccionados && tiposSeleccionados.length > 0) {
 			tiposMarcados = new Set(tiposSeleccionados.map((tipo) => tipo.descripcion));
@@ -72,28 +76,34 @@
 	}
 
 	// Abrir modal cuando mostrar cambia a true
-	$: if (mostrar) {
-		abrir();
-	}
+	$effect(() => {
+		if (mostrar) {
+			abrir();
+		}
+	});
 </script>
 
 {#if mostrar}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-		on:click={cerrar}
+		role="presentation"
+		onclick={cerrar}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') cerrar();
+		}}
 	>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
-			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			tabindex="0"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="text-xl font-semibold text-gray-900">Editar tipos de participación favoritos</h3>
 				<button
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
@@ -116,7 +126,7 @@
 			<!-- Lista de tipos de participación -->
 			<div class="mb-6">
 				<div class="grid gap-3">
-					{#each tiposParticipacion as tipo}
+					{#each tiposParticipacion as tipo (tipo.id_tipo_participacion)}
 						{@const descripcion = tipo.descripcion}
 						{@const seleccionado = tiposMarcados.has(descripcion)}
 						{@const _ = tiposMarcadosArray}
@@ -129,7 +139,7 @@
 						}}
 						<button
 							type="button"
-							on:click={() => toggleTipo(descripcion)}
+							onclick={() => toggleTipo(descripcion)}
 							class="group relative flex items-center gap-4 rounded-lg border p-4 text-left transition-all {seleccionado
 								? 'border-blue-500 bg-blue-50'
 								: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}"

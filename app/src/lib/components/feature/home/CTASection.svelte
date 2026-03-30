@@ -5,15 +5,14 @@
 -->
 
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let visible = false;
-	let sectionRef: HTMLDivElement;
+	let visible = $state(false);
+	let sectionRef: HTMLDivElement | undefined = $state();
 
-	onMount(() => {
+	$effect.pre(() => {
 		const io = new IntersectionObserver(
 			([e]) => {
 				visible = e.isIntersecting;

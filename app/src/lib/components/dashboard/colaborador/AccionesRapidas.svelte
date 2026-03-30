@@ -9,20 +9,28 @@
 		ChevronUp
 	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
+	import type { ComponentType } from 'svelte';
 
-	let showAllActions = false;
+	let showAllActions = $state(false);
 
-	export let solicitudesPendientes = 0;
-	export let mensajesNoLeidos = 0;
-	export let proyectosPendienteCierre = 0;
-
-	export let showEvidenceModal = false;
-	export let showClosureModal = false;
-	export let onExportPDF: () => void = () => {};
+	let { 
+		solicitudesPendientes = 0, 
+		mensajesNoLeidos = 0, 
+		proyectosPendienteCierre = 0, 
+		showEvidenceModal = $bindable(false), 
+		showClosureModal = $bindable(false), 
+		onExportPDF = () => {} 
+	} = $props<{
+		solicitudesPendientes?: number;
+		mensajesNoLeidos?: number;
+		proyectosPendienteCierre?: number;
+		showEvidenceModal?: boolean;
+		showClosureModal?: boolean;
+		onExportPDF?: () => void;
+	}>();
 
 	// Configuracion de indicadores y color para los botones de acción rápida
-	let badgeConfig: Record<string, { count: number; color: string; shadow: string }>;
-	$: badgeConfig = {
+	const badgeConfig = $derived.by(() => ({
 		'Ver colaboraciones': {
 			count: solicitudesPendientes,
 			color: 'bg-rose-500',
@@ -38,11 +46,13 @@
 			color: 'bg-emerald-500',
 			shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
 		}
-	};
+	} as const));
+
+	type BadgeKey = keyof typeof badgeConfig;
 
 	interface Accion {
 		label: string;
-		icon: any;
+		icon: ComponentType;
 		href?: string;
 		onClick?: () => void;
 		primary?: boolean;
@@ -50,7 +60,7 @@
 		color?: string;
 	}
 
-	const acciones: Accion[] = [
+	const acciones: Accion[] = $derived([
 		{
 			label: 'Ver proyectos',
 			icon: FolderKanban,
@@ -72,15 +82,16 @@
 			secondary: true,
 			color: 'rose'
 		}
-	];
+	]);
 </script>
 
 <div class="relative mb-12">
 	<!-- Diseño para Escritorio (Grilla) -->
 	<div class="hidden sm:grid sm:grid-cols-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-6">
-		{#each acciones as accion}
+		{#each acciones as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						class="group flex h-full items-center justify-center gap-3 rounded-full px-5 py-3 backdrop-blur-md transition-all duration-300
@@ -95,13 +106,14 @@
 								? 'text-white'
 								: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						class="group flex h-full w-full items-center justify-center gap-3 rounded-full px-5 py-3 backdrop-blur-md transition-all duration-300
 					{accion.primary
 							? 'border border-blue-500/30 bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_6px_25px_-4px_rgba(59,130,246,0.6)]'
@@ -114,20 +126,20 @@
 								? 'text-white'
 								: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</button>
 				{/if}
 
 				<!-- Badges renderizados dinámicamente -->
-				{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+				{#if badgeConfig[accion.label as BadgeKey] && badgeConfig[accion.label as BadgeKey].count > 0}
 					<div
 						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {badgeConfig[
-							accion.label
-						].color} {badgeConfig[accion.label].shadow}"
+							accion.label as BadgeKey
+						].color} {badgeConfig[accion.label as BadgeKey].shadow}"
 					>
-						{badgeConfig[accion.label].count}
+						{badgeConfig[accion.label as BadgeKey].count}
 					</div>
 				{/if}
 			</div>
@@ -137,9 +149,10 @@
 	<!-- Diseño Mobile (Lista + Expandible) -->
 	<div class="flex flex-col gap-3 sm:hidden">
 		<!-- Acciones Destacadas (Siempre visibles) -->
-		{#each acciones.filter((a) => a.primary || (a.secondary && a.color === 'rose')) as accion}
+		{#each acciones.filter((a) => a.primary || (a.secondary && a.color === 'rose')) as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
@@ -151,12 +164,13 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
-						on:click={accion.onClick}
+						onclick={accion.onClick}
 						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
 						{accion.primary
 							? 'border border-blue-500/30 bg-gradient-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
@@ -167,7 +181,7 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</button>
 				{/if}
@@ -177,32 +191,34 @@
 		<!-- Acciones Secundarias (Expandibles) -->
 		{#if showAllActions}
 			<div transition:slide={{ duration: 300, axis: 'y' }} class="grid grid-cols-2 gap-3 pt-2">
-				{#each acciones.filter((a) => !a.primary && !(a.secondary && a.color === 'rose')) as accion}
+				{#each acciones.filter((a) => !a.primary && !(a.secondary && a.color === 'rose')) as accion (accion.label)}
 					<div class="relative w-full">
 						{#if accion.href}
+							{@const Icono = accion.icon}
 							<a
 								href={accion.href}
 								class="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</a>
 						{:else}
+							{@const Icono = accion.icon}
 							<button
-								on:click={accion.onClick}
+								onclick={accion.onClick}
 								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</button>
 						{/if}
 
 						<!-- Indicadores (Badges) -->
-						{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+						{#if badgeConfig[accion.label as BadgeKey] && badgeConfig[accion.label as BadgeKey].count > 0}
 							<div
 								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {badgeConfig[
-									accion.label
-								].color} {badgeConfig[accion.label].shadow}"
+									accion.label as BadgeKey
+								].color} {badgeConfig[accion.label as BadgeKey].shadow}"
 							></div>
 						{/if}
 					</div>
@@ -212,7 +228,7 @@
 
 		<!-- Botón para alternar vista -->
 		<button
-			on:click={() => (showAllActions = !showAllActions)}
+			onclick={() => (showAllActions = !showAllActions)}
 			class="flex w-full items-center justify-center gap-2 rounded-lg py-2 text-xs font-medium text-slate-400 transition-colors hover:text-white"
 		>
 			<span>{showAllActions ? 'Ver menos acciones' : 'Ver más acciones'}</span>

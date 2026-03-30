@@ -1,16 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 
-	export let proyectos: Proyecto[] = [];
+	let { proyectos = [] } = $props<{
+		proyectos?: Proyecto[];
+	}>();
 
-	let visible = false;
-	let sectionRef: HTMLElement;
+	let visible = $state(false);
+	let sectionRef: HTMLElement | undefined = $state();
 
-	onMount(() => {
+	$effect.pre(() => {
 		const io = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.18
 		});

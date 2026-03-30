@@ -8,31 +8,26 @@
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
 
-	// TODO(Tomás): Reportes está duplicado en dos páginas:
-	// - /reportes (general, compartida entre admin/colaborador/institución)
-	// - /admin/reportes (panel admin específico)
-	// Decidir cuál mantener y consolidar en una sola ruta.
+	let { data } = $props();
 
-	export let data;
+	let reportes = $derived(data.reportes);
+	let totalReportes = $derived(data.total);
 
-	$: reportes = data.reportes;
-	$: totalReportes = data.total;
-
-	$: estadoFilter = data.filtros.estado || 'todos';
-	$: tipoFilter = data.filtros.tipo_objeto || 'todos';
+	let estadoFilter = $derived(data.filtros.estado || 'todos');
+	let tipoFilter = $derived(data.filtros.tipo_objeto || 'todos');
 
 	// Estado del Modal de Resolución
-	let modalResolucionAbierto = false;
+	let modalResolucionAbierto = $state(false);
 	let reporteSeleccionado: Reporte | null = null;
-	let resolucionComentario = '';
-	let resolucionEstado: 'verificado' | 'desestimado' = 'verificado';
-	let errorValidacion = '';
+	let resolucionComentario = $state('');
+	let resolucionEstado: 'verificado' | 'desestimado' = $state('verificado');
+	let errorValidacion = $state('');
 	let enviandoResolucion = false;
 
 	// Paginación
-	$: itemsPerPage = data.filtros.limit;
-	$: totalPages = itemsPerPage ? Math.ceil(totalReportes / itemsPerPage) : 1;
-	$: currentPage = Math.floor(data.filtros.offset / (itemsPerPage || 1)) + 1;
+	let itemsPerPage = $derived(data.filtros.limit);
+	let totalPages = $derived(itemsPerPage ? Math.ceil(totalReportes / itemsPerPage) : 1);
+	let currentPage = $derived(Math.floor(data.filtros.offset / (itemsPerPage || 1)) + 1);
 
 	// Navegación reactiva cuando cambian los filtros
 	function updateQuery(paramsToUpdate: Record<string, string | null>) {
@@ -216,7 +211,7 @@
 				<select
 					id="status-filter"
 					bind:value={estadoFilter}
-					on:change={() => updateQuery({ estado: estadoFilter })}
+					onchange={() => updateQuery({ estado: estadoFilter })}
 					class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-xl border-gray-300 py-2.5 text-base font-medium sm:w-64"
 				>
 					<option value="todos">Todos los estados</option>
@@ -234,7 +229,7 @@
 					<select
 						id="type-filter"
 						bind:value={tipoFilter}
-						on:change={() => updateQuery({ tipo_objeto: tipoFilter })}
+						onchange={() => updateQuery({ tipo_objeto: tipoFilter })}
 						class="form-select focus:ring-primary-500 focus:border-primary-500 w-full rounded-xl border-gray-300 py-2.5 text-base font-medium sm:w-64"
 					>
 						<option value="todos">Todos los tipos</option>
@@ -414,7 +409,7 @@
 
 											{#if $isAdmin && reporte.estado === 'pendiente'}
 												<button
-													on:click={() => abrirModalResolucion(reporte)}
+													onclick={() => abrirModalResolucion(reporte)}
 													class="bg-primary hover:bg-primary-hover mt-4 flex items-center gap-2 rounded-xl px-6 py-2.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95"
 												>
 													<svg
@@ -449,7 +444,7 @@
 					<button
 						disabled={currentPage === 1}
 						class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-base font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md disabled:opacity-40 disabled:shadow-none"
-						on:click={() => goToPage(currentPage - 1)}
+						onclick={() => goToPage(currentPage - 1)}
 					>
 						Anterior
 					</button>
@@ -461,7 +456,7 @@
 									? 'bg-primary hover:bg-primary-hover text-white'
 									: 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:shadow-md'
 							}`}
-							on:click={() => goToPage(i + 1)}
+							onclick={() => goToPage(i + 1)}
 						>
 							{i + 1}
 						</button>
@@ -470,7 +465,7 @@
 					<button
 						disabled={currentPage === totalPages}
 						class="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-base font-bold text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md disabled:opacity-40 disabled:shadow-none"
-						on:click={() => goToPage(currentPage + 1)}
+						onclick={() => goToPage(currentPage + 1)}
 					>
 						Siguiente
 					</button>
@@ -521,7 +516,7 @@
 				{#if estadoFilter !== 'todos'}
 					<button
 						class="text-primary-600 hover:text-primary-700 mt-4 text-sm font-medium"
-						on:click={() => updateQuery({ estado: null })}
+						onclick={() => updateQuery({ estado: null })}
 					>
 						Limpiar filtros
 					</button>
@@ -534,7 +529,7 @@
 	<Modal
 		abierto={modalResolucionAbierto}
 		titulo="Resolver reporte"
-		on:cerrar={cerrarModalResolucion}
+		oncerrar={cerrarModalResolucion}
 		anchoMaximo="max-w-md"
 	>
 		<div class="space-y-4">
@@ -597,26 +592,28 @@
 			</div>
 		</div>
 
-		<div slot="footer" class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
-			<button
-				type="button"
-				class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
-				on:click={cerrarModalResolucion}
-			>
-				Cancelar
-			</button>
-			<button
-				type="button"
-				class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm ${
-					resolucionEstado === 'verificado'
-						? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
-						: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-				}`}
-				on:click={confirmarResolucion}
-			>
-				{resolucionEstado === 'verificado' ? 'Confirmar verificación' : 'Desestimar reporte'}
-			</button>
-		</div>
+		{#snippet footer()}
+			<div class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
+				<button
+					type="button"
+					class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
+					onclick={cerrarModalResolucion}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm ${
+						resolucionEstado === 'verificado'
+							? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+							: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+					}`}
+					onclick={confirmarResolucion}
+				>
+					{resolucionEstado === 'verificado' ? 'Confirmar verificación' : 'Desestimar reporte'}
+				</button>
+			</div>
+		{/snippet}
 	</Modal>
 </main>
 

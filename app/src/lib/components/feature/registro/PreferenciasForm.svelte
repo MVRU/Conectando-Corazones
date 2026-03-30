@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { clsx } from 'clsx';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Check } from 'lucide-svelte';
@@ -20,12 +19,13 @@
 		onskip
 	}: Props = $props();
 
-	let categoriasSeleccionadas: number[] = $state([]);
-	let tiposSeleccionados: number[] = $state([]);
+	let categoriasSeleccionadas = $state<number[]>([]);
+	let tiposSeleccionados = $state<number[]>([]);
 	let animarEntrada = $state(false);
 
-	onMount(() => {
-		setTimeout(() => (animarEntrada = true), 100);
+	$effect(() => {
+		const timer = setTimeout(() => (animarEntrada = true), 100);
+		return () => clearTimeout(timer);
 	});
 
 	function toggleCategoria(id: number) {

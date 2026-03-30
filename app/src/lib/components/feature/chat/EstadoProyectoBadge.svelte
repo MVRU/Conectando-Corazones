@@ -2,7 +2,9 @@
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 
-	export let estado: EstadoDescripcion;
+	let { estado } = $props<{
+		estado: EstadoDescripcion;
+	}>();
 
 	const estadoConfig: Record<
 		EstadoDescripcion,
@@ -52,12 +54,10 @@
 		}
 	};
 
-	$: config = estadoConfig[estado] || estadoConfig.en_curso;
+	let config = $derived(estadoConfig[estado as keyof typeof estadoConfig] || estadoConfig.en_curso);
 </script>
 
-<span
-	class="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase {config.bgColor} {config.textColor} {config.borderColor} shadow-sm"
->
+<div class="flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold {config.bgColor} {config.textColor} shadow-sm border {config.borderColor}">
 	<span class="h-1.5 w-1.5 rounded-full {config.dotColor} shadow-sm"></span>
-	{ESTADO_LABELS[estado]}
-</span>
+	{ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS]}
+</div>

@@ -1,30 +1,26 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import type { Usuario, Institucion, Colaborador, Organizacion } from '$lib/domain/types/Usuario';
-	import type { Writable, Readable } from 'svelte/store';
-	import type { EditarPerfilForm } from '$lib/domain/types/forms/EditarPerfilForm';
-	import type { Localidad } from '$lib/domain/entities/Localidad';
 	import type { Provincia } from '$lib/domain/entities/Provincia';
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { toastStore } from '$lib/stores/toast';
+	import { createEventDispatcher } from 'svelte';
+	import { env } from '$lib/infrastructure/config/env';
 
-	let provincias: Provincia[] = [];
-	let cargandoProvincias = true;
-	let subiendoFoto = false;
-	let pendingUploadMetadata: {
+	let provincias = $state<Provincia[]>([]);
+	let cargandoProvincias = $state(true);
+	let subiendoFoto = $state(false);
+	let pendingUploadMetadata = $state<{
 		url: string;
 		nombreArchivo: string;
 		tipoMime: string;
 		tamanio: number;
-	} | null = null;
+	} | null>(null);
 
-	let modoFoto: 'upload' | 'url' = 'upload';
-	let urlFotoManual = '';
-	let validandoUrl = false;
-
-	import { env } from '$lib/infrastructure/config/env';
+	let modoFoto = $state<'upload' | 'url'>('upload');
+	let urlFotoManual = $state('');
+	let validandoUrl = $state(false);
 
 	async function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -165,22 +161,20 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-	export let mostrar: boolean;
-	export let perfilUsuario: UsuarioCompleto;
-	export let datosEdicion: Writable<EditarPerfilForm>;
-	export let provinciaSeleccionada: Writable<number | undefined>;
-	export let localidadesFiltradas: Readable<Localidad[]>;
-	export let errorDescripcion: Readable<string | null>;
-	export let onCambiarProvincia: (idProvincia: number | undefined) => void;
-	export let onActualizarDescripcion: (valor: string) => void;
-	export let onActualizarCampo: (campo: keyof EditarPerfilForm, valor: EditarPerfilForm[keyof EditarPerfilForm]) => void;
-	export let edicion: {
-		validarDescripcion: (descripcion: string) => string | null;
-		actualizarCampo: (campo: keyof EditarPerfilForm, valor: EditarPerfilForm[keyof EditarPerfilForm]) => void;
-	};
-	export let guardando = false;
+	let {
+		mostrar,
+		perfilUsuario,
+		datosEdicion,
+		provinciaSeleccionada,
+		localidadesFiltradas,
+		errorDescripcion,
+		onCambiarProvincia,
+		onActualizarDescripcion,
+		onActualizarCampo,
+		edicion,
+		guardando = false
+	} = $props();
 
-	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 
 	function handleSubmit() {
@@ -191,17 +185,19 @@
 		dispatch('cerrar');
 	}
 
-	onMount(async () => {
-		try {
-			const response = await fetch('/api/ubicaciones/provincias');
-			if (response.ok) {
-				provincias = await response.json();
+	$effect(() => {
+		(async () => {
+			try {
+				const response = await fetch('/api/ubicaciones/provincias');
+				if (response.ok) {
+					provincias = await response.json();
+				}
+			} catch (e) {
+				console.error('Error cargando provincias:', e);
+			} finally {
+				cargandoProvincias = false;
 			}
-		} catch (e) {
-			console.error('Error cargando provincias:', e);
-		} finally {
-			cargandoProvincias = false;
-		}
+		})();
 	});
 
 	function handleCambioProvinciaLocal() {
@@ -251,51 +247,57 @@
 
 	function obtenerNombreUsuario(usuario: UsuarioCompleto): string {
 		if (usuario.rol === 'institucion') {
-		return (usuario as Institucion).nombre_legal || usuario.nombre;
+			return (usuario as Institucion).nombre_legal || usuario.nombre;
 		}
 		return `${usuario.nombre} ${usuario.apellido}`;
 	}
 
 	function campoNombreDeshabilitado(usuario: UsuarioCompleto): boolean {
 		if (usuario.rol === 'institucion') return true;
-		if (usuario.rol === 'colaborador' && (usuario as Colaborador).tipo_colaborador === 'unipersonal') {
+		if (
+			usuario.rol === 'colaborador' &&
+			(usuario as Colaborador).tipo_colaborador === 'unipersonal'
+		) {
 			return true;
 		}
 		return false;
 	}
 
-	$: nombreUsuario = obtenerNombreUsuario(perfilUsuario);
-	$: nombreDeshabilitado = campoNombreDeshabilitado(perfilUsuario);
+	let nombreUsuario = $derived(obtenerNombreUsuario(perfilUsuario));
+	let nombreDeshabilitado = $derived(campoNombreDeshabilitado(perfilUsuario));
 
-
-	$: tituloSeccionNombre =
-		perfilUsuario.rol === 'institucion' ? 'Representante legal' : 'Información personal';
-	$: mensajeDeshabilitado =
+	let tituloSeccionNombre = $derived(
+		perfilUsuario.rol === 'institucion' ? 'Representante legal' : 'Información personal'
+	);
+	let mensajeDeshabilitado = $derived(
 		perfilUsuario.rol === 'institucion'
 			? 'El nombre del representante legal no puede modificarse'
-			: 'Los usuarios unipersonales no pueden modificar su nombre';
-	$: placeholderDescripcion =
+			: 'Los usuarios unipersonales no pueden modificar su nombre'
+	);
+	let placeholderDescripcion = $derived(
 		perfilUsuario.rol === 'institucion'
 			? 'Describí tu institución, misión, valores...'
-			: 'Describí tus intereses, experiencia, motivaciones...';
-	$: labelDescripcion =
-		perfilUsuario.rol === 'institucion' ? 'Contanos sobre tu institución' : 'Contanos sobre vos';
+			: 'Describí tus intereses, experiencia, motivaciones...'
+	);
+	let labelDescripcion = $derived(
+		perfilUsuario.rol === 'institucion' ? 'Contanos sobre tu institución' : 'Contanos sobre vos'
+	);
 
-	let formContactos: MetodosContactoForm;
+	let formContactos = $state<MetodosContactoForm | undefined>(undefined);
 </script>
 
 {#if mostrar}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm sm:p-6"
-		on:click={handleCerrar}
-		on:keydown={(e) => e.key === 'Escape' && handleCerrar()}
+		onclick={handleCerrar}
+		onkeydown={(e) => e.key === 'Escape' && handleCerrar()}
 		role="presentation"
 		tabindex="-1"
 	>
 		<div
 			class="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl focus:outline-none"
-			on:click|stopPropagation
-			on:keydown={(e) => e.key === 'Escape' && handleCerrar()}
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.key === 'Escape' && handleCerrar()}
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="modal-title"
@@ -306,7 +308,7 @@
 			>
 				<h3 id="modal-title" class="text-xl font-bold text-gray-900">Editar perfil</h3>
 				<button
-					on:click={handleCerrar}
+					onclick={handleCerrar}
 					aria-label="Cerrar modal"
 					class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-gray-200 focus:outline-none"
 				>
@@ -338,17 +340,17 @@
 					</div>
 
 					<div class="mb-4 w-full px-4 text-left">
-						<p class="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">
+						<p class="mb-2 block text-xs font-bold tracking-wider text-gray-500 uppercase">
 							Cambiar foto
 						</p>
-						<div class="flex gap-1 rounded-lg border border-gray-200 bg-white p-1 mb-4">
+						<div class="mb-4 flex gap-1 rounded-lg border border-gray-200 bg-white p-1">
 							<button
 								type="button"
 								class="flex-1 rounded-md px-2 py-1.5 text-xs font-medium transition-all {modoFoto ===
 								'upload'
 									? 'bg-blue-600 text-white shadow-sm'
 									: 'text-gray-600 hover:bg-gray-100'}"
-								on:click={() => setModoFoto('upload')}
+								onclick={() => setModoFoto('upload')}
 							>
 								Subir
 							</button>
@@ -358,7 +360,7 @@
 								'url'
 									? 'bg-blue-600 text-white shadow-sm'
 									: 'text-gray-600 hover:bg-gray-100'}"
-								on:click={() => setModoFoto('url')}
+								onclick={() => setModoFoto('url')}
 							>
 								Enlace
 							</button>
@@ -371,14 +373,10 @@
 									type="button"
 									class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-blue-400 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50"
 									disabled={subiendoFoto}
-									on:click={() => document.getElementById('file-upload')?.click()}
+									onclick={() => document.getElementById('file-upload')?.click()}
 								>
 									{#if subiendoFoto}
-										<svg
-											class="h-4 w-4 animate-spin text-blue-600"
-											fill="none"
-											viewBox="0 0 24 24"
-										>
+										<svg class="h-4 w-4 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
 											<circle
 												class="opacity-25"
 												cx="12"
@@ -395,8 +393,18 @@
 										</svg>
 										<span>Subiendo...</span>
 									{:else}
-										<svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+										<svg
+											class="h-4 w-4 text-blue-500"
+											fill="none"
+											stroke="currentColor"
+											viewBox="0 0 24 24"
+										>
+											<path
+												stroke-linecap="round"
+												stroke-linejoin="round"
+												stroke-width="2"
+												d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+											/>
 										</svg>
 										<span>Seleccionar archivo</span>
 									{/if}
@@ -406,13 +414,15 @@
 									type="file"
 									accept="image/*"
 									disabled={subiendoFoto}
-									on:change={handleFileUpload}
+									onchange={handleFileUpload}
 									class="sr-only"
 								/>
 							</div>
 						{:else}
 							<div class="space-y-3" in:fly={{ y: 10, duration: 200 }}>
-								<p class="text-[11px] text-gray-500">Pegá el enlace directo a una imagen pública.</p>
+								<p class="text-[11px] text-gray-500">
+									Pegá el enlace directo a una imagen pública.
+								</p>
 								<div class="relative">
 									<input
 										type="url"
@@ -422,19 +432,35 @@
 									/>
 									<button
 										type="button"
-										on:click={handleUrlUpload}
+										onclick={handleUrlUpload}
 										disabled={validandoUrl || !urlFotoManual}
-										class="absolute right-2 top-1.5 rounded-lg bg-blue-100 p-1.5 text-blue-600 transition-colors hover:bg-blue-200 disabled:opacity-50"
+										class="absolute top-1.5 right-2 rounded-lg bg-blue-100 p-1.5 text-blue-600 transition-colors hover:bg-blue-200 disabled:opacity-50"
 										title="Validar URL"
 									>
 										{#if validandoUrl}
 											<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-												<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-												<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+												<circle
+													class="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													stroke-width="4"
+												></circle>
+												<path
+													class="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												></path>
 											</svg>
 										{:else}
 											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+												<path
+													stroke-linecap="round"
+													stroke-linejoin="round"
+													stroke-width="2"
+													d="M5 13l4 4L19 7"
+												/>
 											</svg>
 										{/if}
 									</button>
@@ -526,7 +552,7 @@
 									<select
 										id="provincia"
 										bind:value={$provinciaSeleccionada}
-										on:change={handleCambioProvinciaLocal}
+										onchange={handleCambioProvinciaLocal}
 										disabled={cargandoProvincias}
 										class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400 sm:text-sm"
 									>
@@ -580,7 +606,7 @@
 								<textarea
 									id="descripcion"
 									value={$datosEdicion.descripcion}
-									on:input={(e) => onActualizarDescripcion(e.currentTarget.value)}
+									oninput={(e) => onActualizarDescripcion(e.currentTarget.value)}
 									rows="4"
 									maxlength="500"
 									placeholder={placeholderDescripcion}

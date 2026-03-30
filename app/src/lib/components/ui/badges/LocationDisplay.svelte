@@ -4,18 +4,26 @@
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import { getUbicacionTexto } from '$lib/utils/util-proyectos';
 
-	export let proyecto: Proyecto;
-	export let showIcon = true;
-	export let className = '';
-	export let variant: 'text' | 'badge' = 'text';
+	let {
+		proyecto,
+		showIcon = true,
+		className = '',
+		variant = 'text'
+	} = $props<{
+		proyecto: Proyecto;
+		showIcon?: boolean;
+		className?: string;
+		variant?: 'text' | 'badge';
+	}>();
 
-	$: ubicacionTexto = getUbicacionTexto(proyecto);
-	$: isVirtual = ubicacionTexto === 'Virtual';
+	let ubicacionTexto = $derived(getUbicacionTexto(proyecto));
+	let isVirtual = $derived(ubicacionTexto === 'Virtual');
 
-	$: badgeClasses =
+	let badgeClasses = $derived(
 		variant === 'badge'
 			? 'bg-white/95 px-3 py-1 rounded-full shadow-sm backdrop-blur-sm text-xs font-medium text-gray-700'
-			: 'text-sm text-gray-600';
+			: 'text-sm text-gray-600'
+	);
 </script>
 
 <div class="inline-flex items-center gap-1.5 {badgeClasses} {className}">
