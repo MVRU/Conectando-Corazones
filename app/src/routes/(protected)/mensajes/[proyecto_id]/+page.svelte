@@ -39,32 +39,40 @@
 			hasAccess
 	);
 
-	// Agrupar mensajes por fecha
+	// Estado reactivo para los mensajes (combina persistidos y nuevos de la sesión)
+	let listaMensajes = $state<Mensaje[]>([]);
+
+	// Inicializar mensajes desde data
+	$effect(() => {
+		if (chat?.mensajes) {
+			listaMensajes = [...chat.mensajes];
+		}
+	});
+
+	// Agrupar mensajes por fecha (reactivo al cambio en listaMensajes)
 	interface MessageGroup {
 		date: Date;
 		messages: Mensaje[];
 	}
 
 	const messageGroups = $derived(
-		chat && chat.mensajes
-			? chat.mensajes.reduce((groups: MessageGroup[], mensaje: Mensaje) => {
-					const messageDate = new Date(mensaje.created_at);
-					const dateOnly = new Date(
-						messageDate.getFullYear(),
-						messageDate.getMonth(),
-						messageDate.getDate()
-					);
+		listaMensajes.reduce((groups: MessageGroup[], mensaje: Mensaje) => {
+			const messageDate = new Date(mensaje.created_at);
+			const dateOnly = new Date(
+				messageDate.getFullYear(),
+				messageDate.getMonth(),
+				messageDate.getDate()
+			);
 
-					const existingGroup = groups.find((g) => g.date.getTime() === dateOnly.getTime());
+			const existingGroup = groups.find((g) => g.date.getTime() === dateOnly.getTime());
 
-					if (existingGroup) {
-						existingGroup.messages.push(mensaje);
-					} else {
-						groups.push({ date: dateOnly, messages: [mensaje] });
-					}
-					return groups;
-				}, [])
-			: []
+			if (existingGroup) {
+				existingGroup.messages.push(mensaje);
+			} else {
+				groups.push({ date: dateOnly, messages: [mensaje] });
+			}
+			return groups;
+		}, [])
 	);
 
 	// Referencia al contenedor de mensajes para scroll
@@ -83,8 +91,21 @@
 
 	// Manejar envío de mensajes
 	async function handleSend(event: { contenido: string }) {
-		// Backend no implementado
-		console.log('Enviar mensaje:', event.contenido);
+		if (!$usuario?.id_usuario || !chat?.id_chat) return;
+
+		// Mock funcional para demo: agregamos mensaje al estado local instantáneamente
+		const nuevoMensaje: Mensaje = {
+			id_mensaje: Math.floor(Math.random() * 1000000),
+			chat_id: chat.id_chat,
+			remitente_id: $usuario.id_usuario,
+			contenido: event.contenido,
+			created_at: new Date()
+		};
+
+		listaMensajes = [...listaMensajes, nuevoMensaje];
+
+		// El scroll se dispara por el $effect que observa messageGroups
+		console.log('Mensaje enviado localmente (Demo):', nuevoMensaje.contenido);
 	}
 
 	// Mobile menu
@@ -176,14 +197,14 @@
 							<EstadoProyectoBadge estado={proyecto.estado} />
 						{/if}
 						<span class="text-xs text-gray-500">
-							{chat.mensajes.length}
-							{chat.mensajes.length === 1 ? 'mensaje' : 'mensajes'}
+							{listaMensajes.length}
+							{listaMensajes.length === 1 ? 'mensaje' : 'mensajes'}
 						</span>
 					</div>
 				</div>
 
 				<!-- Botones de acción -->
-				<div class="flex flex-shrink-0 gap-2">
+				<div class="flex shrink-0 gap-2">
 					<a
 						href="/proyectos/{proyectoId}"
 						class="hidden items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md md:flex"
@@ -302,9 +323,9 @@
 
 		<!-- Área de mensajes -->
 		<div class="no-scrollbar flex-1 overflow-y-auto bg-white p-4 md:p-6" bind:this={chatContainer}>
-			{#each messageGroups as group}
+			{#each messageGroups as group (group.date.getTime())}
 				<SeparadorFecha fecha={group.date} />
-				{#each group.messages as mensaje}
+				{#each group.messages as mensaje (mensaje.id_mensaje)}
 					<BurbujaMensaje {mensaje} esPropio={mensaje.remitente_id === $usuario?.id_usuario} />
 				{/each}
 			{/each}
