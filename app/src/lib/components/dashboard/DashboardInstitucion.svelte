@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Filter, ChevronRight, ChevronDown, MapPin, School } from 'lucide-svelte';
+	import { Filter, ChevronRight, ChevronDown, MapPin, School, HeartOff, Activity, Users, Sparkles } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './institucion/AccionesRapidas.svelte';
 	import MetricasPanel from './institucion/MetricasPanel.svelte';
@@ -15,6 +15,7 @@
 	import EstadisticasProyectoModal from './institucion/EstadisticasProyectoModal.svelte';
 	import EstadisticasAgendaModal from './institucion/EstadisticasAgendaModal.svelte';
 	import GestionarEvidenciasModal from './institucion/GestionarEvidenciasModal.svelte';
+	import EmptyState from './ui/EmptyState.svelte';
 	import type { InstitucionDashboardData } from './institucion/types';
 
 
@@ -48,7 +49,6 @@
 	}
 
 	import jsPDF from 'jspdf';
-	import { FileText } from 'lucide-svelte';
 	import { PdfService } from '$lib/utils/pdf.service';
 
 	onMount(() => {
@@ -501,11 +501,31 @@
 			<div class="flex flex-col gap-6 lg:col-span-7">
 				<!-- Seguimiento de Objetivos -->
 				<div class="min-h-[400px]">
-					<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
+						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="No hay proyectos activos" 
+								description="Cuando crees un proyecto y comiences a recibir ayuda, podrás ver el progreso de tus objetivos aquí."
+								icon={HeartOff}
+							/>
+						</div>
+					{/if}
 				</div>
 				<!-- Actividad Reciente -->
 				<div class="flex-1">
-					<ActividadReciente actividad={data.actividadReciente} />
+					{#if data.actividadReciente && data.actividadReciente.length > 0}
+						<ActividadReciente actividad={data.actividadReciente} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="Sin actividad reciente" 
+								description="Aquí aparecerán las últimas interacciones con tus proyectos y colaboradores."
+								icon={Activity}
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -519,7 +539,17 @@
 				<!-- Top Colaboradores -->
 				<!-- Top Colaboradores -->
 				<div class="min-h-[300px]">
-					<TopColaboradores colaboradores={data.topColaboradores} />
+					{#if data.topColaboradores && data.topColaboradores.length > 0}
+						<TopColaboradores colaboradores={data.topColaboradores} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="Sin colaboradores aún" 
+								description="Tus colaboradores más destacados aparecerán aquí cuando comiencen a participar en tus proyectos."
+								icon={Users}
+							/>
+						</div>
+					{/if}
 				</div>
 
 				<!-- Últimas Reseñas -->
@@ -530,12 +560,21 @@
 			</div>
 		</div>
 
-		<!-- Bottom Row: Aspectos & Novedades (Delay 300 inherited or new?) Let's keep it part of flow or add delay-400 if I defined it. I didn't define 400. So I'll just wrap it in delay-300 as well or leave it. -->
-		<!-- Actually, let's wrap the bottom row too for consistency -->
+		<!-- Bottom Row: Aspectos & Novedades -->
 		<div class="animate-fade-in-up grid grid-cols-1 gap-6 delay-300 md:grid-cols-2">
 			<!-- Aspectos a mejorar -->
 			<div class="min-h-[200px]">
-				<AspectosMejorar aspectos={data.aspectosMejorar} />
+				{#if data.aspectosMejorar && data.aspectosMejorar.length > 0}
+					<AspectosMejorar aspectos={data.aspectosMejorar} />
+				{:else}
+					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+						<EmptyState 
+							message="Todo en orden" 
+							description="No hay sugerencias o aspectos críticos a mejorar reportados por tus colaboradores actualmente."
+							icon={Sparkles}
+						/>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Novedades -->
