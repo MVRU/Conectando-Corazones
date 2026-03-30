@@ -16,8 +16,8 @@
 	let proyectoSeleccionado = $state<string>('');
 	let enviandoSolicitud = $state(false);
 	let solicitudEnviada = $state(false);
-	let objetivosExpandidos = $state<Record<number, boolean>>({});
 	let modalReporteAbierto = $state(false);
+	let errorSolicitud = $state<string | null>(null);
 	let checks = $state({
 		evidenciasSuficientes: false,
 		archivosLegibles: false,
@@ -92,50 +92,61 @@
 		mounted && !accesoEstado.denegado && $usuario && (proyectosDisponibles?.length || 0) === 0
 	);
 
-	let objetivosDelProyecto = $derived(data.objetivos || []);
+	let objetivosDelProyecto = $derived.by(() => {
+		// Priorizar proyectoActual.participacion_permitida como fuente de verdad
+		// Fallback a data.objetivos si participacion_permitida no está disponible
+		let items = [];
+		if (proyectoActual?.participacion_permitida && proyectoActual.participacion_permitida.length > 0) {
+			items = proyectoActual.participacion_permitida;
+		} else {
+			items = data.objetivos || [];
+		}
+
+		return items;
+	});
+
 	let evidenciasPorObjetivo = $derived.by(() => {
-		const objetivos = objetivosDelProyecto || [];
+		if (!objetivosDelProyecto || objetivosDelProyecto.length === 0) {
+			return [];
+		}
+		
 		const evidencias = data.evidencias || [];
-
-		return objetivos.map((obj: { id_participacion_permitida?: number | null }) => {
-			const objId = obj.id_participacion_permitida;
-			if (!objId) {
-				return {
-					objetivo: obj,
-					evidencias: [],
-					evidenciasEntrada: [],
-					evidenciasSalida: [],
-					totalArchivos: 0
-				};
-			}
-
-			const evidenciasRelacionadas = evidencias.filter(
-				(ev: { id_participacion_permitida?: number | null }) =>
-					ev.id_participacion_permitida === objId
+		
+		const result = (objetivosDelProyecto || []).map((obj: any) => {
+			const objId = Number(obj.id_participacion_permitida);
+			const evsParaEsteObjetivo = evidencias.filter((ev: any) => 
+				Number(ev.id_participacion_permitida) === objId
 			);
 
-			const totalArch = evidenciasRelacionadas.reduce(
-				(sum: number, ev: { archivos?: unknown[] }) => sum + (ev.archivos?.length || 0),
+			const entrada = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'entrada');
+			const salida = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'salida');
+
+			const totalArch = evsParaEsteObjetivo.reduce(
+				(sum: number, ev: any) => sum + (ev.archivos?.length || 0),
 				0
 			);
 
 			return {
 				objetivo: obj,
-				evidencias: evidenciasRelacionadas,
-				evidenciasEntrada: evidenciasRelacionadas.filter(
-					(ev: { tipo_evidencia?: string }) => ev.tipo_evidencia === 'entrada'
-				),
-				evidenciasSalida: evidenciasRelacionadas.filter(
-					(ev: { tipo_evidencia?: string }) => ev.tipo_evidencia === 'salida'
-				),
+				evidencias: evsParaEsteObjetivo,
+				evidenciasEntrada: entrada,
+				evidenciasSalida: salida,
 				totalArchivos: totalArch
 			};
 		});
+
+		return result;
 	});
 
-	let todosLosObjetivosTienenEvidencias = $derived(
-		(evidenciasPorObjetivo || []).every((item: { evidencias: unknown[] }) => item.evidencias.length > 0)
-	);
+	let todosLosObjetivosTienenEvidenciasCompletas = $derived.by(() => {
+		if (!evidenciasPorObjetivo || evidenciasPorObjetivo.length === 0) return false;
+		return (evidenciasPorObjetivo || []).every((item: {
+			evidenciasEntrada: unknown[];
+			evidenciasSalida: unknown[];
+		}) =>
+			item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
+		);
+	});
 
 	let todosLosChecksCompletos = $derived(Object.values(checks).every((check) => check === true));
 
@@ -168,7 +179,7 @@
 		if (
 			!proyectoSeleccionado ||
 			!todosLosChecksCompletos ||
-			!todosLosObjetivosTienenEvidencias ||
+			!todosLosObjetivosTienenEvidenciasCompletas ||
 			tieneSolicitudPendiente
 		) {
 			return;
@@ -193,12 +204,23 @@
 				body: formData
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
-				console.error('Error al enviar solicitud de cierre', errorData ?? response.statusText);
+			let resultado: any = null;
+			try {
+				resultado = await response.json();
+			} catch {
+				errorSolicitud = 'Error al procesar la respuesta del servidor.';
 				enviandoSolicitud = false;
 				return;
 			}
+
+			// SvelteKit serializa fail() como { type: 'failure', data: { message: '...' } }
+			if (resultado?.type === 'failure' || !response.ok) {
+				errorSolicitud = resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
+				enviandoSolicitud = false;
+				return;
+			}
+
+			errorSolicitud = null;
 
 			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
@@ -408,12 +430,11 @@
 											evidenciasEntrada={evidenciasEntrada || []}
 											evidenciasSalida={evidenciasSalida || []}
 											totalArchivos={totalArchivos || 0}
-											bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida || 0]}
 										/>
 									{/if}
 								{/each}
 
-								{#if !todosLosObjetivosTienenEvidencias}
+								{#if !todosLosObjetivosTienenEvidenciasCompletas}
 									<div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<div class="flex gap-3">
 											<AlertTriangle class="h-5 w-5 flex-shrink-0 text-amber-600" />
@@ -422,8 +443,9 @@
 													Atención: Faltan evidencias
 												</h3>
 												<p class="mt-1 text-sm text-amber-700">
-													Algunos objetivos no tienen evidencias cargadas. Tenés que cargar al menos
-													una evidencia para cada objetivo antes de solicitar el cierre.
+													Cada objetivo requiere <strong>evidencias de entrada y de salida</strong>.
+													Asegurate de haber cargado ambos tipos de evidencias para cada objetivo
+													antes de solicitar el cierre.
 												</p>
 											</div>
 										</div>
@@ -457,7 +479,7 @@
 								onclick={enviarSolicitud}
 								disabled={enviandoSolicitud ||
 									!todosLosChecksCompletos ||
-									!todosLosObjetivosTienenEvidencias ||
+									!todosLosObjetivosTienenEvidenciasCompletas ||
 									tieneSolicitudPendiente ||
 									formularioBloqueadoPorAuditoria}
 								class="mt-6 flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
@@ -471,6 +493,12 @@
 									Solicitar Cierre
 								{/if}
 							</button>
+
+							{#if errorSolicitud}
+								<div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+									<p class="text-sm font-medium text-red-700">{errorSolicitud}</p>
+								</div>
+							{/if}
 
 							{#if !todosLosChecksCompletos}
 								<p class="mt-4 text-center text-xs text-slate-400">

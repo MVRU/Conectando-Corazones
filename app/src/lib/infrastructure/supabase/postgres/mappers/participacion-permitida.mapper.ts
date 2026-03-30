@@ -13,10 +13,14 @@ export class ParticipacionPermitidaMapper {
 		const actualCalculado = contributions.reduce((sum, c) => sum + (c.cantidad || 0), 0);
 
 		return new ParticipacionPermitida({
-			id_participacion_permitida: prismaParticipacion.id_participacion_permitida,
-			id_proyecto: prismaParticipacion.id_proyecto ?? undefined,
-			id_tipo_participacion: prismaParticipacion.id_tipo_participacion ?? undefined,
-			objetivo: prismaParticipacion.objetivo,
+			id_participacion_permitida: Number(prismaParticipacion.id_participacion_permitida),
+			id_proyecto: prismaParticipacion.id_proyecto != null
+				? Number(prismaParticipacion.id_proyecto)
+				: undefined,
+			id_tipo_participacion: prismaParticipacion.id_tipo_participacion != null
+				? Number(prismaParticipacion.id_tipo_participacion)
+				: undefined,
+			objetivo: Number(prismaParticipacion.objetivo),
 			actual: actualCalculado,
 			unidad_medida: prismaParticipacion.unidad_medida ?? undefined,
 			especie: prismaParticipacion.especie ?? undefined,
@@ -24,11 +28,11 @@ export class ParticipacionPermitidaMapper {
 				? TipoParticipacionMapper.toDomain(prismaParticipacion.tipo_participacion)
 				: undefined,
 			colaboraciones_tipo_participacion: contributions.map((c: any) => ({
-				id_colaboracion_tipo_participacion: c.id_colaboracion_tipo_participacion,
-				colaboracion_id: c.colaboracion_id,
-				participacion_permitida_id: c.participacion_permitida_id,
-				cantidad: c.cantidad,
-				colaboracion: c.colaboracion // Asegurar que pasamos la relacion colaboracion si existe
+				id_colaboracion_tipo_participacion: Number(c.id_colaboracion_tipo_participacion),
+				colaboracion_id: c.colaboracion_id != null ? Number(c.colaboracion_id) : undefined,
+				participacion_permitida_id: c.participacion_permitida_id != null ? Number(c.participacion_permitida_id) : undefined,
+				cantidad: Number(c.cantidad || 0),
+				colaboracion: c.colaboracion
 			}))
 		});
 	}
