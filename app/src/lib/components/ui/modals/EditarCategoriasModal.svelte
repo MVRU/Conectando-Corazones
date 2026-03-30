@@ -1,16 +1,24 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/domain/types/Categoria';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let { mostrar = false, categoriasSeleccionadas = [], categorias = [], guardando = false }: { mostrar?: boolean; categoriasSeleccionadas?: Categoria[]; categorias?: Categoria[]; guardando?: boolean } = $props();
-
-	const dispatch = createEventDispatcher<{
-		guardar: Categoria[];
-		cerrar: void;
-	}>();
+	let { 
+		mostrar = $bindable(false), 
+		categoriasSeleccionadas = [], 
+		categorias = [], 
+		guardando = false,
+		onguardar,
+		oncerrar
+	}: { 
+		mostrar?: boolean; 
+		categoriasSeleccionadas?: Categoria[]; 
+		categorias?: Categoria[]; 
+		guardando?: boolean;
+		onguardar: (categorias: Categoria[]) => void;
+		oncerrar: () => void;
+	} = $props();
 
 	let categoriasMarcadas = $state<Set<number>>(new Set());
 
@@ -44,7 +52,7 @@
 	const categoriasMarcadasArray = $derived(Array.from(categoriasMarcadas));
 
 	function cerrar() {
-		dispatch('cerrar');
+		oncerrar();
 	}
 
 	function guardar() {
@@ -53,7 +61,7 @@
 		);
 
 		console.log('Guardando categorías:', categoriasFinales);
-		dispatch('guardar', categoriasFinales);
+		onguardar(categoriasFinales);
 	}
 
 	function abrir() {
@@ -119,8 +127,7 @@
 
 			<!-- Lista de categorías -->
 			<div class="mb-6 max-h-[400px] overflow-y-auto">
-				<div class="grid gap-3 sm:grid-cols-2">
-					{#each categoriasVisibles as categoria}
+					{#each categoriasVisibles as categoria (categoria.id_categoria)}
 						{@const seleccionada =
 							categoria.id_categoria !== undefined &&
 							categoriasMarcadas.has(categoria.id_categoria)}
@@ -170,7 +177,6 @@
 						</button>
 					{/each}
 				</div>
-			</div>
 
 			<!-- Contador de seleccionadas -->
 			<div class="mb-6 rounded-lg bg-blue-50 p-3">

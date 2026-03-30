@@ -25,6 +25,13 @@
 	let visible = $state(false);
 	let tickerRef: HTMLElement | undefined = $state();
 
+	// Memorizar la lista extendida para evitar re-crear arrays en el render que causan loops
+	const extendedLogos = $derived(
+		Array(6)
+			.fill(logos)
+			.flat()
+	);
+
 	$effect(() => {
 		if (!tickerRef) return;
 
@@ -47,9 +54,7 @@
 			customClass
 		)}
 	>
-		{#each Array(6)
-			.fill(logos)
-			.flat() as logo, i (typeof logo === 'string' ? logo + i : logo.src + i)}
+		{#each extendedLogos as logo, i (typeof logo === 'string' ? logo + i : logo.src + i)}
 			{#if typeof logo === 'string'}
 				<img
 					src={logo}

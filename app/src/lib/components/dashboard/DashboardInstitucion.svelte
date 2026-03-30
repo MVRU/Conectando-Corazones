@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Filter, ChevronRight, ChevronDown, MapPin, Sparkles, School } from 'lucide-svelte';
+	import { Filter, ChevronRight, ChevronDown, MapPin, School } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './institucion/AccionesRapidas.svelte';
 	import MetricasPanel from './institucion/MetricasPanel.svelte';
@@ -28,9 +28,6 @@
 	});
 
 	// Animation & Scroll
-	let mounted = false;
-	let filterScrollContainer: HTMLDivElement = $state();
-	let showFilterIndicator = false;
 	let showFilters = $state(false);
 	let showLeftGradient = $state(false);
 	let showRightGradient = $state(false);
@@ -38,6 +35,9 @@
 	let showProjectStats = $state(false);
 	let showCalendarStats = $state(false);
 	let showEvidenceModal = $state(false);
+
+	let filterScrollContainer: HTMLDivElement | undefined = $state();
+	let showFilterIndicator = $state(false);
 
 	function checkFilterScroll() {
 		if (!filterScrollContainer) return;
@@ -48,27 +48,15 @@
 	}
 
 	import jsPDF from 'jspdf';
-	import autoTable from 'jspdf-autotable';
 	import { FileText } from 'lucide-svelte';
+	import { PdfService } from '$lib/utils/pdf.service';
 
 	onMount(() => {
-		mounted = true;
 		setTimeout(checkFilterScroll, 100);
 		window.addEventListener('resize', checkFilterScroll);
 		return () => window.removeEventListener('resize', checkFilterScroll);
 	});
 
-	async function loadImage(url: string): Promise<HTMLImageElement> {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.crossOrigin = 'Anonymous';
-			img.src = url;
-			img.onload = () => resolve(img);
-			img.onerror = reject;
-		});
-	}
-
-	import { PdfService } from '$lib/utils/pdf.service';
 	interface Props {
 		data: InstitucionDashboardData;
 	}
@@ -501,9 +489,9 @@
 					nuevosColaboradores: 2,
 					proximoCierre: data.metricas.diasProximoCierre
 				}}
-				on:clickColaboradores={() => (showCollaboratorStats = true)}
-				on:clickProyectos={() => (showProjectStats = true)}
-				on:clickAgenda={() => (showCalendarStats = true)}
+				onclickColaboradores={() => (showCollaboratorStats = true)}
+				onclickProyectos={() => (showProjectStats = true)}
+				onclickAgenda={() => (showCalendarStats = true)}
 			/>
 		</div>
 

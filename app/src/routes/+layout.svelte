@@ -10,15 +10,17 @@
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { canAccessRoute, isLoading, authStore, unauthenticatedState } from '$lib/stores/auth';
+	import { canAccessRoute, isLoading, authStore, unauthenticatedState, type AuthState } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
 	import { goto } from '$app/navigation';
+	import { untrack } from 'svelte';
 
 	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 	import { Usuario } from '$lib/domain/entities/Usuario';
 
-	let { children, data }: { data: LayoutData } = $props();
+	import type { Snippet } from 'svelte';
+	let { children, data }: { data: LayoutData; children: Snippet } = $props();
 
 	let supabase = $derived(data.supabase);
 	let session = $derived(data.session);
@@ -30,31 +32,46 @@
 	let mounted = $state(false);
 
 	$effect(() => {
-		beforeNavigate(clearBreadcrumbs);
+		beforeNavigate(untrack(() => clearBreadcrumbs));
 
 		const { data: subscription } = supabase.auth.onAuthStateChange(
 			(event: AuthChangeEvent, _session: Session | null) => {
-				if (_session?.expires_at !== session?.expires_at) {
+				const currentSession = untrack(() => session);
+				if (_session?.expires_at !== currentSession?.expires_at) {
 					invalidate('supabase:auth');
 				}
 			}
 		);
 
 		// Inicializar estado global de auth con datos del servidor
-		if (data.usuario) {
-			const usuarioInstance = new Usuario(data.usuario);
-			authStore.update((s) => ({
-				...s,
-				usuario: usuarioInstance,
-				isAuthenticated: true,
-				isLoading: false
-			}));
+		let authValue: AuthState;
+		const unsubscribe = authStore.subscribe(v => { authValue = v; });
+		unsubscribe(); 
+
+		const userFromData = data.usuario;
+
+		if (userFromData) {
+			const usuarioInstance = new Usuario(userFromData);
+			// Solo actualizar si el usuario cambió o no estaba autenticado
+			// id_usuario es el identificador en nuestra entidad Usuario
+			if (!authValue!.isAuthenticated || authValue!.usuario?.id_usuario !== userFromData.id_usuario) {
+				authStore.update((s) => ({
+					...s,
+					usuario: usuarioInstance,
+					isAuthenticated: true,
+					isLoading: false
+				}));
+			}
 		} else {
 			if (session) {
-				authStore.update((s) => ({ ...s, isLoading: false }));
+				if (authValue!.isLoading) {
+					authStore.update((s) => ({ ...s, isLoading: false }));
+				}
 			} else {
-				// Sin sesión
-				authStore.set(unauthenticatedState);
+				// Sin sesión, solo resetear si no estábamos ya en unauthenticatedState
+				if (authValue!.isAuthenticated || authValue!.isLoading) {
+					authStore.set(unauthenticatedState);
+				}
 			}
 		}
 
@@ -64,6 +81,9 @@
 	});
 
 	$effect(() => {
+		// Acceso reactivo a mounted e isLoading
+		// No bloqueamos el renderizado con isLoading, permitimos que children() se rinda siempre.
+		// El guard de ruta solo actúa después de que el sistema está montado.
 		if (mounted && !$isLoading) {
 			if (!canAccessRoute(page.url.pathname)) {
 				goto('/iniciar-sesion');
@@ -128,7 +148,7 @@
 <ScrollToTop />
 
 <main class="min-h-screen">
-	{@render children?.()}
+	{@render children()}
 </main>
 
 <Footer />

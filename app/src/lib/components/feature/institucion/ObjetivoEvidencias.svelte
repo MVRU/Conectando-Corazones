@@ -11,7 +11,7 @@
 		evidenciasEntrada,
 		evidenciasSalida,
 		totalArchivos,
-		expandido = false
+		expandido = $bindable(false)
 	} = $props<{
 		objetivo: ParticipacionPermitida;
 		evidencias: Evidencia[];

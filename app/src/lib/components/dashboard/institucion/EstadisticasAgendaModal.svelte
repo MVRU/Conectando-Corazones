@@ -31,7 +31,7 @@
 		// Normalizamos al rango del inicio más temprano y el final más tardío en el conjunto de datos
 		if (!stats?.projectTimeline.length) return '';
 
-		const dates = stats.projectTimeline.flatMap((p) => [
+		const dates = stats.projectTimeline.flatMap((p: { fechaInicio: string; fechaFin: string }) => [
 			new Date(p.fechaInicio).getTime(),
 			new Date(p.fechaFin).getTime()
 		]);

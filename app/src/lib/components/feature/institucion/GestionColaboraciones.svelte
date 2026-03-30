@@ -28,7 +28,7 @@
 		getColaboracionesAprobadas,
 		calcularDiasActivo
 	} from '$lib/utils/util-colaboraciones';
-	import { slide, fade, scale } from 'svelte/transition';
+	import { fade, scale } from 'svelte/transition';
 	import { page } from '$app/state';
 
 	// Prop recibida desde el padre
@@ -94,8 +94,8 @@
 			}
 
 			// Actualizar estado en el proyecto seleccionado
-			if (proyectoSeleccionado.colaboraciones) {
-				proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+			if (proyectoSeleccionado && proyectoSeleccionado.colaboraciones) {
+				proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map((c: Colaboracion) =>
 					c.id_colaboracion === colaboracionId ? result : c
 				);
 			}
@@ -147,8 +147,8 @@
 					throw new Error(result.error || 'Error al rechazar la colaboración');
 				}
 
-				if (proyectoSeleccionado.colaboraciones) {
-					proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+				if (proyectoSeleccionado && proyectoSeleccionado.colaboraciones) {
+					proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map((c: Colaboracion) =>
 						c.id_colaboracion === colaboracionARechazar ? result : c
 					);
 				}
@@ -245,7 +245,11 @@
 							</div>
 							<div>
 								<p class="text-2xl font-bold text-gray-900">
-									{getColaboracionesPendientes(proyectoSeleccionado)}
+									{#if proyectoSeleccionado}
+										{getColaboracionesPendientes(proyectoSeleccionado)}
+									{:else}
+										0
+									{/if}
 								</p>
 								<p class="hidden text-sm font-medium text-gray-500 sm:block">Pendientes</p>
 								<p class="text-xs text-gray-400 sm:hidden">Pend.</p>
@@ -263,7 +267,11 @@
 							</div>
 							<div>
 								<p class="text-2xl font-bold text-gray-900">
-									{getColaboracionesAprobadas(proyectoSeleccionado)}
+									{#if proyectoSeleccionado}
+										{getColaboracionesAprobadas(proyectoSeleccionado)}
+									{:else}
+										0
+									{/if}
 								</p>
 								<p class="hidden text-sm font-medium text-gray-500 sm:block">Activas</p>
 								<p class="text-xs text-gray-400 sm:hidden">Act.</p>
@@ -281,7 +289,11 @@
 							</div>
 							<div>
 								<p class="text-2xl font-bold text-gray-900">
-									{getColaboracionesRechazadas(proyectoSeleccionado)}
+									{#if proyectoSeleccionado}
+										{getColaboracionesRechazadas(proyectoSeleccionado)}
+									{:else}
+										0
+									{/if}
 								</p>
 								<p class="hidden text-sm font-medium text-gray-500 sm:block">Rechazadas</p>
 								<p class="text-xs text-gray-400 sm:hidden">Rech.</p>
@@ -299,7 +311,11 @@
 							</div>
 							<div>
 								<p class="text-2xl font-bold text-gray-900">
-									{getColaboracionesCount(proyectoSeleccionado)}
+									{#if proyectoSeleccionado}
+										{getColaboracionesCount(proyectoSeleccionado)}
+									{:else}
+										0
+									{/if}
 								</p>
 								<p class="hidden text-sm font-medium text-gray-500 sm:block">Total</p>
 								<p class="text-xs text-gray-400 sm:hidden">Total</p>
@@ -310,17 +326,19 @@
 
 				<!-- Info extra desktop -->
 				<div class="hidden gap-6 pl-1 text-sm text-gray-500 lg:flex">
-					{#if proyectoSeleccionado.fecha_fin_tentativa}
-						<p>
-							<span class="font-medium text-gray-700">Finalización tentativa:</span>
-							{formatearFecha(proyectoSeleccionado.fecha_fin_tentativa)}
-						</p>
-					{/if}
-					{#if proyectoSeleccionado.created_at}
-						<p>
-							<span class="font-medium text-gray-700">Creado el:</span>
-							{formatearFecha(proyectoSeleccionado.created_at)}
-						</p>
+					{#if proyectoSeleccionado}
+						{#if proyectoSeleccionado.fecha_fin_tentativa}
+							<p>
+								<span class="font-medium text-gray-700">Finalización tentativa:</span>
+								{formatearFecha(proyectoSeleccionado.fecha_fin_tentativa)}
+							</p>
+						{/if}
+						{#if proyectoSeleccionado.created_at}
+							<p>
+								<span class="font-medium text-gray-700">Creado el:</span>
+								{formatearFecha(proyectoSeleccionado.created_at)}
+							</p>
+						{/if}
 					{/if}
 				</div>
 			</section>

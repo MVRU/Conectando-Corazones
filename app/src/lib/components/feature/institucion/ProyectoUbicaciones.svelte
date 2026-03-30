@@ -16,8 +16,8 @@
 	import { Lock } from 'lucide-svelte';
 
 	let {
-		ubicaciones = [],
-		errores = {},
+		ubicaciones = $bindable([]),
+		errores = $bindable({}),
 		esEdicionRestringida = false,
 		esAdmin = false
 	} = $props<{
@@ -51,7 +51,7 @@
 	async function cargarLocalidades(provinciaNombre: string) {
 		if (!provinciaNombre || localidadesCache[provinciaNombre]) return;
 
-		const prov = provinciasData.find((p) => p.nombre === provinciaNombre);
+		const prov = provinciasData.find((p: Provincia) => p.nombre === provinciaNombre);
 		if (!prov) return;
 
 		try {
@@ -90,7 +90,7 @@
 
 	function esTipoPredefinido(tipo: string): boolean {
 		const normalizado = (tipo || '').trim().toLowerCase();
-		return TIPO_UBICACION.some((t) => t.toLowerCase() === normalizado);
+		return TIPO_UBICACION.some((t: string) => t.toLowerCase() === normalizado);
 	}
 
 	function manejarCambioTipo(index: number, valor: string) {
@@ -111,7 +111,7 @@
 		}
 
 		if (ubicaciones.length > 1) {
-			ubicaciones = ubicaciones.filter((_, i) => i !== index);
+			ubicaciones = ubicaciones.filter((_: UbicacionFormulario, i: number) => i !== index);
 		}
 	}
 
@@ -128,7 +128,7 @@
 			!esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')
 		) {
 			const valorNormalizado = valor.trim().toLowerCase();
-			const existeEnLista = TIPO_UBICACION.some((tipo) => tipo.toLowerCase() === valorNormalizado);
+			const existeEnLista = TIPO_UBICACION.some((tipo: string) => tipo.toLowerCase() === valorNormalizado);
 
 			if (existeEnLista) {
 				errores[`ubicacion_${index}_tipo`] = 'Ese tipo de ubicación ya existe en la lista oficial.';
@@ -148,7 +148,7 @@
 		// Verificar si intenta marcar como "Principal" cuando ya existe una
 		if (campo === 'tipo_ubicacion' && valor.toLowerCase() === 'principal') {
 			const yaTienePrincipal = ubicaciones.some(
-				(u, i) => i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
+				(u: UbicacionFormulario, i: number) => i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
 			);
 			if (yaTienePrincipal) {
 				errores[`ubicacion_${index}_tipo`] =
@@ -213,7 +213,7 @@
 		}
 	}
 
-	let yaTienePrincipal = $derived(ubicaciones.some((u) => u.tipo_ubicacion?.toLowerCase() === 'principal'));
+	let yaTienePrincipal = $derived(ubicaciones.some((u: UbicacionFormulario) => u.tipo_ubicacion?.toLowerCase() === 'principal'));
 
 	// Función para obtener tipos disponibles según el índice
 	function obtenerTiposDisponibles(index: number): readonly string[] {
@@ -224,7 +224,7 @@
 		}
 		// Si ya hay una Principal en otra ubicación, filtrarla
 		if (yaTienePrincipal) {
-			return TIPO_UBICACION.filter((tipo) => tipo.toLowerCase() !== 'principal');
+			return TIPO_UBICACION.filter((tipo: string) => tipo.toLowerCase() !== 'principal');
 		}
 		return TIPO_UBICACION;
 	}

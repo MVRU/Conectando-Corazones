@@ -32,9 +32,9 @@
 		tiposParticipacionDisponibles = [],
 		calcularLocalidadesDisponibles,
 		restablecerFiltros,
-		'header-actions': headerActions,
+		headerActions,
 		card,
-		'empty-action': emptyAction
+		emptyAction
 	} = $props<{
 		proyectos?: Proyecto[];
 		titulo?: string;
@@ -60,9 +60,9 @@
 		tiposParticipacionDisponibles?: string[];
 		calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
 		restablecerFiltros: () => void;
-		'header-actions'?: Snippet;
+		headerActions?: Snippet;
 		card: Snippet<[{ proyecto: Proyecto }]>;
-		'empty-action'?: Snippet<[{ restablecerFiltros: () => void }]>;
+		emptyAction?: Snippet<[{ restablecerFiltros: () => void }]>;
 	}>();
 
 	let localidades = $derived(calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada));
@@ -83,8 +83,8 @@
 		}
 	});
 
-	function manejarCambioPagina(event: CustomEvent<number>) {
-		paginaActual = event.detail;
+	function manejarCambioPagina(page: number) {
+		paginaActual = page;
 		const element = document.getElementById('proyectos-list-top');
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth' });

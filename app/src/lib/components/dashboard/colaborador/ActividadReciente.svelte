@@ -29,7 +29,7 @@
 	</div>
 
 	<div class="relative ml-3 space-y-8 border-l border-white/10 pt-2 pl-8">
-		{#each actividad as item}
+		{#each actividad as item (item.id)}
 			<div class="relative">
 				<!-- Dot on timeline -->
 				<div
@@ -43,7 +43,7 @@
 						>
 						<span class="h-1 w-1 rounded-full bg-slate-600"></span>
 						<span class="text-xs font-medium tracking-wider text-slate-500 uppercase"
-							>{TIPO_LABELS[item.tipo]}</span
+							>{TIPO_LABELS[item.tipo as keyof typeof TIPO_LABELS]}</span
 						>
 					</div>
 					<h4 class="text-base font-medium text-white">{item.titulo}</h4>

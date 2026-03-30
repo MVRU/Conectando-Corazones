@@ -19,15 +19,15 @@
 	import { toastStore } from '$lib/stores/toast';
 
 	let {
-		titulo = '',
-		descripcion = '',
-		urlPortada = '',
-		fechaFinTentativa = '',
+		titulo = $bindable(''),
+		descripcion = $bindable(''),
+		urlPortada = $bindable(''),
+		fechaFinTentativa = $bindable(''),
 		fechaMinima = '',
-		beneficiarios = undefined,
-		categoriasSeleccionadas = [],
-		categoriaOtraDescripcion = '',
-		errores = {},
+		beneficiarios = $bindable(undefined),
+		categoriasSeleccionadas = $bindable([]),
+		categoriaOtraDescripcion = $bindable(''),
+		errores = $bindable({}),
 		limpiarError,
 		categorias = [],
 		esEdicionRestringida = false,
@@ -151,7 +151,7 @@
 		if (esEdicionRestringida && !esAdmin) return;
 
 		if (categoriasSeleccionadas.includes(categoriaId)) {
-			categoriasSeleccionadas = categoriasSeleccionadas.filter((id) => id !== categoriaId);
+			categoriasSeleccionadas = categoriasSeleccionadas.filter((id: number) => id !== categoriaId);
 			if (idCategoriaOtra != null && categoriaId === idCategoriaOtra) {
 				categoriaOtraDescripcion = '';
 				limpiarError('categoria_otra');
@@ -171,7 +171,7 @@
 
 	let idCategoriaOtra = $derived(
 		categorias.find(
-			(c) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+			(c: Categoria) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 		)?.id_categoria
 	);
 

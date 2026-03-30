@@ -1,21 +1,27 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type {
 		TipoParticipacion,
 		TipoParticipacionDescripcion
 	} from '$lib/domain/types/TipoParticipacion';
-	import { TIPOS_PARTICIPACION_DESCRIPCION } from '$lib/domain/types/TipoParticipacion';
 	import { INFO_TIPOS_PARTICIPACION } from '$lib/utils/constants';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
-	import { toastStore } from '$lib/stores/toast';
 
-	let { mostrar = false, tiposSeleccionados = [], tiposParticipacion = [], guardando = false }: { mostrar?: boolean; tiposSeleccionados?: TipoParticipacion[]; tiposParticipacion?: TipoParticipacion[]; guardando?: boolean } = $props();
-
-	const dispatch = createEventDispatcher<{
-		guardar: TipoParticipacion[];
-		cerrar: void;
-	}>();
+	let { 
+		mostrar = $bindable(false), 
+		tiposSeleccionados = [], 
+		tiposParticipacion = [], 
+		guardando = false,
+		onguardar,
+		oncerrar
+	}: { 
+		mostrar?: boolean; 
+		tiposSeleccionados?: TipoParticipacion[]; 
+		tiposParticipacion?: TipoParticipacion[]; 
+		guardando?: boolean;
+		onguardar: (tipos: TipoParticipacion[]) => void;
+		oncerrar: () => void;
+	} = $props();
 
 	let tiposMarcados = $state<Set<TipoParticipacionDescripcion>>(new Set());
 
@@ -42,7 +48,7 @@
 	const tiposMarcadosArray = $derived(Array.from(tiposMarcados));
 
 	function cerrar() {
-		dispatch('cerrar');
+		oncerrar();
 	}
 
 	function guardar() {
@@ -57,7 +63,7 @@
 			.filter((t) => t.id_tipo_participacion !== undefined);
 
 		console.log('Guardando tipos de participación:', tiposFinales);
-		dispatch('guardar', tiposFinales);
+		onguardar(tiposFinales);
 	}
 
 	function abrir() {
@@ -120,7 +126,7 @@
 			<!-- Lista de tipos de participación -->
 			<div class="mb-6">
 				<div class="grid gap-3">
-					{#each tiposParticipacion as tipo}
+					{#each tiposParticipacion as tipo (tipo.id_tipo_participacion)}
 						{@const descripcion = tipo.descripcion}
 						{@const seleccionado = tiposMarcados.has(descripcion)}
 						{@const _ = tiposMarcadosArray}

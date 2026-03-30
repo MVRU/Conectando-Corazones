@@ -28,7 +28,7 @@
 
 	// Calcular el máximo para escalar las barras
 	const maxProyectos = $derived(
-		stats?.institucionesAyudadas.reduce((max, inst) => Math.max(max, inst.cantidadProyectos), 0) || 1
+		stats?.institucionesAyudadas.reduce((max: number, inst: { cantidadProyectos: number }) => Math.max(max, inst.cantidadProyectos), 0) || 1
 	);
 
 	// Función para obtener el icono de ranking
@@ -140,7 +140,7 @@
 								<div class="h-px w-full border-t border-dashed border-slate-700"></div>
 							</div>
 
-							{#each stats.institucionesAyudadas as institucion, index}
+							{#each stats.institucionesAyudadas as institucion, index (institucion.nombre)}
 								{@const height = (institucion.cantidadProyectos / maxProyectos) * 100}
 								{@const isTop3 = institucion.ranking && institucion.ranking <= 3}
 								<!-- 
@@ -237,7 +237,7 @@
 									stroke-width="3"
 								/>
 								<!-- Segments -->
-								{#each [{ value: stats.colaboraciones.aprobadas, color: 'text-emerald-500', offset: 0 }, { value: stats.colaboraciones.pendientes, color: 'text-amber-500', offset: (stats.colaboraciones.aprobadas / stats.colaboraciones.total) * 100 }, { value: stats.colaboraciones.rechazadas, color: 'text-rose-500', offset: ((stats.colaboraciones.aprobadas + stats.colaboraciones.pendientes) / stats.colaboraciones.total) * 100 }] as segment}
+								{#each [{ value: stats.colaboraciones.aprobadas, color: 'text-emerald-500', offset: 0, label: 'aprobadas' }, { value: stats.colaboraciones.pendientes, color: 'text-amber-500', offset: (stats.colaboraciones.aprobadas / stats.colaboraciones.total) * 100, label: 'pendientes' }, { value: stats.colaboraciones.rechazadas, color: 'text-rose-500', offset: ((stats.colaboraciones.aprobadas + stats.colaboraciones.pendientes) / stats.colaboraciones.total) * 100, label: 'rechazadas' }] as segment (segment.label)}
 									{#if segment.value > 0}
 										<path
 											class="{segment.color} transition-all duration-1000 ease-out hover:opacity-80"

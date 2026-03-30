@@ -1,42 +1,43 @@
-<!-- @migration-task Error while migrating Svelte code: Can't migrate code with afterUpdate. Please migrate by hand. -->
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import BurbujaMensaje from '$lib/components/feature/chat/BurbujaMensaje.svelte';
 	import InputMensaje from '$lib/components/feature/chat/InputMensaje.svelte';
 	import SeparadorFecha from '$lib/components/feature/chat/SeparadorFecha.svelte';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
-	import { afterUpdate, onDestroy } from 'svelte';
 	import { usuario } from '$lib/stores/auth';
-	import { chatStore } from '$lib/stores/chatStore';
-	import type { Mensaje, Chat } from '$lib/domain/types/Chat';
+	import type { Mensaje } from '$lib/domain/types/Chat';
 	import type { PageData } from './$types';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	// Obtener ID del proyecto desde la URL
-	$: proyectoId = Number($page.params.proyecto_id);
+	const proyectoId = $derived(Number(page.params.proyecto_id));
 
 	// Props
-	export let data: PageData;
+	let { data } = $props<{ data: PageData }>();
 
-	$: chat = data.chat;
-	$: proyecto = data.proyecto;
+	const chat = $derived(data.chat);
+	const proyecto = $derived(data.proyecto);
 
-	$: if (chat) {
-		setBreadcrumbs([
-			{ label: 'Mensajes', href: '/mensajes' },
-			{ label: chat.titulo || 'Chat' }
-		]);
-	}
+	$effect(() => {
+		if (chat) {
+			setBreadcrumbs([
+				{ label: 'Mensajes', href: '/mensajes' },
+				{ label: chat.titulo || 'Chat' }
+			]);
+		}
+	});
 
 	// Validar acceso
-	$: hasAccess =
-		$usuario?.id_usuario && chat?.participantes_ids.includes($usuario.id_usuario) ? true : false;
+	const hasAccess = $derived(
+		$usuario?.id_usuario && chat?.participantes_ids.includes($usuario.id_usuario) ? true : false
+	);
 
 	// Validar estado del proyecto para escritura
-	$: canWrite =
+	const canWrite = $derived(
 		proyecto?.estado &&
-		!['en_auditoria', 'cancelado', 'completado'].includes(proyecto.estado) &&
-		hasAccess;
+			!['en_auditoria', 'cancelado', 'completado'].includes(proyecto.estado) &&
+			hasAccess
+	);
 
 	// Agrupar mensajes por fecha
 	interface MessageGroup {
@@ -44,7 +45,7 @@
 		messages: Mensaje[];
 	}
 
-	$: messageGroups =
+	const messageGroups = $derived(
 		chat && chat.mensajes
 			? chat.mensajes.reduce((groups: MessageGroup[], mensaje: Mensaje) => {
 					const messageDate = new Date(mensaje.created_at);
@@ -63,10 +64,11 @@
 					}
 					return groups;
 				}, [])
-			: [];
+			: []
+	);
 
 	// Referencia al contenedor de mensajes para scroll
-	let chatContainer: HTMLElement;
+	let chatContainer: HTMLElement | undefined = $state();
 
 	function scrollToBottom() {
 		if (chatContainer) {
@@ -75,28 +77,28 @@
 	}
 
 	// Scroll automático al cargar y al recibir mensajes
-	afterUpdate(() => {
-		scrollToBottom();
+	$effect(() => {
+		if (messageGroups) scrollToBottom();
 	});
 
 	// Manejar envío de mensajes
-	// Manejar envío de mensajes
-	async function handleSend(event: CustomEvent<{ contenido: string }>) {
+	async function handleSend(event: { contenido: string }) {
 		// Backend no implementado
-		console.log('Enviar mensaje:', event.detail.contenido);
+		console.log('Enviar mensaje:', event.contenido);
 	}
 
 	// Mobile menu
-	let showMobileMenu = false;
+	let showMobileMenu = $state(false);
 	function toggleMobileMenu() {
 		showMobileMenu = !showMobileMenu;
 	}
 
 	// Enlace de evidencias según rol
-	$: evidenciasLink =
+	const evidenciasLink = $derived(
 		$usuario?.rol === 'institucion'
 			? `/institucion/proyectos/${proyectoId}/aportes`
-			: `/colaborador/proyectos/${proyectoId}/mis-aportes`;
+			: `/colaborador/proyectos/${proyectoId}/mis-aportes`
+	);
 </script>
 
 {#if !chat}
@@ -224,7 +226,7 @@
 					</a>
 					<!-- Mobile: Menu -->
 					<button
-						on:click={toggleMobileMenu}
+						onclick={toggleMobileMenu}
 						class="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md md:hidden"
 						aria-label="Menú"
 					>
@@ -254,7 +256,7 @@
 						<a
 							href="/proyectos/{proyectoId}"
 							class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-							on:click={() => (showMobileMenu = false)}
+							onclick={() => (showMobileMenu = false)}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -275,7 +277,7 @@
 						<a
 							href={evidenciasLink}
 							class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-							on:click={() => (showMobileMenu = false)}
+							onclick={() => (showMobileMenu = false)}
 						>
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
@@ -308,6 +310,6 @@
 			{/each}
 		</div>
 
-		<InputMensaje deshabilitado={!canWrite} chatId={chat.id_chat} on:send={handleSend} />
+		<InputMensaje deshabilitado={!canWrite} chatId={chat.id_chat} onSend={handleSend} />
 	</div>
 {/if}

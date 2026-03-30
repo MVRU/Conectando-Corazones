@@ -551,7 +551,7 @@
 			fecha_fin_tentativa: new Date(fechaFinTentativa),
 			beneficiarios: beneficiarios ? Number(beneficiarios) : undefined,
 			institucion_id: 0, // Se inyecta en el servidor
-			categoria_ids: categoriasSeleccionadas.filter((id) => Number.isFinite(id) && id > 0),
+			categoria_ids: categoriasSeleccionadas.filter((id: number) => Number.isFinite(id) && id > 0),
 			participaciones: participaciones,
 			ubicaciones: ubicacionesCargadas,
 			estado: edicion ? undefined : estado

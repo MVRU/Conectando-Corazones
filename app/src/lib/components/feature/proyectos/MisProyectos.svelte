@@ -177,48 +177,50 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
-	>
-		{#snippet headerActions()}
-			<div class="mb-4 flex flex-wrap justify-center gap-3">
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'todos'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					onclick={() => cambiarPestana('todos')}
-				>
-					Todos
-				</button>
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'activos'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					onclick={() => cambiarPestana('activos')}
-				>
-					Activos
-				</button>
-				<button
-					class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
-					'completados'
-						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
-						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
-					onclick={() => cambiarPestana('completados')}
-				>
-					Completados
-				</button>
-			</div>
-		{/snippet}
+		headerActions={headerActionsSnippet}
+		card={cardSnippet}
+	/>
 
-		{#snippet card({ proyecto })}
-			<ProyectoCard
-				{proyecto}
-				{usuario}
-				variante="mis-proyectos"
-				esInstitucion={usuario?.rol === 'institucion'}
-			/>
-		{/snippet}
-	</ProyectosBase>
+	{#snippet headerActionsSnippet()}
+		<div class="mb-4 flex flex-wrap justify-center gap-3">
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'todos'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('todos')}
+			>
+				Todos
+			</button>
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'activos'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('activos')}
+			>
+				Activos
+			</button>
+			<button
+				class="rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none {pestanaActiva ===
+				'completados'
+					? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
+					: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'}"
+				onclick={() => cambiarPestana('completados')}
+			>
+				Completados
+			</button>
+		</div>
+	{/snippet}
+
+	{#snippet cardSnippet({ proyecto }: { proyecto: Proyecto })}
+		<ProyectoCard
+			{proyecto}
+			{usuario}
+			variante="mis-proyectos"
+			esInstitucion={usuario?.rol === 'institucion'}
+		/>
+	{/snippet}
 
 	{#if usuario?.rol === 'institucion'}
 		{#if verificationAprobada}

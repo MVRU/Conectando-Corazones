@@ -4,11 +4,9 @@
 		X,
 		Calendar,
 		Clock,
-		CheckCircle2,
-		AlertTriangle,
-		AlertCircle,
 		CalendarClock,
-		ArrowRight
+		ArrowRight,
+		AlertCircle
 	} from 'lucide-svelte';
 	import type { EstadisticasCalendario } from './types';
 	import { quintOut } from 'svelte/easing';
@@ -28,7 +26,7 @@
 	function getGanttStyle(fechaInicio: string, fechaFin: string) {
 		if (!stats?.projectTimeline.length) return '';
 
-		const dates = stats.projectTimeline.flatMap((p) => [
+		const dates = stats.projectTimeline.flatMap((p: { fechaInicio: string; fechaFin: string }) => [
 			new Date(p.fechaInicio).getTime(),
 			new Date(p.fechaFin).getTime()
 		]);
@@ -78,7 +76,7 @@
 			onclick={onClose}
 			role="button"
 			tabindex="-1"
-			onkeydown={(e) => e.key === 'Enter' && onClose()}
+			onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && onClose()}
 		></div>
 
 		<!-- Modal Content -->
@@ -157,7 +155,7 @@
 
 						<!-- Timeline Items -->
 						<div class="space-y-4">
-							{#each stats.projectTimeline as project}
+							{#each stats.projectTimeline as project (project.id)}
 								<div class="relative">
 									<div class="mb-1 flex justify-between text-xs text-slate-400">
 										<span class="truncate pr-2">{project.titulo}</span>
@@ -192,7 +190,7 @@
 						Próximos eventos
 					</h3>
 					<div class="space-y-3">
-						{#each stats.proximosVencimientos as deadline}
+						{#each stats.proximosVencimientos as deadline (deadline.id || deadline.titulo + deadline.fecha)}
 							<div
 								class="flex flex-col gap-2 rounded-xl border border-white/5 bg-white/5 p-3 px-4 transition-colors hover:bg-white/10 sm:flex-row sm:items-center sm:justify-between"
 							>

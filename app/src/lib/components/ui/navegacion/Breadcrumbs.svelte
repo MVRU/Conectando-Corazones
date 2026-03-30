@@ -3,6 +3,8 @@
 	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 	import { ChevronRight } from 'lucide-svelte';
 
+	import { untrack } from 'svelte';
+
 	let {
 		useIconSeparator = true
 	} = $props<{
@@ -21,10 +23,12 @@
 	let containerWidth = $state(0);
 	let visibleCrumbsCount = $state(0);
 
+	// Efecto para sincronizar el store con el estado local
 	$effect(() => {
-		breadcrumbs = $breadcrumbsStore;
-		if (breadcrumbs !== lastBreadcrumbs) {
-			lastBreadcrumbs = breadcrumbs;
+		const storeItems = $breadcrumbsStore;
+		if (storeItems !== untrack(() => lastBreadcrumbs)) {
+			breadcrumbs = storeItems;
+			lastBreadcrumbs = storeItems;
 			showPopover = false;
 		}
 	});
@@ -46,7 +50,10 @@
 
 		const ro = new ResizeObserver((entries) => {
 			for (const entry of entries) {
-				containerWidth = entry.contentRect.width;
+				const width = entry.contentRect.width;
+				if (width !== untrack(() => containerWidth)) {
+					containerWidth = width;
+				}
 			}
 		});
 		ro.observe(navRef);
@@ -59,32 +66,36 @@
 	});
 
 	$effect(() => {
-		visibleCrumbsCount = 0;
+		// Dependencia explícita de breadcrumbs y containerWidth
+		const currentCrumbs = breadcrumbs;
+		const currentWidth = containerWidth;
+		
+		if (!currentCrumbs || !currentCrumbs.length) {
+			visibleCrumbsCount = 0;
+			return;
+		}
 
-		if (breadcrumbs && breadcrumbs.length) {
-			let remaining = containerWidth;
+		let remaining = currentWidth;
 
-			// Siempre muestra primero y último
-			remaining -= MIN_ITEM_WIDTH; // primero
-			remaining -= MIN_LAST_ITEM_WIDTH; // último
-			remaining -= SEPARATOR_WIDTH * (breadcrumbs.length - 1);
+		// Siempre muestra primero y último
+		remaining -= MIN_ITEM_WIDTH; // primero
+		remaining -= MIN_LAST_ITEM_WIDTH; // último
+		remaining -= SEPARATOR_WIDTH * (currentCrumbs.length - 1);
 
-			const possibleMiddle = Math.max(breadcrumbs.length - 2, 0);
-			let maxMiddle = 0;
+		const possibleMiddle = Math.max(currentCrumbs.length - 2, 0);
+		let maxMiddle = 0;
 
-			while (remaining > 0 && maxMiddle < possibleMiddle) {
-				remaining -= MIN_ITEM_WIDTH;
-				if (remaining >= 0) maxMiddle++;
-			}
-			visibleCrumbsCount = 2 + maxMiddle; // primero + último + los del medio
+		while (remaining > 0 && maxMiddle < possibleMiddle) {
+			remaining -= MIN_ITEM_WIDTH;
+			if (remaining >= 0) maxMiddle++;
+		}
+		
+		const calculatedCount = currentCrumbs.length <= 3 
+			? currentCrumbs.length 
+			: Math.min(2 + maxMiddle, currentCrumbs.length);
 
-			if (breadcrumbs.length <= 3) {
-				visibleCrumbsCount = breadcrumbs.length;
-			}
-
-			if (visibleCrumbsCount > breadcrumbs.length) {
-				visibleCrumbsCount = breadcrumbs.length;
-			}
+		if (calculatedCount !== untrack(() => visibleCrumbsCount)) {
+			visibleCrumbsCount = calculatedCount;
 		}
 	});
 </script>

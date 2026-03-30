@@ -9,11 +9,19 @@
 		ChevronDown,
 		ChevronUp
 	} from 'lucide-svelte';
+	import type { ComponentType } from 'svelte';
 	import { slide } from 'svelte/transition';
 
 	let showAllActions = $state(false);
 
-	let { solicitudesPendientes = 0, mensajesNoLeidos = 0, proyectosPendienteCierre = 0, estaVerificado = false, showEvidenceModal = false, onExportPDF = () => {} } = $props<{
+	let {
+		solicitudesPendientes = 0,
+		mensajesNoLeidos = 0,
+		proyectosPendienteCierre = 0,
+		estaVerificado = false,
+		showEvidenceModal = $bindable(false),
+		onExportPDF = () => {}
+	} = $props<{
 		solicitudesPendientes?: number;
 		mensajesNoLeidos?: number;
 		proyectosPendienteCierre?: number;
@@ -24,7 +32,7 @@
 
 	interface Accion {
 		label: string;
-		icon: any;
+		icon: ComponentType;
 		href?: string;
 		onClick?: () => void;
 		primary?: boolean;
@@ -52,31 +60,37 @@
 		}
 	}));
 
-	const acciones = $derived.by(() => [
-		{
-			label: 'Crear proyecto',
-			icon: Plus,
-			href: estaVerificado ? '/proyectos/crear' : undefined,
-			primary: true,
-			disabled: !estaVerificado,
-			title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
-		},
-		{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
-		{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
-		{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
-		{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
-		{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' }
-	] as Accion[]);
+	const acciones = $derived.by(
+		() =>
+			[
+				{
+					label: 'Crear proyecto',
+					icon: Plus,
+					href: estaVerificado ? '/proyectos/crear' : undefined,
+					primary: true,
+					disabled: !estaVerificado,
+					title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
+				},
+				{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
+				{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
+				{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
+				{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
+				{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' }
+			] as Accion[]
+	);
 
-	const accionesExtras = $derived.by(() => [
-		{
-			label: 'Exportar reporte',
-			icon: FileText,
-			onClick: onExportPDF,
-			secondary: true,
-			color: 'rose'
-		}
-	] as Accion[]);
+	const accionesExtras = $derived.by(
+		() =>
+			[
+				{
+					label: 'Exportar reporte',
+					icon: FileText,
+					onClick: onExportPDF,
+					secondary: true,
+					color: 'rose'
+				}
+			] as Accion[]
+	);
 
 	const todasLasAcciones = $derived([...acciones, ...accionesExtras]);
 </script>
@@ -84,9 +98,10 @@
 <div class="relative mb-12">
 	<!-- Desktop Layout (Grid) -->
 	<div class="hidden sm:grid sm:grid-cols-2 sm:gap-4 md:grid-cols-4 xl:grid-cols-7">
-		{#each todasLasAcciones as accion}
+		{#each todasLasAcciones as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						title={accion.title}
@@ -106,11 +121,12 @@
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<accion.icon size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
 						onclick={accion.onClick}
 						disabled={accion.disabled}
@@ -131,20 +147,20 @@
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<accion.icon size={18} />
+							<Icono size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</button>
 				{/if}
 
 				<!-- Dinamically rendered Badges -->
-				{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+				{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 					<div
 						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {badgeConfig[
-							accion.label
-						].color} {badgeConfig[accion.label].shadow}"
+							accion.label as keyof typeof badgeConfig
+						].color} {badgeConfig[accion.label as keyof typeof badgeConfig].shadow}"
 					>
-						{badgeConfig[accion.label].count}
+						{badgeConfig[accion.label as keyof typeof badgeConfig].count}
 					</div>
 				{/if}
 			</div>
@@ -154,9 +170,10 @@
 	<!-- Mobile Layout (Stack + Expandable) -->
 	<div class="flex flex-col gap-3 sm:hidden">
 		<!-- Featured Actions (Always Visible) -->
-		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && a.color === 'rose')) as accion}
+		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && a.color === 'rose')) as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
+					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						title={accion.title}
@@ -171,10 +188,11 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<accion.icon size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</a>
 				{:else}
+					{@const Icono = accion.icon}
 					<button
 						onclick={accion.onClick}
 						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
@@ -187,7 +205,7 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<accion.icon size={22} weight="bold" />
+						<Icono size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</button>
 				{/if}
@@ -197,32 +215,36 @@
 		<!-- Secondary Actions (Expandable) -->
 		{#if showAllActions}
 			<div transition:slide={{ duration: 300, axis: 'y' }} class="grid grid-cols-2 gap-3 pt-2">
-				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && a.color === 'rose')) as accion}
-					<div class="relative w-full">
+				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && a.color === 'rose')) as accion (accion.label)}
+					<div
+						class="group relative flex flex-col items-center justify-center gap-3 transition-all active:scale-95"
+					>
 						{#if accion.href}
+							{@const Icono = accion.icon}
 							<a
 								href={accion.href}
-								class="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
+								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<accion.icon size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</a>
 						{:else}
+							{@const Icono = accion.icon}
 							<button
 								onclick={accion.onClick}
 								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<accion.icon size={20} />
+								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</button>
 						{/if}
 
 						<!-- Badges -->
-						{#if badgeConfig[accion.label] && badgeConfig[accion.label].count > 0}
+						{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 							<div
 								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {badgeConfig[
-									accion.label
-								].color} {badgeConfig[accion.label].shadow}"
+									accion.label as keyof typeof badgeConfig
+								].color} {badgeConfig[accion.label as keyof typeof badgeConfig].shadow}"
 							></div>
 						{/if}
 					</div>

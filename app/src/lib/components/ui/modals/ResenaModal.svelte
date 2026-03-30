@@ -1,23 +1,31 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { Resena, TipoObjetoResena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let { mostrar = false, titulo = 'Agregar reseña', placeholder = 'Compartí tu experiencia...', tipoObjeto = 'usuario', idObjeto = undefined, maxCaracteres = 500 }: { mostrar?: boolean; titulo?: string; placeholder?: string; tipoObjeto?: string; idObjeto?: number; maxCaracteres?: number } = $props();
-
-	const dispatch = createEventDispatcher<{
-		guardar: Resena;
-		cerrar: void;
-	}>();
+	let { 
+		mostrar = false, 
+		titulo = 'Agregar reseña', 
+		placeholder = 'Compartí tu experiencia...', 
+		tipoObjeto = 'usuario', 
+		idObjeto = undefined, 
+		maxCaracteres = 500,
+		onguardar,
+		oncerrar
+	}: { 
+		mostrar?: boolean; 
+		titulo?: string; 
+		placeholder?: string; 
+		tipoObjeto?: string; 
+		idObjeto?: number; 
+		maxCaracteres?: number;
+		onguardar: (resena: Resena) => void;
+		oncerrar: () => void;
+	} = $props();
 
 	let nuevaResena = $state({ contenido: '', puntaje: 5 });
 
 	function abrir() {
 		nuevaResena = { contenido: '', puntaje: 5 };
-	}
-
-	function cerrar() {
-		dispatch('cerrar');
 	}
 
 	function guardar() {
@@ -27,8 +35,8 @@
 			tipo_objeto: tipoObjeto as TipoObjetoResena,
 			id_objeto: idObjeto
 		};
-		dispatch('guardar', resena);
-		cerrar();
+		onguardar(resena);
+		oncerrar();
 	}
 
 	// Abrir modal cuando mostrar cambia a true
@@ -45,7 +53,7 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 		role="presentation"
-		onclick={cerrar}
+		onclick={oncerrar}
 	>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -59,7 +67,7 @@
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="text-xl font-semibold text-gray-900">{titulo}</h3>
 				<button
-					onclick={cerrar}
+					onclick={oncerrar}
 					aria-label="Cerrar modal"
 					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
@@ -80,14 +88,14 @@
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>
 						<div class="flex items-center gap-1">
-							{#each Array(5).keys() as i (i)}
+							{#each Array.from({ length: 5 }).map((_, i: number) => i + 1) as p (p)}
 								<button
 									type="button"
-									onclick={() => (nuevaResena.puntaje = i + 1)}
-									class="h-8 w-8 {i < nuevaResena.puntaje
+									onclick={() => (nuevaResena.puntaje = p)}
+									class="h-8 w-8 {p <= nuevaResena.puntaje
 										? 'text-amber-400'
 										: 'text-gray-300'} transition-colors hover:text-amber-400"
-									aria-label="Puntaje {i + 1} de 5"
+									aria-label="Puntaje {p} de 5"
 								>
 									<svg fill="currentColor" viewBox="0 0 20 20">
 										<path
@@ -130,7 +138,7 @@
 						variant="secondary"
 						size="md"
 						type="button"
-						onclick={cerrar}
+						onclick={oncerrar}
 						customClass="w-full md:w-auto"
 					/>
 					<Button

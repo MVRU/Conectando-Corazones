@@ -45,8 +45,8 @@
 		}
 	};
 
-	let config = $derived(CONFIG[estado ?? 'en_curso'] || CONFIG.en_curso);
-	let label = $derived(ESTADO_LABELS[estado ?? 'en_curso'] || 'Desconocido');
+	let config = $derived(CONFIG[estado as keyof typeof CONFIG] || CONFIG.en_curso);
+	let label = $derived(ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS] || 'Desconocido');
 </script>
 
 <span

@@ -29,9 +29,9 @@
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
 
 	let {
-		tiposParticipacionSeleccionados = [],
-		participacionesPermitidas = [],
-		errores = {},
+		tiposParticipacionSeleccionados = $bindable([]),
+		participacionesPermitidas = $bindable([]),
+		errores = $bindable({}),
 		limpiarError,
 		esEdicionRestringida = false,
 		participacionesOriginales = [],
@@ -64,15 +64,15 @@
 		if (tiposParticipacionSeleccionados.includes(tipo)) {
 			// No se puede quitar un tipo que ya existe en el proyecto original en modo edición
 			const esOriginal = participacionesOriginales.some(
-				(p) => p.tipo_participacion?.descripcion === tipo
+				(p: ParticipacionPermitida) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (esEdicionRestringida && esOriginal && !esAdmin) {
 				return;
 			}
 
-			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
+			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
 			participacionesPermitidas = participacionesPermitidas.filter(
-				(p) => p.tipo_participacion?.descripcion !== tipo
+				(p: ParticipacionForm) => p.tipo_participacion?.descripcion !== tipo
 			);
 		} else {
 			tiposParticipacionSeleccionados = [...tiposParticipacionSeleccionados, tipo];
@@ -107,7 +107,7 @@
 		} else if (field === 'objetivo') {
 			const valNum = value as number | undefined;
 			const original = participacionesOriginales.find(
-				(p) =>
+				(p: ParticipacionPermitida) =>
 					p.id_participacion_permitida ===
 					participacionesPermitidas[index].id_participacion_permitida
 			);
@@ -169,13 +169,13 @@
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
-		participacionesPermitidas = participacionesPermitidas.filter((_, i) => i !== index);
+		participacionesPermitidas = participacionesPermitidas.filter((_: any, i: number) => i !== index);
 		if (tipo) {
 			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(
-				(p) => p.tipo_participacion?.descripcion === tipo
+				(p: ParticipacionForm) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (!tieneOtrosDelMismoTipo) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t) => t !== tipo);
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
 			}
 		}
 	}
@@ -194,11 +194,11 @@
 	}
 
 	let tiposDisponibles = $derived(tiposParticipacion.filter(
-		(t) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+		(t: TipoParticipacion) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
 	));
 
 	let cantidadDonacionesEspecie = $derived(participacionesPermitidas.filter(
-		(p) => p.tipo_participacion?.descripcion === 'Especie'
+		(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
 	).length);
 
 	let limiteEspecieAlcanzado = $derived(cantidadDonacionesEspecie >= 10);
@@ -257,7 +257,7 @@
 		{@const esOriginal = esEdicionRestringida && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
 			? participacionesOriginales.find(
-					(p) => p.id_participacion_permitida === participacion.id_participacion_permitida
+					(p: ParticipacionPermitida) => p.id_participacion_permitida === participacion.id_participacion_permitida
 				)
 			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
@@ -267,7 +267,7 @@
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
 					{TIPO_PARTICIPACION_LABELS[
-						participacion.tipo_participacion?.descripcion || 'Voluntariado'
+						(participacion.tipo_participacion?.descripcion || 'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
 					]}
 					{#if esOriginal && esEdicionRestringida && !esAdmin}
 						<span

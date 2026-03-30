@@ -73,8 +73,8 @@
         transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});
         filter:blur({visible ? 0 : 6}px);
         transition:opacity .8s cubic-bezier(.45,0,.2,1),
-                  transform .8s cubic-bezier(.45,0,.2,1),
-                  filter   .8s cubic-bezier(.45,0,.2,1);
+                   transform .8s cubic-bezier(.45,0,.2,1),
+                   filter   .8s cubic-bezier(.45,0,.2,1);
     "
 >
 	<div
@@ -94,11 +94,10 @@
 
 	{#if testimoniosVisibles.length > 0}
 		<!-- Carrusel -->
-		<!-- ! Ignorar el error que aparece, está ok -->
 		<div
 			use:swipe={{}}
-			onswipeleft={mostrarSiguiente}
-			onswiperight={mostrarAnterior}
+			{...{ onswipeleft: mostrarSiguiente }}
+			{...{ onswiperight: mostrarAnterior }}
 			class="relative mx-auto flex w-full max-w-5xl flex-col items-center gap-6"
 		>
 			<!-- Contenedor de tarjetas -->

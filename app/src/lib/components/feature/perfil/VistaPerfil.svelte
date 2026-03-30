@@ -157,7 +157,7 @@
 		modales.abrir('resena');
 	}
 
-	async function handleGuardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	async function handleGuardarResena(resena: Resena) {
 		if (!$usuarioStore) return;
 
 		try {
@@ -167,8 +167,8 @@
 				body: JSON.stringify({
 					tipo_objeto: 'usuario',
 					id_objeto: perfilUsuario.id_usuario,
-					contenido: event.detail.contenido,
-					puntaje: event.detail.puntaje
+					contenido: resena.contenido,
+					puntaje: resena.puntaje
 				})
 			});
 
@@ -248,14 +248,14 @@
 	const abrirModalCategorias = crearAbrirModal('categorias');
 	const abrirModalTiposParticipacion = crearAbrirModal('tiposParticipacion');
 
-	function handleGuardarCategorias(event: CustomEvent<Categoria[]>) {
-		actualizarUsuarioCon({ categorias_preferidas: event.detail }, () =>
+	function handleGuardarCategorias(cats: Categoria[]) {
+		actualizarUsuarioCon({ categorias_preferidas: cats }, () =>
 			modales.cerrar('categorias')
 		);
 	}
 
-	function handleGuardarTiposParticipacion(event: CustomEvent<TipoParticipacion[]>) {
-		actualizarUsuarioCon({ tipos_participacion_preferidas: event.detail }, () =>
+	function handleGuardarTiposParticipacion(tipos: TipoParticipacion[]) {
+		actualizarUsuarioCon({ tipos_participacion_preferidas: tipos }, () =>
 			modales.cerrar('tiposParticipacion')
 		);
 	}
@@ -500,8 +500,8 @@
 		tipoObjeto="usuario"
 		idObjeto={perfilUsuario.id_usuario}
 		maxCaracteres={500}
-		on:guardar={handleGuardarResena}
-		on:cerrar={() => modales.cerrar('resena')}
+		onguardar={handleGuardarResena}
+		oncerrar={() => modales.cerrar('resena')}
 	/>
 {/if}
 
@@ -559,8 +559,8 @@
 		categoriasSeleccionadas={perfilUsuario.categorias_preferidas || []}
 		{categorias}
 		{guardando}
-		on:guardar={handleGuardarCategorias}
-		on:cerrar={() => modales.cerrar('categorias')}
+		onguardar={handleGuardarCategorias}
+		oncerrar={() => modales.cerrar('categorias')}
 	/>
 {/if}
 
@@ -570,8 +570,8 @@
 		tiposSeleccionados={perfilUsuario.tipos_participacion_preferidas || []}
 		{tiposParticipacion}
 		{guardando}
-		on:guardar={handleGuardarTiposParticipacion}
-		on:cerrar={() => modales.cerrar('tiposParticipacion')}
+		onguardar={handleGuardarTiposParticipacion}
+		oncerrar={() => modales.cerrar('tiposParticipacion')}
 	/>
 {/if}
 

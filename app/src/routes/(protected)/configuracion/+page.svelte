@@ -397,7 +397,7 @@
 	titulo="Eliminar cuenta"
 	anchoMaximo="max-w-sm"
 	cerrarAlClickearFondo={!isLoadingDelete}
-	on:cerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+	oncerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
 >
 	<div class="flex flex-col items-center py-2 text-center">
 		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
@@ -409,7 +409,6 @@
 		</p>
 	</div>
 	{#snippet footer()}
-	
 			<Button
 				label="Sí, eliminar"
 				loadingLabel="Eliminando..."
@@ -423,6 +422,5 @@
 				disabled={isLoadingDelete}
 				onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
 			/>
-		
 	{/snippet}
 </Modal>

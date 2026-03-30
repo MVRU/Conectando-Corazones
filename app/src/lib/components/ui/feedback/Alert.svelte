@@ -37,42 +37,44 @@
 			title: 'text-red-800',
 			text: 'text-red-700'
 		}
-	};
+	} satisfies Record<string, Record<string, string>>;
 
 	const icons = {
 		info: Info,
 		success: CircleCheck,
 		warning: TriangleAlert,
 		error: CircleAlert
-	};
+	} as const;
 
-	const SvelteComponent = $derived(icons[variant]);
+	type VariantKey = keyof typeof icons;
+
+	const SvelteComponent = $derived(icons[variant as VariantKey]);
 </script>
 
 <div
-	class="rounded-lg border p-4 shadow-sm transition-all duration-300 {styles[variant].container}"
+	class="rounded-lg border p-4 shadow-sm transition-all duration-300 {styles[variant as VariantKey].container}"
 	role="alert"
 	transition:fade={{ duration: 200 }}
 >
 	<div class="flex items-start gap-4">
 		<div class="mt-0.5 flex-shrink-0">
 			<SvelteComponent
-				class="h-5 w-5 {styles[variant].icon}"
+				class="h-5 w-5 {styles[variant as VariantKey].icon}"
 				strokeWidth={2}
 			/>
 		</div>
 		<div class="flex-1">
 			{#if title}
-				<h3 class="mb-1 text-base font-semibold {styles[variant].title}">
+				<h3 class="mb-1 text-base font-semibold {styles[variant as VariantKey].title}">
 					{title}
 				</h3>
 			{/if}
 			{#if message}
-				<div class="text-sm font-medium {styles[variant].text}">
+				<div class="text-sm font-medium {styles[variant as VariantKey].text}">
 					{message}
 				</div>
 			{/if}
-			<div class="text-sm {styles[variant].text}">
+			<div class="text-sm {styles[variant as VariantKey].text}">
 				{@render children?.()}
 			</div>
 		</div>

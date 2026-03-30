@@ -27,7 +27,7 @@
 				date.setDate(today.getDate() - ((weeksToShow - 1 - w) * 7 + (6 - d)));
 				const dateStr = date.toISOString().split('T')[0];
 
-				const found = data.find((d) => d.fecha === dateStr);
+				const found = data.find((d: { fecha: string; nivel: number }) => d.fecha === dateStr);
 				week.push({
 					date: dateStr,
 					intensity: found ? found.intensidad : 0

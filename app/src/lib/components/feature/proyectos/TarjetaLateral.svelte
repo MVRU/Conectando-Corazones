@@ -111,7 +111,7 @@
 		};
 	}
 
-	const unidadInfo = getUnidadInfo(unicoObjetivo, multiplesObjetivos);
+	let unidadInfo = $derived(getUnidadInfo(unicoObjetivo, multiplesObjetivos));
 
 	function ProyectoAbierto() {
 		return getEstadoCodigo(proyecto.estado, proyecto.estado_id) === 'en_curso';

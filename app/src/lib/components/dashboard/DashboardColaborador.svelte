@@ -30,7 +30,7 @@
 
 	// Animación y Scroll
 	let mounted = false;
-	let filterScrollContainer: HTMLDivElement = $state();
+	let filterScrollContainer = $state<HTMLDivElement | undefined>(undefined);
 	let showFilterIndicator = false;
 	let showFilters = $state(false);
 	let showLeftGradient = $state(false);
@@ -423,9 +423,9 @@
 					nuevasInstituciones: data.metricas.nuevasInstituciones,
 					proximoCierre: data.metricas.diasProximoCierre
 				}}
-				on:clickInstituciones={() => (showInstitucionesModal = true)}
-				on:clickProyectos={() => (showProjectStats = true)}
-				on:clickAgenda={() => (showCalendarStats = true)}
+				onclickInstituciones={() => (showInstitucionesModal = true)}
+				onclickProyectos={() => (showProjectStats = true)}
+				onclickAgenda={() => (showCalendarStats = true)}
 			/>
 		</div>
 
