@@ -2,6 +2,9 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { XMark } from '@steeze-ui/heroicons';
 	import { scale } from 'svelte/transition';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	let {
 		abierto = $bindable(false),
@@ -34,8 +37,17 @@
 	});
 
 	function cerrar() {
+		// Solo ejecutar una vez: idempotente
+		if (!abierto) return;
 		abierto = false;
+		// Soportar ambas APIs: callback Svelte 5 y evento Svelte 4
 		if (onCerrar) onCerrar();
+		dispatch('cerrar');
+	}
+
+	function sincronizarEstado() {
+		// Solo sincronizar estado sin ejecutar callbacks (se llama desde onclose)
+		abierto = false;
 	}
 
 	function manejarClickFondo(e: MouseEvent) {
@@ -47,7 +59,7 @@
 
 <dialog
 	bind:this={dialogo}
-	onclose={cerrar}
+	onclose={sincronizarEstado}
 	onclick={manejarClickFondo}
 	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();
@@ -94,8 +106,6 @@
 		</div>
 	{/if}
 </dialog>
-
-
 
 <style>
 	dialog::backdrop {

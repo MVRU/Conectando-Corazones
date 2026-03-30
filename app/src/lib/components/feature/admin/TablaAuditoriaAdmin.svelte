@@ -2,6 +2,14 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { RegistroAuditoriaAdminDto } from '$lib/domain/types/dto/PanelAdmin';
 
+	// TODO(Tomás): Agregar más filtros a la bitácora de auditoría.
+	// Actualmente solo filtra por idObjeto y usuarioId.
+	// Filtros faltantes considerados:
+	// - Rango de fechas (created_at)
+	// - Tipo de objeto (tipo_objeto: 'Usuario', 'Verificacion', etc.)
+	// - Acción (accion: 'Crear', 'Actualizar', 'Eliminar', etc.)
+	// - Atributo afectado (atributo_afectado)
+
 	let {
 		logs = [],
 		loading = false,
