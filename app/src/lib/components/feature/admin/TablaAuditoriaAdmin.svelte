@@ -1,45 +1,81 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { RegistroAuditoriaAdminDto } from '$lib/domain/types/dto/PanelAdmin';
 
-	// TODO(Tomás): Agregar más filtros a la bitácora de auditoría.
-	// Actualmente solo filtra por idObjeto y usuarioId.
-	// Filtros faltantes considerados:
-	// - Rango de fechas (created_at)
-	// - Tipo de objeto (tipo_objeto: 'Usuario', 'Verificacion', etc.)
-	// - Acción (accion: 'Crear', 'Actualizar', 'Eliminar', etc.)
-	// - Atributo afectado (atributo_afectado)
+	interface FiltrosAuditoriaAdmin {
+		idObjeto: string | number;
+		usuarioId: string | number;
+		tipoObjeto: string;
+		accion: string;
+		atributoAfectado: string;
+		fechaDesde: string;
+		fechaHasta: string;
+		texto: string;
+	}
 
 	let {
 		logs = [],
 		loading = false,
-		filtros = { idObjeto: '', usuarioId: '' },
+		filtros = {
+			idObjeto: '',
+			usuarioId: '',
+			tipoObjeto: '',
+			accion: '',
+			atributoAfectado: '',
+			fechaDesde: '',
+			fechaHasta: '',
+			texto: ''
+		},
 		paginacion = { total: 0, page: 1, pageSize: 100 },
 		onBuscar = undefined,
 		onCambiarPagina = undefined
 	} = $props<{
 		logs?: RegistroAuditoriaAdminDto[];
 		loading?: boolean;
-		filtros?: { idObjeto: string | number; usuarioId: string | number };
+		filtros?: FiltrosAuditoriaAdmin;
 		paginacion?: { total: number; page: number; pageSize: number };
-		onBuscar?: (data: { idObjeto: string | number; usuarioId: string | number }) => void;
+		onBuscar?: (data: FiltrosAuditoriaAdmin) => void;
 		onCambiarPagina?: (data: { page: number }) => void;
 	}>();
 
 	let innerFiltros = $state({ ...filtros });
+	let serializedFiltros = $derived(JSON.stringify(filtros));
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 		if (onBuscar) onBuscar(innerFiltros);
 	}
 
+	function limpiarFiltros() {
+		innerFiltros = {
+			idObjeto: '',
+			usuarioId: '',
+			tipoObjeto: '',
+			accion: '',
+			atributoAfectado: '',
+			fechaDesde: '',
+			fechaHasta: '',
+			texto: ''
+		};
+		onBuscar?.(innerFiltros);
+	}
+
+	$effect(() => {
+		serializedFiltros;
+		innerFiltros = { ...filtros };
+	});
+
 	let totalPaginas = $derived(Math.ceil(paginacion.total / paginacion.pageSize));
+
+	function renderValor(valor: string | null | undefined) {
+		if (!valor || valor.trim() === '') return 'Sin valor';
+		return valor;
+	}
 </script>
 
 <div class="space-y-6">
 	<!-- Filtros de búsqueda -->
 	<section class="rounded-2xl border border-white/5 bg-white/5 p-6 backdrop-blur-md shadow-sm">
-		<form class="grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end" onsubmit={handleSubmit}>
+		<form class="grid gap-4 md:grid-cols-4 md:items-end" onsubmit={handleSubmit}>
 			<div class="space-y-2">
 				<label for="id_objeto" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">ID del Objeto</label>
 				<input
@@ -60,13 +96,79 @@
 					bind:value={innerFiltros.usuarioId}
 				/>
 			</div>
-			<div class="flex">
+			<div class="space-y-2">
+				<label for="tipo_objeto" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Tipo de objeto</label>
+				<input
+					id="tipo_objeto"
+					type="text"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					placeholder="Ej: Usuario, Verificacion"
+					bind:value={innerFiltros.tipoObjeto}
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="accion" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Acción</label>
+				<input
+					id="accion"
+					type="text"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					placeholder="Ej: Actualizar, Crear"
+					bind:value={innerFiltros.accion}
+				/>
+			</div>
+			<div class="space-y-2 md:col-span-2">
+				<label for="atributo_afectado" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Atributo afectado</label>
+				<input
+					id="atributo_afectado"
+					type="text"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					placeholder="Ej: estado, rol"
+					bind:value={innerFiltros.atributoAfectado}
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="fecha_desde" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Desde</label>
+				<input
+					id="fecha_desde"
+					type="date"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					bind:value={innerFiltros.fechaDesde}
+				/>
+			</div>
+			<div class="space-y-2">
+				<label for="fecha_hasta" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Hasta</label>
+				<input
+					id="fecha_hasta"
+					type="date"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					bind:value={innerFiltros.fechaHasta}
+				/>
+			</div>
+			<div class="space-y-2 md:col-span-2">
+				<label for="texto" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">Texto libre</label>
+				<input
+					id="texto"
+					type="text"
+					class="w-full rounded-lg border border-white/10 bg-[#151730] px-4 py-2.5 text-sm text-white focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50"
+					placeholder="Busca en justificación, valores, admin, acción..."
+					bind:value={innerFiltros.texto}
+				/>
+			</div>
+			<div class="flex gap-2 md:col-span-4 md:justify-end">
 				<button
 					type="submit"
-					class="w-full rounded-lg bg-white/5 px-6 py-2.5 text-sm font-bold text-white border border-white/10 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50 h-[42px]"
+					class="rounded-lg bg-white/5 px-6 py-2.5 text-sm font-bold text-white border border-white/10 transition-all hover:bg-white/10 active:scale-95 disabled:opacity-50 h-[42px]"
 					disabled={loading}
 				>
 					Filtrar
+				</button>
+				<button
+					type="button"
+					class="rounded-lg border border-white/10 bg-transparent px-6 py-2.5 text-sm font-bold text-slate-300 transition-all hover:bg-white/5"
+					disabled={loading}
+					onclick={limpiarFiltros}
+				>
+					Limpiar
 				</button>
 			</div>
 		</form>
@@ -94,7 +196,7 @@
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Admin</th>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Acción</th>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Objeto</th>
-						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Detalles</th>
+						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Detalle del cambio</th>
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-white/5">
@@ -112,9 +214,11 @@
 								</td>
 								<td class="px-6 py-4">
 									<div class="text-white font-bold transition-colors group-hover:text-emerald-400">
-										@{log.username_admin}
+										{log.admin?.username ? `@${log.admin.username}` : 'Sistema'}
 									</div>
-									<div class="text-[10px] text-slate-500">ID: {log.usuario_admin_id}</div>
+									<div class="text-[10px] text-slate-500">
+										ID: {log.usuario_id ?? 'N/A'}
+									</div>
 								</td>
 								<td class="px-6 py-4">
 									<span class="inline-flex items-center rounded-sm bg-blue-500/10 px-2 py-0.5 text-[11px] font-bold text-blue-400 border border-blue-500/20 uppercase tracking-tighter">
@@ -126,9 +230,23 @@
 									<div class="text-[10px] text-slate-500 font-mono">#{log.id_objeto}</div>
 								</td>
 								<td class="px-6 py-4">
-									<p class="max-w-xs text-xs text-slate-400 leading-relaxed italic">
-										"{log.detalles}"
-									</p>
+									<div class="max-w-md space-y-1 text-xs">
+										<p class="text-slate-300">
+											<span class="font-semibold text-slate-400">Atributo:</span>
+											{log.atributo_afectado}
+										</p>
+										<p class="text-slate-300">
+											<span class="font-semibold text-slate-400">Anterior:</span>
+											<span class="font-mono">{renderValor(log.valor_anterior)}</span>
+										</p>
+										<p class="text-slate-300">
+											<span class="font-semibold text-slate-400">Nuevo:</span>
+											<span class="font-mono">{renderValor(log.valor_nuevo)}</span>
+										</p>
+										{#if log.justificacion}
+											<p class="text-slate-400 italic">"{log.justificacion}"</p>
+										{/if}
+									</div>
 								</td>
 							</tr>
 						{/each}
