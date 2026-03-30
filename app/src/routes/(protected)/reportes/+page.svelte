@@ -8,6 +8,11 @@
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
 
+	// TODO(Tomás): Reportes está duplicado en dos páginas:
+	// - /reportes (general, compartida entre admin/colaborador/institución)
+	// - /admin/reportes (panel admin específico)
+	// Decidir cuál mantener y consolidar en una sola ruta.
+
 	export let data;
 
 	$: reportes = data.reportes;
