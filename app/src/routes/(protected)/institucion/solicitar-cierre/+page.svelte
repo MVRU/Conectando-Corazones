@@ -1,56 +1,23 @@
 <!-- TODO: corregir esta ruta -->
 
 <script lang="ts">
-	import { page } from '$app/state';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
+	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
 	import type { PageData } from './$types';
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	let proyectoSeleccionado = $derived(page.url.searchParams.get('proyecto') || '');
-
+	let mounted = $state(false);
+	let proyectoSeleccionado = $state<string>('');
 	let enviandoSolicitud = $state(false);
 	let solicitudEnviada = $state(false);
-	let mounted = $state(false);
 	let objetivosExpandidos = $state<Record<number, boolean>>({});
-
-	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
-	let accesoEstado = $derived.by(() => {
-		if (!mounted || $isLoading) return { denegado: false, mensaje: '' };
-		
-		if (!$isAuthenticated || !$usuario) return { denegado: true, mensaje: 'Redirigiendo...' };
-		if (!$isInstitucion) return { denegado: true, mensaje: 'Acceso exclusivo para instituciones.' };
-
-		const verificacion = data.verificacion;
-		if (!verificacion) return { denegado: true, mensaje: 'No se encontró información de verificación.' };
-		if (verificacion.estado !== 'aprobada') {
-			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
-		}
-
-		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
-			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
-		}
-
-		return { denegado: false, mensaje: '' };
-	});
-
-	$effect(() => {
-		mounted = true;
-	});
-
-	$effect(() => {
-		if (mounted && !$isLoading && (!$isAuthenticated || !$usuario)) {
-			goto('/iniciar-sesion');
-		}
-	});
-
+	let modalReporteAbierto = $state(false);
 	let checks = $state({
 		evidenciasSuficientes: false,
 		archivosLegibles: false,
@@ -59,6 +26,29 @@
 		conformidadRevision: false
 	});
 
+	$effect(() => {
+		mounted = true;
+	});
+
+	$effect(() => {
+		if (mounted && !$isLoading && (!$isAuthenticated || !$usuario)) {
+			// Navigation handled by the auth guard in the layout/middleware
+			window.location.href = '/iniciar-sesion';
+		}
+	});
+
+	// Sync URL param with local state on mount and after navigation
+	$effect.pre(() => {
+		if (mounted && typeof window !== 'undefined') {
+			const params = new URL(window.location.href).searchParams;
+			proyectoSeleccionado = params.get('proyecto') || '';
+		}
+	});
+
+	// Derived state - order matters: define data dependencies first
+	let proyectoActual = $derived(data.proyectoActual);
+	let solicitudPendienteExistente = $derived(data.solicitudPendiente);
+	let solicitudesRechazadas = $derived(data.solicitudesRechazadas || []);
 	let proyectosDisponibles = $derived(
 		(data.proyectos || []).map((p: { id_proyecto: number; titulo: string }) => ({
 			value: String(p.id_proyecto),
@@ -66,61 +56,90 @@
 		}))
 	);
 
-	let sinProyectosPendientes = $derived(
-		mounted && !accesoEstado.denegado && $usuario && proyectosDisponibles.length === 0
-	);
-
-	let proyectoActual = $derived(data.proyectoActual);
-
-	let solicitudPendienteExistente = $derived(data.solicitudPendiente);
-
 	let tieneSolicitudPendiente = $derived(!!solicitudPendienteExistente);
-
 	let proyectoPerteneceAInstitucion = $derived(
 		proyectoActual
 			? proyectoActual.institucion_id === $usuario?.id_usuario
 			: false
 	);
-
-	let solicitudesRechazadas = $derived(data.solicitudesRechazadas);
-
-	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
-	let muchosRechazos = $derived(solicitudesRechazadas.length >= 3);
+	let muchosRechazos = $derived((solicitudesRechazadas?.length || 0) >= 3);
 	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
 
+	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
+	let accesoEstado = $derived.by(() => {
+		// Durante carga, no mostrar mensajes de error
+		if (!mounted || $isLoading) return { denegado: false, mensaje: '' };
+
+		// Verificar autenticación básica
+		if (!$isAuthenticated || !$usuario) return { denegado: true, mensaje: 'Redirigiendo...' };
+		if (!$isInstitucion) return { denegado: true, mensaje: 'Acceso exclusivo para instituciones.' };
+
+		// Verificar estado de aprobación de la institución
+		const verificacion = data.verificacion;
+		if (verificacion && verificacion.estado !== 'aprobada') {
+			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
+		}
+
+		// Verificar que el proyecto seleccionado pertenece a la institución del usuario
+		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
+			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
+		}
+
+		return { denegado: false, mensaje: '' };
+	});
+
+	let sinProyectosPendientes = $derived(
+		mounted && !accesoEstado.denegado && $usuario && (proyectosDisponibles?.length || 0) === 0
+	);
+
 	let objetivosDelProyecto = $derived(data.objetivos || []);
-	let evidenciasPorObjetivo = $derived(
-		objetivosDelProyecto.map((obj: { id_participacion_permitida: number }) => {
-			// Objetivos con progreso calculado dinámicamente en el servidor
-			const evidenciasRelacionadas = (data.evidencias || []).filter(
-				(ev: { id_participacion_permitida: number | null }) =>
-					ev.id_participacion_permitida === obj.id_participacion_permitida
+	let evidenciasPorObjetivo = $derived.by(() => {
+		const objetivos = objetivosDelProyecto || [];
+		const evidencias = data.evidencias || [];
+
+		return objetivos.map((obj: { id_participacion_permitida?: number | null }) => {
+			const objId = obj.id_participacion_permitida;
+			if (!objId) {
+				return {
+					objetivo: obj,
+					evidencias: [],
+					evidenciasEntrada: [],
+					evidenciasSalida: [],
+					totalArchivos: 0
+				};
+			}
+
+			const evidenciasRelacionadas = evidencias.filter(
+				(ev: { id_participacion_permitida?: number | null }) =>
+					ev.id_participacion_permitida === objId
 			);
+
 			const totalArch = evidenciasRelacionadas.reduce(
 				(sum: number, ev: { archivos?: unknown[] }) => sum + (ev.archivos?.length || 0),
 				0
 			);
+
 			return {
 				objetivo: obj,
 				evidencias: evidenciasRelacionadas,
 				evidenciasEntrada: evidenciasRelacionadas.filter(
-					(ev: { tipo_evidencia: string }) => ev.tipo_evidencia === 'entrada'
+					(ev: { tipo_evidencia?: string }) => ev.tipo_evidencia === 'entrada'
 				),
 				evidenciasSalida: evidenciasRelacionadas.filter(
-					(ev: { tipo_evidencia: string }) => ev.tipo_evidencia === 'salida'
+					(ev: { tipo_evidencia?: string }) => ev.tipo_evidencia === 'salida'
 				),
 				totalArchivos: totalArch
 			};
-		})
-	);
+		});
+	});
 
 	let todosLosObjetivosTienenEvidencias = $derived(
-		evidenciasPorObjetivo.every((item: { evidencias: unknown[] }) => item.evidencias.length > 0)
+		(evidenciasPorObjetivo || []).every((item: { evidencias: unknown[] }) => item.evidencias.length > 0)
 	);
 
 	let todosLosChecksCompletos = $derived(Object.values(checks).every((check) => check === true));
 
-	function handleProyectoChange(option: { value: string; label: string }) {
+	async function handleProyectoChange(option: { value: string; label: string }) {
 		const nuevoId = option.value;
 		const url = new URL(window.location.href);
 		if (nuevoId) {
@@ -128,7 +147,9 @@
 		} else {
 			url.searchParams.delete('proyecto');
 		}
-		goto(url.toString(), { keepFocus: true, noScroll: true, replaceState: false });
+		// Use window.location to navigate and trigger server-side data load
+		// The new URL will cause +page.server.ts to run with the new proyecto parameter
+		window.location.href = url.toString();
 	}
 
 	async function enviarSolicitud(event: Event) {
@@ -185,7 +206,7 @@
 
 			const url = new URL(window.location.href);
 			url.searchParams.delete('proyecto');
-			goto(url.toString(), { replaceState: true });
+			window.location.href = url.toString();
 
 			checks = {
 				evidenciasSuficientes: false,
@@ -245,7 +266,7 @@
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
 				<p class="text-slate-600">{accesoEstado.mensaje}</p>
 				<button
-					onclick={() => goto('/')}
+					onclick={() => window.location.href = '/'}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"
 				>
 					Volver al inicio
@@ -261,7 +282,7 @@
 					No tenés ningún proyecto pendiente de solicitud de cierre en este momento.
 				</p>
 				<button
-					onclick={() => goto('/proyectos')}
+					onclick={() => window.location.href = '/proyectos'}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
 				>
 					Ver mis proyectos
@@ -287,7 +308,7 @@
 						<label for="proyecto" class="mb-2 block text-sm font-semibold text-slate-700">
 							Seleccioná el proyecto <span class="text-red-500">*</span>
 						</label>
-						{#if browser && mounted}
+						{#if mounted}
 							<div class="w-full">
 								<Select
 									id="proyecto"
@@ -367,7 +388,7 @@
 						{/if}
 					</div>
 
-					{#if proyectoSeleccionado && evidenciasPorObjetivo.length > 0}
+					{#if proyectoSeleccionado && (evidenciasPorObjetivo?.length || 0) > 0}
 						<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 							<div class="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
 								<h3 class="flex items-center text-lg font-bold text-slate-800">
@@ -379,15 +400,17 @@
 								</p>
 							</div>
 							<div class="space-y-4 p-6">
-								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo.id_participacion_permitida)}
-									<ObjetivoEvidencias
-										{objetivo}
-										{evidencias}
-										{evidenciasEntrada}
-										{evidenciasSalida}
-										{totalArchivos}
-										bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida!]}
-									/>
+								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo?.id_participacion_permitida)}
+									{#if objetivo}
+										<ObjetivoEvidencias
+											{objetivo}
+											evidencias={evidencias || []}
+											evidenciasEntrada={evidenciasEntrada || []}
+											evidenciasSalida={evidenciasSalida || []}
+											totalArchivos={totalArchivos || 0}
+											bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida || 0]}
+										/>
+									{/if}
 								{/each}
 
 								{#if !todosLosObjetivosTienenEvidencias}
@@ -408,7 +431,7 @@
 								{/if}
 							</div>
 						</div>
-					{:else if proyectoSeleccionado && evidenciasPorObjetivo.length === 0}
+					{:else if proyectoSeleccionado && (evidenciasPorObjetivo?.length || 0) === 0}
 						<div
 							class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500"
 						>
@@ -459,10 +482,7 @@
 								<button
 									type="button"
 									class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-red-50 hover:text-red-600"
-									onclick={() =>
-										alert(
-											'Irregularidad reportada. El equipo de auditoría revisará este proyecto.'
-										)}
+									onclick={() => (modalReporteAbierto = true)}
 								>
 									<AlertTriangle class="mr-2 h-4 w-4" />
 									Reportar irregularidad
@@ -496,3 +516,11 @@
 		{/if}
 	</div>
 </main>
+
+<ModalReportarIrregularidad
+	bind:open={modalReporteAbierto}
+	tipo_objeto="Proyecto"
+	id_objeto={proyectoActual?.id_proyecto || 0}
+	nombre_objeto={proyectoActual?.titulo || ''}
+	onclose={() => (modalReporteAbierto = false)}
+/>

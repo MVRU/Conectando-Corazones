@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	if (proyectoId) {
 		const idProyecto = Number(proyectoId);
-		
+
 		// Carga paralela de todo el grafo de datos del proyecto seleccionado
 		const [p, solicitud, rechazadas, evs] = await Promise.all([
 			proyectoRepo.findById(idProyecto),
@@ -68,8 +68,14 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			proyectoActual = p;
 			solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
 			solicitudesRechazadas = rechazadas;
-			evidencias = evs;
-			
+
+			// Filtrar evidencias para asegurar que pertenecen a objetivos válidos del proyecto
+			const objetivosIds = new Set((p.participacion_permitida || []).map((obj: any) => obj.id_participacion_permitida));
+			evidencias = evs.filter((ev: any) => {
+				const hasValidObjectiveId = ev.id_participacion_permitida != null && objetivosIds.has(ev.id_participacion_permitida);
+				return hasValidObjectiveId;
+			});
+
 			// Objetivos con progreso calculado dinámicamente en el servidor
 			objetivos = (p.participacion_permitida || []).map(obj => ({
 				...obj,

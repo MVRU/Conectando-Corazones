@@ -7,17 +7,17 @@
 
 	let {
 		objetivo,
-		evidencias,
-		evidenciasEntrada,
-		evidenciasSalida,
-		totalArchivos,
+		evidencias = [],
+		evidenciasEntrada = [],
+		evidenciasSalida = [],
+		totalArchivos = 0,
 		expandido = $bindable(false)
 	} = $props<{
 		objetivo: ParticipacionPermitida;
-		evidencias: Evidencia[];
-		evidenciasEntrada: Evidencia[];
-		evidenciasSalida: Evidencia[];
-		totalArchivos: number;
+		evidencias?: Evidencia[];
+		evidenciasEntrada?: Evidencia[];
+		evidenciasSalida?: Evidencia[];
+		totalArchivos?: number;
 		expandido?: boolean;
 	}>();
 
@@ -184,7 +184,7 @@
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}
 											<div class="space-y-2">
-												{#each evidencia.archivos as archivo}
+												{#each evidencia.archivos as archivo}	
 													<ArchivoPreview {archivo} />
 												{/each}
 											</div>
