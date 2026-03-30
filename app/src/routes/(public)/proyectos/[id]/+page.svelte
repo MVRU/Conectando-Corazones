@@ -30,7 +30,7 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
-	import { ordenarPorProgreso, calcularProgresoTotal } from '$lib/utils/util-progreso';
+	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
@@ -215,12 +215,8 @@
 
 	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
 
-	let progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
-	let diasFaltantes = $derived(proyecto?.fecha_fin_tentativa ? diasRestantes(proyecto.fecha_fin_tentativa) : 999);
 	let mostrarAccionFinalizar = $derived(
-		esCreador &&
-		estadoCodigo === 'en_curso' &&
-		(progresoTotal >= 80 || diasFaltantes <= 0)
+		esCreador && estadoCodigo === 'en_curso'
 	);
 
 	function clasesChipColaborador(tipo?: string) {
@@ -534,6 +530,12 @@
 						icon: Pencil,
 						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
 						disabled: !esEditable
+					});
+
+					acc.push({
+						label: 'Finalizar actividades',
+						icon: CheckCircle,
+						onclick: () => (mostrarModalCeseActividades = true)
 					});
 				}
 
