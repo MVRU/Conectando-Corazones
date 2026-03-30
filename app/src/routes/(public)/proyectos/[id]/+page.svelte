@@ -22,6 +22,7 @@
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
+	import ProjectActionCard from '$lib/components/proyectos/ProjectActionCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
@@ -29,13 +30,15 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
-	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
+	import { ordenarPorProgreso, calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
+	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import { toastStore } from '$lib/stores/toast';
+	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 
 	import {
@@ -212,6 +215,14 @@
 
 	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
 
+	let progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
+	let diasFaltantes = $derived(proyecto?.fecha_fin_tentativa ? diasRestantes(proyecto.fecha_fin_tentativa) : 999);
+	let mostrarAccionFinalizar = $derived(
+		esCreador &&
+		estadoCodigo === 'en_curso' &&
+		(progresoTotal >= 80 || diasFaltantes <= 0)
+	);
+
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
 		return t.includes('org') ? 'bg-indigo-50 text-indigo-700' : 'bg-sky-50 text-sky-700';
@@ -260,6 +271,40 @@
 	let mostrarModalCancelar = $state(false);
 	let justificacionCancelacion = $state('');
 	let cancelando = $state(false);
+
+	let mostrarModalCeseActividades = $state(false);
+	let ceseActividades = $state(false);
+
+	async function confirmarCeseActividades() {
+		if (ceseActividades) return;
+		ceseActividades = true;
+		try {
+			const res = await fetch(`/api/proyectos/${proyecto.id_proyecto}/solicitar-cierre`, {
+				method: 'POST'
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.message || 'Error al finalizar actividades');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				message: 'Actividades finalizadas. El proyecto está pendiente de solicitud de cierre.'
+			});
+
+			await invalidateAll();
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+			toastStore.show({
+				variant: 'error',
+				message: errorMsg
+			});
+		} finally {
+			ceseActividades = false;
+			mostrarModalCeseActividades = false;
+		}
+	}
 
 	async function confirmarCancelacion() {
 		if (cancelando) return;
@@ -766,7 +811,14 @@
 
 							<ProyectoProgreso {proyecto} variant="extended" />
 
-							{#if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
+							{#if mostrarAccionFinalizar}
+								<ProjectActionCard
+									title="Finalizá las actividades"
+									description="El proyecto dejará de aceptar nuevos colaboradores. Podrás seguir subiendo evidencias antes del cierre formal."
+									buttonLabel="Finalizar actividades"
+									onClick={() => (mostrarModalCeseActividades = true)}
+								/>
+							{:else if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
 								<div
 									class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:p-5"
 									role="region"
@@ -1905,6 +1957,70 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Modal de Cese de Actividades -->
+<Modal
+	bind:abierto={mostrarModalCeseActividades}
+	titulo="Finalizar actividades"
+	oncerrar={() => (mostrarModalCeseActividades = false)}
+>
+	<div class="space-y-6">
+		<div class="flex flex-col items-center justify-center text-center">
+			<div
+				class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 ring-8 ring-blue-50/50"
+			>
+				<Icon src={CheckCircle} class="h-8 w-8 text-blue-600" />
+			</div>
+			<h3 class="text-xl font-bold text-gray-900">¿Finalizar las actividades?</h3>
+			<p class="mt-2 text-sm text-gray-500">Estás a un paso de completar una gran etapa.</p>
+		</div>
+
+		<div class="rounded-2xl border border-sky-100 bg-sky-50/50 p-5">
+			<h4 class="mb-3 flex items-center gap-2 text-sm font-bold text-sky-900">
+				<Icon src={Clock} class="h-4 w-4" />
+				¿Qué sucede al finalizar?
+			</h4>
+			<ul class="space-y-3 text-sm text-sky-800/80">
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>El proyecto dejará de ser visible para nuevas postulaciones.</span>
+				</li>
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>Podrás subir fotos y documentos como evidencia del impacto.</span>
+				</li>
+			</ul>
+		</div>
+
+		<div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+			<p class="text-xs leading-relaxed text-amber-800">
+				<strong class="mb-1 block">Nota importante:</strong>
+				Esta acción no cierra legalmente el proyecto, pero es necesaria para prepararlo para la auditoría
+				y validación final de los colaboradores.
+			</p>
+		</div>
+	</div>
+
+	{#snippet footer()}
+		<div class="flex flex-col-reverse gap-3 sm:flex-row">
+			<Button
+				label="Todavía no"
+				variant="secondary"
+				size="sm"
+				customClass="flex-1"
+				onclick={() => (mostrarModalCeseActividades = false)}
+			/>
+			<Button
+				label="Sí, finalizar actividades"
+				variant="primary"
+				size="sm"
+				customClass="flex-1"
+				loading={ceseActividades}
+				onclick={confirmarCeseActividades}
+			/>
+		</div>
+	{/snippet}
+</Modal>
 
 <style>
 	@keyframes fade-up {
