@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
@@ -12,7 +12,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let proyectoSeleccionado = $derived($page.url.searchParams.get('proyecto') || '');
+	let proyectoSeleccionado = $derived(page.url.searchParams.get('proyecto') || '');
 
 	let enviandoSolicitud = $state(false);
 	let solicitudEnviada = $state(false);
@@ -240,7 +240,7 @@
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
 				<p class="text-slate-600">{mensajeErrorAcceso}</p>
 				<button
-					on:click={() => goto('/')}
+					onclick={() => goto('/')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"
 				>
 					Volver al inicio
@@ -256,7 +256,7 @@
 					No tenés ningún proyecto pendiente de solicitud de cierre en este momento.
 				</p>
 				<button
-					on:click={() => goto('/proyectos')}
+					onclick={() => goto('/proyectos')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
 				>
 					Ver mis proyectos
@@ -426,7 +426,7 @@
 							/>
 
 							<button
-								on:click={enviarSolicitud}
+								onclick={enviarSolicitud}
 								disabled={enviandoSolicitud ||
 									!todosLosChecksCompletos ||
 									!todosLosObjetivosTienenEvidencias ||
@@ -454,7 +454,7 @@
 								<button
 									type="button"
 									class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-red-50 hover:text-red-600"
-									on:click={() =>
+									onclick={() =>
 										alert(
 											'Irregularidad reportada. El equipo de auditoría revisará este proyecto.'
 										)}

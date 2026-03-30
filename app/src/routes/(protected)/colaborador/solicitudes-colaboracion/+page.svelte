@@ -60,6 +60,8 @@
 			day: 'numeric'
 		});
 	}
+
+	const SvelteComponent = $derived(tabs.find((t) => t.id === activeTab)?.icon);
 </script>
 
 <div class="min-h-screen w-full bg-gray-50/50 pb-12">
@@ -99,8 +101,7 @@
 				<div
 					class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
 				>
-					<svelte:component
-						this={tabs.find((t) => t.id === activeTab)?.icon}
+					<SvelteComponent
 						class="h-5 w-5 text-gray-400"
 					/>
 				</div>
@@ -137,9 +138,9 @@
 					<button
 						class="relative flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-300 focus:outline-none
                         {activeTab === tab.id ? tab.activeClass : tab.inactiveClass}"
-						on:click={() => (activeTab = tab.id as any)}
+						onclick={() => (activeTab = tab.id as any)}
 					>
-						<svelte:component this={tab.icon} class="h-4 w-4" />
+						<tab.icon class="h-4 w-4" />
 						{tab.label}
 						{#if data.colaboraciones}
 							<span
@@ -279,7 +280,7 @@
 				{#if activeTab !== 'pendiente' || searchTerm}
 					<button
 						class="mt-6 inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
-						on:click={() => {
+						onclick={() => {
 							searchTerm = '';
 							activeTab = 'pendiente';
 						}}

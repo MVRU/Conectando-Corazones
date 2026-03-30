@@ -106,7 +106,7 @@
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<accion.icon size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</a>
@@ -131,7 +131,7 @@
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
-							<svelte:component this={accion.icon} size={18} />
+							<accion.icon size={18} />
 						</div>
 						<span class="text-sm tracking-wide whitespace-nowrap">{accion.label}</span>
 					</button>
@@ -171,7 +171,7 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<accion.icon size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</a>
 				{:else}
@@ -187,7 +187,7 @@
 							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
-						<svelte:component this={accion.icon} size={22} weight="bold" />
+						<accion.icon size={22} weight="bold" />
 						<span class="text-lg font-bold tracking-wide">{accion.label}</span>
 					</button>
 				{/if}
@@ -204,7 +204,7 @@
 								href={accion.href}
 								class="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<accion.icon size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</a>
 						{:else}
@@ -212,7 +212,7 @@
 								onclick={accion.onClick}
 								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
 							>
-								<svelte:component this={accion.icon} size={20} />
+								<accion.icon size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
 							</button>
 						{/if}

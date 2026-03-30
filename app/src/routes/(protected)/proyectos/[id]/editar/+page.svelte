@@ -1,30 +1,36 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import CrearProyecto from '$lib/components/feature/institucion/CrearProyecto.svelte';
 	import { isLoading, usuario } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
-	export let data;
+	let { data } = $props();
 
-	$: if (data.form?.titulo) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
-			{ label: 'Editar' }
-		]);
-	}
-
-	$: if (!$isLoading) {
-		if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {
-			toastStore.show({
-				title: 'Acceso denegado',
-				message: 'No tenés permisos para acceder a esta página.',
-				variant: 'error'
-			});
-			goto('/');
+	run(() => {
+		if (data.form?.titulo) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
+				{ label: 'Editar' }
+			]);
 		}
-	}
+	});
+
+	run(() => {
+		if (!$isLoading) {
+			if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {
+				toastStore.show({
+					title: 'Acceso denegado',
+					message: 'No tenés permisos para acceder a esta página.',
+					variant: 'error'
+				});
+				goto('/');
+			}
+		}
+	});
 </script>
 
 {#if !$isLoading && data.form}

@@ -4,7 +4,7 @@
 	import MisProyectos from './MisProyectos.svelte';
 	import { usuario } from '$lib/stores/auth';
 	import { fade } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	interface Props {
 		proyectos: Proyecto[];
@@ -27,9 +27,9 @@
 	let esAdministrador = $derived($usuario?.rol === 'administrador');
 
 	$effect(() => {
-		if ($page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario && !esAdministrador) {
+		if (page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario && !esAdministrador) {
 			activeTab = 'mis-proyectos';
-		} else if ($page.url.searchParams.get('tab') === 'auditoria' && esAdministrador) {
+		} else if (page.url.searchParams.get('tab') === 'auditoria' && esAdministrador) {
 			activeTab = 'auditoria';
 		}
 	});

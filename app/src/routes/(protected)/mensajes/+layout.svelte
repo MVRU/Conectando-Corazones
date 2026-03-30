@@ -4,23 +4,29 @@
 	import { usuario } from '$lib/stores/auth';
 	import { chatStore } from '$lib/stores/chatStore';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
-	// Filtrar chats donde el usuario es participante
-	export let data: any;
+	
+	interface Props {
+		// Filtrar chats donde el usuario es participante
+		data: any;
+		children?: import('svelte').Snippet;
+	}
+
+	let { data, children }: Props = $props();
 
 	// Backend de chat derivado de colaboraciones aprobadas
-	$: chatsUsuario = data.chats || [];
+	let chatsUsuario = $derived(data.chats || []);
 
-	$: activeChats = chatsUsuario.filter((c: Chat) => {
+	let activeChats = $derived(chatsUsuario.filter((c: Chat) => {
 		const estado = c.estado_proyecto || 'en_curso';
 		return !['completado', 'cancelado'].includes(estado);
-	});
-	$: archivedChats = chatsUsuario.filter((c: Chat) => {
+	}));
+	let archivedChats = $derived(chatsUsuario.filter((c: Chat) => {
 		const estado = c.estado_proyecto || 'en_curso';
 		return ['completado', 'cancelado'].includes(estado);
-	});
+	}));
 
 	// Determinar si estamos en la vista de chat (mobile)
-	$: isInChat = !!$page.params.proyecto_id;
+	let isInChat = $derived(!!$page.params.proyecto_id);
 
 	function getProyecto(proyectoId: number): any {
 		const chat = chatsUsuario.find((c: Chat) => c.proyecto_id === proyectoId);
@@ -62,7 +68,7 @@
 					</div>
 				</div>
 				<button
-					on:click={() => chatStore.toggleSidebar()}
+					onclick={() => chatStore.toggleSidebar()}
 					class="hidden rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 md:block"
 					aria-label={$chatStore.sidebarCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
 					title={$chatStore.sidebarCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
@@ -90,7 +96,7 @@
 		<!-- Tabs -->
 		<div class="flex border-b border-gray-200 bg-white px-2 pt-2">
 			<button
-				on:click={() => chatStore.toggleArchived()}
+				onclick={() => chatStore.toggleArchived()}
 				class="relative flex-1 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-all {!$chatStore.showArchived
 					? 'bg-gray-50 text-blue-600'
 					: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
@@ -110,7 +116,7 @@
 				{/if}
 			</button>
 			<button
-				on:click={() => chatStore.toggleArchived()}
+				onclick={() => chatStore.toggleArchived()}
 				class="relative flex-1 rounded-t-lg px-4 py-2.5 text-sm font-medium transition-all {$chatStore.showArchived
 					? 'bg-gray-50 text-blue-600'
 					: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
@@ -218,7 +224,7 @@
 		{#if $chatStore.sidebarCollapsed}
 			<div class="absolute top-0 left-0 z-10 hidden p-4 md:block">
 				<button
-					on:click={() => chatStore.toggleSidebar()}
+					onclick={() => chatStore.toggleSidebar()}
 					class="rounded-lg bg-white p-2.5 text-gray-600 shadow-md transition-all hover:bg-gray-50 hover:text-blue-600 hover:shadow-lg"
 					aria-label="Mostrar sidebar"
 					title="Mostrar sidebar"
@@ -240,6 +246,6 @@
 				</button>
 			</div>
 		{/if}
-		<slot />
+		{@render children?.()}
 	</main>
 </div>

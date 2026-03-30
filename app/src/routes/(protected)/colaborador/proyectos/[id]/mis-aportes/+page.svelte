@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto, invalidateAll } from '$app/navigation';
 	import {
 		ChevronLeft,
@@ -24,7 +24,7 @@
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
 	let { data } = $props();
-	const projectIdUrl = $page.params.id;
+	const projectIdUrl = page.params.id;
 
 	$effect(() => {
 		const titulo = data.proyecto?.titulo || 'Proyecto';

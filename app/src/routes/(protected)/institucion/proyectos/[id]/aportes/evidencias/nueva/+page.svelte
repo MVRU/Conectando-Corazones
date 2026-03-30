@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto, beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { ChevronLeft, Plus, Upload, X, AlertCircle, FileStack, History } from 'lucide-svelte';
@@ -19,7 +19,7 @@
 
 	let { data } = $props();
 
-	const projectIdUrl = $page.params.id;
+	const projectIdUrl = page.params.id;
 
 	$effect(() => {
 		setBreadcrumbs([

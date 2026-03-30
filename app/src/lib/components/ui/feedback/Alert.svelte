@@ -2,7 +2,7 @@
 	import { Info, CircleCheck, TriangleAlert, CircleAlert } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
-	let {
+	let { children,
 		variant = 'info' as 'info' | 'success' | 'warning' | 'error',
 		title = '',
 		message = ''
@@ -45,6 +45,8 @@
 		warning: TriangleAlert,
 		error: CircleAlert
 	};
+
+	const SvelteComponent = $derived(icons[variant]);
 </script>
 
 <div
@@ -54,8 +56,7 @@
 >
 	<div class="flex items-start gap-4">
 		<div class="mt-0.5 flex-shrink-0">
-			<svelte:component
-				this={icons[variant]}
+			<SvelteComponent
 				class="h-5 w-5 {styles[variant].icon}"
 				strokeWidth={2}
 			/>
@@ -72,7 +73,7 @@
 				</div>
 			{/if}
 			<div class="text-sm {styles[variant].text}">
-				<slot />
+				{@render children?.()}
 			</div>
 		</div>
 	</div>

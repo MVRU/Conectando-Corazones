@@ -7,7 +7,7 @@
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 	import ProyectosBase from './ProyectosBase.svelte';
 	import ProyectoCard from '$lib/components/ui/cards/ProyectoCard.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 
 	let {
@@ -79,11 +79,11 @@
 	useProyectosFiltrosUrl(filtros);
 
 	let pestanaActiva = $state<'todos' | 'activos' | 'completados'>(
-		($page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos'
+		(page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados') || 'activos'
 	);
 
 	$effect(() => {
-		const estadoUrl = $page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados';
+		const estadoUrl = page.url.searchParams.get('estado') as 'todos' | 'activos' | 'completados';
 		if (
 			estadoUrl &&
 			['todos', 'activos', 'completados'].includes(estadoUrl) &&
@@ -95,7 +95,7 @@
 
 	function cambiarPestana(nuevaPestana: 'todos' | 'activos' | 'completados') {
 		pestanaActiva = nuevaPestana;
-		const url = new URL($page.url);
+		const url = new URL(page.url);
 		url.searchParams.set('estado', nuevaPestana);
 		goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 	}

@@ -6,7 +6,7 @@
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/infrastructure/config/breadcrumbs.config';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
@@ -18,13 +18,13 @@
 	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 	import { Usuario } from '$lib/domain/entities/Usuario';
 
-	let { data }: { data: LayoutData } = $props();
+	let { children, data }: { data: LayoutData } = $props();
 
 	let supabase = $derived(data.supabase);
 	let session = $derived(data.session);
 
 	let showBreadcrumbs = $derived(
-		shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2
+		shouldShowBreadcrumbs(page.url.pathname) && $breadcrumbs.length >= 2
 	);
 
 	let mounted = $state(false);
@@ -65,7 +65,7 @@
 
 	$effect(() => {
 		if (mounted && !$isLoading) {
-			if (!canAccessRoute($page.url.pathname)) {
+			if (!canAccessRoute(page.url.pathname)) {
 				goto('/iniciar-sesion');
 			}
 		}
@@ -73,7 +73,7 @@
 
 	$effect(() => {
 		if (browser) {
-			const error = $page.url.searchParams.get('error');
+			const error = page.url.searchParams.get('error');
 			if (error === 'already_logged_in') {
 				setTimeout(() => {
 					toastStore.show({
@@ -82,13 +82,13 @@
 						variant: 'info'
 					});
 
-					const newUrl = new URL($page.url);
+					const newUrl = new URL(page.url);
 					newUrl.searchParams.delete('error');
 					window.history.replaceState({}, '', newUrl.toString());
 				}, 0);
 			}
 
-			const reason = $page.url.searchParams.get('reason');
+			const reason = page.url.searchParams.get('reason');
 			if (reason === 'unauthenticated') {
 				setTimeout(() => {
 					toastStore.show({
@@ -97,7 +97,7 @@
 						variant: 'warning'
 					});
 
-					const newUrl = new URL($page.url);
+					const newUrl = new URL(page.url);
 					newUrl.searchParams.delete('reason');
 					window.history.replaceState({}, '', newUrl.toString());
 				}, 0);
@@ -109,7 +109,7 @@
 						variant: 'error'
 					});
 
-					const newUrl = new URL($page.url);
+					const newUrl = new URL(page.url);
 					newUrl.searchParams.delete('reason');
 					window.history.replaceState({}, '', newUrl.toString());
 				}, 0);
@@ -128,7 +128,7 @@
 <ScrollToTop />
 
 <main class="min-h-screen">
-	<slot />
+	{@render children?.()}
 </main>
 
 <Footer />

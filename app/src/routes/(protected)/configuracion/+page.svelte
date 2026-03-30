@@ -408,19 +408,21 @@
 			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados permanentemente.
 		</p>
 	</div>
-	<svelte:fragment slot="footer">
-		<Button
-			label="Sí, eliminar"
-			loadingLabel="Eliminando..."
-			variant="danger"
-			loading={isLoadingDelete}
-			onclick={confirmarEliminarCuenta}
-		/>
-		<Button
-			label="Cancelar"
-			variant="secondary"
-			disabled={isLoadingDelete}
-			onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
-		/>
-	</svelte:fragment>
+	{#snippet footer()}
+	
+			<Button
+				label="Sí, eliminar"
+				loadingLabel="Eliminando..."
+				variant="danger"
+				loading={isLoadingDelete}
+				onclick={confirmarEliminarCuenta}
+			/>
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				disabled={isLoadingDelete}
+				onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+			/>
+		
+	{/snippet}
 </Modal>

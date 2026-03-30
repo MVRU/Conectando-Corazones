@@ -7,14 +7,14 @@
 	import GestionColaboraciones from '$lib/components/feature/institucion/GestionColaboraciones.svelte';
 	import type { PageData } from './$types';
 	import { fly } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
 	let { data }: { data: PageData } = $props();
 
 	// Breadcrumbs contextuales
 	$effect(() => {
-		const proyectoIdParam = $page.url.searchParams.get('proyecto');
+		const proyectoIdParam = page.url.searchParams.get('proyecto');
 		const proyecto = proyectoIdParam
 			? data.proyectos.find((p: any) => String(p.id_proyecto) === proyectoIdParam)
 			: null;

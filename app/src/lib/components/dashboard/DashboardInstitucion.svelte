@@ -17,28 +17,27 @@
 	import GestionarEvidenciasModal from './institucion/GestionarEvidenciasModal.svelte';
 	import type { InstitucionDashboardData } from './institucion/types';
 
-	export let data: InstitucionDashboardData;
 
 	// Filters state
-	let filters = {
+	let filters = $state({
 		periodo: 'mes_actual',
 		categoria: 'todas',
 		estado: 'en_curso',
 		tipoParticipacion: 'todos',
 		ubicacion: 'todas'
-	};
+	});
 
 	// Animation & Scroll
 	let mounted = false;
-	let filterScrollContainer: HTMLDivElement;
+	let filterScrollContainer: HTMLDivElement = $state();
 	let showFilterIndicator = false;
-	let showFilters = false;
-	let showLeftGradient = false;
-	let showRightGradient = false;
-	let showCollaboratorStats = false;
-	let showProjectStats = false;
-	let showCalendarStats = false;
-	let showEvidenceModal = false;
+	let showFilters = $state(false);
+	let showLeftGradient = $state(false);
+	let showRightGradient = $state(false);
+	let showCollaboratorStats = $state(false);
+	let showProjectStats = $state(false);
+	let showCalendarStats = $state(false);
+	let showEvidenceModal = $state(false);
 
 	function checkFilterScroll() {
 		if (!filterScrollContainer) return;
@@ -70,6 +69,11 @@
 	}
 
 	import { PdfService } from '$lib/utils/pdf.service';
+	interface Props {
+		data: InstitucionDashboardData;
+	}
+
+	let { data }: Props = $props();
 
 	async function generatePDF() {
 		const doc = new jsPDF();
@@ -335,7 +339,7 @@
 					<!-- Toggle Filters (Desktop: Right aligned) -->
 					<div class="flex items-center gap-3">
 						<button
-							on:click={() => (showFilters = !showFilters)}
+							onclick={() => (showFilters = !showFilters)}
 							class="group flex w-fit items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 transition-all hover:bg-white/10 active:scale-95"
 						>
 							<Filter
@@ -387,7 +391,7 @@
 
 				<div
 					bind:this={filterScrollContainer}
-					on:scroll={checkFilterScroll}
+					onscroll={checkFilterScroll}
 					class="grid w-full grid-cols-1 gap-3 pb-2 md:grid md:w-full md:grid-cols-3 md:pb-0 lg:w-auto xl:grid-cols-5"
 				>
 					<div class="relative w-full min-w-[140px] shrink-0 snap-start">

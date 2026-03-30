@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import {
@@ -45,7 +45,7 @@
 	);
 
 	let expandedId = $state<number | null>(null);
-	const projectId = $page.params.id;
+	const projectId = page.params.id;
 
 	function toggleColaborador(id: number) {
 		expandedId = expandedId === id ? null : id;

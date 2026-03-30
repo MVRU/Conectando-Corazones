@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import {
 		isAuthenticated,
@@ -39,7 +39,7 @@
 	let headerRef = $state<HTMLElement | undefined>();
 	let mostrarDropdown = $state(false);
 
-	const isHome = $derived($page.url.pathname === '/');
+	const isHome = $derived(page.url.pathname === '/');
 
 	const navLinks = $derived([
 		{ label: 'Inicio', href: '/' },

@@ -176,8 +176,7 @@
 													<div
 														class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0F1029] shadow-[0_0_15px_rgba(0,0,0,0.5)] ring-2 ring-white/10"
 													>
-														<svelte:component
-															this={RankingIcon}
+														<RankingIcon
 															size={22}
 															class="{getRankingColor(institucion.ranking)} drop-shadow-md"
 														/>

@@ -59,7 +59,7 @@
 						src="/img/manosUnidas.jpg"
 						alt="Manos unidas"
 						class="h-full w-full object-cover transition-all duration-500 hover:scale-105 hover:brightness-95"
-						on:error={handleImageError}
+						onerror={handleImageError}
 						loading="lazy"
 						decoding="async"
 					/>
@@ -251,7 +251,7 @@
 							src={member.img}
 							alt={member.name}
 							class="h-full w-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-95"
-							on:error={handleImageError}
+							onerror={handleImageError}
 						/>
 					</a>
 					<h3 class="mb-2 text-xl font-semibold tracking-wide text-gray-800">{member.name}</h3>

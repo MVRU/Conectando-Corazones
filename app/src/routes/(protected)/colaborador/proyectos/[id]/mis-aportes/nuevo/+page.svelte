@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { goto, beforeNavigate } from '$app/navigation';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import {
@@ -19,7 +19,7 @@
 
 	let { data } = $props();
 
-	const projectIdUrl = $page.params.id;
+	const projectIdUrl = page.params.id;
 
 	$effect(() => {
 		const titulo = data.proyecto?.titulo || 'Proyecto';
@@ -81,7 +81,7 @@
 
 	onMount(() => {
 		// Pre-selección por query param (desde el botón "Subir evidencias" de Mis Aportes)
-		const participacionId = $page.url.searchParams.get('participacion');
+		const participacionId = page.url.searchParams.get('participacion');
 		if (participacionId) {
 			const id = Number(participacionId);
 			if (data.participacionesPermitidas.some((p: any) => p.id_participacion_permitida === id)) {

@@ -55,7 +55,7 @@
 	let caracteresRestantes = $derived(500 - mensajeColaboracion.length);
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if open}
 	<div

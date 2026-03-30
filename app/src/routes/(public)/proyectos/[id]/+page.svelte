@@ -6,7 +6,7 @@
 	// import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -1499,7 +1499,7 @@
 			</div>
 			<!-- Modal de reporte interceptado (Shallow Routing) -->
 			<ModalReportarIrregularidad
-				open={!!$page.state.showReportModal}
+				open={!!page.state.showReportModal}
 				tipo_objeto="Proyecto"
 				id_objeto={proyecto.id_proyecto ?? 0}
 				nombre_objeto={proyecto.titulo}

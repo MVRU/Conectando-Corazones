@@ -186,7 +186,7 @@
 			</div>
 			<div class="mt-4">
 				<span class="flex items-center gap-1.5 text-sm {mensajeCierre.colorTexto}">
-					<svelte:component this={mensajeCierre.icono} size={16} class={mensajeCierre.colorIcono} />
+					<mensajeCierre.icono size={16} class={mensajeCierre.colorIcono} />
 					{mensajeCierre.texto}
 				</span>
 			</div>

@@ -29,7 +29,7 @@
 		calcularDiasActivo
 	} from '$lib/utils/util-colaboraciones';
 	import { slide, fade, scale } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
 	// Prop recibida desde el padre
 	let { proyectos = [] }: { proyectos?: Proyecto[] } = $props();
@@ -38,7 +38,7 @@
 	let proyectoSeleccionadoId = $state<number | undefined>(undefined);
 
 	// Para contexto de navegación
-	const contextoProyectoId = $derived($page.url.searchParams.get('proyecto'));
+	const contextoProyectoId = $derived(page.url.searchParams.get('proyecto'));
 
 	$effect(() => {
 		if (proyectos.length > 0 && !proyectoSeleccionado) {
