@@ -16,7 +16,6 @@
 	let proyectoSeleccionado = $state<string>('');
 	let enviandoSolicitud = $state(false);
 	let solicitudEnviada = $state(false);
-	let objetivosExpandidos = $state<Record<number, boolean>>({});
 	let modalReporteAbierto = $state(false);
 	let errorSolicitud = $state<string | null>(null);
 	let checks = $state({
@@ -102,19 +101,12 @@
 		} else {
 			items = data.objetivos || [];
 		}
-		
-		console.log('[DEBUG:Objetivos]', {
-			count: items.length,
-			source: proyectoActual?.participacion_permitida ? 'proyectoActual' : 'data.objetivos',
-			ids: items.map((o: any) => o.id_participacion_permitida)
-		});
-		
+
 		return items;
 	});
 
 	let evidenciasPorObjetivo = $derived.by(() => {
 		if (!objetivosDelProyecto || objetivosDelProyecto.length === 0) {
-			console.log('[DEBUG:Evidencias] No hay objetivos cargados');
 			return [];
 		}
 		
@@ -134,16 +126,6 @@
 				0
 			);
 
-			if (evsParaEsteObjetivo.length > 0) {
-				console.log(`[DEBUG:Evidencias:ObjID=${objId}]`, {
-					total: evsParaEsteObjetivo.length,
-					entrada: entrada.length,
-					salida: salida.length,
-					archivos: totalArch,
-					primerUsuario: evsParaEsteObjetivo[0]?.archivos?.[0]?.usuario?.username || 'N/A'
-				});
-			}
-
 			return {
 				objetivo: obj,
 				evidencias: evsParaEsteObjetivo,
@@ -152,8 +134,7 @@
 				totalArchivos: totalArch
 			};
 		});
-		
-		console.log('[DEBUG:Evidencias] Mapeadas por objetivo:', result.length);
+
 		return result;
 	});
 
@@ -449,7 +430,6 @@
 											evidenciasEntrada={evidenciasEntrada || []}
 											evidenciasSalida={evidenciasSalida || []}
 											totalArchivos={totalArchivos || 0}
-											bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida || 0]}
 										/>
 									{/if}
 								{/each}

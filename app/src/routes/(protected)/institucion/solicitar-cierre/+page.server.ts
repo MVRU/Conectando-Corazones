@@ -19,6 +19,13 @@ function esSolicitudActiva(estado: string | null | undefined): boolean {
 	return e === '' || ESTADOS_SOLICITUD_ACTIVA.has(e);
 }
 
+function calcularActual(participacion: {
+	colaboraciones_tipo_participacion?: Array<{ cantidad: number | null }>;
+}): number {
+	const contribuciones = participacion.colaboraciones_tipo_participacion || [];
+	return contribuciones.reduce((sum, c) => sum + Number(c.cantidad || 0), 0);
+}
+
 /**
  * Carga de datos optimizada para solicitar cierre de proyecto.
  * Recupera objetivos, progreso y evidencias asociadas usando Prisma.
@@ -34,7 +41,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const proyectoRepo = new PostgresProyectoRepository();
 	const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
-	const evidenciaRepo = new PostgresEvidenciaRepository();
 
 	const proyectoId = url.searchParams.get('proyecto');
 	
@@ -46,7 +52,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectosDisponibles = allProyectos.filter(
 		(p) =>
 			p.institucion_id === user.id_usuario &&
-			p.estado === 'pendiente_solicitud_cierre'
+			(p.estado === 'pendiente_solicitud_cierre' || p.estado === 'en_curso')
 	);
 
 	let proyectoActual = null;
@@ -102,22 +108,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				})
 			]);
 
-			// DIAGNÓSTICO PROFUNDO
-			console.log(`[solicitar-cierre:load] Proyecto ID=${idProyecto}:`, {
-				encontrado: !!p,
-				estado: p?.estado?.descripcion,
-				countObjetivos: p?.participacion_permitida?.length ?? 0,
-				countEvidenciasTotal: evs.length,
-				detalleEvidencias: evs.map(ev => ({
-					id: ev.id_evidencia,
-					tipo: ev.tipo_evidencia,
-					obj: ev.participacion_permitida?.tipo_participacion?.descripcion,
-					archivos: ev.archivos?.length ?? 0,
-					usuarios: ev.archivos?.map(a => a.usuario?.username).filter(Boolean) || []
-				}))
-			});
-
 			if (p && p.id_proyecto === idProyecto) {
+				if (p.institucion_id !== user.id_usuario) {
+					throw redirect(303, '/mi-panel?reason=forbidden_project');
+				}
+
 				proyectoActual = p;
 				solicitudPendiente = solicitud && esSolicitudActiva(solicitud.estado) ? solicitud : null;
 				solicitudesRechazadas = rechazadas;
@@ -130,11 +125,15 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 					return evObjId != null && objetivosIds.has(evObjId);
 				});
 
-				objetivos = participacionesPermitidas.map(obj => ({
+				objetivos = participacionesPermitidas.map((obj) => {
+					const actual = calcularActual(obj);
+					return {
 					...obj,
 					id_participacion_permitida: Number(obj.id_participacion_permitida),
-					porcentaje: (Number(obj.objetivo) || 0) > 0 ? ((Number(obj.actual) || 0) / (Number(obj.objetivo) || 1)) * 100 : 0
-				}));
+					actual,
+					porcentaje: (Number(obj.objetivo) || 0) > 0 ? (actual / (Number(obj.objetivo) || 1)) * 100 : 0
+				};
+				});
 			}
 		}
 	}
@@ -144,18 +143,21 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const pActualMapped = proyectoActual ? {
 		...JSON.parse(JSON.stringify(proyectoActual)),
 		id_proyecto: Number(proyectoActual.id_proyecto),
-		participacion_permitida: (proyectoActual.participacion_permitida || []).map(p => ({
-			...JSON.parse(JSON.stringify(p)),
-			id_participacion_permitida: Number(p.id_participacion_permitida),
-			id_proyecto: Number(p.id_proyecto),
-			id_tipo_participacion: Number(p.id_tipo_participacion),
-			objetivo: Number(p.objetivo),
-			actual: Number(p.actual || 0),
-			tipo_participacion: p.tipo_participacion ? {
-				id_tipo_participacion: Number(p.tipo_participacion.id_tipo_participacion),
-				descripcion: p.tipo_participacion.descripcion
-			} : undefined
-		}))
+		participacion_permitida: (proyectoActual.participacion_permitida || []).map((p) => {
+			const actual = calcularActual(p);
+			return {
+				...JSON.parse(JSON.stringify(p)),
+				id_participacion_permitida: Number(p.id_participacion_permitida),
+				id_proyecto: Number(p.id_proyecto),
+				id_tipo_participacion: Number(p.id_tipo_participacion),
+				objetivo: Number(p.objetivo),
+				actual,
+				tipo_participacion: p.tipo_participacion ? {
+					id_tipo_participacion: Number(p.tipo_participacion.id_tipo_participacion),
+					descripcion: p.tipo_participacion.descripcion
+				} : undefined
+			};
+		})
 	} : null;
 
 	const evidenciasMapped = evidencias.map((ev: any) => ({
