@@ -2,7 +2,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import {
 		isAuthenticated,
 		usuario as usuarioStore,
@@ -33,7 +33,7 @@
 	let { proyectos = [] }: { proyectos?: Proyecto[] } = $props();
 
 	let menuAbierto = $state(false);
-	let visible = $state(false);
+	let visible = $state(true);
 	let mostrarHeader = $state(true);
 	let lastScrollY = $state(0);
 	let headerRef = $state<HTMLElement | undefined>();
@@ -115,6 +115,14 @@
 		}
 		lastScrollY = current;
 	};
+
+	afterNavigate(() => {
+		mostrarHeader = true;
+		menuAbierto = false;
+		mostrarDropdown = false;
+		visible = true;
+		layoutStore.setHeaderVisible(true);
+	});
 
 	$effect(() => {
 		if (!headerRef) return;

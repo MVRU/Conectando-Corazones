@@ -13,7 +13,7 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { goto, pushState, invalidateAll } from '$app/navigation';
+	import { goto, pushState, invalidateAll, preloadData } from '$app/navigation';
 	import GestionarProyectoDropdown from '$lib/components/feature/proyectos/GestionarProyectoDropdown.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -508,7 +508,7 @@
 					acc.push({
 						label: 'Evaluar finalización',
 						icon: ClipboardDocumentCheck,
-						onclick: () => goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)
+						onclick: irAEvaluarFinalizacion
 					});
 				}
 			}
@@ -570,6 +570,22 @@
 
 		return acc;
 	});
+
+	$effect(() => {
+		if (
+			mostrarMenuGestion &&
+			esColaboradorAprobado &&
+			estadoCodigo === 'en_revision' &&
+			proyecto?.id_proyecto
+		) {
+			void preloadData(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+		}
+	});
+
+	function irAEvaluarFinalizacion() {
+		if (!proyecto?.id_proyecto) return;
+		goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+	}
 
 	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {

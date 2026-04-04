@@ -1,5 +1,3 @@
-<!-- TODO: corregir esta ruta -->
-
 <script lang="ts">
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
@@ -386,7 +384,7 @@
 										</p>
 										{#if proyectoSeleccionado}
 											<a
-												href="/institucion/proyectos/{proyectoSeleccionado}/solicitudes-cierre"
+												href={`/institucion/proyectos/${proyectoSeleccionado}/solicitudes-cierre`}
 												class="mt-3 inline-flex text-sm font-semibold text-amber-900 underline hover:text-amber-950"
 											>
 												Ver historial de solicitudes de cierre

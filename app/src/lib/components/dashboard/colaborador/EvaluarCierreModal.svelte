@@ -88,7 +88,7 @@
 							</div>
 
 							<a
-								href="/colaborador/proyectos/{proyecto.id}/evaluar-cierre"
+								href={`/colaborador/proyectos/${proyecto.id}/evaluar-cierre`}
 								class="flex items-center gap-2 rounded-xl bg-emerald-500/10 px-4 py-2 text-sm font-semibold text-emerald-400 transition-all hover:bg-emerald-500 hover:text-white hover:shadow-lg hover:shadow-emerald-900/40"
 							>
 								Evaluar

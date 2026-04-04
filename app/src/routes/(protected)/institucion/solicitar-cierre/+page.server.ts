@@ -52,7 +52,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectosDisponibles = allProyectos.filter(
 		(p) =>
 			p.institucion_id === user.id_usuario &&
-			(p.estado === 'pendiente_solicitud_cierre' || p.estado === 'en_curso')
+			p.estado === 'pendiente_solicitud_cierre'
+	);
+
+	const proyectosDisponiblesIds = new Set(
+		proyectosDisponibles.map((proyecto) => Number(proyecto.id_proyecto))
 	);
 
 	let proyectoActual = null;
@@ -65,6 +69,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const idProyecto = Number(proyectoId);
 
 		if (idProyecto && !isNaN(idProyecto)) {
+			if (!proyectosDisponiblesIds.has(idProyecto)) {
+				throw redirect(303, url.pathname);
+			}
+
 			// CARGA MASIVA Y PROFUNDA (Relaciones completas de Proyecto y Evidencias)
 			const [p, solicitud, rechazadas, evs] = await Promise.all([
 				prisma.proyecto.findUnique({

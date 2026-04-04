@@ -66,6 +66,16 @@
 		data.proyecto.participacion_permitida ?? [],
 		(data.solicitud as any)?.evidencias ?? []
 	));
+
+	function estaExpandido(objetivoId: number | null | undefined): boolean {
+		if (objetivoId == null) return false;
+		return objetivosExpandidos[objetivoId] ?? false;
+	}
+
+	function toggleObjetivo(objetivoId: number | null | undefined) {
+		if (objetivoId == null) return;
+		objetivosExpandidos[objetivoId] = !estaExpandido(objetivoId);
+	}
 </script>
 
 <svelte:head>
@@ -77,7 +87,7 @@
 		<!-- Header -->
 		<nav class="mb-4 flex items-center text-sm text-slate-500">
 			<a
-				href="/proyectos/{data.proyecto.id_proyecto}"
+				href={`/proyectos/${data.proyecto.id_proyecto}`}
 				class="flex items-center transition-colors hover:text-blue-600"
 			>
 				<ChevronLeft class="mr-1 h-4 w-4" />
@@ -100,7 +110,7 @@
 				</p>
 				<div class="mt-8">
 					<a
-						href="/proyectos/{data.proyecto.id_proyecto}"
+						href={`/proyectos/${data.proyecto.id_proyecto}`}
 						class="inline-flex items-center rounded-xl border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg"
 					>
 						Volver al panel
@@ -196,7 +206,8 @@
 											{evidenciasEntrada}
 											{evidenciasSalida}
 											{totalArchivos}
-											bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida!]}
+											expandido={estaExpandido(objetivo.id_participacion_permitida)}
+											onToggle={() => toggleObjetivo(objetivo.id_participacion_permitida)}
 										/>
 									{/each}
 								</div>
