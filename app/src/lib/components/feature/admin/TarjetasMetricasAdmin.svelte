@@ -11,9 +11,8 @@
 	} from 'lucide-svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { onMount } from 'svelte';
 
-	export let kpis: KpisPanelAdminDto;
+	let { kpis } = $props<{ kpis: KpisPanelAdminDto }>();
 
 	// Animaciones para los números principales
 	const tUsuarios = tweened(0, { duration: 2000, easing: cubicOut });
@@ -21,20 +20,12 @@
 	const tReportes = tweened(0, { duration: 2000, easing: cubicOut });
 	const tOnboarding = tweened(0, { duration: 2000, easing: cubicOut });
 
-	onMount(() => {
+	$effect(() => {
 		tUsuarios.set(kpis.totalUsuarios);
 		tProyectos.set(kpis.proyectosEnCurso);
 		tReportes.set(kpis.reportesPendientes);
 		tOnboarding.set(kpis.onboardingPendiente);
 	});
-
-	// Reactividad para cuando cambian los KPIs (ej: filtros)
-	$: {
-		tUsuarios.set(kpis.totalUsuarios);
-		tProyectos.set(kpis.proyectosEnCurso);
-		tReportes.set(kpis.reportesPendientes);
-		tOnboarding.set(kpis.onboardingPendiente);
-	}
 </script>
 
 <!-- KPIs Principales -->

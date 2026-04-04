@@ -7,6 +7,7 @@ import { CrearSolicitudFinalizacion } from '$lib/domain/use-cases/proyectos/Crea
 import { redirect, fail } from '@sveltejs/kit';
 import { GestionarEstadoProyecto } from '$lib/domain/use-cases/proyectos/GestionarEstadoProyecto';
 import { prisma } from '$lib/infrastructure/prisma/client';
+import { Prisma } from '@prisma/client';
 
 const ESTADOS_SOLICITUD_ACTIVA = new Set(['', 'pendiente', 'en_revision']);
 
@@ -52,7 +53,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const proyectosDisponibles = allProyectos.filter(
 		(p) =>
 			p.institucion_id === user.id_usuario &&
-			(p.estado === 'pendiente_solicitud_cierre' || p.estado === 'en_curso')
+			p.estado === 'pendiente_solicitud_cierre'
+	);
+
+	const proyectosDisponiblesIds = new Set(
+		proyectosDisponibles.map((proyecto) => Number(proyecto.id_proyecto))
 	);
 
 	let proyectoActual = null;
@@ -65,6 +70,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const idProyecto = Number(proyectoId);
 
 		if (idProyecto && !isNaN(idProyecto)) {
+			if (!proyectosDisponiblesIds.has(idProyecto)) {
+				throw redirect(303, url.pathname);
+			}
+
 			// CARGA MASIVA Y PROFUNDA (Relaciones completas de Proyecto y Evidencias)
 			const [p, solicitud, rechazadas, evs] = await Promise.all([
 				prisma.proyecto.findUnique({
@@ -213,22 +222,39 @@ export const actions: Actions = {
 
 		if (!proyectoId) return fail(400, { message: 'Debe seleccionar un proyecto' });
 
-		const useCase = new CrearSolicitudFinalizacion(
-			new PostgresSolicitudFinalizacionRepository(),
-			new PostgresProyectoRepository(),
-			new PostgresEvidenciaRepository(),
-			new PostgresHistorialDeCambiosRepository()
-		);
-
 		try {
-			const solicitud = await useCase.execute(user.id_usuario!, proyectoId, evidenciaIds);
+			const solicitud = await prisma.$transaction(
+				async (tx) => {
+					const solicitudRepo = new PostgresSolicitudFinalizacionRepository(tx);
+					const proyectoRepo = new PostgresProyectoRepository(tx);
+					const evidenciaRepo = new PostgresEvidenciaRepository(tx);
+					const historialRepo = new PostgresHistorialDeCambiosRepository(tx);
 
-			// Transicionar el proyecto a en_revision
-			const gestionEstado = new GestionarEstadoProyecto(
-				new PostgresProyectoRepository(),
-				new PostgresHistorialDeCambiosRepository()
+					const useCase = new CrearSolicitudFinalizacion(
+						solicitudRepo,
+						proyectoRepo,
+						evidenciaRepo,
+						historialRepo
+					);
+
+					const solicitudCreada = await useCase.execute(
+						user.id_usuario!,
+						proyectoId,
+						evidenciaIds
+					);
+
+					const gestionEstado = new GestionarEstadoProyecto(proyectoRepo, historialRepo);
+					await gestionEstado.enviarASolicitudCierreConEvidencias(
+						proyectoId,
+						user.id_usuario!
+					);
+
+					return solicitudCreada;
+				},
+				{
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+				}
 			);
-			await gestionEstado.enviarASolicitudCierreConEvidencias(proyectoId, user.id_usuario!);
 
 			return { success: true, solicitud };
 		} catch (error: any) {

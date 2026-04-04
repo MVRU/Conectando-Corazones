@@ -5,7 +5,6 @@
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { createEventDispatcher } from 'svelte';
 	import { env } from '$lib/infrastructure/config/env';
 
 	let provincias = $state<Provincia[]>([]);
@@ -172,17 +171,17 @@
 		onActualizarDescripcion,
 		onActualizarCampo,
 		edicion,
-		guardando = false
+		guardando = false,
+		onGuardar = () => {},
+		onCerrar = () => {}
 	} = $props();
 
-	const dispatch = createEventDispatcher();
-
 	function handleSubmit() {
-		dispatch('guardar');
+		onGuardar();
 	}
 
 	function handleCerrar() {
-		dispatch('cerrar');
+		onCerrar();
 	}
 
 	$effect(() => {

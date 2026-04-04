@@ -1,6 +1,8 @@
 <script lang="ts">
 	import '../app.css';
 	import type { LayoutData } from './$types';
+	import { createBrowserClient, parse, serialize } from '@supabase/ssr';
+	import { env } from '$lib/infrastructure/config/env';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
@@ -10,10 +12,9 @@
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { canAccessRoute, isLoading, authStore, unauthenticatedState, type AuthState } from '$lib/stores/auth';
+	import { syncAuthState } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
-	import { goto } from '$app/navigation';
 	import { untrack } from 'svelte';
 
 	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
@@ -22,17 +23,35 @@
 	import type { Snippet } from 'svelte';
 	let { children, data }: { data: LayoutData; children: Snippet } = $props();
 
-	let supabase = $derived(data.supabase);
+	const supabase = browser
+		? createBrowserClient(env.SUPABASE_URL || '', env.SUPABASE_ANON_KEY || '', {
+				cookies: {
+					get(key) {
+						return parse(document.cookie)[key];
+					},
+					set(key, value, options) {
+						document.cookie = serialize(key, value, options);
+					},
+					remove(key, options) {
+						document.cookie = serialize(key, '', { ...options, maxAge: 0 });
+					}
+				}
+			})
+		: null;
 	let session = $derived(data.session);
 
 	let showBreadcrumbs = $derived(
 		shouldShowBreadcrumbs(page.url.pathname) && $breadcrumbs.length >= 2
 	);
 
-	let mounted = $state(false);
-
 	$effect(() => {
 		beforeNavigate(untrack(() => clearBreadcrumbs));
+	});
+
+	$effect(() => {
+		if (!supabase) {
+			return;
+		}
 
 		const { data: subscription } = supabase.auth.onAuthStateChange(
 			(event: AuthChangeEvent, _session: Session | null) => {
@@ -43,52 +62,11 @@
 			}
 		);
 
-		// Inicializar estado global de auth con datos del servidor
-		let authValue: AuthState;
-		const unsubscribe = authStore.subscribe(v => { authValue = v; });
-		unsubscribe(); 
-
-		const userFromData = data.usuario;
-
-		if (userFromData) {
-			const usuarioInstance = new Usuario(userFromData);
-			// Solo actualizar si el usuario cambió o no estaba autenticado
-			// id_usuario es el identificador en nuestra entidad Usuario
-			if (!authValue!.isAuthenticated || authValue!.usuario?.id_usuario !== userFromData.id_usuario) {
-				authStore.update((s) => ({
-					...s,
-					usuario: usuarioInstance,
-					isAuthenticated: true,
-					isLoading: false
-				}));
-			}
-		} else {
-			if (session) {
-				if (authValue!.isLoading) {
-					authStore.update((s) => ({ ...s, isLoading: false }));
-				}
-			} else {
-				// Sin sesión, solo resetear si no estábamos ya en unauthenticatedState
-				if (authValue!.isAuthenticated || authValue!.isLoading) {
-					authStore.set(unauthenticatedState);
-				}
-			}
-		}
-
-		mounted = true;
-
 		return () => subscription.subscription.unsubscribe();
 	});
 
 	$effect(() => {
-		// Acceso reactivo a mounted e isLoading
-		// No bloqueamos el renderizado con isLoading, permitimos que children() se rinda siempre.
-		// El guard de ruta solo actúa después de que el sistema está montado.
-		if (mounted && !$isLoading) {
-			if (!canAccessRoute(page.url.pathname)) {
-				goto('/iniciar-sesion');
-			}
-		}
+		syncAuthState(data.usuario ? new Usuario(data.usuario) : null);
 	});
 
 	$effect(() => {
@@ -138,7 +116,7 @@
 	});
 </script>
 
-<Header proyectos={data.proyectos} />
+<Header />
 <ToastHost />
 
 {#if showBreadcrumbs}
