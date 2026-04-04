@@ -489,8 +489,8 @@
 	onActualizarCampo={(c: keyof EditarPerfilForm, v: any) => edicion.actualizarCampo(c, v)}
 	{edicion}
 	{guardando}
-	on:guardar={handleGuardarPerfil}
-	on:cerrar={() => modales.cerrar('edicion')}
+	onGuardar={handleGuardarPerfil}
+	onCerrar={() => modales.cerrar('edicion')}
 />
 
 {#if $modales.resena && !esMiPerfil && $isAuthenticated && $usuarioStore}

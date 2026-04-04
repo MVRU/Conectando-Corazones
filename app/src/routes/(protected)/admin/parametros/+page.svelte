@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { preventDefault } from 'svelte/legacy';
-
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
 
@@ -22,6 +20,11 @@
 	function cancelEditing() {
 		editingId = null;
 		editValue = '';
+	}
+
+	async function handleSubmitParametro(event: SubmitEvent, id: number) {
+		event.preventDefault();
+		await saveParametro(id);
 	}
 
 	async function saveParametro(id: number) {
@@ -83,7 +86,7 @@
 							{#if editingId === parametro.id_parametro}
 								<form
 									class="flex gap-2"
-									onsubmit={preventDefault(() => saveParametro(parametro.id_parametro))}
+									onsubmit={(event) => handleSubmitParametro(event, parametro.id_parametro)}
 								>
 									<input
 										type="text"

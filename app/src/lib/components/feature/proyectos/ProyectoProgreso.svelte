@@ -172,7 +172,7 @@
 
 <ModalCalculoAportes 
 	bind:show={showModal} 
-	progresoObjetivos={progresoCantidad}
+	progresoCantidad={progresoCantidad}
 	{progresoTiempo}
 	{progresoTotal}
 />

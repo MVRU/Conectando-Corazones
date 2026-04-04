@@ -116,7 +116,7 @@
 					variant="secondary"
 					size="sm"
 					customClass="mx-auto block mt-6"
-					on:click={() => {
+					onclick={() => {
 						searchQuery.set('');
 						if (searchInput) searchInput.focus();
 					}}

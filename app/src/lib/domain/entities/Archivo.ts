@@ -9,6 +9,11 @@ export class Archivo {
 	usuario_id?: number | null;
 	evidencia_id?: number | null;
 	proyecto_id?: number | null;
+	usuario?: {
+		nombre?: string | null;
+		apellido?: string | null;
+		username?: string | null;
+	} | null;
 
 	constructor(data: Partial<Archivo>) {
 		Object.assign(this, data);
