@@ -52,6 +52,41 @@
 
 	const MIN_CARACTERES_JUSTIFICACION = 20;
 
+	async function manejarResultadoVotacion(
+		result: {
+			type: 'success' | 'failure' | 'error' | 'redirect';
+			data?: { message?: string; error?: string };
+		},
+		update: (options?: { reset?: boolean; invalidateAll?: boolean }) => Promise<void>,
+		fallbackSuccess: string,
+		opciones?: { cerrarModalRechazo?: boolean }
+	) {
+		if (result.type === 'success') {
+			toastStore.show({
+				message: String(result.data?.message ?? fallbackSuccess),
+				variant: 'success'
+			});
+			await update({ reset: true, invalidateAll: true });
+
+			if (opciones?.cerrarModalRechazo) {
+				showRejectModal = false;
+				justificacionRechazo = '';
+			}
+
+			loading = false;
+			return;
+		}
+
+		if (result.type === 'failure' && result.data?.error) {
+			toastStore.show({
+				message: String(result.data.error),
+				variant: 'error'
+			});
+		}
+
+		loading = false;
+	}
+
 	async function handleReportSuccess() {
 		toastStore.show({
 			message: 'Reporte enviado correctamente. El equipo de administración lo revisará.',
@@ -261,25 +296,17 @@
 							<div class="space-y-4">
 								<form
 									method="POST"
-									action="?/aprobar"
-									use:enhance={() => {
-										loading = true;
-										return async ({ result, update }) => {
-											if (result.type === 'success' && result.data?.message) {
-												toastStore.show({
-													message: String(result.data.message),
-													variant: 'success'
-												});
-											} else if (result.type === 'failure' && result.data?.error) {
-												toastStore.show({
-													message: String(result.data.error),
-													variant: 'error'
-												});
-											}
-											await update();
-											loading = false;
-										};
-									}}
+								action="?/aprobar"
+								use:enhance={() => {
+									loading = true;
+									return async ({ result, update }) => {
+										await manejarResultadoVotacion(
+											result,
+											update,
+											'Tu voto fue registrado correctamente.'
+										);
+									};
+								}}
 								>
 									<input type="hidden" name="solicitud_id" value={solicitud.id_solicitud} />
 									<button
@@ -346,21 +373,12 @@
 							use:enhance={() => {
 								loading = true;
 								return async ({ result, update }) => {
-									if (result.type === 'success' && result.data?.message) {
-										toastStore.show({
-											message: String(result.data.message),
-											variant: 'success'
-										});
-									} else if (result.type === 'failure' && result.data?.error) {
-										toastStore.show({
-											message: String(result.data.error),
-											variant: 'error'
-										});
-									}
-									await update();
-									loading = false;
-									showRejectModal = false;
-									justificacionRechazo = '';
+									await manejarResultadoVotacion(
+										result,
+										update,
+										'Tu rechazo fue registrado correctamente.',
+										{ cerrarModalRechazo: true }
+									);
 								};
 							}}
 						>

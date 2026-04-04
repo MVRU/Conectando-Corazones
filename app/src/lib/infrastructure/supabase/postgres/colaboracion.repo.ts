@@ -1,9 +1,11 @@
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import { Colaboracion } from '$lib/domain/entities/Colaboracion';
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import { ColaboracionMapper } from './mappers/colaboracion.mapper';
 
 export class PostgresColaboracionRepository implements ColaboracionRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	private includeOptions = {
 		colaborador: {
 			include: {
@@ -35,7 +37,7 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 
 	async findByProyecto(proyectoId: number): Promise<Colaboracion[]> {
 		try {
-			const colaboraciones = await prisma.colaboracion.findMany({
+			const colaboraciones = await this.db.colaboracion.findMany({
 				where: { proyecto_id: proyectoId },
 				include: this.includeOptions,
 				orderBy: { created_at: 'desc' }
@@ -68,7 +70,7 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 		colaboradorId: number
 	): Promise<Colaboracion | null> {
 		try {
-			const colaboracion = await prisma.colaboracion.findFirst({
+			const colaboracion = await this.db.colaboracion.findFirst({
 				where: {
 					proyecto_id: proyectoId,
 					colaborador_id: colaboradorId

@@ -6,7 +6,9 @@ import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postg
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
+import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
 import { prisma } from '$lib/infrastructure/prisma/client';
+import { Prisma } from '@prisma/client';
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
@@ -14,13 +16,18 @@ const evaluacionRepo = new PostgresEvaluacionRepository();
 const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 const historialRepo = new PostgresHistorialDeCambiosRepository();
 
-const registrarEvaluacion = new RegistrarEvaluacion(
-	evaluacionRepo,
-	proyectoRepo,
-	colaboracionRepo,
-	solicitudRepo,
-	historialRepo
-);
+function dispararAnalisisProyectoCompletado(proyectoId: number) {
+	setTimeout(async () => {
+		try {
+			const result = await analizarProyecto(proyectoId);
+			if (!result.success && result.error) {
+				console.error(`[IA] Error en análisis del proyecto ${proyectoId}:`, result.error);
+			}
+		} catch (error) {
+			console.error(`[IA] Excepción no controlada en background task del proyecto ${proyectoId}:`, error);
+		}
+	}, 0);
+}
 
 /**
  * Evaluación de solicitudes de cierre por parte del colaborador.
@@ -88,7 +95,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}),
 		prisma.solicitudFinalizacion.findFirst({
 			where: {
-				proyecto_id: proyectoId
+				proyecto_id: proyectoId,
+				estado: 'pendiente'
 			},
 			orderBy: {
 				created_at: 'desc'
@@ -240,15 +248,51 @@ export const actions: Actions = {
 		if (!solicitudId) return fail(400, { error: 'Falta ID de solicitud' });
 
 		try {
-			await registrarEvaluacion.execute({
-				proyectoId,
-				solicitudId,
-				colaboradorId: user.id_usuario!,
-				voto: 'aprobado',
-				justificacion
+			await prisma.$transaction(
+				async (tx) => {
+					const registrarEvaluacion = new RegistrarEvaluacion(
+						new PostgresEvaluacionRepository(tx),
+						new PostgresProyectoRepository(tx),
+						new PostgresColaboracionRepository(tx),
+						new PostgresSolicitudFinalizacionRepository(tx),
+						new PostgresHistorialDeCambiosRepository(tx)
+					);
+
+					await registrarEvaluacion.execute({
+						proyectoId,
+						solicitudId,
+						colaboradorId: user.id_usuario!,
+						voto: 'aprobado',
+						justificacion
+					});
+				},
+				{
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+				}
+			);
+
+			const proyectoActualizado = await prisma.proyecto.findUnique({
+				where: { id_proyecto: proyectoId },
+				select: {
+					estado: {
+						select: {
+							descripcion: true
+						}
+					}
+				}
 			});
 
-			return { success: true };
+			if (proyectoActualizado?.estado?.descripcion === 'completado') {
+				dispararAnalisisProyectoCompletado(proyectoId);
+			}
+
+			return {
+				success: true,
+				message:
+					proyectoActualizado?.estado?.descripcion === 'completado'
+						? 'Tu voto fue registrado. El proyecto quedó completado.'
+						: 'Tu voto fue registrado correctamente.'
+			};
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error interno';
 			return fail(400, { error: errorMessage });
@@ -269,15 +313,47 @@ export const actions: Actions = {
 			return fail(400, { error: 'La justificación es obligatoria para rechazar' });
 
 		try {
-			await registrarEvaluacion.execute({
-				proyectoId,
-				solicitudId,
-				colaboradorId: user.id_usuario!,
-				voto: 'rechazado',
-				justificacion
+			await prisma.$transaction(
+				async (tx) => {
+					const registrarEvaluacion = new RegistrarEvaluacion(
+						new PostgresEvaluacionRepository(tx),
+						new PostgresProyectoRepository(tx),
+						new PostgresColaboracionRepository(tx),
+						new PostgresSolicitudFinalizacionRepository(tx),
+						new PostgresHistorialDeCambiosRepository(tx)
+					);
+
+					await registrarEvaluacion.execute({
+						proyectoId,
+						solicitudId,
+						colaboradorId: user.id_usuario!,
+						voto: 'rechazado',
+						justificacion
+					});
+				},
+				{
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+				}
+			);
+
+			const proyectoActualizado = await prisma.proyecto.findUnique({
+				where: { id_proyecto: proyectoId },
+				select: {
+					estado: {
+						select: {
+							descripcion: true
+						}
+					}
+				}
 			});
 
-			return { success: true };
+			return {
+				success: true,
+				message:
+					proyectoActualizado?.estado?.descripcion === 'en_auditoria'
+						? 'Tu rechazo fue registrado. El proyecto pasó a auditoría.'
+						: 'Tu rechazo fue registrado. El proyecto volvió a pendiente de solicitud de cierre.'
+			};
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Error interno';
 			return fail(400, { error: errorMessage });
