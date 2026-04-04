@@ -13,7 +13,6 @@
 		isInstitucionVerificada
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
-	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import {
 		MessageCircle,
 		ChevronDown,
@@ -29,8 +28,6 @@
 	} from 'lucide-svelte';
 
 	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
-
-	let { proyectos = [] }: { proyectos?: Proyecto[] } = $props();
 
 	let menuAbierto = $state(false);
 	let visible = $state(true);
@@ -57,16 +54,6 @@
 	}
 
 	const verificacionAprobada = $derived($isInstitucionVerificada);
-
-	const proyectosEnCursoCount = $derived(
-		$usuarioStore
-			? proyectos.filter(
-					(p) => p.institucion_id === $usuarioStore?.id_usuario && p.estado === 'en_curso'
-				).length
-			: 0
-	);
-
-	const limiteProyectosAlcanzado = $derived(proyectosEnCursoCount >= 5);
 
 	const emailUsuario = $derived(
 		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
@@ -250,7 +237,7 @@
 							<!-- Acciones Principales -->
 							<div class="p-1">
 								{#if $isInstitucion}
-									{#if verificacionAprobada && !limiteProyectosAlcanzado}
+									{#if verificacionAprobada}
 										<a
 											href="/proyectos/crear"
 											class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
@@ -262,9 +249,7 @@
 									{:else}
 										<div
 											class="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 opacity-60"
-											title={!verificacionAprobada
-												? 'Debés tener la verificación aprobada'
-												: 'Límite de proyectos alcanzado'}
+											title="Debés tener la verificación aprobada"
 										>
 											<PlusCircle class="h-4 w-4" />
 											Crear proyecto
