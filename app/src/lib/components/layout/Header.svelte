@@ -27,7 +27,7 @@
 		FileWarning
 	} from 'lucide-svelte';
 
-	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 
 	let menuAbierto = $state(false);
 	let visible = $state(true);
@@ -206,9 +206,14 @@
 					>
 						<div class="h-8 w-8 overflow-hidden rounded-full border-2 border-blue-400/60">
 							<img
-								src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+								src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 								alt="Avatar"
 								class="h-full w-full object-cover"
+								onerror={(event) => {
+									const target = event.currentTarget as HTMLImageElement;
+									if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+									target.src = IMAGEN_USUARIO_FALLBACK;
+								}}
 							/>
 						</div>
 						<div class="hidden flex-col items-start leading-none md:flex">
@@ -360,9 +365,14 @@
 					<!-- Perfil Mobile -->
 					<div class="mb-4 flex items-center gap-3 rounded-xl bg-blue-500/5 p-3">
 						<img
-							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+							src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 							alt="Avatar"
 							class="h-10 w-10 rounded-full object-cover"
+							onerror={(event) => {
+								const target = event.currentTarget as HTMLImageElement;
+								if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+								target.src = IMAGEN_USUARIO_FALLBACK;
+							}}
 						/>
 						<div class="flex flex-col">
 							<span class="font-medium text-white">{nombreCompleto}</span>

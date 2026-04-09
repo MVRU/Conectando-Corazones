@@ -16,13 +16,23 @@
 
 	let categorias = $derived(perfilUsuario.categorias_preferidas || []);
 	let tieneCategorias = $derived(categorias.length > 0);
+	let esInstitucion = $derived(perfilUsuario.rol === 'institucion');
+	let titulo = $derived(
+		esInstitucion
+			? esMiPerfil
+				? 'Mis causas y proyectos frecuentes'
+				: 'Causas y proyectos frecuentes'
+			: esMiPerfil
+				? 'Mis categorías'
+				: 'Categorías'
+	);
 </script>
 
 <section>
 	<div class="mb-4 flex items-center justify-between">
 		<h3 class="flex items-center gap-2 text-sm font-bold text-gray-800">
 			<Tag class="h-4 w-4 text-[#007FFF]" />
-			{esMiPerfil ? 'Mis categorías' : 'Categorías'}
+			{titulo}
 		</h3>
 		{#if esMiPerfil}
 			<button
@@ -56,15 +66,25 @@
 			<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]">
 				<Tag class="h-7 w-7" />
 			</div>
-			
+
 			<h4 class="mb-1 text-sm font-semibold text-gray-800">
-				{esMiPerfil ? 'Sin categorías personalizadas' : 'No hay categorías definidas'}
+				{esInstitucion
+					? esMiPerfil
+						? 'Sin causas o proyectos frecuentes'
+						: 'No hay causas o proyectos frecuentes definidos'
+					: esMiPerfil
+						? 'Sin categorías personalizadas'
+						: 'No hay categorías definidas'}
 			</h4>
-			
+
 			<p class="max-w-[200px] text-xs leading-relaxed text-gray-500">
-				{esMiPerfil 
-					? 'Agregá las temáticas que más te interesan para personalizar tu experiencia.' 
-					: 'Este usuario aún no ha seleccionado sus categorías de interés.'}
+				{esInstitucion
+					? esMiPerfil
+						? 'Definí las causas que acompañás y los tipos de proyectos que tu institución publica con más frecuencia.'
+						: 'Esta institución todavía no definió las causas o los tipos de proyectos que suele impulsar.'
+					: esMiPerfil
+						? 'Agregá las temáticas que más te interesan para personalizar tu experiencia.'
+						: 'Este usuario aún no ha seleccionado sus categorías de interés.'}
 			</p>
 
 			{#if esMiPerfil}
@@ -73,7 +93,7 @@
 					class="mt-5 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-200 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95"
 				>
 					<Plus class="h-3.5 w-3.5" />
-					Configurar intereses
+					{esInstitucion ? 'Configurar perfil institucional' : 'Configurar intereses'}
 				</button>
 			{/if}
 		</div>

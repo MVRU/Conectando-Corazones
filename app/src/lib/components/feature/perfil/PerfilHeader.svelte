@@ -6,6 +6,7 @@
 	import { Pencil, Camera, CheckCircle2 } from 'lucide-svelte';
 	import { fly, fade } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
+	import { IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
@@ -66,9 +67,14 @@
 	<div class="group relative mx-auto shrink-0 md:mx-0" in:fly={{ x: -20, y: 10, duration: 400, easing: cubicOut }}>
 		<div class="relative h-24 w-24 overflow-hidden rounded-2xl bg-white shadow-lg ring-4 ring-white sm:h-28 sm:w-28 md:h-32 md:w-32">
 			<img
-				src={perfilUsuario.url_foto ?? '/logo-1.png'}
+				src={perfilUsuario.url_foto || IMAGEN_USUARIO_FALLBACK}
 				alt="Foto de perfil de {nombreCompleto}"
 				class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+				onerror={(event) => {
+					const target = event.currentTarget as HTMLImageElement;
+					if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+					target.src = IMAGEN_USUARIO_FALLBACK;
+				}}
 			/>
 			{#if esMiPerfil}
 				<button

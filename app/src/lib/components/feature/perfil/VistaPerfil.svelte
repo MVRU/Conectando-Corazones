@@ -376,6 +376,14 @@
 									{esMiPerfil}
 									onEditarClick={abrirModalCategorias}
 								/>
+								{#if perfilUsuario.rol === 'institucion'}
+									<div class="my-5 border-t border-gray-100"></div>
+									<PerfilSeccionTiposParticipacion
+										{perfilUsuario}
+										{esMiPerfil}
+										onEditarClick={abrirModalTiposParticipacion}
+									/>
+								{/if}
 							</div>
 						</div>
 
