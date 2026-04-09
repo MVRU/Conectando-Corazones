@@ -5,7 +5,13 @@ on:
     - cron: "0 */2 * * *"
   workflow_dispatch:
   pull_request:
-    types: [labeled]
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+      - review_requested
+      - labeled
 
 jobs:
   remind:
@@ -14,17 +20,20 @@ jobs:
     env:
       CORE_TEAM: '["MVRU","TomasAlvarez0","AleSklate0807"]'
       TARGET_LABEL: "ready-for-review"
+      FREEZE_DATE: "2026-05-01T00:00:00-03:00"
+      REVIEW_SLA_HOURS: "48"
+      BOT_COOLDOWN_HOURS: "12"
 
     permissions:
       pull-requests: write
       issues: write
-      contents: write
+      contents: read
 
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Run PR Reminder
         uses: actions/github-script@v7
@@ -33,16 +42,13 @@ jobs:
             const { owner, repo } = context.repo;
             const now = new Date();
 
-            const DEMO_DEADLINE = new Date("2026-03-30T16:00:00-03:00");
-            const hoursToDeadline = (DEMO_DEADLINE - now) / (1000 * 60 * 60);
-
-            if (hoursToDeadline <= 0) {
-              console.log("Deadline alcanzado. Bot detenido.");
-              return;
-            }
-
             const CORE_TEAM = JSON.parse(process.env.CORE_TEAM);
             const TARGET_LABEL = process.env.TARGET_LABEL;
+            const FREEZE_DATE = new Date(process.env.FREEZE_DATE);
+            const REVIEW_SLA_HOURS = Number(process.env.REVIEW_SLA_HOURS || "48");
+            const BOT_COOLDOWN_HOURS = Number(process.env.BOT_COOLDOWN_HOURS || "12");
+
+            const isCodeFreeze = now >= FREEZE_DATE;
 
             const prs = await github.paginate(github.rest.pulls.list, {
               owner,
@@ -52,20 +58,17 @@ jobs:
             });
 
             for (const pr of prs) {
-              if (!pr || pr.draft || pr.user?.type === 'Bot') continue;
-
+              if (!pr || pr.draft || pr.user?.type === "Bot") continue;
               if (pr.state !== "open" || pr.merged) continue;
 
               const prNumber = pr.number;
               const author = pr.user.login.toLowerCase();
               const labels = (pr.labels || []).map(l => l.name);
 
-              // ================================
-              // AUTO-READY-FOR-REVIEW
-              // ================================
+              // =====================================
+              // AUTO READY-FOR-REVIEW
+              // =====================================
               if (!labels.includes(TARGET_LABEL)) {
-                console.log(`PR #${prNumber} sin ready-for-review → asignando automáticamente`);
-
                 try {
                   await github.rest.issues.addLabels({
                     owner,
@@ -78,11 +81,12 @@ jobs:
                     owner,
                     repo,
                     issue_number: prNumber,
-                    body: `🤖 Este PR estaba abierto y no marcado como \`ready-for-review\`.
-
-            Se asume listo para revisión y se activa el flujo automáticamente.`
+                    body: [
+                      "🤖 Este PR estaba abierto y no marcado como `ready-for-review`.",
+                      "",
+                      "Se asume listo para revisión y se activa el flujo automáticamente."
+                    ].join("\n")
                   });
-
                 } catch (e) {
                   console.error(`Error asignando label en PR #${prNumber}: ${e.message}`);
                 }
@@ -90,62 +94,136 @@ jobs:
                 continue;
               }
 
-              // ================================
+              // =====================================
               // REVIEWS
-              // ================================
+              // =====================================
               const reviews = await github.paginate(
                 github.rest.pulls.listReviews,
-                { owner, repo, pull_number: prNumber }
+                { owner, repo, pull_number: prNumber, per_page: 100 }
               );
 
               const latestReviewByUser = {};
               for (const review of reviews) {
                 if (!review.user) continue;
 
-                const user = review.user.login.toLowerCase();
+                const login = review.user.login.toLowerCase();
                 const submittedAt = new Date(review.submitted_at || 0);
 
                 if (
-                  !latestReviewByUser[user] ||
-                  new Date(latestReviewByUser[user].submitted_at) < submittedAt
+                  !latestReviewByUser[login] ||
+                  new Date(latestReviewByUser[login].submitted_at || 0) < submittedAt
                 ) {
-                  latestReviewByUser[user] = review;
+                  latestReviewByUser[login] = review;
                 }
               }
 
               const reviewersWhoCompleted = Object.values(latestReviewByUser)
+                .filter(r =>
+                  ["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(r.state)
+                )
                 .map(r => r.user.login.toLowerCase());
 
               const hasBlockingReview = Object.values(latestReviewByUser)
-                .some(r => r.state === 'CHANGES_REQUESTED');
+                .some(r => r.state === "CHANGES_REQUESTED");
 
-              const hasMVRUApproval = Object.values(latestReviewByUser)
-                .some(r =>
-                  r.user.login.toLowerCase() === 'mvru' &&
-                  r.state === 'APPROVED'
-                );
-
-              // ================================
+              // =====================================
               // REVIEWERS PENDIENTES
-              // ================================
+              // =====================================
               let pendingReviewers = (pr.requested_reviewers || [])
                 .map(r => r.login)
-                .filter(r => !reviewersWhoCompleted.includes(r.toLowerCase()));
+                .filter(login => !reviewersWhoCompleted.includes(login.toLowerCase()));
 
               if (pendingReviewers.length === 0) {
-                pendingReviewers = CORE_TEAM.filter(u =>
-                  u.toLowerCase() !== author &&
-                  !reviewersWhoCompleted.includes(u.toLowerCase())
+                pendingReviewers = CORE_TEAM.filter(login =>
+                  login.toLowerCase() !== author &&
+                  !reviewersWhoCompleted.includes(login.toLowerCase())
                 );
               }
 
-              if (pendingReviewers.length === 0) continue;
+              if (pendingReviewers.length === 0) {
+                // Ya hubo pronunciamiento de todos los relevantes
+                continue;
+              }
 
-              const reviewersStr = pendingReviewers.map(u => `@${u}`).join(" ");
+              const pendingReviewersLower = pendingReviewers.map(r => r.toLowerCase());
+              const reviewersStr = pendingReviewers.map(r => `@${r}`).join(" ");
 
-              // ================================
-              // EVENTO INMEDIATO
-              // ================================
+              // =====================================
+              // COMENTARIOS DEL PR
+              // =====================================
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number: prNumber, per_page: 100 }
+              );
+
+              // Comentarios generales hechos por revisores pendientes
+              const reviewerComments = comments.filter(comment =>
+                comment.user &&
+                pendingReviewersLower.includes(comment.user.login.toLowerCase())
+              );
+
+              // =====================================
+              // ÚLTIMO PRONUNCIAMIENTO DE CADA REVISOR
+              // Cuenta review o comentario general
+              // =====================================
+              const reviewerLastActivity = {};
+
+              for (const reviewer of pendingReviewers) {
+                const key = reviewer.toLowerCase();
+                reviewerLastActivity[key] = null;
+              }
+
+              for (const review of reviews) {
+                if (!review.user) continue;
+                const login = review.user.login.toLowerCase();
+                if (!pendingReviewersLower.includes(login)) continue;
+
+                if (!["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(review.state)) {
+                  continue;
+                }
+
+                const dt = new Date(review.submitted_at || 0);
+                if (!reviewerLastActivity[login] || reviewerLastActivity[login] < dt) {
+                  reviewerLastActivity[login] = dt;
+                }
+              }
+
+              for (const comment of reviewerComments) {
+                const login = comment.user.login.toLowerCase();
+                const dt = new Date(comment.created_at || 0);
+
+                if (!reviewerLastActivity[login] || reviewerLastActivity[login] < dt) {
+                  reviewerLastActivity[login] = dt;
+                }
+              }
+
+              // =====================================
+              // BASELINE PARA SLA
+              // Si el revisor nunca habló, medimos desde creación del PR
+              // =====================================
+              const prCreatedAt = new Date(pr.created_at);
+              const silentReviewers = pendingReviewers.filter(r => {
+                const last = reviewerLastActivity[r.toLowerCase()];
+                return !last;
+              });
+
+              const hoursSincePRCreated = (now - prCreatedAt) / (1000 * 60 * 60);
+              const slaBreached = silentReviewers.length > 0 && hoursSincePRCreated >= REVIEW_SLA_HOURS;
+
+              // =====================================
+              // COOLDOWN BOT
+              // =====================================
+              const lastBotComment = comments
+                .filter(c => c.user?.type === "Bot")
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+
+              const hoursSinceLastBotComment = lastBotComment
+                ? (now - new Date(lastBotComment.created_at)) / (1000 * 60 * 60)
+                : Infinity;
+
+              // =====================================
+              // EVENTO INMEDIATO AL ETIQUETAR ready-for-review
+              // =====================================
               const justLabeled =
                 context.eventName === "pull_request" &&
                 context.payload.action === "labeled" &&
@@ -159,132 +237,63 @@ jobs:
                   issue_number: prNumber,
                   body: `🚀 PR listo para review\n\n${reviewersStr}`
                 });
-
                 continue;
               }
 
-              // ================================
-              // COOLDOWN
-              // ================================
-              const comments = await github.paginate(
-                github.rest.issues.listComments,
-                { owner, repo, issue_number: prNumber }
-              );
-
-              const lastBotComment = comments
-                .filter(c => c.user.type === 'Bot')
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-
-              const hoursSinceLastComment = lastBotComment
-                ? (now - new Date(lastBotComment.created_at)) / (1000 * 60 * 60)
-                : Infinity;
-
-              // ================================
-              // MERGE STATUS (con retry)
-              // ================================
-              let prDetails = await github.rest.pulls.get({
-                owner,
-                repo,
-                pull_number: prNumber
-              });
-
-              let isMergeable = prDetails.data.mergeable;
-
-              if (isMergeable === null) {
-                console.log(`Recalculando mergeable para PR #${prNumber}...`);
-                await new Promise(resolve => setTimeout(resolve, 2000));
-
-                const retry = await github.rest.pulls.get({
-                  owner,
-                  repo,
-                  pull_number: prNumber
-                });
-
-                isMergeable = retry.data.mergeable;
+              if (hoursSinceLastBotComment < BOT_COOLDOWN_HOURS) {
+                continue;
               }
 
-              isMergeable = isMergeable === true;
+              // =====================================
+              // ARMADO DEL MENSAJE
+              // =====================================
+              let sections = [];
+              let shouldComment = false;
 
-              // ================================
-              // STATUS CHECKS (CI real)
-              // ================================
-              const checks = await github.rest.checks.listForRef({
-                owner,
-                repo,
-                ref: pr.head.sha
-              });
-
-              const checkRuns = checks.data.check_runs;
-
-              const allChecksPassed =
-                checkRuns.length > 0 &&
-                checkRuns.every(
-                  c => c.status === "completed" && c.conclusion === "success"
-                );
-
-              // ================================
-              // AUTO-MERGE CRÍTICO
-              // ================================
-              if (
-                hoursToDeadline < 12 &&
-                hasMVRUApproval &&
-                !hasBlockingReview &&
-                isMergeable &&
-                allChecksPassed
-              ) {
-                try {
-                  await github.rest.issues.createComment({
-                    owner,
-                    repo,
-                    issue_number: prNumber,
-                    body: `🤖 Auto-merge ejecutado
-
-            Condiciones cumplidas:
-            - Sin cambios solicitados
-            - Sin conflictos
-            - CI exitoso
-            - Ventana crítica pre-demo`
-                  });
-
-                  await github.rest.pulls.merge({
-                    owner,
-                    repo,
-                    pull_number: prNumber,
-                    merge_method: "squash"
-                  });
-
-                  console.log(`PR #${prNumber} mergeado automáticamente`);
-                  continue;
-
-                } catch (e) {
-                  console.error(`Error auto-merge PR #${prNumber}: ${e.message}`);
-                }
+              if (isCodeFreeze) {
+                shouldComment = true;
+                sections.push([
+                  "## 🚫 Code freeze alcanzado",
+                  "",
+                  `Desde el **1 de mayo de 2026** no se permiten nuevas features ni cambios no críticos sobre el código de cara a la demo.`,
+                  "Solo deberían evaluarse fixes críticos y excepcionales, previamente validados por el equipo."
+                ].join("\n"));
               }
 
-              // ================================
-              // RECORDATORIOS
-              // ================================
-              if (hoursSinceLastComment < 6 && hoursToDeadline >= 12) continue;
+              if (slaBreached) {
+                shouldComment = true;
 
-              let body = "";
-
-              if (hoursToDeadline < 12) {
-                body = `🚨 CRÍTICO
-
-            ${reviewersStr}
-
-            Escalado a @MVRU`;
-              } else if (hoursToDeadline < 36) {
-                body = `⚠️ PRIORITARIO
-
-            ${reviewersStr}`;
-              } else {
-                body = `⏰ Reminder
-
-            ${reviewersStr}`;
+                const silentStr = silentReviewers.map(u => `@${u}`).join(" ");
+                sections.push([
+                  "## ⏰ Escalada por falta de revisión",
+                  "",
+                  `Pasaron **${REVIEW_SLA_HOURS} horas o más** desde la creación del PR sin pronunciamiento de estos revisores:`,
+                  "",
+                  silentStr,
+                  "",
+                  "Se necesita al menos uno de estos pronunciamientos:",
+                  "- comentario",
+                  "- aprobación",
+                  "- solicitud de cambios"
+                ].join("\n"));
               }
 
-              if (hoursToDeadline < 36 && !labels.includes("needs-focus")) {
+              // Si no hay freeze ni SLA vencido, hacer reminder normal
+              if (!shouldComment) {
+                sections.push([
+                  "## ⏰ Reminder de revisión",
+                  "",
+                  `${reviewersStr}`,
+                  "",
+                  "Este PR sigue pendiente de revisión."
+                ].join("\n"));
+                shouldComment = true;
+              }
+
+              // =====================================
+              // LABEL needs-focus SOLO CUANDO HAYA SLA VENCIDO O FREEZE
+              // =====================================
+              if ((slaBreached || isCodeFreeze) && !labels.includes("needs-focus")) {
                 try {
                   await github.rest.issues.addLabels({
                     owner,
@@ -293,16 +302,21 @@ jobs:
                     labels: ["needs-focus"]
                   });
                 } catch (e) {
-                  console.error(`Error agregando labels en PR #${prNumber}: ${e.message}`);
+                  console.error(`Error agregando label needs-focus en PR #${prNumber}: ${e.message}`);
                 }
               }
 
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: prNumber,
-                body
-              });
+              // =====================================
+              // COMENTAR
+              // =====================================
+              if (shouldComment) {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  body: sections.join("\n\n---\n\n")
+                });
+              }
             }
 
             console.log("Finalizado.");
