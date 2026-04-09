@@ -40,9 +40,7 @@
 		: null;
 	let session = $derived(data.session);
 
-	let showBreadcrumbs = $derived(
-		shouldShowBreadcrumbs(page.url.pathname) && $breadcrumbs.length >= 2
-	);
+	let showBreadcrumbs = $derived(shouldShowBreadcrumbs(page.url) && $breadcrumbs.length >= 2);
 
 	$effect(() => {
 		beforeNavigate(untrack(() => clearBreadcrumbs));
