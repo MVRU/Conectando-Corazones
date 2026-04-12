@@ -89,13 +89,17 @@ export class ActualizarEstadoColaboracion {
 			// 3. Registrar en historial de cambios
 			await this.historialRepository.create(
 				{
-					tipo_objeto: 'colaboracion',
+					tipo_objeto: 'Colaboracion',
 					id_objeto: id,
-					accion: nuevoEstado === 'aprobada' ? 'aprobar' : 'rechazar',
+					accion: 'Actualizar',
 					atributo_afectado: 'estado',
 					valor_anterior: estadoAnterior,
 					valor_nuevo: nuevoEstado,
-					justificacion: justificacion,
+					justificacion:
+						justificacion ??
+						(nuevoEstado === 'aprobada'
+							? 'Solicitud de colaboración aprobada por la institución.'
+							: 'Solicitud de colaboración rechazada por la institución.'),
 					usuario_id: usuarioId
 				},
 				tx
