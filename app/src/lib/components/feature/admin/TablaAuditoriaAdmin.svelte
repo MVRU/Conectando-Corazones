@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { RegistroAuditoriaAdminDto } from '$lib/domain/types/dto/PanelAdmin';
 
 	// TODO(Tomás): Agregar más filtros a la bitácora de auditoría.
@@ -26,7 +25,17 @@
 		onCambiarPagina?: (data: { page: number }) => void;
 	}>();
 
-	let innerFiltros = $state({ ...filtros });
+	let innerFiltros = $state<{ idObjeto: string | number; usuarioId: string | number }>({
+		idObjeto: '',
+		usuarioId: ''
+	});
+
+	$effect(() => {
+		innerFiltros = {
+			idObjeto: filtros.idObjeto,
+			usuarioId: filtros.usuarioId
+		};
+	});
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();

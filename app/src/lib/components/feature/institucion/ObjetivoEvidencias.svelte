@@ -8,7 +8,8 @@
 		evidenciasEntrada = [],
 		evidenciasSalida = [],
 		totalArchivos = 0,
-		expandido = $bindable(false)
+		expandido = false,
+		onToggle
 	} = $props<{
 		objetivo: any;
 		evidencias?: any[];
@@ -16,10 +17,25 @@
 		evidenciasSalida?: any[];
 		totalArchivos?: number;
 		expandido?: boolean;
+		onToggle?: () => void;
 	}>();
 
+	let expandidoInterno = $state(false);
+	let estaExpandido = $derived(onToggle ? expandido : expandidoInterno);
+
+	$effect(() => {
+		if (!onToggle) {
+			expandidoInterno = expandido;
+		}
+	});
+
 	function toggleExpansion() {
-		expandido = !expandido;
+		if (onToggle) {
+			onToggle();
+			return;
+		}
+
+		expandidoInterno = !expandidoInterno;
 	}
 
 	function obtenerUsername(evidencia: any): string {
@@ -111,7 +127,7 @@
 		</div>
 
 		<svg
-			class="h-5 w-5 text-gray-400 transition-transform {expandido ? 'rotate-180' : ''}"
+			class="h-5 w-5 text-gray-400 transition-transform {estaExpandido ? 'rotate-180' : ''}"
 			fill="none"
 			stroke="currentColor"
 			stroke-width="2"
@@ -121,7 +137,7 @@
 		</svg>
 	</button>
 
-	{#if expandido}
+	{#if estaExpandido}
 		<div class="border-t border-gray-200 bg-white p-4">
 			{#if evidencias.length === 0}
 				<div class="py-4 text-center">

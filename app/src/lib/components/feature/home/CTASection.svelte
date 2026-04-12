@@ -9,6 +9,11 @@
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
+	let { ctaLabel = 'Registrate y empezá a generar impacto', ctaHref = '/registrarse' } = $props<{
+		ctaLabel?: string;
+		ctaHref?: string;
+	}>();
+
 	let visible = $state(false);
 	let sectionRef: HTMLDivElement | undefined = $state();
 
@@ -68,13 +73,18 @@
 			>
 				<!-- !Button solo visible en mobile -->
 				<div class="sm:hidden">
-					<Button label="Registrate y generá impacto" href="/registro" variant="ghost" size="sm" />
+					<Button
+						label={ctaLabel === 'Mi panel' ? ctaLabel : 'Registrate y generá impacto'}
+						href={ctaHref}
+						variant="ghost"
+						size="sm"
+					/>
 				</div>
 				<!-- !Button solo visible en desktop -->
 				<div class="hidden sm:block">
 					<Button
-						label="Registrate y empezá a generar impacto"
-						href="/registrarse"
+						label={ctaLabel === 'Mi panel' ? ctaLabel : 'Registrate y empezá a generar impacto'}
+						href={ctaHref}
 						variant="ghost"
 						size="md"
 					/>

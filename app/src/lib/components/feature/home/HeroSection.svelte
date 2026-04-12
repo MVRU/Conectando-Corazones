@@ -4,6 +4,11 @@
 	import Ticker from '$lib/components/ui/Ticker.svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 
+	let { ctaLabel = 'Registrarse', ctaHref = '/registrarse' } = $props<{
+		ctaLabel?: string;
+		ctaHref?: string;
+	}>();
+
 	const logos = [
 		{ src: '/instituciones/rotary.png', href: '/perfil/rotary_arrecifes' },
 		{ src: '/instituciones/unicef.png', href: '/perfil/unicef_argentina' },
@@ -101,8 +106,8 @@
 					class="drop-shadow-lg transition-transform duration-400 hover:scale-105 active:scale-95"
 				>
 					<Button
-						label="Registrarse"
-						href="/registrarse"
+						label={ctaLabel}
+						href={ctaHref}
 						variant="primary"
 						size="md"
 						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "

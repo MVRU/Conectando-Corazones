@@ -1,13 +1,6 @@
-/**
- * * DECISIÓN DE DISEÑO
- *    -*- Configuración centralizada de las rutas con Breadcrumbs.
- *    -*- Permite habilitarlas sin alterar la lógica del store.
- */
-
 export const ENABLED_BREADCRUMB_PATHS = [
 	// Público
 	'/proyectos/:id',
-	'/perfil/:username',
 
 	// Proyectos
 	'/proyectos/:id/editar',
@@ -31,9 +24,30 @@ export const ENABLED_BREADCRUMB_PATHS = [
 /**
  * -!- Verifica si la ruta actual está habilitada para mostrar Breadcrumbs.
  */
-export function shouldShowBreadcrumbs(pathname: string): boolean {
-	const normalized = pathname.replace(/\/+$/, '') || '/';
+export function shouldShowBreadcrumbs(input: string | URL): boolean {
+	const url = typeof input === 'string' ? new URL(input, 'http://breadcrumbs.local') : input;
+	const normalized = url.pathname.replace(/\/+$/, '') || '/';
+
+	if (matchRoute(normalized, '/perfil/:username')) {
+		return hasProfileBreadcrumbContext(url);
+	}
+
 	return ENABLED_BREADCRUMB_PATHS.some((pattern) => matchRoute(normalized, pattern));
+}
+
+export function hasProfileBreadcrumbContext(url: URL): boolean {
+	const from = url.searchParams.get('from');
+	const proyectoId = url.searchParams.get('proyecto');
+
+	if (from === 'proyecto') {
+		return Boolean(proyectoId);
+	}
+
+	if (from === 'solicitudes') {
+		return true;
+	}
+
+	return false;
 }
 
 // * Utilidad interna para comparar rutas con segmentos dinámicos

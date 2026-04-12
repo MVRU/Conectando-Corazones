@@ -5,6 +5,12 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	const usuarioPorDefecto = '/users/user-default.png';
 
+	function aplicarFallbackImagen(event: Event) {
+		const target = event.currentTarget as HTMLImageElement;
+		if (target.src.endsWith(usuarioPorDefecto)) return;
+		target.src = usuarioPorDefecto;
+	}
+
 	import {
 		getUbicacionCorta,
 		formatearFechaBadge,
@@ -119,6 +125,7 @@
 							alt="Tu perfil"
 							class="h-full w-full object-cover"
 							loading="lazy"
+							onerror={aplicarFallbackImagen}
 						/>
 					</div>
 				{/if}
@@ -170,6 +177,7 @@
 							alt={proyecto.institucion.nombre_legal}
 							class="h-5 w-5 rounded-full object-cover shadow-sm"
 							loading="lazy"
+							onerror={aplicarFallbackImagen}
 						/>
 						<span class="truncate font-medium text-gray-700">
 							{proyecto.institucion.nombre_legal}

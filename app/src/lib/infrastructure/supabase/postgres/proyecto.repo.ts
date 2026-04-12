@@ -3,7 +3,7 @@ import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { esClientePrisma, type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
 import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
 import { PostgresCategoriaRepository } from './categoria.repo';
@@ -12,6 +12,8 @@ import type { ProyectoSearchCriteria } from '$lib/domain/types/dto/ProyectoSearc
 import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	private includeOptions = {
 		estado: true,
 		proyecto_categorias: {
@@ -213,7 +215,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	}
 
 	async findById(id: number): Promise<Proyecto | null> {
-		const proyecto = await prisma.proyecto.findUnique({
+		const proyecto = await this.db.proyecto.findUnique({
 			where: { id_proyecto: id },
 			include: this.includeOptions
 		});
@@ -580,13 +582,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 
 	async updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto> {
 		// Buscar el ID del estado basado en la descripción
-		const estadoObj = await prisma.estado.findUnique({
+		const estadoObj = await this.db.estado.findUnique({
 			where: { descripcion: nuevoEstado }
 		});
 
 		if (!estadoObj) throw new Error(`Estado ${nuevoEstado} no encontrado`);
 
-		const updated = await prisma.proyecto.update({
+		const updated = await this.db.proyecto.update({
 			where: { id_proyecto: id },
 			data: {
 				estado_id: estadoObj.id_estado
@@ -595,7 +597,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		});
 
 		// Generación de resumen y aprendizajes (asíncrono)
-		if (nuevoEstado === 'completado') {
+		if (nuevoEstado === 'completado' && esClientePrisma(this.db)) {
 			setTimeout(async () => {
 				try {
 					const result = await analizarProyecto(id);
@@ -642,7 +644,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	}
 
 	async countSolicitudesRechazadas(id: number): Promise<number> {
-		return await prisma.solicitudFinalizacion.count({
+		return await this.db.solicitudFinalizacion.count({
 			where: {
 				proyecto_id: id,
 				estado: 'rechazada'

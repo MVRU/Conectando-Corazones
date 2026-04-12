@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import CrearProyecto from '$lib/components/feature/institucion/CrearProyecto.svelte';
 	import { isLoading, usuario } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
@@ -9,7 +7,7 @@
 
 	let { data } = $props();
 
-	run(() => {
+	$effect(() => {
 		if (data.form?.titulo) {
 			setBreadcrumbs([
 				BREADCRUMB_ROUTES.proyectos,
@@ -19,7 +17,7 @@
 		}
 	});
 
-	run(() => {
+	$effect(() => {
 		if (!$isLoading) {
 			if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {
 				toastStore.show({

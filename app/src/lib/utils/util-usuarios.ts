@@ -1,6 +1,8 @@
 // import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
 import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
 
+export const IMAGEN_USUARIO_FALLBACK = '/users/user-default.png';
+
 /**
  * Obtiene el nombre completo de un usuario por su ID
  * @param usuarioId - ID del usuario
@@ -29,6 +31,19 @@ export function obtenerNombreCompleto(usuario: Usuario): string {
 	}
 
 	return `${u.nombre} ${u.apellido}`.trim() || u.username;
+}
+
+export function obtenerRutaPanelPorRol(rol: Usuario['rol'] | undefined): string {
+	switch (rol) {
+		case 'institucion':
+			return '/institucion/mi-panel';
+		case 'colaborador':
+			return '/colaborador/mi-panel';
+		case 'administrador':
+			return '/admin';
+		default:
+			return '/';
+	}
 }
 
 /**

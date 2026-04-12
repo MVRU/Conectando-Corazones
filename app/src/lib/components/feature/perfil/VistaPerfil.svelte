@@ -376,6 +376,14 @@
 									{esMiPerfil}
 									onEditarClick={abrirModalCategorias}
 								/>
+								{#if perfilUsuario.rol === 'institucion'}
+									<div class="my-5 border-t border-gray-100"></div>
+									<PerfilSeccionTiposParticipacion
+										{perfilUsuario}
+										{esMiPerfil}
+										onEditarClick={abrirModalTiposParticipacion}
+									/>
+								{/if}
 							</div>
 						</div>
 
@@ -489,8 +497,8 @@
 	onActualizarCampo={(c: keyof EditarPerfilForm, v: any) => edicion.actualizarCampo(c, v)}
 	{edicion}
 	{guardando}
-	on:guardar={handleGuardarPerfil}
-	on:cerrar={() => modales.cerrar('edicion')}
+	onGuardar={handleGuardarPerfil}
+	onCerrar={() => modales.cerrar('edicion')}
 />
 
 {#if $modales.resena && !esMiPerfil && $isAuthenticated && $usuarioStore}

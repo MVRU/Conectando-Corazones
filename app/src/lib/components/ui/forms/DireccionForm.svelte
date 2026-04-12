@@ -4,7 +4,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 
-	import { MENSAJES_ERROR } from '$lib/utils/validaciones';
+	import { MENSAJES_ERROR, validarUrl } from '$lib/utils/validaciones';
 	import { construirUrlsVistaPreviaGoogleMaps } from '$lib/utils/googleMaps';
 
 	import type { Provincia } from '$lib/domain/entities/Provincia';
@@ -143,7 +143,11 @@
 		localidad:
 			localidad?.id_provincia === provincia?.id_provincia
 				? ''
-				: MENSAJES_ERROR.ciudadNoPerteneceProvincia
+				: MENSAJES_ERROR.ciudadNoPerteneceProvincia,
+		url_google_maps:
+			requiereGeolocalizacion && editandoUrlMapaGoogle && urlGoogleMaps.trim() && !validarUrl(urlGoogleMaps)
+				? MENSAJES_ERROR.urlInvalida
+				: ''
 	});
 
 	let tieneErrores = $derived(Object.values(errores).some((mensajeError) => mensajeError !== ''));
@@ -178,7 +182,7 @@
 		toastStore.show({
 			variant: 'info',
 			title: 'Paso omitido',
-			message: 'Podés completar tu ubicación más adelante desde el panel de la institución.'
+			message: 'Podés completar tu ubicación más adelante desde tu panel.'
 		});
 		onskip?.();
 	}
@@ -235,6 +239,7 @@
 						<Input
 							id="urlGoogleMaps"
 							bind:value={urlGoogleMaps}
+							error={intentoEnvio ? errores.url_google_maps : ''}
 							placeholder="Se genera automáticamente"
 							customClass="w-full rounded-2xl border border-gray-300 bg-white px-4 py-2 text-base text-black placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:bg-gray-100"
 						/>
@@ -243,13 +248,13 @@
 							href={urlGoogleMaps}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 pr-14 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
 						>
 							{urlGoogleMapsLegible}
 						</a>
 					{:else}
 						<p
-							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-base text-gray-500 italic"
+							class="rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-4 py-3 pr-14 text-base text-gray-500 italic"
 						>
 							Se genera automáticamente
 						</p>
@@ -286,6 +291,9 @@
 						{/if}
 					</button>
 				</div>
+				{#if intentoEnvio && errores.url_google_maps}
+					<p class="mt-2 text-sm text-red-600">{errores.url_google_maps}</p>
+				{/if}
 			</div>
 
 			{#if googleMapsPreview && !editandoUrlMapaGoogle}

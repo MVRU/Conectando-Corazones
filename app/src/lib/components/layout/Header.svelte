@@ -2,7 +2,7 @@
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import {
 		isAuthenticated,
 		usuario as usuarioStore,
@@ -13,7 +13,6 @@
 		isInstitucionVerificada
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
-	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import {
 		MessageCircle,
 		ChevronDown,
@@ -28,12 +27,10 @@
 		FileWarning
 	} from 'lucide-svelte';
 
-	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
-
-	let { proyectos = [] }: { proyectos?: Proyecto[] } = $props();
+	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 
 	let menuAbierto = $state(false);
-	let visible = $state(false);
+	let visible = $state(true);
 	let mostrarHeader = $state(true);
 	let lastScrollY = $state(0);
 	let headerRef = $state<HTMLElement | undefined>();
@@ -57,16 +54,6 @@
 	}
 
 	const verificacionAprobada = $derived($isInstitucionVerificada);
-
-	const proyectosEnCursoCount = $derived(
-		$usuarioStore
-			? proyectos.filter(
-					(p) => p.institucion_id === $usuarioStore?.id_usuario && p.estado === 'en_curso'
-				).length
-			: 0
-	);
-
-	const limiteProyectosAlcanzado = $derived(proyectosEnCursoCount >= 5);
 
 	const emailUsuario = $derived(
 		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
@@ -115,6 +102,14 @@
 		}
 		lastScrollY = current;
 	};
+
+	afterNavigate(() => {
+		mostrarHeader = true;
+		menuAbierto = false;
+		mostrarDropdown = false;
+		visible = true;
+		layoutStore.setHeaderVisible(true);
+	});
 
 	$effect(() => {
 		if (!headerRef) return;
@@ -211,9 +206,14 @@
 					>
 						<div class="h-8 w-8 overflow-hidden rounded-full border-2 border-blue-400/60">
 							<img
-								src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+								src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 								alt="Avatar"
 								class="h-full w-full object-cover"
+								onerror={(event) => {
+									const target = event.currentTarget as HTMLImageElement;
+									if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+									target.src = IMAGEN_USUARIO_FALLBACK;
+								}}
 							/>
 						</div>
 						<div class="hidden flex-col items-start leading-none md:flex">
@@ -242,7 +242,7 @@
 							<!-- Acciones Principales -->
 							<div class="p-1">
 								{#if $isInstitucion}
-									{#if verificacionAprobada && !limiteProyectosAlcanzado}
+									{#if verificacionAprobada}
 										<a
 											href="/proyectos/crear"
 											class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
@@ -254,9 +254,7 @@
 									{:else}
 										<div
 											class="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 opacity-60"
-											title={!verificacionAprobada
-												? 'Debés tener la verificación aprobada'
-												: 'Límite de proyectos alcanzado'}
+											title="Debés tener la verificación aprobada"
 										>
 											<PlusCircle class="h-4 w-4" />
 											Crear proyecto
@@ -367,9 +365,14 @@
 					<!-- Perfil Mobile -->
 					<div class="mb-4 flex items-center gap-3 rounded-xl bg-blue-500/5 p-3">
 						<img
-							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+							src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 							alt="Avatar"
 							class="h-10 w-10 rounded-full object-cover"
+							onerror={(event) => {
+								const target = event.currentTarget as HTMLImageElement;
+								if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+								target.src = IMAGEN_USUARIO_FALLBACK;
+							}}
 						/>
 						<div class="flex flex-col">
 							<span class="font-medium text-white">{nombreCompleto}</span>

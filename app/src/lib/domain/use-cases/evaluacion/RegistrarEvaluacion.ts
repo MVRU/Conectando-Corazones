@@ -38,7 +38,16 @@ export class RegistrarEvaluacion {
         const existente = await this.evaluacionRepo.findBySolicitudAndColaborador(params.solicitudId, params.colaboradorId);
         if (existente) throw new Error('Ya has enviado tu evaluación para esta solicitud.');
 
-        // 4. Crear Evaluación
+        // 4. Validar que la solicitud corresponda al proyecto evaluado y siga pendiente
+        const solicitud = await this.solicitudRepo.findByProyectoId(params.proyectoId);
+        if (!solicitud || solicitud.id_solicitud !== params.solicitudId) {
+            throw new Error('La solicitud no corresponde al proyecto indicado.');
+        }
+        if (solicitud.estado !== 'pendiente') {
+            throw new Error('La solicitud ya no está pendiente de evaluación.');
+        }
+
+        // 5. Crear Evaluación
         const nuevaEvaluacion = new Evaluacion({
             solicitud_id: params.solicitudId,
             colaborador_id: params.colaboradorId,
@@ -60,7 +69,7 @@ export class RegistrarEvaluacion {
             usuario_id: params.colaboradorId
         });
 
-        // 5. Lógica de consenso y umbral
+        // 6. Lógica de consenso y umbral
         if (params.voto === 'rechazado') {
             // Caso rechazo:
             const rechazosPrevios = await this.proyectoRepo.countSolicitudesRechazadas(params.proyectoId)
