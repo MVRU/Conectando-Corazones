@@ -366,6 +366,7 @@
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				estaVerificado={data.info.estaVerificado}
+				estadoVerificacion={data.info.estadoVerificacion ?? null}
 				bind:showEvidenceModal
 				onExportPDF={generatePDF}
 			/>

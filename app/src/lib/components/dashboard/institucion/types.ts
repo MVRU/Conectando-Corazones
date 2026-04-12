@@ -66,6 +66,7 @@ export interface InstitucionDashboardData {
 		fecha: string;
 		ubicacion: string;
 		estaVerificado: boolean;
+		estadoVerificacion?: 'aprobada' | 'pendiente' | 'rechazada' | null;
 		bio?: string;
 	};
 	metricas: {

@@ -22,6 +22,11 @@
 			icon: Clock,
 			label: 'Verificación pendiente'
 		},
+		verificacion_rechazada: {
+			color: 'bg-rose-100 text-rose-700 border-rose-200',
+			icon: ShieldExclamation,
+			label: 'Verificación rechazada'
+		},
 		verificado_email_institucional: {
 			color: 'bg-blue-100 text-blue-700 border-blue-200',
 			icon: CheckBadge,
@@ -45,6 +50,7 @@
 	const textosMobile = {
 		sin_verificacion: 'Sin verificar',
 		verificacion_pendiente: 'Pendiente',
+		verificacion_rechazada: 'Rechazada',
 		verificado_email_institucional: 'Email',
 		verificado_documental: 'Documental',
 		verificado_renaper: 'RENAPER'
