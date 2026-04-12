@@ -3,31 +3,34 @@
 
 	let {
 		deshabilitado = false,
-		placeholder = 'Escribe un mensaje...',
+		enviando = false,
+		placeholder = 'Escribí un mensaje...',
 		chatId = undefined,
 		onSend
 	} = $props<{
 		deshabilitado?: boolean;
+		enviando?: boolean;
 		placeholder?: string;
-		chatId?: number | undefined;
-		onSend?: (event: { contenido: string }) => void;
+		chatId?: number;
+		onSend?: (event: { contenido: string }) => void | Promise<void>;
 	}>();
 
 	let mensaje = $state('');
-	let textareaElement: HTMLTextAreaElement;
+	let textareaElement = $state<HTMLTextAreaElement | null>(null);
+	let procesando = $state(false);
 
-	// Cargar borrador al montar si existe
 	$effect(() => {
-		if (chatId !== undefined) {
-			const draft = $chatStore.draftMessages.get(chatId);
-			if (draft) {
-				mensaje = draft;
-				setTimeout(autoExpand, 0);
-			}
+		if (chatId === undefined) {
+			return;
+		}
+
+		const draft = $chatStore.draftMessages.get(chatId);
+		if (draft !== undefined && draft !== mensaje) {
+			mensaje = draft;
+			queueMicrotask(autoExpand);
 		}
 	});
 
-	// Guardar borrador al desmontar si hay contenido
 	$effect(() => {
 		return () => {
 			if (chatId !== undefined && mensaje.trim()) {
@@ -36,49 +39,44 @@
 		};
 	});
 
-	// Guardar borrador cuando cambia el chatId
-	$effect(() => {
-		if (chatId !== undefined) {
-			const draft = $chatStore.draftMessages.get(chatId);
-			if (draft !== undefined && draft !== mensaje) {
-				mensaje = draft;
-				setTimeout(autoExpand, 0);
-			}
-		}
-	});
-
-	function enviar() {
-		if (!mensaje.trim() || deshabilitado) return;
-		onSend?.({ contenido: mensaje });
-		mensaje = '';
-		if (textareaElement) {
-			textareaElement.style.height = 'auto';
-		}
-		// Limpiar borrador después de enviar
-		if (chatId !== undefined) {
-			chatStore.clearDraft(chatId);
-		}
-	}
-
-	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Enter' && !e.shiftKey) {
-			e.preventDefault();
-			enviar();
-		}
-	}
-
 	function autoExpand() {
-		if (textareaElement) {
-			textareaElement.style.height = 'auto';
-			const newHeight = Math.min(textareaElement.scrollHeight, 200);
-			textareaElement.style.height = newHeight + 'px';
+		if (!textareaElement) {
+			return;
+		}
+
+		textareaElement.style.height = 'auto';
+		textareaElement.style.height = `${Math.min(textareaElement.scrollHeight, 200)}px`;
+	}
+
+	async function enviar() {
+		if (!mensaje.trim() || deshabilitado || procesando || enviando) {
+			return;
+		}
+
+		const contenido = mensaje;
+		procesando = true;
+
+		try {
+			await onSend?.({ contenido });
+			mensaje = '';
+			if (chatId !== undefined) {
+				chatStore.clearDraft(chatId);
+			}
+			autoExpand();
+		} finally {
+			procesando = false;
+		}
+	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			void enviar();
 		}
 	}
 
 	$effect(() => {
-		if (mensaje !== undefined) {
-			setTimeout(autoExpand, 0);
-		}
+		queueMicrotask(autoExpand);
 	});
 </script>
 
@@ -89,52 +87,54 @@
 			bind:value={mensaje}
 			onkeydown={handleKeydown}
 			oninput={autoExpand}
-			disabled={deshabilitado}
+			disabled={deshabilitado || procesando || enviando}
 			{placeholder}
 			rows="1"
 			class="no-scrollbar flex-1 resize-none overflow-y-auto rounded-xl border-2 border-gray-200 bg-gray-50 p-3 text-sm transition-all placeholder:text-gray-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 md:text-base"
 			style="min-height: 44px; max-height: 200px;"
 		></textarea>
+
 		<button
-			onclick={enviar}
-			disabled={!mensaje.trim() || deshabilitado}
+			onclick={() => void enviar()}
+			disabled={!mensaje.trim() || deshabilitado || procesando || enviando}
 			class="flex items-center justify-center self-end rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-800 hover:shadow-lg active:scale-95 disabled:cursor-not-allowed disabled:from-gray-300 disabled:to-gray-400 disabled:shadow-none md:px-5"
 			style="min-height: 44px;"
 		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="2"
-				stroke="currentColor"
-				class="h-5 w-5 md:mr-2"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-				/>
-			</svg>
-			<span class="hidden md:inline">Enviar</span>
+			{#if procesando || enviando}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke="currentColor"
+					class="h-5 w-5 animate-spin md:mr-2"
+				>
+					<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v3m0 9v3m7.5-7.5h-3m-9 0h-3m12.364 5.364l-2.121-2.121m-8.486 0L3.636 17.364m12.728-10.728l-2.121 2.121m-8.486 0L3.636 6.636" />
+				</svg>
+				<span class="hidden md:inline">Enviando</span>
+			{:else}
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke="currentColor"
+					class="h-5 w-5 md:mr-2"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+					/>
+				</svg>
+				<span class="hidden md:inline">Enviar</span>
+			{/if}
 		</button>
 	</div>
+
 	{#if deshabilitado}
-		<p class="mt-2 flex items-center justify-center gap-1.5 text-center text-xs text-amber-600">
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="h-4 w-4"
-			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
-				/>
-			</svg>
-			El chat está deshabilitado para este proyecto
+		<p class="mt-2 text-center text-xs text-amber-600">
+			No podés enviar mensajes en este chat.
 		</p>
 	{/if}
 </div>

@@ -205,8 +205,8 @@
 									{#if proyecto?.estado}
 										<EstadoProyectoBadge estado={proyecto.estado} />
 									{/if}
-									{#if chat.mensajes.length > 0}
-										<span class="text-xs text-gray-400">{chat.mensajes.length} mensajes</span>
+									{#if chat.cantidad_mensajes > 0}
+										<span class="text-xs text-gray-400">{chat.cantidad_mensajes} mensajes</span>
 									{/if}
 								</div>
 							</a>
