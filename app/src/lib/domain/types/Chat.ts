@@ -6,7 +6,13 @@ export interface ParticipanteChat {
 	nombre: string;
 	apellido: string;
 	rol: string;
+	url_foto?: string | null;
 	nombre_legal?: string | null;
+	tipo_colaborador?: string | null;
+	razon_social?: string | null;
+	nombreVisible?: string;
+	rolVisible?: string;
+	perfilHref?: string | null;
 }
 
 export interface Mensaje {

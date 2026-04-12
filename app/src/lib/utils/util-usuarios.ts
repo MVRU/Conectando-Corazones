@@ -1,5 +1,5 @@
 // import { mockUsuarios } from '$lib/infrastructure/mocks/mock-usuarios';
-import type { Usuario, Institucion } from '$lib/domain/types/Usuario';
+import type { Usuario } from '$lib/domain/types/Usuario';
 
 export const IMAGEN_USUARIO_FALLBACK = '/users/user-default.png';
 
@@ -20,7 +20,17 @@ export function obtenerNombreUsuario(usuarioId: number): string {
  * @param usuario - Objeto del usuario
  * @returns Nombre completo del usuario
  */
-export function obtenerNombreCompleto(usuario: Usuario): string {
+type UsuarioNombrable = {
+	username?: string | null;
+	nombre: string;
+	apellido: string;
+	rol: Usuario['rol'] | string;
+	nombre_legal?: string | null;
+	tipo_colaborador?: string | null;
+	razon_social?: string | null;
+};
+
+export function obtenerNombreCompleto(usuario: UsuarioNombrable): string {
 	const u = usuario as any;
 	if (u.rol === 'institucion' && u.nombre_legal) {
 		return u.nombre_legal;
@@ -31,6 +41,18 @@ export function obtenerNombreCompleto(usuario: Usuario): string {
 	}
 
 	return `${u.nombre} ${u.apellido}`.trim() || u.username;
+}
+
+export function obtenerRolVisibleUsuario(rol: Usuario['rol'] | string | undefined): string {
+	return rol === 'institucion' ? 'Institución' : 'Colaborador';
+}
+
+export function obtenerHrefPerfilPublico(username: string | null | undefined): string | null {
+	if (!username?.trim()) {
+		return null;
+	}
+
+	return `/perfil/${username}`;
 }
 
 export function obtenerRutaPanelPorRol(rol: Usuario['rol'] | undefined): string {

@@ -2,6 +2,11 @@ import { Prisma } from '@prisma/client';
 import { prisma, type PrismaDbClient } from '$lib/infrastructure/prisma/client';
 import type { ChatRepository } from '$lib/domain/repositories/ChatRepository';
 import type { Chat, Mensaje, ParticipanteChat } from '$lib/domain/types/Chat';
+import {
+	obtenerHrefPerfilPublico,
+	obtenerNombreCompleto,
+	obtenerRolVisibleUsuario
+} from '$lib/utils/util-usuarios';
 
 const participanteSelect = {
 	id_usuario: true,
@@ -9,7 +14,10 @@ const participanteSelect = {
 	nombre: true,
 	apellido: true,
 	rol: true,
-	nombre_legal: true
+	url_foto: true,
+	nombre_legal: true,
+	tipo_colaborador: true,
+	razon_social: true
 } satisfies Prisma.UsuarioSelect;
 
 const mensajeSelect = {
@@ -213,14 +221,16 @@ export class PostgresChatRepository implements ChatRepository {
 		);
 		const vistos = new Set<number>();
 
-		return participantes.filter((participante) => {
-			if (vistos.has(participante.id_usuario)) {
-				return false;
-			}
+		return participantes
+			.filter((participante) => {
+				if (vistos.has(participante.id_usuario)) {
+					return false;
+				}
 
-			vistos.add(participante.id_usuario);
-			return true;
-		});
+				vistos.add(participante.id_usuario);
+				return true;
+			})
+			.map((participante) => this.mapParticipante(participante));
 	}
 
 	private mapMensaje(mensaje: MensajeRow): Mensaje {
@@ -232,7 +242,16 @@ export class PostgresChatRepository implements ChatRepository {
 			contenido: mensaje.contenido,
 			client_id: mensaje.client_id,
 			created_at: mensaje.created_at,
-			autor: mensaje.autor
+			autor: this.mapParticipante(mensaje.autor)
+		};
+	}
+
+	private mapParticipante(participante: ParticipanteRow): ParticipanteChat {
+		return {
+			...participante,
+			nombreVisible: obtenerNombreCompleto(participante),
+			rolVisible: obtenerRolVisibleUsuario(participante.rol),
+			perfilHref: obtenerHrefPerfilPublico(participante.username)
 		};
 	}
 }

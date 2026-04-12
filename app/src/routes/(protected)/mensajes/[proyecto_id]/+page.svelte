@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createBrowserClient } from '@supabase/ssr';
+	import { resolve } from '$app/paths';
 	import { browser } from '$app/environment';
 	import { tick } from 'svelte';
 	import BurbujaMensaje from '$lib/components/feature/chat/BurbujaMensaje.svelte';
@@ -8,13 +9,15 @@
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { env } from '$lib/infrastructure/config/env';
-	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
+	import { formatearCantidadMensajes } from '$lib/utils/chatTexto';
 	import {
 		readChatOutbox,
 		removeChatOutboxEntry,
 		type ChatOutboxEntry,
 		upsertChatOutboxEntry
 	} from '$lib/utils/chatOutbox';
+	import { ArrowLeft, EllipsisVertical, FolderKanban, MessageSquareText, ShieldAlert } from 'lucide-svelte';
+	import { fade, fly } from 'svelte/transition';
 	import type { Mensaje } from '$lib/domain/types/Chat';
 	import type { PageData } from './$types';
 
@@ -45,19 +48,8 @@
 	const proyecto = $derived(data.proyecto);
 	const usuarioActual = $derived(data.usuario ?? null);
 	const proyectoId = $derived(proyecto?.id_proyecto ?? 0);
+	const esInstitucionActual = $derived(usuarioActual?.rol === 'institucion');
 	const puedeEnviar = $derived(Boolean(data.tieneAcceso && usuarioActual?.id_usuario && chat));
-	const evidenciasLink = $derived(
-		usuarioActual?.rol === 'institucion'
-			? `/institucion/proyectos/${proyectoId}/aportes`
-			: `/colaborador/proyectos/${proyectoId}/mis-aportes`
-	);
-	const participantesPorId = $derived.by(() => {
-		const participantes = new Map<number, Participante>();
-		for (const participante of chat?.participantes ?? []) {
-			participantes.set(participante.id_usuario, participante);
-		}
-		return participantes;
-	});
 
 	let mensajes = $state<MensajeVista[]>([]);
 	let chatInicializado = $state<number | null>(null);
@@ -66,17 +58,9 @@
 	let reenviandoPendientes = $state(false);
 	let chatContainer = $state<HTMLElement | null>(null);
 	let showMobileMenu = $state(false);
-
-	$effect(() => {
-		if (!chat) {
-			return;
-		}
-
-		setBreadcrumbs([
-			{ label: 'Mensajes', href: '/mensajes' },
-			{ label: chat.titulo || 'Chat' }
-		]);
-	});
+	const cantidadMensajesPersistidos = $derived(
+		mensajes.filter((mensaje) => getEstadoLocal(mensaje) === 'persistido').length
+	);
 
 	$effect(() => {
 		if (!chat || chatInicializado === chat.id_chat) {
@@ -129,7 +113,7 @@
 						contenido: nuevo.contenido,
 						client_id: nuevo.client_id,
 						created_at: nuevo.created_at,
-						autor: participantesPorId.get(nuevo.autor_id),
+						autor: obtenerParticipantePorId(nuevo.autor_id),
 						estadoLocal: 'persistido'
 					});
 
@@ -177,6 +161,12 @@
 		showMobileMenu = !showMobileMenu;
 	}
 
+	function obtenerParticipantePorId(idUsuario: number): Participante | undefined {
+		return chat?.participantes.find(
+			(participante: Participante) => participante.id_usuario === idUsuario
+		);
+	}
+
 	function crearClientId(): string {
 		if (browser && typeof window.crypto?.randomUUID === 'function') {
 			return window.crypto.randomUUID();
@@ -197,9 +187,7 @@
 			contenido: entry.contenido,
 			client_id: entry.clientId,
 			created_at: entry.createdAt,
-			autor: chat?.participantes.find(
-				(participante: Participante) => participante.id_usuario === usuarioActual?.id_usuario
-			),
+			autor: obtenerParticipantePorId(usuarioActual?.id_usuario ?? 0),
 			estadoLocal
 		};
 	}
@@ -341,107 +329,125 @@
 </script>
 
 {#if !chat}
-	<div class="flex h-full items-center justify-center bg-gray-50">
-		<div class="text-center">
-			<p class="text-lg font-medium text-gray-700">Chat no disponible</p>
+	<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center bg-transparent px-4">
+		<div class="max-w-md w-full rounded-[2.5rem] border border-white/10 bg-white/5 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-xl">
+			<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-rose-500/10 text-rose-400 ring-1 ring-inset ring-rose-400/20 shadow-[0_0_30px_rgba(244,63,94,0.15)]">
+				<ShieldAlert class="h-10 w-10" />
+			</div>
+			<p class="text-xl font-bold text-slate-100">Chat no disponible</p>
+			<p class="mt-3 text-sm text-slate-400">
+				No pudimos cargar esta conversación.
+			</p>
 		</div>
 	</div>
 {:else}
-	<div class="flex h-full flex-col">
-		<header class="relative flex-shrink-0 border-b border-gray-200 bg-white px-4 py-3 shadow-sm md:px-6 md:py-4">
-			<div class="flex items-center justify-between gap-4">
+	<div class="flex h-full flex-col text-slate-100 bg-transparent">
+		<header class="message-enter relative z-10 flex-shrink-0 border-b border-white/5 bg-white/[0.02] px-4 py-3 backdrop-blur-md md:px-6 md:py-4" style="--message-enter-delay: 40ms;">
+			<div class="mx-auto flex w-full max-w-5xl items-start justify-between gap-4">
 				<a
-					href="/mensajes"
-					class="flex items-center text-gray-600 transition-colors hover:text-blue-600 md:hidden"
+					href={resolve('/mensajes')}
+					class="mt-1 flex items-center rounded-xl p-1 text-slate-400 transition-colors hover:text-slate-100 md:hidden"
 					aria-label="Volver a la lista de chats"
 				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke-width="2"
-						stroke="currentColor"
-						class="h-6 w-6"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-					</svg>
+					<ArrowLeft class="h-5 w-5" />
 				</a>
 
 				<div class="min-w-0 flex-1">
-					<h1 class="truncate text-lg font-bold text-gray-900 md:text-xl">{chat.titulo}</h1>
-					<div class="mt-1 flex items-center gap-2">
+					<div class="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase ring-1 ring-inset ring-slate-800">
+						<MessageSquareText class="h-3.5 w-3.5" />
+						Chat del proyecto
+					</div>
+					<p class="sr-only">
+						Conversación del proyecto
+					</p>
+					<h1 class="mt-2 truncate text-lg font-bold tracking-tight text-slate-50 md:text-[1.4rem]">
+						{chat.titulo}
+					</h1>
+					<div class="mt-2 flex flex-wrap items-center gap-2">
 						{#if proyecto?.estado}
 							<EstadoProyectoBadge estado={proyecto.estado} />
 						{/if}
-						<span class="text-xs text-gray-500">
-							{mensajes.filter((mensaje) => getEstadoLocal(mensaje) === 'persistido').length}
-							{mensajes.filter((mensaje) => getEstadoLocal(mensaje) === 'persistido').length === 1
-								? ' mensaje'
-								: ' mensajes'}
+						<span class="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 ring-1 ring-inset ring-slate-700">
+							{formatearCantidadMensajes(cantidadMensajesPersistidos)}
 						</span>
 					</div>
 				</div>
 
 				<div class="flex shrink-0 gap-2">
-					<a
-						href="/proyectos/{proyectoId}"
-						class="hidden items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-blue-700 hover:shadow-md md:flex"
-					>
-						Ver proyecto
-					</a>
-					<a
-						href={evidenciasLink}
-						class="hidden items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md md:flex"
-					>
-						{usuarioActual?.rol === 'institucion' ? 'Evidencias' : 'Mis aportes'}
-					</a>
+					{#if proyectoId}
+						<a
+							href={resolve('/(public)/proyectos/[id]', { id: String(proyectoId) })}
+							class="hidden items-center gap-2 rounded-xl bg-[#007FFF] px-4 py-2 text-sm font-medium text-white shadow-sm shadow-[#007FFF]/20 transition hover:bg-[#42A1FF] md:flex"
+						>
+							<FolderKanban class="h-4 w-4" />
+							Ver proyecto
+						</a>
+					{/if}
+					{#if proyectoId}
+						{#if esInstitucionActual}
+							<a
+								href={resolve('/(protected)/institucion/proyectos/[id]/aportes', { id: String(proyectoId) })}
+								class="hidden items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 shadow-sm transition hover:bg-slate-800 md:flex"
+							>
+								Evidencias
+							</a>
+						{:else}
+							<a
+								href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', { id: String(proyectoId) })}
+								class="hidden items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 shadow-sm transition hover:bg-slate-800 md:flex"
+							>
+								Mis aportes
+							</a>
+						{/if}
+					{/if}
 					<button
 						onclick={toggleMobileMenu}
-						class="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:shadow-md md:hidden"
+						class="rounded-xl border border-slate-700 bg-slate-900 p-2 text-slate-300 shadow-sm transition hover:bg-slate-800 md:hidden"
 						aria-label="Menú"
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="1.5"
-							stroke="currentColor"
-							class="h-5 w-5"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z"
-							/>
-						</svg>
+						<EllipsisVertical class="h-5 w-5" />
 					</button>
 				</div>
 			</div>
 
 			{#if showMobileMenu}
-				<div class="absolute top-full right-4 z-10 mt-2 w-56 rounded-lg border border-gray-200 bg-white shadow-lg md:hidden">
+				<div class="absolute top-full right-4 z-10 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-950 p-1 shadow-2xl md:hidden">
 					<div class="py-1">
-						<a
-							href="/proyectos/{proyectoId}"
-							class="block px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-							onclick={() => (showMobileMenu = false)}
-						>
-							Ver proyecto
-						</a>
-						<a
-							href={evidenciasLink}
-							class="block px-4 py-3 text-sm text-gray-700 transition-colors hover:bg-gray-50"
-							onclick={() => (showMobileMenu = false)}
-						>
-							{usuarioActual?.rol === 'institucion' ? 'Evidencias' : 'Mis aportes'}
-						</a>
+						{#if proyectoId}
+							<a
+								href={resolve('/(public)/proyectos/[id]', { id: String(proyectoId) })}
+								class="block rounded-xl px-4 py-3 text-sm text-slate-200 transition-colors hover:bg-slate-900"
+								onclick={() => (showMobileMenu = false)}
+							>
+								Ver proyecto
+							</a>
+						{/if}
+						{#if proyectoId}
+							{#if esInstitucionActual}
+								<a
+									href={resolve('/(protected)/institucion/proyectos/[id]/aportes', { id: String(proyectoId) })}
+									class="block rounded-xl px-4 py-3 text-sm text-slate-200 transition-colors hover:bg-slate-900"
+									onclick={() => (showMobileMenu = false)}
+								>
+									Evidencias
+								</a>
+							{:else}
+								<a
+									href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', { id: String(proyectoId) })}
+									class="block rounded-xl px-4 py-3 text-sm text-slate-200 transition-colors hover:bg-slate-900"
+									onclick={() => (showMobileMenu = false)}
+								>
+									Mis aportes
+								</a>
+							{/if}
+						{/if}
 					</div>
 				</div>
 			{/if}
 		</header>
 
 		{#if errorEnvio}
-			<div class="border-b border-amber-100 bg-white px-4 py-3 md:px-6">
+			<div class="message-enter relative z-10 border-b border-amber-500/10 bg-amber-500/5 px-4 py-3 backdrop-blur-md md:px-6" style="--message-enter-delay: 90ms;">
 				<Alert
 					variant="warning"
 					title="Hubo un problema al enviar"
@@ -451,7 +457,7 @@
 		{/if}
 
 		{#if hayPendientes}
-			<div class="border-b border-blue-100 bg-white px-4 py-3 md:px-6">
+			<div class="message-enter relative z-10 border-b border-[#007FFF]/10 bg-[#007FFF]/5 px-4 py-3 backdrop-blur-md md:px-6" style="--message-enter-delay: 90ms;">
 				<Alert
 					variant="info"
 					title="Hay mensajes pendientes"
@@ -460,35 +466,76 @@
 			</div>
 		{/if}
 
-		<div class="no-scrollbar flex-1 overflow-y-auto bg-white p-4 md:p-6" bind:this={chatContainer}>
+		<div
+			class="message-enter relative z-0 no-scrollbar flex-1 overflow-y-auto bg-transparent px-3 py-4 sm:px-4 md:px-6 md:py-5"
+			style="--message-enter-delay: 120ms;"
+			bind:this={chatContainer}
+		>
 			{#if mensajes.length === 0}
-				<div class="flex h-full items-center justify-center">
-					<div class="max-w-sm rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-8 text-center">
-						<p class="text-base font-semibold text-gray-800">Todavía no hay mensajes</p>
-						<p class="mt-2 text-sm text-gray-500">
+				<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center">
+					<div class="max-w-md w-full rounded-[2.5rem] border border-white/5 bg-white/[0.02] px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-lg transition-all hover:border-white/10">
+						<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/5 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20 shadow-[0_0_30px_rgba(0,127,255,0.10)]">
+							<MessageSquareText class="h-10 w-10" strokeWidth={1.5} />
+						</div>
+						<p class="text-xl font-bold tracking-tight text-slate-100">Todavía no hay mensajes</p>
+						<p class="mt-3 text-sm leading-relaxed text-slate-400">
 							Este historial queda persistido en el proyecto y no se puede eliminar.
 						</p>
 					</div>
 				</div>
 			{:else}
-				{#each messageGroups as group (group.date.getTime())}
-					<SeparadorFecha fecha={group.date} />
-					{#each group.messages as mensaje (getMensajeKey(mensaje))}
-						<BurbujaMensaje
-							{mensaje}
-							esPropio={mensaje.remitente_id === usuarioActual?.id_usuario}
-							estadoLocal={getEstadoLocal(mensaje)}
-						/>
+				<div class="mx-auto flex w-full max-w-4xl flex-col">
+					{#each messageGroups as group (group.date.getTime())}
+						<SeparadorFecha fecha={group.date} />
+						{#each group.messages as mensaje (getMensajeKey(mensaje))}
+							<div in:fly={{ y: 20, duration: 400, delay: 50 }}>
+								<BurbujaMensaje
+									{mensaje}
+									esPropio={mensaje.remitente_id === usuarioActual?.id_usuario}
+									estadoLocal={getEstadoLocal(mensaje)}
+								/>
+							</div>
+						{/each}
 					{/each}
-				{/each}
+				</div>
 			{/if}
 		</div>
 
-		<InputMensaje
+		<div class="message-enter" style="--message-enter-delay: 160ms;">
+			<InputMensaje
 			deshabilitado={!puedeEnviar}
 			enviando={enviandoActual}
 			chatId={chat.id_chat}
 			onSend={handleSend}
-		/>
+			/>
+		</div>
 	</div>
 {/if}
+
+<style>
+	.message-enter {
+		animation: message-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+		animation-delay: var(--message-enter-delay, 0ms);
+		will-change: opacity, transform;
+	}
+
+	@keyframes message-enter {
+		from {
+			opacity: 0;
+			transform: translate3d(0, 12px, 0);
+		}
+
+		to {
+			opacity: 1;
+			transform: translate3d(0, 0, 0);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.message-enter {
+			animation: none;
+			transform: none;
+			will-change: auto;
+		}
+	}
+</style>
