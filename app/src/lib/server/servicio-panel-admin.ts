@@ -181,7 +181,11 @@ export class ServicioPanelAdmin {
 			});
 
 			const nuevoEstado = accion === 'aprobar' ? 'aprobada' : 'rechazada';
-			const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : 'inactivo';
+			const actualizacionUsuario =
+				accion === 'aprobar'
+					? { estado_verificacion: nuevoEstado, estado: 'activo' }
+					: { estado_verificacion: nuevoEstado };
+			const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : (usuarioAnterior?.estado ?? 'inactivo');
 
 			await tx.verificacion.update({
 				where: { id_verificacion: idVerificacion },
@@ -190,10 +194,7 @@ export class ServicioPanelAdmin {
 
 			await tx.usuario.update({
 				where: { id_usuario: verificacion.usuario_id },
-				data: {
-					estado_verificacion: nuevoEstado,
-					estado: nuevoEstadoUsuario
-				}
+				data: actualizacionUsuario
 			});
 
 			await tx.historialDeCambios.create({
