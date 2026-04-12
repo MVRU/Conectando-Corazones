@@ -1,0 +1,327 @@
+name: Issue Deadline Reminder
+
+on:
+  schedule:
+    # Argentina UTC-3 → 09:00 local = 12:00 UTC
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  remind-issues:
+    runs-on: ubuntu-latest
+
+    env:
+      PROJECT_OWNER: "MVRU"
+      PROJECT_NUMBER: "6"
+      DUE_DATE_FIELD_NAME: "Target date"
+      STATUS_FIELD_NAME: "Status"
+      HARD_DEADLINE: "2026-04-25"
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Remind pending issues with due date
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PROJECT_TOKEN }}
+          script: |
+            const owner = process.env.PROJECT_OWNER;
+            const projectNumber = Number(process.env.PROJECT_NUMBER);
+            const dueDateFieldName = process.env.DUE_DATE_FIELD_NAME;
+            const statusFieldName = process.env.STATUS_FIELD_NAME;
+            const hardDeadline = process.env.HARD_DEADLINE;
+
+            const today = new Date();
+            const todayStr = today.toISOString().slice(0, 10);
+
+            function diffDays(targetDateStr, baseDateStr) {
+              const target = new Date(targetDateStr + "T00:00:00Z");
+              const base = new Date(baseDateStr + "T00:00:00Z");
+              return Math.floor((target - base) / (1000 * 60 * 60 * 24));
+            }
+
+            function buildDailyMarker(dateStr) {
+              return `<!-- issue-deadline-reminder:date=${dateStr} -->`;
+            }
+
+            async function getProjectItems() {
+              const query = `
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      items(first: 100) {
+                        nodes {
+                          content {
+                            __typename
+                            ... on Issue {
+                              number
+                              title
+                              state
+                              assignees(first: 10) {
+                                nodes {
+                                  login
+                                }
+                              }
+                              repository {
+                                name
+                                owner {
+                                  login
+                                }
+                              }
+                            }
+                          }
+                          fieldValues(first: 50) {
+                            nodes {
+                              __typename
+                              ... on ProjectV2ItemFieldDateValue {
+                                date
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                              ... on ProjectV2ItemFieldSingleSelectValue {
+                                name
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                              ... on ProjectV2ItemFieldTextValue {
+                                text
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      items(first: 100) {
+                        nodes {
+                          content {
+                            __typename
+                            ... on Issue {
+                              number
+                              title
+                              state
+                              assignees(first: 10) {
+                                nodes {
+                                  login
+                                }
+                              }
+                              repository {
+                                name
+                                owner {
+                                  login
+                                }
+                              }
+                            }
+                          }
+                          fieldValues(first: 50) {
+                            nodes {
+                              __typename
+                              ... on ProjectV2ItemFieldDateValue {
+                                date
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                              ... on ProjectV2ItemFieldSingleSelectValue {
+                                name
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                              ... on ProjectV2ItemFieldTextValue {
+                                text
+                                field {
+                                  ... on ProjectV2FieldCommon {
+                                    name
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+
+              const result = await github.graphql(query, {
+                owner,
+                number: projectNumber
+              });
+
+              return result.organization?.projectV2?.items?.nodes
+                || result.user?.projectV2?.items?.nodes
+                || [];
+            }
+
+            function getFieldValue(item, fieldName) {
+              for (const node of item.fieldValues.nodes) {
+                const currentFieldName = node.field?.name;
+                if (currentFieldName !== fieldName) continue;
+
+                if (node.__typename === "ProjectV2ItemFieldDateValue") {
+                  return node.date;
+                }
+
+                if (node.__typename === "ProjectV2ItemFieldSingleSelectValue") {
+                  return node.name;
+                }
+
+                if (node.__typename === "ProjectV2ItemFieldTextValue") {
+                  return node.text;
+                }
+              }
+
+              return null;
+            }
+
+            async function getComments(owner, repo, issue_number) {
+              return await github.paginate(
+                github.rest.issues.listComments,
+                { owner, repo, issue_number, per_page: 100 }
+              );
+            }
+
+            const items = await getProjectItems();
+
+            for (const item of items) {
+              const issue = item.content;
+
+              if (!issue || issue.__typename !== "Issue") continue;
+              if (issue.state !== "OPEN") continue;
+
+              const repoOwner = issue.repository.owner.login;
+              const repoName = issue.repository.name;
+              const issueNumber = issue.number;
+
+              const assignees = issue.assignees.nodes.map(a => a.login);
+              if (assignees.length === 0) continue;
+
+              const dueDate = getFieldValue(item, dueDateFieldName);
+              const status = getFieldValue(item, statusFieldName);
+
+              if (!dueDate) continue;
+              if (status === "En revisión" || status === "Completado") continue;
+
+              const marker = buildDailyMarker(todayStr);
+              const comments = await getComments(repoOwner, repoName, issueNumber);
+
+              const alreadyCommentedToday = comments.some(comment =>
+                comment.user?.type === "Bot" &&
+                comment.body?.includes(marker)
+              );
+
+              if (alreadyCommentedToday) {
+                continue;
+              }
+
+              const daysRemaining = diffDays(dueDate, todayStr);
+              const overdueDays = diffDays(todayStr, dueDate);
+              const hardDeadlineReached = todayStr >= hardDeadline;
+
+              const mention = assignees.map(login => `@${login}`).join(" ");
+
+              let body;
+
+              if (hardDeadlineReached) {
+                body = [
+                  marker,
+                  "## ❌ Incumplimiento de fecha límite",
+                  "",
+                  `${mention}`,
+                  "",
+                  `La fecha límite dura era **${hardDeadline}** y esta issue sigue sin estar en \`En revisión\` ni \`Completado\`.`,
+                  "",
+                  "Esto ya constituye un incumplimiento directo del compromiso asumido.",
+                  "Además de terminar esta tarea, corresponde también realizar el **manual del administrador**.",
+                  "",
+                  `Estado actual: **${status || "Sin estado"}**.`,
+                  `Fecha límite: **${dueDate}**.`
+                ].join("\n");
+              } else if (daysRemaining > 1) {
+                body = [
+                  marker,
+                  "## ⏰ Recordatorio de avance",
+                  "",
+                  `${mention}`,
+                  "",
+                  `Esta issue tiene fecha límite **${dueDate}**.`,
+                  `Quedan **${daysRemaining} días** para implementar, probar, aprobar y mergear a \`main\`.`,
+                  "",
+                  "No debería seguir postergándose. Ya tendría que venir avanzando con consistencia para no perjudicar al resto del equipo.",
+                  "",
+                  `Estado actual: **${status || "Sin estado"}**.`
+                ].join("\n");
+              } else if (daysRemaining === 1) {
+                body = [
+                  marker,
+                  "## 🚨 Recordatorio crítico",
+                  "",
+                  `${mention}`,
+                  "",
+                  `Esta issue vence **mañana (${dueDate})**.`,
+                  "Solo queda **1 día** para implementar, probar, aprobar y mergear a `main`.",
+                  "",
+                  "Esto ya está en zona crítica y no debería seguir demorándose.",
+                  "",
+                  `Estado actual: **${status || "Sin estado"}**.`
+                ].join("\n");
+              } else if (daysRemaining === 0) {
+                body = [
+                  marker,
+                  "## 🚨 Vence hoy",
+                  "",
+                  `${mention}`,
+                  "",
+                  `La fecha límite de esta issue es **hoy (${dueDate})**.`,
+                  "Hoy debería quedar resuelta, revisada y mergeada a `main` para no afectar al resto del equipo.",
+                  "",
+                  `Estado actual: **${status || "Sin estado"}**.`
+                ].join("\n");
+              } else {
+                body = [
+                  marker,
+                  "## ❌ Issue vencida",
+                  "",
+                  `${mention}`,
+                  "",
+                  `Esta issue venció el **${dueDate}** y lleva **${overdueDays} día(s)** de atraso.`,
+                  "",
+                  "El atraso ya está perjudicando directamente la planificación y el avance del equipo.",
+                  "Tiene que resolverse con urgencia.",
+                  "",
+                  `Estado actual: **${status || "Sin estado"}**.`
+                ].join("\n");
+              }
+
+              await github.rest.issues.createComment({
+                owner: repoOwner,
+                repo: repoName,
+                issue_number: issueNumber,
+                body
+              });

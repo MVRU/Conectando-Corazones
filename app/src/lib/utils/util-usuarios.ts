@@ -54,7 +54,6 @@ export function obtenerHrefPerfilPublico(username: string | null | undefined): s
 
 	return `/perfil/${username}`;
 }
-
 export function obtenerRutaPanelPorRol(rol: Usuario['rol'] | undefined): string {
 	switch (rol) {
 		case 'institucion':

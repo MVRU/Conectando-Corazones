@@ -2,7 +2,9 @@ name: PR Reminder Bot
 
 on:
   schedule:
-    - cron: "0 */2 * * *"
+    # Argentina UTC-3
+    # Ventana local 08:00-20:00 => UTC 11:00-23:00
+    - cron: "0 11,14,17,20,23 * * *"
   workflow_dispatch:
   pull_request:
     types:
@@ -11,23 +13,23 @@ on:
       - synchronize
       - ready_for_review
       - review_requested
+      - review_request_removed
       - labeled
+      - unlabeled
+      - converted_to_draft
 
 jobs:
   remind:
     runs-on: ubuntu-latest
 
-    env:
-      CORE_TEAM: '["MVRU","TomasAlvarez0","AleSklate0807"]'
-      TARGET_LABEL: "ready-for-review"
-      FREEZE_DATE: "2026-05-01T00:00:00-03:00"
-      REVIEW_SLA_HOURS: "48"
-      BOT_COOLDOWN_HOURS: "12"
-
     permissions:
       pull-requests: write
       issues: write
       contents: read
+
+    env:
+      TARGET_LABEL: "ready-for-review"
+      FREEZE_DATE: "2026-05-01T00:00:00-03:00"
 
     steps:
       - name: Setup Node.js
@@ -42,13 +44,90 @@ jobs:
             const { owner, repo } = context.repo;
             const now = new Date();
 
-            const CORE_TEAM = JSON.parse(process.env.CORE_TEAM);
             const TARGET_LABEL = process.env.TARGET_LABEL;
             const FREEZE_DATE = new Date(process.env.FREEZE_DATE);
-            const REVIEW_SLA_HOURS = Number(process.env.REVIEW_SLA_HOURS || "48");
-            const BOT_COOLDOWN_HOURS = Number(process.env.BOT_COOLDOWN_HOURS || "12");
+            const MVRU_LOGIN = "mvru";
 
             const isCodeFreeze = now >= FREEZE_DATE;
+
+            function lower(s) {
+              return String(s || "").toLowerCase();
+            }
+
+            function hoursBetween(a, b) {
+              return (a - b) / (1000 * 60 * 60);
+            }
+
+            function latestDate(dates) {
+              const valid = dates.filter(Boolean).map(d => new Date(d));
+              if (valid.length === 0) return null;
+              return new Date(Math.max(...valid.map(d => d.getTime())));
+            }
+
+            function getLatestReviewByUser(reviews) {
+              const latest = {};
+
+              for (const review of reviews) {
+                if (!review.user) continue;
+
+                const login = lower(review.user.login);
+                const submittedAt = new Date(review.submitted_at || 0);
+
+                if (!latest[login] || new Date(latest[login].submitted_at || 0) < submittedAt) {
+                  latest[login] = review;
+                }
+              }
+
+              return latest;
+            }
+
+            function getStage(hoursSinceReady) {
+              if (hoursSinceReady >= 72) return "72h";
+              if (hoursSinceReady >= 48) return "48h";
+              if (hoursSinceReady >= 24) return "24h";
+              return null;
+            }
+
+            function extractBotStages(comments) {
+              const stages = new Set();
+
+              for (const c of comments) {
+                if (c.user?.type !== "Bot") continue;
+
+                const body = c.body || "";
+                const match = body.match(/<!--\s*pr-reminder:stage=([a-z0-9_-]+)\s*-->/i);
+
+                if (match?.[1]) {
+                  stages.add(match[1]);
+                }
+              }
+
+              return stages;
+            }
+
+            async function getTimelineEvents(issue_number) {
+              return await github.paginate(
+                github.rest.issues.listEventsForTimeline,
+                {
+                  owner,
+                  repo,
+                  issue_number,
+                  per_page: 100
+                }
+              );
+            }
+
+            async function getReviewComments(pull_number) {
+              return await github.paginate(
+                github.rest.pulls.listReviewComments,
+                {
+                  owner,
+                  repo,
+                  pull_number,
+                  per_page: 100
+                }
+              );
+            }
 
             const prs = await github.paginate(github.rest.pulls.list, {
               owner,
@@ -58,129 +137,104 @@ jobs:
             });
 
             for (const pr of prs) {
-              if (!pr || pr.draft || pr.user?.type === "Bot") continue;
+              if (!pr || pr.user?.type === "Bot") continue;
               if (pr.state !== "open" || pr.merged) continue;
+              if (pr.draft) continue;
 
               const prNumber = pr.number;
-              const author = pr.user.login.toLowerCase();
+              const author = lower(pr.user.login);
               const labels = (pr.labels || []).map(l => l.name);
+              const labelsLower = labels.map(lower);
 
-              // =====================================
-              // AUTO READY-FOR-REVIEW
-              // =====================================
-              if (!labels.includes(TARGET_LABEL)) {
-                try {
-                  await github.rest.issues.addLabels({
-                    owner,
-                    repo,
-                    issue_number: prNumber,
-                    labels: [TARGET_LABEL]
-                  });
-
-                  await github.rest.issues.createComment({
-                    owner,
-                    repo,
-                    issue_number: prNumber,
-                    body: [
-                      "🤖 Este PR estaba abierto y no marcado como `ready-for-review`.",
-                      "",
-                      "Se asume listo para revisión y se activa el flujo automáticamente."
-                    ].join("\n")
-                  });
-                } catch (e) {
-                  console.error(`Error asignando label en PR #${prNumber}: ${e.message}`);
-                }
-
+              // Solo entra al flujo si realmente está marcado ready-for-review
+              if (!labelsLower.includes(lower(TARGET_LABEL))) {
                 continue;
               }
 
-              // =====================================
-              // REVIEWS
-              // =====================================
-              const reviews = await github.paginate(
-                github.rest.pulls.listReviews,
-                { owner, repo, pull_number: prNumber, per_page: 100 }
-              );
+              const [
+                reviews,
+                issueComments,
+                timelineEvents,
+                reviewComments
+              ] = await Promise.all([
+                github.paginate(github.rest.pulls.listReviews, {
+                  owner,
+                  repo,
+                  pull_number: prNumber,
+                  per_page: 100
+                }),
+                github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: prNumber,
+                  per_page: 100
+                }),
+                getTimelineEvents(prNumber),
+                getReviewComments(prNumber)
+              ]);
 
-              const latestReviewByUser = {};
-              for (const review of reviews) {
-                if (!review.user) continue;
-
-                const login = review.user.login.toLowerCase();
-                const submittedAt = new Date(review.submitted_at || 0);
-
-                if (
-                  !latestReviewByUser[login] ||
-                  new Date(latestReviewByUser[login].submitted_at || 0) < submittedAt
-                ) {
-                  latestReviewByUser[login] = review;
-                }
-              }
+              const latestReviewByUser = getLatestReviewByUser(reviews);
 
               const reviewersWhoCompleted = Object.values(latestReviewByUser)
-                .filter(r =>
-                  ["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(r.state)
-                )
-                .map(r => r.user.login.toLowerCase());
+                .filter(r => ["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(r.state))
+                .map(r => lower(r.user.login));
 
               const hasBlockingReview = Object.values(latestReviewByUser)
                 .some(r => r.state === "CHANGES_REQUESTED");
 
-              // =====================================
-              // REVIEWERS PENDIENTES
-              // =====================================
-              let pendingReviewers = (pr.requested_reviewers || [])
-                .map(r => r.login)
-                .filter(login => !reviewersWhoCompleted.includes(login.toLowerCase()));
+              const requestedReviewers = (pr.requested_reviewers || []).map(r => r.login);
+
+              const pendingReviewers = requestedReviewers
+                .filter(login => !reviewersWhoCompleted.includes(lower(login)));
 
               if (pendingReviewers.length === 0) {
-                pendingReviewers = CORE_TEAM.filter(login =>
-                  login.toLowerCase() !== author &&
-                  !reviewersWhoCompleted.includes(login.toLowerCase())
-                );
-              }
-
-              if (pendingReviewers.length === 0) {
-                // Ya hubo pronunciamiento de todos los relevantes
                 continue;
               }
 
-              const pendingReviewersLower = pendingReviewers.map(r => r.toLowerCase());
+              const pendingReviewersLower = pendingReviewers.map(lower);
               const reviewersStr = pendingReviewers.map(r => `@${r}`).join(" ");
 
-              // =====================================
-              // COMENTARIOS DEL PR
-              // =====================================
-              const comments = await github.paginate(
-                github.rest.issues.listComments,
-                { owner, repo, issue_number: prNumber, per_page: 100 }
+              // Baseline real:
+              // - fecha del label ready-for-review
+              // - fecha del evento ready_for_review
+              // usamos la más tardía de ambas
+              const readyLabelEvents = timelineEvents.filter(e =>
+                e.event === "labeled" &&
+                lower(e.label?.name) === lower(TARGET_LABEL)
               );
 
-              // Comentarios generales hechos por revisores pendientes
-              const reviewerComments = comments.filter(comment =>
-                comment.user &&
-                pendingReviewersLower.includes(comment.user.login.toLowerCase())
+              const readyForReviewEvents = timelineEvents.filter(e =>
+                e.event === "ready_for_review"
               );
 
-              // =====================================
-              // ÚLTIMO PRONUNCIAMIENTO DE CADA REVISOR
-              // Cuenta review o comentario general
-              // =====================================
+              const readyAt = latestDate([
+                ...readyLabelEvents.map(e => e.created_at),
+                ...readyForReviewEvents.map(e => e.created_at)
+              ]);
+
+              if (!readyAt) {
+                continue;
+              }
+
+              const hoursSinceReady = hoursBetween(now, readyAt);
+              const currentStage = getStage(hoursSinceReady);
+
+              if (!currentStage && !isCodeFreeze) {
+                continue;
+              }
+
+              // Pronunciamiento = review, issue comment o review comment
               const reviewerLastActivity = {};
-
-              for (const reviewer of pendingReviewers) {
-                const key = reviewer.toLowerCase();
-                reviewerLastActivity[key] = null;
+              for (const reviewer of pendingReviewersLower) {
+                reviewerLastActivity[reviewer] = null;
               }
 
               for (const review of reviews) {
                 if (!review.user) continue;
-                const login = review.user.login.toLowerCase();
-                if (!pendingReviewersLower.includes(login)) continue;
 
-                if (!["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(review.state)) {
-                  continue;
-                }
+                const login = lower(review.user.login);
+                if (!pendingReviewersLower.includes(login)) continue;
+                if (!["COMMENTED", "APPROVED", "CHANGES_REQUESTED"].includes(review.state)) continue;
 
                 const dt = new Date(review.submitted_at || 0);
                 if (!reviewerLastActivity[login] || reviewerLastActivity[login] < dt) {
@@ -188,112 +242,139 @@ jobs:
                 }
               }
 
-              for (const comment of reviewerComments) {
-                const login = comment.user.login.toLowerCase();
-                const dt = new Date(comment.created_at || 0);
+              for (const comment of issueComments) {
+                if (!comment.user) continue;
 
+                const login = lower(comment.user.login);
+                if (!pendingReviewersLower.includes(login)) continue;
+
+                const dt = new Date(comment.created_at || 0);
                 if (!reviewerLastActivity[login] || reviewerLastActivity[login] < dt) {
                   reviewerLastActivity[login] = dt;
                 }
               }
 
-              // =====================================
-              // BASELINE PARA SLA
-              // Si el revisor nunca habló, medimos desde creación del PR
-              // =====================================
-              const prCreatedAt = new Date(pr.created_at);
-              const silentReviewers = pendingReviewers.filter(r => {
-                const last = reviewerLastActivity[r.toLowerCase()];
-                return !last;
-              });
+              for (const comment of reviewComments) {
+                if (!comment.user) continue;
 
-              const hoursSincePRCreated = (now - prCreatedAt) / (1000 * 60 * 60);
-              const slaBreached = silentReviewers.length > 0 && hoursSincePRCreated >= REVIEW_SLA_HOURS;
+                const login = lower(comment.user.login);
+                if (!pendingReviewersLower.includes(login)) continue;
 
-              // =====================================
-              // COOLDOWN BOT
-              // =====================================
-              const lastBotComment = comments
-                .filter(c => c.user?.type === "Bot")
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+                const dt = new Date(comment.created_at || 0);
+                if (!reviewerLastActivity[login] || reviewerLastActivity[login] < dt) {
+                  reviewerLastActivity[login] = dt;
+                }
+              }
 
-              const hoursSinceLastBotComment = lastBotComment
-                ? (now - new Date(lastBotComment.created_at)) / (1000 * 60 * 60)
-                : Infinity;
+              const silentReviewers = pendingReviewers.filter(
+                reviewer => !reviewerLastActivity[lower(reviewer)]
+              );
+              const silentReviewersStr = silentReviewers.map(r => `@${r}`).join(" ");
 
-              // =====================================
-              // EVENTO INMEDIATO AL ETIQUETAR ready-for-review
-              // =====================================
-              const justLabeled =
-                context.eventName === "pull_request" &&
-                context.payload.action === "labeled" &&
-                context.payload.label?.name === TARGET_LABEL &&
-                context.payload.pull_request?.number === prNumber;
+              const botStages = extractBotStages(issueComments);
 
-              if (justLabeled) {
-                await github.rest.issues.createComment({
-                  owner,
-                  repo,
-                  issue_number: prNumber,
-                  body: `🚀 PR listo para review\n\n${reviewersStr}`
-                });
+              const mvruLatestReview = latestReviewByUser[MVRU_LOGIN];
+              const isAuthorMVRU = author === MVRU_LOGIN;
+              const hasMvruApproved = mvruLatestReview?.state === "APPROVED";
+
+              const exactlyOnePending = pendingReviewers.length === 1;
+              const exactlyOneSilent = silentReviewers.length === 1;
+              const lonePendingIsNotMvru =
+                exactlyOnePending && lower(pendingReviewers[0]) !== MVRU_LOGIN;
+
+              const canAnnounceForcedMerge =
+                currentStage === "72h" &&
+                !hasBlockingReview &&
+                exactlyOnePending &&
+                exactlyOneSilent &&
+                lonePendingIsNotMvru &&
+                (isAuthorMVRU || hasMvruApproved);
+
+              // Evitar repetir exactamente la misma etapa
+              if (currentStage && botStages.has(currentStage)) {
                 continue;
               }
 
-              if (hoursSinceLastBotComment < BOT_COOLDOWN_HOURS) {
+              // Si hay freeze y ya se comentó freeze, no repetirlo solo por freeze
+              if (!currentStage && isCodeFreeze && botStages.has("freeze")) {
                 continue;
               }
 
-              // =====================================
-              // ARMADO DEL MENSAJE
-              // =====================================
-              let sections = [];
-              let shouldComment = false;
+              const sections = [];
 
-              if (isCodeFreeze) {
-                shouldComment = true;
+              if (isCodeFreeze && !botStages.has("freeze")) {
                 sections.push([
                   "## 🚫 Code freeze alcanzado",
                   "",
-                  `Desde el **1 de mayo de 2026** no se permiten nuevas features ni cambios no críticos sobre el código de cara a la demo.`,
+                  "Desde el **1 de mayo de 2026** no se permiten nuevas features ni cambios no críticos sobre el código de cara a la demo.",
                   "Solo deberían evaluarse fixes críticos y excepcionales, previamente validados por el equipo."
                 ].join("\n"));
               }
 
-              if (slaBreached) {
-                shouldComment = true;
-
-                const silentStr = silentReviewers.map(u => `@${u}`).join(" ");
+              if (currentStage === "24h") {
                 sections.push([
-                  "## ⏰ Escalada por falta de revisión",
+                  "## ⏰ Recordatorio de revisión — 24h",
                   "",
-                  `Pasaron **${REVIEW_SLA_HOURS} horas o más** desde la creación del PR sin pronunciamiento de estos revisores:`,
+                  "Este PR quedó listo para revisión hace más de **24 horas**.",
                   "",
-                  silentStr,
+                  `Pendientes: ${reviewersStr}`,
                   "",
-                  "Se necesita al menos uno de estos pronunciamientos:",
+                  "Se solicita al menos un pronunciamiento:",
                   "- comentario",
                   "- aprobación",
                   "- solicitud de cambios"
                 ].join("\n"));
               }
 
-              // Si no hay freeze ni SLA vencido, hacer reminder normal
-              if (!shouldComment) {
+              if (currentStage === "48h") {
                 sections.push([
-                  "## ⏰ Reminder de revisión",
+                  "## ⚠️ Escalada de revisión — 48h",
                   "",
-                  `${reviewersStr}`,
+                  "Este PR quedó listo para revisión hace más de **48 horas**.",
                   "",
-                  "Este PR sigue pendiente de revisión."
-                ].join("\n"));
-                shouldComment = true;
+                  `Pendientes: ${reviewersStr}`,
+                  silentReviewers.length > 0 ? `Sin pronunciamiento aún: ${silentReviewersStr}` : "",
+                  "",
+                  "Ya pasó una ventana razonable de revisión. Se requiere respuesta."
+                ].filter(Boolean).join("\n"));
               }
 
-              // =====================================
-              // LABEL needs-focus SOLO CUANDO HAYA SLA VENCIDO O FREEZE
-              // =====================================
-              if ((slaBreached || isCodeFreeze) && !labels.includes("needs-focus")) {
+              if (currentStage === "72h") {
+                if (canAnnounceForcedMerge) {
+                  sections.push([
+                    "## 🚨 Escalada máxima — 72h+",
+                    "",
+                    "Este PR quedó listo para revisión hace más de **72 horas**.",
+                    "",
+                    `Pendiente sin pronunciamiento: ${silentReviewersStr}`,
+                    "",
+                    "Dado que **solo falta 1 reviewer**, no hubo respuesta y no hay bloqueo activo por cambios solicitados,",
+                    "**queda habilitado el merge forzado a `main` por falta de respuesta**."
+                  ].join("\n"));
+                } else {
+                  sections.push([
+                    "## 🚨 Escalada de revisión — 72h+",
+                    "",
+                    "Este PR quedó listo para revisión hace más de **72 horas**.",
+                    "",
+                    `Pendientes: ${reviewersStr}`,
+                    silentReviewers.length > 0 ? `Sin pronunciamiento aún: ${silentReviewersStr}` : "",
+                    "",
+                    hasBlockingReview
+                      ? "Existe un `CHANGES_REQUESTED`, por lo tanto no corresponde hablar de merge forzado."
+                      : "Se requiere resolución prioritaria."
+                  ].filter(Boolean).join("\n"));
+                }
+              }
+
+              if (sections.length === 0) {
+                continue;
+              }
+
+              if (
+                (currentStage === "48h" || currentStage === "72h" || isCodeFreeze) &&
+                !labelsLower.includes("needs-focus")
+              ) {
                 try {
                   await github.rest.issues.addLabels({
                     owner,
@@ -306,17 +387,23 @@ jobs:
                 }
               }
 
-              // =====================================
-              // COMENTAR
-              // =====================================
-              if (shouldComment) {
-                await github.rest.issues.createComment({
-                  owner,
-                  repo,
-                  issue_number: prNumber,
-                  body: sections.join("\n\n---\n\n")
-                });
+              const markers = [];
+              if (currentStage) {
+                markers.push(`<!-- pr-reminder:stage=${currentStage} -->`);
               }
+              if (isCodeFreeze && !botStages.has("freeze")) {
+                markers.push(`<!-- pr-reminder:stage=freeze -->`);
+              }
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: prNumber,
+                body: [
+                  ...markers,
+                  ...sections
+                ].join("\n\n")
+              });
             }
 
             console.log("Finalizado.");
