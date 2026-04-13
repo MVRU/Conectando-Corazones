@@ -10,10 +10,11 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-	let { perfilUsuario, esMiPerfil, estadoVerificacion, onEditarClick } = $props<{
+let { perfilUsuario, esMiPerfil, estadoVerificacion, requiereCargaInicialDocumentacion, onEditarClick } = $props<{
 		perfilUsuario: UsuarioCompleto;
 		esMiPerfil: boolean;
 		estadoVerificacion: EstadoVerificacionDisplay;
+		requiereCargaInicialDocumentacion: boolean;
 		onEditarClick: () => void;
 	}>();
 
@@ -60,6 +61,18 @@
 	let nombreCompleto = $derived(obtenerNombreCompleto(perfilUsuario));
 	let subtipoBadge = $derived(obtenerSubtipoBadge(perfilUsuario));
 	let mostrarRepresentante = $derived(debeMostrarRepresentante(perfilUsuario));
+let enlaceGestionVerificacion = $derived(
+	esMiPerfil &&
+		perfilUsuario.rol === 'institucion' &&
+		(requiereCargaInicialDocumentacion ||
+			estadoVerificacion === 'verificacion_pendiente' ||
+			estadoVerificacion === 'verificacion_rechazada')
+		? '/institucion/verificacion'
+		: null
+);
+let textoBadgeVerificacion = $derived(
+	requiereCargaInicialDocumentacion ? 'Verificar' : null
+);
 </script>
 
 <div class="flex w-full flex-col items-start gap-6 md:flex-row md:gap-8">
@@ -129,7 +142,11 @@
 					{/if}
 
 					{#if perfilUsuario.rol === 'institucion'}
-						<BadgeVerificacion estado={estadoVerificacion} />
+						<BadgeVerificacion
+							estado={estadoVerificacion}
+							href={enlaceGestionVerificacion}
+							textoAccion={textoBadgeVerificacion}
+						/>
 					{/if}
 				</div>
 			</div>
