@@ -1,58 +1,52 @@
-import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { error, redirect } from '@sveltejs/kit';
 import { PostgresChatRepository } from '$lib/infrastructure/supabase/postgres/chat.repo';
-import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
-import { ObtenerChatPorProyecto } from '$lib/domain/use-cases/chat/ObtenerChatPorProyecto';
-import { error } from '@sveltejs/kit';
+import { ChatAccessError, validarAccesoChatProyecto } from '$lib/server/chat.service';
 import type { PageServerLoad } from './$types';
 
-const ESTADOS_CHAT_ACTIVO = ['en_curso', 'pendiente_solicitud_cierre', 'en_revision'];
-
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const proyectoRepo = new PostgresProyectoRepository();
-	const chatRepo = new PostgresChatRepository();
-	const colaboracionRepo = new PostgresColaboracionRepository();
-	const obtenerChatUseCase = new ObtenerChatPorProyecto(chatRepo);
-
 	const proyectoId = Number(params.proyecto_id);
-	if (Number.isNaN(proyectoId)) {
+
+	if (!Number.isInteger(proyectoId) || proyectoId <= 0) {
 		throw error(400, 'ID de proyecto inválido');
 	}
 
 	const usuario = locals.usuario;
-	if (!usuario) {
+	if (!usuario?.id_usuario) {
 		throw error(401, 'Debés iniciar sesión para acceder al chat');
 	}
 
-	if (!usuario.id_usuario) {
-		throw error(400, 'Usuario inválido');
+	try {
+		const acceso = await validarAccesoChatProyecto(proyectoId, usuario.id_usuario);
+		const chatRepo = new PostgresChatRepository();
+		const chat = await chatRepo.obtenerChatPorProyecto(proyectoId);
+
+		if (!chat) {
+			throw redirect(303, `/proyectos/${proyectoId}?chat=no-habilitado`);
+		}
+
+		return {
+			proyecto: {
+				id_proyecto: acceso.proyectoId,
+				titulo: acceso.titulo,
+				estado: acceso.estado
+			},
+			chat: JSON.parse(JSON.stringify(chat)),
+			tieneAcceso: true,
+			esDuenoDelProyecto: acceso.esDuenoDelProyecto
+		};
+	} catch (err) {
+		if (err instanceof ChatAccessError) {
+			if (err.code === 'not_found') {
+				throw error(404, err.message);
+			}
+
+			if (err.code === 'not_enabled') {
+				throw redirect(303, `/proyectos/${proyectoId}?chat=no-habilitado`);
+			}
+
+			throw error(403, err.message);
+		}
+
+		throw err;
 	}
-
-	const proyecto = await proyectoRepo.findById(proyectoId);
-	if (!proyecto) {
-		throw error(404, 'Proyecto no encontrado');
-	}
-
-	const esDuenoDelProyecto = proyecto.institucion_id === usuario.id_usuario;
-
-	let tieneColaboracionAprobada = false;
-	if (!esDuenoDelProyecto) {
-		const colaboracion = await colaboracionRepo.findByProyectoAndColaborador(
-			proyectoId,
-			usuario.id_usuario
-		);
-		tieneColaboracionAprobada = colaboracion?.estado === 'aprobada';
-	}
-
-	if (!esDuenoDelProyecto && !tieneColaboracionAprobada) {
-		throw error(403, 'No tenés acceso a este chat. Necesitás una colaboración aprobada.');
-	}
-
-	const chat = await obtenerChatUseCase.ejecutar(proyectoId);
-
-	return {
-		proyecto: JSON.parse(JSON.stringify(proyecto)),
-		chat: chat ? JSON.parse(JSON.stringify(chat)) : null,
-		tieneAcceso: true,
-		esDuenoDelProyecto
-	};
 };

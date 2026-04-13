@@ -2,9 +2,11 @@ import { PostgresChatRepository } from '$lib/infrastructure/supabase/postgres/ch
 import { ObtenerChatsPorUsuario } from '$lib/domain/use-cases/chat/ObtenerChatsPorUsuario';
 import type { LayoutServerLoad } from './$types';
 
-export const load: any = async ({ locals }: any) => {
+export const load: LayoutServerLoad = async ({ locals }) => {
 	const usuario = locals.usuario;
-	if (!usuario) return { chats: [] };
+	if (!usuario?.id_usuario) {
+		return { chats: [] };
+	}
 
 	const chatRepo = new PostgresChatRepository();
 	const useCase = new ObtenerChatsPorUsuario(chatRepo);

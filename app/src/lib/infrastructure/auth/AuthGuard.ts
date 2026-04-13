@@ -42,6 +42,11 @@ export class AuthGuard {
 			fallback: '/iniciar-sesion'
 		},
 		{
+			prefix: '/mensajes',
+			roles: ['institucion', 'colaborador', 'administrador'],
+			fallback: '/iniciar-sesion'
+		},
+		{
 			prefix: '/mis-proyectos',
 			roles: ['institucion', 'administrador'],
 			fallback: '/iniciar-sesion'
