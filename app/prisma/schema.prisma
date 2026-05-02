@@ -421,7 +421,7 @@ model MensajeChat {
   proyecto_id     Int
   autor_id        Int
   client_id       String
-  contenido       String
+  contenido       String @db.VarChar(4000)
   created_at      DateTime @default(now())
 
   proyecto Proyecto @relation(fields: [proyecto_id], references: [id_proyecto])

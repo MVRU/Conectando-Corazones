@@ -30,6 +30,10 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({ error: 'El mensaje no puede estar vacío' }, { status: 400 });
 	}
 
+	if (contenido.length > 4000) {
+		return json({ error: 'El mensaje no puede superar los 4000 caracteres' }, { status: 400 });
+	}
+
 	if (!clientId) {
 		return json({ error: 'Falta el identificador del mensaje' }, { status: 400 });
 	}
