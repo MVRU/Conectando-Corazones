@@ -236,6 +236,7 @@ model Proyecto {
 
   archivos                 Archivo[]
   colaboraciones           Colaboracion[]
+  mensajes_chat            MensajeChat[]
   participacion_permitida  ParticipacionPermitida[]
   proyecto_categorias      ProyectoCategoria[]
   proyecto_ubicaciones     ProyectoUbicacion[]
@@ -404,6 +405,7 @@ model Usuario {
   contactos                      Contacto[]
   evaluaciones                   Evaluacion[]
   historial_cambios              HistorialDeCambios[]
+  mensajes_chat                  MensajeChat[]
   proyectos_institucion          Proyecto[] // Relation to Proyecto.institucion_id
   reportes_creados               Reporte[]                      @relation("Reportante")
   reportes_resueltos             Reporte[]                      @relation("AdminResolutor")
@@ -412,6 +414,23 @@ model Usuario {
   resenas_escritas               Resena[]
 
   @@map("usuarios")
+}
+
+model MensajeChat {
+  id_mensaje_chat Int      @id @default(autoincrement())
+  proyecto_id     Int
+  autor_id        Int
+  client_id       String
+  contenido       String
+  created_at      DateTime @default(now())
+
+  proyecto Proyecto @relation(fields: [proyecto_id], references: [id_proyecto])
+  autor    Usuario  @relation(fields: [autor_id], references: [id_usuario])
+
+  @@unique([proyecto_id, client_id])
+  @@index([proyecto_id, created_at, id_mensaje_chat])
+  @@index([autor_id, created_at])
+  @@map("mensajes_chat")
 }
 
 model Verificacion {

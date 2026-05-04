@@ -3,7 +3,7 @@ import { error } from '@sveltejs/kit';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresReporteRepository } from '$lib/infrastructure/supabase/postgres/reporte.repo';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async ({ params, locals, url }) => {
 	try {
 		const id = Number(params.id);
 		if (isNaN(id)) {
@@ -31,7 +31,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		return {
 			proyecto: JSON.parse(JSON.stringify(proyecto)),
-			tieneReportePendiente
+			tieneReportePendiente,
+			chatAviso: url.searchParams.get('chat') === 'no-habilitado'
 		};
 	} catch (err: unknown) {
 		console.error('Error loading project:', err);
@@ -45,6 +46,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// retornamos el error para que la página pueda mostrar un mensaje amigable sin "romperse"
 		return {
 			proyecto: null,
+			chatAviso: false,
 			error:
 				'Hubo un problema al cargar los detalles del proyecto. Por favor, intentá nuevamente más tarde.'
 		};
