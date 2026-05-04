@@ -19,7 +19,6 @@ jobs:
       PROJECT_NUMBER: "6"
       DUE_DATE_FIELD_NAME: "Target date"
       STATUS_FIELD_NAME: "Status"
-      HARD_DEADLINE: "2026-04-25"
 
     steps:
       - name: Setup Node.js
@@ -36,7 +35,6 @@ jobs:
             const projectNumber = Number(process.env.PROJECT_NUMBER);
             const dueDateFieldName = process.env.DUE_DATE_FIELD_NAME;
             const statusFieldName = process.env.STATUS_FIELD_NAME;
-            const hardDeadline = process.env.HARD_DEADLINE;
 
             const today = new Date();
             const todayStr = today.toISOString().slice(0, 10);
@@ -173,28 +171,12 @@ jobs:
 
               const daysRemaining = diffDays(dueDate, todayStr);
               const overdueDays = diffDays(todayStr, dueDate);
-              const hardDeadlineReached = todayStr >= hardDeadline;
 
               const mention = assignees.map(login => `@${login}`).join(" ");
 
               let body;
 
-              if (hardDeadlineReached) {
-                body = [
-                  marker,
-                  "## ❌ Incumplimiento de fecha límite",
-                  "",
-                  `${mention}`,
-                  "",
-                  `La fecha límite dura era **${hardDeadline}** y esta issue sigue sin estar en \`En revisión\` ni \`Completado\`.`,
-                  "",
-                  "Esto ya constituye un incumplimiento directo del compromiso asumido.",
-                  "Además de terminar esta tarea, corresponde también realizar el **manual del administrador**.",
-                  "",
-                  `Estado actual: **${status || "Sin estado"}**.`,
-                  `Fecha límite: **${dueDate}**.`
-                ].join("\n");
-              } else if (daysRemaining > 1) {
+              if (daysRemaining > 1) {
                 body = [
                   marker,
                   "## ⏰ Recordatorio de avance",
