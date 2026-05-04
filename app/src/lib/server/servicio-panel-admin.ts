@@ -175,10 +175,10 @@ export class ServicioPanelAdmin {
 
 			await tx.usuario.update({
 				where: { id_usuario: verificacion.usuario_id },
-				data: {
-					estado_verificacion: nuevoEstado,
-					estado: accion === 'aprobar' ? 'activo' : 'inactivo'
-				}
+				data:
+					accion === 'aprobar'
+						? { estado_verificacion: nuevoEstado, estado: 'activo' }
+						: { estado_verificacion: nuevoEstado }
 			});
 
 			await tx.historialDeCambios.create({

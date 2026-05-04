@@ -17,6 +17,50 @@ export class ObtenerDashboardInstitucion {
 		private resenaRepo: ResenaRepository
 	) {}
 
+	private obtenerEstadoVerificacionActual(institucion: Usuario): 'aprobada' | 'pendiente' | 'rechazada' | null {
+		const verificaciones = (institucion.verificaciones as any[]) ?? [];
+		if (!verificaciones.length) {
+			return (institucion.estado_verificacion as 'aprobada' | 'pendiente' | 'rechazada' | null) ?? null;
+		}
+
+		const getFechaMs = (v: any) => {
+			if (!v?.created_at) return 0;
+			const d = v.created_at instanceof Date ? v.created_at : new Date(v.created_at);
+			return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+		};
+
+		const ultima = [...verificaciones].sort((a, b) => {
+			const diffFecha = getFechaMs(b) - getFechaMs(a);
+			if (diffFecha !== 0) return diffFecha;
+			return (b.id_verificacion ?? 0) - (a.id_verificacion ?? 0);
+		})[0];
+
+		if (ultima?.estado === 'aprobada') return 'aprobada';
+		if (ultima?.estado === 'pendiente') return 'pendiente';
+		if (ultima?.estado === 'rechazada') return 'rechazada';
+
+		return (institucion.estado_verificacion as 'aprobada' | 'pendiente' | 'rechazada' | null) ?? null;
+	}
+
+	private obtenerMetaVerificacion(institucion: Usuario): {
+		estado: 'aprobada' | 'pendiente' | 'rechazada' | null;
+		requiereVerificacionDocumental: boolean;
+		documentacionVerificacionEnRevision: boolean;
+	} {
+		const estado = this.obtenerEstadoVerificacionActual(institucion);
+		const verificaciones = (institucion.verificaciones as any[]) ?? [];
+		const tieneSolicitudVerificacion = verificaciones.length > 0;
+		// Si no hay solicitud cargada y no está aprobada, debe poder iniciar/verificar.
+		const requiereVerificacionDocumental = !tieneSolicitudVerificacion && estado !== 'aprobada';
+		const documentacionVerificacionEnRevision = estado === 'pendiente' && tieneSolicitudVerificacion;
+
+		return {
+			estado,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		};
+	}
+
 	async execute(institucionId: number): Promise<InstitucionDashboardData> {
 		const [institucion, proyectos] = await Promise.all([
 			this.usuarioRepo.findById(institucionId),
@@ -61,11 +105,12 @@ export class ObtenerDashboardInstitucion {
 			(p) => p.estado === 'pendiente_solicitud_cierre'
 		).length;
 
-		const estaVerificado = !!(
-			institucion.estado_verificacion === 'aprobada' ||
-			(institucion.verificaciones &&
-				institucion.verificaciones.some((v: any) => v.estado === 'aprobada'))
-		);
+		const {
+			estado: estadoVerificacion,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		} = this.obtenerMetaVerificacion(institucion);
+		const estaVerificado = estadoVerificacion === 'aprobada';
 
 		const colaboradoresUnicos = new Set(
 			colaboracionesAprobadas.map((c) => c.colaborador_id).filter(Boolean)
@@ -102,6 +147,9 @@ export class ObtenerDashboardInstitucion {
 						? `${institucion.localidad.nombre}, ${institucion.localidad.provincia.nombre}`
 						: (institucion as any).domicilio_legal || 'Sin ubicación',
 				estaVerificado,
+				estadoVerificacion,
+				requiereVerificacionDocumental,
+				documentacionVerificacionEnRevision,
 				bio: institucion.descripcion || 'Sin descripción disponible.'
 			},
 			metricas: {
