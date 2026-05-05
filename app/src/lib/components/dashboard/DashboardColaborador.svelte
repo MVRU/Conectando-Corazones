@@ -6,7 +6,6 @@
 	import MetricasPanel from './colaborador/MetricasPanel.svelte';
 	import SeguimientoObjetivos from './colaborador/SeguimientoObjetivos.svelte';
 	import EstadisticasAyuda from './colaborador/EstadisticasAyuda.svelte';
-	import ActividadReciente from './colaborador/ActividadReciente.svelte';
 	import UltimasResenas from './colaborador/UltimasResenas.svelte';
 	import Novedades from './Novedades.svelte';
 	import EstadisticasProyectoModal from './colaborador/EstadisticasProyectoModal.svelte';
@@ -461,7 +460,6 @@
 
 				<!-- Últimas Reseñas -->
 				<div class="min-h-[300px]">
-					<!-- TODO: implementar módulo de reseñas -->
 					<UltimasResenas resenas={data.ultimasResenas} />
 				</div>
 			</div>
