@@ -6,6 +6,7 @@ import { PostgresEvaluacionRepository } from '$lib/infrastructure/supabase/postg
 import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/supabase/postgres/solicitud-finalizacion.repo';
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
+import { notificarProyectoEnAuditoriaAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 const proyectoRepo = new PostgresProyectoRepository();
 const colaboracionRepo = new PostgresColaboracionRepository();
@@ -132,6 +133,17 @@ export const actions: Actions = {
 				voto: 'rechazado',
 				justificacion
 			});
+
+			const proyectoActualizado = await proyectoRepo.findById(proyectoId);
+			if (proyectoActualizado?.estado === 'en_auditoria') {
+				await notificarProyectoEnAuditoriaAdmin({
+					proyectoId,
+					tituloProyecto: proyectoActualizado.titulo,
+					solicitudId,
+					colaboradorId: user.id_usuario!,
+					colaboradorUsername: user.username
+				});
+			}
 
 			return { success: true };
 		} catch (error) {

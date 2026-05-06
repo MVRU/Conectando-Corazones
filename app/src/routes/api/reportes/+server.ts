@@ -6,6 +6,7 @@ import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supaba
 import { CrearReporte } from '$lib/domain/use-cases/reportes/CrearReporte';
 import { ListarReportes } from '$lib/domain/use-cases/reportes/ListarReportes';
 import { MotivoReporte } from '$lib/domain/types/Reporte';
+import { notificarNuevoReporteAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 // POST /api/reportes — Crear un reporte (cualquier usuario autenticado)
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -51,6 +52,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			motivo: data.motivo as MotivoReporte,
 			descripcion: data.descripcion,
 			reportante_id: usuario.id_usuario!
+		});
+
+		await notificarNuevoReporteAdmin({
+			tipoObjeto: data.tipo_objeto as 'Usuario' | 'Proyecto',
+			idObjeto: id_objeto,
+			motivo: String(data.motivo),
+			reportanteId: usuario.id_usuario!,
+			reportanteUsername: usuario.username
 		});
 
 		return json({ success: true, reporte }, { status: 201 });
