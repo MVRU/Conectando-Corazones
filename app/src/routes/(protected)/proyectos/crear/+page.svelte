@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import CrearProyecto from '$lib/components/feature/institucion/CrearProyecto.svelte';
 	import { goto } from '$app/navigation';
 	import { usuario, isLoading } from '$lib/stores/auth';
@@ -14,7 +12,7 @@
 
 	let { data } = $props();
 
-	run(() => {
+	$effect(() => {
 		if (!$isLoading) {
 			if ($usuario?.rol !== 'institucion') {
 				toastStore.show({

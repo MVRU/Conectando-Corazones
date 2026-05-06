@@ -17,7 +17,8 @@
 		MENSAJES_ERROR,
 		validarCalle,
 		validarNumeroCalle,
-		esFechaFutura
+		esFechaFutura,
+		validarUrl
 	} from '$lib/utils/validaciones';
 	import {
 		validarBeneficiariosValor,

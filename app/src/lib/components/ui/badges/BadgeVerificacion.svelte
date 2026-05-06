@@ -50,7 +50,8 @@
 
 	type EstadoKey = keyof typeof badgeConfig;
 
-	let config = $derived(badgeConfig[estado as EstadoKey]);
+	let estadoKey = $derived((estado in badgeConfig ? estado : 'sin_verificacion') as EstadoKey);
+	let config = $derived(badgeConfig[estadoKey]);
 	let labelMostrado = $derived(textoAccion ?? config.label);
 
 	// Textos cortos para mobile
@@ -73,7 +74,7 @@
 	>
 		<Icon src={config.icon} class="h-4 w-4" />
 		<span class="hidden sm:inline">{labelMostrado}</span>
-		<span class="sm:hidden">{textoAccion ?? textosMobile[estado]}</span>
+		<span class="sm:hidden">{textoAccion ?? textosMobile[estadoKey]}</span>
 	</a>
 {:else}
 	<span
@@ -82,6 +83,6 @@
 	>
 		<Icon src={config.icon} class="h-4 w-4" />
 		<span class="hidden sm:inline">{labelMostrado}</span>
-		<span class="sm:hidden">{textoAccion ?? textosMobile[estado]}</span>
+		<span class="sm:hidden">{textoAccion ?? textosMobile[estadoKey]}</span>
 	</span>
 {/if}

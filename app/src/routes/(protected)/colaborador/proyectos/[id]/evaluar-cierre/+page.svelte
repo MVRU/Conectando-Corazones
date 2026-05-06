@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { fade, fly } from 'svelte/transition';
@@ -34,7 +32,7 @@
 	let evaluacion = $derived(data.evaluacion);
 	let yaVote = $derived(data.yaVote);
 
-	run(() => {
+	$effect(() => {
 		if (proyecto) {
 			setBreadcrumbs([
 				BREADCRUMB_ROUTES.proyectos,
