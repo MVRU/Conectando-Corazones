@@ -29,7 +29,6 @@ jobs:
 
     env:
       TARGET_LABEL: "ready-for-review"
-      FREEZE_DATE: "2026-05-01T00:00:00-03:00"
 
     steps:
       - name: Setup Node.js
@@ -45,10 +44,7 @@ jobs:
             const now = new Date();
 
             const TARGET_LABEL = process.env.TARGET_LABEL;
-            const FREEZE_DATE = new Date(process.env.FREEZE_DATE);
             const MVRU_LOGIN = "mvru";
-
-            const isCodeFreeze = now >= FREEZE_DATE;
 
             function lower(s) {
               return String(s || "").toLowerCase();
@@ -219,7 +215,7 @@ jobs:
               const hoursSinceReady = hoursBetween(now, readyAt);
               const currentStage = getStage(hoursSinceReady);
 
-              if (!currentStage && !isCodeFreeze) {
+              if (!currentStage) {
                 continue;
               }
 
@@ -296,20 +292,7 @@ jobs:
               }
 
               // Si hay freeze y ya se comentó freeze, no repetirlo solo por freeze
-              if (!currentStage && isCodeFreeze && botStages.has("freeze")) {
-                continue;
-              }
-
               const sections = [];
-
-              if (isCodeFreeze && !botStages.has("freeze")) {
-                sections.push([
-                  "## 🚫 Code freeze alcanzado",
-                  "",
-                  "Desde el **1 de mayo de 2026** no se permiten nuevas features ni cambios no críticos sobre el código de cara a la demo.",
-                  "Solo deberían evaluarse fixes críticos y excepcionales, previamente validados por el equipo."
-                ].join("\n"));
-              }
 
               if (currentStage === "24h") {
                 sections.push([
@@ -372,7 +355,7 @@ jobs:
               }
 
               if (
-                (currentStage === "48h" || currentStage === "72h" || isCodeFreeze) &&
+                (currentStage === "48h" || currentStage === "72h") &&
                 !labelsLower.includes("needs-focus")
               ) {
                 try {
@@ -390,9 +373,6 @@ jobs:
               const markers = [];
               if (currentStage) {
                 markers.push(`<!-- pr-reminder:stage=${currentStage} -->`);
-              }
-              if (isCodeFreeze && !botStages.has("freeze")) {
-                markers.push(`<!-- pr-reminder:stage=freeze -->`);
               }
 
               await github.rest.issues.createComment({
