@@ -39,6 +39,9 @@
 			})
 		: null;
 	let session = $derived(data.session);
+	let isMensajesRoute = $derived(
+		page.url.pathname === '/mensajes' || page.url.pathname.startsWith('/mensajes/')
+	);
 
 	let showBreadcrumbs = $derived(shouldShowBreadcrumbs(page.url) && $breadcrumbs.length >= 2);
 
@@ -123,8 +126,10 @@
 
 <ScrollToTop />
 
-<main class="min-h-screen">
+<main class={isMensajesRoute ? 'h-[calc(100dvh-4rem)] overflow-hidden' : 'min-h-screen'}>
 	{@render children()}
 </main>
 
-<Footer />
+{#if !isMensajesRoute}
+	<Footer />
+{/if}
