@@ -37,6 +37,7 @@
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
+	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
@@ -65,6 +66,7 @@
 	} from '@steeze-ui/heroicons';
 
 	let proyecto: Proyecto = $derived(data.proyecto);
+	let chatAviso = $derived(data.chatAviso ?? false);
 	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
 	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
@@ -214,6 +216,7 @@
 	}
 
 	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
+	let chatHabilitado = $derived(colaboradoresAprobados.length > 0);
 
 	let mostrarAccionFinalizar = $derived(
 		esCreador && estadoCodigo === 'en_curso'
@@ -458,11 +461,13 @@
 		}
 
 		if (esCreador || esColaboradorAprobado) {
-			acc.push({
-				label: 'Ir al chat',
-				icon: ChatBubbleLeftRight,
-				onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
-			});
+			if (chatHabilitado) {
+				acc.push({
+					label: 'Ir al chat',
+					icon: ChatBubbleLeftRight,
+					onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
+				});
+			}
 
 			if (esCreador) {
 				acc.push({
@@ -798,6 +803,14 @@
 			<div
 				class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 			>
+				{#if chatAviso}
+					<Alert
+						variant="info"
+						title="Chat todavía no habilitado"
+						message="El chat del proyecto se habilita cuando hay al menos un colaborador aprobado."
+					/>
+				{/if}
+
 				<ProyectoHeader
 					{proyecto}
 					{esAdministrador}
