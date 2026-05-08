@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import type { Chat } from '$lib/domain/types/Chat';
 	import { formatearCantidadMensajes } from '$lib/utils/chatTexto';
 	import { usuario } from '$lib/stores/auth';
 	import { chatStore } from '$lib/stores/chatStore';
+	import { marcarVisitaChat } from '$lib/utils/chat-visit';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
 	import {
 		Archive,
@@ -15,6 +17,10 @@
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+
+	onMount(() => {
+		marcarVisitaChat();
+	});
 
 	interface Props {
 		data: any;

@@ -28,6 +28,11 @@
 	} from 'lucide-svelte';
 
 	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
+
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
 	let menuAbierto = $state(false);
 	let visible = $state(true);
@@ -182,7 +187,7 @@
 		>
 			{#if $isAuthenticated}
 				<!-- Mis mensajes (Desktop) -->
-				<div class="hidden md:block">
+				<div class="relative hidden md:block">
 					<a
 						href="/mensajes"
 						class="group flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:bg-blue-500/20 hover:text-white"
@@ -191,6 +196,12 @@
 						<MessageCircle class="h-4 w-4" />
 						<span>Mis chats</span>
 					</a>
+					{#if hayNuevosMensajesChat}
+						<span
+							class="header-chat-dot pointer-events-none absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+							aria-label="Tenés mensajes nuevos"
+						></span>
+					{/if}
 				</div>
 
 				<!-- Dropdown Auth -->
@@ -384,11 +395,17 @@
 					<div class="mb-4 grid grid-cols-2 gap-2">
 						<a
 							href="/mensajes"
-							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
+							class="relative flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							onclick={() => (menuAbierto = false)}
 						>
 							<MessageCircle class="h-5 w-5 text-blue-400" />
 							<span class="text-xs font-medium text-blue-100">Mis chats</span>
+							{#if hayNuevosMensajesChat}
+								<span
+									class="header-chat-dot pointer-events-none absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+									aria-label="Tenés mensajes nuevos"
+								></span>
+							{/if}
 						</a>
 						<a
 							href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}

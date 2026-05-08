@@ -17,6 +17,7 @@
 	let {
 		solicitudesPendientes = 0,
 		mensajesNoLeidos = 0,
+		hayNuevosMensajes = false,
 		proyectosPendienteCierre = 0,
 		estaVerificado = false,
 		showEvidenceModal = $bindable(false),
@@ -24,6 +25,7 @@
 	} = $props<{
 		solicitudesPendientes?: number;
 		mensajesNoLeidos?: number;
+		hayNuevosMensajes?: boolean;
 		proyectosPendienteCierre?: number;
 		estaVerificado?: boolean;
 		showEvidenceModal?: boolean;
@@ -154,7 +156,12 @@
 				{/if}
 
 				<!-- Dinamically rendered Badges -->
-				{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
+				{#if accion.label === 'Mis chats' && hayNuevosMensajes}
+					<span
+						class="animate-bounce-subtle pointer-events-none absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)] ring-2 ring-[#0F1029]"
+						aria-label="Tenés mensajes nuevos"
+					></span>
+				{:else if accion.label !== 'Mis chats' && badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 					<div
 						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {badgeConfig[
 							accion.label as keyof typeof badgeConfig
@@ -240,7 +247,12 @@
 						{/if}
 
 						<!-- Badges -->
-						{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
+						{#if accion.label === 'Mis chats' && hayNuevosMensajes}
+							<div
+								class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
+								aria-label="Tenés mensajes nuevos"
+							></div>
+						{:else if accion.label !== 'Mis chats' && badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 							<div
 								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {badgeConfig[
 									accion.label as keyof typeof badgeConfig

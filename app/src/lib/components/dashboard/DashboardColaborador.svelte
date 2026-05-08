@@ -16,7 +16,13 @@
 	import HeatmapActividad from './colaborador/HeatmapActividad.svelte';
 	import ProyectosComunidad from './colaborador/ProyectosComunidad.svelte';
 	import EmptyState from './ui/EmptyState.svelte';
+	import { page } from '$app/state';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
 	import type { ColaboradorDashboardData } from './colaborador/types';
+
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
 
 	// Estado de los filtros
@@ -280,6 +286,7 @@
 			<AccionesRapidas
 				solicitudesPendientes={data.metricas.solicitudesPendientes}
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				bind:showEvidenceModal
 				bind:showClosureModal
