@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { Flame, Info } from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
+	import { HEATMAP_SEMANAS } from '$lib/utils/constants';
 
 	let { data = [] } = $props<{
 		data?: { fecha: string; intensidad: number; conteo: number }[];
 	}>();
 
-	const weeksToShow = 26;
+	const weeksToShow = HEATMAP_SEMANAS;
 	const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 	function getColor(intensity: number) {
@@ -27,7 +28,7 @@
 				date.setDate(today.getDate() - ((weeksToShow - 1 - w) * 7 + (6 - d)));
 				const dateStr = date.toISOString().split('T')[0];
 
-				const found = data.find((d) => d.fecha === dateStr);
+				const found = data.find((d: { fecha: string; intensidad: number; conteo: number }) => d.fecha === dateStr);
 				week.push({
 					date: dateStr,
 					intensity: found ? found.intensidad : 0,

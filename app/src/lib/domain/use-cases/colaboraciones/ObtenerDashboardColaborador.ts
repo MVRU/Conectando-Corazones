@@ -4,6 +4,7 @@ import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioReposito
 import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import type { ChatRepository } from '$lib/domain/repositories/ChatRepository';
+import { HEATMAP_SEMANAS } from '$lib/utils/constants';
 import type { ColaboradorDashboardData } from '$lib/components/dashboard/colaborador/types';
 
 export class ObtenerDashboardColaborador {
@@ -166,7 +167,7 @@ export class ObtenerDashboardColaborador {
 
 	private async calcularHeatmapActividad(colaboradorId: number) {
 		const desde = new Date();
-		desde.setDate(desde.getDate() - 182);
+		desde.setDate(desde.getDate() - HEATMAP_SEMANAS * 7);
 
 		const [cambios, eventosChat] = await Promise.all([
 			this.historialRepo.findAll({ usuario_id: colaboradorId, desde }),
