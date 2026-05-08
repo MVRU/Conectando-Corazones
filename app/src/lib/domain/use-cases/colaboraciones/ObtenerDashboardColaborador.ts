@@ -3,6 +3,7 @@ import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoReposi
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
 import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
 import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
+import type { ChatRepository } from '$lib/domain/repositories/ChatRepository';
 import type { ColaboradorDashboardData } from '$lib/components/dashboard/colaborador/types';
 
 export class ObtenerDashboardColaborador {
@@ -11,7 +12,8 @@ export class ObtenerDashboardColaborador {
 		private proyectoRepo: ProyectoRepository,
 		private usuarioRepo: UsuarioRepository,
 		private resenaRepo: ResenaRepository,
-		private historialRepo: HistorialDeCambiosRepository
+		private historialRepo: HistorialDeCambiosRepository,
+		private chatRepo: ChatRepository
 	) {}
 
 	async execute(colaboradorId: number): Promise<ColaboradorDashboardData> {
@@ -166,19 +168,32 @@ export class ObtenerDashboardColaborador {
 		const desde = new Date();
 		desde.setDate(desde.getDate() - 182);
 
-		const cambios = await this.historialRepo.findAll({ usuario_id: colaboradorId, desde });
+		const [cambios, eventosChat] = await Promise.all([
+			this.historialRepo.findAll({ usuario_id: colaboradorId, desde }),
+			this.chatRepo.obtenerEventosChatDelUsuario(colaboradorId, desde)
+		]);
 
 		const conteoPorDia = new Map<string, number>();
+
 		for (const cambio of cambios) {
 			if (!cambio.created_at) continue;
-			const fecha = new Date(cambio.created_at);
-			const clave = fecha.toISOString().split('T')[0];
+			const clave = new Date(cambio.created_at).toISOString().split('T')[0];
 			conteoPorDia.set(clave, (conteoPorDia.get(clave) || 0) + 1);
+		}
+
+		const tuplasChat = new Set<string>();
+		for (const ev of eventosChat) {
+			const dia = ev.fecha.toISOString().split('T')[0];
+			const clave = `${ev.proyecto_id}::${dia}`;
+			if (tuplasChat.has(clave)) continue;
+			tuplasChat.add(clave);
+			conteoPorDia.set(dia, (conteoPorDia.get(dia) || 0) + 1);
 		}
 
 		return Array.from(conteoPorDia.entries()).map(([fecha, conteo]) => ({
 			fecha,
-			intensidad: this.mapearIntensidad(conteo)
+			intensidad: this.mapearIntensidad(conteo),
+			conteo
 		}));
 	}
 

@@ -5,6 +5,7 @@ import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgre
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresResenaRepository } from '$lib/infrastructure/supabase/postgres/resena.repo';
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
+import { PostgresChatRepository } from '$lib/infrastructure/supabase/postgres/chat.repo';
 
 /**
  * Carga de datos para el dashboard del colaborador.
@@ -19,13 +20,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 		const usuarioRepo = new PostgresUsuarioRepository();
 		const resenaRepo = new PostgresResenaRepository();
 		const historialRepo = new PostgresHistorialDeCambiosRepository();
+		const chatRepo = new PostgresChatRepository();
 
 		const obtenerDashboard = new ObtenerDashboardColaborador(
 			colaboracionRepo,
 			proyectoRepo,
 			usuarioRepo,
 			resenaRepo,
-			historialRepo
+			historialRepo,
+			chatRepo
 		);
 
 		const dashboardData = await obtenerDashboard.execute(usuario.id_usuario!);
