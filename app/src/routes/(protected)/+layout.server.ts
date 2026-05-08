@@ -1,5 +1,6 @@
 import type { LayoutServerLoad } from './$types';
 import { PostgresChatRepository } from '$lib/infrastructure/supabase/postgres/chat.repo';
+import { ObtenerEstadoMensajesUsuario } from '$lib/domain/use-cases/chat/ObtenerEstadoMensajesUsuario';
 
 /**
  * Layout para rutas protegidas.
@@ -14,8 +15,9 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	if (usuarioId) {
 		const chatRepo = new PostgresChatRepository();
-		const fecha = await chatRepo.obtenerFechaUltimoMensajeAjeno(usuarioId);
-		ultimoMensajeAjenoAt = fecha?.toISOString() ?? null;
+		const obtenerEstado = new ObtenerEstadoMensajesUsuario(chatRepo);
+		const estado = await obtenerEstado.ejecutar(usuarioId);
+		ultimoMensajeAjenoAt = estado.ultimoMensajeAjenoAt;
 	}
 
 	return {
