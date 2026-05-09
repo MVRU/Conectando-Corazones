@@ -116,7 +116,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		await notificarSolicitudVerificacionAdmin({
 			usuarioId: usuarioIdInt,
 			username: usuarioSesion.username,
-			tipoSolicitud: 'institucional',
+			tipoSolicitud: usuarioSesion.rol,
 			cantidadArchivos: files.length
 		});
 
