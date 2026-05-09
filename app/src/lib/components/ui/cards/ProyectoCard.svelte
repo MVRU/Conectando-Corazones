@@ -5,51 +5,57 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	const usuarioPorDefecto = '/users/user-default.png';
 
+	function aplicarFallbackImagen(event: Event) {
+		const target = event.currentTarget as HTMLImageElement;
+		if (target.src.endsWith(usuarioPorDefecto)) return;
+		target.src = usuarioPorDefecto;
+	}
+
 	import {
-		getParticipacionVisual,
 		getUbicacionCorta,
-		formatearFechaBadge
+		formatearFechaBadge,
+		calcularDiasRestantes
 	} from '$lib/utils/util-proyectos';
+	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
-	export let proyecto: Proyecto;
-	export let usuario: Usuario | null = null;
-	export let mostrarBotones: boolean = false;
-	export let variante: 'default' | 'mis-proyectos' = 'default';
-	export let esInstitucion: boolean = false;
+	let { proyecto, usuario = null, mostrarBotones = false, variante = 'default', esInstitucion = false }: { proyecto: Proyecto; usuario?: Usuario | null; mostrarBotones?: boolean; variante?: 'default' | 'mis-proyectos'; esInstitucion?: boolean } = $props();
 
 	// Obtener colaboración del usuario
-	$: colaboracionUsuario =
+	const colaboracionUsuario = $derived(
 		usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === usuario?.id_usuario)
-			: null;
+			: null
+	);
 
 	// Detectar roles
-	$: esCreador = usuario?.id_usuario === proyecto.institucion_id;
+	const esCreador = $derived(usuario?.id_usuario === proyecto.institucion_id);
 
-	$: esParticipante =
+	const esParticipante = $derived(
 		!esCreador &&
 		!!usuario &&
 		usuario.rol === 'colaborador' &&
-		colaboracionUsuario?.estado === 'aprobada';
+		colaboracionUsuario?.estado === 'aprobada'
+	);
 
 	// Detectar si el usuario ya envió una solicitud (pendiente, rechazada, etc) pero NO está aprobada (ya cubierto por esParticipante)
-	$: yaColaboro =
+	const yaColaboro = $derived(
 		!esCreador &&
 		!esParticipante &&
 		!!usuario &&
 		usuario.rol === 'colaborador' &&
-		!!colaboracionUsuario;
+		!!colaboracionUsuario
+	);
 
-	$: esRechazada = colaboracionUsuario?.estado === 'rechazada';
-	$: esAnulada = colaboracionUsuario?.estado === 'anulada';
+	const esRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
+	const esAnulada = $derived(colaboracionUsuario?.estado === 'anulada');
 
-	$: esAdmin = usuario?.rol === 'administrador';
+	const esAdmin = $derived(usuario?.rol === 'administrador');
 
-	let mostrarJustificacion = false;
+	let mostrarJustificacion = $state(false);
 
 	function manejarClickColaborar(e: Event) {
 		if (esRechazada) {
@@ -59,10 +65,18 @@
 		}
 	}
 
-	$: botonColaborarDeshabilitado = proyecto.estado !== 'en_curso' || yaColaboro || esAnulada;
-	$: ubicacionCorta = getUbicacionCorta(proyecto);
-	$: esVirtual = ubicacionCorta === 'Virtual';
-	$: estaInactivo = proyecto.estado === 'completado' || proyecto.estado === 'cancelado';
+	const progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
+	const diasFaltantes = $derived(proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999);
+	const listoParaFinalizar = $derived(
+		esCreador &&
+		proyecto.estado === 'en_curso' &&
+		(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7))
+	);
+
+	const botonColaborarDeshabilitado = $derived(proyecto.estado !== 'en_curso' || yaColaboro || esAnulada);
+	const ubicacionCorta = $derived(getUbicacionCorta(proyecto));
+	const esVirtual = $derived(ubicacionCorta === 'Virtual');
+	const estaInactivo = $derived(proyecto.estado === 'completado' || proyecto.estado === 'cancelado');
 </script>
 
 <div
@@ -111,6 +125,7 @@
 							alt="Tu perfil"
 							class="h-full w-full object-cover"
 							loading="lazy"
+							onerror={aplicarFallbackImagen}
 						/>
 					</div>
 				{/if}
@@ -162,6 +177,7 @@
 							alt={proyecto.institucion.nombre_legal}
 							class="h-5 w-5 rounded-full object-cover shadow-sm"
 							loading="lazy"
+							onerror={aplicarFallbackImagen}
 						/>
 						<span class="truncate font-medium text-gray-700">
 							{proyecto.institucion.nombre_legal}
@@ -194,12 +210,12 @@
 			<div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row">
 				{#if esInstitucion && proyecto.estado === 'en_curso'}
 					<Button
-						label="Editar"
-						href={`/proyectos/${proyecto.id_proyecto}/editar`}
+						label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
+						href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
-						customAriaLabel="Editar proyecto"
+						customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
 					/>
 					<Button
 						label="Ver detalles"
@@ -223,12 +239,12 @@
 				{#if esCreador}
 					{#if proyecto.estado === 'en_curso'}
 						<Button
-							label="Editar"
-							href={`/proyectos/${proyecto.id_proyecto}/editar`}
+							label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
+							href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
 							variant="secondary"
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel="Editar proyecto"
+							customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
 						/>
 					{/if}
 					<Button
@@ -301,7 +317,7 @@
 									: yaColaboro
 										? 'Solicitud de colaboración enviada'
 										: 'Colaborar en este proyecto'}
-							on:click={manejarClickColaborar}
+							onclick={manejarClickColaborar}
 						/>
 					{/if}
 				{/if}
@@ -341,7 +357,7 @@
 			<button
 				type="button"
 				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-				on:click={() => (mostrarJustificacion = false)}
+				onclick={() => (mostrarJustificacion = false)}
 			>
 				Cerrar
 			</button>

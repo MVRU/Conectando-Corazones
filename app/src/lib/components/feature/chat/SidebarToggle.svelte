@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { chatStore } from '$lib/stores/chatStore';
 
-	$: collapsed = $chatStore.sidebarCollapsed;
+	let collapsed = $derived($chatStore.sidebarCollapsed);
 </script>
 
 <button
-	on:click={() => chatStore.toggleSidebar()}
+	onclick={() => chatStore.toggleSidebar()}
 	class="flex h-9 w-9 items-center justify-center rounded-lg text-gray-600 transition-all hover:bg-gray-100 hover:text-gray-900"
 	aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
 	title={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}

@@ -3,7 +3,7 @@ import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { esClientePrisma, type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
 import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
 import { PostgresCategoriaRepository } from './categoria.repo';
@@ -12,6 +12,8 @@ import type { ProyectoSearchCriteria } from '$lib/domain/types/dto/ProyectoSearc
 import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	private includeOptions = {
 		estado: true,
 		proyecto_categorias: {
@@ -213,7 +215,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	}
 
 	async findById(id: number): Promise<Proyecto | null> {
-		const proyecto = await prisma.proyecto.findUnique({
+		const proyecto = await this.db.proyecto.findUnique({
 			where: { id_proyecto: id },
 			include: this.includeOptions
 		});
@@ -434,36 +436,57 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					});
 				}
 
-				// 3. Sincronizar participaciones permitidas
-				// Eliminar existentes
+				// 3. Sincronizar participaciones permitidas (upsert)
+				const participacionesEnPayload = proyecto.participacion_permitida || [];
+				const idsPayload = participacionesEnPayload
+					.map((p) => p.id_participacion_permitida)
+					.filter(Boolean) as number[];
+
+				// a. Eliminar las que ya no están en el payload
 				await tx.participacionPermitida.deleteMany({
-					where: { id_proyecto: proyecto.id_proyecto }
+					where: {
+						id_proyecto: proyecto.id_proyecto,
+						...(idsPayload.length > 0
+							? { id_participacion_permitida: { notIn: idsPayload } }
+							: {})
+					}
 				});
 
-				// Crear nuevas
-				if (proyecto.participacion_permitida && proyecto.participacion_permitida.length > 0) {
-					for (const p of proyecto.participacion_permitida) {
-						let tipoId = p.id_tipo_participacion;
+				// b. Procesar cada participación del payload
+				for (const p of participacionesEnPayload) {
+					let tipoId = p.id_tipo_participacion;
 
-						// Si no tiene ID pero sí descripción, buscarlo (caso de creación/edición rápida)
-						if (!tipoId && p.tipo_participacion?.descripcion) {
-							const tipos = await tx.tipoParticipacion.findMany({
-								where: { descripcion: p.tipo_participacion.descripcion }
-							});
-							tipoId = tipos[0]?.id_tipo_participacion;
-						}
+					// Si no tiene ID pero sí descripción, buscarlo
+					if (!tipoId && p.tipo_participacion?.descripcion) {
+						const tipos = await tx.tipoParticipacion.findMany({
+							where: { descripcion: p.tipo_participacion.descripcion }
+						});
+						tipoId = tipos[0]?.id_tipo_participacion;
+					}
 
-						if (tipoId) {
-							await tx.participacionPermitida.create({
-								data: {
-									id_proyecto: proyecto.id_proyecto!,
-									id_tipo_participacion: tipoId,
-									objetivo: p.objetivo,
-									unidad_medida: p.unidad_medida,
-									especie: p.especie
-								}
-							});
-						}
+					if (!tipoId) continue;
+
+					if (p.id_participacion_permitida) {
+						// UPDATE existente — preservar el ID y el campo actual
+						await tx.participacionPermitida.update({
+							where: { id_participacion_permitida: p.id_participacion_permitida },
+							data: {
+								objetivo: p.objetivo,
+								unidad_medida: p.unidad_medida,
+								especie: p.especie ?? null
+							}
+						});
+					} else {
+						// CREATE nueva
+						await tx.participacionPermitida.create({
+							data: {
+								proyecto: { connect: { id_proyecto: proyecto.id_proyecto! } },
+								tipo_participacion: { connect: { id_tipo_participacion: tipoId } },
+								objetivo: p.objetivo,
+								unidad_medida: p.unidad_medida,
+								especie: p.especie ?? null
+							}
+						});
 					}
 				}
 
@@ -559,13 +582,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 
 	async updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto> {
 		// Buscar el ID del estado basado en la descripción
-		const estadoObj = await prisma.estado.findUnique({
+		const estadoObj = await this.db.estado.findUnique({
 			where: { descripcion: nuevoEstado }
 		});
 
 		if (!estadoObj) throw new Error(`Estado ${nuevoEstado} no encontrado`);
 
-		const updated = await prisma.proyecto.update({
+		const updated = await this.db.proyecto.update({
 			where: { id_proyecto: id },
 			data: {
 				estado_id: estadoObj.id_estado
@@ -574,7 +597,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		});
 
 		// Generación de resumen y aprendizajes (asíncrono)
-		if (nuevoEstado === 'completado') {
+		if (nuevoEstado === 'completado' && esClientePrisma(this.db)) {
 			setTimeout(async () => {
 				try {
 					const result = await analizarProyecto(id);
@@ -621,7 +644,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 	}
 
 	async countSolicitudesRechazadas(id: number): Promise<number> {
-		return await prisma.solicitudFinalizacion.count({
+		return await this.db.solicitudFinalizacion.count({
 			where: {
 				proyecto_id: id,
 				estado: 'rechazada'

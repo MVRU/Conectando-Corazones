@@ -4,23 +4,35 @@
 	import MisProyectos from './MisProyectos.svelte';
 	import { usuario } from '$lib/stores/auth';
 	import { fade } from 'svelte/transition';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 
-	export let proyectos: Proyecto[];
-	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: { value: string; label: string }[] = [];
-	export let categoriasDisponibles: string[] = [];
-	export let tiposParticipacionDisponibles: string[] = [];
-
-	let activeTab: 'todos' | 'mis-proyectos' | 'auditoria' = 'todos';
-
-	$: esAdministrador = $usuario?.rol === 'administrador';
-
-	$: if ($page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario && !esAdministrador) {
-		activeTab = 'mis-proyectos';
-	} else if ($page.url.searchParams.get('tab') === 'auditoria' && esAdministrador) {
-		activeTab = 'auditoria';
+	interface Props {
+		proyectos: Proyecto[];
+		provinciasDisponibles?: string[];
+		estadosDisponibles?: Array<{ value: string; label: string }>;
+		categoriasDisponibles?: string[];
+		tiposParticipacionDisponibles?: string[];
 	}
+
+	let {
+		proyectos = [],
+		provinciasDisponibles = [],
+		estadosDisponibles = [],
+		categoriasDisponibles = [],
+		tiposParticipacionDisponibles = []
+	}: Props = $props();
+
+	let activeTab = $state<'todos' | 'mis-proyectos' | 'auditoria'>('todos');
+
+	let esAdministrador = $derived($usuario?.rol === 'administrador');
+
+	$effect(() => {
+		if (page.url.searchParams.get('tab') === 'mis-proyectos' && $usuario && !esAdministrador) {
+			activeTab = 'mis-proyectos';
+		} else if (page.url.searchParams.get('tab') === 'auditoria' && esAdministrador) {
+			activeTab = 'auditoria';
+		}
+	});
 
 	function handleTabChange(tab: 'todos' | 'mis-proyectos' | 'auditoria') {
 		activeTab = tab;
@@ -33,14 +45,18 @@
 		window.history.replaceState({}, '', url);
 	}
 
-	$: proyectosEnAuditoria = proyectos.filter((p) => p.estado === 'en_auditoria');
-
-	$: proyectosPublicos = proyectos.filter(
-		(p) => p.estado !== 'cancelado' && p.estado !== 'en_auditoria'
+	let proyectosEnAuditoria = $derived(
+		proyectos.filter((p: Proyecto) => p.estado === 'en_auditoria')
 	);
 
-	$: estadosPublicos = estadosDisponibles.filter(
-		(e) => e.value !== 'cancelado' && e.value !== 'en_auditoria'
+	let proyectosPublicos = $derived(
+		proyectos.filter((p: Proyecto) => p.estado !== 'cancelado' && p.estado !== 'en_auditoria')
+	);
+
+	let estadosPublicos = $derived(
+		estadosDisponibles.filter(
+			(e: { value: string; label: string }) => e.value !== 'cancelado' && e.value !== 'en_auditoria'
+		)
 	);
 </script>
 
@@ -54,7 +70,7 @@
 					'todos'
 						? 'bg-white text-gray-900 shadow-sm'
 						: 'text-gray-500 hover:text-gray-900'}"
-					on:click={() => handleTabChange('todos')}
+					onclick={() => handleTabChange('todos')}
 				>
 					Todos los proyectos
 				</button>
@@ -64,7 +80,7 @@
 						'auditoria'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"
-						on:click={() => handleTabChange('auditoria')}
+					onclick={() => handleTabChange('auditoria')}
 					>
 						Proyectos en auditoría
 					</button>
@@ -74,7 +90,7 @@
 						'mis-proyectos'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"
-						on:click={() => handleTabChange('mis-proyectos')}
+						onclick={() => handleTabChange('mis-proyectos')}
 					>
 						Mis proyectos
 					</button>
@@ -91,15 +107,12 @@
 				estadosDisponibles={estadosPublicos}
 				{categoriasDisponibles}
 				{tiposParticipacionDisponibles}
-				on:cambiarTab={(e) => handleTabChange(e.detail)}
+				oncambiarTab={handleTabChange}
 			/>
 		</div>
 	{:else if activeTab === 'auditoria' && esAdministrador}
 		<div in:fade={{ duration: 200 }}>
-			<TodosProyectos
-				proyectos={proyectosEnAuditoria}
-				on:cambiarTab={(e) => handleTabChange(e.detail)}
-			/>
+			<TodosProyectos proyectos={proyectosEnAuditoria} oncambiarTab={handleTabChange} />
 		</div>
 	{:else if activeTab === 'mis-proyectos' && $usuario && !esAdministrador}
 		<div in:fade={{ duration: 200 }}>

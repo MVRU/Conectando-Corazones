@@ -1,15 +1,18 @@
-<!-- TODO: implementar módulo de reseñas -->
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
 
-	export let resenas: {
+	interface Props {
+		resenas?: {
 		id: string;
 		usuario: string;
 		avatarUrl?: string;
 		calificacion: number;
 		comentario: string;
 		fecha: string;
-	}[] = [];
+	}[];
+	}
+
+	let { resenas = [] }: Props = $props();
 </script>
 
 <div

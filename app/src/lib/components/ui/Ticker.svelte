@@ -13,15 +13,30 @@
 
 <script lang="ts">
 	import clsx from 'clsx';
-	import { onMount } from 'svelte';
-	export let logos: Array<string | { src: string; href?: string }> = [];
-	let visible = false;
-	let tickerRef: HTMLElement;
-	export let customClass: string = '';
 
-	onMount(() => {
+	let {
+		logos = [],
+		customClass = ''
+	} = $props<{
+		logos?: Array<string | { src: string; href?: string }>;
+		customClass?: string;
+	}>();
+
+	let visible = $state(false);
+	let tickerRef: HTMLElement | undefined = $state();
+
+	// Memorizar la lista extendida para evitar re-crear arrays en el render que causan loops
+	const extendedLogos = $derived(
+		Array(6)
+			.fill(logos)
+			.flat()
+	);
+
+	$effect(() => {
+		if (!tickerRef) return;
+
 		const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.12 });
-		if (tickerRef) io.observe(tickerRef);
+		io.observe(tickerRef);
 		return () => io.disconnect();
 	});
 </script>
@@ -39,9 +54,7 @@
 			customClass
 		)}
 	>
-		{#each Array(6)
-			.fill(logos)
-			.flat() as logo, i (typeof logo === 'string' ? logo + i : logo.src + i)}
+		{#each extendedLogos as logo, i (typeof logo === 'string' ? logo + i : logo.src + i)}
 			{#if typeof logo === 'string'}
 				<img
 					src={logo}

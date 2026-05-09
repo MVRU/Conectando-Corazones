@@ -18,6 +18,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			getAll: () => event.cookies.getAll(),
 			setAll: (cookiesToSet) => {
 				cookiesToSet.forEach(({ name, value, options }) => {
+					// Preservar y extender opciones de Supabase
 					const cookieOptions = {
 						...options,
 						path: '/',
@@ -26,7 +27,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 						sameSite: 'lax' as const
 					};
 
-					// Extender duración si el usuario marcó 'recordarme'
 					if (rememberMe && name.includes('auth-token')) {
 						cookieOptions.maxAge = 60 * 60 * 24 * 30; // 30 días
 					}
@@ -39,20 +39,26 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	/**
 	 * Función para obtener la sesión de forma segura y tipada.
+	 * getUser() es el método recomendado para validar la sesión en el servidor.
 	 */
 	event.locals.safeGetSession = async () => {
 		const {
 			data: { user },
-			error
+			error: userError
 		} = await event.locals.supabase.auth.getUser();
 
-		if (error || !user) {
+		if (userError || !user) {
 			return { session: null, user: null };
 		}
 
 		const {
-			data: { session }
+			data: { session },
+			error: sessionError
 		} = await event.locals.supabase.auth.getSession();
+
+		if (sessionError) {
+			return { session: null, user };
+		}
 
 		return { session, user };
 	};
@@ -62,7 +68,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = session;
 	event.locals.user = user;
 
-	// 3. Resolución de usuario de dominio (Backend local)
+	// 3. Resolución de usuario de dominio (Prisma)
 	if (user) {
 		const usuarioRepo = new PostgresUsuarioRepository();
 		const obtenerUsuario = new ObtenerUsuarioSesion(usuarioRepo);
@@ -70,17 +76,28 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const usuarioDb = await obtenerUsuario.execute(user.id);
 		if (usuarioDb) {
 			event.locals.usuario = usuarioDb;
+		} else {
+			console.warn(`[Auth] Usuario Supabase existe (${user.id}) pero no tiene perfil en Prisma.`);
 		}
 	}
 
 	// 4. Centralización de Control de Acceso (RBAC)
 	const { pathname } = event.url;
 
-	// Prevenir acceso a login/registro si ya está logueado
-	AuthGuard.handleAuthRoutes(pathname, event.locals.usuario);
+	try {
+		// Prevenir acceso a login/registro si ya está logueado
+		AuthGuard.handleAuthRoutes(pathname, event.locals.usuario);
 
-	// Proteger rutas según roles
-	AuthGuard.checkAccess(pathname, event.locals.usuario);
+		// Proteger rutas según roles
+		AuthGuard.checkAccess(pathname, event.locals.usuario);
+	} catch (err) {
+		// Si es una redirección de SvelteKit, la relanzamos
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		if (err instanceof Error && err.constructor.name === 'Redirect' || (err as any)?.status >= 300) {
+			throw err;
+		}
+		console.error('[AuthGuard] Error inesperado en el guardia:', err);
+	}
 
 	// 5. Resolver el request original
 	return resolve(event, {

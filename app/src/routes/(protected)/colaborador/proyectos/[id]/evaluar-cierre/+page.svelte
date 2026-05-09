@@ -21,30 +21,71 @@
 	import { formatearFecha } from '$lib/utils/validaciones';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
-	export let data: PageData;
-
-	$: proyecto = data.proyecto;
-	$: solicitud = data.solicitud as any;
-	$: evaluacion = data.evaluacion;
-	$: yaVote = data.yaVote;
-
-	$: if (proyecto) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
-			{ label: 'Evaluación de Cierre' }
-		]);
+	interface Props {
+		data: PageData;
 	}
 
-	let showReportModal = false;
+	let { data }: Props = $props();
 
-	let showRejectModal = false;
-	let loading = false;
-	let declarationChecked = false;
-	let objetivosExpandidos: Record<number, boolean> = {};
-	let justificacionRechazo = '';
+	let proyecto = $derived(data.proyecto);
+	let solicitud = $derived(data.solicitud as any);
+	let evaluacion = $derived(data.evaluacion);
+	let yaVote = $derived(data.yaVote);
+
+	$effect(() => {
+		if (proyecto) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: proyecto.titulo, href: `/proyectos/${proyecto.id_proyecto}` },
+				{ label: 'Evaluación de Cierre' }
+			]);
+		}
+	});
+
+	let showReportModal = $state(false);
+
+	let showRejectModal = $state(false);
+	let loading = $state(false);
+	let declarationChecked = $state(false);
+	let objetivosExpandidos: Record<number, boolean> = $state({});
+	let justificacionRechazo = $state('');
 
 	const MIN_CARACTERES_JUSTIFICACION = 20;
+
+	async function manejarResultadoVotacion(
+		result: {
+			type: 'success' | 'failure' | 'error' | 'redirect';
+			data?: { message?: string; error?: string };
+		},
+		update: (options?: { reset?: boolean; invalidateAll?: boolean }) => Promise<void>,
+		fallbackSuccess: string,
+		opciones?: { cerrarModalRechazo?: boolean }
+	) {
+		if (result.type === 'success') {
+			toastStore.show({
+				message: String(result.data?.message ?? fallbackSuccess),
+				variant: 'success'
+			});
+			await update({ reset: true, invalidateAll: true });
+
+			if (opciones?.cerrarModalRechazo) {
+				showRejectModal = false;
+				justificacionRechazo = '';
+			}
+
+			loading = false;
+			return;
+		}
+
+		if (result.type === 'failure' && result.data?.error) {
+			toastStore.show({
+				message: String(result.data.error),
+				variant: 'error'
+			});
+		}
+
+		loading = false;
+	}
 
 	async function handleReportSuccess() {
 		toastStore.show({
@@ -56,10 +97,20 @@
 	}
 
 	// Agrupar evidencias por objetivo
-	$: evidenciasPorObjetivo = agruparEvidenciasPorObjetivo(
+	let evidenciasPorObjetivo = $derived(agruparEvidenciasPorObjetivo(
 		data.proyecto.participacion_permitida ?? [],
 		(data.solicitud as any)?.evidencias ?? []
-	);
+	));
+
+	function estaExpandido(objetivoId: number | null | undefined): boolean {
+		if (objetivoId == null) return false;
+		return objetivosExpandidos[objetivoId] ?? false;
+	}
+
+	function toggleObjetivo(objetivoId: number | null | undefined) {
+		if (objetivoId == null) return;
+		objetivosExpandidos[objetivoId] = !estaExpandido(objetivoId);
+	}
 </script>
 
 <svelte:head>
@@ -71,7 +122,7 @@
 		<!-- Header -->
 		<nav class="mb-4 flex items-center text-sm text-slate-500">
 			<a
-				href="/proyectos/{data.proyecto.id_proyecto}"
+				href={`/proyectos/${data.proyecto.id_proyecto}`}
 				class="flex items-center transition-colors hover:text-blue-600"
 			>
 				<ChevronLeft class="mr-1 h-4 w-4" />
@@ -94,7 +145,7 @@
 				</p>
 				<div class="mt-8">
 					<a
-						href="/proyectos/{data.proyecto.id_proyecto}"
+						href={`/proyectos/${data.proyecto.id_proyecto}`}
 						class="inline-flex items-center rounded-xl border border-transparent bg-blue-600 px-6 py-3 text-base font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg"
 					>
 						Volver al panel
@@ -190,7 +241,8 @@
 											{evidenciasEntrada}
 											{evidenciasSalida}
 											{totalArchivos}
-											bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida!]}
+											expandido={estaExpandido(objetivo.id_participacion_permitida)}
+											onToggle={() => toggleObjetivo(objetivo.id_participacion_permitida)}
 										/>
 									{/each}
 								</div>
@@ -244,25 +296,17 @@
 							<div class="space-y-4">
 								<form
 									method="POST"
-									action="?/aprobar"
-									use:enhance={() => {
-										loading = true;
-										return async ({ result, update }) => {
-											if (result.type === 'success' && result.data?.message) {
-												toastStore.show({
-													message: String(result.data.message),
-													variant: 'success'
-												});
-											} else if (result.type === 'failure' && result.data?.error) {
-												toastStore.show({
-													message: String(result.data.error),
-													variant: 'error'
-												});
-											}
-											await update();
-											loading = false;
-										};
-									}}
+								action="?/aprobar"
+								use:enhance={() => {
+									loading = true;
+									return async ({ result, update }) => {
+										await manejarResultadoVotacion(
+											result,
+											update,
+											'Tu voto fue registrado correctamente.'
+										);
+									};
+								}}
 								>
 									<input type="hidden" name="solicitud_id" value={solicitud.id_solicitud} />
 									<button
@@ -285,7 +329,7 @@
 								<button
 									type="button"
 									disabled={loading}
-									on:click={() => (showRejectModal = true)}
+									onclick={() => (showRejectModal = true)}
 									class="flex w-full items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-6 py-4 font-bold text-slate-700 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:ring-4 focus:ring-red-50"
 								>
 									<XCircle class="mr-2 h-5 w-5" />
@@ -299,7 +343,7 @@
 							<button
 								type="button"
 								class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-slate-50 hover:text-red-600"
-								on:click={() => (showReportModal = true)}
+								onclick={() => (showReportModal = true)}
 							>
 								<AlertTriangle class="mr-2 h-4 w-4" />
 								Reportar irregularidad
@@ -329,21 +373,12 @@
 							use:enhance={() => {
 								loading = true;
 								return async ({ result, update }) => {
-									if (result.type === 'success' && result.data?.message) {
-										toastStore.show({
-											message: String(result.data.message),
-											variant: 'success'
-										});
-									} else if (result.type === 'failure' && result.data?.error) {
-										toastStore.show({
-											message: String(result.data.error),
-											variant: 'error'
-										});
-									}
-									await update();
-									loading = false;
-									showRejectModal = false;
-									justificacionRechazo = '';
+									await manejarResultadoVotacion(
+										result,
+										update,
+										'Tu rechazo fue registrado correctamente.',
+										{ cerrarModalRechazo: true }
+									);
 								};
 							}}
 						>
@@ -391,7 +426,7 @@
 								<button
 									type="button"
 									class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 transition-colors hover:bg-slate-50"
-									on:click={() => (showRejectModal = false)}
+									onclick={() => (showRejectModal = false)}
 								>
 									Cancelar
 								</button>

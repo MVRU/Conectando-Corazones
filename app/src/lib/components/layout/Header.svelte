@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
-	import { page } from '$app/stores';
-	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import { afterNavigate, goto } from '$app/navigation';
 	import {
 		isAuthenticated,
 		usuario as usuarioStore,
@@ -14,8 +13,6 @@
 		isInstitucionVerificada
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
-	import type { Proyecto } from '$lib/domain/types/Proyecto';
-	import type { Verificacion } from '$lib/domain/types/Verificacion';
 	import {
 		MessageCircle,
 		ChevronDown,
@@ -30,26 +27,29 @@
 		FileWarning
 	} from 'lucide-svelte';
 
-	import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
 
-	export let proyectos: Proyecto[] = [];
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
-	let menuAbierto = false;
-	let visible = false;
-	let mostrarHeader = true;
-	let lastScrollY = 0;
-	let headerRef: HTMLElement;
-	let mostrarDropdown = false;
+	let menuAbierto = $state(false);
+	let visible = $state(true);
+	let mostrarHeader = $state(true);
+	let lastScrollY = $state(0);
+	let headerRef = $state<HTMLElement | undefined>();
+	let mostrarDropdown = $state(false);
 
-	$: isHome = $page.url.pathname === '/';
+	const isHome = $derived(page.url.pathname === '/');
 
-	$: navLinks = [
+	const navLinks = $derived([
 		{ label: 'Inicio', href: '/' },
 		{ label: 'Nosotros', href: '/nosotros' },
 		{ label: 'Proyectos', href: '/proyectos' },
 		{ label: 'FAQ', href: isHome ? '#faq' : '/faq' },
 		{ label: 'Contacto', href: isHome ? '#support' : '/contacto' }
-	];
+	]);
 
 	async function handleLogout() {
 		await authActions.logout();
@@ -58,21 +58,16 @@
 		goto('/');
 	}
 
-	$: verificacionAprobada = $isInstitucionVerificada;
+	const verificacionAprobada = $derived($isInstitucionVerificada);
 
-	$: proyectosEnCursoCount = $usuarioStore
-		? proyectos.filter(
-				(p) => p.institucion_id === $usuarioStore?.id_usuario && p.estado === 'en_curso'
-			).length
-		: 0;
-
-	$: limiteProyectosAlcanzado = proyectosEnCursoCount >= 5;
-
-	$: emailUsuario =
+	const emailUsuario = $derived(
 		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
-			?.valor || 'Sin email';
+			?.valor || 'Sin email'
+	);
 
-	$: nombreCompleto = $usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario';
+	const nombreCompleto = $derived(
+		$usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario'
+	);
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -101,27 +96,35 @@
 		}
 	}
 
-	onMount(() => {
+	const handleScroll = () => {
+		const current = window.scrollY;
+		if (current > 100 && current > lastScrollY) {
+			mostrarHeader = false;
+			layoutStore.setHeaderVisible(false);
+		} else {
+			mostrarHeader = true;
+			layoutStore.setHeaderVisible(true);
+		}
+		lastScrollY = current;
+	};
+
+	afterNavigate(() => {
+		mostrarHeader = true;
+		menuAbierto = false;
+		mostrarDropdown = false;
+		visible = true;
+		layoutStore.setHeaderVisible(true);
+	});
+
+	$effect(() => {
+		if (!headerRef) return;
+
 		const observer = new IntersectionObserver(([entry]) => (visible = entry.isIntersecting), {
 			threshold: 0.1
 		});
 
-		if (headerRef) observer.observe(headerRef);
-
+		observer.observe(headerRef);
 		window.addEventListener('click', closeDropdownOnClickOutside);
-
-		const handleScroll = () => {
-			const current = window.scrollY;
-			if (current > 100 && current > lastScrollY) {
-				mostrarHeader = false;
-				layoutStore.setHeaderVisible(false);
-			} else {
-				mostrarHeader = true;
-				layoutStore.setHeaderVisible(true);
-			}
-			lastScrollY = current;
-		};
-
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		return () => {
@@ -136,7 +139,7 @@
 	<div
 		class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
 		aria-hidden="true"
-		on:click={() => (menuAbierto = false)}
+		onclick={() => (menuAbierto = false)}
 	></div>
 {/if}
 
@@ -167,7 +170,7 @@
 					{href}
 					class="group relative px-1 py-1 text-sm font-medium text-blue-100 transition-colors duration-200 hover:text-white"
 					style="transition-delay:{i * 50}ms"
-					on:click={(e) => handleNavClick(e, href)}
+					onclick={(e) => handleNavClick(e, href)}
 				>
 					{label}
 					<span
@@ -184,7 +187,7 @@
 		>
 			{#if $isAuthenticated}
 				<!-- Mis mensajes (Desktop) -->
-				<div class="hidden md:block">
+				<div class="relative hidden md:block">
 					<a
 						href="/mensajes"
 						class="group flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:bg-blue-500/20 hover:text-white"
@@ -193,6 +196,12 @@
 						<MessageCircle class="h-4 w-4" />
 						<span>Mis chats</span>
 					</a>
+					{#if hayNuevosMensajesChat}
+						<span
+							class="header-chat-dot pointer-events-none absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+							aria-label="Tenés mensajes nuevos"
+						></span>
+					{/if}
 				</div>
 
 				<!-- Dropdown Auth -->
@@ -201,16 +210,21 @@
 						aria-label="Menú de usuario"
 						aria-haspopup="true"
 						aria-expanded={mostrarDropdown}
-						on:click={toggleDropdown}
+						onclick={toggleDropdown}
 						class="flex items-center gap-2 rounded-full border border-transparent bg-transparent p-1 pr-3 pl-2 transition-all hover:bg-blue-500/10 focus:ring-2 focus:ring-blue-400/50 focus:outline-none active:scale-95 {mostrarDropdown
 							? 'bg-blue-500/10 ring-2 ring-blue-400/50'
 							: ''}"
 					>
 						<div class="h-8 w-8 overflow-hidden rounded-full border-2 border-blue-400/60">
 							<img
-								src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+								src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 								alt="Avatar"
 								class="h-full w-full object-cover"
+								onerror={(event) => {
+									const target = event.currentTarget as HTMLImageElement;
+									if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+									target.src = IMAGEN_USUARIO_FALLBACK;
+								}}
 							/>
 						</div>
 						<div class="hidden flex-col items-start leading-none md:flex">
@@ -239,11 +253,11 @@
 							<!-- Acciones Principales -->
 							<div class="p-1">
 								{#if $isInstitucion}
-									{#if verificacionAprobada && !limiteProyectosAlcanzado}
+									{#if verificacionAprobada}
 										<a
 											href="/proyectos/crear"
 											class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-											on:click={() => (mostrarDropdown = false)}
+											onclick={() => (mostrarDropdown = false)}
 										>
 											<PlusCircle class="h-4 w-4 text-blue-400 group-hover:text-blue-300" />
 											Crear proyecto
@@ -251,9 +265,7 @@
 									{:else}
 										<div
 											class="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-500 opacity-60"
-											title={!verificacionAprobada
-												? 'Debés tener la verificación aprobada'
-												: 'Límite de proyectos alcanzado'}
+											title="Debés tener la verificación aprobada"
 										>
 											<PlusCircle class="h-4 w-4" />
 											Crear proyecto
@@ -264,7 +276,7 @@
 								<a
 									href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-									on:click={() => (mostrarDropdown = false)}
+									onclick={() => (mostrarDropdown = false)}
 								>
 									<LayoutDashboard class="h-4 w-4 text-blue-400 group-hover:text-blue-300" />
 									{$isAdmin ? 'Panel de admin' : 'Panel de control'}
@@ -278,7 +290,7 @@
 								<a
 									href="/perfil"
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-									on:click={() => (mostrarDropdown = false)}
+									onclick={() => (mostrarDropdown = false)}
 								>
 									<User class="h-4 w-4 text-gray-400 group-hover:text-white" />
 									Mi perfil
@@ -288,7 +300,7 @@
 									<a
 										href="/reportes"
 										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-										on:click={() => (mostrarDropdown = false)}
+										onclick={() => (mostrarDropdown = false)}
 									>
 										<FileWarning class="h-4 w-4 text-gray-400 group-hover:text-white" />
 										Reportes
@@ -299,7 +311,7 @@
 									<a
 										href="/reportes"
 										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-										on:click={() => (mostrarDropdown = false)}
+										onclick={() => (mostrarDropdown = false)}
 									>
 										<FileText class="h-4 w-4 text-gray-400 group-hover:text-white" />
 										Mis reportes
@@ -309,7 +321,7 @@
 								<a
 									href="/configuracion"
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
-									on:click={() => (mostrarDropdown = false)}
+									onclick={() => (mostrarDropdown = false)}
 								>
 									<Settings class="h-4 w-4 text-gray-400 group-hover:text-white" />
 									Configuración
@@ -321,7 +333,7 @@
 							<!-- Cerrar Sesión -->
 							<div class="p-1">
 								<button
-									on:click={handleLogout}
+									onclick={handleLogout}
 									class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300"
 								>
 									<LogOut class="h-4 w-4" />
@@ -342,7 +354,7 @@
 			<button
 				aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
 				class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600/10 text-blue-100 transition-colors hover:bg-blue-600/20 md:hidden"
-				on:click={() => (menuAbierto = !menuAbierto)}
+				onclick={() => (menuAbierto = !menuAbierto)}
 			>
 				{#if menuAbierto}
 					<X class="h-6 w-6" />
@@ -364,9 +376,14 @@
 					<!-- Perfil Mobile -->
 					<div class="mb-4 flex items-center gap-3 rounded-xl bg-blue-500/5 p-3">
 						<img
-							src={$usuarioStore?.url_foto ?? '/users/escuela-esperanza.jpg'}
+							src={$usuarioStore?.url_foto || IMAGEN_USUARIO_FALLBACK}
 							alt="Avatar"
 							class="h-10 w-10 rounded-full object-cover"
+							onerror={(event) => {
+								const target = event.currentTarget as HTMLImageElement;
+								if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+								target.src = IMAGEN_USUARIO_FALLBACK;
+							}}
 						/>
 						<div class="flex flex-col">
 							<span class="font-medium text-white">{nombreCompleto}</span>
@@ -378,16 +395,22 @@
 					<div class="mb-4 grid grid-cols-2 gap-2">
 						<a
 							href="/mensajes"
-							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
-							on:click={() => (menuAbierto = false)}
+							class="relative flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
+							onclick={() => (menuAbierto = false)}
 						>
 							<MessageCircle class="h-5 w-5 text-blue-400" />
 							<span class="text-xs font-medium text-blue-100">Mis chats</span>
+							{#if hayNuevosMensajesChat}
+								<span
+									class="header-chat-dot pointer-events-none absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+									aria-label="Tenés mensajes nuevos"
+								></span>
+							{/if}
 						</a>
 						<a
 							href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
 							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
-							on:click={() => (menuAbierto = false)}
+							onclick={() => (menuAbierto = false)}
 						>
 							<LayoutDashboard class="h-5 w-5 text-blue-400" />
 							<span class="text-xs font-medium text-blue-100">Panel</span>
@@ -398,7 +421,7 @@
 						<a
 							href="/iniciar-sesion"
 							class="flex w-full items-center justify-center rounded-lg bg-blue-600 py-3 font-semibold text-white shadow-lg transition-transform active:scale-95"
-							on:click={() => (menuAbierto = false)}
+							onclick={() => (menuAbierto = false)}
 						>
 							Iniciar sesión
 						</a>
@@ -411,7 +434,7 @@
 						<a
 							{href}
 							class="block rounded-lg px-4 py-3 text-base font-medium text-blue-100 transition-colors hover:bg-blue-500/10 hover:text-white"
-							on:click={(e) => handleNavClick(e, href)}
+							onclick={(e) => handleNavClick(e, href)}
 						>
 							{label}
 						</a>
@@ -426,7 +449,7 @@
 							<a
 								href="/proyectos/crear"
 								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
-								on:click={() => (menuAbierto = false)}
+								onclick={() => (menuAbierto = false)}
 							>
 								<PlusCircle class="h-4 w-4" /> Crear proyecto
 							</a>
@@ -434,7 +457,7 @@
 						<a
 							href="/perfil"
 							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
-							on:click={() => (menuAbierto = false)}
+							onclick={() => (menuAbierto = false)}
 						>
 							<User class="h-4 w-4" /> Mi perfil
 						</a>
@@ -443,7 +466,7 @@
 							<a
 								href="/reportes"
 								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
-								on:click={() => (menuAbierto = false)}
+								onclick={() => (menuAbierto = false)}
 							>
 								<FileWarning class="h-4 w-4" /> Reportes
 							</a>
@@ -453,7 +476,7 @@
 							<a
 								href="/reportes"
 								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
-								on:click={() => (menuAbierto = false)}
+								onclick={() => (menuAbierto = false)}
 							>
 								<FileText class="h-4 w-4" /> Mis reportes
 							</a>
@@ -462,12 +485,12 @@
 						<a
 							href="/configuracion"
 							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
-							on:click={() => (menuAbierto = false)}
+							onclick={() => (menuAbierto = false)}
 						>
 							<Settings class="h-4 w-4" /> Configuración
 						</a>
 						<button
-							on:click={handleLogout}
+							onclick={handleLogout}
 							class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300"
 						>
 							<LogOut class="h-4 w-4" /> Cerrar sesión

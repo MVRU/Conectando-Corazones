@@ -8,20 +8,22 @@
 	import SoporteSection from '$lib/components/feature/home/SoporteSection.svelte';
 	import ProyectosDestacadosSection from '$lib/components/feature/home/ProyectosDestacadosSection.svelte';
 	import { clearBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { onMount } from 'svelte';
+	import { obtenerRutaPanelPorRol } from '$lib/utils/util-usuarios';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
+	let ctaLabel = $derived(data.usuario ? 'Mi panel' : 'Registrarse');
+	let ctaHref = $derived(data.usuario ? obtenerRutaPanelPorRol(data.usuario.rol) : '/registrarse');
 
-	onMount(() => {
-		clearBreadcrumbs(); // Limpia los breadcrumbs
+	$effect(() => {
+		clearBreadcrumbs();
 	});
 </script>
 
-<HeroSection />
+<HeroSection {ctaLabel} {ctaHref} />
 <ComoFuncionaSection />
 <HistoriaSection />
-<CTASection />
+<CTASection {ctaLabel} {ctaHref} />
 <TestimoniosSection />
 <FaqSection />
 <ProyectosDestacadosSection proyectos={data.proyectosDestacados} />

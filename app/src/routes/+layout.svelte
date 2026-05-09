@@ -1,120 +1,123 @@
 <script lang="ts">
 	import '../app.css';
 	import type { LayoutData } from './$types';
+	import { createBrowserClient, parse, serialize } from '@supabase/ssr';
+	import { env } from '$lib/infrastructure/config/env';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Footer from '$lib/components/layout/Footer.svelte';
 	import Breadcrumbs from '$lib/components/ui/navegacion/Breadcrumbs.svelte';
 	import { breadcrumbs, clearBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { shouldShowBreadcrumbs } from '$lib/infrastructure/config/breadcrumbs.config';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ScrollToTop from '$lib/components/ui/navegacion/ScrollToTop.svelte';
 	import { beforeNavigate, invalidate } from '$app/navigation';
 	import { browser } from '$app/environment';
-	import { onMount } from 'svelte';
-	import { canAccessRoute, isLoading, authStore, unauthenticatedState } from '$lib/stores/auth';
+	import { syncAuthState } from '$lib/stores/auth';
 	import { toastStore } from '$lib/stores/toast';
 	import ToastHost from '$lib/components/ui/feedback/ToastHost.svelte';
-	import { goto } from '$app/navigation';
+	import { untrack } from 'svelte';
 
 	import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 	import { Usuario } from '$lib/domain/entities/Usuario';
 
-	export let data: LayoutData;
+	import type { Snippet } from 'svelte';
+	let { children, data }: { data: LayoutData; children: Snippet } = $props();
 
-	let { supabase, session } = data;
-	$: ({ supabase, session } = data);
+	const supabase = browser
+		? createBrowserClient(env.SUPABASE_URL || '', env.SUPABASE_ANON_KEY || '', {
+				cookies: {
+					get(key) {
+						return parse(document.cookie)[key];
+					},
+					set(key, value, options) {
+						document.cookie = serialize(key, value, options);
+					},
+					remove(key, options) {
+						document.cookie = serialize(key, '', { ...options, maxAge: 0 });
+					}
+				}
+			})
+		: null;
+	let session = $derived(data.session);
+	let isMensajesRoute = $derived(
+		page.url.pathname === '/mensajes' || page.url.pathname.startsWith('/mensajes/')
+	);
 
-	let showBreadcrumbs = false;
-	$: showBreadcrumbs = shouldShowBreadcrumbs($page.url.pathname) && $breadcrumbs.length >= 2;
+	let showBreadcrumbs = $derived(shouldShowBreadcrumbs(page.url) && $breadcrumbs.length >= 2);
 
-	let mounted = false;
+	$effect(() => {
+		beforeNavigate(untrack(() => clearBreadcrumbs));
+	});
 
-	onMount(() => {
-		beforeNavigate(clearBreadcrumbs);
+	$effect(() => {
+		if (!supabase) {
+			return;
+		}
 
 		const { data: subscription } = supabase.auth.onAuthStateChange(
 			(event: AuthChangeEvent, _session: Session | null) => {
-				if (_session?.expires_at !== session?.expires_at) {
+				const currentSession = untrack(() => session);
+				if (_session?.expires_at !== currentSession?.expires_at) {
 					invalidate('supabase:auth');
 				}
 			}
 		);
 
-		// Inicializar estado global de auth con datos del servidor
-		if (data.usuario) {
-			const usuarioInstance = new Usuario(data.usuario);
-			authStore.update((s) => ({
-				...s,
-				usuario: usuarioInstance,
-				isAuthenticated: true,
-				isLoading: false
-			}));
-		} else {
-			if (session) {
-				authStore.update((s) => ({ ...s, isLoading: false }));
-			} else {
-				// Sin sesión
-				authStore.set(unauthenticatedState);
-			}
-		}
-
-		mounted = true;
-
 		return () => subscription.subscription.unsubscribe();
 	});
 
-	$: if (mounted && !$isLoading) {
-		if (!canAccessRoute($page.url.pathname)) {
-			goto('/iniciar-sesion');
+	$effect(() => {
+		syncAuthState(data.usuario ? new Usuario(data.usuario) : null);
+	});
+
+	$effect(() => {
+		if (browser) {
+			const error = page.url.searchParams.get('error');
+			if (error === 'already_logged_in') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Sesión activa',
+						message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
+						variant: 'info'
+					});
+
+					const newUrl = new URL(page.url);
+					newUrl.searchParams.delete('error');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			}
+
+			const reason = page.url.searchParams.get('reason');
+			if (reason === 'unauthenticated') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Acceso restringido',
+						message: 'Necesitás iniciar sesión para acceder a esa página.',
+						variant: 'warning'
+					});
+
+					const newUrl = new URL(page.url);
+					newUrl.searchParams.delete('reason');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			} else if (reason === 'forbidden') {
+				setTimeout(() => {
+					toastStore.show({
+						title: 'Sin permisos',
+						message: 'No tenés permisos para acceder a esa sección.',
+						variant: 'error'
+					});
+
+					const newUrl = new URL(page.url);
+					newUrl.searchParams.delete('reason');
+					window.history.replaceState({}, '', newUrl.toString());
+				}, 0);
+			}
 		}
-	}
-
-	$: if (browser) {
-		const error = $page.url.searchParams.get('error');
-		if (error === 'already_logged_in') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Sesión activa',
-					message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
-					variant: 'info'
-				});
-
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('error');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
-		}
-
-		const reason = $page.url.searchParams.get('reason');
-		if (reason === 'unauthenticated') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Acceso restringido',
-					message: 'Necesitás iniciar sesión para acceder a esa página.',
-					variant: 'warning'
-				});
-
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('reason');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
-		} else if (reason === 'forbidden') {
-			setTimeout(() => {
-				toastStore.show({
-					title: 'Sin permisos',
-					message: 'No tenés permisos para acceder a esa sección.',
-					variant: 'error'
-				});
-
-				const newUrl = new URL($page.url);
-				newUrl.searchParams.delete('reason');
-				window.history.replaceState({}, '', newUrl.toString());
-			}, 0);
-		}
-	}
+	});
 </script>
 
-<Header proyectos={data.proyectos} />
+<Header />
 <ToastHost />
 
 {#if showBreadcrumbs}
@@ -123,8 +126,10 @@
 
 <ScrollToTop />
 
-<main class="min-h-screen">
-	<slot />
+<main class={isMensajesRoute ? 'h-[calc(100dvh-4rem)] overflow-hidden' : 'min-h-screen'}>
+	{@render children()}
 </main>
 
-<Footer />
+{#if !isMensajesRoute}
+	<Footer />
+{/if}

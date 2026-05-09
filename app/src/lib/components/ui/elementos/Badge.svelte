@@ -11,10 +11,18 @@
 
 <script lang="ts">
 	import clsx from 'clsx';
-	export let text: string;
-	export let shape: 'square' | 'circle' = 'square';
-	export let customClass = '';
-	export let customColor: string = 'rgb(var(--color-primary))';
+
+	let {
+		text,
+		shape = 'square',
+		customClass = '',
+		customColor = 'rgb(var(--color-primary))'
+	} = $props<{
+		text: string;
+		shape?: 'square' | 'circle';
+		customClass?: string;
+		customColor?: string;
+	}>();
 </script>
 
 <div class={clsx('flex items-center gap-2', customClass)}>

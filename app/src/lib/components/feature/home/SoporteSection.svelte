@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import Badge from '$lib/components/ui/elementos/Badge.svelte';
 	import SoporteCard from '$lib/components/ui/cards/SoporteCard.svelte';
 
@@ -29,10 +28,10 @@
 		}
 	] as const;
 
-	let visible = false;
-	let sectionRef: HTMLElement;
+	let visible = $state(false);
+	let sectionRef: HTMLElement | undefined = $state();
 
-	onMount(() => {
+	$effect.pre(() => {
 		const obs = new IntersectionObserver(
 			([e]) => {
 				visible = e.isIntersecting;

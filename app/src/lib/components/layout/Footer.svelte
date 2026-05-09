@@ -1,11 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	let visible = false;
-	let hasAnimated = false;
-	let footerRef: HTMLElement;
+	import { afterNavigate } from '$app/navigation';
+
+	let visible = $state(false);
+	let hasAnimated = $state(false);
+	let footerRef: HTMLElement | undefined;
 	const anio = new Date().getFullYear();
 
-	onMount(() => {
+	afterNavigate(() => {
+		visible = true;
+		hasAnimated = true;
+	});
+
+	$effect(() => {
 		const obs = new IntersectionObserver(
 			([e]) => {
 				if (e.isIntersecting && !hasAnimated) {

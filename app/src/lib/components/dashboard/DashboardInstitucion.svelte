@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Filter, ChevronRight, ChevronDown, MapPin, Sparkles, School } from 'lucide-svelte';
+	import { Filter, ChevronRight, ChevronDown, MapPin, School, HeartOff, Activity, Users, Sparkles } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './institucion/AccionesRapidas.svelte';
 	import MetricasPanel from './institucion/MetricasPanel.svelte';
@@ -15,30 +15,36 @@
 	import EstadisticasProyectoModal from './institucion/EstadisticasProyectoModal.svelte';
 	import EstadisticasAgendaModal from './institucion/EstadisticasAgendaModal.svelte';
 	import GestionarEvidenciasModal from './institucion/GestionarEvidenciasModal.svelte';
+	import EmptyState from './ui/EmptyState.svelte';
+	import { page } from '$app/state';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
 	import type { InstitucionDashboardData } from './institucion/types';
 
-	export let data: InstitucionDashboardData;
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
+
 
 	// Filters state
-	let filters = {
+	let filters = $state({
 		periodo: 'mes_actual',
 		categoria: 'todas',
 		estado: 'en_curso',
 		tipoParticipacion: 'todos',
 		ubicacion: 'todas'
-	};
+	});
 
 	// Animation & Scroll
-	let mounted = false;
-	let filterScrollContainer: HTMLDivElement;
-	let showFilterIndicator = false;
-	let showFilters = false;
-	let showLeftGradient = false;
-	let showRightGradient = false;
-	let showCollaboratorStats = false;
-	let showProjectStats = false;
-	let showCalendarStats = false;
-	let showEvidenceModal = false;
+	let showFilters = $state(false);
+	let showLeftGradient = $state(false);
+	let showRightGradient = $state(false);
+	let showCollaboratorStats = $state(false);
+	let showProjectStats = $state(false);
+	let showCalendarStats = $state(false);
+	let showEvidenceModal = $state(false);
+
+	let filterScrollContainer: HTMLDivElement | undefined = $state();
+	let showFilterIndicator = $state(false);
 
 	function checkFilterScroll() {
 		if (!filterScrollContainer) return;
@@ -49,27 +55,19 @@
 	}
 
 	import jsPDF from 'jspdf';
-	import autoTable from 'jspdf-autotable';
-	import { FileText } from 'lucide-svelte';
+	import { PdfService } from '$lib/utils/pdf.service';
 
 	onMount(() => {
-		mounted = true;
 		setTimeout(checkFilterScroll, 100);
 		window.addEventListener('resize', checkFilterScroll);
 		return () => window.removeEventListener('resize', checkFilterScroll);
 	});
 
-	async function loadImage(url: string): Promise<HTMLImageElement> {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.crossOrigin = 'Anonymous';
-			img.src = url;
-			img.onload = () => resolve(img);
-			img.onerror = reject;
-		});
+	interface Props {
+		data: InstitucionDashboardData;
 	}
 
-	import { PdfService } from '$lib/utils/pdf.service';
+	let { data }: Props = $props();
 
 	async function generatePDF() {
 		const doc = new jsPDF();
@@ -335,7 +333,7 @@
 					<!-- Toggle Filters (Desktop: Right aligned) -->
 					<div class="flex items-center gap-3">
 						<button
-							on:click={() => (showFilters = !showFilters)}
+							onclick={() => (showFilters = !showFilters)}
 							class="group flex w-fit items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2 transition-all hover:bg-white/10 active:scale-95"
 						>
 							<Filter
@@ -364,6 +362,7 @@
 			<AccionesRapidas
 				solicitudesPendientes={data.metricas.solicitudesPendientes}
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				estaVerificado={data.info.estaVerificado}
 				bind:showEvidenceModal
@@ -387,7 +386,7 @@
 
 				<div
 					bind:this={filterScrollContainer}
-					on:scroll={checkFilterScroll}
+					onscroll={checkFilterScroll}
 					class="grid w-full grid-cols-1 gap-3 pb-2 md:grid md:w-full md:grid-cols-3 md:pb-0 lg:w-auto xl:grid-cols-5"
 				>
 					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
@@ -497,9 +496,9 @@
 					nuevosColaboradores: 2,
 					proximoCierre: data.metricas.diasProximoCierre
 				}}
-				on:clickColaboradores={() => (showCollaboratorStats = true)}
-				on:clickProyectos={() => (showProjectStats = true)}
-				on:clickAgenda={() => (showCalendarStats = true)}
+				onclickColaboradores={() => (showCollaboratorStats = true)}
+				onclickProyectos={() => (showProjectStats = true)}
+				onclickAgenda={() => (showCalendarStats = true)}
 			/>
 		</div>
 
@@ -509,11 +508,31 @@
 			<div class="flex flex-col gap-6 lg:col-span-7">
 				<!-- Seguimiento de Objetivos -->
 				<div class="min-h-[400px]">
-					<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
+						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="No hay proyectos activos" 
+								description="Cuando crees un proyecto y comiences a recibir ayuda, podrás ver el progreso de tus objetivos aquí."
+								icon={HeartOff}
+							/>
+						</div>
+					{/if}
 				</div>
 				<!-- Actividad Reciente -->
 				<div class="flex-1">
-					<ActividadReciente actividad={data.actividadReciente} />
+					{#if data.actividadReciente && data.actividadReciente.length > 0}
+						<ActividadReciente actividad={data.actividadReciente} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="Sin actividad reciente" 
+								description="Aquí aparecerán las últimas interacciones con tus proyectos y colaboradores."
+								icon={Activity}
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -527,7 +546,17 @@
 				<!-- Top Colaboradores -->
 				<!-- Top Colaboradores -->
 				<div class="min-h-[300px]">
-					<TopColaboradores colaboradores={data.topColaboradores} />
+					{#if data.topColaboradores && data.topColaboradores.length > 0}
+						<TopColaboradores colaboradores={data.topColaboradores} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="Sin colaboradores aún" 
+								description="Tus colaboradores más destacados aparecerán aquí cuando comiencen a participar en tus proyectos."
+								icon={Users}
+							/>
+						</div>
+					{/if}
 				</div>
 
 				<!-- Últimas Reseñas -->
@@ -538,12 +567,21 @@
 			</div>
 		</div>
 
-		<!-- Bottom Row: Aspectos & Novedades (Delay 300 inherited or new?) Let's keep it part of flow or add delay-400 if I defined it. I didn't define 400. So I'll just wrap it in delay-300 as well or leave it. -->
-		<!-- Actually, let's wrap the bottom row too for consistency -->
+		<!-- Bottom Row: Aspectos & Novedades -->
 		<div class="animate-fade-in-up grid grid-cols-1 gap-6 delay-300 md:grid-cols-2">
 			<!-- Aspectos a mejorar -->
 			<div class="min-h-[200px]">
-				<AspectosMejorar aspectos={data.aspectosMejorar} />
+				{#if data.aspectosMejorar && data.aspectosMejorar.length > 0}
+					<AspectosMejorar aspectos={data.aspectosMejorar} />
+				{:else}
+					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+						<EmptyState 
+							message="Todo en orden" 
+							description="No hay sugerencias o aspectos críticos a mejorar reportados por tus colaboradores actualmente."
+							icon={Sparkles}
+						/>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Novedades -->

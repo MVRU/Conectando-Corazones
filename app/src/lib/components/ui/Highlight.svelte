@@ -1,19 +1,21 @@
 <script lang="ts">
 	import { escapeRegExp } from '$lib/utils/sanitize';
 
-	export let text: string;
-	export let query: string;
+	let { text, query } = $props<{
+		text: string;
+		query: string;
+	}>();
 
-	$: parts = (() => {
+	let parts = $derived.by(() => {
 		if (!query.trim()) {
 			return [{ text, highlighted: false }];
 		}
 		const regex = new RegExp(`(${escapeRegExp(query.trim())})`, 'gi');
-		return text.split(regex).map((part, i) => ({
+		return text.split(regex).map((part: string, i: number): { text: string; highlighted: boolean } => ({
 			text: part,
 			highlighted: i % 2 === 1
 		}));
-	})();
+	});
 </script>
 
 <span class="inline-block w-full break-words">

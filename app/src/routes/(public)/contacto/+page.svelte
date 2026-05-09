@@ -4,13 +4,18 @@
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import type { PageData } from '../contacto/$types';
 	import { toastStore } from '$lib/stores/toast';
+	import { untrack } from 'svelte';
 
-	export let data: PageData;
-	let formularioEnviado = false;
-	let enviandoFormulario = false;
-	let validationErrors: string[] = [];
-	let intentoEnvio = false;
-	let asunto = data.preselectedAsunto || '';
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
+	let formularioEnviado = $state(false);
+	let enviandoFormulario = $state(false);
+	let validationErrors: string[] = $state([]);
+	let intentoEnvio = $state(false);
+	let asunto = $state(untrack(() => data.preselectedAsunto || ''));
 
 	const opcionesAsunto = [
 		{ value: 'consulta-general', label: 'Consulta general' },

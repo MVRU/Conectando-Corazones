@@ -1,26 +1,55 @@
 <script lang="ts">
 	import { formatearFecha } from '$lib/utils/validaciones';
-	import { obtenerNombreUsuario } from '$lib/utils/util-usuarios';
-	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
-	import type { Evidencia } from '$lib/domain/types/Evidencia';
 	import ArchivoPreview from './ArchivoPreview.svelte';
 
-	export let objetivo: ParticipacionPermitida;
-	export let evidencias: Evidencia[];
-	export let evidenciasEntrada: Evidencia[];
-	export let evidenciasSalida: Evidencia[];
-	export let totalArchivos: number;
-	export let expandido: boolean = false;
+	let {
+		objetivo,
+		evidencias = [],
+		evidenciasEntrada = [],
+		evidenciasSalida = [],
+		totalArchivos = 0,
+		expandido = false,
+		onToggle
+	} = $props<{
+		objetivo: any;
+		evidencias?: any[];
+		evidenciasEntrada?: any[];
+		evidenciasSalida?: any[];
+		totalArchivos?: number;
+		expandido?: boolean;
+		onToggle?: () => void;
+	}>();
+
+	let expandidoInterno = $state(false);
+	let estaExpandido = $derived(onToggle ? expandido : expandidoInterno);
+
+	$effect(() => {
+		if (!onToggle) {
+			expandidoInterno = expandido;
+		}
+	});
 
 	function toggleExpansion() {
-		expandido = !expandido;
+		if (onToggle) {
+			onToggle();
+			return;
+		}
+
+		expandidoInterno = !expandidoInterno;
+	}
+
+	function obtenerUsername(evidencia: any): string {
+		if (evidencia.archivos && evidencia.archivos.length > 0) {
+			return evidencia.archivos[0]?.usuario?.username || 'Usuario desconocido';
+		}
+		return 'Usuario desconocido';
 	}
 </script>
 
 <div class="rounded-lg border border-gray-200 bg-gray-50">
 	<!-- Header del objetivo -->
 	<button
-		on:click={toggleExpansion}
+		onclick={toggleExpansion}
 		class="flex w-full items-center justify-between p-4 text-left transition hover:bg-gray-100"
 	>
 		<div class="flex-1">
@@ -45,7 +74,6 @@
 			</div>
 
 			<div class="mt-2 flex flex-wrap gap-3 text-sm">
-				<!-- Progreso -->
 				<div class="flex items-center gap-1.5">
 					<span class="text-gray-500">Progreso:</span>
 					<span class="font-medium text-gray-900">
@@ -54,7 +82,6 @@
 					</span>
 				</div>
 
-				<!-- Badge de evidencias -->
 				{#if evidencias.length === 0}
 					<span
 						class="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800"
@@ -99,9 +126,8 @@
 			</div>
 		</div>
 
-		<!-- Ícono de expansión -->
 		<svg
-			class="h-5 w-5 text-gray-400 transition-transform {expandido ? 'rotate-180' : ''}"
+			class="h-5 w-5 text-gray-400 transition-transform {estaExpandido ? 'rotate-180' : ''}"
 			fill="none"
 			stroke="currentColor"
 			stroke-width="2"
@@ -111,8 +137,7 @@
 		</svg>
 	</button>
 
-	<!-- Contenido expandible -->
-	{#if expandido}
+	{#if estaExpandido}
 		<div class="border-t border-gray-200 bg-white p-4">
 			{#if evidencias.length === 0}
 				<div class="py-4 text-center">
@@ -135,11 +160,10 @@
 					</p>
 				</div>
 			{:else}
-				<!-- Grid de evidencias: Entrada | Salida -->
 				<div class="grid gap-6 md:grid-cols-2">
 					<!-- Columna: ENTRADA -->
 					<div>
-						<div class="mb-3 flex items-center gap-2">
+						<div class="mb-3 flex items-center gap-2 border-b pb-2">
 							<svg
 								class="h-5 w-5 text-blue-500"
 								fill="none"
@@ -153,24 +177,30 @@
 									d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15"
 								/>
 							</svg>
-							<h4 class="font-medium text-gray-900">Entrada</h4>
-							<span class="text-sm text-gray-500">
-								({evidenciasEntrada.length})
+							<h4 class="font-bold text-slate-800">Entrada</h4>
+							<span class="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700">
+								{evidenciasEntrada.length}
 							</span>
 						</div>
 
 						{#if evidenciasEntrada.length === 0}
-							<p class="text-sm text-gray-400 italic">Sin evidencias de entrada</p>
+							<p class="py-4 text-center text-sm italic text-slate-400">Sin evidencias de entrada</p>
 						{:else}
-							<div class="space-y-3">
+							<div class="space-y-4">
 								{#each evidenciasEntrada as evidencia}
-									<div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-										<div class="mb-2 flex items-start justify-between">
+									<div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+										<div class="mb-3 flex items-center justify-between">
 											<div class="flex flex-col">
-												<span class="text-[10px] text-gray-500">
-													{formatearFecha(evidencia.created_at)}
+												<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+													Cargado por
+												</span>
+												<span class="text-sm font-medium text-slate-900">
+													{obtenerUsername(evidencia)}
 												</span>
 											</div>
+											<span class="text-xs text-slate-400">
+												{formatearFecha(evidencia.created_at)}
+											</span>
 										</div>
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}
@@ -188,9 +218,9 @@
 
 					<!-- Columna: SALIDA -->
 					<div>
-						<div class="mb-3 flex items-center gap-2">
+						<div class="mb-3 flex items-center gap-2 border-b pb-2">
 							<svg
-								class="h-5 w-5 text-green-500"
+								class="h-5 w-5 text-emerald-500"
 								fill="none"
 								stroke="currentColor"
 								stroke-width="2"
@@ -202,24 +232,30 @@
 									d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15M9 12l3 3m0 0l3-3m-3 3V2.25"
 								/>
 							</svg>
-							<h4 class="font-medium text-gray-900">Salida</h4>
-							<span class="text-sm text-gray-500">
-								({evidenciasSalida.length})
+							<h4 class="font-bold text-slate-800">Salida</h4>
+							<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+								{evidenciasSalida.length}
 							</span>
 						</div>
 
 						{#if evidenciasSalida.length === 0}
-							<p class="text-sm text-gray-400 italic">Sin evidencias de salida</p>
+							<p class="py-4 text-center text-sm italic text-slate-400">Sin evidencias de salida</p>
 						{:else}
-							<div class="space-y-3">
+							<div class="space-y-4">
 								{#each evidenciasSalida as evidencia}
-									<div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-										<div class="mb-2 flex items-start justify-between">
+									<div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
+										<div class="mb-3 flex items-center justify-between">
 											<div class="flex flex-col">
-												<span class="text-[10px] text-gray-500">
-													{formatearFecha(evidencia.created_at)}
+												<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+													Cargado por
+												</span>
+												<span class="text-sm font-medium text-slate-900">
+													{obtenerUsername(evidencia)}
 												</span>
 											</div>
+											<span class="text-xs text-slate-400">
+												{formatearFecha(evidencia.created_at)}
+											</span>
 										</div>
 
 										{#if evidencia.archivos && evidencia.archivos.length > 0}

@@ -37,8 +37,29 @@
 		onCambiarPagina?: (data: { page: number }) => void;
 	}>();
 
-	let innerFiltros = $state({ ...filtros });
-	let serializedFiltros = $derived(JSON.stringify(filtros));
+	let innerFiltros = $state<FiltrosAuditoriaAdmin>({
+		idObjeto: '',
+		usuarioId: '',
+		tipoObjeto: '',
+		accion: '',
+		atributoAfectado: '',
+		fechaDesde: '',
+		fechaHasta: '',
+		texto: ''
+	});
+
+	$effect(() => {
+		innerFiltros = {
+			idObjeto: filtros.idObjeto,
+			usuarioId: filtros.usuarioId,
+			tipoObjeto: filtros.tipoObjeto,
+			accion: filtros.accion,
+			atributoAfectado: filtros.atributoAfectado,
+			fechaDesde: filtros.fechaDesde,
+			fechaHasta: filtros.fechaHasta,
+			texto: filtros.texto
+		};
+	});
 
 	function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -58,11 +79,6 @@
 		};
 		onBuscar?.(innerFiltros);
 	}
-
-	$effect(() => {
-		serializedFiltros;
-		innerFiltros = { ...filtros };
-	});
 
 	let totalPaginas = $derived(Math.ceil(paginacion.total / paginacion.pageSize));
 

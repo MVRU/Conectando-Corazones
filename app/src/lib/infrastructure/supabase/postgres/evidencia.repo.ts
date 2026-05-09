@@ -1,9 +1,11 @@
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import type { EvidenciaRepository } from '../../../domain/repositories/EvidenciaRepository';
 import { Evidencia } from '../../../domain/entities/Evidencia';
 import { Archivo } from '../../../domain/entities/Archivo';
 
 export class PostgresEvidenciaRepository implements EvidenciaRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	async create(evidencia: Evidencia): Promise<Evidencia> {
 		if (!evidencia.archivos || evidencia.archivos.length === 0) {
 			throw new Error('No se puede crear una evidencia sin archivos.');
@@ -93,7 +95,19 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 					tipo_evidencia: tipo
 				}
 			},
-			include: { archivos: true }
+			include: {
+				archivos: {
+					include: {
+						usuario: {
+							select: {
+								nombre: true,
+								apellido: true,
+								username: true
+							}
+						}
+					}
+				}
+			}
 		});
 
 		if (!ev) return null;
@@ -104,7 +118,15 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 			created_at: ev.created_at,
 			id_participacion_permitida: ev.id_participacion_permitida,
 			archivos: ev.archivos.map(
-				(a) => new Archivo({ ...a, nombre_original: a.nombre_original ?? undefined })
+				(a: any) => new Archivo({
+					...a,
+					nombre_original: a.nombre_original ?? undefined,
+					usuario: a.usuario ? {
+						nombre: a.usuario.nombre,
+						apellido: a.usuario.apellido,
+						username: a.usuario.username
+					} : undefined
+				})
 			)
 		});
 	}
@@ -152,14 +174,24 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 	}
 
 	async findAllByProyecto(proyectoId: number): Promise<Evidencia[]> {
-		const evidencias = await prisma.evidencia.findMany({
+		const evidencias = await this.db.evidencia.findMany({
 			where: {
 				participacion_permitida: {
 					id_proyecto: proyectoId
 				}
 			},
 			include: {
-				archivos: true
+				archivos: {
+					include: {
+						usuario: {
+							select: {
+								nombre: true,
+								apellido: true,
+								username: true
+							}
+						}
+					}
+				}
 			}
 		});
 
@@ -182,7 +214,12 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 								created_at: a.created_at,
 								usuario_id: a.usuario_id,
 								evidencia_id: a.evidencia_id,
-								proyecto_id: a.proyecto_id
+								proyecto_id: a.proyecto_id,
+								usuario: a.usuario ? {
+									nombre: a.usuario.nombre,
+									apellido: a.usuario.apellido,
+									username: a.usuario.username
+								} : undefined
 							})
 					)
 				})

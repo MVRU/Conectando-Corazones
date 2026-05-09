@@ -5,9 +5,10 @@
 	import { Package, Calendar, FileText } from 'lucide-svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	const { evidenciasPorProyecto, totalEvidencias } = data;
+	let evidenciasPorProyecto = $derived(data.evidenciasPorProyecto);
+	let totalEvidencias = $derived(data.totalEvidencias);
 
 	function formatearFecha(fecha: string | Date): string {
 		const date = typeof fecha === 'string' ? new Date(fecha) : fecha;

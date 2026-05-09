@@ -4,8 +4,8 @@
 	import { faqs as allFaqs } from '\$lib/domain/types/static-data/faqs';
 	import { inView } from '\$lib/utils/actions/inView';
 
-	let faqVisible = false;
-	let imagenVisible = false;
+	let faqVisible = $state(false);
+	let imagenVisible = $state(false);
 
 	// Filtrar solo las FAQs con categoría "General" (NO CAMBIAR)
 	const faqs = allFaqs.filter((faq) => faq.categoria === 'General');

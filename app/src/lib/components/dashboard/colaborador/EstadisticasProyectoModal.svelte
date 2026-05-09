@@ -16,9 +16,11 @@
 	import type { EstadisticasProyectos } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	export let show = false;
-	export let stats: EstadisticasProyectos | undefined;
-	export let onClose: () => void;
+	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+		show?: boolean;
+		stats?: EstadisticasProyectos;
+		onClose?: () => void;
+	}>();
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
@@ -39,7 +41,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if show && stats}
 	<div
@@ -52,10 +54,10 @@
 			class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
 			in:fade={{ duration: 200 }}
 			out:fade={{ duration: 200 }}
-			on:click={onClose}
+			onclick={onClose}
 			role="button"
 			tabindex="-1"
-			on:keydown={(e) => e.key === 'Enter' && onClose()}
+			onkeydown={(e) => e.key === 'Enter' && onClose()}
 		></div>
 
 		<!-- Contenido del Modal -->
@@ -80,7 +82,7 @@
 					</div>
 				</div>
 				<button
-					on:click={onClose}
+					onclick={onClose}
 					class="rounded-full p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
 				>
 					<X size={20} />

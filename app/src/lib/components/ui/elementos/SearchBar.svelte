@@ -1,16 +1,23 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	let {
+		value = $bindable(''),
+		placeholder = 'Buscar...',
+		ariaLabel = 'Campo de búsqueda',
+		showReset = true,
+		autofocus = false,
+		customClass = ''
+	} = $props<{
+		value?: string;
+		placeholder?: string;
+		ariaLabel?: string;
+		showReset?: boolean;
+		autofocus?: boolean;
+		customClass?: string;
+	}>();
 
-	export let value: string = '';
-	export let placeholder = 'Buscar...';
-	export let ariaLabel = 'Campo de búsqueda';
-	export let showReset = true;
-	export let autofocus = false;
-	export let customClass: string = '';
+	let inputRef: HTMLInputElement | null = $state(null);
 
-	let inputRef: HTMLInputElement | null = null;
-
-	onMount(() => {
+	$effect(() => {
 		if (autofocus && inputRef) {
 			inputRef.focus();
 		}
@@ -30,7 +37,7 @@
 		aria-label={ariaLabel}
 		bind:this={inputRef}
 		bind:value
-		on:keydown={(e) => {
+		onkeydown={(e) => {
 			if (e.key === 'Escape') clearSearch();
 		}}
 	/>
@@ -57,7 +64,7 @@
 			type="button"
 			aria-label="Limpiar búsqueda"
 			class="absolute top-1/2 right-4 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-			on:click={clearSearch}
+			onclick={clearSearch}
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path

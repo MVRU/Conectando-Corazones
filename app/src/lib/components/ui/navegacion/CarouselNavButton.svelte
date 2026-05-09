@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let direction: 'prev' | 'next' = 'next';
+	let { direction = 'next' } = $props<{
+		direction?: 'prev' | 'next';
+	}>();
 </script>
 
 <button

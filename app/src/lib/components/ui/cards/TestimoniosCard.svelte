@@ -1,16 +1,27 @@
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
-	export let puntaje: number = 5;
-	export let contenido: string = '';
-	export let username: string = '';
-	export let rol: string | undefined = undefined;
-	export let active: boolean = false;
-	export let locked: boolean = false;
+
+	let {
+		puntaje = 5,
+		contenido = '',
+		username = '',
+		rol = undefined,
+		active = false,
+		locked = false
+	} = $props<{
+		puntaje?: number;
+		contenido?: string;
+		username?: string;
+		rol?: string;
+		active?: boolean;
+		locked?: boolean;
+	}>();
 
 	const MAX_LENGTH = 180;
 
-	$: contenidoTruncado =
-		contenido.length > MAX_LENGTH ? contenido.slice(0, MAX_LENGTH).trimEnd() + '…' : contenido;
+	let contenidoTruncado = $derived(
+		contenido.length > MAX_LENGTH ? contenido.slice(0, MAX_LENGTH).trimEnd() + '…' : contenido
+	);
 </script>
 
 <div

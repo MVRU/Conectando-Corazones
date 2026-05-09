@@ -1,116 +1,154 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Select from '$lib/components/ui/elementos/Select.svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ChecklistVerificacion from '$lib/components/feature/institucion/ChecklistVerificacion.svelte';
+	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import { usuario, isAuthenticated, isLoading, isInstitucion } from '$lib/stores/auth';
 	import type { PageData } from './$types';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-	import { goto } from '$app/navigation';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	$: proyectoSeleccionado = $page.url.searchParams.get('proyecto') || '';
-
-	let enviandoSolicitud = false;
-	let solicitudEnviada = false;
-	let mounted = false;
-	let objetivosExpandidos: Record<number, boolean> = {};
-
-	let accesoDenegado = false;
-	let mensajeErrorAcceso = '';
-
-	onMount(() => {
-		mounted = true;
-	});
-
-	$: if (browser && mounted && !$isLoading) {
-		accesoDenegado = false;
-		mensajeErrorAcceso = '';
-
-		if (!$isAuthenticated || !$usuario) {
-			goto('/iniciar-sesion');
-		} else if (!$isInstitucion) {
-			accesoDenegado = true;
-			mensajeErrorAcceso = 'Acceso exclusivo para instituciones.';
-		} else {
-			const verificacion = data.verificacion;
-
-			if (!verificacion) {
-				accesoDenegado = true;
-				mensajeErrorAcceso = 'No se encontró la información de verificación de tu institución.';
-			} else if (verificacion.estado !== 'aprobada') {
-				accesoDenegado = true;
-				mensajeErrorAcceso = `Tu institución debe estar verificada (estado "aprobada") para realizar esta acción. Estado actual: ${verificacion.estado}`;
-			} else if (proyectoSeleccionado && proyectoActual && !proyectoPerteneceAInstitucion) {
-				accesoDenegado = true;
-				mensajeErrorAcceso =
-					'Este proyecto no pertenece a tu institución. Solo podés solicitar el cierre de tus propios proyectos.';
-			}
-		}
-	}
-
-	let checks = {
+	let mounted = $state(false);
+	let proyectoSeleccionado = $state<string>('');
+	let enviandoSolicitud = $state(false);
+	let solicitudEnviada = $state(false);
+	let modalReporteAbierto = $state(false);
+	let errorSolicitud = $state<string | null>(null);
+	let checks = $state({
 		evidenciasSuficientes: false,
 		archivosLegibles: false,
 		evidenciasRespaldadas: false,
 		noRequiereMasEvidencias: false,
 		conformidadRevision: false
-	};
+	});
 
-	$: proyectosDisponibles = data.proyectosDisponibles.map((p: any) => ({
-		value: String(p.id_proyecto),
-		label: p.titulo
-	}));
+	$effect(() => {
+		mounted = true;
+	});
 
-	$: sinProyectosPendientes =
-		mounted && !accesoDenegado && $usuario && proyectosDisponibles.length === 0;
+	$effect(() => {
+		if (mounted && !$isLoading && (!$isAuthenticated || !$usuario)) {
+			// Navigation handled by the auth guard in the layout/middleware
+			window.location.href = '/iniciar-sesion';
+		}
+	});
 
-	$: proyectoActual = data.proyectoActual;
+	// Sync URL param with local state on mount and after navigation
+	$effect.pre(() => {
+		if (mounted && typeof window !== 'undefined') {
+			const params = new URL(window.location.href).searchParams;
+			proyectoSeleccionado = params.get('proyecto') || '';
+		}
+	});
 
-	$: solicitudPendienteExistente = data.solicitudPendiente;
-
-	$: tieneSolicitudPendiente = !!solicitudPendienteExistente;
-
-	$: proyectoPerteneceAInstitucion = proyectoActual
-		? proyectoActual.institucion_id === $usuario?.id_usuario
-		: false;
-
-	$: solicitudesRechazadas = data.solicitudesRechazadas;
-
-	/** Tres o más rechazos bloquean el reintento solo si el proyecto sigue en auditoría (escalado). */
-	$: muchosRechazos = solicitudesRechazadas.length >= 3;
-	$: formularioBloqueadoPorAuditoria = muchosRechazos && proyectoActual?.estado === 'en_auditoria';
-
-	$: evidenciasPorObjetivo = proyectoActual
-		? proyectoActual.participacion_permitida?.map((objetivo: any) => {
-				const evidenciasObjetivo = (data.evidencias || []).filter(
-					(e: any) => e.id_participacion_permitida === objetivo.id_participacion_permitida
-				);
-				// Separar evidencias de entrada y salida
-				const evidenciasEntrada = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'entrada');
-				const evidenciasSalida = evidenciasObjetivo.filter((e: any) => e.tipo_evidencia === 'salida');
-
-				return {
-					objetivo,
-					evidencias: evidenciasObjetivo,
-					evidenciasEntrada,
-					evidenciasSalida,
-					totalArchivos: evidenciasObjetivo.reduce((sum: number, ev: any) => sum + (ev.archivos?.length || 0), 0)
-				};
-			}) || []
-		: [];
-
-	$: todosLosObjetivosTienenEvidencias = evidenciasPorObjetivo.every(
-		(item: any) => item.evidencias.length > 0
+	// Derived state - order matters: define data dependencies first
+	let proyectoActual = $derived(data.proyectoActual);
+	let solicitudPendienteExistente = $derived(data.solicitudPendiente);
+	let solicitudesRechazadas = $derived(data.solicitudesRechazadas || []);
+	let proyectosDisponibles = $derived(
+		(data.proyectos || []).map((p: { id_proyecto: number; titulo: string }) => ({
+			value: String(p.id_proyecto),
+			label: p.titulo
+		}))
 	);
 
-	$: todosLosChecksCompletos = Object.values(checks).every((check) => check === true);
+	let tieneSolicitudPendiente = $derived(!!solicitudPendienteExistente);
+	let proyectoPerteneceAInstitucion = $derived(
+		proyectoActual
+			? proyectoActual.institucion_id === $usuario?.id_usuario
+			: false
+	);
+	let muchosRechazos = $derived((solicitudesRechazadas?.length || 0) >= 3);
+	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
 
-	function handleProyectoChange(option: { value: string; label: string }) {
+	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
+	let accesoEstado = $derived.by(() => {
+		// Durante carga, no mostrar mensajes de error
+		if (!mounted || $isLoading) return { denegado: false, mensaje: '' };
+
+		// Verificar autenticación básica
+		if (!$isAuthenticated || !$usuario) return { denegado: true, mensaje: 'Redirigiendo...' };
+		if (!$isInstitucion) return { denegado: true, mensaje: 'Acceso exclusivo para instituciones.' };
+
+		// Verificar estado de aprobación de la institución
+		const verificacion = data.verificacion;
+		if (verificacion && verificacion.estado !== 'aprobada') {
+			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
+		}
+
+		// Verificar que el proyecto seleccionado pertenece a la institución del usuario
+		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
+			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
+		}
+
+		return { denegado: false, mensaje: '' };
+	});
+
+	let sinProyectosPendientes = $derived(
+		mounted && !accesoEstado.denegado && $usuario && (proyectosDisponibles?.length || 0) === 0
+	);
+
+	let objetivosDelProyecto = $derived.by(() => {
+		// Priorizar proyectoActual.participacion_permitida como fuente de verdad
+		// Fallback a data.objetivos si participacion_permitida no está disponible
+		let items = [];
+		if (proyectoActual?.participacion_permitida && proyectoActual.participacion_permitida.length > 0) {
+			items = proyectoActual.participacion_permitida;
+		} else {
+			items = data.objetivos || [];
+		}
+
+		return items;
+	});
+
+	let evidenciasPorObjetivo = $derived.by(() => {
+		if (!objetivosDelProyecto || objetivosDelProyecto.length === 0) {
+			return [];
+		}
+		
+		const evidencias = data.evidencias || [];
+		
+		const result = (objetivosDelProyecto || []).map((obj: any) => {
+			const objId = Number(obj.id_participacion_permitida);
+			const evsParaEsteObjetivo = evidencias.filter((ev: any) => 
+				Number(ev.id_participacion_permitida) === objId
+			);
+
+			const entrada = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'entrada');
+			const salida = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'salida');
+
+			const totalArch = evsParaEsteObjetivo.reduce(
+				(sum: number, ev: any) => sum + (ev.archivos?.length || 0),
+				0
+			);
+
+			return {
+				objetivo: obj,
+				evidencias: evsParaEsteObjetivo,
+				evidenciasEntrada: entrada,
+				evidenciasSalida: salida,
+				totalArchivos: totalArch
+			};
+		});
+
+		return result;
+	});
+
+	let todosLosObjetivosTienenEvidenciasCompletas = $derived.by(() => {
+		if (!evidenciasPorObjetivo || evidenciasPorObjetivo.length === 0) return false;
+		return (evidenciasPorObjetivo || []).every((item: {
+			evidenciasEntrada: unknown[];
+			evidenciasSalida: unknown[];
+		}) =>
+			item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
+		);
+	});
+
+	let todosLosChecksCompletos = $derived(Object.values(checks).every((check) => check === true));
+
+	async function handleProyectoChange(option: { value: string; label: string }) {
 		const nuevoId = option.value;
 		const url = new URL(window.location.href);
 		if (nuevoId) {
@@ -118,7 +156,9 @@
 		} else {
 			url.searchParams.delete('proyecto');
 		}
-		goto(url.toString(), { keepFocus: true, noScroll: true, replaceState: false });
+		// Use window.location to navigate and trigger server-side data load
+		// The new URL will cause +page.server.ts to run with the new proyecto parameter
+		window.location.href = url.toString();
 	}
 
 	async function enviarSolicitud(event: Event) {
@@ -137,7 +177,7 @@
 		if (
 			!proyectoSeleccionado ||
 			!todosLosChecksCompletos ||
-			!todosLosObjetivosTienenEvidencias ||
+			!todosLosObjetivosTienenEvidenciasCompletas ||
 			tieneSolicitudPendiente
 		) {
 			return;
@@ -162,12 +202,23 @@
 				body: formData
 			});
 
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => null);
-				console.error('Error al enviar solicitud de cierre', errorData ?? response.statusText);
+			let resultado: any = null;
+			try {
+				resultado = await response.json();
+			} catch {
+				errorSolicitud = 'Error al procesar la respuesta del servidor.';
 				enviandoSolicitud = false;
 				return;
 			}
+
+			// SvelteKit serializa fail() como { type: 'failure', data: { message: '...' } }
+			if (resultado?.type === 'failure' || !response.ok) {
+				errorSolicitud = resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
+				enviandoSolicitud = false;
+				return;
+			}
+
+			errorSolicitud = null;
 
 			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
@@ -175,7 +226,7 @@
 
 			const url = new URL(window.location.href);
 			url.searchParams.delete('proyecto');
-			goto(url.toString(), { replaceState: true });
+			window.location.href = url.toString();
 
 			checks = {
 				evidenciasSuficientes: false,
@@ -227,15 +278,15 @@
 			</div>
 		</header>
 
-		{#if accesoDenegado}
+		{#if accesoEstado.denegado}
 			<div class="rounded-2xl border border-red-200 bg-white p-12 text-center shadow-sm" in:fade>
 				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-red-100 p-3">
 					<ShieldAlert class="h-8 w-8 text-red-600" />
 				</div>
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
-				<p class="text-slate-600">{mensajeErrorAcceso}</p>
+				<p class="text-slate-600">{accesoEstado.mensaje}</p>
 				<button
-					on:click={() => goto('/')}
+					onclick={() => window.location.href = '/'}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"
 				>
 					Volver al inicio
@@ -251,7 +302,7 @@
 					No tenés ningún proyecto pendiente de solicitud de cierre en este momento.
 				</p>
 				<button
-					on:click={() => goto('/proyectos')}
+					onclick={() => window.location.href = '/proyectos'}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
 				>
 					Ver mis proyectos
@@ -277,7 +328,7 @@
 						<label for="proyecto" class="mb-2 block text-sm font-semibold text-slate-700">
 							Seleccioná el proyecto <span class="text-red-500">*</span>
 						</label>
-						{#if browser && mounted}
+						{#if mounted}
 							<div class="w-full">
 								<Select
 									id="proyecto"
@@ -333,7 +384,7 @@
 										</p>
 										{#if proyectoSeleccionado}
 											<a
-												href="/institucion/proyectos/{proyectoSeleccionado}/solicitudes-cierre"
+												href={`/institucion/proyectos/${proyectoSeleccionado}/solicitudes-cierre`}
 												class="mt-3 inline-flex text-sm font-semibold text-amber-900 underline hover:text-amber-950"
 											>
 												Ver historial de solicitudes de cierre
@@ -357,7 +408,7 @@
 						{/if}
 					</div>
 
-					{#if proyectoSeleccionado && evidenciasPorObjetivo.length > 0}
+					{#if proyectoSeleccionado && (evidenciasPorObjetivo?.length || 0) > 0}
 						<div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
 							<div class="border-b border-slate-100 bg-slate-50/50 px-6 py-5">
 								<h3 class="flex items-center text-lg font-bold text-slate-800">
@@ -369,18 +420,19 @@
 								</p>
 							</div>
 							<div class="space-y-4 p-6">
-								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo.id_participacion_permitida)}
-									<ObjetivoEvidencias
-										{objetivo}
-										{evidencias}
-										{evidenciasEntrada}
-										{evidenciasSalida}
-										{totalArchivos}
-										bind:expandido={objetivosExpandidos[objetivo.id_participacion_permitida!]}
-									/>
+								{#each evidenciasPorObjetivo as { objetivo, evidencias, evidenciasEntrada, evidenciasSalida, totalArchivos } (objetivo?.id_participacion_permitida)}
+									{#if objetivo}
+										<ObjetivoEvidencias
+											{objetivo}
+											evidencias={evidencias || []}
+											evidenciasEntrada={evidenciasEntrada || []}
+											evidenciasSalida={evidenciasSalida || []}
+											totalArchivos={totalArchivos || 0}
+										/>
+									{/if}
 								{/each}
 
-								{#if !todosLosObjetivosTienenEvidencias}
+								{#if !todosLosObjetivosTienenEvidenciasCompletas}
 									<div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<div class="flex gap-3">
 											<AlertTriangle class="h-5 w-5 flex-shrink-0 text-amber-600" />
@@ -389,8 +441,9 @@
 													Atención: Faltan evidencias
 												</h3>
 												<p class="mt-1 text-sm text-amber-700">
-													Algunos objetivos no tienen evidencias cargadas. Tenés que cargar al menos
-													una evidencia para cada objetivo antes de solicitar el cierre.
+													Cada objetivo requiere <strong>evidencias de entrada y de salida</strong>.
+													Asegurate de haber cargado ambos tipos de evidencias para cada objetivo
+													antes de solicitar el cierre.
 												</p>
 											</div>
 										</div>
@@ -398,7 +451,7 @@
 								{/if}
 							</div>
 						</div>
-					{:else if proyectoSeleccionado && evidenciasPorObjetivo.length === 0}
+					{:else if proyectoSeleccionado && (evidenciasPorObjetivo?.length || 0) === 0}
 						<div
 							class="rounded-2xl border border-slate-200 bg-white p-12 text-center text-slate-500"
 						>
@@ -421,10 +474,10 @@
 							/>
 
 							<button
-								on:click={enviarSolicitud}
+								onclick={enviarSolicitud}
 								disabled={enviandoSolicitud ||
 									!todosLosChecksCompletos ||
-									!todosLosObjetivosTienenEvidencias ||
+									!todosLosObjetivosTienenEvidenciasCompletas ||
 									tieneSolicitudPendiente ||
 									formularioBloqueadoPorAuditoria}
 								class="mt-6 flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-4 font-bold text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-xl focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
@@ -439,6 +492,12 @@
 								{/if}
 							</button>
 
+							{#if errorSolicitud}
+								<div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
+									<p class="text-sm font-medium text-red-700">{errorSolicitud}</p>
+								</div>
+							{/if}
+
 							{#if !todosLosChecksCompletos}
 								<p class="mt-4 text-center text-xs text-slate-400">
 									Completá todos los puntos para habilitar el envío.
@@ -449,10 +508,7 @@
 								<button
 									type="button"
 									class="flex w-full items-center justify-center rounded-xl px-6 py-3 text-sm font-medium text-slate-500 transition-all hover:bg-red-50 hover:text-red-600"
-									on:click={() =>
-										alert(
-											'Irregularidad reportada. El equipo de auditoría revisará este proyecto.'
-										)}
+									onclick={() => (modalReporteAbierto = true)}
 								>
 									<AlertTriangle class="mr-2 h-4 w-4" />
 									Reportar irregularidad
@@ -486,3 +542,11 @@
 		{/if}
 	</div>
 </main>
+
+<ModalReportarIrregularidad
+	bind:open={modalReporteAbierto}
+	tipo_objeto="Proyecto"
+	id_objeto={proyectoActual?.id_proyecto || 0}
+	nombre_objeto={proyectoActual?.titulo || ''}
+	onclose={() => (modalReporteAbierto = false)}
+/>

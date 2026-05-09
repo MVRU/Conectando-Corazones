@@ -10,23 +10,31 @@
 	import { haReportado, limpiarReporteLog } from '$lib/utils/util-reportes';
 	import { usuario } from '$lib/stores/auth';
 
-	export let proyecto: Proyecto;
-	export let esAdministrador: boolean = false;
-	export let esCreador: boolean = false;
-	export let tieneReportePendiente: boolean = false;
+	let {
+		proyecto,
+		esAdministrador = false,
+		esCreador = false,
+		tieneReportePendiente = false
+	} = $props<{
+		proyecto: Proyecto;
+		esAdministrador?: boolean;
+		esCreador?: boolean;
+		tieneReportePendiente?: boolean;
+	}>();
 
-	let mostrarMenuReportar = false;
+	let mostrarMenuReportar = $state(false);
 
-	// Sincronizar log local con SSR: si el SSR dice que no hay pendiente, limpiamos el log local.
-	$: if ($usuario && proyecto?.id_proyecto && tieneReportePendiente === false) {
-		limpiarReporteLog($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
-	}
+	$effect(() => {
+		if ($usuario && proyecto?.id_proyecto && tieneReportePendiente === false) {
+			limpiarReporteLog($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
+		}
+	});
 
-	let yaReporto = false;
-	$: if ($usuario && proyecto?.id_proyecto) {
+	let yaReporto = $derived.by(() => {
+		if (!$usuario || !proyecto?.id_proyecto) return false;
 		const reportoLocal = haReportado($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
-		yaReporto = tieneReportePendiente || reportoLocal;
-	}
+		return tieneReportePendiente || reportoLocal;
+	});
 
 	function reportarIrregularidad() {
 		mostrarMenuReportar = false;
@@ -53,14 +61,13 @@
 
 	<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-	<!-- Menú de más acciones -->
 	{#if $usuario && !esCreador && !esAdministrador}
 		<div class="absolute top-4 right-4 z-10">
 			<div class="relative" use:clickOutside={() => (mostrarMenuReportar = false)}>
 				<button
 					type="button"
 					class="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:ring-2 focus:ring-white/50 focus:outline-none"
-					on:click={() => (mostrarMenuReportar = !mostrarMenuReportar)}
+					onclick={() => (mostrarMenuReportar = !mostrarMenuReportar)}
 					aria-label="Más acciones"
 					aria-expanded={mostrarMenuReportar}
 				>
@@ -82,7 +89,7 @@
 								: 'flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'}
 							role="menuitem"
 							tabindex="-1"
-							on:click={reportarIrregularidad}
+							onclick={reportarIrregularidad}
 							disabled={yaReporto}
 						>
 							<Icon
@@ -120,7 +127,7 @@
 			{#if proyecto.institucion?.nombre_legal}
 				{#if obtenerUrlPerfil(proyecto.institucion)}
 					<a
-						href={obtenerUrlPerfil(proyecto.institucion)}
+						href={`${obtenerUrlPerfil(proyecto.institucion)}?from=proyecto&proyecto=${proyecto.id_proyecto}`}
 						class="text-lg font-medium text-white/90 transition-colors hover:text-white hover:underline"
 					>
 						{proyecto.institucion.nombre_legal}

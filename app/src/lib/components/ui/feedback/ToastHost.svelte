@@ -2,8 +2,9 @@
 	import { fly, fade } from 'svelte/transition';
 	import { toastStore, type ToastMessage } from '$lib/stores/toast';
 	import { Info, CheckCircle2, AlertTriangle, ShieldAlert, X } from 'lucide-svelte';
+	import type { ComponentType } from 'svelte';
 
-	let toasts: ToastMessage[] = [];
+	let toasts = $state<ToastMessage[]>([]);
 	type VariantConfig = {
 		border: string;
 		iconWrapper: string;
@@ -48,9 +49,11 @@
 		toasts = items;
 	});
 
-	$: if (toasts.length === 0) {
-		unsubscribe;
-	}
+	$effect(() => {
+		if (toasts.length === 0) {
+			unsubscribe();
+		}
+	});
 
 	function closeToast(id: string) {
 		toastStore.dismiss(id);
@@ -61,6 +64,7 @@
 	class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-end gap-3 p-4 sm:p-6"
 >
 	{#each toasts as toast (toast.id)}
+		{@const IconComponent = VARIANT_STYLES[toast.variant].icon as ComponentType}
 		<div
 			role="status"
 			aria-live="polite"
@@ -76,8 +80,7 @@
 					<span
 						class="absolute inset-0 animate-pulse bg-gradient-to-br from-white/50 to-transparent opacity-50"
 					></span>
-					<svelte:component
-						this={VARIANT_STYLES[toast.variant].icon}
+					<IconComponent
 						class={`relative h-5 w-5 ${VARIANT_STYLES[toast.variant].iconClass}`}
 						strokeWidth={1.8}
 					/>
@@ -93,7 +96,7 @@
 				<button
 					type="button"
 					class="rounded-full p-1 text-slate-400 transition hover:text-slate-600 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-slate-300"
-					on:click={() => closeToast(toast.id)}
+					onclick={() => closeToast(toast.id)}
 					aria-label="Cerrar notificación"
 				>
 					<X class="h-4 w-4" strokeWidth={1.8} />

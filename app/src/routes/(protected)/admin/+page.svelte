@@ -14,11 +14,26 @@
 	);
 	let loading = $state(false);
 
-	let kpis = $state(data.kpis);
-	let onboarding = $state(data.onboarding);
-	let usuarios = $state(data.usuarios);
-	let logs = $state(data.logs);
-	let auditoriaPaginacion = $state(data.auditoriaPaginacion);
+	let kpisOverride = $state<PageData['kpis'] | null>(null);
+	let onboardingOverride = $state<PageData['onboarding'] | null>(null);
+	let usuariosOverride = $state<PageData['usuarios'] | null>(null);
+	let logsOverride = $state<PageData['logs'] | null>(null);
+	let auditoriaPaginacionOverride = $state<PageData['auditoriaPaginacion'] | null>(null);
+
+	let kpis = $derived(kpisOverride ?? data.kpis);
+	let onboarding = $derived(onboardingOverride ?? data.onboarding);
+	let usuarios = $derived(usuariosOverride ?? data.usuarios);
+	let logs = $derived(logsOverride ?? data.logs);
+	let auditoriaPaginacion = $derived(auditoriaPaginacionOverride ?? data.auditoriaPaginacion);
+
+	$effect(() => {
+		data;
+		kpisOverride = null;
+		onboardingOverride = null;
+		usuariosOverride = null;
+		logsOverride = null;
+		auditoriaPaginacionOverride = null;
+	});
 
 	let filtrosUsuarios = $state({
 		rol: '',
@@ -46,12 +61,12 @@
 
 	async function refreshDashboard() {
 		const res = await fetch('/api/admin/dashboard');
-		if (res.ok) kpis = await res.json();
+		if (res.ok) kpisOverride = await res.json();
 	}
 
 	async function refreshOnboarding() {
 		const res = await fetch('/api/admin/onboarding');
-		if (res.ok) onboarding = await res.json();
+		if (res.ok) onboardingOverride = await res.json();
 	}
 
 	async function refreshUsuarios() {
@@ -60,7 +75,7 @@
 		if (filtrosUsuarios.estado) query.set('estado', filtrosUsuarios.estado);
 		if (filtrosUsuarios.fechaAltaDesde) query.set('fechaAltaDesde', filtrosUsuarios.fechaAltaDesde);
 		const res = await fetch(`/api/admin/usuarios?${query.toString()}`);
-		if (res.ok) usuarios = await res.json();
+		if (res.ok) usuariosOverride = await res.json();
 	}
 
 	async function onAprobarOnboarding(detail: { idVerificacion: number }) {
@@ -170,8 +185,8 @@
 			const res = await fetch(`/api/admin/auditoria?${query.toString()}`);
 			const body = await res.json().catch(() => null);
 			if (!res.ok) throw new Error(body?.error || 'No se pudo consultar auditoría');
-			logs = body.items;
-			auditoriaPaginacion = {
+			logsOverride = body.items;
+			auditoriaPaginacionOverride = {
 				total: body.total,
 				page: body.page,
 				pageSize: body.pageSize

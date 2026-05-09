@@ -1,27 +1,28 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 	import type { Colaboracion } from '$lib/domain/types/Colaboracion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
-	// import type { Resena } from '$lib/domain/types/Resena';
 	import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
-	import { page } from '$app/stores';
-	import type { PageData } from './$types';
-
-	export let data: PageData;
+	import { page } from '$app/state';
 	import {
 		esUbicacionPresencial,
 		esUbicacionVirtual,
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { goto, pushState, invalidateAll } from '$app/navigation';
+	import { goto, pushState, invalidateAll, preloadData } from '$app/navigation';
+	import GestionarProyectoDropdown from '$lib/components/feature/proyectos/GestionarProyectoDropdown.svelte';
+
+	let { data }: { data: PageData } = $props();
 
 	import ProyectoHeader from '$lib/components/feature/proyectos/ProyectoHeader.svelte';
 	import DetallesProyecto from '$lib/components/feature/proyectos/DetallesProyecto.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import ModalColaboracion from '$lib/components/feature/proyectos/ModalColaboracion.svelte';
+	import ProjectActionCard from '$lib/components/proyectos/ProjectActionCard.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import ResenaProyectoModal from '$lib/components/feature/proyectos/ResenaProyectoModal.svelte';
@@ -34,10 +35,11 @@
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import type { Resena } from '$lib/domain/types/Resena';
-	import { onDestroy, onMount } from 'svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
+	import Modal from '$lib/components/ui/overlays/Modal.svelte';
+	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { haReportado, guardarReporteLog } from '$lib/utils/util-reportes';
+	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 
 	import {
@@ -63,48 +65,44 @@
 		Star
 	} from '@steeze-ui/heroicons';
 
-	let proyecto: Proyecto;
-	let colaboracionesActivas: Colaboracion[] = [];
-	let participacionesOrdenadas: ParticipacionPermitida[] = [];
-	let ubicacionesOrdenadas: ProyectoUbicacion[] = [];
-	let misAportes: ColaboracionTipoParticipacion[] = [];
+	let proyecto: Proyecto = $derived(data.proyecto);
+	let chatAviso = $derived(data.chatAviso ?? false);
+	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
+	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
 	
-	let resenasProyecto: Resena[] = [];
-	let resenaAEliminar: Resena | null = null;
-	let mostrarModalResena = false;
-	let mostrarConfirmarEliminar = false;
+	let resenasProyecto: Resena[] = $state([]);
+	let resenaAEliminar: Resena | null = $state(null);
+	let mostrarModalResena = $state(false);
+	let mostrarConfirmarEliminar = $state(false);
 	const maxCaracteresResena = 500;
 
-	$: colaboracionesActivas = colaboracionesVisibles(proyecto?.colaboraciones ?? []);
-	$: participacionesOrdenadas = ordenarPorProgreso(proyecto?.participacion_permitida ?? []);
-
-	$: esCreador = $usuario?.id_usuario === proyecto?.institucion?.id_usuario;
-	$: colaboracionUsuario =
+	let esCreador = $derived(!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario);
+	let colaboracionUsuario = $derived(
 		$usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
-			: undefined;
+			: undefined
+	);
+	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
 
-	$: misAportes = colaboracionUsuario?.colaboraciones_tipo_participacion || [];
+	let esColaboradorAprobado = $derived(colaboracionUsuario?.estado === 'aprobada');
+	let esSolicitudRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
+	let tieneSolicitudPendiente = $derived(colaboracionUsuario?.estado === 'pendiente');
+	let tieneColaboracionAnulada = $derived(colaboracionUsuario?.estado === 'anulada');
+	let esAdministrador = $derived($usuario?.rol === 'administrador');
+	let esInstitucion = $derived($usuario?.rol === 'institucion');
 
-	$: esColaboradorAprobado = colaboracionUsuario?.estado === 'aprobada';
-	$: esSolicitudRechazada = colaboracionUsuario?.estado === 'rechazada';
-	$: tieneSolicitudPendiente = colaboracionUsuario?.estado === 'pendiente';
-	$: tieneColaboracionAnulada = colaboracionUsuario?.estado === 'anulada';
-	$: esAdministrador = $usuario?.rol === 'administrador';
-	$: esInstitucion = $usuario?.rol === 'institucion';
-	$: puedeVerResenas = true;
+	let resenaUsuarioActual = $derived(resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario));
+	let tieneResenaUsuario = $derived(!!resenaUsuarioActual);
 
-	$: proyecto = data.proyecto;
-	
-	$: resenaUsuarioActual = resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario);
-	$: tieneResenaUsuario = Boolean(resenaUsuarioActual);
-
-	$: if (proyecto) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: proyecto.titulo }
-		]);
-	}
+	$effect(() => {
+		if (proyecto) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: proyecto.titulo }
+			]);
+		}
+	});
 
 	function aFecha(fecha: string | Date | undefined | null): Date | null {
 		if (!fecha) return null;
@@ -117,10 +115,8 @@
 		if (!fin) return 0;
 
 		const hoy = new Date();
-		// Normalizamos "hoy" a medianoche local para comparar solo días
 		const baseHoy = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate()).getTime();
 
-		// Si fin es a medianoche UTC, es una fecha de calendario pura. La tomamos como tal.
 		let baseFin: number;
 		if (fin.getUTCHours() === 0 && fin.getUTCMinutes() === 0) {
 			baseFin = new Date(fin.getUTCFullYear(), fin.getUTCMonth(), fin.getUTCDate()).getTime();
@@ -137,8 +133,6 @@
 		const d = aFecha(fecha);
 		if (!d) return 'Fecha no disponible';
 
-		// Si es una fecha a medianoche (ej: 2026-02-15T00:00:00.000Z),
-		// la formateamos en UTC para evitar el desfase por zona horaria (ej: Argentina -3h).
 		const esMedianocheUTC = d.getUTCHours() === 0 && d.getUTCMinutes() === 0;
 
 		if (esMedianocheUTC) {
@@ -167,32 +161,34 @@
 		);
 	}
 
-	$: estadoCodigo = proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso';
-	$: clasesChipEstado = clasesEstado(estadoCodigo);
-	// Las reseñas se hacen a los proyectos que están listos
-	$: puedeRedactarResena = (esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision';
-	$: puedeCrearResena = puedeRedactarResena && !tieneResenaUsuario;
-	$: mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
-	$: resumenTexto = (proyecto?.resumen || '').trim();
-	$: aprendizajesTexto = (proyecto?.aprendizajes || '').trim();
-	$: listadoAprendizajes = (aprendizajesTexto || '')
+	let estadoCodigo = $derived(proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso');
+	let clasesChipEstado = $derived(clasesEstado(estadoCodigo));
+	let puedeVerResenas = $derived(
+		estadoCodigo === 'completado' || estadoCodigo === 'en_revision' || esCreador
+	);
+	let puedeRedactarResena = $derived((esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision');
+	let puedeCrearResena = $derived(puedeRedactarResena && !tieneResenaUsuario);
+	let mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let resumenTexto = $derived((proyecto?.resumen || '').trim());
+	let aprendizajesTexto = $derived((proyecto?.aprendizajes || '').trim());
+	let listadoAprendizajes = $derived((aprendizajesTexto || '')
 		.split('\n')
 		.map((l) => l.trim())
 		.filter((l) => l.length > 0)
-		.map((l) => l.replace(/^[-*•]\s*/, '')); // Remover viñetas "-" generadas por la IA
+		.map((l) => l.replace(/^[-*•]\s*/, '')));
 
-	// Dividimos el resumen en oraciones para que no sea un bloque de texto denso
-	$: listadoResumen = (resumenTexto || '')
+	let listadoResumen = $derived((resumenTexto || '')
 		.split('. ')
 		.map((s) => s.trim())
 		.filter((s) => s.length > 0)
-		.map((s) => (s.endsWith('.') ? s : s + '.'));
+		.map((s) => (s.endsWith('.') ? s : s + '.')));
 
-	$: tieneResumenIA = Boolean(resumenTexto);
-	$: tieneAprendizajesIA = Boolean(aprendizajesTexto);
-	$: mostrarSeccionResumenIA =
-		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA);
-	$: puedeVerAprendizajesIA = esCreador || esColaboradorAprobado;
+	let tieneResumenIA = $derived(Boolean(resumenTexto));
+	let tieneAprendizajesIA = $derived(Boolean(aprendizajesTexto));
+	let mostrarSeccionResumenIA = $derived(
+		estadoCodigo === 'completado' && (tieneResumenIA || tieneAprendizajesIA)
+	);
+	let puedeVerAprendizajesIA = $derived(esCreador || esColaboradorAprobado);
 
 	function estadoObjetivo(actual: number, objetivo: number): 'completo' | 'parcial' | 'pendiente' {
 		if (actual >= objetivo) return 'completo';
@@ -219,9 +215,12 @@
 		});
 	}
 
-	$: ubicacionesOrdenadas = ordenarUbicaciones(proyecto?.ubicaciones);
+	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
+	let chatHabilitado = $derived(colaboradoresAprobados.length > 0);
 
-	$: colaboradoresAprobados = (colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada');
+	let mostrarAccionFinalizar = $derived(
+		esCreador && estadoCodigo === 'en_curso'
+	);
 
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
@@ -267,10 +266,44 @@
 		}).format(valor);
 	}
 
-	let mostrarModalColaborar = false;
-	let mostrarModalCancelar = false;
-	let justificacionCancelacion = '';
-	let cancelando = false;
+	let mostrarModalColaborar = $state(false);
+	let mostrarModalCancelar = $state(false);
+	let justificacionCancelacion = $state('');
+	let cancelando = $state(false);
+
+	let mostrarModalCeseActividades = $state(false);
+	let ceseActividades = $state(false);
+
+	async function confirmarCeseActividades() {
+		if (ceseActividades) return;
+		ceseActividades = true;
+		try {
+			const res = await fetch(`/api/proyectos/${proyecto.id_proyecto}/solicitar-cierre`, {
+				method: 'POST'
+			});
+
+			if (!res.ok) {
+				const data = await res.json();
+				throw new Error(data.message || 'Error al finalizar actividades');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				message: 'Actividades finalizadas. El proyecto está pendiente de solicitud de cierre.'
+			});
+
+			await invalidateAll();
+		} catch (err: unknown) {
+			const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+			toastStore.show({
+				variant: 'error',
+				message: errorMsg
+			});
+		} finally {
+			ceseActividades = false;
+			mostrarModalCeseActividades = false;
+		}
+	}
 
 	async function confirmarCancelacion() {
 		if (cancelando) return;
@@ -349,16 +382,15 @@
 				message: 'Solicitud anulada exitosamente'
 			});
 
-			// Actualizar estado reactivo
-			if (colaboracionUsuario) {
-				colaboracionUsuario.estado = 'anulada';
-			}
+			await invalidateAll();
 
 			mostrarModalAnular = false;
-		} catch (err: any) {
+		} catch (err: unknown) {
+			const error = err as Error;
+			console.error('Error al anular solicitud:', error);
 			toastStore.show({
 				variant: 'error',
-				message: err.message
+				message: error.message || 'Error al anular la solicitud'
 			});
 		} finally {
 			anulando = false;
@@ -385,20 +417,20 @@
 		irAColaborar();
 	}
 
-	let mostrarModalExito = false;
-	let mostrarModalJustificacion = false;
-	let mostrarModalPendiente = false;
-	let mostrarModalAnular = false;
-	let anulando = false;
-	let mostrarResumenIA = false;
-	let mostrarAprendizajesIA = false;
-	let mostrarMenuGestion = false;
-	let solicitudRecienEnviada = false;
+	let mostrarModalExito = $state(false);
+	let mostrarModalJustificacion = $state(false);
+	let mostrarModalPendiente = $state(false);
+	let mostrarModalAnular = $state(false);
+	let anulando = $state(false);
+	let mostrarResumenIA = $state(false);
+	let mostrarAprendizajesIA = $state(false);
+	let mostrarMenuGestion = $state(false);
+	let solicitudRecienEnviada = $state(false);
 
-	$: accionesMenu = (() => {
+	let accionesMenu = $derived.by(() => {
 		const acc: {
 			label: string;
-			icon: any;
+			icon: typeof CheckCircle;
 			onclick: () => void;
 			variant?: 'danger' | 'default';
 			disabled?: boolean;
@@ -417,7 +449,7 @@
 				icon: ShieldCheck,
 				onclick: () => {}
 			});
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 			acc.push({
 				label: 'Cancelar proyecto',
 				icon: XCircle,
@@ -429,11 +461,13 @@
 		}
 
 		if (esCreador || esColaboradorAprobado) {
-			acc.push({
-				label: 'Ir al chat',
-				icon: ChatBubbleLeftRight,
-				onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
-			});
+			if (chatHabilitado) {
+				acc.push({
+					label: 'Ir al chat',
+					icon: ChatBubbleLeftRight,
+					onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
+				});
+			}
 
 			if (esCreador) {
 				acc.push({
@@ -442,7 +476,7 @@
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
 				});
-				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado') {
+				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado' && estadoCodigo !== 'en_curso') {
 					acc.push({
 						label: 'Solicitudes de cierre',
 						icon: ClipboardDocumentCheck,
@@ -479,7 +513,7 @@
 					acc.push({
 						label: 'Evaluar finalización',
 						icon: ClipboardDocumentCheck,
-						onclick: () => goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)
+						onclick: irAEvaluarFinalizacion
 					});
 				}
 			}
@@ -490,10 +524,10 @@
 				onclick: irAAportes
 			});
 
-			acc.push({ divider: true } as any);
+			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
 
 			if (esCreador) {
-				const esEditable = estadoCodigo === 'en_curso' && colaboradoresAprobados.length === 0;
+				const esEditable = estadoCodigo === 'en_curso';
 
 				if (estadoCodigo === 'en_curso') {
 					acc.push({
@@ -501,6 +535,12 @@
 						icon: Pencil,
 						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
 						disabled: !esEditable
+					});
+
+					acc.push({
+						label: 'Finalizar actividades',
+						icon: CheckCircle,
+						onclick: () => (mostrarModalCeseActividades = true)
 					});
 				}
 
@@ -534,17 +574,31 @@
 		}
 
 		return acc;
-	})();
+	});
+
+	$effect(() => {
+		if (
+			mostrarMenuGestion &&
+			esColaboradorAprobado &&
+			estadoCodigo === 'en_revision' &&
+			proyecto?.id_proyecto
+		) {
+			void preloadData(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+		}
+	});
+
+	function irAEvaluarFinalizacion() {
+		if (!proyecto?.id_proyecto) return;
+		goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+	}
 
 	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
-			guardarReporteLog($usuario.id_usuario, 'Proyecto', proyecto.id_proyecto);
 			toastStore.show({
 				variant: 'success',
 				message:
 					'Gracias por ayudarnos a mantener la comunidad segura. Un administrador revisará tu reporte.'
 			});
-			// Refrescar datos antes de volver
 			await invalidateAll();
 			history.back();
 		}
@@ -609,7 +663,7 @@
 		mostrarConfirmarEliminar = false;
 	}
 
-	async function guardarResena(event: CustomEvent<{ contenido: string; puntaje: number }>) {
+	async function guardarResena({ contenido, puntaje }: { contenido: string; puntaje: number }) {
 		if (!proyecto?.id_proyecto || !$usuario) return;
 
 		if (tieneResenaUsuario) {
@@ -627,8 +681,8 @@
 				body: JSON.stringify({
 					tipo_objeto: 'proyecto',
 					id_objeto: proyecto.id_proyecto,
-					contenido: event.detail.contenido,
-					puntaje: event.detail.puntaje
+					contenido,
+					puntaje
 				})
 			});
 
@@ -636,23 +690,9 @@
 				const data = await res.json();
 				throw new Error(data.error || 'Error al guardar reseña.');
 			}
-			const nuevaResenaStr = await res.json();
+			const nuevaResena = await res.json();
 
-			const reseñaConAutor = {
-				...nuevaResenaStr,
-				autor: {
-					...$usuario,
-					rol: $usuario.rol,
-					nombre: $usuario.nombre,
-					apellido: $usuario.apellido,
-					url_foto: $usuario.url_foto,
-					
-					nombre_legal: ($usuario as any).nombre_legal,
-					razon_social: ($usuario as any).razon_social
-				}
-			};
-
-			resenasProyecto = [reseñaConAutor, ...resenasProyecto];
+			resenasProyecto = [nuevaResena, ...resenasProyecto];
 			mostrarModalResena = false;
 			toastStore.show({
 				variant: 'success',
@@ -663,22 +703,27 @@
 		}
 	}
 
-	onMount(async () => {
+	$effect(() => {
 		layoutStore.showStickyBottomBar();
-		if (proyecto?.id_proyecto) {
-			try {
-				const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
-				if (res.ok) {
-					resenasProyecto = await res.json();
+		
+		async function cargarResenas() {
+			if (proyecto?.id_proyecto) {
+				try {
+					const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+					if (res.ok) {
+						resenasProyecto = await res.json();
+					}
+				} catch (e) {
+					console.error('Error cargando reseñas', e);
 				}
-			} catch (e) {
-				console.error('Error cargando reseñas', e);
 			}
 		}
-	});
 
-	onDestroy(() => {
-		layoutStore.hideStickyBottomBar();
+		cargarResenas();
+
+		return () => {
+			layoutStore.hideStickyBottomBar();
+		};
 	});
 </script>
 
@@ -710,79 +755,12 @@
 	{#if proyecto}
 		{#snippet MenuGestion(isMobile = false)}
 			{#if accionesMenu.length > 0}
-				<div class="relative flex-1">
-					<button
-						type="button"
-						onclick={() => (mostrarMenuGestion = !mostrarMenuGestion)}
-						class={esAdministrador
-							? isMobile
-								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
-								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-slate-900 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(15,23,42,.35)] transition hover:bg-slate-800 focus-visible:ring-2 focus-visible:ring-slate-700 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
-							: isMobile
-								? 'flex w-full items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold whitespace-nowrap text-white shadow-lg transition active:scale-[0.98]'
-								: 'inline-flex h-11 w-full cursor-pointer items-center justify-between gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 font-semibold whitespace-nowrap text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'}
-						aria-expanded={mostrarMenuGestion}
-						aria-haspopup="true"
-					>
-						<span>Gestionar proyecto</span>
-						<Icon
-							src={ChevronDown}
-							class="h-4 w-4 shrink-0 transition-transform duration-200 {mostrarMenuGestion
-								? 'rotate-180'
-								: ''}"
-						/>
-					</button>
-
-					{#if mostrarMenuGestion}
-						<div
-							class="animate-in {isMobile
-								? 'slide-in-from-bottom-5 absolute bottom-full left-0 z-50 mb-3 flex w-max min-w-full text-left'
-								: 'fade-in zoom-in-95 absolute top-full right-0 left-0 z-10 mt-2 flex'} flex-col overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl ring-1 ring-black/5 duration-100"
-							role="menu"
-							tabindex="-1"
-						>
-							{#each accionesMenu as accion}
-								{#if accion.divider}
-									<div class="my-1 border-t border-gray-100"></div>
-								{:else}
-									<button
-										class="flex w-full items-center gap-3 px-4 py-2.5 {isMobile
-											? 'text-base'
-											: 'text-sm'} font-medium transition-colors {accion.variant === 'danger'
-											? accion.disabled
-												? 'cursor-not-allowed text-gray-400 opacity-50'
-												: 'text-red-600 hover:bg-red-50'
-											: 'text-gray-700 hover:bg-gray-50 active:bg-gray-100'} {accion.disabled
-											? 'cursor-not-allowed opacity-50'
-											: ''}"
-										role="menuitem"
-										disabled={accion.disabled}
-										onclick={() => {
-											accion.onclick();
-											mostrarMenuGestion = false;
-										}}
-									>
-										<Icon
-											src={accion.icon}
-											class="{isMobile ? 'h-5 w-5' : 'h-4 w-4'} {accion.variant === 'danger'
-												? accion.disabled
-													? 'text-gray-400'
-													: 'text-red-500'
-												: 'text-gray-500'}"
-										/>
-										{accion.label}
-									</button>
-								{/if}
-							{/each}
-						</div>
-
-						<div
-							class="fixed inset-0 z-[-1] {isMobile ? 'bg-black/50' : ''}"
-							onclick={() => (mostrarMenuGestion = false)}
-							aria-hidden="true"
-						></div>
-					{/if}
-				</div>
+				<GestionarProyectoDropdown
+					bind:isOpen={mostrarMenuGestion}
+					{accionesMenu}
+					{isMobile}
+					esAdministrador={esAdministrador}
+				/>
 			{/if}
 		{/snippet}
 		<main
@@ -825,6 +803,14 @@
 			<div
 				class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 			>
+				{#if chatAviso}
+					<Alert
+						variant="info"
+						title="Chat todavía no habilitado"
+						message="El chat del proyecto se habilita cuando hay al menos un colaborador aprobado."
+					/>
+				{/if}
+
 				<ProyectoHeader
 					{proyecto}
 					{esAdministrador}
@@ -844,7 +830,6 @@
 									Progreso del proyecto
 								</h2>
 								{#if esCreador && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
-									<!-- TODO: implementar función para actualizar el progreso de un proyecto -->
 									<a
 										href={`/proyectos/${proyecto.id_proyecto}`}
 										class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-none"
@@ -857,7 +842,14 @@
 
 							<ProyectoProgreso {proyecto} variant="extended" />
 
-							{#if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
+							{#if mostrarAccionFinalizar}
+								<ProjectActionCard
+									title="Finalizá las actividades"
+									description="El proyecto dejará de aceptar nuevos colaboradores. Podrás seguir subiendo evidencias antes del cierre formal."
+									buttonLabel="Finalizar actividades"
+									onClick={() => (mostrarModalCeseActividades = true)}
+								/>
+							{:else if esCreador && estadoCodigo === 'pendiente_solicitud_cierre'}
 								<div
 									class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 sm:p-5"
 									role="region"
@@ -966,7 +958,7 @@
 
 								{#if misAportes.length > 0}
 									<ul class="space-y-3">
-										{#each misAportes as aporte}
+										{#each misAportes as aporte (aporte.id_colaboracion_tipo_participacion || Math.random())}
 											<li
 												class="flex items-center justify-between rounded-lg border border-gray-100 p-3"
 											>
@@ -1031,7 +1023,7 @@
 										{#if mostrarResumenIA}
 											<div class="border-t border-gray-100 bg-sky-50/30 px-4 pt-4 pb-6">
 												<div class="space-y-4">
-													{#each listadoResumen as parrafo}
+													{#each listadoResumen as parrafo (parrafo)}
 														<p class="text-base leading-relaxed text-gray-700">
 															{parrafo}
 														</p>
@@ -1072,7 +1064,7 @@
 												<div class="border-t border-gray-100 bg-amber-50/30 px-4 pt-4 pb-6">
 													{#if listadoAprendizajes.length > 0}
 														<ul class="flex flex-col gap-4">
-															{#each listadoAprendizajes as item}
+															{#each listadoAprendizajes as item (item)}
 																<li class="flex gap-4">
 																	<div class="relative mt-2 flex-shrink-0">
 																		<div
@@ -1523,7 +1515,7 @@
 			</div>
 			<!-- Modal de reporte interceptado (Shallow Routing) -->
 			<ModalReportarIrregularidad
-				open={!!$page.state.showReportModal}
+				open={!!page.state.showReportModal}
 				tipo_objeto="Proyecto"
 				id_objeto={proyecto.id_proyecto ?? 0}
 				nombre_objeto={proyecto.titulo}
@@ -1938,13 +1930,13 @@
 {/if}
 
 	<ResenaProyectoModal
-	mostrar={mostrarModalResena}
-	modo="crear"
-	resenaInicial={null}
-	maxCaracteres={maxCaracteresResena}
-	on:guardar={guardarResena}
-	on:cerrar={() => (mostrarModalResena = false)}
-/>
+		mostrar={mostrarModalResena}
+		modo="crear"
+		resenaInicial={null}
+		maxCaracteres={maxCaracteresResena}
+		onguardar={guardarResena}
+		oncerrar={() => (mostrarModalResena = false)}
+	/>
 
 {#if mostrarConfirmarEliminar}
 	
@@ -1996,6 +1988,70 @@
 		</div>
 	</div>
 {/if}
+
+<!-- Modal de Cese de Actividades -->
+<Modal
+	bind:abierto={mostrarModalCeseActividades}
+	titulo="Finalizar actividades"
+	oncerrar={() => (mostrarModalCeseActividades = false)}
+>
+	<div class="space-y-6">
+		<div class="flex flex-col items-center justify-center text-center">
+			<div
+				class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 ring-8 ring-blue-50/50"
+			>
+				<Icon src={CheckCircle} class="h-8 w-8 text-blue-600" />
+			</div>
+			<h3 class="text-xl font-bold text-gray-900">¿Finalizar las actividades?</h3>
+			<p class="mt-2 text-sm text-gray-500">Estás a un paso de completar una gran etapa.</p>
+		</div>
+
+		<div class="rounded-2xl border border-sky-100 bg-sky-50/50 p-5">
+			<h4 class="mb-3 flex items-center gap-2 text-sm font-bold text-sky-900">
+				<Icon src={Clock} class="h-4 w-4" />
+				¿Qué sucede al finalizar?
+			</h4>
+			<ul class="space-y-3 text-sm text-sky-800/80">
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>El proyecto dejará de ser visible para nuevas postulaciones.</span>
+				</li>
+				<li class="flex gap-2">
+					<span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-400"></span>
+					<span>Podrás subir fotos y documentos como evidencia del impacto.</span>
+				</li>
+			</ul>
+		</div>
+
+		<div class="rounded-xl border border-amber-100 bg-amber-50 p-4">
+			<p class="text-xs leading-relaxed text-amber-800">
+				<strong class="mb-1 block">Nota importante:</strong>
+				Esta acción no cierra legalmente el proyecto, pero es necesaria para prepararlo para la auditoría
+				y validación final de los colaboradores.
+			</p>
+		</div>
+	</div>
+
+	{#snippet footer()}
+		<div class="flex flex-col-reverse gap-3 sm:flex-row">
+			<Button
+				label="Todavía no"
+				variant="secondary"
+				size="sm"
+				customClass="flex-1"
+				onclick={() => (mostrarModalCeseActividades = false)}
+			/>
+			<Button
+				label="Sí, finalizar actividades"
+				variant="primary"
+				size="sm"
+				customClass="flex-1"
+				loading={ceseActividades}
+				onclick={confirmarCeseActividades}
+			/>
+		</div>
+	{/snippet}
+</Modal>
 
 <style>
 	@keyframes fade-up {

@@ -9,14 +9,14 @@
 
 	import { Check, AlertTriangle } from 'lucide-svelte';
 
-	let formularioEnviado = false;
-	let enviandoFormulario = false;
-	let errorEnvio = '';
+	let formularioEnviado = $state(false);
+	let enviandoFormulario = $state(false);
+	let errorEnvio = $state('');
 
-	$: queryParams = $page.url.searchParams;
-	$: tipoObjeto = (queryParams.get('type') as 'Usuario' | 'Proyecto') || 'Proyecto';
-	$: idObjeto = parseInt(queryParams.get('id') || '0');
-	$: nombreObjeto = queryParams.get('name') || '';
+	let queryParams = $derived($page.url.searchParams);
+	let tipoObjeto = $derived((queryParams.get('type') as 'Usuario' | 'Proyecto') || 'Proyecto');
+	let idObjeto = $derived(parseInt(queryParams.get('id') || '0'));
+	let nombreObjeto = $derived(queryParams.get('name') || '');
 
 	async function handleFormSubmit(detail: {
 		motivo: string;

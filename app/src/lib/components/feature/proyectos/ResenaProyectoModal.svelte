@@ -1,61 +1,72 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { Star, X } from 'lucide-svelte';
 
-	export let mostrar = false;
-	export let modo: 'crear' | 'editar' = 'crear';
-	export let resenaInicial: Resena | null = null;
-	export let maxCaracteres = 500;
-
-	const dispatch = createEventDispatcher<{
-		guardar: { contenido: string; puntaje: number };
-		cerrar: void;
+	let {
+		mostrar = false,
+		modo = 'crear',
+		resenaInicial = null,
+		maxCaracteres = 500,
+		onguardar,
+		oncerrar
+	} = $props<{
+		mostrar?: boolean;
+		modo?: 'crear' | 'editar';
+		resenaInicial?: Resena | null;
+		maxCaracteres?: number;
+		onguardar?: (data: { contenido: string; puntaje: number }) => void;
+		oncerrar?: () => void;
 	}>();
 
-	let contenido = '';
-	let puntaje = 5;
+	let contenido = $state('');
+	let puntaje = $state(5);
 
-	$: if (mostrar) {
-		contenido = resenaInicial?.contenido ?? '';
-		puntaje = resenaInicial?.puntaje ?? 5;
-	}
+	$effect(() => {
+		if (mostrar) {
+			contenido = resenaInicial?.contenido ?? '';
+			puntaje = resenaInicial?.puntaje ?? 5;
+		}
+	});
 
-	$: caracteresUsados = contenido.length;
-	$: excedeLimite = caracteresUsados > maxCaracteres;
-	$: titulo = modo === 'editar' ? 'Editar reseña' : 'Escribir reseña';
-	$: botonLabel = modo === 'editar' ? 'Guardar cambios' : 'Publicar reseña';
+	const caracteresUsados = $derived(contenido.length);
+	const excedeLimite = $derived(caracteresUsados > maxCaracteres);
+	const titulo = $derived(modo === 'editar' ? 'Editar reseña' : 'Escribir reseña');
+	const botonLabel = $derived(modo === 'editar' ? 'Guardar cambios' : 'Publicar reseña');
 
 	function cerrar() {
-		dispatch('cerrar');
+		oncerrar?.();
 	}
 
 	function guardar() {
 		if (excedeLimite || !contenido.trim()) return;
-		dispatch('guardar', { contenido: contenido.trim(), puntaje });
+		onguardar?.({ contenido: contenido.trim(), puntaje });
 		cerrar();
 	}
 </script>
 
 {#if mostrar}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-		on:click={cerrar}
+		role="presentation"
+		onclick={cerrar}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') cerrar();
+		}}
 	>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
-			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			tabindex="-1"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div
 				class="relative mb-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 p-4 text-white"
 			>
 				<button
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 					class="absolute top-3 right-3 rounded-lg p-2 text-white/80 hover:bg-white/10 hover:text-white"
 				>
@@ -77,7 +88,7 @@
 				</ul>
 			</div>
 
-			<form on:submit|preventDefault={guardar} class="mt-6 space-y-6">
+			<form onsubmit={(e) => { e.preventDefault(); guardar(); }} class="mt-6 space-y-6">
 				<div>
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>
@@ -85,7 +96,7 @@
 							{#each Array(5).keys() as i}
 								<button
 									type="button"
-									on:click={() => (puntaje = i + 1)}
+									onclick={() => (puntaje = i + 1)}
 									class="h-8 w-8 transition-colors hover:text-amber-400"
 									aria-label="Puntaje {i + 1} de 5"
 								>

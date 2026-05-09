@@ -9,7 +9,6 @@
 	import { Lock, Eye, EyeOff, Check, Heart, Users, ShieldCheck, Sparkles } from 'lucide-svelte';
 	import type { ComponentType } from 'svelte';
 	import { fly, fade } from 'svelte/transition';
-	import { onMount } from 'svelte';
 	import { cubicOut } from 'svelte/easing';
 
 	let identificador = $state('');
@@ -19,11 +18,12 @@
 	let erroresValidacion = $state<string[]>([]);
 	let montado = $state(false);
 
-	onMount(() => {
-		setTimeout(() => {
+	$effect(() => {
+		const timer = setTimeout(() => {
 			montado = true;
 			iniciarContadores();
 		}, 50);
+		return () => clearTimeout(timer);
 	});
 
 	const kpis = [

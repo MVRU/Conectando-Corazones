@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { fade } from 'svelte/transition';
 
-	const projectId = $page.params.id;
+	const projectId = page.params.id;
 </script>
 
 <div class="min-h-screen bg-slate-50/30 pb-10 md:pb-20">

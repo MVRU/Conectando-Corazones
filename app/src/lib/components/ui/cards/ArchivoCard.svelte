@@ -25,11 +25,12 @@
 		onedit
 	}: Props = $props();
 
-	const Icon = obtenerIconoArchivo(archivo.tipo_mime);
-	const fecha =
+	let Icon = $derived(obtenerIconoArchivo(archivo.tipo_mime));
+	let fecha = $derived(
 		archivo.fecha_formateada ||
-		(archivo.created_at ? new Date(archivo.created_at).toLocaleDateString('es-AR') : '');
-	const tamano = formatearBytes(archivo.tamanio_bytes);
+			(archivo.created_at ? new Date(archivo.created_at).toLocaleDateString('es-AR') : '')
+	);
+	let tamano = $derived(formatearBytes(archivo.tamanio_bytes));
 </script>
 
 <div

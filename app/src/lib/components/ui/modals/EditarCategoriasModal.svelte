@@ -1,32 +1,39 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { Categoria } from '$lib/domain/types/Categoria';
 	import { obtenerIconoCategoria } from '$lib/utils/util-proyecto-form';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	export let mostrar: boolean = false;
-	export let categoriasSeleccionadas: Categoria[] = [];
-	export let categorias: Categoria[] = [];
-	export let guardando: boolean = false;
+	let { 
+		mostrar = $bindable(false), 
+		categoriasSeleccionadas = [], 
+		categorias = [], 
+		guardando = false,
+		onguardar,
+		oncerrar
+	}: { 
+		mostrar?: boolean; 
+		categoriasSeleccionadas?: Categoria[]; 
+		categorias?: Categoria[]; 
+		guardando?: boolean;
+		onguardar: (categorias: Categoria[]) => void;
+		oncerrar: () => void;
+	} = $props();
 
-	const dispatch = createEventDispatcher<{
-		guardar: Categoria[];
-		cerrar: void;
-	}>();
+	let categoriasMarcadas = $state<Set<number>>(new Set());
 
-	let categoriasMarcadas: Set<number> = new Set();
-
-	$: categoriasVisibles = categorias;
+	const categoriasVisibles = $derived(categorias);
 
 	// Inicializar categorías marcadas cuando cambian las seleccionadas
-	$: if (categoriasSeleccionadas && categoriasSeleccionadas.length > 0) {
-		categoriasMarcadas = new Set(
-			categoriasSeleccionadas
-				.map((cat) => cat.id_categoria)
-				.filter((id): id is number => id !== undefined)
-		);
-	}
+	$effect(() => {
+		if (categoriasSeleccionadas && categoriasSeleccionadas.length > 0) {
+			categoriasMarcadas = new Set(
+				categoriasSeleccionadas
+					.map((cat) => cat.id_categoria)
+					.filter((id): id is number => id !== undefined)
+			);
+		}
+	});
 
 	function toggleCategoria(categoria: Categoria) {
 		if (!categoria.id_categoria) return;
@@ -42,10 +49,10 @@
 		categoriasMarcadas = nuevoSet;
 	}
 
-	$: categoriasMarcadasArray = Array.from(categoriasMarcadas);
+	const categoriasMarcadasArray = $derived(Array.from(categoriasMarcadas));
 
 	function cerrar() {
-		dispatch('cerrar');
+		oncerrar();
 	}
 
 	function guardar() {
@@ -54,7 +61,7 @@
 		);
 
 		console.log('Guardando categorías:', categoriasFinales);
-		dispatch('guardar', categoriasFinales);
+		onguardar(categoriasFinales);
 	}
 
 	function abrir() {
@@ -71,28 +78,34 @@
 	}
 
 	// Abrir modal cuando mostrar cambia a true
-	$: if (mostrar) {
-		abrir();
-	}
+	$effect(() => {
+		if (mostrar) {
+			abrir();
+		}
+	});
 </script>
 
 {#if mostrar}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<!-- svelte-ignore a11y-no-static-element-interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
-		on:click={cerrar}
+		role="presentation"
+		onclick={cerrar}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') cerrar();
+		}}
 	>
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div
 			class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
-			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			tabindex="0"
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div class="mb-6 flex items-center justify-between">
 				<h3 class="text-xl font-semibold text-gray-900">Editar categorías favoritas</h3>
 				<button
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 					class="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
 				>
@@ -114,8 +127,7 @@
 
 			<!-- Lista de categorías -->
 			<div class="mb-6 max-h-[400px] overflow-y-auto">
-				<div class="grid gap-3 sm:grid-cols-2">
-					{#each categoriasVisibles as categoria}
+					{#each categoriasVisibles as categoria (categoria.id_categoria)}
 						{@const seleccionada =
 							categoria.id_categoria !== undefined &&
 							categoriasMarcadas.has(categoria.id_categoria)}
@@ -123,7 +135,7 @@
 						<!-- Force reactivity -->
 						<button
 							type="button"
-							on:click={() => toggleCategoria(categoria)}
+							onclick={() => toggleCategoria(categoria)}
 							class="group relative flex items-center gap-3 rounded-lg border p-3 text-left transition-all {seleccionada
 								? 'border-blue-500 bg-blue-50'
 								: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}"
@@ -165,7 +177,6 @@
 						</button>
 					{/each}
 				</div>
-			</div>
 
 			<!-- Contador de seleccionadas -->
 			<div class="mb-6 rounded-lg bg-blue-50 p-3">

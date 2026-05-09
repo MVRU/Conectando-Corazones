@@ -3,8 +3,10 @@
 	import { Users, Tag, CalendarDays, Clock } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 
-	export let proyecto: Proyecto;
-	export let formatearFecha: (fecha: Date | string | undefined | null) => string;
+	let { proyecto, formatearFecha } = $props<{
+		proyecto: Proyecto;
+		formatearFecha: (fecha: Date | string | undefined | null) => string;
+	}>();
 
 	const nf = new Intl.NumberFormat('es-AR');
 
@@ -25,16 +27,15 @@
 		return lista.map((c) => c?.descripcion).filter((x): x is string => Boolean(x?.trim()));
 	}
 
-	let beneficiarios = 0;
-	$: beneficiarios = normalizarBeneficiarios(proyecto?.beneficiarios);
+	let beneficiarios = $derived(normalizarBeneficiarios(proyecto?.beneficiarios));
 
-	let textoBeneficiarios = '';
-	$: textoBeneficiarios =
+	let textoBeneficiarios = $derived(
 		beneficiarios > 0
 			? `${nf.format(beneficiarios)} persona${beneficiarios === 1 ? '' : 's'} alcanzada${beneficiarios === 1 ? '' : 's'}`
-			: '';
+			: ''
+	);
 
-	const categorias = obtenerCategorias(proyecto?.categorias);
+	let categorias = $derived(obtenerCategorias(proyecto?.categorias));
 
 	const claseCard =
 		'animate-fade-up rounded-xl border border-gray-100 bg-white p-4 shadow-sm ring-1 ring-transparent transition-all hover:shadow-md hover:ring-gray-100 min-h-[96px] sm:p-5';
@@ -94,7 +95,7 @@
 
 		{#if categorias.length}
 			<div class="mt-1 flex flex-wrap gap-2" aria-label="Lista de categorías">
-				{#each categorias as categoria}
+				{#each categorias as categoria (categoria)}
 					<a
 						href="/proyectos?tab=todos&categorias={encodeURIComponent(categoria)}&filtros=true"
 						class="inline-flex items-center rounded-full border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs text-gray-700 transition hover:bg-gray-100"

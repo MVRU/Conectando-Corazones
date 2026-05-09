@@ -9,10 +9,14 @@
 		UserCircle
 	} from 'lucide-svelte';
 
-	export let data: PageData;
+	interface Props {
+		data: PageData;
+	}
 
-	$: proyecto = data.proyecto;
-	$: solicitudes = data.solicitudes as Array<{
+	let { data }: Props = $props();
+
+	let proyecto = $derived(data.proyecto);
+	let solicitudes = $derived(data.solicitudes as Array<{
 		id_solicitud: number;
 		estado: string | null;
 		created_at: string | null;
@@ -28,7 +32,7 @@
 				apellido: string;
 			} | null;
 		}>;
-	}>;
+	}>);
 
 	function labelEstadoSolicitud(estado: string | null | undefined): string {
 		const e = (estado || '').toLowerCase();
@@ -94,7 +98,7 @@
 			<button
 				type="button"
 				class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-900"
-				on:click={() => goto(`/proyectos/${proyecto?.id_proyecto}`)}
+				onclick={() => goto(`/proyectos/${proyecto?.id_proyecto}`)}
 			>
 				<ArrowLeft class="h-4 w-4" />
 				Volver al proyecto

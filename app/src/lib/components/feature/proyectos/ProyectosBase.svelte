@@ -1,66 +1,90 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
+	import type { Snippet } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import Pagination from '$lib/components/ui/elementos/Pagination.svelte';
 	import type { Writable } from 'svelte/store';
 	import ProyectosFiltro from './ProyectosFiltro.svelte';
 
-	// Props
-	export let proyectos: Proyecto[] = [];
-	export let titulo: string = '';
-	export let placeholderBusqueda: string = 'Buscar por título o institución...';
-	export let textoVacio: string = 'No hay proyectos disponibles';
-	export let descripcionVacia: string =
-		'Probá con otro tipo de participación o reiniciá los filtros.';
+	let {
+		proyectos = [],
+		titulo = '',
+		placeholderBusqueda = 'Buscar por título o institución...',
+		textoVacio = 'No hay proyectos disponibles',
+		descripcionVacia = 'Probá con otro tipo de participación o reiniciá los filtros.',
+		mostrarEstado = false,
+		prefijoIdFiltros = 'filtros-base',
+		mostrarFiltros,
+		filtroParticipacion,
+		categoriaSeleccionada,
+		tipoUbicacion,
+		provinciaSeleccionada,
+		localidadSeleccionada,
+		fechaDesde,
+		fechaHasta,
+		estadoSeleccionado,
+		criterioOrden,
+		consultaBusqueda,
+		categoriasDisponibles = [],
+		provinciasDisponibles = [],
+		estadosDisponibles = [],
+		tiposParticipacionDisponibles = [],
+		calcularLocalidadesDisponibles,
+		restablecerFiltros,
+		headerActions,
+		card,
+		emptyAction
+	} = $props<{
+		proyectos?: Proyecto[];
+		titulo?: string;
+		placeholderBusqueda?: string;
+		textoVacio?: string;
+		descripcionVacia?: string;
+		mostrarEstado?: boolean;
+		prefijoIdFiltros?: string;
+		mostrarFiltros: Writable<boolean>;
+		filtroParticipacion: Writable<string[]>;
+		categoriaSeleccionada: Writable<string[]>;
+		tipoUbicacion: Writable<'Todas' | 'Presencial' | 'Virtual'>;
+		provinciaSeleccionada: Writable<string>;
+		localidadSeleccionada: Writable<string>;
+		fechaDesde: Writable<string>;
+		fechaHasta: Writable<string>;
+		estadoSeleccionado: Writable<string[]>;
+		criterioOrden: Writable<'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'>;
+		consultaBusqueda: Writable<string>;
+		categoriasDisponibles?: string[];
+		provinciasDisponibles?: string[];
+		estadosDisponibles?: { value: string; label: string }[];
+		tiposParticipacionDisponibles?: string[];
+		calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
+		restablecerFiltros: () => void;
+		headerActions?: Snippet;
+		card: Snippet<[{ proyecto: Proyecto }]>;
+		emptyAction?: Snippet<[{ restablecerFiltros: () => void }]>;
+	}>();
 
-	// Configuración
-	export let mostrarEstado: boolean = false;
-	export let prefijoIdFiltros: string = 'filtros-base';
-
-	// Stores de filtros (Writables)
-	export let mostrarFiltros: Writable<boolean>;
-	export let filtroParticipacion: Writable<string[]>;
-	export let categoriaSeleccionada: Writable<string[]>;
-	export let tipoUbicacion: Writable<'Todas' | 'Presencial' | 'Virtual'>;
-	export let provinciaSeleccionada: Writable<string>;
-	export let localidadSeleccionada: Writable<string>;
-	export let fechaDesde: Writable<string>;
-	export let fechaHasta: Writable<string>;
-	export let estadoSeleccionado: Writable<string[]>;
-	export let criterioOrden: Writable<
-		'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'
-	>;
-	export let consultaBusqueda: Writable<string>;
-
-	// Datos derivados
-	export let categoriasDisponibles: string[] = [];
-	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: { value: string; label: string }[] = [];
-	export let tiposParticipacionDisponibles: string[] = [];
-
-	// Funciones
-	export let calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
-	export let restablecerFiltros: () => void;
-
-	$: localidades = calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada);
+	let localidades = $derived(calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada));
 
 	// Paginación
 	const ITEMS_POR_PAGINA = 16;
-	let paginaActual = 1;
+	let paginaActual = $state(1);
 
-	$: totalPaginas = Math.ceil(proyectos.length / ITEMS_POR_PAGINA);
-	$: indiceInicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
-	$: indiceFin = indiceInicio + ITEMS_POR_PAGINA;
-	$: proyectosVisibles = proyectos.slice(indiceInicio, indiceFin);
+	let totalPaginas = $derived(Math.ceil(proyectos.length / ITEMS_POR_PAGINA));
+	let indiceInicio = $derived((paginaActual - 1) * ITEMS_POR_PAGINA);
+	let indiceFin = $derived(indiceInicio + ITEMS_POR_PAGINA);
+	let proyectosVisibles = $derived(proyectos.slice(indiceInicio, indiceFin));
 
 	// Reset página al filtrar
-	$: if (proyectos.length || $consultaBusqueda || $filtroParticipacion) {
-		paginaActual = 1;
-	}
+	$effect(() => {
+		if (proyectos.length || $consultaBusqueda || $filtroParticipacion) {
+			paginaActual = 1;
+		}
+	});
 
-	function manejarCambioPagina(event: CustomEvent<number>) {
-		paginaActual = event.detail;
+	function manejarCambioPagina(page: number) {
+		paginaActual = page;
 		const element = document.getElementById('proyectos-list-top');
 		if (element) {
 			element.scrollIntoView({ behavior: 'smooth' });
@@ -75,7 +99,7 @@
 			<h2 class="text-center text-3xl font-extrabold text-gray-900 sm:text-4xl md:text-5xl">
 				{titulo}
 			</h2>
-			<slot name="header-actions" />
+			{#if headerActions}{@render headerActions()}{/if}
 		</div>
 	{/if}
 
@@ -108,14 +132,14 @@
 			bind:estado={$estadoSeleccionado}
 			{estadosDisponibles}
 			bind:criterioOrden={$criterioOrden}
-			on:reset={() => {
+			onreset={() => {
 				restablecerFiltros();
 			}}
-			on:ubicacionChange={() => {
+			onubicacionchange={() => {
 				$provinciaSeleccionada = 'Todas';
 				$localidadSeleccionada = 'Todas';
 			}}
-			on:toggle={() => ($mostrarFiltros = !$mostrarFiltros)}
+			ontoggle={() => ($mostrarFiltros = !$mostrarFiltros)}
 		/>
 	</div>
 
@@ -137,7 +161,7 @@
 				out:fade={{ duration: 150 }}
 				class="transition-transform hover:scale-[1.02]"
 			>
-				<slot name="card" {proyecto} />
+				{@render card({ proyecto })}
 			</div>
 		{/each}
 	</div>
@@ -148,7 +172,7 @@
 			<Pagination
 				currentPage={paginaActual}
 				totalPages={totalPaginas}
-				on:pageChange={manejarCambioPagina}
+				onpagechange={manejarCambioPagina}
 			/>
 		</div>
 	{/if}
@@ -165,7 +189,7 @@
 				{/if}
 			</p>
 			<div class="flex justify-center">
-				<slot name="empty-action" {restablecerFiltros} />
+				{#if emptyAction}{@render emptyAction({ restablecerFiltros })}{/if}
 			</div>
 		</div>
 	{/if}

@@ -19,11 +19,19 @@
 -->
 
 <script lang="ts">
-	export let size: number = 50;
-	export let loading = false;
-	export let message: string = 'Cargando...';
-	export let overlayColor: string = '#ffffff';
-	export let overlayOpacity: number = 0.6;
+	let {
+		size = 50,
+		loading = false,
+		message = 'Cargando...',
+		overlayColor = '#ffffff',
+		overlayOpacity = 0.6
+	} = $props<{
+		size?: number;
+		loading?: boolean;
+		message?: string;
+		overlayColor?: string;
+		overlayOpacity?: number;
+	}>();
 </script>
 
 {#if loading}

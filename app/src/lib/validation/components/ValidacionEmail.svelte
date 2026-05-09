@@ -1,19 +1,26 @@
 <script lang="ts">
 	import { Mail, AlertCircle } from 'lucide-svelte';
-	import { createEventDispatcher, onMount } from 'svelte';
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import Loader from '$lib/components/ui/feedback/Loader.svelte';
 
-	const dispatch = createEventDispatcher();
+	let {
+		pasoActual = 4,
+		pasosTotales = 5,
+		emailDestino = '',
+		oncontinue,
+		onback
+	} = $props<{
+		pasoActual?: number;
+		pasosTotales?: number;
+		emailDestino?: string;
+		oncontinue?: () => void;
+		onback?: () => void;
+	}>();
 
-	export let pasoActual = 4;
-	export let pasosTotales = 5;
-	export let emailDestino = '';
-
-	let etapa: 'sending' | 'waiting' | 'verified' | 'error' = 'sending';
-	let codigo = '';
-	let codigoError = '';
+	let etapa = $state<'sending' | 'waiting' | 'verified' | 'error'>('sending');
+	let codigo = $state('');
+	let codigoError = $state('');
 
 	function enviarEmail() {
 		return new Promise((resolve) => {
@@ -21,7 +28,7 @@
 		});
 	}
 
-	onMount(() => {
+	$effect(() => {
 		enviarEmail()
 			.then(() => {
 				etapa = 'waiting';
@@ -33,7 +40,7 @@
 
 	function verificarCodigoManual() {
 		if (codigo === '123456') {
-			dispatch('continue');
+			oncontinue?.();
 		} else {
 			codigoError = 'El código ingresado no es válido';
 		}
@@ -70,6 +77,10 @@
 		<input
 			class="mt-8 w-full max-w-xs rounded-lg border px-4 py-3 text-center text-2xl tracking-widest text-gray-800 focus:border-blue-500 focus:outline-none"
 			bind:value={codigo}
+			oninput={(e) => {
+				const target = e.target as HTMLInputElement;
+				codigo = target.value;
+			}}
 			inputmode="numeric"
 			maxlength="6"
 			placeholder="••••••"
@@ -101,7 +112,7 @@
 		</p>
 		<div class="mt-8 flex flex-col gap-4 sm:flex-row">
 			<Button label="Reintentar" onclick={() => (etapa = 'sending')} />
-			<Button label="Volver" variant="secondary" onclick={() => dispatch('back')} />
+			<Button label="Volver" variant="secondary" onclick={() => onback?.()} />
 		</div>
 	</div>
 {/if}

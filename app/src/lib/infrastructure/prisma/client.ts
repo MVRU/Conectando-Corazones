@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '$env/dynamic/private';
@@ -20,3 +20,20 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 export const prisma = globalForPrisma.prisma || new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export type PrismaDbClient = PrismaClient | Prisma.TransactionClient;
+
+export function esClientePrisma(db: PrismaDbClient): db is PrismaClient {
+	return '$transaction' in db;
+}
+
+export async function ejecutarEnTransaccionExistenteOTotal<T>(
+	db: PrismaDbClient,
+	callback: (tx: Prisma.TransactionClient) => Promise<T>
+): Promise<T> {
+	if (esClientePrisma(db)) {
+		return db.$transaction(callback);
+	}
+
+	return callback(db);
+}

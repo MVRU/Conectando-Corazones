@@ -5,36 +5,42 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
 
-	export let data;
+	let { data } = $props();
 
-	$: if (data.form?.titulo) {
-		setBreadcrumbs([
-			BREADCRUMB_ROUTES.proyectos,
-			{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
-			{ label: 'Editar' }
-		]);
-	}
-
-	$: if (!$isLoading) {
-		if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {
-			toastStore.show({
-				title: 'Acceso denegado',
-				message: 'No tenés permisos para acceder a esta página.',
-				variant: 'error'
-			});
-			goto('/');
+	$effect(() => {
+		if (data.form?.titulo) {
+			setBreadcrumbs([
+				BREADCRUMB_ROUTES.proyectos,
+				{ label: data.form.titulo, href: `/proyectos/${data.proyectoId}` },
+				{ label: 'Editar' }
+			]);
 		}
-	}
+	});
+
+	$effect(() => {
+		if (!$isLoading) {
+			if ($usuario?.rol !== 'institucion' && $usuario?.rol !== 'administrador') {
+				toastStore.show({
+					title: 'Acceso denegado',
+					message: 'No tenés permisos para acceder a esta página.',
+					variant: 'error'
+				});
+				goto('/');
+			}
+		}
+	});
 </script>
 
 {#if !$isLoading && data.form}
 	<CrearProyecto
 		edicion={true}
 		proyectoId={data.proyectoId}
-		initialData={data.form}
+		initialData={{ ...data.form, originales: data.originales }}
 		categorias={data.categorias}
 		tiposParticipacion={data.tiposParticipacion}
 		esEdicionRestringida={data.esEdicionRestringida}
+		tieneColaboradoresAprobados={data.tieneColaboradoresAprobados}
 		esAdmin={data.esAdmin}
+		estaVerificado={true}
 	/>
 {/if}

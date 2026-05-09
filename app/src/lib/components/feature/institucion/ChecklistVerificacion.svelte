@@ -1,7 +1,11 @@
 <script lang="ts">
-	export let checks: Record<string, boolean>;
-	export let disabled: boolean = false;
-	export let onUpdate: (checks: Record<string, boolean>) => void = () => {};
+	interface Props {
+		checks: Record<string, boolean>;
+		disabled?: boolean;
+		onUpdate?: (checks: Record<string, boolean>) => void;
+	}
+
+	let { checks = $bindable(), disabled = false, onUpdate = () => {} }: Props = $props();
 
 	// Definición de items del checklist
 	const checklistItems = [
@@ -31,9 +35,9 @@
 		}
 	];
 
-	$: completados = Object.values(checks).filter((c) => c).length;
-	$: totalItems = checklistItems.length;
-	$: todosCompletos = completados === totalItems;
+	let completados = $derived(Object.values(checks).filter((c) => c).length);
+	let totalItems = $derived(checklistItems.length);
+	let todosCompletos = $derived(completados === totalItems);
 
 	function handleCheckChange(key: string, value: boolean) {
 		checks = { ...checks, [key]: value };
@@ -70,7 +74,7 @@
 				<input
 					type="checkbox"
 					checked={checks[item.key]}
-					on:change={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
+					onchange={(e) => handleCheckChange(item.key, e.currentTarget.checked)}
 					{disabled}
 					class="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 {disabled
 						? 'cursor-not-allowed'

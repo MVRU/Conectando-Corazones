@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Sparkles, ArrowRight, HeartHandshake } from 'lucide-svelte';
 
-	export let proyectos: {
+	interface Props {
+		proyectos?: {
 		id: string;
 		titulo: string;
 		institucion: string;
@@ -9,7 +10,10 @@
 		imagen?: string;
 		coincidencia: number;
 		ubicacion: string;
-	}[] = [];
+	}[];
+	}
+
+	let { proyectos = [] }: Props = $props();
 </script>
 
 <div

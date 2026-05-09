@@ -10,18 +10,20 @@
 		{ label: 'Crear Proyecto' }
 	]);
 
-	export let data;
+	let { data } = $props();
 
-	$: if (!$isLoading) {
-		if ($usuario?.rol !== 'institucion') {
-			toastStore.show({
-				title: 'Acceso restringido',
-				message: 'Solo las instituciones pueden crear proyectos.',
-				variant: 'error'
-			});
-			goto('/');
+	$effect(() => {
+		if (!$isLoading) {
+			if ($usuario?.rol !== 'institucion') {
+				toastStore.show({
+					title: 'Acceso restringido',
+					message: 'Solo las instituciones pueden crear proyectos.',
+					variant: 'error'
+				});
+				goto('/');
+			}
 		}
-	}
+	});
 </script>
 
 {#if !$isLoading && $usuario?.rol === 'institucion'}

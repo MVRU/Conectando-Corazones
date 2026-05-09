@@ -1,13 +1,23 @@
 <script lang="ts">
-	import { inView } from '\$lib/utils/actions/inView';
+	import { inView } from '$lib/utils/actions/inView';
 
-	export let stepNumber: number;
-	export let title: string;
-	export let summary: string;
-	export let details: string;
-	export let image: string;
-	export let delay = 0;
-	export let animate = false;
+	let {
+		stepNumber,
+		title,
+		summary,
+		details,
+		image,
+		delay = 0
+	} = $props<{
+		stepNumber: number;
+		title: string;
+		summary: string;
+		details: string;
+		image: string;
+		delay?: number;
+	}>();
+
+	let animate = $state(false);
 </script>
 
 <!-- *Contenedor -->

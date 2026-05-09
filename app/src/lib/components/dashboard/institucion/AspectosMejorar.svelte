@@ -2,11 +2,13 @@
 	import { Sparkles, BrainCircuit, Lightbulb, ArrowRight, BookOpen } from 'lucide-svelte';
 	import { slide, fade } from 'svelte/transition';
 
-	export let aspectos: {
-		id: string;
-		proyecto: string;
-		sugerencias: string[];
-	}[] = [];
+	let { aspectos = [] } = $props<{
+		aspectos?: {
+			id: string;
+			proyecto: string;
+			sugerencias: string[];
+		}[];
+	}>();
 </script>
 
 <div

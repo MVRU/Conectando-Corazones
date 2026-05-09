@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let fecha: Date;
+	let { fecha } = $props<{
+		fecha: Date;
+	}>();
 
 	// Formatear la fecha según la proximidad
 	function formatearFecha(fecha: Date): string {

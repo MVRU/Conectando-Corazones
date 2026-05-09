@@ -80,6 +80,21 @@ export const isInstitucionVerificada = derived(authStore, ($auth) =>
 	esInstitucionVerificada($auth.usuario)
 );
 
+export function syncAuthState(usuario: UsuarioCompleto | null): void {
+	if (usuario) {
+		authStore.update((state) => ({
+			...state,
+			usuario,
+			isAuthenticated: true,
+			isLoading: false,
+			error: null
+		}));
+		return;
+	}
+
+	authStore.set(unauthenticatedState);
+}
+
 export const authActions = {
 	/**
 	 * Iniciar sesión (acepta email o username como "identificador")

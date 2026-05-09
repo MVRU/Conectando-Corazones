@@ -1,4 +1,4 @@
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import { Prisma } from '@prisma/client';
 import type {
 	HistorialDeCambiosRepository,
@@ -7,6 +7,8 @@ import type {
 import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 
 export class PostgresHistorialDeCambiosRepository implements HistorialDeCambiosRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	private mapear(c: {
 		id_cambio: number;
 		tipo_objeto: string;
@@ -34,7 +36,7 @@ export class PostgresHistorialDeCambiosRepository implements HistorialDeCambiosR
 	}
 
 	async create(cambio: HistorialDeCambios, tx?: unknown): Promise<HistorialDeCambios> {
-		const db = (tx as Prisma.TransactionClient) || prisma;
+		const db = (tx as Prisma.TransactionClient) || this.db;
 
 		const created = await db.historialDeCambios.create({
 			data: {

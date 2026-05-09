@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import {
 		Share,
 		CheckCircle,
@@ -12,16 +11,19 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 
-	export let proyecto: Proyecto;
-	export let show = false;
+	interface Props {
+		proyecto: Proyecto;
+		show: boolean;
+		onclose: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { proyecto, show = $bindable(false), onclose }: Props = $props();
 
-	let compartido = false;
-	let copiado = false;
+	let compartido = $state(false);
+	let copiado = $state(false);
 
 	function generarTextoCompartir(incluirUrl = true) {
-		const url = window.location.href;
+		const url = typeof window !== 'undefined' ? window.location.href : '';
 		const titulo = proyecto?.titulo || 'Proyecto Solidario';
 		let texto = `¡Sumate a este proyecto solidario!\n\n"${titulo}"\n\nTu ayuda puede transformar vidas. Juntos podemos conectar corazones.\n\nCada colaboración cuenta. ¿Te sumás a la causa?`;
 		if (incluirUrl) {
@@ -30,7 +32,7 @@
 		return texto;
 	}
 
-	$: textoCompartir = generarTextoCompartir(true);
+	let textoCompartir = $derived(generarTextoCompartir(true));
 
 	async function compartirNativo() {
 		const titulo = proyecto?.titulo || 'Proyecto Solidario';
@@ -85,15 +87,18 @@
 	function cerrar() {
 		compartido = false;
 		copiado = false;
-		dispatch('close');
+		onclose();
 	}
 </script>
 
 {#if show}
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
-		on:click={cerrar}
-		aria-hidden="true"
+		onclick={cerrar}
+		onkeydown={(e) => e.key === 'Escape' && cerrar()}
+		role="button"
+		tabindex="0"
+		aria-label="Cerrar modal"
 	></div>
 
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
@@ -103,8 +108,8 @@
 			aria-modal="true"
 			aria-labelledby="modal-compartir-titulo"
 			tabindex="-1"
-			on:click|stopPropagation
-			on:keydown={(e) => {
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => {
 				if (e.key === 'Escape') cerrar();
 			}}
 		>
@@ -118,7 +123,7 @@
 				<button
 					type="button"
 					class="rounded-full p-1 text-gray-500 transition-all hover:bg-gray-100 hover:text-gray-700 focus:ring-2 focus:ring-gray-300 focus:outline-none"
-					on:click={cerrar}
+					onclick={cerrar}
 					aria-label="Cerrar modal"
 				>
 					<Icon src={XMark} class="h-5 w-5" />
@@ -150,7 +155,7 @@
 						<button
 							type="button"
 							class="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-4 py-3 font-semibold text-white shadow-sm transition hover:brightness-105 focus:ring-2 focus:ring-[#25D366] focus:ring-offset-2 focus:outline-none active:translate-y-[1px]"
-							on:click={compartirWhatsApp}
+							onclick={compartirWhatsApp}
 						>
 							<Icon src={ChatBubbleLeftRight} class="h-5 w-5" aria-hidden="true" />
 							WhatsApp
@@ -159,7 +164,7 @@
 						<button
 							type="button"
 							class="inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 font-semibold text-gray-700 shadow-sm transition hover:bg-gray-200 focus:ring-2 focus:ring-gray-300 focus:ring-offset-2 focus:outline-none active:translate-y-[1px]"
-							on:click={compartirEmail}
+							onclick={compartirEmail}
 						>
 							<Icon src={Envelope} class="h-5 w-5" aria-hidden="true" />
 							Email
@@ -170,7 +175,7 @@
 						<button
 							type="button"
 							class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none active:translate-y-[1px]"
-							on:click={copiarAlPortapapeles}
+							onclick={copiarAlPortapapeles}
 						>
 							<Icon src={ClipboardDocument} class="h-4 w-4" aria-hidden="true" />
 							Copiar mensaje
@@ -180,7 +185,7 @@
 							<button
 								type="button"
 								class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 focus:ring-2 focus:ring-gray-300 focus:outline-none active:translate-y-[1px]"
-								on:click={compartirNativo}
+								onclick={compartirNativo}
 							>
 								<Icon src={EllipsisHorizontal} class="h-4 w-4" aria-hidden="true" />
 								Más opciones
@@ -225,3 +230,4 @@
 		</div>
 	</div>
 {/if}
+

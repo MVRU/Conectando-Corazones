@@ -1,0 +1,342 @@
+
+> frontend@0.0.1 check
+> svelte-kit sync && svelte-check --tsconfig ./tsconfig.json
+
+
+====================================
+Loading svelte-check in workspace: c:\Dev\Conectando-Corazones\app
+Getting Svelte diagnostics...
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\ui\badges\StatusBadge.svelte[39m:48:24
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ borrador: { color: string; icon: IconSource; }; en_curso: { color: string; icon: IconSource; }; pendiente_solicitud_cierre: { color: string; icon: IconSource; }; en_revision: { ...; }; en_auditoria: { ...; }; completado: { ...; }; cancelado: { ...; }; }'. (ts)
+[36m
+	let config = $derived([35mCONFIG[estado ?? 'en_curso'][36m || CONFIG.en_curso);
+	let label = $derived(ESTADO_LABELS[estado ?? 'en_curso'] || 'Desconocido');
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\ui\badges\StatusBadge.svelte[39m:49:23
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<"en_curso" | "borrador" | "pendiente_solicitud_cierre" | "en_revision" | "en_auditoria" | "completado" | "cancelado", string>'. (ts)
+[36m	let config = $derived(CONFIG[estado ?? 'en_curso'] || CONFIG.en_curso);
+	let label = $derived([35mESTADO_LABELS[estado ?? 'en_curso'][36m || 'Desconocido');
+</script>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\colaborador\AccionesRapidas.svelte[39m:108:8
+[31mError[39m: `{@const}` must be the immediate child of `{#snippet}`, `{#if}`, `{:else if}`, `{:else}`, `{#each}`, `{:then}`, `{:catch}`, `<svelte:fragment>`, `<svelte:boundary` or `<Component>`
+https://svelte.dev/e/const_tag_invalid_placement (svelte)
+[36m						>
+							[35m{@const Icono = accion.icon}[36m
+							<Icono size={18} />
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\colaborador\ActividadReciente.svelte[39m:46:10
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ proyecto: string; colaboracion: string; evidencia: string; mensaje: string; }'. (ts)
+[36m						<span class="text-xs font-medium tracking-wider text-slate-500 uppercase"
+							>{[35mTIPO_LABELS[item.tipo][36m}</span
+						>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\colaborador\InstitucionesAlcanzadasModal.svelte[39m:31:40
+[31mError[39m: Parameter 'max' implicitly has an 'any' type. (ts)
+[36m	const maxProyectos = $derived(
+		stats?.institucionesAyudadas.reduce(([35mmax[36m, inst) => Math.max(max, inst.cantidadProyectos), 0) || 1
+	);
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\colaborador\InstitucionesAlcanzadasModal.svelte[39m:31:45
+[31mError[39m: Parameter 'inst' implicitly has an 'any' type. (ts)
+[36m	const maxProyectos = $derived(
+		stats?.institucionesAyudadas.reduce((max, [35minst[36m) => Math.max(max, inst.cantidadProyectos), 0) || 1
+	);
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\colaborador\HeatmapActividad.svelte[39m:30:30
+[31mError[39m: Parameter 'd' implicitly has an 'any' type. (ts)
+[36m
+				const found = data.find(([35md[36m) => d.fecha === dateStr);
+				week.push({
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:141:10
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m				<!-- Dinamically rendered Badges -->
+				{#if [35mbadgeConfig[accion.label][36m && badgeConfig[accion.label].count > 0}
+					<div
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:141:39
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m				<!-- Dinamically rendered Badges -->
+				{#if badgeConfig[accion.label] && [35mbadgeConfig[accion.label][36m.count > 0}
+					<div
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:143:227
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m					<div
+						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {[35mbadgeConfig[
+							accion.label
+						][36m.color} {badgeConfig[accion.label].shadow}"
+					>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:145:17
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m							accion.label
+						].color} {[35mbadgeConfig[accion.label][36m.shadow}"
+					>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:147:8
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m					>
+						{[35mbadgeConfig[accion.label][36m.count}
+					</div>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:221:12
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m						<!-- Badges -->
+						{#if [35mbadgeConfig[accion.label][36m && badgeConfig[accion.label].count > 0}
+							<div
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:221:41
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m						<!-- Badges -->
+						{#if badgeConfig[accion.label] && [35mbadgeConfig[accion.label][36m.count > 0}
+							<div
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:223:70
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m							<div
+								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {[35mbadgeConfig[
+									accion.label
+								][36m.color} {badgeConfig[accion.label].shadow}"
+							></div>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\AccionesRapidas.svelte[39m:225:19
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'.
+  No index signature with a parameter of type 'string' was found on type '{ 'Ver colaboraciones': { count: any; color: string; shadow: string; }; 'Mis chats': { count: any; color: string; shadow: string; }; 'Solicitar cierre': { count: any; color: string; shadow: string; }; }'. (ts)
+[36m									accion.label
+								].color} {[35mbadgeConfig[accion.label][36m.shadow}"
+							></div>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\ActividadReciente.svelte[39m:67:10
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type '{ proyecto: string; colaboracion: string; evidencia: string; }'. (ts)
+[36m						<span class="text-xs font-medium tracking-wider text-slate-500 uppercase"
+							>{[35mTIPO_LABELS[item.tipo][36m}</span
+						>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\institucion\EstadisticasAgendaModal.svelte[39m:34:48
+[31mError[39m: Parameter 'p' implicitly has an 'any' type. (ts)
+[36m
+		const dates = stats.projectTimeline.flatMap(([35mp[36m) => [
+			new Date(p.fechaInicio).getTime(),
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\DashboardInstitucion.svelte[39m:32:6
+[31mError[39m: Type 'HTMLDivElement | undefined' is not assignable to type 'HTMLDivElement'.
+  Type 'undefined' is not assignable to type 'HTMLDivElement'. (ts)
+[36m	let mounted = false;
+	let [35mfilterScrollContainer[36m: HTMLDivElement = $state();
+	let showFilterIndicator = false;
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\DashboardInstitucion.svelte[39m:373:5
+[31mError[39m: Cannot use 'bind:' with this property. It is declared as non-bindable inside the component.
+To mark a property as bindable: 'let { showEvidenceModal = $bindable() } = $props()' (ts)
+[36m				estaVerificado={data.info.estaVerificado}
+				[35mbind:showEvidenceModal[36m
+				onExportPDF={generatePDF}
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\DashboardInstitucion.svelte[39m:504:8
+[31mError[39m: Argument of type '"clickColaboradores"' is not assignable to parameter of type 'never'. (ts)
+[36m				}}
+				on:[35mclickColaboradores[36m={() => (showCollaboratorStats = true)}
+				on:clickProyectos={() => (showProjectStats = true)}
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\DashboardInstitucion.svelte[39m:505:8
+[31mError[39m: Argument of type '"clickProyectos"' is not assignable to parameter of type 'never'. (ts)
+[36m				on:clickColaboradores={() => (showCollaboratorStats = true)}
+				on:[35mclickProyectos[36m={() => (showProjectStats = true)}
+				on:clickAgenda={() => (showCalendarStats = true)}
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\dashboard\DashboardInstitucion.svelte[39m:506:8
+[31mError[39m: Argument of type '"clickAgenda"' is not assignable to parameter of type 'never'. (ts)
+[36m				on:clickProyectos={() => (showProjectStats = true)}
+				on:[35mclickAgenda[36m={() => (showCalendarStats = true)}
+			/>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\chat\EstadoProyectoBadge.svelte[39m:57:24
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<"en_curso" | "borrador" | "pendiente_solicitud_cierre" | "en_revision" | "en_auditoria" | "completado" | "cancelado", { dotColor: string; bgColor: string; textColor: string; borderColor: string; }>'. (ts)
+[36m
+	let config = $derived([35mestadoConfig[estado][36m || estadoConfig.en_curso);
+</script>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\chat\EstadoProyectoBadge.svelte[39m:64:3
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<"en_curso" | "borrador" | "pendiente_solicitud_cierre" | "en_revision" | "en_auditoria" | "completado" | "cancelado", string>'. (ts)
+[36m	<span class="h-1.5 w-1.5 rounded-full {config.dotColor} shadow-sm"></span>
+	{[35mESTADO_LABELS[estado][36m}
+</span>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\home\TestimoniosSection.svelte[39m:100:4
+[31mError[39m: Object literal may only specify known properties, and '"onswipeleft"' does not exist in type '(Omit<HTMLAttributes<HTMLDivElement>, keyof HTMLAttributes<any>> & HTMLAttributes<any>) | (Omit<...> & HTMLAttributes<...> & SwipeEvents)'. (ts)
+[36m			use:swipe={{}}
+			[35monswipeleft[36m={mostrarSiguiente}
+			onswiperight={mostrarAnterior}
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\ProyectoParticipaciones.svelte[39m:269:7
+[31mError[39m: Element implicitly has an 'any' type because expression of type 'any' can't be used to index type 'Record<"Voluntariado" | "Especie" | "Monetaria", string>'. (ts)
+[36m					</span>
+					{[35mTIPO_PARTICIPACION_LABELS[
+						participacion.tipo_participacion?.descripcion || 'Voluntariado'
+					][36m}
+					{#if esOriginal && esEdicionRestringida && !esAdmin}
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\CrearProyecto.svelte[39m:554:51
+[31mError[39m: Parameter 'id' implicitly has an 'any' type. (ts)
+[36m			institucion_id: 0, // Se inyecta en el servidor
+			categoria_ids: categoriasSeleccionadas.filter(([35mid[36m) => Number.isFinite(id) && id > 0),
+			participaciones: participaciones,
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:97:8
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m			// Actualizar estado en el proyecto seleccionado
+			if ([35mproyectoSeleccionado[36m.colaboraciones) {
+				proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:98:5
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m			if (proyectoSeleccionado.colaboraciones) {
+				[35mproyectoSeleccionado[36m.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+					c.id_colaboracion === colaboracionId ? result : c
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:98:43
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m			if (proyectoSeleccionado.colaboraciones) {
+				proyectoSeleccionado.colaboraciones = [35mproyectoSeleccionado[36m.colaboraciones.map((c) =>
+					c.id_colaboracion === colaboracionId ? result : c
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:150:9
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m
+				if ([35mproyectoSeleccionado[36m.colaboraciones) {
+					proyectoSeleccionado.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:151:6
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m				if (proyectoSeleccionado.colaboraciones) {
+					[35mproyectoSeleccionado[36m.colaboraciones = proyectoSeleccionado.colaboraciones.map((c) =>
+						c.id_colaboracion === colaboracionARechazar ? result : c
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:151:44
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m				if (proyectoSeleccionado.colaboraciones) {
+					proyectoSeleccionado.colaboraciones = [35mproyectoSeleccionado[36m.colaboraciones.map((c) =>
+						c.id_colaboracion === colaboracionARechazar ? result : c
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:248:39
+[31mError[39m: Argument of type 'Proyecto | undefined' is not assignable to parameter of type '{ colaboraciones?: Colaboracion[] | undefined; }'.
+  Type 'undefined' is not assignable to type '{ colaboraciones?: Colaboracion[] | undefined; }'. (ts)
+[36m								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesPendientes([35mproyectoSeleccionado[36m)}
+								</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:266:38
+[31mError[39m: Argument of type 'Proyecto | undefined' is not assignable to parameter of type '{ colaboraciones?: Colaboracion[] | undefined; }'.
+  Type 'undefined' is not assignable to type '{ colaboraciones?: Colaboracion[] | undefined; }'. (ts)
+[36m								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesAprobadas([35mproyectoSeleccionado[36m)}
+								</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:284:39
+[31mError[39m: Argument of type 'Proyecto | undefined' is not assignable to parameter of type 'Proyecto'.
+  Type 'undefined' is not assignable to type 'Proyecto'. (ts)
+[36m								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesRechazadas([35mproyectoSeleccionado[36m)}
+								</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:302:34
+[31mError[39m: Argument of type 'Proyecto | undefined' is not assignable to parameter of type '{ colaboraciones?: Colaboracion[] | undefined; }'.
+  Type 'undefined' is not assignable to type '{ colaboraciones?: Colaboracion[] | undefined; }'. (ts)
+[36m								<p class="text-2xl font-bold text-gray-900">
+									{getColaboracionesCount([35mproyectoSeleccionado[36m)}
+								</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:313:11
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m				<div class="hidden gap-6 pl-1 text-sm text-gray-500 lg:flex">
+					{#if [35mproyectoSeleccionado[36m.fecha_fin_tentativa}
+						<p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:316:24
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m							<span class="font-medium text-gray-700">Finalización tentativa:</span>
+							{formatearFecha([35mproyectoSeleccionado[36m.fecha_fin_tentativa)}
+						</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:319:11
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m					{/if}
+					{#if [35mproyectoSeleccionado[36m.created_at}
+						<p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\lib\components\feature\institucion\GestionColaboraciones.svelte[39m:322:24
+[31mError[39m: 'proyectoSeleccionado' is possibly 'undefined'. (ts)
+[36m							<span class="font-medium text-gray-700">Creado el:</span>
+							{formatearFecha([35mproyectoSeleccionado[36m.created_at)}
+						</p>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\routes\(protected)\configuracion\+page.svelte[39m:400:5
+[31mError[39m: Argument of type '"cerrar"' is not assignable to parameter of type 'never'. (ts)
+[36m	cerrarAlClickearFondo={!isLoadingDelete}
+	on:[35mcerrar[36m={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+>
+[39m
+
+c:\Dev\Conectando-Corazones\app\[32msrc\routes\(protected)\reportes\+page.svelte[39m:532:6
+[31mError[39m: Argument of type '"cerrar"' is not assignable to parameter of type 'never'. (ts)
+[36m		titulo="Resolver reporte"
+		on:[35mcerrar[36m={cerrarModalResolucion}
+		anchoMaximo="max-w-md"
+[39m
+
+====================================
+[31msvelte-check found 44 errors and 0 warnings in 16 files
+[39m

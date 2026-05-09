@@ -3,18 +3,22 @@
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 
-	export let estadisticas: {
+	interface Props {
+		estadisticas: {
 		voluntariado: number;
 		monetaria: number;
 		especie: number;
 		totalBeneficiarios: number;
 	};
+	}
+
+	let { estadisticas }: Props = $props();
 
 	// Calculate target percentages
-	$: total = estadisticas.voluntariado + estadisticas.monetaria + estadisticas.especie;
-	$: targetVol = total ? (estadisticas.voluntariado / total) * 100 : 0;
-	$: targetMon = total ? (estadisticas.monetaria / total) * 100 : 0;
-	$: targetEsp = total ? (estadisticas.especie / total) * 100 : 0;
+	let total = $derived(estadisticas.voluntariado + estadisticas.monetaria + estadisticas.especie);
+	let targetVol = $derived(total ? (estadisticas.voluntariado / total) * 100 : 0);
+	let targetMon = $derived(total ? (estadisticas.monetaria / total) * 100 : 0);
+	let targetEsp = $derived(total ? (estadisticas.especie / total) * 100 : 0);
 
 	// Tweened stores
 	const tVol = tweened(0, { duration: 1500, easing: cubicOut });
@@ -30,16 +34,16 @@
 	}
 
 	// Dynamic gradient based on tweened values
-	$: gradient = `conic-gradient(
+	let gradient = $derived(`conic-gradient(
         #3b82f6 0% ${$tVol}%, 
         #10b981 ${$tVol}% ${$tVol + $tMon}%, 
         #fbbf24 ${$tVol + $tMon}% 100%
-    )`;
+    )`);
 </script>
 
 <div
 	use:reveal
-	on:reveal={handleReveal}
+	onreveal={handleReveal}
 	class="reveal-hidden flex h-full flex-col rounded-[2rem] border border-amber-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
 >
 	<h2 class="mb-6 w-full text-center text-xl font-semibold tracking-tight text-white md:text-left">

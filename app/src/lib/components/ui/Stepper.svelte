@@ -2,30 +2,33 @@
 	import { fade } from 'svelte/transition';
 	import { Check } from 'lucide-svelte';
 
-	export let pasoActual = 1;
-	export let pasosTotales = 4;
-	export let etiquetas: string[] = [
-		'Tipo de cuenta',
-		'Datos de cuenta',
-		'Identidad',
-		'Contacto',
-		'Ubicación'
-	];
+	let {
+		pasoActual = 1,
+		pasosTotales = 4,
+		etiquetas = ['Tipo de cuenta', 'Datos de cuenta', 'Identidad', 'Contacto', 'Ubicación']
+	} = $props<{
+		pasoActual?: number;
+		pasosTotales?: number;
+		etiquetas?: string[];
+	}>();
 
-	$: totalNormalizado = Math.max(pasosTotales, 0);
+	let totalNormalizado = $derived(Math.max(pasosTotales, 0));
 	const ETIQUETA_COMPLETADO = 'Completado';
 
-	$: etiquetasEfectivas = Array.from(
-		{ length: totalNormalizado },
-		(_, index) => etiquetas[index] ?? `Paso ${index + 1}`
+	let etiquetasEfectivas = $derived(
+		Array.from(
+			{ length: totalNormalizado },
+			(_, index) => etiquetas[index] ?? `Paso ${index + 1}`
+		)
 	);
 
-	$: porcentajeProgreso = Math.min((pasoActual / totalNormalizado) * 100, 100);
+	let porcentajeProgreso = $derived(Math.min((pasoActual / totalNormalizado) * 100, 100));
 
-	$: etiquetaActual =
+	let etiquetaActual = $derived(
 		pasoActual > 0 && pasoActual <= totalNormalizado
 			? etiquetasEfectivas[pasoActual - 1]
-			: ETIQUETA_COMPLETADO;
+			: ETIQUETA_COMPLETADO
+	);
 </script>
 
 <div class="w-full">

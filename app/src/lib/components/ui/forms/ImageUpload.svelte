@@ -1,10 +1,17 @@
 <script lang="ts">
 	import { validarUrl } from '$lib/utils/validaciones';
 
-	export let value = '';
-	export let placeholder = '';
-	export let label = 'Imagen';
-	export let error: string | undefined = undefined;
+	let {
+		value = $bindable(''),
+		placeholder = '',
+		label = 'Imagen',
+		error = undefined as string | undefined
+	} = $props<{
+		value?: string;
+		placeholder?: string;
+		label?: string;
+		error?: string;
+	}>();
 
 	function handleInput(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -24,7 +31,7 @@
 			name="image-upload"
 			type="url"
 			bind:value
-			on:input={handleInput}
+			oninput={handleInput}
 			{placeholder}
 			class="w-full rounded-lg border border-gray-300 px-3 py-2 transition-colors duration-200 focus:border-transparent focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:outline-none {error
 				? 'border-red-500 ring-red-500 focus:ring-red-500'
@@ -38,10 +45,10 @@
 					src={value}
 					alt="Vista previa"
 					class="h-48 w-full rounded-lg border border-gray-200 object-cover"
-					on:error={() => {
+					onerror={() => {
 						error = 'No se pudo cargar la imagen desde esta URL';
 					}}
-					on:load={() => {
+					onload={() => {
 						if (error === 'No se pudo cargar la imagen desde esta URL') {
 							error = undefined;
 						}
@@ -49,7 +56,7 @@
 				/>
 				<button
 					type="button"
-					on:click={() => {
+					onclick={() => {
 						value = '';
 					}}
 					class="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-sm text-white transition-colors hover:bg-red-600"

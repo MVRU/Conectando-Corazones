@@ -4,13 +4,17 @@
 	import { page } from '$app/stores';
 	import { formatearTamaño, obtenerExtension, esImagen, esPDF } from '$lib/utils/util-archivos';
 
-	export let archivo: Archivo;
+	interface Props {
+		archivo: Archivo;
+	}
 
-	$: esImagenArchivo = esImagen(archivo.tipo_mime);
-	$: esPDFArchivo = esPDF(archivo.tipo_mime);
+	let { archivo }: Props = $props();
+
+	let esImagenArchivo = $derived(esImagen(archivo.tipo_mime));
+	let esPDFArchivo = $derived(esPDF(archivo.tipo_mime));
 
 	// Username del usuario que subió el archivo
-	$: nombreUsuario = archivo.usuario?.username ?? null;
+	let nombreUsuario = $derived(archivo.usuario?.username ?? null);
 
 	// URL completa del archivo
 	function resolverUrl(url: string): string {
@@ -154,7 +158,7 @@
 				{#if esImagenArchivo || esPDFArchivo}
 					<button
 						type="button"
-						on:click={abrirArchivo}
+						onclick={abrirArchivo}
 						class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:outline-none"
 					>
 						<svg
@@ -175,7 +179,7 @@
 				{/if}
 				<button
 					type="button"
-					on:click={descargarArchivo}
+					onclick={descargarArchivo}
 					class="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-500 focus:ring-offset-1 focus:outline-none"
 				>
 					<svg

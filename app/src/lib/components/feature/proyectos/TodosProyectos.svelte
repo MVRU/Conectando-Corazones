@@ -6,11 +6,21 @@
 	import { createProyectosFiltros } from '$lib/stores/proyectosFiltros';
 	import { useProyectosFiltrosUrl } from '$lib/utils/proyectosFiltrosUrl';
 
-	export let proyectos: Proyecto[] = [];
-	export let provinciasDisponibles: string[] = [];
-	export let estadosDisponibles: Array<{ value: string; label: string }> = [];
-	export let categoriasDisponibles: string[] = [];
-	export let tiposParticipacionDisponibles: string[] = [];
+	let {
+		proyectos = [],
+		provinciasDisponibles = [],
+		estadosDisponibles = [],
+		categoriasDisponibles = [],
+		tiposParticipacionDisponibles = [],
+		oncambiarTab
+	} = $props<{
+		proyectos?: Proyecto[];
+		provinciasDisponibles?: string[];
+		estadosDisponibles?: Array<{ value: string; label: string }>;
+		categoriasDisponibles?: string[];
+		tiposParticipacionDisponibles?: string[];
+		oncambiarTab?: (tab: 'todos' | 'mis-proyectos' | 'auditoria') => void;
+	}>();
 
 	const filtros = createProyectosFiltros();
 	const {
@@ -37,22 +47,36 @@
 
 	useProyectosFiltrosUrl(filtros);
 
-	$: proyectosStore.set(proyectos);
-	$: if (provinciasDisponibles.length > 0) {
-		provinciasDisponiblesStore.set(provinciasDisponibles);
-	}
-	$: if (estadosDisponibles.length > 0) {
-		estadosDisponiblesStore.set(estadosDisponibles);
-	}
-	$: if (categoriasDisponibles.length > 0) {
-		categoriasDisponiblesStore.set(categoriasDisponibles);
-	}
-	$: if (tiposParticipacionDisponibles.length > 0) {
-		tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
-	}
+	$effect(() => {
+		proyectosStore.set(proyectos);
+	});
 
-	export function cambiarTab(tab: string) {
-		// Implementar lógica de cambio de tab si es necesario
+	$effect(() => {
+		if (provinciasDisponibles.length > 0) {
+			provinciasDisponiblesStore.set(provinciasDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (estadosDisponibles.length > 0) {
+			estadosDisponiblesStore.set(estadosDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (categoriasDisponibles.length > 0) {
+			categoriasDisponiblesStore.set(categoriasDisponibles);
+		}
+	});
+
+	$effect(() => {
+		if (tiposParticipacionDisponibles.length > 0) {
+			tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
+		}
+	});
+
+	function cambiarTab(tab: 'todos' | 'mis-proyectos' | 'auditoria') {
+		oncambiarTab?.(tab);
 	}
 </script>
 
@@ -84,8 +108,8 @@
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
 	>
-		<svelte:fragment slot="card" let:proyecto>
+		{#snippet card({ proyecto })}
 			<ProyectoCard {proyecto} usuario={$usuario} />
-		</svelte:fragment>
+		{/snippet}
 	</ProyectosBase>
 </section>
