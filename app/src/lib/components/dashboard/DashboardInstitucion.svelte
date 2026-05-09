@@ -16,7 +16,13 @@
 	import EstadisticasAgendaModal from './institucion/EstadisticasAgendaModal.svelte';
 	import GestionarEvidenciasModal from './institucion/GestionarEvidenciasModal.svelte';
 	import EmptyState from './ui/EmptyState.svelte';
+	import { page } from '$app/state';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
 	import type { InstitucionDashboardData } from './institucion/types';
+
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
 
 	// Filters state
@@ -356,6 +362,7 @@
 			<AccionesRapidas
 				solicitudesPendientes={data.metricas.solicitudesPendientes}
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				estaVerificado={data.info.estaVerificado}
 				bind:showEvidenceModal

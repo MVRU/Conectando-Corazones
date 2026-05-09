@@ -660,15 +660,15 @@ export class ObtenerDashboardInstitucion {
 	}
 
 	private async obtenerUltimasResenas(institucionId: number) {
-		const resenas = await this.resenaRepo.findByObjetoAprobadas('institucion', institucionId, 5);
+		const resenas = await this.resenaRepo.findByObjetoAprobadas('usuario', institucionId, 5);
 
 		return resenas.map((r) => ({
 			id: r.id_resena?.toString() || '',
 			usuario: r.username || 'Usuario anónimo',
-			avatarUrl: undefined,
+			avatarUrl: r.autor?.url_foto ?? undefined,
 			calificacion: r.puntaje || 0,
 			comentario: r.contenido || '',
-			fecha: new Date().toISOString()
+			fecha: r.created_at?.toISOString() ?? new Date().toISOString()
 		}));
 	}
 
