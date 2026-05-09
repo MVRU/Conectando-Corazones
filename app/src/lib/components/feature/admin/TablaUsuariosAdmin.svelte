@@ -16,9 +16,21 @@
 
 	let sortBy = $state<'rol' | 'estado_gestion' | 'estado_verificacion' | 'created_at'>('created_at');
 	let sortDir = $state<'asc' | 'desc'>('desc');
+	let busqueda = $state('');
 
-	let usuariosOrdenados = $derived(
-		[...(users ?? [])].sort((a, b) => {
+	let usuariosOrdenados = $derived.by(() => {
+		const termino = busqueda.trim().toLowerCase();
+		const filtrados = termino
+			? (users ?? []).filter((u: UsuarioAdminItemDto) => {
+					const nombreCompleto = `${u.nombre} ${u.apellido}`.toLowerCase();
+					return (
+						nombreCompleto.includes(termino) ||
+						u.username.toLowerCase().includes(termino)
+					);
+				})
+			: (users ?? []);
+
+		return [...filtrados].sort((a, b) => {
 			const dir = sortDir === 'asc' ? 1 : -1;
 			if (sortBy === 'created_at') {
 				const tA = a.created_at ? new Date(a.created_at).getTime() : 0;
@@ -28,8 +40,8 @@
 			const valA = (a[sortBy] ?? '').toString().toLowerCase();
 			const valB = (b[sortBy] ?? '').toString().toLowerCase();
 			return valA.localeCompare(valB) * dir;
-		})
-	);
+		});
+	});
 
 	function changeSort(key: typeof sortBy) {
 		if (sortBy === key) {
@@ -55,9 +67,17 @@
 </script>
 
 <section class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md shadow-sm">
-	<div class="border-b border-white/10 bg-gradient-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5">
-		<h3 class="text-xl font-bold text-white">Gestión de usuarios</h3>
-		<p class="text-sm text-slate-400">Habilitación, inhabilitación y consulta de perfiles.</p>
+	<div class="border-b border-white/10 bg-gradient-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+		<div>
+			<h3 class="text-xl font-bold text-white">Gestión de usuarios</h3>
+			<p class="text-sm text-slate-400">Habilitación, inhabilitación y consulta de perfiles.</p>
+		</div>
+		<input
+			type="text"
+			placeholder="Buscar por nombre o @usuario..."
+			class="rounded-lg border border-white/10 bg-[#151730] px-4 py-2 text-sm text-white placeholder-slate-500 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 sm:w-72"
+			bind:value={busqueda}
+		/>
 	</div>
 
 	<div class="overflow-x-auto">
@@ -103,10 +123,10 @@
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-white/5">
-				{#if users.length === 0}
+				{#if usuariosOrdenados.length === 0}
 					<tr>
 						<td colspan="6" class="px-6 py-12 text-center text-slate-500 italic">
-							Sin resultados para mostrar
+							{busqueda.trim() ? `Sin resultados para "${busqueda.trim()}"` : 'Sin resultados para mostrar'}
 						</td>
 					</tr>
 				{:else}
