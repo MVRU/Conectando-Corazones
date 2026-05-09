@@ -74,7 +74,7 @@ export class ServicioPanelAdmin {
 				prisma.reporte.count({ where: { estado: 'pendiente' } }),
 				prisma.reporte.count({
 					where: {
-						estado: { in: ['resuelto', 'rechazado'] },
+						estado: { in: ['verificado', 'desestimado'] },
 						OR: [
 							{
 								fecha_resolucion: {
