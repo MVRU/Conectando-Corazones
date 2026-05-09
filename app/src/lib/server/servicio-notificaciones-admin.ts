@@ -38,15 +38,19 @@ async function obtenerCorreosDestinatarios(): Promise<string[]> {
 	return obtenerCorreosAdminsDesdeDB();
 }
 
+function escapeHtml(s: string): string {
+	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function renderHtml(payload: DatosNotificacionAdmin): string {
 	const detalleHtml = payload.detalles
-		.map((detalle) => `<li><strong>${detalle.etiqueta}:</strong> ${detalle.valor}</li>`)
+		.map((detalle) => `<li><strong>${escapeHtml(detalle.etiqueta)}:</strong> ${escapeHtml(detalle.valor)}</li>`)
 		.join('');
 
 	return `
 		<div style="font-family: Arial, sans-serif; color: #1f2937; line-height: 1.5;">
-			<h2 style="margin-bottom: 8px;">${payload.titulo}</h2>
-			<p style="margin-top: 0;">${payload.resumen}</p>
+			<h2 style="margin-bottom: 8px;">${escapeHtml(payload.titulo)}</h2>
+			<p style="margin-top: 0;">${escapeHtml(payload.resumen)}</p>
 			<ul>${detalleHtml}</ul>
 		</div>
 	`;
@@ -59,7 +63,7 @@ function renderText(payload: DatosNotificacionAdmin): string {
 
 async function enviarEmail(destinatarios: string[], payload: DatosNotificacionAdmin): Promise<void> {
 	const apiKey = env.RESEND_API_KEY;
-	const sender = env.ADMIN_ALERTS_EMAIL_FROM || 'Conectando Corazones <onboarding@conectando-corazones.app>';
+	const sender = env.ADMIN_ALERTS_EMAIL_FROM || 'onboarding@resend.dev';
 
 	if (!apiKey) {
 		console.warn('[ServicioNotificacionesAdmin] RESEND_API_KEY no configurada. Se omite envío de email.');
