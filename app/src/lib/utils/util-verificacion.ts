@@ -10,7 +10,7 @@ export type EstadoVerificacionDisplay =
 
 import type { Usuario } from '$lib/domain/types/Usuario';
 
-function obtenerUltimaVerificacion(verificaciones: Verificacion[]): Verificacion | null {
+export function obtenerUltimaVerificacion(verificaciones: Verificacion[]): Verificacion | null {
 	if (!verificaciones?.length) return null;
 
 	const getFechaMs = (v: Verificacion) => {
