@@ -3,7 +3,7 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
@@ -20,7 +20,7 @@
 	const motivoRechazo = $derived(data.motivoRechazo);
 	const yaVerificada = $derived(verificacionActual?.estado === 'aprobada');
 	let documentosVerificacion = $state<DocumentoExistente[]>(
-		(data.documentosVerificacion as DocumentoExistente[]) ?? []
+		untrack(() => (data.documentosVerificacion as DocumentoExistente[]) ?? [])
 	);
 	const tieneDocumentacionCargada = $derived(documentosVerificacion.length > 0);
 
