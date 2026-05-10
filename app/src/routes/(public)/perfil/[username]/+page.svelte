@@ -4,7 +4,8 @@
 	import { isAuthenticated, isLoading } from '$lib/stores/auth';
 	import VistaPerfil from '$lib/components/feature/perfil/VistaPerfil.svelte';
 	import type { PageData } from './$types';
-	import { setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { clearBreadcrumbs, setBreadcrumbs, BREADCRUMB_ROUTES } from '$lib/stores/breadcrumbs';
+	import { hasProfileBreadcrumbContext } from '$lib/infrastructure/config/breadcrumbs.config';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -18,20 +19,25 @@
 		proyectoContexto
 	} = $derived.by(() => data);
 
-	// Redirección si es mi perfil y no está autenticado
 	$effect(() => {
 		if (esMiPerfil && !$isLoading && !$isAuthenticated) {
 			goto('/iniciar-sesion');
 		}
 	});
 
-	// Breadcrumbs contextuales
 	$effect(() => {
+		if (!hasProfileBreadcrumbContext(page.url)) {
+			clearBreadcrumbs();
+			return;
+		}
+
 		const from = page.url.searchParams.get('from');
 		const nombrePerfil = perfilUsuario
 			? perfilUsuario.rol === 'institucion'
-				? (perfilUsuario as { nombre_legal?: string; nombre: string }).nombre_legal || perfilUsuario.nombre
-				: (perfilUsuario as { razon_social?: string; nombre: string; apellido: string }).razon_social || `${perfilUsuario.nombre} ${perfilUsuario.apellido}`
+				? (perfilUsuario as { nombre_legal?: string; nombre: string }).nombre_legal ||
+					perfilUsuario.nombre
+				: (perfilUsuario as { razon_social?: string; nombre: string; apellido: string })
+						.razon_social || `${perfilUsuario.nombre} ${perfilUsuario.apellido}`
 			: 'Perfil';
 
 		if (from === 'solicitudes') {
@@ -65,7 +71,7 @@
 				{ label: nombrePerfil }
 			]);
 		} else {
-			setBreadcrumbs([BREADCRUMB_ROUTES.personas, { label: nombrePerfil }]);
+			clearBreadcrumbs();
 		}
 	});
 </script>
@@ -74,7 +80,8 @@
 	<title>
 		{perfilUsuario
 			? perfilUsuario.rol === 'institucion'
-				? (perfilUsuario as { nombre_legal?: string; nombre: string }).nombre_legal || perfilUsuario.nombre
+				? (perfilUsuario as { nombre_legal?: string; nombre: string }).nombre_legal ||
+					perfilUsuario.nombre
 				: `${perfilUsuario.nombre} ${perfilUsuario.apellido}`
 			: 'Perfil'} - Conectando Corazones
 	</title>

@@ -10,7 +10,12 @@
 	import { haReportado, limpiarReporteLog } from '$lib/utils/util-reportes';
 	import { usuario } from '$lib/stores/auth';
 
-	let { proyecto, esAdministrador = false, esCreador = false, tieneReportePendiente = false } = $props<{
+	let {
+		proyecto,
+		esAdministrador = false,
+		esCreador = false,
+		tieneReportePendiente = false
+	} = $props<{
 		proyecto: Proyecto;
 		esAdministrador?: boolean;
 		esCreador?: boolean;
@@ -19,7 +24,6 @@
 
 	let mostrarMenuReportar = $state(false);
 
-	// Sincronizar log local con SSR: si el SSR dice que no hay pendiente, limpiamos el log local.
 	$effect(() => {
 		if ($usuario && proyecto?.id_proyecto && tieneReportePendiente === false) {
 			limpiarReporteLog($usuario.id_usuario!, 'Proyecto', proyecto.id_proyecto!);
@@ -57,7 +61,6 @@
 
 	<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-	<!-- Menú de más acciones -->
 	{#if $usuario && !esCreador && !esAdministrador}
 		<div class="absolute top-4 right-4 z-10">
 			<div class="relative" use:clickOutside={() => (mostrarMenuReportar = false)}>
@@ -124,7 +127,7 @@
 			{#if proyecto.institucion?.nombre_legal}
 				{#if obtenerUrlPerfil(proyecto.institucion)}
 					<a
-						href={obtenerUrlPerfil(proyecto.institucion)}
+						href={`${obtenerUrlPerfil(proyecto.institucion)}?from=proyecto&proyecto=${proyecto.id_proyecto}`}
 						class="text-lg font-medium text-white/90 transition-colors hover:text-white hover:underline"
 					>
 						{proyecto.institucion.nombre_legal}

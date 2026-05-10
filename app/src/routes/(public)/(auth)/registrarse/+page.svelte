@@ -113,6 +113,18 @@
 	});
 
 	const infoPasoActual = $derived(pasosFiltrados[pasoActualSecuencial - 1] || pasosFiltrados[0]);
+	const encabezadoPasoPreferencias = $derived(
+		rol === 'institucion'
+			? {
+					titulo: 'Tu configuración institucional',
+					descripcion:
+						'Definí las causas, tipos de proyectos y formas de participación que mejor representan cómo suele actuar tu institución.'
+				}
+			: {
+					titulo: infoPasoActual.titulo,
+					descripcion: infoPasoActual.descripcion
+				}
+	);
 	let registrando = $state(false);
 	let errorRegistro: string | null = $state(null);
 
@@ -742,10 +754,10 @@
 							<h2
 								class="text-3xl leading-tight font-black tracking-tight text-slate-900 md:text-4xl"
 							>
-								{@render TextHighlight(infoPasoActual.titulo)}
+								{@render TextHighlight(encabezadoPasoPreferencias.titulo)}
 							</h2>
 							<p class="font-medium text-slate-500">
-								{infoPasoActual.descripcion}
+								{encabezadoPasoPreferencias.descripcion}
 							</p>
 						</div>
 
@@ -960,6 +972,7 @@
 
 						<div in:fly={{ y: 30, duration: 800, delay: 400, easing: cubicOut }} class="w-full">
 							<PreferenciasForm
+								{rol}
 								categorias={data.categorias}
 								tiposParticipacion={data.tiposParticipacion}
 								procesando={procesandoFormulario}

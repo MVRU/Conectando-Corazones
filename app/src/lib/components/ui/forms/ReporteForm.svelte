@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { MotivoReporte } from '$lib/domain/types/Reporte';
+	import { clsx } from 'clsx';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
 	let {
@@ -146,9 +147,12 @@
 			id="motivo"
 			bind:value={motivo}
 			disabled={isLoading}
-			class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorMotivo
-				? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-				: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
+			class={clsx(
+				'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+				errorMotivo
+					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+			)}
 		>
 			<option value="">-- Seleccioná un motivo --</option>
 			{#each motivosDisponibles as motivoOpcion}
@@ -182,9 +186,12 @@
 				bind:value={motivoOtro}
 				disabled={isLoading}
 				placeholder="Detalle su motivo..."
-				class="mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorMotivoOtro
-					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
+				class={clsx(
+					'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+					errorMotivoOtro
+						? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+						: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+				)}
 			/>
 			{#if errorMotivoOtro}
 				<p class="mt-2 flex items-center gap-1 text-sm text-red-600">
@@ -220,9 +227,12 @@
 			disabled={isLoading}
 			maxlength="800"
 			placeholder="Describí en detalle la irregularidad observada. Incluí fechas, nombres, montos o cualquier evidencia que ayude a la investigación..."
-			class="mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {errorDescripcion
-				? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-				: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'}"
+			class={clsx(
+				'mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+				errorDescripcion
+					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
+					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+			)}
 		></textarea>
 		{#if errorDescripcion}
 			<p class="mt-2 flex items-center gap-1 text-sm text-red-600">
@@ -237,11 +247,14 @@
 			</p>
 		{/if}
 		<p
-			class="mt-2 text-xs transition-colors duration-200 {descripcion.length < 20
-				? 'text-amber-600'
-				: descripcion.length > 800
-					? 'text-red-600'
-					: 'text-gray-500'}"
+			class={clsx(
+				'mt-2 text-xs transition-colors duration-200',
+				descripcion.length < 20
+					? 'text-amber-600'
+					: descripcion.length > 800
+						? 'text-red-600'
+						: 'text-gray-500'
+			)}
 		>
 			Mínimo 20 caracteres • Máximo 800 • Caracteres: {descripcion.length}
 		</p>

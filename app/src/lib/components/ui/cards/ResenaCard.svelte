@@ -9,6 +9,7 @@
 		Administrador
 	} from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
+	import { IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion | Unipersonal | Administrador;
 
@@ -106,9 +107,14 @@
 			<a href="/perfil/{resena.username}" class="group flex items-center gap-3">
 				{#if autor?.url_foto}
 					<img
-						src={autor.url_foto}
+						src={autor.url_foto || IMAGEN_USUARIO_FALLBACK}
 						alt={nombreMostrar}
 						class="h-8 w-8 rounded-full object-cover ring-2 ring-gray-100 transition-all group-hover:ring-blue-100"
+						onerror={(event) => {
+							const target = event.currentTarget as HTMLImageElement;
+							if (target.src.endsWith(IMAGEN_USUARIO_FALLBACK)) return;
+							target.src = IMAGEN_USUARIO_FALLBACK;
+						}}
 					/>
 				{:else}
 					<div

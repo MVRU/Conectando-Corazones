@@ -1,4 +1,5 @@
 import { prisma } from '$lib/infrastructure/prisma/client';
+import type { Prisma } from '@prisma/client';
 import type {
 	AuditoriaPaginadaAdminDto,
 	EstadoGestionUsuario,
@@ -26,6 +27,12 @@ interface FiltrosUsuarios {
 interface FiltrosAuditoria {
 	idObjeto?: number;
 	usuarioId?: number;
+	tipoObjeto?: string;
+	accion?: string;
+	atributoAfectado?: string;
+	fechaDesde?: Date;
+	fechaHasta?: Date;
+	texto?: string;
 	page?: number;
 	pageSize?: number;
 }
@@ -67,7 +74,7 @@ export class ServicioPanelAdmin {
 				prisma.reporte.count({ where: { estado: 'pendiente' } }),
 				prisma.reporte.count({
 					where: {
-						estado: { in: ['resuelto', 'rechazado'] },
+						estado: { in: ['verificado', 'desestimado'] },
 						OR: [
 							{
 								fecha_resolucion: {
@@ -165,8 +172,20 @@ export class ServicioPanelAdmin {
 			if (!verificacion || !verificacion.usuario_id) {
 				throw new Error('La solicitud de onboarding no existe.');
 			}
+			const usuarioAnterior = await tx.usuario.findUnique({
+				where: { id_usuario: verificacion.usuario_id },
+				select: {
+					estado: true,
+					estado_verificacion: true
+				}
+			});
 
 			const nuevoEstado = accion === 'aprobar' ? 'aprobada' : 'rechazada';
+			const actualizacionUsuario =
+				accion === 'aprobar'
+					? { estado_verificacion: nuevoEstado, estado: 'activo' }
+					: { estado_verificacion: nuevoEstado };
+			const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : (usuarioAnterior?.estado ?? 'inactivo');
 
 			await tx.verificacion.update({
 				where: { id_verificacion: idVerificacion },
@@ -175,10 +194,7 @@ export class ServicioPanelAdmin {
 
 			await tx.usuario.update({
 				where: { id_usuario: verificacion.usuario_id },
-				data:
-					accion === 'aprobar'
-						? { estado_verificacion: nuevoEstado, estado: 'activo' }
-						: { estado_verificacion: nuevoEstado }
+				data: actualizacionUsuario
 			});
 
 			await tx.historialDeCambios.create({
@@ -196,6 +212,42 @@ export class ServicioPanelAdmin {
 					usuario_id: adminId
 				}
 			});
+
+			if (usuarioAnterior && usuarioAnterior.estado_verificacion !== nuevoEstado) {
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: 'Usuario',
+						id_objeto: verificacion.usuario_id,
+						accion: 'Actualizar',
+						atributo_afectado: 'estado_verificacion',
+						valor_anterior: usuarioAnterior.estado_verificacion ?? 'null',
+						valor_nuevo: nuevoEstado,
+						justificacion:
+							accion === 'aprobar'
+								? 'Verificación documental aprobada por administración.'
+								: `Verificación documental rechazada por administración. Motivo: ${motivo?.trim() || 'Sin motivo'}`,
+						usuario_id: adminId
+					}
+				});
+			}
+
+			if (usuarioAnterior && usuarioAnterior.estado !== nuevoEstadoUsuario) {
+				await tx.historialDeCambios.create({
+					data: {
+						tipo_objeto: 'Usuario',
+						id_objeto: verificacion.usuario_id,
+						accion: 'Actualizar',
+						atributo_afectado: 'estado',
+						valor_anterior: usuarioAnterior.estado,
+						valor_nuevo: nuevoEstadoUsuario,
+						justificacion:
+							accion === 'aprobar'
+								? 'Cuenta activada por aprobación de verificación documental.'
+								: 'Cuenta inactivada por rechazo de verificación documental.',
+						usuario_id: adminId
+					}
+				});
+			}
 		});
 	}
 
@@ -212,7 +264,22 @@ export class ServicioPanelAdmin {
 						}
 					: {})
 			},
-			orderBy: { created_at: 'desc' }
+			orderBy: { created_at: 'desc' },
+			include: {
+				_count: {
+					select: {
+						proyectos_institucion: {
+							where: { estado: { descripcion: 'en_curso' } }
+						},
+						colaboraciones: {
+							where: {
+								estado: 'aprobada',
+								proyecto: { estado: { descripcion: 'en_curso' } }
+							}
+						}
+					}
+				}
+			}
 		});
 
 		const mapped = rows.map((u) => ({
@@ -224,7 +291,9 @@ export class ServicioPanelAdmin {
 			estado: u.estado,
 			estado_verificacion: u.estado_verificacion ?? null,
 			estado_gestion: this.mapEstadoGestion(u.estado, u.estado_verificacion),
-			created_at: u.created_at ?? null
+			created_at: u.created_at ?? null,
+			tieneProyectosActivos: u._count.proyectos_institucion > 0,
+			tieneColaboracionesActivas: u._count.colaboraciones > 0
 		}));
 
 		if (!filtros.estadoGestion) return mapped;
@@ -240,11 +309,18 @@ export class ServicioPanelAdmin {
 		const usuario = await this.usuarioRepo.findById(usuarioId, true);
 		if (!usuario) throw new Error('Usuario no encontrado.');
 
-		// Regla CUS 10: solo bloquear por proyectos activos (institución con proyectos en curso).
-		if (!habilitar && usuario.rol === 'institucion') {
-			const tieneProyectosActivos = await this.usuarioRepo.hasActiveProjects(usuarioId);
+		// Regla: no permitir inhabilitar cuentas con actividad vigente.
+		if (!habilitar) {
+			const [tieneProyectosActivos, tieneColaboracionesActivas] = await Promise.all([
+				this.usuarioRepo.hasActiveProjects(usuarioId),
+				this.usuarioRepo.hasActiveCollaborations(usuarioId)
+			]);
+
 			if (tieneProyectosActivos) {
-				throw new Error('No se puede inhabilitar: el usuario tiene proyectos activos');
+				throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
+			}
+			if (tieneColaboracionesActivas) {
+				throw new Error('No se puede inhabilitar: el usuario está participando en proyectos en curso.');
 			}
 		}
 
@@ -330,11 +406,16 @@ export class ServicioPanelAdmin {
 				});
 				if (!reportado) throw new Error('Usuario reportado no encontrado.');
 
-				if (reportado.rol === 'institucion') {
-					const tieneProyectosActivos = await this.usuarioRepo.hasActiveProjects(reporte.id_objeto);
-					if (tieneProyectosActivos) {
-						throw new Error('No se puede inhabilitar: el usuario tiene proyectos activos');
-					}
+				const [tieneProyectosActivos, tieneColaboracionesActivas] = await Promise.all([
+					this.usuarioRepo.hasActiveProjects(reporte.id_objeto),
+					this.usuarioRepo.hasActiveCollaborations(reporte.id_objeto)
+				]);
+
+				if (tieneProyectosActivos) {
+					throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
+				}
+				if (tieneColaboracionesActivas) {
+					throw new Error('No se puede inhabilitar: el usuario está participando en proyectos en curso.');
 				}
 
 				await tx.usuario.update({
@@ -397,9 +478,42 @@ export class ServicioPanelAdmin {
 	async getAuditoria(filtros: FiltrosAuditoria = {}): Promise<AuditoriaPaginadaAdminDto> {
 		const page = filtros.page && filtros.page > 0 ? filtros.page : 1;
 		const pageSize = filtros.pageSize && filtros.pageSize > 0 ? Math.min(filtros.pageSize, 200) : 100;
-		const where = {
+		const where: Prisma.HistorialDeCambiosWhereInput = {
 			...(filtros.idObjeto ? { id_objeto: filtros.idObjeto } : {}),
-			...(filtros.usuarioId ? { usuario_id: filtros.usuarioId } : {})
+			...(filtros.usuarioId ? { usuario_id: filtros.usuarioId } : {}),
+			...(filtros.tipoObjeto
+				? { tipo_objeto: { contains: filtros.tipoObjeto.trim(), mode: 'insensitive' } }
+				: {}),
+			...(filtros.accion ? { accion: { contains: filtros.accion.trim(), mode: 'insensitive' } } : {}),
+			...(filtros.atributoAfectado
+				? {
+						atributo_afectado: {
+							contains: filtros.atributoAfectado.trim(),
+							mode: 'insensitive'
+						}
+					}
+				: {}),
+			...(filtros.fechaDesde || filtros.fechaHasta
+				? {
+						created_at: {
+							...(filtros.fechaDesde ? { gte: filtros.fechaDesde } : {}),
+							...(filtros.fechaHasta ? { lte: filtros.fechaHasta } : {})
+						}
+					}
+				: {}),
+			...(filtros.texto
+				? {
+						OR: [
+							{ justificacion: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ valor_anterior: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ valor_nuevo: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ tipo_objeto: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ accion: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ atributo_afectado: { contains: filtros.texto.trim(), mode: 'insensitive' } },
+							{ usuario: { username: { contains: filtros.texto.trim(), mode: 'insensitive' } } }
+						]
+					}
+				: {})
 		};
 
 		const [total, rows] = await Promise.all([
@@ -407,6 +521,16 @@ export class ServicioPanelAdmin {
 			prisma.historialDeCambios.findMany({
 				where,
 				orderBy: { created_at: 'desc' },
+				include: {
+					usuario: {
+						select: {
+							id_usuario: true,
+							username: true,
+							nombre: true,
+							apellido: true
+						}
+					}
+				},
 				skip: (page - 1) * pageSize,
 				take: pageSize
 			})
@@ -422,7 +546,15 @@ export class ServicioPanelAdmin {
 			valor_nuevo: row.valor_nuevo,
 			justificacion: row.justificacion ?? null,
 			created_at: row.created_at ?? null,
-			usuario_id: row.usuario_id ?? null
+			usuario_id: row.usuario_id ?? null,
+			admin: row.usuario
+				? {
+						id_usuario: row.usuario.id_usuario,
+						username: row.usuario.username,
+						nombre: row.usuario.nombre,
+						apellido: row.usuario.apellido
+					}
+				: null
 		}));
 
 		return { items, total, page, pageSize };

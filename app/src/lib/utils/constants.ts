@@ -169,6 +169,10 @@ export const ICONOS_UNIDAD: Record<string, IconSource> = {
 
 export const DEFAULT_PARTICIPACION_ICON = ArchiveBox;
 
+// --- HEATMAP DE ACTIVIDAD ---
+
+export const HEATMAP_SEMANAS = 26;
+
 // --- COLORES UI ---
 
 export const COLORES_UI = {

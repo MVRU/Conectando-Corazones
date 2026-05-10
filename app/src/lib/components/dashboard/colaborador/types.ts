@@ -144,6 +144,7 @@ export interface ColaboradorDashboardData {
 	heatmapActividad: {
 		fecha: string;
 		intensidad: number;
+		conteo: number;
 	}[];
 	proyectosComunidad: {
 		id: string;

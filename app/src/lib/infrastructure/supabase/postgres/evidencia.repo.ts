@@ -1,9 +1,11 @@
-import { prisma } from '$lib/infrastructure/prisma/client';
+import { type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import type { EvidenciaRepository } from '../../../domain/repositories/EvidenciaRepository';
 import { Evidencia } from '../../../domain/entities/Evidencia';
 import { Archivo } from '../../../domain/entities/Archivo';
 
 export class PostgresEvidenciaRepository implements EvidenciaRepository {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	async create(evidencia: Evidencia): Promise<Evidencia> {
 		if (!evidencia.archivos || evidencia.archivos.length === 0) {
 			throw new Error('No se puede crear una evidencia sin archivos.');
@@ -172,7 +174,7 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 	}
 
 	async findAllByProyecto(proyectoId: number): Promise<Evidencia[]> {
-		const evidencias = await prisma.evidencia.findMany({
+		const evidencias = await this.db.evidencia.findMany({
 			where: {
 				participacion_permitida: {
 					id_proyecto: proyectoId

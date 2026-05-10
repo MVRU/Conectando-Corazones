@@ -3,7 +3,9 @@
 	import { swipe } from '$lib/utils/actions/swipe';
 	import type { Resena } from '$lib/domain/types/Resena';
 
-	let testimonios = $state<Resena[]>([]);
+	import { mockResenas } from '$lib/mocks/mockResenas';
+
+	let testimonios = $state<Resena[]>(mockResenas);
 	let centerIndex = $state(0);
 	let cantidadVisible = $state(3);
 
@@ -48,15 +50,8 @@
 		});
 		if (sectionRef) io.observe(sectionRef);
 
-		fetch('/api/resenas/publicas')
-			.then((res) => (res.ok ? res.json() : []))
-			.then((data) => {
-				testimonios = data;
-				limitarCentro();
-			})
-			.catch(() => {
-				// Si falla la carga, el carrusel simplemente no muestra nada
-			});
+		// Ya no se requiere el fetch, usamos el mockResenas inicializado en el state
+		limitarCentro();
 
 		return () => {
 			window.removeEventListener('resize', actualizarCantidadVisible);

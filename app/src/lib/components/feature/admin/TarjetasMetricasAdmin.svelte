@@ -11,9 +11,8 @@
 	} from 'lucide-svelte';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
-	import { onMount } from 'svelte';
 
-	export let kpis: KpisPanelAdminDto;
+	let { kpis } = $props<{ kpis: KpisPanelAdminDto }>();
 
 	// Animaciones para los números principales
 	const tUsuarios = tweened(0, { duration: 2000, easing: cubicOut });
@@ -21,20 +20,12 @@
 	const tReportes = tweened(0, { duration: 2000, easing: cubicOut });
 	const tOnboarding = tweened(0, { duration: 2000, easing: cubicOut });
 
-	onMount(() => {
+	$effect(() => {
 		tUsuarios.set(kpis.totalUsuarios);
 		tProyectos.set(kpis.proyectosEnCurso);
 		tReportes.set(kpis.reportesPendientes);
 		tOnboarding.set(kpis.onboardingPendiente);
 	});
-
-	// Reactividad para cuando cambian los KPIs (ej: filtros)
-	$: {
-		tUsuarios.set(kpis.totalUsuarios);
-		tProyectos.set(kpis.proyectosEnCurso);
-		tReportes.set(kpis.reportesPendientes);
-		tOnboarding.set(kpis.onboardingPendiente);
-	}
 </script>
 
 <!-- KPIs Principales -->
@@ -103,8 +94,9 @@
 	</div>
 
 	<!-- Reportes -->
-	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10"
+	<a
+		href="/reportes"
+		class="group relative overflow-hidden rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10 block"
 	>
 		<div
 			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-[40px] transition-all duration-700 group-hover:bg-rose-500/20"
@@ -121,7 +113,7 @@
 					<ShieldAlert size={24} />
 				</div>
 			</div>
-			<div class="mt-5">
+			<div class="mt-5 space-y-1">
 				<span
 					class="inline-flex items-center gap-1 text-xs font-bold {kpis.reportesPendientes > 0
 						? 'text-rose-400 animate-pulse'
@@ -133,9 +125,12 @@
 						Todo al día
 					{/if}
 				</span>
+				<p class="text-[11px] font-semibold text-rose-300/90 group-hover:text-rose-200">
+					Ir a Gestión de reportes
+				</p>
 			</div>
 		</div>
-	</div>
+	</a>
 
 	<!-- Validación -->
 	<div
@@ -260,5 +255,3 @@
 		</div>
 	</div>
 </div>
-
-

@@ -22,9 +22,9 @@
 		editValue = '';
 	}
 
-	function handleSubmitParametro(event: SubmitEvent, id: number) {
+	async function handleSubmitParametro(event: SubmitEvent, id: number) {
 		event.preventDefault();
-		void saveParametro(id);
+		await saveParametro(id);
 	}
 
 	async function saveParametro(id: number) {

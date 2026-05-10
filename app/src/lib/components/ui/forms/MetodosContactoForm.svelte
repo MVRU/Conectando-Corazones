@@ -221,7 +221,7 @@
 							id={'valor-' + i}
 							bind:value={contacto.valor}
 							placeholder={getPlaceholder(contacto.tipo_contacto)}
-							error={contacto.valor.trim() ? errors[i] : ''}
+							error={intentoEnvio || camposTocados[i]?.valor ? errors[i] : ''}
 							onblur={() => marcarCampoComoTocado(i, 'valor')}
 							disabled={i === 0 && bloquearPrimerContacto}
 						/>
@@ -250,6 +250,7 @@
 								id={'etiqueta-' + i}
 								bind:value={contacto.etiqueta}
 								placeholder="Ej: Telegram..."
+								error={intentoEnvio || camposTocados[i]?.etiqueta ? errors[i] : ''}
 								onblur={() => marcarCampoComoTocado(i, 'etiqueta')}
 							/>
 						{:else}

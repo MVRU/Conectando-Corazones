@@ -4,6 +4,7 @@
 	import { Check } from 'lucide-svelte';
 
 	interface Props {
+		rol?: 'institucion' | 'colaborador' | null;
 		categorias?: { id_categoria: number; descripcion: string }[];
 		tiposParticipacion?: { id_tipo_participacion: number; descripcion: string }[];
 		procesando?: boolean;
@@ -12,6 +13,7 @@
 	}
 
 	let {
+		rol = null,
 		categorias = [],
 		tiposParticipacion = [],
 		procesando = false,
@@ -22,6 +24,24 @@
 	let categoriasSeleccionadas = $state<number[]>([]);
 	let tiposSeleccionados = $state<number[]>([]);
 	let animarEntrada = $state(false);
+
+	let esInstitucion = $derived(rol === 'institucion');
+	let tituloCategorias = $derived(
+		esInstitucion ? 'Causas y tipos de proyectos frecuentes' : 'Causas que te mueven'
+	);
+	let descripcionCategorias = $derived(
+		esInstitucion
+			? 'Seleccioná las categorías que mejor representan los proyectos que tu institución suele publicar y las causas que acompaña con más frecuencia.'
+			: 'Seleccioná una o más categorías de interés.'
+	);
+	let tituloTipos = $derived(
+		esInstitucion ? 'Formas de participación más alineadas' : '¿Cómo te gustaría ayudar?'
+	);
+	let descripcionTipos = $derived(
+		esInstitucion
+			? 'Marcá las formas de participación más alineadas con la misión de tu institución y las que probablemente vas a usar con más frecuencia al crear proyectos.'
+			: 'Indicanos tus preferencias de participación.'
+	);
 
 	$effect(() => {
 		const timer = setTimeout(() => (animarEntrada = true), 100);
@@ -62,11 +82,11 @@
 		animarEntrada ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
 	)}
 >
-	<div class="space-y-8 rounded-3xl bg-white p-6 shadow-sm border border-slate-100 md:p-10">
+	<div class="space-y-8 rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-10">
 		<section class="space-y-6">
 			<header>
-				<h3 class="text-lg font-semibold text-slate-800">Causas que te mueven</h3>
-				<p class="text-xs text-slate-500">Seleccioná una o más categorías de interés.</p>
+				<h3 class="text-lg font-semibold text-slate-800">{tituloCategorias}</h3>
+				<p class="text-xs text-slate-500">{descripcionCategorias}</p>
 			</header>
 			<div class="flex flex-wrap gap-3">
 				{#each categorias as categoria (categoria.id_categoria)}
@@ -94,8 +114,8 @@
 
 		<section class="space-y-6">
 			<header>
-				<h3 class="text-lg font-semibold text-slate-800 text-left">¿Cómo te gustaría ayudar?</h3>
-				<p class="text-xs text-slate-500 text-left">Indicanos tus preferencias de participación.</p>
+				<h3 class="text-left text-lg font-semibold text-slate-800">{tituloTipos}</h3>
+				<p class="text-left text-xs text-slate-500">{descripcionTipos}</p>
 			</header>
 			<div class="flex flex-wrap gap-3">
 				{#each tiposParticipacion as tipo (tipo.id_tipo_participacion)}
@@ -132,7 +152,7 @@
 				label={procesando ? 'Guardando...' : 'Finalizar registro'}
 				onclick={finalizar}
 				disabled={procesando}
-				customClass="w-full sm:w-auto min-w-[120px]"
+				customClass="w-full min-w-[120px] sm:w-auto"
 			/>
 		</div>
 	</div>

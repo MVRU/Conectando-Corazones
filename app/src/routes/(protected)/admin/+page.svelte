@@ -5,22 +5,35 @@
 	import TarjetasMetricasAdmin from '$lib/components/feature/admin/TarjetasMetricasAdmin.svelte';
 	import TablaOnboardingAdmin from '$lib/components/feature/admin/TablaOnboardingAdmin.svelte';
 	import TablaUsuariosAdmin from '$lib/components/feature/admin/TablaUsuariosAdmin.svelte';
-	import TablaReportesAdmin from '$lib/components/feature/admin/TablaReportesAdmin.svelte';
 	import TablaAuditoriaAdmin from '$lib/components/feature/admin/TablaAuditoriaAdmin.svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
-	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'reportes' | 'auditoria'>(
+	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'auditoria'>(
 		'dashboard'
 	);
 	let loading = $state(false);
 
-	let kpis = $state(data.kpis);
-	let onboarding = $state(data.onboarding);
-	let usuarios = $state(data.usuarios);
-	let reportes = $state(data.reportes);
-	let logs = $state(data.logs);
-	let auditoriaPaginacion = $state(data.auditoriaPaginacion);
+	let kpisOverride = $state<PageData['kpis'] | null>(null);
+	let onboardingOverride = $state<PageData['onboarding'] | null>(null);
+	let usuariosOverride = $state<PageData['usuarios'] | null>(null);
+	let logsOverride = $state<PageData['logs'] | null>(null);
+	let auditoriaPaginacionOverride = $state<PageData['auditoriaPaginacion'] | null>(null);
+
+	let kpis = $derived(kpisOverride ?? data.kpis);
+	let onboarding = $derived(onboardingOverride ?? data.onboarding);
+	let usuarios = $derived(usuariosOverride ?? data.usuarios);
+	let logs = $derived(logsOverride ?? data.logs);
+	let auditoriaPaginacion = $derived(auditoriaPaginacionOverride ?? data.auditoriaPaginacion);
+
+	$effect(() => {
+		data;
+		kpisOverride = null;
+		onboardingOverride = null;
+		usuariosOverride = null;
+		logsOverride = null;
+		auditoriaPaginacionOverride = null;
+	});
 
 	let filtrosUsuarios = $state({
 		rol: '',
@@ -30,25 +43,30 @@
 
 	let filtrosAuditoria = $state({
 		idObjeto: '' as string | number,
-		usuarioId: '' as string | number
+		usuarioId: '' as string | number,
+		tipoObjeto: '',
+		accion: '',
+		atributoAfectado: '',
+		fechaDesde: '',
+		fechaHasta: '',
+		texto: ''
 	});
 
 	const tabs = [
 		{ id: 'dashboard', label: 'Inicio' },
 		{ id: 'onboarding', label: 'Validación documental' },
 		{ id: 'usuarios', label: 'Usuarios' },
-		{ id: 'reportes', label: 'Reportes' },
 		{ id: 'auditoria', label: 'Auditoría' }
 	] as const;
 
 	async function refreshDashboard() {
 		const res = await fetch('/api/admin/dashboard');
-		if (res.ok) kpis = await res.json();
+		if (res.ok) kpisOverride = await res.json();
 	}
 
 	async function refreshOnboarding() {
 		const res = await fetch('/api/admin/onboarding');
-		if (res.ok) onboarding = await res.json();
+		if (res.ok) onboardingOverride = await res.json();
 	}
 
 	async function refreshUsuarios() {
@@ -57,12 +75,7 @@
 		if (filtrosUsuarios.estado) query.set('estado', filtrosUsuarios.estado);
 		if (filtrosUsuarios.fechaAltaDesde) query.set('fechaAltaDesde', filtrosUsuarios.fechaAltaDesde);
 		const res = await fetch(`/api/admin/usuarios?${query.toString()}`);
-		if (res.ok) usuarios = await res.json();
-	}
-
-	async function refreshReportes() {
-		const res = await fetch('/api/admin/reportes');
-		if (res.ok) reportes = await res.json();
+		if (res.ok) usuariosOverride = await res.json();
 	}
 
 	async function onAprobarOnboarding(detail: { idVerificacion: number }) {
@@ -147,47 +160,33 @@
 		goto(`/perfil/${detail.username}`);
 	}
 
-	async function onResolverReporte(detail: {
-		reporteId: number;
-		accion: 'desestimar' | 'inhabilitar_cuenta' | 'forzar_baja_proyecto';
-		comentario: string;
-	}) {
-		loading = true;
-		try {
-			const res = await fetch('/api/admin/reportes', {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(detail)
-			});
-			const body = await res.json().catch(() => null);
-			if (!res.ok) throw new Error(body?.error || 'No se pudo resolver reporte');
-			toastStore.show({ variant: 'success', message: 'Reporte resuelto.' });
-			await Promise.all([refreshReportes(), refreshDashboard(), refreshUsuarios()]);
-		} catch (error) {
-			toastStore.show({
-				variant: 'error',
-				message: error instanceof Error ? error.message : 'Error al resolver reporte.'
-			});
-		} finally {
-			loading = false;
-		}
-	}
-
 	async function fetchAuditoria(page: number = 1) {
 		loading = true;
 		try {
 			const query = new URLSearchParams();
 			const idObjeto = String(filtrosAuditoria.idObjeto ?? '').trim();
 			const usuarioId = String(filtrosAuditoria.usuarioId ?? '').trim();
+			const tipoObjeto = filtrosAuditoria.tipoObjeto.trim();
+			const accion = filtrosAuditoria.accion.trim();
+			const atributoAfectado = filtrosAuditoria.atributoAfectado.trim();
+			const fechaDesde = filtrosAuditoria.fechaDesde.trim();
+			const fechaHasta = filtrosAuditoria.fechaHasta.trim();
+			const texto = filtrosAuditoria.texto.trim();
 			if (idObjeto) query.set('id_objeto', idObjeto);
 			if (usuarioId) query.set('usuario_id', usuarioId);
+			if (tipoObjeto) query.set('tipo_objeto', tipoObjeto);
+			if (accion) query.set('accion', accion);
+			if (atributoAfectado) query.set('atributo_afectado', atributoAfectado);
+			if (fechaDesde) query.set('fecha_desde', fechaDesde);
+			if (fechaHasta) query.set('fecha_hasta', fechaHasta);
+			if (texto) query.set('texto', texto);
 			query.set('page', String(page));
 			query.set('pageSize', String(auditoriaPaginacion.pageSize || 100));
 			const res = await fetch(`/api/admin/auditoria?${query.toString()}`);
 			const body = await res.json().catch(() => null);
 			if (!res.ok) throw new Error(body?.error || 'No se pudo consultar auditoría');
-			logs = body.items;
-			auditoriaPaginacion = {
+			logsOverride = body.items;
+			auditoriaPaginacionOverride = {
 				total: body.total,
 				page: body.page,
 				pageSize: body.pageSize
@@ -202,7 +201,16 @@
 		}
 	}
 
-	async function onBuscarAuditoria(detail: { idObjeto: string | number; usuarioId: string | number }) {
+	async function onBuscarAuditoria(detail: {
+		idObjeto: string | number;
+		usuarioId: string | number;
+		tipoObjeto: string;
+		accion: string;
+		atributoAfectado: string;
+		fechaDesde: string;
+		fechaHasta: string;
+		texto: string;
+	}) {
 		filtrosAuditoria = detail;
 		await fetchAuditoria(1);
 	}
@@ -347,16 +355,6 @@
 					{loading}
 					onToggleEstado={onToggleEstadoUsuario}
 					onVerPerfil={onVerPerfil}
-				/>
-			</div>
-		{/if}
-
-		{#if activeTab === 'reportes'}
-			<div class="animate-fade-in-up delay-200">
-				<TablaReportesAdmin
-					reportes={reportes}
-					{loading}
-					onResolver={onResolverReporte}
 				/>
 			</div>
 		{/if}

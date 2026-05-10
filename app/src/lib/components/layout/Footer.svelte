@@ -1,8 +1,15 @@
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
+
 	let visible = $state(false);
 	let hasAnimated = $state(false);
 	let footerRef: HTMLElement | undefined;
 	const anio = new Date().getFullYear();
+
+	afterNavigate(() => {
+		visible = true;
+		hasAnimated = true;
+	});
 
 	$effect(() => {
 		const obs = new IntersectionObserver(

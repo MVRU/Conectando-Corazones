@@ -13,7 +13,7 @@
 		construirDireccionCompleta,
 		generarUrlGoogleMaps
 	} from '$lib/utils/util-proyectos';
-	import { goto, pushState, invalidateAll } from '$app/navigation';
+	import { goto, pushState, invalidateAll, preloadData } from '$app/navigation';
 	import GestionarProyectoDropdown from '$lib/components/feature/proyectos/GestionarProyectoDropdown.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -30,13 +30,14 @@
 	import { getEstadoCodigo, estadoLabel } from '$lib/utils/util-estados';
 	import { colaboracionesVisibles, obtenerNombreColaborador } from '$lib/utils/util-colaboraciones';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
-	import { ordenarPorProgreso, calcularProgresoTotal } from '$lib/utils/util-progreso';
+	import { ordenarPorProgreso } from '$lib/utils/util-progreso';
 	import { layoutStore } from '$lib/stores/layout';
 	import { usuario } from '$lib/stores/auth';
 	import type { ColaboracionTipoParticipacion } from '$lib/domain/types/ColaboracionTipoParticipacion';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
+	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
@@ -65,6 +66,7 @@
 	} from '@steeze-ui/heroicons';
 
 	let proyecto: Proyecto = $derived(data.proyecto);
+	let chatAviso = $derived(data.chatAviso ?? false);
 	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
 	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
 	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
@@ -214,13 +216,10 @@
 	}
 
 	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
+	let chatHabilitado = $derived(colaboradoresAprobados.length > 0);
 
-	let progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
-	let diasFaltantes = $derived(proyecto?.fecha_fin_tentativa ? diasRestantes(proyecto.fecha_fin_tentativa) : 999);
 	let mostrarAccionFinalizar = $derived(
-		esCreador &&
-		estadoCodigo === 'en_curso' &&
-		(progresoTotal >= 80 || diasFaltantes <= 0)
+		esCreador && estadoCodigo === 'en_curso'
 	);
 
 	function clasesChipColaborador(tipo?: string) {
@@ -462,11 +461,13 @@
 		}
 
 		if (esCreador || esColaboradorAprobado) {
-			acc.push({
-				label: 'Ir al chat',
-				icon: ChatBubbleLeftRight,
-				onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
-			});
+			if (chatHabilitado) {
+				acc.push({
+					label: 'Ir al chat',
+					icon: ChatBubbleLeftRight,
+					onclick: () => goto(`/mensajes/${proyecto.id_proyecto}`)
+				});
+			}
 
 			if (esCreador) {
 				acc.push({
@@ -512,7 +513,7 @@
 					acc.push({
 						label: 'Evaluar finalización',
 						icon: ClipboardDocumentCheck,
-						onclick: () => goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`)
+						onclick: irAEvaluarFinalizacion
 					});
 				}
 			}
@@ -534,6 +535,12 @@
 						icon: Pencil,
 						onclick: () => goto(`/proyectos/${proyecto.id_proyecto}/editar`),
 						disabled: !esEditable
+					});
+
+					acc.push({
+						label: 'Finalizar actividades',
+						icon: CheckCircle,
+						onclick: () => (mostrarModalCeseActividades = true)
 					});
 				}
 
@@ -568,6 +575,22 @@
 
 		return acc;
 	});
+
+	$effect(() => {
+		if (
+			mostrarMenuGestion &&
+			esColaboradorAprobado &&
+			estadoCodigo === 'en_revision' &&
+			proyecto?.id_proyecto
+		) {
+			void preloadData(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+		}
+	});
+
+	function irAEvaluarFinalizacion() {
+		if (!proyecto?.id_proyecto) return;
+		goto(`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`);
+	}
 
 	async function handleReportSuccess() {
 		if ($usuario?.id_usuario && proyecto?.id_proyecto) {
@@ -780,6 +803,14 @@
 			<div
 				class="animate-fade-up mx-auto w-full max-w-7xl space-y-6 px-4 sm:space-y-12 sm:px-6 lg:px-8"
 			>
+				{#if chatAviso}
+					<Alert
+						variant="info"
+						title="Chat todavía no habilitado"
+						message="El chat del proyecto se habilita cuando hay al menos un colaborador aprobado."
+					/>
+				{/if}
+
 				<ProyectoHeader
 					{proyecto}
 					{esAdministrador}

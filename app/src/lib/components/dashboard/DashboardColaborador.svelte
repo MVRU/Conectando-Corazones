@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Filter, ChevronRight, ChevronDown, MapPin, Sparkles, Users } from 'lucide-svelte';
+	import { Filter, ChevronRight, ChevronDown, MapPin, Sparkles, Users, HeartOff, Calendar, LayoutGrid } from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './colaborador/AccionesRapidas.svelte';
 	import MetricasPanel from './colaborador/MetricasPanel.svelte';
 	import SeguimientoObjetivos from './colaborador/SeguimientoObjetivos.svelte';
 	import EstadisticasAyuda from './colaborador/EstadisticasAyuda.svelte';
-	import ActividadReciente from './colaborador/ActividadReciente.svelte';
 	import UltimasResenas from './colaborador/UltimasResenas.svelte';
 	import Novedades from './Novedades.svelte';
 	import EstadisticasProyectoModal from './colaborador/EstadisticasProyectoModal.svelte';
@@ -16,7 +15,14 @@
 	import EvaluarCierreModal from './colaborador/EvaluarCierreModal.svelte';
 	import HeatmapActividad from './colaborador/HeatmapActividad.svelte';
 	import ProyectosComunidad from './colaborador/ProyectosComunidad.svelte';
+	import EmptyState from './ui/EmptyState.svelte';
+	import { page } from '$app/state';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
 	import type { ColaboradorDashboardData } from './colaborador/types';
+
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
 
 	// Estado de los filtros
@@ -51,8 +57,7 @@
 	}
 
 	import jsPDF from 'jspdf';
-	import autoTable from 'jspdf-autotable';
-	import { FileText } from 'lucide-svelte';
+	import { PdfService } from '$lib/utils/pdf.service';
 
 	onMount(() => {
 		mounted = true;
@@ -61,17 +66,6 @@
 		return () => window.removeEventListener('resize', checkFilterScroll);
 	});
 
-	async function loadImage(url: string): Promise<HTMLImageElement> {
-		return new Promise((resolve, reject) => {
-			const img = new Image();
-			img.crossOrigin = 'Anonymous';
-			img.src = url;
-			img.onload = () => resolve(img);
-			img.onerror = reject;
-		});
-	}
-
-	import { PdfService } from '$lib/utils/pdf.service';
 	interface Props {
 		data: ColaboradorDashboardData;
 	}
@@ -292,6 +286,7 @@
 			<AccionesRapidas
 				solicitudesPendientes={data.metricas.solicitudesPendientes}
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				bind:showEvidenceModal
 				bind:showClosureModal
@@ -435,11 +430,31 @@
 			<div class="flex flex-col gap-6 lg:col-span-7">
 				<!-- Seguimiento de Objetivos -->
 				<div class="min-h-[400px]">
-					<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
+						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+							<EmptyState 
+								message="No estás participando en proyectos" 
+								description="Explora los proyectos de la comunidad y comienza a colaborar para ver tus objetivos aquí."
+								icon={HeartOff}
+							/>
+						</div>
+					{/if}
 				</div>
 				<!-- Heatmap de Actividad -->
 				<div class="flex-1">
-					<HeatmapActividad data={data.heatmapActividad} />
+					{#if data.heatmapActividad && data.heatmapActividad.length > 0}
+						<HeatmapActividad data={data.heatmapActividad} />
+					{:else}
+						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm p-8">
+							<EmptyState 
+								message="Sin actividad registrada" 
+								description="Tu historial de colaboraciones aparecerá aquí conforme participes en proyectos solidarios."
+								icon={Calendar}
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -452,7 +467,6 @@
 
 				<!-- Últimas Reseñas -->
 				<div class="min-h-[300px]">
-					<!-- TODO: implementar módulo de reseñas -->
 					<UltimasResenas resenas={data.ultimasResenas} />
 				</div>
 			</div>
@@ -462,7 +476,17 @@
 		<div class="animate-fade-in-up grid grid-cols-1 gap-6 delay-300 md:grid-cols-2">
 			<!-- Proyectos de la Comunidad -->
 			<div class="min-h-[200px]">
-				<ProyectosComunidad proyectos={data.proyectosComunidad} />
+				{#if data.proyectosComunidad && data.proyectosComunidad.length > 0}
+					<ProyectosComunidad proyectos={data.proyectosComunidad} />
+				{:else}
+					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
+						<EmptyState 
+							message="No hay recomendaciones" 
+							description="Prueba actualizar tus categorías preferidas para que podamos recomendarte proyectos afines."
+							icon={LayoutGrid}
+						/>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Novedades -->

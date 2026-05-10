@@ -9,19 +9,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw error(403, 'Acceso denegado');
 	}
 
-	const [kpis, onboarding, usuarios, reportes, auditoria] = await Promise.all([
+	const [kpis, onboarding, usuarios, auditoria] = await Promise.all([
 		service.getKpis(),
 		service.getOnboardingPendientes(),
 		service.getUsuarios({}),
-		service.getReportes(),
-		service.getAuditoria({ page: 1, pageSize: 100 })
+		service.getAuditoria({ page: 1, pageSize: 20 })
 	]);
 
 	return {
 		kpis,
 		onboarding,
 		usuarios,
-		reportes,
 		logs: auditoria.items,
 		auditoriaPaginacion: {
 			total: auditoria.total,

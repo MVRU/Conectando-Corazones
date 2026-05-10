@@ -1,4 +1,8 @@
-import { prisma } from '$lib/infrastructure/prisma/client';
+import {
+	ejecutarEnTransaccionExistenteOTotal,
+	type PrismaDbClient,
+	prisma
+} from '$lib/infrastructure/prisma/client';
 import type { SolicitudFinalizacionRepository } from '$lib/domain/repositories/SolicitudFinalizacionRepository';
 import type { SolicitudFinalizacion } from '$lib/domain/types/SolicitudFinalizacion';
 
@@ -7,8 +11,10 @@ const archivoInclude = { include: { usuario: true } } as const;
 export class PostgresSolicitudFinalizacionRepository
 	implements SolicitudFinalizacionRepository
 {
+	constructor(private readonly db: PrismaDbClient = prisma) {}
+
 	async findByProyectoId(proyectoId: number): Promise<SolicitudFinalizacion | null> {
-		const solicitud = await prisma.solicitudFinalizacion.findFirst({
+		const solicitud = await this.db.solicitudFinalizacion.findFirst({
 			where: {
 				proyecto_id: proyectoId
 			},
@@ -37,7 +43,7 @@ export class PostgresSolicitudFinalizacionRepository
 	}
 
 	async findRechazadasByProyectoId(proyectoId: number): Promise<SolicitudFinalizacion[]> {
-		const solicitudes = await prisma.solicitudFinalizacion.findMany({
+		const solicitudes = await this.db.solicitudFinalizacion.findMany({
 			where: {
 				proyecto_id: proyectoId,
 				estado: 'rechazada'
@@ -67,7 +73,7 @@ export class PostgresSolicitudFinalizacionRepository
 		estado: string,
 		_motivoRechazo?: string
 	): Promise<SolicitudFinalizacion> {
-		const updated = await prisma.solicitudFinalizacion.update({
+		const updated = await this.db.solicitudFinalizacion.update({
 			where: { id_solicitud: id },
 			data: {
 				estado
@@ -92,7 +98,7 @@ export class PostgresSolicitudFinalizacionRepository
 	}
 
 	async countRechazadasByProyectoId(proyectoId: number): Promise<number> {
-		const count = await prisma.solicitudFinalizacion.count({
+		const count = await this.db.solicitudFinalizacion.count({
 			where: {
 				proyecto_id: proyectoId,
 				estado: 'rechazada'
@@ -111,7 +117,7 @@ export class PostgresSolicitudFinalizacionRepository
 			throw new Error('La solicitud de finalización debe incluir al menos una evidencia.');
 		}
 
-		const created = await prisma.$transaction(async (tx) => {
+		const created = await ejecutarEnTransaccionExistenteOTotal(this.db, async (tx) => {
 			const nuevaSolicitud = await tx.solicitudFinalizacion.create({
 				data: {
 					proyecto_id: solicitud.proyecto_id,

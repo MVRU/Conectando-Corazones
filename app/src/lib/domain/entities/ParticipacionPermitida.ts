@@ -32,8 +32,9 @@ export class ParticipacionPermitida implements IParticipacionPermitida {
 	}
 
 	private validar(): void {
-		if (this.objetivo <= 0) {
-			throw new Error('El objetivo debe ser mayor a cero.');
+		// El objetivo debe ser un número válido (>= 0)
+		if (typeof this.objetivo !== 'number' || this.objetivo < 0) {
+			throw new Error('El objetivo debe ser un número válido mayor o igual a cero.');
 		}
 		if (this.actual && this.actual < 0) {
 			throw new Error('La cantidad actual no puede ser negativa.');
