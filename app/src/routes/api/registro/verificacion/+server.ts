@@ -205,7 +205,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		// Notificar solo en creación inicial (la verificación es nueva y quedó pendiente)
-		if (resultado.estado === 'pendiente' && resultado.documentos.length === archivosParaSubir.length) {
+		if (resultado.estado === 'pendiente') {
 			await notificarSolicitudVerificacionAdmin({
 				usuarioId: usuarioIdInt,
 				username: usuarioSesion.username,
