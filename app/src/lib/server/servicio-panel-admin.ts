@@ -225,7 +225,7 @@ export class ServicioPanelAdmin {
 						justificacion:
 							accion === 'aprobar'
 								? 'Verificación documental aprobada por administración.'
-								: `Verificación documental rechazada por administración. Motivo: ${motivo?.trim() || 'Sin motivo'}`,
+								: 'Verificación documental rechazada por administración.',
 						usuario_id: adminId
 					}
 				});
@@ -536,6 +536,22 @@ export class ServicioPanelAdmin {
 			})
 		]);
 
+		const usuarioIds = [
+			...new Set(
+				rows
+					.filter((r) => r.tipo_objeto === 'Usuario')
+					.map((r) => r.id_objeto)
+			)
+		];
+		const usuariosAfectados =
+			usuarioIds.length > 0
+				? await prisma.usuario.findMany({
+						where: { id_usuario: { in: usuarioIds } },
+						select: { id_usuario: true, username: true }
+					})
+				: [];
+		const usuarioMap = new Map(usuariosAfectados.map((u) => [u.id_usuario, u.username]));
+
 		const items: RegistroAuditoriaAdminDto[] = rows.map((row) => ({
 			id_cambio: row.id_cambio,
 			tipo_objeto: row.tipo_objeto,
@@ -554,7 +570,9 @@ export class ServicioPanelAdmin {
 						nombre: row.usuario.nombre,
 						apellido: row.usuario.apellido
 					}
-				: null
+				: null,
+			objetoUsername:
+				row.tipo_objeto === 'Usuario' ? (usuarioMap.get(row.id_objeto) ?? null) : null
 		}));
 
 		return { items, total, page, pageSize };

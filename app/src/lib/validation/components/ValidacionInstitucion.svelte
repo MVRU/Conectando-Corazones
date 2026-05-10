@@ -5,16 +5,31 @@
 
 	type MetodoVerificacion = 'manual' | 'renaper' | 'omitido';
 
+interface DocumentoExistente {
+	id_archivo: number;
+	nombre_original: string | null;
+	url: string;
+	tipo_mime: string | null;
+	tamanio_bytes: number | null;
+	created_at: string | null;
+}
+
 	interface Props {
 		permitirOmitir?: boolean;
+		modoActualizacion?: boolean;
 		onsubmit: (detail: { files: File[] }) => void;
+	documentosExistentes?: DocumentoExistente[];
+	ondeleteexisting?: (idArchivo: number) => Promise<void>;
 		onskip?: () => void;
 		oncancel?: () => void;
 	}
 
 	let {
 		permitirOmitir = true,
+		modoActualizacion = false,
 		onsubmit,
+		documentosExistentes = [],
+		ondeleteexisting = async () => {},
 		onskip = () => {},
 		oncancel = () => {}
 	}: Props = $props();
@@ -102,12 +117,53 @@
 		archivosSeleccionados = archivosSeleccionados.filter((_, i) => i !== index);
 	}
 
+	function formatearTamanio(bytes: number | null) {
+		if (!bytes) return 'Tamaño no disponible';
+		if (bytes < 1024) return `${bytes} B`;
+		if (bytes < 1024 * 1024) return `${Math.ceil(bytes / 1024)} KB`;
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	function formatearFecha(fechaIso: string | null) {
+		if (!fechaIso) return 'Fecha no disponible';
+		const fecha = new Date(fechaIso);
+		if (Number.isNaN(fecha.getTime())) return 'Fecha no disponible';
+		return fecha.toLocaleDateString('es-AR', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric'
+		});
+	}
+
+	async function eliminarDocumentoExistente(idArchivo: number) {
+		try {
+			await ondeleteexisting(idArchivo);
+			documentosExistentes = documentosExistentes.filter((doc) => doc.id_archivo !== idArchivo);
+			toastStore.show({
+				variant: 'success',
+				title: 'Archivo eliminado',
+				message: 'El documento se eliminó correctamente.'
+			});
+		} catch (error) {
+			toastStore.show({
+				variant: 'error',
+				title: 'No se pudo eliminar',
+				message:
+					error instanceof Error
+						? error.message
+						: 'No pudimos eliminar el documento. Intentá nuevamente.'
+			});
+		}
+	}
+
 	function enviarDocumentos() {
 		if (metodoSeleccionado !== 'manual') {
 			return;
 		}
 
-		if (!archivosSeleccionados.length) {
+		const puedeEnviarSinNuevosArchivos = modoActualizacion && documentosExistentes.length > 0;
+
+		if (!archivosSeleccionados.length && !puedeEnviarSinNuevosArchivos) {
 			errorFormulario = 'Debés adjuntar al menos un documento antes de continuar.';
 			return;
 		}
@@ -229,6 +285,51 @@
 				</div>
 
 				<div class="space-y-2">
+					{#if documentosExistentes.length}
+						<div class="mb-3 rounded-lg border border-sky-200 bg-sky-50 p-4">
+							<p class="text-sm font-semibold text-sky-900">Documentos ya enviados</p>
+							<p class="mt-1 text-xs text-sky-800">
+								Podés abrirlos para revisarlos o eliminarlos si querés reemplazarlos.
+							</p>
+							<ul class="mt-3 space-y-2">
+								{#each documentosExistentes as doc (doc.id_archivo)}
+									<li
+										class="flex flex-col gap-3 rounded-lg border border-sky-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
+									>
+										<div class="min-w-0">
+											<p
+												class="truncate text-sm font-medium text-slate-900"
+												title={doc.nombre_original ?? 'Documento'}
+											>
+												{doc.nombre_original ?? `Documento #${doc.id_archivo}`}
+											</p>
+											<p class="text-xs text-slate-500">
+												{formatearTamanio(doc.tamanio_bytes)} · Subido el {formatearFecha(doc.created_at)}
+											</p>
+										</div>
+										<div class="flex items-center gap-2">
+											<a
+												href={doc.url}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="inline-flex items-center rounded-md border border-sky-300 bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-900 transition hover:bg-sky-200"
+											>
+												Abrir
+											</a>
+											<button
+												type="button"
+												class="inline-flex items-center rounded-md border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+												onclick={() => eliminarDocumentoExistente(doc.id_archivo)}
+											>
+												Eliminar
+											</button>
+										</div>
+									</li>
+								{/each}
+							</ul>
+						</div>
+					{/if}
+
 					<label class="block text-sm font-medium text-gray-900" for="documentos">
 						Documentación respaldatoria
 					</label>
@@ -304,7 +405,7 @@
 					/>
 					<Button
 						type="button"
-						label="Enviar"
+						label={modoActualizacion ? 'Enviar para revisión' : 'Enviar'}
 						onclick={enviarDocumentos}
 						customClass="w-full sm:w-auto"
 						disabled={botonEnviarDeshabilitado}

@@ -89,6 +89,7 @@ export interface RegistroAuditoriaAdminDto {
 		nombre: string;
 		apellido: string;
 	} | null;
+	objetoUsername: string | null;
 }
 
 export interface AuditoriaPaginadaAdminDto {

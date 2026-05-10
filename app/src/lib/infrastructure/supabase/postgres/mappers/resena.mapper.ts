@@ -1,4 +1,3 @@
-import type { Resena as PrismaResena } from '@prisma/client';
 import { Resena } from '$lib/domain/entities/Resena';
 import type { TipoObjetoResena } from '$lib/domain/types/Resena';
 
@@ -19,7 +18,7 @@ export class ResenaMapper {
 		});
 	}
 
-	static toPrisma(resena: Resena): Omit<PrismaResena, 'id_resena'> {
+	static toPrisma(resena: Resena): Record<string, unknown> {
 		return {
 			tipo_objeto: resena.tipo_objeto ?? null,
 			id_objeto: resena.id_objeto ?? null,

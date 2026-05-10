@@ -365,6 +365,9 @@
 				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				estaVerificado={data.info.estaVerificado}
+				estadoVerificacion={data.info.estadoVerificacion ?? null}
+				requiereVerificacionDocumental={data.info.requiereVerificacionDocumental ?? false}
+				documentacionVerificacionEnRevision={data.info.documentacionVerificacionEnRevision ?? false}
 				bind:showEvidenceModal
 				onExportPDF={generatePDF}
 			/>

@@ -7,7 +7,9 @@ import type { InstitucionDashboardData } from '$lib/components/dashboard/institu
 import type { Colaboracion } from '$lib/domain/entities/Colaboracion';
 import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { Usuario } from '$lib/domain/entities/Usuario';
+import type { EstadoVerificacion } from '$lib/domain/types/Verificacion';
 import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+import { obtenerUltimaVerificacion } from '$lib/utils/util-verificacion';
 
 export class ObtenerDashboardInstitucion {
 	constructor(
@@ -16,6 +18,31 @@ export class ObtenerDashboardInstitucion {
 		private usuarioRepo: UsuarioRepository,
 		private resenaRepo: ResenaRepository
 	) {}
+
+	private obtenerEstadoVerificacionActual(institucion: Usuario): EstadoVerificacion | null {
+		const ultima = obtenerUltimaVerificacion(institucion.verificaciones ?? []);
+		if (ultima?.estado === 'aprobada') return 'aprobada';
+		if (ultima?.estado === 'pendiente') return 'pendiente';
+		if (ultima?.estado === 'rechazada') return 'rechazada';
+		return (institucion.estado_verificacion as EstadoVerificacion | null) ?? null;
+	}
+
+	private obtenerMetaVerificacion(institucion: Usuario): {
+		estado: EstadoVerificacion | null;
+		requiereVerificacionDocumental: boolean;
+		documentacionVerificacionEnRevision: boolean;
+	} {
+		const estado = this.obtenerEstadoVerificacionActual(institucion);
+		const tieneSolicitudVerificacion = (institucion.verificaciones?.length ?? 0) > 0;
+		const requiereVerificacionDocumental = !tieneSolicitudVerificacion && estado !== 'aprobada';
+		const documentacionVerificacionEnRevision = estado === 'pendiente' && tieneSolicitudVerificacion;
+
+		return {
+			estado,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		};
+	}
 
 	async execute(institucionId: number): Promise<InstitucionDashboardData> {
 		const [institucion, proyectos] = await Promise.all([
@@ -61,11 +88,12 @@ export class ObtenerDashboardInstitucion {
 			(p) => p.estado === 'pendiente_solicitud_cierre'
 		).length;
 
-		const estaVerificado = !!(
-			institucion.estado_verificacion === 'aprobada' ||
-			(institucion.verificaciones &&
-				institucion.verificaciones.some((v: any) => v.estado === 'aprobada'))
-		);
+		const {
+			estado: estadoVerificacion,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		} = this.obtenerMetaVerificacion(institucion);
+		const estaVerificado = estadoVerificacion === 'aprobada';
 
 		const colaboradoresUnicos = new Set(
 			colaboracionesAprobadas.map((c) => c.colaborador_id).filter(Boolean)
@@ -102,6 +130,9 @@ export class ObtenerDashboardInstitucion {
 						? `${institucion.localidad.nombre}, ${institucion.localidad.provincia.nombre}`
 						: (institucion as any).domicilio_legal || 'Sin ubicación',
 				estaVerificado,
+				estadoVerificacion,
+				requiereVerificacionDocumental,
+				documentacionVerificacionEnRevision,
 				bio: institucion.descripcion || 'Sin descripción disponible.'
 			},
 			metricas: {

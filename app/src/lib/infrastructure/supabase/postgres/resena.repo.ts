@@ -74,7 +74,7 @@ export class PostgresResenaRepository implements ResenaRepository {
 
 	async create(resena: Resena): Promise<Resena> {
 		try {
-			const data = ResenaMapper.toPrisma(resena);
+			const data = ResenaMapper.toPrisma(resena) as any;
 			const created = await prisma.resena.create({ data });
 			return ResenaMapper.toDomain(created);
 		} catch (error) {
