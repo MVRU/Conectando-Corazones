@@ -45,6 +45,8 @@ export interface UsuarioAdminItemDto {
 	estado_verificacion: string | null;
 	estado_gestion: EstadoGestionUsuario;
 	created_at: Date | null;
+	tieneProyectosActivos: boolean;
+	tieneColaboracionesActivas: boolean;
 }
 
 export interface ReporteAdminItemDto {

@@ -264,7 +264,22 @@ export class ServicioPanelAdmin {
 						}
 					: {})
 			},
-			orderBy: { created_at: 'desc' }
+			orderBy: { created_at: 'desc' },
+			include: {
+				_count: {
+					select: {
+						proyectos_institucion: {
+							where: { estado: { descripcion: 'en_curso' } }
+						},
+						colaboraciones: {
+							where: {
+								estado: 'aprobada',
+								proyecto: { estado: { descripcion: 'en_curso' } }
+							}
+						}
+					}
+				}
+			}
 		});
 
 		const mapped = rows.map((u) => ({
@@ -276,7 +291,9 @@ export class ServicioPanelAdmin {
 			estado: u.estado,
 			estado_verificacion: u.estado_verificacion ?? null,
 			estado_gestion: this.mapEstadoGestion(u.estado, u.estado_verificacion),
-			created_at: u.created_at ?? null
+			created_at: u.created_at ?? null,
+			tieneProyectosActivos: u._count.proyectos_institucion > 0,
+			tieneColaboracionesActivas: u._count.colaboraciones > 0
 		}));
 
 		if (!filtros.estadoGestion) return mapped;
@@ -299,11 +316,6 @@ export class ServicioPanelAdmin {
 				this.usuarioRepo.hasActiveCollaborations(usuarioId)
 			]);
 
-			if (tieneProyectosActivos && tieneColaboracionesActivas) {
-				throw new Error(
-					'No se puede inhabilitar: el usuario tiene proyectos en curso y participaciones activas.'
-				);
-			}
 			if (tieneProyectosActivos) {
 				throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
 			}
@@ -399,11 +411,6 @@ export class ServicioPanelAdmin {
 					this.usuarioRepo.hasActiveCollaborations(reporte.id_objeto)
 				]);
 
-				if (tieneProyectosActivos && tieneColaboracionesActivas) {
-					throw new Error(
-						'No se puede inhabilitar: el usuario tiene proyectos en curso y participaciones activas.'
-					);
-				}
 				if (tieneProyectosActivos) {
 					throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
 				}

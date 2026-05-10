@@ -52,6 +52,17 @@
 		}
 	}
 
+	function tooltipInhabilitar(user: UsuarioAdminItemDto): string | null {
+		if (user.estado_gestion === 'inhabilitado') return null;
+		if (user.tieneProyectosActivos) {
+			return 'No se puede inhabilitar: tiene proyectos en curso.';
+		}
+		if (user.tieneColaboracionesActivas) {
+			return 'No se puede inhabilitar: tiene participaciones activas.';
+		}
+		return null;
+	}
+
 	function confirmarCambioEstado(user: UsuarioAdminItemDto) {
 		const habilitar = user.estado_gestion === 'inhabilitado';
 		const accion = habilitar ? 'habilitar' : 'inhabilitar';
@@ -188,16 +199,29 @@
 										disabled={loading}
 										class="!bg-white/10 !text-white !border-white/20 hover:!bg-white/20 !rounded-full shadow-lg"
 									/>
-									<Button
-										label={user.estado_gestion === 'inhabilitado' ? 'Habilitar' : 'Inhabilitar'}
-										size="sm"
-										variant={user.estado_gestion === 'inhabilitado' ? 'primary' : 'danger'}
-										onclick={() => confirmarCambioEstado(user)}
-										disabled={loading}
-										class={user.estado_gestion === 'inhabilitado'
-											? '!bg-emerald-600 !hover:bg-emerald-700 !text-white !rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40'
-											: '!bg-rose-600 !hover:bg-rose-700 !text-white !rounded-full shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40'}
-									/>
+									{#if tooltipInhabilitar(user)}
+										<span title={tooltipInhabilitar(user) ?? ''} class="cursor-not-allowed">
+											<Button
+												label="Inhabilitar"
+												size="sm"
+												variant="danger"
+												onclick={() => {}}
+												disabled={true}
+												class="!bg-rose-600/40 !text-white/40 !rounded-full pointer-events-none"
+											/>
+										</span>
+									{:else}
+										<Button
+											label={user.estado_gestion === 'inhabilitado' ? 'Habilitar' : 'Inhabilitar'}
+											size="sm"
+											variant={user.estado_gestion === 'inhabilitado' ? 'primary' : 'danger'}
+											onclick={() => confirmarCambioEstado(user)}
+											disabled={loading}
+											class={user.estado_gestion === 'inhabilitado'
+												? '!bg-emerald-600 !hover:bg-emerald-700 !text-white !rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40'
+												: '!bg-rose-600 !hover:bg-rose-700 !text-white !rounded-full shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40'}
+										/>
+									{/if}
 								</div>
 							</td>
 						</tr>
