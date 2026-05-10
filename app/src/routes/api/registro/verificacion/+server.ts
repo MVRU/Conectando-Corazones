@@ -284,6 +284,10 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 
 		if (storageError) {
 			console.error('Error al eliminar archivo de storage:', storageError);
+			return json(
+				{ success: false, error: 'No se pudo eliminar el archivo del almacenamiento. Intentá de nuevo.' },
+				{ status: 500 }
+			);
 		}
 
 		await prisma.archivo.delete({
