@@ -80,14 +80,6 @@ export function esInstitucionVerificada(
 	return false;
 }
 
-export function puedeEditarDocumentacion(estado: string | undefined | null): boolean {
-	return estado === 'aprobada' || estado === 'rechazada' || estado === undefined || estado === null;
-}
-
-export function requiereEnvioParaRevision(estado: string | undefined | null): boolean {
-	return estado === 'aprobada' || estado === 'rechazada';
-}
-
 // Filtra las verificaciones de un usuario específico
 export function obtenerVerificacionesUsuario(
 	usuarioId: number | undefined,
