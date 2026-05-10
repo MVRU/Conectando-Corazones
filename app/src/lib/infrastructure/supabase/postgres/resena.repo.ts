@@ -17,8 +17,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 	async findByObjeto(tipoObjeto: string, idObjeto: number): Promise<Resena[]> {
 		try {
 			const resenas = await prisma.resena.findMany({
-				where: { tipo_objeto: tipoObjeto, id_objeto: idObjeto, aprobado: true } as any,
-				orderBy: { created_at: 'desc' } as any
+				where: { tipo_objeto: tipoObjeto, id_objeto: idObjeto, aprobado: true },
+				orderBy: { created_at: 'desc' },
+				include: { autor: true }
 			});
 			return resenas.map(ResenaMapper.toDomain);
 		} catch (error) {
@@ -30,8 +31,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 	async findByAutor(autorId: number): Promise<Resena[]> {
 		try {
 			const resenas = await prisma.resena.findMany({
-				where: { autor_id: autorId } as any,
-				orderBy: { created_at: 'desc' } as any
+				where: { autor_id: autorId },
+				orderBy: { created_at: 'desc' },
+				include: { autor: true }
 			});
 			return resenas.map(ResenaMapper.toDomain);
 		} catch (error) {
@@ -47,7 +49,7 @@ export class PostgresResenaRepository implements ResenaRepository {
 	): Promise<Resena | null> {
 		try {
 			const resena = await prisma.resena.findFirst({
-				where: { autor_id: autorId, tipo_objeto: tipoObjeto, id_objeto: idObjeto } as any
+				where: { autor_id: autorId, tipo_objeto: tipoObjeto, id_objeto: idObjeto }
 			});
 			return resena ? ResenaMapper.toDomain(resena) : null;
 		} catch (error) {
@@ -59,8 +61,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 	async findAll(soloAprobadas: boolean = false): Promise<Resena[]> {
 		try {
 			const resenas = await prisma.resena.findMany({
-				where: (soloAprobadas ? { aprobado: true } : undefined) as any,
-				orderBy: { created_at: 'desc' } as any
+				where: soloAprobadas ? { aprobado: true } : undefined,
+				orderBy: { created_at: 'desc' },
+				include: { autor: true }
 			});
 			return resenas.map(ResenaMapper.toDomain);
 		} catch (error) {
@@ -93,8 +96,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 	async findByUsuario(usuarioId: number): Promise<Resena[]> {
 		try {
 			const resenas = await prisma.resena.findMany({
-				where: { autor_id: usuarioId } as any,
-				orderBy: { created_at: 'desc' } as any
+				where: { autor_id: usuarioId },
+				orderBy: { created_at: 'desc' },
+				include: { autor: true }
 			});
 			return resenas.map(ResenaMapper.toDomain);
 		} catch (error) {
@@ -110,8 +114,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 	): Promise<Resena[]> {
 		try {
 			const resenas = await prisma.resena.findMany({
-				where: { tipo_objeto: tipoObjeto, id_objeto: idObjeto, aprobado: true } as any,
-				orderBy: { created_at: 'desc' } as any,
+				where: { tipo_objeto: tipoObjeto, id_objeto: idObjeto, aprobado: true },
+				orderBy: { created_at: 'desc' },
+				include: { autor: true },
 				take: limite
 			});
 			return resenas.map(ResenaMapper.toDomain);
