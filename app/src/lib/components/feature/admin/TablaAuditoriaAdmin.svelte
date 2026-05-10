@@ -103,7 +103,7 @@
 				/>
 			</div>
 			<div class="space-y-2">
-				<label for="usuario_id" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">ID Usuario Admin</label>
+				<label for="usuario_id" class="text-xs font-bold text-slate-500 uppercase tracking-tighter">ID Usuario</label>
 				<input
 					id="usuario_id"
 					type="text"
@@ -195,7 +195,7 @@
 		<div class="border-b border-white/10 bg-gradient-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5 flex justify-between items-center">
 			<div>
 				<h3 class="text-xl font-bold text-white">Bitácora de auditoría</h3>
-				<p class="text-sm text-slate-400">Historial completo de acciones administrativas.</p>
+				<p class="text-sm text-slate-400">Historial completo de acciones.</p>
 			</div>
 			<div class="text-right">
 				<span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
@@ -209,7 +209,7 @@
 				<thead class="bg-white/5">
 					<tr>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Fecha</th>
-						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Admin</th>
+						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Usuario</th>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Acción</th>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Objeto</th>
 						<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Detalle del cambio</th>
