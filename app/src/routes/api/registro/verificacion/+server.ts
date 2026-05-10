@@ -142,7 +142,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 			if (uploadError) {
 				console.error(`Error subiendo archivo ${file.name}:`, uploadError);
-
 				throw new Error(`Fallo al subir el archivo ${file.name} a Storage.`);
 			}
 
@@ -154,63 +153,66 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
+		const dataArchivos = archivosParaSubir.map((arch) => ({
+			nombre_original: arch.name,
+			url: arch.path,
+			tipo_mime: arch.type,
+			tamanio_bytes: arch.size,
+			descripcion: 'Documentación de verificación',
+			usuario: { connect: { id_usuario: usuarioIdInt } }
+		}));
+
 		const resultado = await prisma.$transaction(async (tx) => {
-			let verificacion = await tx.verificacion.findFirst({
-				where: {
-					usuario_id: usuarioIdInt,
-					estado: 'pendiente'
-				},
+			const verificacionExistente = await tx.verificacion.findFirst({
+				where: { usuario_id: usuarioIdInt },
+				orderBy: [{ created_at: 'desc' }, { id_verificacion: 'desc' }],
 				include: { documentos: true }
 			});
 
-			const dataArchivos = archivosParaSubir.map((arch) => ({
-				nombre_original: arch.name,
-				url: arch.path,
-				tipo_mime: arch.type,
-				tamanio_bytes: arch.size,
-				descripcion: 'Documentación de verificación',
-				usuario: { connect: { id_usuario: usuarioIdInt } }
-			}));
-
-			if (!verificacion) {
-				verificacion = await tx.verificacion.create({
-					data: {
-						tipo: 'institucional',
-						estado: 'pendiente',
-						usuario: { connect: { id_usuario: usuarioIdInt } },
-						fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
-						documentos: {
-							create: dataArchivos
-						}
-					},
-					include: { documentos: true }
+			if (verificacionExistente?.estado === 'pendiente') {
+				throw Object.assign(new Error('No podés modificar la documentación mientras está en revisión.'), {
+					statusCode: 409
 				});
-			} else {
-				verificacion = await tx.verificacion.update({
-					where: { id_verificacion: verificacion.id_verificacion },
-					data: {
-						documentos: {
-							create: dataArchivos
-						}
-					},
+			}
+
+			if (verificacionExistente) {
+				// aprobada o rechazada: agregar docs sin cambiar estado
+				return tx.verificacion.update({
+					where: { id_verificacion: verificacionExistente.id_verificacion },
+					data: { documentos: { create: dataArchivos } },
 					include: { documentos: true }
 				});
 			}
+
+			// Sin verificación previa: crear nueva en pendiente
+			const nueva = await tx.verificacion.create({
+				data: {
+					tipo: 'institucional',
+					estado: 'pendiente',
+					usuario: { connect: { id_usuario: usuarioIdInt } },
+					fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+					documentos: { create: dataArchivos }
+				},
+				include: { documentos: true }
+			});
 
 			await tx.usuario.update({
 				where: { id_usuario: usuarioIdInt },
 				data: { estado_verificacion: 'pendiente' }
 			});
 
-			return verificacion;
+			return nueva;
 		});
 
-		await notificarSolicitudVerificacionAdmin({
-			usuarioId: usuarioIdInt,
-			username: usuarioSesion.username,
-			tipoSolicitud: usuarioSesion.rol,
-			cantidadArchivos: files.length
-		});
+		// Notificar solo en creación inicial (la verificación es nueva y quedó pendiente)
+		if (resultado.estado === 'pendiente' && resultado.documentos.length === archivosParaSubir.length) {
+			await notificarSolicitudVerificacionAdmin({
+				usuarioId: usuarioIdInt,
+				username: usuarioSesion.username,
+				tipoSolicitud: usuarioSesion.rol,
+				cantidadArchivos: files.length
+			});
+		}
 
 		return json({
 			success: true,
@@ -223,12 +225,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	} catch (error) {
 		console.error('Error en carga de verificación:', error);
 
+		const statusCode = (error as any)?.statusCode ?? 500;
 		return json(
 			{
 				success: false,
 				error: error instanceof Error ? error.message : 'Error interno al procesar archivos'
 			},
-			{ status: 500 }
+			{ status: statusCode }
 		);
 	}
 };
@@ -268,6 +271,13 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 			);
 		}
 
+		if (archivo.verificacion.estado === 'pendiente') {
+			return json(
+				{ success: false, error: 'No podés modificar la documentación mientras está en revisión.' },
+				{ status: 409 }
+			);
+		}
+
 		const { error: storageError } = await supabaseAdmin.storage
 			.from('documentos-privados')
 			.remove([archivo.url]);
@@ -290,6 +300,112 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 			{
 				success: false,
 				error: 'Error interno al eliminar el archivo.'
+			},
+			{ status: 500 }
+		);
+	}
+};
+
+export const PATCH: RequestHandler = async ({ request, locals }) => {
+	try {
+		const sesion = validarInstitucionSesion(locals.usuario);
+		if (!sesion.ok) return sesion.response;
+
+		const usuarioSesion = locals.usuario!;
+		const usuarioId = usuarioSesion.id_usuario!;
+
+		const body = await request.json().catch(() => ({}));
+		if (body?.accion !== 'enviar-para-revision') {
+			return json({ success: false, error: 'Acción no reconocida.' }, { status: 400 });
+		}
+
+		const verificacion = await prisma.verificacion.findFirst({
+			where: { usuario_id: usuarioId },
+			orderBy: [{ created_at: 'desc' }, { id_verificacion: 'desc' }],
+			include: { _count: { select: { documentos: true } } }
+		});
+
+		if (!verificacion) {
+			return json(
+				{ success: false, error: 'No tenés una verificación activa.' },
+				{ status: 409 }
+			);
+		}
+
+		if (verificacion.estado === 'pendiente') {
+			return json(
+				{ success: false, error: 'Tu documentación ya está en revisión.' },
+				{ status: 409 }
+			);
+		}
+
+		if (verificacion.estado !== 'aprobada' && verificacion.estado !== 'rechazada') {
+			return json(
+				{ success: false, error: 'No podés enviar para revisión desde el estado actual.' },
+				{ status: 409 }
+			);
+		}
+
+		if (verificacion._count.documentos === 0) {
+			return json(
+				{ success: false, error: 'Tenés que cargar al menos un documento antes de enviar.' },
+				{ status: 400 }
+			);
+		}
+
+		const estadoAnterior = verificacion.estado;
+
+		await prisma.$transaction(async (tx) => {
+			await tx.verificacion.update({
+				where: { id_verificacion: verificacion.id_verificacion },
+				data: { estado: 'pendiente' }
+			});
+
+			await tx.usuario.update({
+				where: { id_usuario: usuarioId },
+				data: { estado_verificacion: 'pendiente' }
+			});
+
+			await tx.historialDeCambios.createMany({
+				data: [
+					{
+						tipo_objeto: 'Verificacion',
+						id_objeto: verificacion.id_verificacion,
+						accion: 'Actualizar',
+						atributo_afectado: 'estado',
+						valor_anterior: estadoAnterior,
+						valor_nuevo: 'pendiente',
+						justificacion: 'Institución solicita nueva revisión de documentación.',
+						usuario_id: usuarioId
+					},
+					{
+						tipo_objeto: 'Usuario',
+						id_objeto: usuarioId,
+						accion: 'Actualizar',
+						atributo_afectado: 'estado_verificacion',
+						valor_anterior: estadoAnterior,
+						valor_nuevo: 'pendiente',
+						justificacion: 'Institución solicita nueva revisión de documentación.',
+						usuario_id: usuarioId
+					}
+				]
+			});
+		});
+
+		await notificarSolicitudVerificacionAdmin({
+			usuarioId,
+			username: usuarioSesion.username,
+			tipoSolicitud: usuarioSesion.rol,
+			cantidadArchivos: verificacion._count.documentos
+		});
+
+		return json({ success: true, message: 'Documentación enviada para revisión.' });
+	} catch (error) {
+		console.error('Error al enviar para revisión:', error);
+		return json(
+			{
+				success: false,
+				error: 'Error interno al procesar la solicitud.'
 			},
 			{ status: 500 }
 		);

@@ -16,6 +16,7 @@ interface DocumentoExistente {
 
 	interface Props {
 		permitirOmitir?: boolean;
+		modoActualizacion?: boolean;
 		onsubmit: (detail: { files: File[] }) => void;
 	documentosExistentes?: DocumentoExistente[];
 	ondeleteexisting?: (idArchivo: number) => Promise<void>;
@@ -25,6 +26,7 @@ interface DocumentoExistente {
 
 	let {
 		permitirOmitir = true,
+		modoActualizacion = false,
 		onsubmit,
 		documentosExistentes = [],
 		ondeleteexisting = async () => {},
@@ -159,7 +161,9 @@ interface DocumentoExistente {
 			return;
 		}
 
-		if (!archivosSeleccionados.length) {
+		const puedeEnviarSinNuevosArchivos = modoActualizacion && documentosExistentes.length > 0;
+
+		if (!archivosSeleccionados.length && !puedeEnviarSinNuevosArchivos) {
 			errorFormulario = 'Debés adjuntar al menos un documento antes de continuar.';
 			return;
 		}
@@ -401,7 +405,7 @@ interface DocumentoExistente {
 					/>
 					<Button
 						type="button"
-						label="Enviar"
+						label={modoActualizacion ? 'Enviar para revisión' : 'Enviar'}
 						onclick={enviarDocumentos}
 						customClass="w-full sm:w-auto"
 						disabled={botonEnviarDeshabilitado}

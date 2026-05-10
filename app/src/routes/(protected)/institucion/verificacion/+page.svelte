@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 	import { onMount, untrack } from 'svelte';
 	import type { PageData } from './$types';
@@ -18,11 +18,32 @@
 
 	const verificacionActual = $derived(data.verificacionActual);
 	const motivoRechazo = $derived(data.motivoRechazo);
-	const yaVerificada = $derived(verificacionActual?.estado === 'aprobada');
 	let documentosVerificacion = $state<DocumentoExistente[]>(
 		untrack(() => (data.documentosVerificacion as DocumentoExistente[]) ?? [])
 	);
-	const tieneDocumentacionCargada = $derived(documentosVerificacion.length > 0);
+
+	const estado = $derived(verificacionActual?.estado ?? null);
+	const enEdicion = $derived(estado === 'aprobada' || estado === 'rechazada');
+
+	const tituloPagina = $derived.by(() => {
+		if (!verificacionActual) return 'Verificación de la institución';
+		if (estado === 'pendiente') return 'Documentación en revisión';
+		if (estado === 'aprobada') return 'Actualizar documentación verificada';
+		if (estado === 'rechazada') return 'Reenviar documentación';
+		return 'Verificación de la institución';
+	});
+
+	const subtituloPagina = $derived.by(() => {
+		if (!verificacionActual)
+			return 'Completá la documentación que respalda a tu organización. Nuestro equipo la revisará de forma confidencial.';
+		if (estado === 'pendiente')
+			return 'Tu documentación está siendo evaluada. Cuando el equipo de administración responda, podrás volver a editarla.';
+		if (estado === 'aprobada')
+			return 'Podés agregar o eliminar documentos y enviarlos para revisión cuando estés listo.';
+		if (estado === 'rechazada')
+			return 'Corregí o reemplazá la documentación y volvé a enviarla para revisión.';
+		return '';
+	});
 
 	onMount(() => {
 		setBreadcrumbs([
@@ -33,27 +54,50 @@
 
 	async function manejarSubida(detail: { files: File[] }) {
 		try {
-			const formData = new FormData();
-			detail.files.forEach((f) => formData.append('files', f));
-			const res = await fetch('/api/registro/verificacion', {
-				method: 'POST',
-				body: formData
-			});
-			const body = await res.json();
-			if (!res.ok) {
-				throw new Error(body.error || 'No se pudieron subir los archivos');
+			// Upload new files if any were selected
+			if (detail.files.length > 0) {
+				const formData = new FormData();
+				detail.files.forEach((f) => formData.append('files', f));
+				const res = await fetch('/api/registro/verificacion', {
+					method: 'POST',
+					body: formData
+				});
+				const body = await res.json();
+				if (!res.ok) {
+					throw new Error(body.error || 'No se pudieron subir los archivos');
+				}
 			}
-			toastStore.show({
-				variant: 'success',
-				title: 'Documentación recibida',
-				message: 'Tu verificación quedó en proceso de revisión.'
-			});
-			goto('/institucion/mi-panel');
+
+			// For aprobada/rechazada: also send for revision (PATCH)
+			if (enEdicion) {
+				const res = await fetch('/api/registro/verificacion', {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ accion: 'enviar-para-revision' })
+				});
+				const body = await res.json();
+				if (!res.ok) {
+					throw new Error(body.error || 'No se pudo enviar para revisión');
+				}
+				toastStore.show({
+					variant: 'success',
+					title: 'Enviado para revisión',
+					message: 'El equipo de administración revisará tu documentación.'
+				});
+				await invalidateAll();
+			} else {
+				// Initial upload
+				toastStore.show({
+					variant: 'success',
+					title: 'Documentación recibida',
+					message: 'Tu verificación quedó en proceso de revisión.'
+				});
+				goto('/institucion/mi-panel');
+			}
 		} catch (e) {
-			console.error(e);
 			toastStore.show({
 				variant: 'error',
-				title: 'Error al subir',
+				title: 'Error',
 				message: e instanceof Error ? e.message : 'Intentá de nuevo en unos minutos.'
 			});
 		}
@@ -81,14 +125,11 @@
 
 <div class="mx-auto max-w-3xl px-4 py-10">
 	<div class="mb-8 text-center">
-		<h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Verificación de la institución</h1>
-		<p class="mt-2 text-slate-600">
-			Completá o reenviá la documentación que respalda a tu organización. Nuestro equipo la revisará
-			de forma confidencial.
-		</p>
+		<h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">{tituloPagina}</h1>
+		<p class="mt-2 text-slate-600">{subtituloPagina}</p>
 	</div>
 
-	{#if verificacionActual?.estado === 'rechazada'}
+	{#if estado === 'rechazada'}
 		<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
 			<h2 class="text-sm font-semibold">Tu verificación fue rechazada</h2>
 			<p class="mt-1 text-sm">
@@ -100,30 +141,48 @@
 				</p>
 			{/if}
 		</div>
-	{:else if verificacionActual?.estado === 'pendiente'}
-		<div class="mb-6 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-900">
-			{#if tieneDocumentacionCargada}
-				<h2 class="text-sm font-semibold">Tu documentación está en revisión</h2>
-				<p class="mt-1 text-sm">
-					Podés revisarla, eliminar archivos erróneos y agregar nuevos documentos desde esta sección.
-				</p>
-			{:else}
-				<h2 class="text-sm font-semibold">Tu verificación sigue pendiente de documentación</h2>
-				<p class="mt-1 text-sm">
-					Aún no hay documentos asociados. Cargá la documentación para iniciar la evaluación.
-				</p>
-			{/if}
-		</div>
 	{/if}
 
-	{#if yaVerificada}
-		<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
-			<h2 class="text-sm font-semibold">Tu cuenta ya está verificada</h2>
-			<p class="mt-1 text-sm">No necesitás enviar más documentación por ahora.</p>
-			<div class="mt-4">
+	{#if estado === 'pendiente'}
+		<div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sky-900">
+			<h2 class="text-sm font-semibold">Tu documentación está en revisión</h2>
+			<p class="mt-1 text-sm">
+				No podés editarla hasta que el equipo de administración responda.
+			</p>
+
+			{#if documentosVerificacion.length > 0}
+				<ul class="mt-4 space-y-2">
+					{#each documentosVerificacion as doc (doc.id_archivo)}
+						<li
+							class="flex flex-col gap-2 rounded-lg border border-sky-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
+						>
+							<div class="min-w-0">
+								<p
+									class="truncate text-sm font-medium text-slate-900"
+									title={doc.nombre_original ?? 'Documento'}
+								>
+									{doc.nombre_original ?? `Documento #${doc.id_archivo}`}
+								</p>
+							</div>
+							<a
+								href={doc.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="inline-flex items-center rounded-md border border-sky-300 bg-sky-100 px-3 py-1.5 text-xs font-semibold text-sky-900 transition hover:bg-sky-200"
+							>
+								Abrir
+							</a>
+						</li>
+					{/each}
+				</ul>
+			{:else}
+				<p class="mt-3 text-sm italic text-sky-700">No hay documentos cargados aún.</p>
+			{/if}
+
+			<div class="mt-5">
 				<button
 					type="button"
-					class="inline-flex items-center rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-100"
+					class="inline-flex items-center rounded-lg border border-sky-300 bg-white px-4 py-2 text-sm font-medium text-sky-800 hover:bg-sky-100"
 					onclick={() => goto('/institucion/mi-panel')}
 				>
 					Volver al panel
@@ -133,6 +192,7 @@
 	{:else}
 		<ValidacionInstitucion
 			permitirOmitir={false}
+			modoActualizacion={enEdicion}
 			onsubmit={manejarSubida}
 			documentosExistentes={documentosVerificacion}
 			ondeleteexisting={eliminarDocumentoExistente}

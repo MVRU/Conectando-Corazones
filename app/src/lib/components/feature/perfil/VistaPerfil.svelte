@@ -443,6 +443,24 @@
 							</div>
 						{/if}
 
+						{#if esMiPerfil && estadoVerificacion === 'verificado_documental'}
+							<div class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 shadow-sm">
+								<h4 class="flex items-center gap-2 text-sm font-semibold text-emerald-900">
+									<ShieldCheck class="h-4 w-4" />
+									Documentación verificada
+								</h4>
+								<p class="mt-2 text-sm text-emerald-800">
+									Tu institución está verificada. Podés renovar o actualizar la documentación cuando lo necesites.
+								</p>
+								<a
+									href="/institucion/verificacion"
+									class="mt-3 inline-flex items-center rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 transition hover:bg-emerald-100"
+								>
+									Actualizar documentación
+								</a>
+							</div>
+						{/if}
+
 						<!-- Acciones de perfil (reportar, auditar) -->
 						{#if !esMiPerfil && $isAuthenticated}
 							<div class="mt-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">

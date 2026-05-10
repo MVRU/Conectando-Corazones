@@ -93,7 +93,7 @@ const acciones = $derived.by(
 			...(estadoVerificacion === 'rechazada'
 				? [
 						{
-							label: 'Reenviar verificación',
+							label: 'Reenviar documentación',
 							icon: UploadCloud,
 							href: '/institucion/verificacion',
 							secondary: true,
@@ -101,26 +101,14 @@ const acciones = $derived.by(
 						}
 					]
 				: []),
-			...(requiereVerificacionDocumental
+...(requiereVerificacionDocumental && estadoVerificacion === null
 				? [
 						{
-							label: 'Verificar',
+							label: 'Verificar institución',
 							icon: UploadCloud,
 							href: '/institucion/verificacion',
 							secondary: true,
 							color: 'amber'
-						}
-					]
-				: []),
-			...(documentacionVerificacionEnRevision
-				? [
-						{
-							label: 'Gestionar verificación',
-							icon: Clock3,
-							href: '/institucion/verificacion',
-							secondary: true,
-							color: 'sky',
-							title: 'Tu documentación está en revisión'
 						}
 					]
 				: [])
