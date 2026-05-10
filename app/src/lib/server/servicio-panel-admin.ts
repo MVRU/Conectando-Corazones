@@ -225,7 +225,7 @@ export class ServicioPanelAdmin {
 						justificacion:
 							accion === 'aprobar'
 								? 'Verificación documental aprobada por administración.'
-								: `Verificación documental rechazada por administración. Motivo: ${motivo?.trim() || 'Sin motivo'}`,
+								: 'Verificación documental rechazada por administración.',
 						usuario_id: adminId
 					}
 				});
