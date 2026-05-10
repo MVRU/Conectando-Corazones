@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		service.getKpis(),
 		service.getOnboardingPendientes(),
 		service.getUsuarios({}),
-		service.getAuditoria({ page: 1, pageSize: 100 })
+		service.getAuditoria({ page: 1, pageSize: 20 })
 	]);
 
 	return {

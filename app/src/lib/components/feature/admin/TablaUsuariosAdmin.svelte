@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import type { UsuarioAdminItemDto } from '$lib/domain/types/dto/PanelAdmin';
+	import { scale } from 'svelte/transition';
 
 	let {
 		users = [],
@@ -17,6 +18,21 @@
 	let sortBy = $state<'rol' | 'estado_gestion' | 'estado_verificacion' | 'created_at'>('created_at');
 	let sortDir = $state<'asc' | 'desc'>('desc');
 	let busqueda = $state('');
+	let paginaActual = $state(1);
+	const POR_PAGINA = 20;
+	let modalConfirmar = $state<{ abierto: boolean; usuario: UsuarioAdminItemDto | null }>({
+		abierto: false,
+		usuario: null
+	});
+	let dialogo: HTMLDialogElement | undefined = $state();
+
+	$effect(() => {
+		if (dialogo && modalConfirmar.abierto) {
+			dialogo.showModal();
+		} else if (dialogo && !modalConfirmar.abierto) {
+			dialogo.close();
+		}
+	});
 
 	let usuariosOrdenados = $derived.by(() => {
 		const termino = busqueda.trim().toLowerCase();
@@ -43,6 +59,20 @@
 		});
 	});
 
+	let totalPaginas = $derived(Math.ceil(usuariosOrdenados.length / POR_PAGINA));
+
+	let usuariosPaginados = $derived(
+		usuariosOrdenados.slice((paginaActual - 1) * POR_PAGINA, paginaActual * POR_PAGINA)
+	);
+
+	$effect(() => {
+		// Resetear a página 1 cuando cambia el filtro o el orden
+		busqueda;
+		sortBy;
+		sortDir;
+		paginaActual = 1;
+	});
+
 	function changeSort(key: typeof sortBy) {
 		if (sortBy === key) {
 			sortDir = sortDir === 'asc' ? 'desc' : 'asc';
@@ -64,16 +94,19 @@
 	}
 
 	function confirmarCambioEstado(user: UsuarioAdminItemDto) {
-		const habilitar = user.estado_gestion === 'inhabilitado';
-		const accion = habilitar ? 'habilitar' : 'inhabilitar';
-		const nombreCompleto = `${user.nombre} ${user.apellido}`.trim();
-		const mensaje = `¿Confirmás ${accion} la cuenta de ${nombreCompleto} (@${user.username})?`;
-		if (!window.confirm(mensaje)) return;
+		modalConfirmar = { abierto: true, usuario: user };
+	}
 
-		onToggleEstado?.({
-			idUsuario: user.id_usuario,
-			habilitar
-		});
+	function ejecutarCambioEstado() {
+		if (!modalConfirmar.usuario) return;
+		const habilitar = modalConfirmar.usuario.estado_gestion === 'inhabilitado';
+		onToggleEstado?.({ idUsuario: modalConfirmar.usuario.id_usuario, habilitar });
+		modalConfirmar = { abierto: false, usuario: null };
+	}
+
+	function cancelarCambio() {
+		if (!modalConfirmar.abierto) return;
+		modalConfirmar = { abierto: false, usuario: null };
 	}
 </script>
 
@@ -141,7 +174,7 @@
 						</td>
 					</tr>
 				{:else}
-					{#each usuariosOrdenados as user}
+					{#each usuariosPaginados as user}
 						<tr class="transition-colors hover:bg-white/5">
 							<td class="px-6 py-4">
 								<div class="font-bold text-white hover:text-emerald-400 transition-colors">
@@ -230,4 +263,103 @@
 			</tbody>
 		</table>
 	</div>
+
+	<!-- Paginación -->
+	{#if totalPaginas > 1}
+		<div class="border-t border-white/10 bg-white/5 px-6 py-4 flex items-center justify-between">
+			<div class="text-xs text-slate-400">
+				Página <span class="font-bold text-white">{paginaActual}</span> de <span class="font-bold text-white">{totalPaginas}</span>
+			</div>
+			<div class="flex gap-2">
+				<button
+					class="rounded-lg bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 disabled:opacity-30"
+					disabled={paginaActual <= 1 || loading}
+					onclick={() => paginaActual--}
+				>
+					Anterior
+				</button>
+				<button
+					class="rounded-lg bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10 disabled:opacity-30"
+					disabled={paginaActual >= totalPaginas || loading}
+					onclick={() => paginaActual++}
+				>
+					Siguiente
+				</button>
+			</div>
+		</div>
+	{/if}
 </section>
+
+<dialog
+	bind:this={dialogo}
+	onclose={cancelarCambio}
+	onclick={(e) => { if (e.target === dialogo) cancelarCambio(); }}
+	class="m-auto w-full max-w-md rounded-2xl bg-transparent p-0 px-4 outline-none backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+>
+	{#if modalConfirmar.abierto && modalConfirmar.usuario}
+		{@const user = modalConfirmar.usuario}
+		{@const habilitar = user.estado_gestion === 'inhabilitado'}
+		{@const nombreCompleto = `${user.nombre} ${user.apellido}`.trim()}
+		<div
+			class="w-full rounded-2xl border border-white/10 bg-[#111327] p-6 shadow-2xl"
+			transition:scale={{ duration: 200, start: 0.95 }}
+		>
+			<!-- Ícono + título -->
+			<div class="mb-4 flex items-center gap-3">
+				<div
+					class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${habilitar ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}
+				>
+					{#if habilitar}
+						<svg class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+						</svg>
+					{:else}
+						<svg class="h-5 w-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+						</svg>
+					{/if}
+				</div>
+				<h3 class="text-lg font-bold text-white">
+					{habilitar ? 'Habilitar cuenta' : 'Inhabilitar cuenta'}
+				</h3>
+			</div>
+
+			<!-- Cuerpo -->
+			<p class="mb-1 text-sm text-slate-300">
+				¿Confirmás
+				<span class={`font-bold ${habilitar ? 'text-emerald-400' : 'text-rose-400'}`}>
+					{habilitar ? 'habilitar' : 'inhabilitar'}
+				</span>
+				la cuenta de:
+			</p>
+			<p class="mb-6 text-sm font-semibold text-white">
+				{nombreCompleto}
+				<span class="font-normal text-slate-400">(@{user.username})</span>
+			</p>
+
+			<!-- Acciones -->
+			<div class="flex justify-end gap-3">
+				<button
+					type="button"
+					class="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-white/10 disabled:opacity-50"
+					onclick={cancelarCambio}
+					disabled={loading}
+				>
+					Cancelar
+				</button>
+				<button
+					type="button"
+					class={`rounded-lg px-4 py-2 text-sm font-bold text-white shadow-lg transition-all disabled:opacity-50 ${
+						habilitar
+							? 'bg-emerald-600 shadow-emerald-500/20 hover:bg-emerald-700'
+							: 'bg-rose-600 shadow-rose-500/20 hover:bg-rose-700'
+					}`}
+					onclick={ejecutarCambioEstado}
+					disabled={loading}
+				>
+					{habilitar ? 'Sí, habilitar' : 'Sí, inhabilitar'}
+				</button>
+			</div>
+		</div>
+	{/if}
+</dialog>
