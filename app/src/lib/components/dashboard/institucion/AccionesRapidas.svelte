@@ -227,7 +227,7 @@ const acciones = $derived.by(
 	<!-- Mobile Layout (Stack + Expandable) -->
 	<div class="flex flex-col gap-3 sm:hidden">
 		<!-- Featured Actions (Always Visible) -->
-		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion}
+		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
 					{@const Icono = accion.icon}
@@ -280,7 +280,7 @@ const acciones = $derived.by(
 		<!-- Secondary Actions (Expandable) -->
 		{#if showAllActions}
 			<div transition:slide={{ duration: 300, axis: 'y' }} class="grid grid-cols-2 gap-3 pt-2">
-				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion}
+				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion (accion.label)}
 					<div class="relative w-full">
 						{#if accion.href}
 							{@const Icono = accion.icon}
