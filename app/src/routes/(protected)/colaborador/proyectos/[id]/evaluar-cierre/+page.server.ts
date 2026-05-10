@@ -7,6 +7,7 @@ import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/sup
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
+import { notificarProyectoEnAuditoriaAdmin } from '$lib/server/servicio-notificaciones-admin';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { Prisma } from '@prisma/client';
 
@@ -339,6 +340,7 @@ export const actions: Actions = {
 			const proyectoActualizado = await prisma.proyecto.findUnique({
 				where: { id_proyecto: proyectoId },
 				select: {
+					titulo: true,
 					estado: {
 						select: {
 							descripcion: true
@@ -346,6 +348,16 @@ export const actions: Actions = {
 					}
 				}
 			});
+
+			if (proyectoActualizado?.estado?.descripcion === 'en_auditoria') {
+				await notificarProyectoEnAuditoriaAdmin({
+					proyectoId,
+					tituloProyecto: proyectoActualizado.titulo,
+					solicitudId,
+					colaboradorId: user.id_usuario!,
+					colaboradorUsername: user.username
+				});
+			}
 
 			return {
 				success: true,

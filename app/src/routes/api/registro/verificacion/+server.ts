@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 import { prisma } from '$lib/infrastructure/prisma/client';
+import { notificarSolicitudVerificacionAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -110,6 +111,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 
 			return verificacion;
+		});
+
+		await notificarSolicitudVerificacionAdmin({
+			usuarioId: usuarioIdInt,
+			username: usuarioSesion.username,
+			tipoSolicitud: usuarioSesion.rol,
+			cantidadArchivos: files.length
 		});
 
 		return json({
