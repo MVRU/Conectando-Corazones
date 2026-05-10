@@ -27,19 +27,26 @@ export function obtenerUltimaVerificacion(verificaciones: Verificacion[]): Verif
 	return sorted[0] ?? null;
 }
 
+// La verificación ARCA es un badge fiscal independiente que NO debe afectar
+// el badge global "Verificado" del usuario/institución.
+const esVerificacionGlobal = (v: Verificacion) => v.tipo !== 'arca';
+
 // Determina qué badge mostrar según las verificaciones del usuario
 export function determinarEstadoVerificacion(
 	verificaciones: Verificacion[],
 	usuario?: Usuario
 ): EstadoVerificacionDisplay {
-	// 1. Prioridad: última verificación registrada
-	const ultima = obtenerUltimaVerificacion(verificaciones ?? []);
+	const verificacionesGlobales = (verificaciones ?? []).filter(esVerificacionGlobal);
+
+	// 1. Prioridad: última verificación registrada (excluye ARCA)
+	const ultima = obtenerUltimaVerificacion(verificacionesGlobales);
 	if (ultima) {
 		if (ultima.estado === 'aprobada') {
 			switch (ultima.tipo) {
 				case 'renaper':
 					return 'verificado_renaper';
-				case 'documental':
+				case 'institucional':
+				case 'documental': // Compat con datos legacy previos a la normalización del tipo.
 					return 'verificado_documental';
 				case 'email_institucional':
 					return 'verificado_email_institucional';
@@ -61,7 +68,7 @@ export function determinarEstadoVerificacion(
 	if (usuario?.estado_verificacion === 'rechazada') return 'verificacion_rechazada';
 
 	// 3. Si no tiene aprobadas pero sí pendientes
-	if (verificaciones && verificaciones.some((v) => v.estado === 'pendiente')) {
+	if (verificacionesGlobales.some((v) => v.estado === 'pendiente')) {
 		return 'verificacion_pendiente';
 	}
 
@@ -74,9 +81,14 @@ export function esInstitucionVerificada(
 ): boolean {
 	if (!usuario) return false;
 	if (usuario.estado_verificacion === 'aprobada') return true;
-	if (verificaciones?.some((v) => v.estado === 'aprobada')) return true;
+	if (verificaciones?.some((v) => esVerificacionGlobal(v) && v.estado === 'aprobada')) return true;
 	// También revisamos si las verificaciones ya vienen dentro del objeto usuario
-	if ((usuario as any).verificaciones?.some((v: any) => v.estado === 'aprobada')) return true;
+	if (
+		(usuario as any).verificaciones?.some(
+			(v: any) => v?.tipo !== 'arca' && v?.estado === 'aprobada'
+		)
+	)
+		return true;
 	return false;
 }
 

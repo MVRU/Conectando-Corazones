@@ -2,7 +2,11 @@ import type {
 	TipoParticipacion as ITipoParticipacion,
 	TipoParticipacionDescripcion
 } from '../types/TipoParticipacion';
-import { esTipoParticipacionCanonico, TIPO_PARTICIPACION_LABELS } from '../types/TipoParticipacion';
+import {
+	esTipoParticipacionCanonico,
+	TIPO_PARTICIPACION_LABELS,
+	TIPOS_PARTICIPACION_DEDUCIBLES
+} from '../types/TipoParticipacion';
 
 export class TipoParticipacion implements ITipoParticipacion {
 	id_tipo_participacion?: number;
@@ -47,6 +51,15 @@ export class TipoParticipacion implements ITipoParticipacion {
 	 */
 	esMonetaria(): boolean {
 		return this.descripcion === 'Monetaria';
+	}
+
+	/**
+	 * Indica si el aporte de este tipo califica para la deducción de
+	 * Impuesto a las Ganancias (RG 2681): donaciones monetarias o en especie.
+	 * El voluntariado no aplica por no representar una donación deducible.
+	 */
+	calificaParaDeduccion(): boolean {
+		return TIPOS_PARTICIPACION_DEDUCIBLES.includes(this.descripcion);
 	}
 
 	/**
