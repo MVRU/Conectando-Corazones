@@ -74,46 +74,46 @@
 		}
 	}));
 
-const acciones = $derived.by(
-	() =>
-		[
-			{
-				label: 'Crear proyecto',
-				icon: Plus,
-				href: estaVerificado ? '/proyectos/crear' : undefined,
-				primary: true,
-				disabled: !estaVerificado,
-				title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
-			},
-			{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
-			{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
-			{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
-			{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
-			{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' },
-			...(estadoVerificacion === 'rechazada'
-				? [
-						{
-							label: 'Reenviar documentación',
-							icon: UploadCloud,
-							href: '/institucion/verificacion',
-							secondary: true,
-							color: 'amber'
-						}
-					]
-				: []),
-...(requiereVerificacionDocumental && estadoVerificacion === null
-				? [
-						{
-							label: 'Verificar institución',
-							icon: UploadCloud,
-							href: '/institucion/verificacion',
-							secondary: true,
-							color: 'amber'
-						}
-					]
-				: [])
-		] as Accion[]
-);
+	const acciones = $derived.by(
+		() =>
+			[
+				{
+					label: 'Crear proyecto',
+					icon: Plus,
+					href: estaVerificado ? '/proyectos/crear' : undefined,
+					primary: true,
+					disabled: !estaVerificado,
+					title: !estaVerificado ? 'Debés estar verificado para crear proyectos' : undefined
+				},
+				{ label: 'Ver colaboraciones', icon: FileText, href: '/institucion/solicitudes-colaboracion' },
+				{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
+				{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
+				{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
+				{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' },
+				...(estadoVerificacion === 'rechazada'
+					? [
+							{
+								label: 'Reenviar documentación',
+								icon: UploadCloud,
+								href: '/institucion/verificacion',
+								secondary: true,
+								color: 'amber'
+							}
+						]
+					: []),
+				...(requiereVerificacionDocumental && estadoVerificacion === null
+					? [
+							{
+								label: 'Verificar institución',
+								icon: UploadCloud,
+								href: '/institucion/verificacion',
+								secondary: true,
+								color: 'amber'
+							}
+						]
+					: [])
+			] as Accion[]
+	);
 
 	const accionesExtras = $derived.by(
 		() =>

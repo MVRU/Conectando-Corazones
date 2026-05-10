@@ -97,7 +97,7 @@
 		} catch (e) {
 			toastStore.show({
 				variant: 'error',
-				title: 'Error',
+				title: enEdicion ? 'Error al enviar para revisión' : 'Error al subir documentación',
 				message: e instanceof Error ? e.message : 'Intentá de nuevo en unos minutos.'
 			});
 		}

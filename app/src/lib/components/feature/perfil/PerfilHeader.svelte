@@ -10,7 +10,7 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-let { perfilUsuario, esMiPerfil, estadoVerificacion, requiereCargaInicialDocumentacion, onEditarClick } = $props<{
+	let { perfilUsuario, esMiPerfil, estadoVerificacion, requiereCargaInicialDocumentacion, onEditarClick } = $props<{
 		perfilUsuario: UsuarioCompleto;
 		esMiPerfil: boolean;
 		estadoVerificacion: EstadoVerificacionDisplay;
