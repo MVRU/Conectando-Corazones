@@ -244,6 +244,9 @@
 								<td class="px-6 py-4">
 									<div class="text-white font-medium">{log.tipo_objeto}</div>
 									<div class="text-[10px] text-slate-500 font-mono">#{log.id_objeto}</div>
+									{#if log.objetoUsername}
+										<div class="text-[10px] text-emerald-400 font-mono">@{log.objetoUsername}</div>
+									{/if}
 								</td>
 								<td class="px-6 py-4">
 									<div class="max-w-md space-y-1 text-xs">
