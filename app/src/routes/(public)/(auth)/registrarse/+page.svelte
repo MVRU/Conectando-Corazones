@@ -4,6 +4,7 @@
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
+	import CertificacionArca from '$lib/validation/components/CertificacionArca.svelte';
 	import DireccionForm from '$lib/components/ui/forms/DireccionForm.svelte';
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import PreferenciasForm from '$lib/components/feature/registro/PreferenciasForm.svelte';
@@ -289,6 +290,7 @@
 		try {
 			const files = detail.files;
 			const formData = new FormData();
+			formData.append('tipo', 'institucional');
 			files.forEach((f) => formData.append('files', f));
 
 			const res = await fetch('/api/registro/verificacion', {
@@ -316,6 +318,28 @@
 				message: 'No pudimos subir los archivos. Podrás intentarlo luego desde tu perfil.'
 			});
 			setEtapaConPersistencia('contacto');
+		}
+	}
+
+	async function manejarSubidaVerificacionArca(detail: { file: File }) {
+		try {
+			const formData = new FormData();
+			formData.append('tipo', 'arca');
+			formData.append('files', detail.file);
+			const res = await fetch('/api/registro/verificacion', { method: 'POST', body: formData });
+			const body = await res.json();
+			if (!res.ok) throw new Error(body.error || 'No se pudo subir el certificado');
+			toastStore.show({
+				variant: 'success',
+				title: 'Certificado ARCA recibido',
+				message: 'Lo revisaremos junto con tu documentación institucional.'
+			});
+		} catch (e) {
+			toastStore.show({
+				variant: 'warning',
+				title: 'No se pudo subir el certificado ARCA',
+				message: e instanceof Error ? e.message : 'Podrás intentarlo luego desde tu perfil.'
+			});
 		}
 	}
 
@@ -833,6 +857,10 @@
 									setEtapaConPersistencia('formulario');
 								}}
 							/>
+
+							<div class="mt-6">
+								<CertificacionArca onsubmit={manejarSubidaVerificacionArca} />
+							</div>
 						</div>
 					</div>
 				{:else if etapa === 'contacto'}
