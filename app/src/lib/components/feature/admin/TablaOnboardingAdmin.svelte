@@ -11,13 +11,15 @@
 	} = $props<{
 		items?: SolicitudOnboardingAdminDto[];
 		loading?: boolean;
-		onAprobar?: (data: { idVerificacion: number }) => void;
+		onAprobar?: (data: { idVerificacion: number; fechaVencimiento?: Date }) => void;
 		onRechazar?: (data: { idVerificacion: number; motivo: string }) => void;
 	}>();
 
 	let sortBy = $state<'nombre' | 'rol' | 'tipo' | 'created_at'>('created_at');
 	let sortDir = $state<'asc' | 'desc'>('desc');
-	let modalAbierto = $state(false);
+
+	// Modal rechazo
+	let modalRechazoAbierto = $state(false);
 	let idVerificacionRechazo = $state<number | null>(null);
 	let motivo = $state('');
 	let error = $state('');
@@ -26,7 +28,7 @@
 		idVerificacionRechazo = idVerificacion;
 		motivo = '';
 		error = '';
-		modalAbierto = true;
+		modalRechazoAbierto = true;
 	}
 
 	function confirmarRechazo() {
@@ -36,7 +38,44 @@
 			return;
 		}
 		if (onRechazar) onRechazar({ idVerificacion: idVerificacionRechazo, motivo: motivo.trim() });
-		modalAbierto = false;
+		modalRechazoAbierto = false;
+	}
+
+	// Modal aprobación ARCA (requiere fecha de vencimiento)
+	let modalAprobacionArcaAbierto = $state(false);
+	let idVerificacionAprobacionArca = $state<number | null>(null);
+	let fechaVencimientoArca = $state('');
+	let errorFechaArca = $state('');
+	const hoyISO = new Date().toISOString().split('T')[0];
+
+	function abrirAprobacionArca(idVerificacion: number) {
+		idVerificacionAprobacionArca = idVerificacion;
+		fechaVencimientoArca = '';
+		errorFechaArca = '';
+		modalAprobacionArcaAbierto = true;
+	}
+
+	function confirmarAprobacionArca() {
+		if (!idVerificacionAprobacionArca) return;
+		if (!fechaVencimientoArca) {
+			errorFechaArca = 'La fecha de vencimiento es obligatoria.';
+			return;
+		}
+		const fecha = new Date(fechaVencimientoArca);
+		if (fecha <= new Date()) {
+			errorFechaArca = 'La fecha debe ser posterior a hoy.';
+			return;
+		}
+		onAprobar?.({ idVerificacion: idVerificacionAprobacionArca, fechaVencimiento: fecha });
+		modalAprobacionArcaAbierto = false;
+	}
+
+	function manejarAprobar(item: SolicitudOnboardingAdminDto) {
+		if (item.tipo === 'arca') {
+			abrirAprobacionArca(item.id_verificacion);
+		} else {
+			onAprobar?.({ idVerificacion: item.id_verificacion });
+		}
 	}
 
 	function getSortValue(item: SolicitudOnboardingAdminDto, key: string): string {
@@ -169,8 +208,7 @@
 									<Button
 										label="Aprobar"
 										size="sm"
-										onclick={() =>
-											onAprobar?.({ idVerificacion: item.id_verificacion })}
+										onclick={() => manejarAprobar(item)}
 										disabled={loading}
 										class="!bg-emerald-600 !hover:bg-emerald-700 !text-white !rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
 									/>
@@ -192,7 +230,7 @@
 	</div>
 </div>
 
-<Modal bind:abierto={modalAbierto} titulo="Motivo de rechazo" anchoMaximo="max-w-xl">
+<Modal bind:abierto={modalRechazoAbierto} titulo="Motivo de rechazo" anchoMaximo="max-w-xl">
 	<div class="space-y-3">
 		<label for="motivo-rechazo" class="block text-sm font-medium text-gray-700">Este motivo será enviado al usuario.</label>
 		<textarea id="motivo-rechazo" class="w-full rounded-lg border border-gray-300 p-3 text-sm" rows="4" bind:value={motivo} placeholder="Ingresá un motivo claro del rechazo documental..."></textarea>
@@ -200,8 +238,36 @@
 	</div>
 	{#snippet footer()}
 		<div class="flex gap-2">
-			<Button label="Cancelar" variant="secondary" size="sm" onclick={() => (modalAbierto = false)} />
+			<Button label="Cancelar" variant="secondary" size="sm" onclick={() => (modalRechazoAbierto = false)} />
 			<Button label="Confirmar rechazo" variant="danger" size="sm" onclick={confirmarRechazo} />
+		</div>
+	{/snippet}
+</Modal>
+
+<Modal bind:abierto={modalAprobacionArcaAbierto} titulo="Aprobar certificación ARCA" anchoMaximo="max-w-md">
+	<div class="space-y-4">
+		<p class="text-sm text-gray-600">
+			Indicá la fecha de vencimiento del certificado emitido por ARCA (RG 2681). La institución
+			podrá renovarlo antes de que expire.
+		</p>
+		<div class="space-y-1">
+			<label for="fecha-vencimiento-arca" class="block text-sm font-medium text-gray-700">
+				Fecha de vencimiento del certificado
+			</label>
+			<input
+				id="fecha-vencimiento-arca"
+				type="date"
+				min={hoyISO}
+				bind:value={fechaVencimientoArca}
+				class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+			/>
+		</div>
+		{#if errorFechaArca}<p class="text-sm text-red-600">{errorFechaArca}</p>{/if}
+	</div>
+	{#snippet footer()}
+		<div class="flex gap-2">
+			<Button label="Cancelar" variant="secondary" size="sm" onclick={() => (modalAprobacionArcaAbierto = false)} />
+			<Button label="Aprobar ARCA" size="sm" onclick={confirmarAprobacionArca} />
 		</div>
 	{/snippet}
 </Modal>
