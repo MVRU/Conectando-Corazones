@@ -34,15 +34,19 @@ function validarInstitucionSesion(localsUsuario: App.Locals['usuario']) {
 	return { ok: true as const };
 }
 
-export const GET: RequestHandler = async ({ locals }) => {
+export const GET: RequestHandler = async ({ locals, url }) => {
 	try {
 		const sesion = validarInstitucionSesion(locals.usuario);
 		if (!sesion.ok) return sesion.response;
 
 		const usuarioId = locals.usuario!.id_usuario!;
+		const tipo = url.searchParams.get('tipo') ?? 'institucional';
+		if (!['institucional', 'arca'].includes(tipo)) {
+			return json({ success: false, error: 'Tipo de verificación no válido.' }, { status: 400 });
+		}
 
 		const verificacion = await prisma.verificacion.findFirst({
-			where: { usuario_id: usuarioId },
+			where: { usuario_id: usuarioId, tipo },
 			orderBy: [{ created_at: 'desc' }, { id_verificacion: 'desc' }],
 			include: {
 				documentos: {
@@ -119,6 +123,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const formData = await request.formData();
+		const tipo = formData.get('tipo')?.toString() ?? 'institucional';
+		if (!['institucional', 'arca'].includes(tipo)) {
+			return json({ success: false, error: 'Tipo de verificación no válido.' }, { status: 400 });
+		}
 		const files = formData.getAll('files') as File[];
 
 		if (!files.length) {
@@ -130,8 +138,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		for (const file of files) {
 			const fileExt = file.name.split('.').pop();
-			const fileName = `${usuarioIdInt}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-			const filePath = `verificaciones/${fileName}`;
+			const filePath = `verificaciones/${tipo}/${usuarioIdInt}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
 
 			const { error: uploadError } = await supabaseAdmin.storage
 				.from('documentos-privados')
@@ -164,7 +171,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const resultado = await prisma.$transaction(async (tx) => {
 			const verificacionExistente = await tx.verificacion.findFirst({
-				where: { usuario_id: usuarioIdInt },
+				where: { usuario_id: usuarioIdInt, tipo },
 				orderBy: [{ created_at: 'desc' }, { id_verificacion: 'desc' }],
 				include: { documentos: true }
 			});
@@ -187,19 +194,25 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			// Sin verificación previa: crear nueva en pendiente
 			const nueva = await tx.verificacion.create({
 				data: {
-					tipo: 'institucional',
+					tipo,
 					estado: 'pendiente',
 					usuario: { connect: { id_usuario: usuarioIdInt } },
-					fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+					// ARCA: el admin fija fecha_vencimiento al aprobar; institucional mantiene el placeholder actual
+					...(tipo !== 'arca'
+						? { fecha_vencimiento: new Date(new Date().setFullYear(new Date().getFullYear() + 1)) }
+						: {}),
 					documentos: { create: dataArchivos }
 				},
 				include: { documentos: true }
 			});
 
-			await tx.usuario.update({
-				where: { id_usuario: usuarioIdInt },
-				data: { estado_verificacion: 'pendiente' }
-			});
+			// ARCA es un badge fiscal independiente; no altera el estado global del usuario
+			if (tipo !== 'arca') {
+				await tx.usuario.update({
+					where: { id_usuario: usuarioIdInt },
+					data: { estado_verificacion: 'pendiente' }
+				});
+			}
 
 			return nueva;
 		});
@@ -209,7 +222,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			await notificarSolicitudVerificacionAdmin({
 				usuarioId: usuarioIdInt,
 				username: usuarioSesion.username,
-				tipoSolicitud: usuarioSesion.rol,
+				tipoSolicitud: tipo,
 				cantidadArchivos: files.length
 			});
 		}
@@ -322,9 +335,13 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		if (body?.accion !== 'enviar-para-revision') {
 			return json({ success: false, error: 'Acción no reconocida.' }, { status: 400 });
 		}
+		const tipo = typeof body.tipo === 'string' ? body.tipo : 'institucional';
+		if (!['institucional', 'arca'].includes(tipo)) {
+			return json({ success: false, error: 'Tipo de verificación no válido.' }, { status: 400 });
+		}
 
 		const verificacion = await prisma.verificacion.findFirst({
-			where: { usuario_id: usuarioId },
+			where: { usuario_id: usuarioId, tipo },
 			orderBy: [{ created_at: 'desc' }, { id_verificacion: 'desc' }],
 			include: { _count: { select: { documentos: true } } }
 		});
@@ -365,41 +382,45 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 				data: { estado: 'pendiente' }
 			});
 
-			await tx.usuario.update({
-				where: { id_usuario: usuarioId },
-				data: { estado_verificacion: 'pendiente' }
-			});
+			// ARCA es un badge fiscal independiente; no altera el estado global del usuario
+			if (tipo !== 'arca') {
+				await tx.usuario.update({
+					where: { id_usuario: usuarioId },
+					data: { estado_verificacion: 'pendiente' }
+				});
+			}
 
-			await tx.historialDeCambios.createMany({
-				data: [
-					{
-						tipo_objeto: 'Verificacion',
-						id_objeto: verificacion.id_verificacion,
-						accion: 'Actualizar',
-						atributo_afectado: 'estado',
-						valor_anterior: estadoAnterior,
-						valor_nuevo: 'pendiente',
-						justificacion: 'Institución solicita nueva revisión de documentación.',
-						usuario_id: usuarioId
-					},
-					{
-						tipo_objeto: 'Usuario',
-						id_objeto: usuarioId,
-						accion: 'Actualizar',
-						atributo_afectado: 'estado_verificacion',
-						valor_anterior: estadoAnterior,
-						valor_nuevo: 'pendiente',
-						justificacion: 'Institución solicita nueva revisión de documentación.',
-						usuario_id: usuarioId
-					}
-				]
-			});
+			const historialItems: import('@prisma/client').Prisma.HistorialDeCambiosCreateManyInput[] = [
+				{
+					tipo_objeto: 'Verificacion',
+					id_objeto: verificacion.id_verificacion,
+					accion: 'Actualizar',
+					atributo_afectado: 'estado',
+					valor_anterior: estadoAnterior,
+					valor_nuevo: 'pendiente',
+					justificacion: 'Institución solicita nueva revisión de documentación.',
+					usuario_id: usuarioId
+				}
+			];
+			if (tipo !== 'arca') {
+				historialItems.push({
+					tipo_objeto: 'Usuario',
+					id_objeto: usuarioId,
+					accion: 'Actualizar',
+					atributo_afectado: 'estado_verificacion',
+					valor_anterior: estadoAnterior,
+					valor_nuevo: 'pendiente',
+					justificacion: 'Institución solicita nueva revisión de documentación.',
+					usuario_id: usuarioId
+				});
+			}
+			await tx.historialDeCambios.createMany({ data: historialItems });
 		});
 
 		await notificarSolicitudVerificacionAdmin({
 			usuarioId,
 			username: usuarioSesion.username,
-			tipoSolicitud: usuarioSesion.rol,
+			tipoSolicitud: tipo,
 			cantidadArchivos: verificacion._count.documentos
 		});
 

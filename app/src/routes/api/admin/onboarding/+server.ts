@@ -22,7 +22,6 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		const idVerificacion = Number(body.idVerificacion);
 		const accion = String(body.accion ?? '');
 		const motivo = typeof body.motivo === 'string' ? body.motivo : undefined;
-
 		if (!idVerificacion || Number.isNaN(idVerificacion)) {
 			return json({ error: 'idVerificacion inválido' }, { status: 400 });
 		}
@@ -30,10 +29,20 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Acción inválida' }, { status: 400 });
 		}
 
+		let fechaVencimiento: Date | undefined;
+		if (typeof body.fechaVencimiento === 'string') {
+			const parsed = new Date(body.fechaVencimiento);
+			if (isNaN(parsed.getTime())) {
+				return json({ error: 'fechaVencimiento no es una fecha válida.' }, { status: 400 });
+			}
+			fechaVencimiento = parsed;
+		}
+
 		await service.resolverOnboarding({
 			idVerificacion,
 			accion,
 			motivo,
+			fechaVencimiento,
 			adminId: locals.usuario.id_usuario
 		});
 
