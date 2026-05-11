@@ -2,6 +2,7 @@
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 	import { Pencil, Camera, CheckCircle2 } from 'lucide-svelte';
 	import { fly, fade } from 'svelte/transition';
@@ -147,6 +148,9 @@ let textoBadgeVerificacion = $derived(
 							href={enlaceGestionVerificacion}
 							textoAccion={textoBadgeVerificacion}
 						/>
+						{#if (perfilUsuario as Institucion).arcaVigente}
+							<BadgeArca />
+						{/if}
 					{/if}
 				</div>
 			</div>

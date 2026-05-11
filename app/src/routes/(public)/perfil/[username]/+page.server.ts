@@ -1,5 +1,6 @@
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
+import { prisma } from '$lib/infrastructure/prisma/client';
 import { ObtenerUsuario } from '$lib/domain/use-cases/usuarios/ObtenerUsuario';
 import { ObtenerProyectosPerfil } from '$lib/domain/use-cases/perfil/ObtenerProyectosPerfil';
 import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgres/categoria.repo';
@@ -52,6 +53,18 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 
 		// 4. Verificar si es mi perfil
 		const esMiPerfil = locals.usuario?.id_usuario === perfilUsuario.id_usuario;
+
+		// 5. Cargar estado ARCA para instituciones
+		if (perfilUsuario.id_usuario && perfilUsuario.rol === 'institucion') {
+			const arcaVerif = await prisma.verificacion.findFirst({
+				where: { usuario_id: perfilUsuario.id_usuario, tipo: 'arca', estado: 'aprobada' },
+				orderBy: { created_at: 'desc' },
+				select: { fecha_vencimiento: true }
+			});
+			perfilUsuario.arcaVigente = arcaVerif?.fecha_vencimiento
+				? new Date(arcaVerif.fecha_vencimiento) > new Date()
+				: false;
+		}
 
 		// Serializar todas las entidades de dominio
 		return {

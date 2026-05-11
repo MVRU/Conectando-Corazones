@@ -88,9 +88,16 @@ export class ProyectoMapper {
 						.filter((u) => u !== null)
 				: [],
 
-			institucion: prismaProyecto.institucion
-				? UsuarioMapper.toDomain(prismaProyecto.institucion)
-				: undefined,
+			institucion: (() => {
+				const rawInst = prismaProyecto.institucion;
+				if (!rawInst) return undefined;
+				const u = UsuarioMapper.toDomain(rawInst);
+				const arcaVerif = (rawInst as any).verificaciones?.[0] ?? null;
+				u.arcaVigente = arcaVerif?.fecha_vencimiento
+					? new Date(arcaVerif.fecha_vencimiento) > new Date()
+					: false;
+				return u;
+			})(),
 
 			colaboraciones: prismaProyecto.colaboraciones
 				? prismaProyecto.colaboraciones

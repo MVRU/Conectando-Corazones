@@ -18,6 +18,7 @@
 	} from '$lib/utils/util-proyectos';
 	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
@@ -182,6 +183,9 @@
 						<span class="truncate font-medium text-gray-700">
 							{proyecto.institucion.nombre_legal}
 						</span>
+						{#if proyecto.institucion.arcaVigente}
+							<BadgeArca />
+						{/if}
 					</div>
 				{/if}
 			</div>
