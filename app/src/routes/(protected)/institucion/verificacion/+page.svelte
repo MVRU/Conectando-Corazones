@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
+	import CertificacionArca from '$lib/validation/components/CertificacionArca.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { goto, invalidateAll } from '$app/navigation';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
@@ -7,6 +8,7 @@
 	import type { PageData } from './$types';
 
 	let { data } = $props<{ data: PageData }>();
+
 	type DocumentoExistente = {
 		id_archivo: number;
 		nombre_original: string | null;
@@ -16,17 +18,17 @@
 		created_at: string | null;
 	};
 
-	const verificacionActual = $derived(data.verificacionActual);
+	const verificacionInstitucional = $derived(data.verificacionInstitucional);
 	const motivoRechazo = $derived(data.motivoRechazo);
 	let documentosVerificacion = $state<DocumentoExistente[]>(
 		untrack(() => (data.documentosVerificacion as DocumentoExistente[]) ?? [])
 	);
 
-	const estado = $derived(verificacionActual?.estado ?? null);
+	const estado = $derived(verificacionInstitucional?.estado ?? null);
 	const enEdicion = $derived(estado === 'aprobada' || estado === 'rechazada');
 
 	const tituloPagina = $derived.by(() => {
-		if (!verificacionActual) return 'Verificación de la institución';
+		if (!verificacionInstitucional) return 'Verificación de la institución';
 		if (estado === 'pendiente') return 'Documentación en revisión';
 		if (estado === 'aprobada') return 'Actualizar documentación verificada';
 		if (estado === 'rechazada') return 'Reenviar documentación';
@@ -34,7 +36,7 @@
 	});
 
 	const subtituloPagina = $derived.by(() => {
-		if (!verificacionActual)
+		if (!verificacionInstitucional)
 			return 'Completá la documentación que respalda a tu organización. Nuestro equipo la revisará de forma confidencial.';
 		if (estado === 'pendiente')
 			return 'Tu documentación está siendo evaluada. Cuando el equipo de administración responda, podrás volver a editarla.';
@@ -54,31 +56,26 @@
 
 	async function manejarSubida(detail: { files: File[] }) {
 		try {
-			// Upload new files if any were selected
 			if (detail.files.length > 0) {
 				const formData = new FormData();
+				formData.append('tipo', 'institucional');
 				detail.files.forEach((f) => formData.append('files', f));
 				const res = await fetch('/api/registro/verificacion', {
 					method: 'POST',
 					body: formData
 				});
 				const body = await res.json();
-				if (!res.ok) {
-					throw new Error(body.error || 'No se pudieron subir los archivos');
-				}
+				if (!res.ok) throw new Error(body.error || 'No se pudieron subir los archivos');
 			}
 
-			// For aprobada/rechazada: also send for revision (PATCH)
 			if (enEdicion) {
 				const res = await fetch('/api/registro/verificacion', {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ accion: 'enviar-para-revision' })
+					body: JSON.stringify({ accion: 'enviar-para-revision', tipo: 'institucional' })
 				});
 				const body = await res.json();
-				if (!res.ok) {
-					throw new Error(body.error || 'No se pudo enviar para revisión');
-				}
+				if (!res.ok) throw new Error(body.error || 'No se pudo enviar para revisión');
 				toastStore.show({
 					variant: 'success',
 					title: 'Enviado para revisión',
@@ -86,7 +83,6 @@
 				});
 				await invalidateAll();
 			} else {
-				// Initial upload
 				toastStore.show({
 					variant: 'success',
 					title: 'Documentación recibida',
@@ -109,13 +105,64 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ id_archivo: idArchivo })
 		});
-
 		const body = await res.json().catch(() => ({}));
-		if (!res.ok) {
-			throw new Error(body.error || 'No se pudo eliminar el archivo');
-		}
-
+		if (!res.ok) throw new Error(body.error || 'No se pudo eliminar el archivo');
 		documentosVerificacion = documentosVerificacion.filter((doc) => doc.id_archivo !== idArchivo);
+	}
+
+	// --- ARCA ---
+
+	async function manejarSubidaArca(detail: { file: File }) {
+		try {
+			const formData = new FormData();
+			formData.append('tipo', 'arca');
+			formData.append('files', detail.file);
+			const res = await fetch('/api/registro/verificacion', {
+				method: 'POST',
+				body: formData
+			});
+			const body = await res.json();
+			if (!res.ok) throw new Error(body.error || 'No se pudo subir el certificado');
+
+			const estadoArca = data.verificacionArca?.estado ?? null;
+			const enEdicionArca = estadoArca === 'aprobada' || estadoArca === 'rechazada';
+
+			if (enEdicionArca) {
+				const patchRes = await fetch('/api/registro/verificacion', {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ accion: 'enviar-para-revision', tipo: 'arca' })
+				});
+				const patchBody = await patchRes.json();
+				if (!patchRes.ok) throw new Error(patchBody.error || 'No se pudo enviar para revisión');
+			}
+
+			toastStore.show({
+				variant: 'success',
+				title: 'Certificado enviado',
+				message: 'El equipo de administración revisará tu certificado ARCA.'
+			});
+			await invalidateAll();
+		} catch (e) {
+			toastStore.show({
+				variant: 'error',
+				title: 'Error al enviar el certificado ARCA',
+				message: e instanceof Error ? e.message : 'Intentá de nuevo en unos minutos.'
+			});
+		}
+	}
+
+	async function eliminarArca() {
+		const doc = data.documentoArca;
+		if (!doc) return;
+		const res = await fetch('/api/registro/verificacion', {
+			method: 'DELETE',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ id_archivo: doc.id_archivo })
+		});
+		const body = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(body.error || 'No se pudo eliminar el certificado');
+		await invalidateAll();
 	}
 </script>
 
@@ -129,6 +176,7 @@
 		<p class="mt-2 text-slate-600">{subtituloPagina}</p>
 	</div>
 
+	<!-- Verificación institucional -->
 	{#if estado === 'rechazada'}
 		<div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
 			<h2 class="text-sm font-semibold">Tu verificación fue rechazada</h2>
@@ -146,9 +194,7 @@
 	{#if estado === 'pendiente'}
 		<div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sky-900">
 			<h2 class="text-sm font-semibold">Tu documentación está en revisión</h2>
-			<p class="mt-1 text-sm">
-				No podés editarla hasta que el equipo de administración responda.
-			</p>
+			<p class="mt-1 text-sm">No podés editarla hasta que el equipo de administración responda.</p>
 
 			{#if documentosVerificacion.length > 0}
 				<ul class="mt-4 space-y-2">
@@ -157,10 +203,7 @@
 							class="flex flex-col gap-2 rounded-lg border border-sky-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
 						>
 							<div class="min-w-0">
-								<p
-									class="truncate text-sm font-medium text-slate-900"
-									title={doc.nombre_original ?? 'Documento'}
-								>
+								<p class="truncate text-sm font-medium text-slate-900" title={doc.nombre_original ?? 'Documento'}>
 									{doc.nombre_original ?? `Documento #${doc.id_archivo}`}
 								</p>
 							</div>
@@ -199,4 +242,21 @@
 			oncancel={() => goto('/institucion/mi-panel')}
 		/>
 	{/if}
+
+	<!-- Certificación ARCA (independiente de la institucional) -->
+	<div class="mt-10">
+		<div class="mb-6 flex items-center gap-4">
+			<div class="h-px flex-1 bg-slate-200"></div>
+			<span class="text-xs font-medium tracking-wide text-slate-400 uppercase">Opcional</span>
+			<div class="h-px flex-1 bg-slate-200"></div>
+		</div>
+
+		<CertificacionArca
+			verificacionArca={data.verificacionArca}
+			documentoExistente={data.documentoArca}
+			motivoRechazo={data.motivoRechazoArca}
+			onsubmit={manejarSubidaArca}
+			ondelete={eliminarArca}
+		/>
+	</div>
 </div>
