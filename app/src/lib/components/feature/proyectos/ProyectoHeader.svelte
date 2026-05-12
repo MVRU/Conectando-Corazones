@@ -4,6 +4,7 @@
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
 	import { Photo, EllipsisHorizontal, Flag } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { pushState } from '$app/navigation';
 	import { clickOutside } from '$lib/utils/util-click-outside';
@@ -106,9 +107,12 @@
 
 	<div class="absolute bottom-0 left-0 w-full p-4 text-white sm:p-6">
 		<div class="flex flex-col gap-2">
-			<div class="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+			<div class="mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
 				<StatusBadge estado={proyecto.estado} />
 				<LocationDisplay {proyecto} variant="badge" />
+				{#if proyecto.esDeducible}
+					<BadgeArca />
+				{/if}
 			</div>
 
 			<h1

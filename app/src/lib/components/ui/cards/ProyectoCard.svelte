@@ -3,6 +3,7 @@
 	import type { Usuario } from '$lib/domain/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	const usuarioPorDefecto = '/users/user-default.png';
 
 	function aplicarFallbackImagen(event: Event) {
@@ -146,10 +147,15 @@
 					{ubicacionCorta}
 				</span>
 			</div>
-			<!-- Rango de fechas -->
+			<!-- Franja inferior: ARCA (izquierda) + fechas (derecha) -->
 			<div
-				class="absolute right-0 bottom-0 left-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
+				{#if proyecto.esDeducible}
+					<BadgeArca />
+				{:else}
+					<span></span>
+				{/if}
 				<span
 					class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
 				>

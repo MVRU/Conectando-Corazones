@@ -444,5 +444,6 @@ model Verificacion {
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
   documentos Archivo[]
 
+  @@unique([usuario_id, tipo])
   @@map("verificaciones")
 }

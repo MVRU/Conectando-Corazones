@@ -20,6 +20,8 @@
 		localidadesDisponibles = [],
 		tiposParticipacion = [],
 		criterioOrden = $bindable('recientes'),
+		soloBeneficiosFiscales = $bindable(false),
+		mostrarFiltroFiscal = false,
 		onreset,
 		onubicacionchange,
 		ontoggle
@@ -41,6 +43,8 @@
 		localidadesDisponibles?: string[];
 		tiposParticipacion?: string[];
 		criterioOrden?: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso';
+		soloBeneficiosFiscales?: boolean;
+		mostrarFiltroFiscal?: boolean;
 		onreset?: () => void;
 		onubicacionchange?: () => void;
 		ontoggle?: () => void;
@@ -67,7 +71,8 @@
 			localidad !== 'Todas',
 			fechaDesde !== '',
 			fechaHasta !== '',
-			mostrarEstado && estado.length > 0 && !estado.includes('Todos')
+			mostrarEstado && estado.length > 0 && !estado.includes('Todos'),
+			soloBeneficiosFiscales
 		].filter(Boolean).length
 	);
 
@@ -691,6 +696,25 @@
 						{/if}
 					</div>
 				</div>
+
+				<!-- Filtro por Beneficios Fiscales -->
+				{#if mostrarFiltroFiscal}
+					<div class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}">
+						<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+							Beneficio fiscal
+						</span>
+						<label class="flex cursor-pointer items-start gap-2.5 pt-1">
+							<input
+								type="checkbox"
+								bind:checked={soloBeneficiosFiscales}
+								class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-amber-600 focus:ring-2 focus:ring-amber-500/30 focus:outline-none"
+							/>
+							<span class="text-sm leading-snug text-gray-700">
+								Solo con ARCA (RG 2681) — donaciones deducibles de Ganancias
+							</span>
+						</label>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

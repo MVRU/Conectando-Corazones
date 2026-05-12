@@ -158,9 +158,10 @@ export class ServicioPanelAdmin {
 		idVerificacion: number;
 		accion: AccionResolverOnboarding;
 		motivo?: string;
+		fechaVencimiento?: Date;
 		adminId: number;
 	}): Promise<void> {
-		const { idVerificacion, accion, motivo, adminId } = input;
+		const { idVerificacion, accion, motivo, fechaVencimiento, adminId } = input;
 		if (accion === 'rechazar' && !motivo?.trim()) {
 			throw new Error('Debés indicar un motivo de rechazo.');
 		}
@@ -172,30 +173,54 @@ export class ServicioPanelAdmin {
 			if (!verificacion || !verificacion.usuario_id) {
 				throw new Error('La solicitud de onboarding no existe.');
 			}
+
+			const esArca = verificacion.tipo === 'arca';
+
+			if (esArca && accion === 'aprobar') {
+				if (!fechaVencimiento) {
+					throw new Error('Debés indicar la fecha de vencimiento para aprobar la certificación ARCA.');
+				}
+				if (fechaVencimiento <= new Date()) {
+					throw new Error('La fecha de vencimiento debe ser posterior a hoy.');
+				}
+			}
+
 			const usuarioAnterior = await tx.usuario.findUnique({
 				where: { id_usuario: verificacion.usuario_id },
-				select: {
-					estado: true,
-					estado_verificacion: true
-				}
+				select: { estado: true, estado_verificacion: true }
 			});
 
 			const nuevoEstado = accion === 'aprobar' ? 'aprobada' : 'rechazada';
-			const actualizacionUsuario =
-				accion === 'aprobar'
-					? { estado_verificacion: nuevoEstado, estado: 'activo' }
-					: { estado_verificacion: nuevoEstado };
-			const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : (usuarioAnterior?.estado ?? 'inactivo');
 
 			await tx.verificacion.update({
 				where: { id_verificacion: idVerificacion },
-				data: { estado: nuevoEstado }
+				data: {
+					estado: nuevoEstado,
+					...(esArca && accion === 'aprobar' && fechaVencimiento
+						? { fecha_vencimiento: fechaVencimiento }
+						: {})
+				}
 			});
 
-			await tx.usuario.update({
-				where: { id_usuario: verificacion.usuario_id },
-				data: actualizacionUsuario
-			});
+			// ARCA es un badge fiscal independiente; no altera el estado global del usuario
+			if (!esArca) {
+				const actualizacionUsuario =
+					accion === 'aprobar'
+						? { estado_verificacion: nuevoEstado, estado: 'activo' }
+						: { estado_verificacion: nuevoEstado };
+				await tx.usuario.update({
+					where: { id_usuario: verificacion.usuario_id },
+					data: actualizacionUsuario
+				});
+			}
+
+			const justificacionVerificacion = esArca
+				? accion === 'aprobar'
+					? `Validación ARCA aprobada por administración. Vigencia hasta: ${fechaVencimiento?.toISOString().split('T')[0]}.`
+					: `Validación ARCA rechazada. Motivo enviado al usuario: ${motivo?.trim()}`
+				: accion === 'aprobar'
+					? 'Validación documental aprobada por administración.'
+					: `Validación documental rechazada. Motivo enviado al usuario: ${motivo?.trim()}`;
 
 			await tx.historialDeCambios.create({
 				data: {
@@ -205,48 +230,49 @@ export class ServicioPanelAdmin {
 					atributo_afectado: 'estado',
 					valor_anterior: verificacion.estado,
 					valor_nuevo: nuevoEstado,
-					justificacion:
-						accion === 'aprobar'
-							? 'Validación documental aprobada por administración.'
-							: `Validación documental rechazada. Motivo enviado al usuario: ${motivo?.trim()}`,
+					justificacion: justificacionVerificacion,
 					usuario_id: adminId
 				}
 			});
 
-			if (usuarioAnterior && usuarioAnterior.estado_verificacion !== nuevoEstado) {
-				await tx.historialDeCambios.create({
-					data: {
-						tipo_objeto: 'Usuario',
-						id_objeto: verificacion.usuario_id,
-						accion: 'Actualizar',
-						atributo_afectado: 'estado_verificacion',
-						valor_anterior: usuarioAnterior.estado_verificacion ?? 'null',
-						valor_nuevo: nuevoEstado,
-						justificacion:
-							accion === 'aprobar'
-								? 'Verificación documental aprobada por administración.'
-								: 'Verificación documental rechazada por administración.',
-						usuario_id: adminId
-					}
-				});
-			}
+			if (!esArca && usuarioAnterior) {
+				const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : (usuarioAnterior.estado ?? 'inactivo');
 
-			if (usuarioAnterior && usuarioAnterior.estado !== nuevoEstadoUsuario) {
-				await tx.historialDeCambios.create({
-					data: {
-						tipo_objeto: 'Usuario',
-						id_objeto: verificacion.usuario_id,
-						accion: 'Actualizar',
-						atributo_afectado: 'estado',
-						valor_anterior: usuarioAnterior.estado,
-						valor_nuevo: nuevoEstadoUsuario,
-						justificacion:
-							accion === 'aprobar'
-								? 'Cuenta activada por aprobación de verificación documental.'
-								: 'Cuenta inactivada por rechazo de verificación documental.',
-						usuario_id: adminId
-					}
-				});
+				if (usuarioAnterior.estado_verificacion !== nuevoEstado) {
+					await tx.historialDeCambios.create({
+						data: {
+							tipo_objeto: 'Usuario',
+							id_objeto: verificacion.usuario_id,
+							accion: 'Actualizar',
+							atributo_afectado: 'estado_verificacion',
+							valor_anterior: usuarioAnterior.estado_verificacion ?? 'null',
+							valor_nuevo: nuevoEstado,
+							justificacion:
+								accion === 'aprobar'
+									? 'Verificación documental aprobada por administración.'
+									: 'Verificación documental rechazada por administración.',
+							usuario_id: adminId
+						}
+					});
+				}
+
+				if (usuarioAnterior.estado !== nuevoEstadoUsuario) {
+					await tx.historialDeCambios.create({
+						data: {
+							tipo_objeto: 'Usuario',
+							id_objeto: verificacion.usuario_id,
+							accion: 'Actualizar',
+							atributo_afectado: 'estado',
+							valor_anterior: usuarioAnterior.estado,
+							valor_nuevo: nuevoEstadoUsuario,
+							justificacion:
+								accion === 'aprobar'
+									? 'Cuenta activada por aprobación de verificación documental.'
+									: 'Cuenta inactivada por rechazo de verificación documental.',
+							usuario_id: adminId
+						}
+					});
+				}
 			}
 		});
 	}

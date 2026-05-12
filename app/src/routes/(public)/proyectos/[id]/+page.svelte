@@ -41,6 +41,8 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
+	import BeneficioFiscalArca from '$lib/components/feature/proyectos/BeneficioFiscalArca.svelte';
+	import { colaboradorPuedeDeducirEnProyecto } from '$lib/domain/use-cases/colaboraciones/colaboradorPuedeDeducirEnProyecto';
 
 	import {
 		CheckCircle,
@@ -84,6 +86,24 @@
 			: undefined
 	);
 	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
+
+	let puedeVerBeneficioFiscal = $derived(
+		colaboradorPuedeDeducirEnProyecto({
+			proyectoEstado: estadoCodigo,
+			institucionVerificacionArca: proyecto?.esDeducible
+				? { tipo: 'arca' as const, estado: 'aprobada' as const, fecha_vencimiento: new Date('2099-12-31') }
+				: null,
+			colaboradorConFinesLucro: data.conFinesLucro,
+			colaboracionDelUsuario: colaboracionUsuario
+				? {
+						estado: colaboracionUsuario.estado ?? '',
+						tipos: misAportes.map((a) => ({
+							descripcion: a.participacion_permitida?.tipo_participacion?.descripcion ?? ''
+						}))
+					}
+				: null
+		})
+	);
 
 	let esColaboradorAprobado = $derived(colaboracionUsuario?.estado === 'aprobada');
 	let esSolicitudRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
@@ -1094,6 +1114,11 @@
 								</div>
 							</section>
 						{/if}
+
+						{#if puedeVerBeneficioFiscal}
+							<BeneficioFiscalArca />
+						{/if}
+
 						<section
 							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 							aria-label="Detalles del proyecto"

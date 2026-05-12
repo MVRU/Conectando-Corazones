@@ -49,7 +49,8 @@
 		estadosDisponibles: estadosDisponiblesStore,
 		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
-		restablecerFiltros
+		restablecerFiltros,
+		soloBeneficiosFiscales
 	} = filtros;
 
 	$effect(() => {
@@ -178,6 +179,8 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
+		{soloBeneficiosFiscales}
+		mostrarFiltroFiscal={true}
 		headerActions={headerActionsSnippet}
 		card={cardSnippet}
 	/>

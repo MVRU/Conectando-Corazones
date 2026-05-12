@@ -42,7 +42,8 @@
 		estadosDisponibles: estadosDisponiblesStore,
 		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
-		restablecerFiltros
+		restablecerFiltros,
+		soloBeneficiosFiscales
 	} = filtros;
 
 	useProyectosFiltrosUrl(filtros);
@@ -107,6 +108,8 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
+		{soloBeneficiosFiscales}
+		mostrarFiltroFiscal={true}
 	>
 		{#snippet card({ proyecto })}
 			<ProyectoCard {proyecto} usuario={$usuario} />

@@ -4,6 +4,7 @@
 	import Stepper from '$lib/components/ui/Stepper.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ValidacionInstitucion from '$lib/validation/components/ValidacionInstitucion.svelte';
+	import CertificacionArca from '$lib/validation/components/CertificacionArca.svelte';
 	import DireccionForm from '$lib/components/ui/forms/DireccionForm.svelte';
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 	import PreferenciasForm from '$lib/components/feature/registro/PreferenciasForm.svelte';
@@ -285,21 +286,45 @@
 		}
 	}
 
-	async function manejarSubidaVerificacion(detail: { files: File[] }) {
+	let archivosInstWizard: File[] = $state([]);
+	let aceptoDeclaracionWizard = $state(false);
+	let metodoWizard = $state('manual');
+	let archivoArcaWizard: File | null = $state(null);
+	let errorVerifWizard: string | null = $state(null);
+	let enviandoVerif = $state(false);
+
+	async function manejarEnvioVerificacionWizard() {
+		errorVerifWizard = null;
+		if (!archivosInstWizard.length) {
+			errorVerifWizard = 'Adjuntá al menos un documento antes de continuar.';
+			return;
+		}
+		if (!aceptoDeclaracionWizard) {
+			errorVerifWizard = 'Debés aceptar la declaración para continuar.';
+			return;
+		}
+
+		enviandoVerif = true;
 		try {
-			const files = detail.files;
 			const formData = new FormData();
-			files.forEach((f) => formData.append('files', f));
+			formData.append('tipo', 'institucional');
+			archivosInstWizard.forEach((f) => formData.append('files', f));
+			const res = await fetch('/api/registro/verificacion', { method: 'POST', body: formData });
+			const body = await res.json();
+			if (!res.ok) throw new Error(body.error || 'Error al subir archivos');
 
-			const res = await fetch('/api/registro/verificacion', {
-				method: 'POST',
-				body: formData
-			});
-
-			const data = await res.json();
-
-			if (!res.ok) {
-				throw new Error(data.error || 'Error al subir archivos');
+			if (archivoArcaWizard) {
+				const formArca = new FormData();
+				formArca.append('tipo', 'arca');
+				formArca.append('files', archivoArcaWizard);
+				const resArca = await fetch('/api/registro/verificacion', { method: 'POST', body: formArca });
+				if (!resArca.ok) {
+					toastStore.show({
+						variant: 'warning',
+						title: 'Documentación enviada',
+						message: 'No se pudo subir el certificado ARCA. Podrás intentarlo luego desde tu perfil.'
+					});
+				}
 			}
 
 			toastStore.show({
@@ -309,13 +334,14 @@
 			});
 			setEtapaConPersistencia('contacto');
 		} catch (error) {
-			console.error('Error subiendo verificación:', error);
 			toastStore.show({
 				variant: 'error',
 				title: 'Error de carga',
 				message: 'No pudimos subir los archivos. Podrás intentarlo luego desde tu perfil.'
 			});
 			setEtapaConPersistencia('contacto');
+		} finally {
+			enviandoVerif = false;
 		}
 	}
 
@@ -826,13 +852,46 @@
 
 						<div in:fly={{ y: 30, duration: 800, delay: 400, easing: cubicOut }} class="w-full">
 							<ValidacionInstitucion
-								onsubmit={manejarSubidaVerificacion}
+								onsubmit={() => {}}
 								onskip={() => setEtapaConPersistencia('contacto')}
-								oncancel={() => {
-									resetFeedback();
-									setEtapaConPersistencia('formulario');
-								}}
+								ocultarBotones
+								onMetodoChange={(m) => (metodoWizard = m)}
+								bind:archivosSeleccionados={archivosInstWizard}
+								bind:aceptoDeclaracion={aceptoDeclaracionWizard}
 							/>
+
+							{#if metodoWizard !== 'omitido'}
+								<div class="mt-6">
+									<CertificacionArca
+										wizardMode
+										onsubmit={() => {}}
+										onArchivoChange={(f) => (archivoArcaWizard = f)}
+									/>
+								</div>
+
+								{#if errorVerifWizard}
+									<p role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+										{errorVerifWizard}
+									</p>
+								{/if}
+
+								<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+									<Button
+										type="button"
+										variant="secondary"
+										label="Cancelar"
+										onclick={() => { resetFeedback(); setEtapaConPersistencia('formulario'); }}
+										customClass="w-full sm:w-auto"
+									/>
+									<Button
+										type="button"
+										label="Enviar"
+										onclick={manejarEnvioVerificacionWizard}
+										disabled={enviandoVerif}
+										customClass="w-full sm:w-auto"
+									/>
+								</div>
+							{/if}
 						</div>
 					</div>
 				{:else if etapa === 'contacto'}

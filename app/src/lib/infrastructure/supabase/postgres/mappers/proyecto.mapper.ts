@@ -7,6 +7,7 @@ import { mapUbicacionToDomain } from './ubicacion.mapper';
 import type { UbicacionDisyuncion } from '$lib/domain/types/Ubicacion';
 import { UsuarioMapper } from './usuario.mapper';
 import { ColaboracionMapper } from './colaboracion.mapper';
+import { TIPOS_PARTICIPACION_DEDUCIBLES } from '$lib/domain/types/TipoParticipacion';
 
 export class ProyectoMapper {
 	static toDomain(
@@ -19,7 +20,11 @@ export class ProyectoMapper {
 			colaboraciones?: any[];
 		}
 	): Proyecto {
-		return new Proyecto({
+		const tieneParticipacionDeducible = (prismaProyecto.participacion_permitida ?? []).some(
+			(pp: any) => TIPOS_PARTICIPACION_DEDUCIBLES.includes(pp?.tipo_participacion?.descripcion)
+		);
+
+		const proyecto = new Proyecto({
 			id_proyecto: prismaProyecto.id_proyecto,
 			titulo: prismaProyecto.titulo,
 			descripcion: prismaProyecto.descripcion,
@@ -88,9 +93,16 @@ export class ProyectoMapper {
 						.filter((u) => u !== null)
 				: [],
 
-			institucion: prismaProyecto.institucion
-				? UsuarioMapper.toDomain(prismaProyecto.institucion)
-				: undefined,
+			institucion: (() => {
+				const rawInst = prismaProyecto.institucion;
+				if (!rawInst) return undefined;
+				const u = UsuarioMapper.toDomain(rawInst);
+				const arcaVerif = (rawInst as any).verificaciones?.[0] ?? null;
+				u.arcaVigente =
+					!!arcaVerif?.fecha_vencimiento &&
+					new Date(arcaVerif.fecha_vencimiento) > new Date();
+				return u;
+			})(),
 
 			colaboraciones: prismaProyecto.colaboraciones
 				? prismaProyecto.colaboraciones
@@ -98,5 +110,9 @@ export class ProyectoMapper {
 						.filter((c) => c !== null)
 				: []
 		});
+
+		proyecto.esDeducible = (proyecto.institucion?.arcaVigente ?? false) && tieneParticipacionDeducible;
+
+		return proyecto;
 	}
 }

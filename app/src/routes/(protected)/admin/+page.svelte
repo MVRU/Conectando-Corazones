@@ -78,7 +78,7 @@
 		if (res.ok) usuariosOverride = await res.json();
 	}
 
-	async function onAprobarOnboarding(detail: { idVerificacion: number }) {
+	async function onAprobarOnboarding(detail: { idVerificacion: number; fechaVencimiento?: Date }) {
 		loading = true;
 		try {
 			const res = await fetch('/api/admin/onboarding', {
@@ -86,7 +86,10 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					idVerificacion: detail.idVerificacion,
-					accion: 'aprobar'
+					accion: 'aprobar',
+					...(detail.fechaVencimiento
+						? { fechaVencimiento: detail.fechaVencimiento.toISOString() }
+						: {})
 				})
 			});
 			const body = await res.json().catch(() => null);

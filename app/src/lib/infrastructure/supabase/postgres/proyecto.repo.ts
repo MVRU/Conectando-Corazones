@@ -34,7 +34,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		},
 		institucion: {
 			include: {
-				localidad: { include: { provincia: true } }
+				localidad: { include: { provincia: true } },
+				verificaciones: {
+					where: { tipo: 'arca', estado: 'aprobada' },
+					orderBy: { created_at: 'desc' as const },
+					take: 1
+				}
 			}
 		},
 		colaboraciones: {
@@ -117,7 +122,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						username: true,
 						rol: true,
 						nombre_legal: true,
-						url_foto: true
+						url_foto: true,
+						verificaciones: {
+							where: { tipo: 'arca', estado: 'aprobada' },
+							orderBy: { created_at: 'desc' },
+							take: 1,
+							select: { tipo: true, estado: true, fecha_vencimiento: true }
+						}
 					}
 				},
 				proyecto_categorias: {

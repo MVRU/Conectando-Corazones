@@ -28,6 +28,7 @@ export class Usuario {
 	tipos_participacion_preferidas?: TipoParticipacion[];
 	consentimientos?: Consentimiento[];
 	verificaciones?: Verificacion[];
+	arcaVigente?: boolean;
 
 	// Propiedades específicas de Institucion/Colaborador (flattened)
 	nombre_legal: string;
@@ -69,6 +70,7 @@ export class Usuario {
 			this.tipos_participacion_preferidas = data.tipos_participacion_preferidas;
 		if (data.consentimientos) this.consentimientos = data.consentimientos;
 		if (data.verificaciones) this.verificaciones = data.verificaciones;
+		if (data.arcaVigente !== undefined) this.arcaVigente = data.arcaVigente;
 	}
 
 	esInstitucion(): boolean {

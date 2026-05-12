@@ -18,7 +18,7 @@ async function recomputarEstadoVerificacionUsuario(
 	tx: Prisma.TransactionClient,
 	usuarioId: number
 ) {
-	const list = await tx.verificacion.findMany({ where: { usuario_id: usuarioId } });
+	const list = await tx.verificacion.findMany({ where: { usuario_id: usuarioId, tipo: { not: 'arca' } } });
 	const hasAprobada = list.some((v) => v.estado === 'aprobada');
 	const hasPendiente = list.some((v) => v.estado === 'pendiente');
 	let ev: string | null = null;
