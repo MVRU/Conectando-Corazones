@@ -18,10 +18,14 @@ interface DocumentoExistente {
 		permitirOmitir?: boolean;
 		modoActualizacion?: boolean;
 		onsubmit: (detail: { files: File[] }) => void;
-	documentosExistentes?: DocumentoExistente[];
-	ondeleteexisting?: (idArchivo: number) => Promise<void>;
+		documentosExistentes?: DocumentoExistente[];
+		ondeleteexisting?: (idArchivo: number) => Promise<void>;
 		onskip?: () => void;
 		oncancel?: () => void;
+		ocultarBotones?: boolean;
+		onMetodoChange?: (metodo: string) => void;
+		archivosSeleccionados?: File[];
+		aceptoDeclaracion?: boolean;
 	}
 
 	let {
@@ -31,14 +35,18 @@ interface DocumentoExistente {
 		documentosExistentes = [],
 		ondeleteexisting = async () => {},
 		onskip = () => {},
-		oncancel = () => {}
+		oncancel = () => {},
+		ocultarBotones = false,
+		onMetodoChange = undefined,
+		archivosSeleccionados = $bindable([]),
+		aceptoDeclaracion = $bindable(false)
 	}: Props = $props();
 
 	let metodoSeleccionado: MetodoVerificacion = $state('manual');
-	let archivosSeleccionados: File[] = $state([]);
-	let aceptoDeclaracion = $state(false);
 	let errorFormulario: string | null = $state(null);
 	let avisoArchivosMostrado = $state(false);
+
+	$effect(() => { onMetodoChange?.(metodoSeleccionado); });
 
 	let botonEnviarDeshabilitado = $derived(!aceptoDeclaracion);
 
@@ -395,23 +403,25 @@ interface DocumentoExistente {
 					</p>
 				{/if}
 
-				<div class="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
-					<Button
-						type="button"
-						variant="secondary"
-						label="Cancelar"
-						onclick={cancelar}
-						customClass="w-full sm:w-auto"
-					/>
-					<Button
-						type="button"
-						label={modoActualizacion ? 'Enviar para revisión' : 'Enviar'}
-						onclick={enviarDocumentos}
-						customClass="w-full sm:w-auto"
-						disabled={botonEnviarDeshabilitado}
-						ariaDisabled={botonEnviarDeshabilitado}
-					/>
-				</div>
+				{#if !ocultarBotones}
+					<div class="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end">
+						<Button
+							type="button"
+							variant="secondary"
+							label="Cancelar"
+							onclick={cancelar}
+							customClass="w-full sm:w-auto"
+						/>
+						<Button
+							type="button"
+							label={modoActualizacion ? 'Enviar para revisión' : 'Enviar'}
+							onclick={enviarDocumentos}
+							customClass="w-full sm:w-auto"
+							disabled={botonEnviarDeshabilitado}
+							ariaDisabled={botonEnviarDeshabilitado}
+						/>
+					</div>
+				{/if}
 			</div>
 		{:else if metodoSeleccionado === 'renaper'}
 			<div

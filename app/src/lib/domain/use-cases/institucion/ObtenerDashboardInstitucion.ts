@@ -20,7 +20,10 @@ export class ObtenerDashboardInstitucion {
 	) {}
 
 	private obtenerEstadoVerificacionActual(institucion: Usuario): EstadoVerificacion | null {
-		const ultima = obtenerUltimaVerificacion(institucion.verificaciones ?? []);
+		const verificacionesGlobales = (institucion.verificaciones ?? []).filter(
+			(v) => v.tipo !== 'arca'
+		);
+		const ultima = obtenerUltimaVerificacion(verificacionesGlobales);
 		if (ultima?.estado === 'aprobada') return 'aprobada';
 		if (ultima?.estado === 'pendiente') return 'pendiente';
 		if (ultima?.estado === 'rechazada') return 'rechazada';
@@ -33,7 +36,9 @@ export class ObtenerDashboardInstitucion {
 		documentacionVerificacionEnRevision: boolean;
 	} {
 		const estado = this.obtenerEstadoVerificacionActual(institucion);
-		const tieneSolicitudVerificacion = (institucion.verificaciones?.length ?? 0) > 0;
+		const tieneSolicitudVerificacion = (institucion.verificaciones ?? []).some(
+			(v) => v.tipo !== 'arca'
+		);
 		const requiereVerificacionDocumental = !tieneSolicitudVerificacion && estado !== 'aprobada';
 		const documentacionVerificacionEnRevision = estado === 'pendiente' && tieneSolicitudVerificacion;
 

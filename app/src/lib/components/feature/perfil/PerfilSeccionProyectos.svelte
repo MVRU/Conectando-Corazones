@@ -79,7 +79,7 @@
 			</p>
 
 			{#if rol === 'institucion'}
-				{#if estadoVerificacion === 'aprobada'}
+				{#if estadoVerificacion === 'verificado_documental' || estadoVerificacion === 'verificado_email_institucional' || estadoVerificacion === 'verificado_renaper'}
 					<a
 						href="/proyectos/nuevo"
 						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-100 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95 text-center"

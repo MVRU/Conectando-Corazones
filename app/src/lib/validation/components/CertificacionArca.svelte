@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import { X } from 'lucide-svelte';
-	import { untrack } from 'svelte';
 
 	interface DocumentoExistente {
 		id_archivo: number;
@@ -22,6 +21,8 @@
 		motivoRechazo?: string | null;
 		onsubmit: (detail: { file: File }) => void;
 		ondelete?: () => Promise<void>;
+		wizardMode?: boolean;
+		onArchivoChange?: (archivo: File | null) => void;
 	}
 
 	let {
@@ -29,15 +30,15 @@
 		documentoExistente = null,
 		motivoRechazo = null,
 		onsubmit,
-		ondelete = async () => {}
+		ondelete = async () => {},
+		wizardMode = false,
+		onArchivoChange = undefined
 	}: Props = $props();
+
+	let inscriptaArca = $state(false);
 
 	const MAX_SIZE_MB = 5;
 
-	let aceptoInscripcion = $state(untrack(() => !!verificacionArca));
-	$effect(() => {
-		if (verificacionArca) aceptoInscripcion = true;
-	});
 	let archivoSeleccionado: File | null = $state(null);
 	let errorFormulario: string | null = $state(null);
 	let eliminando = $state(false);
@@ -92,13 +93,10 @@
 			return;
 		}
 		archivoSeleccionado = archivo;
+		onArchivoChange?.(archivo);
 	}
 
 	function enviar() {
-		if (!aceptoInscripcion) {
-			errorFormulario = 'Debés confirmar la inscripción en el padrón ARCA.';
-			return;
-		}
 		if (!archivoSeleccionado) {
 			errorFormulario = 'Debés adjuntar el certificado de exención antes de continuar.';
 			return;
@@ -195,26 +193,22 @@
 		</div>
 	{/if}
 
-	{#if estadoDisplay === 'sin_certificado'}
-		<label class="flex cursor-pointer items-start gap-3">
-			<input
-				type="checkbox"
-				bind:checked={aceptoInscripcion}
-				class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-			/>
-			<div>
-				<span class="text-sm font-medium text-slate-900">
-					Mi institución está inscripta en el padrón de exentas de ARCA (RG 2681)
+	{#if puedeCargar}
+		{#if wizardMode}
+			<label class="mt-4 flex cursor-pointer items-start gap-3">
+				<input
+					type="checkbox"
+					bind:checked={inscriptaArca}
+					class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+				/>
+				<span class="text-sm leading-snug text-slate-800">
+					Mi institución está inscripta en el padrón de entidades exentas de ARCA (RG 2681)
 				</span>
-				<p class="mt-0.5 text-xs text-slate-500">
-					Si tildás esta opción, las empresas que colaboren con tus proyectos podrán deducir su
-					aporte del Impuesto a las Ganancias.
-				</p>
-			</div>
-		</label>
+			</label>
+		{/if}
 	{/if}
 
-	{#if puedeCargar && aceptoInscripcion}
+	{#if puedeCargar && (!wizardMode || inscriptaArca)}
 		<div class="mt-6 space-y-5 rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-6 sm:p-8">
 			{#if documentoExistente && (estadoDisplay === 'rechazada' || estadoDisplay === 'vencida' || mostrandoFormActualizacion)}
 				<div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
@@ -275,7 +269,7 @@
 						<button
 							type="button"
 							class="text-slate-400 transition hover:text-red-500"
-							onclick={() => (archivoSeleccionado = null)}
+							onclick={() => { archivoSeleccionado = null; onArchivoChange?.(null); }}
 							aria-label="Quitar archivo seleccionado"
 						>
 							<X class="h-4 w-4" />
@@ -290,23 +284,25 @@
 				</p>
 			{/if}
 
-			<div class="flex justify-end gap-3 pt-2">
-				{#if mostrandoFormActualizacion}
+			{#if !wizardMode}
+				<div class="flex justify-end gap-3 pt-2">
+					{#if mostrandoFormActualizacion}
+						<Button
+							type="button"
+							variant="secondary"
+							label="Cancelar"
+							onclick={() => { mostrandoFormActualizacion = false; archivoSeleccionado = null; errorFormulario = null; }}
+						/>
+					{/if}
 					<Button
 						type="button"
-						variant="secondary"
-						label="Cancelar"
-						onclick={() => { mostrandoFormActualizacion = false; archivoSeleccionado = null; errorFormulario = null; }}
+						label="Enviar para revisión"
+						onclick={enviar}
+						disabled={!archivoSeleccionado}
+						ariaDisabled={!archivoSeleccionado}
 					/>
-				{/if}
-				<Button
-					type="button"
-					label="Enviar para revisión"
-					onclick={enviar}
-					disabled={!archivoSeleccionado}
-					ariaDisabled={!archivoSeleccionado}
-				/>
-			</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
