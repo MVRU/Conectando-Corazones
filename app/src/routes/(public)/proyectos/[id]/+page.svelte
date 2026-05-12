@@ -42,7 +42,7 @@
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
 	import BeneficioFiscalArca from '$lib/components/feature/proyectos/BeneficioFiscalArca.svelte';
-	import { colaboradorPuedeDeducirEnProyecto } from '$lib/domain/use-cases/colaboracion/colaboradorPuedeDeducirEnProyecto';
+	import { colaboradorPuedeDeducirEnProyecto } from '$lib/domain/use-cases/colaboraciones/colaboradorPuedeDeducirEnProyecto';
 
 	import {
 		CheckCircle,
@@ -89,14 +89,16 @@
 
 	let puedeVerBeneficioFiscal = $derived(
 		colaboradorPuedeDeducirEnProyecto({
-			estadoProyecto: estadoCodigo,
-			arcaVigente: proyecto?.institucion?.arcaVigente ?? false,
+			proyectoEstado: estadoCodigo,
+			institucionVerificacionArca: proyecto?.institucion?.arcaVigente
+				? { tipo: 'arca' as const, estado: 'aprobada' as const, fecha_vencimiento: new Date('2099-12-31') }
+				: null,
 			colaboradorConFinesLucro: data.conFinesLucro,
-			colaboracion: colaboracionUsuario
+			colaboracionDelUsuario: colaboracionUsuario
 				? {
 						estado: colaboracionUsuario.estado ?? '',
 						tipos: misAportes.map((a) => ({
-							descripcion: a.participacion_permitida?.tipo_participacion?.descripcion
+							descripcion: a.participacion_permitida?.tipo_participacion?.descripcion ?? ''
 						}))
 					}
 				: null
