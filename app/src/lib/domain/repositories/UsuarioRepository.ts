@@ -12,4 +12,5 @@ export interface UsuarioRepository {
 	delete(id: number): Promise<void>;
 	hasActiveProjects(id: number): Promise<boolean>;
 	hasActiveCollaborations(id: number): Promise<boolean>;
+	obtenerArcaVigente(usuarioId: number): Promise<boolean>;
 }
