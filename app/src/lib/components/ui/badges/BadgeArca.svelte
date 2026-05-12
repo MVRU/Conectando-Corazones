@@ -8,6 +8,5 @@
 	title="Donaciones deducibles de Ganancias (RG 2681)"
 >
 	<Icon src={CurrencyDollar} class="h-4 w-4" />
-	<span class="hidden sm:inline">ARCA (RG 2681)</span>
-	<span class="sm:hidden">ARCA</span>
+	ARCA
 </span>

@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
-	import { MapPin, GlobeAlt, Photo, XCircle, CurrencyDollar } from '@steeze-ui/heroicons';
+	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	const usuarioPorDefecto = '/users/user-default.png';
 
 	function aplicarFallbackImagen(event: Event) {
@@ -151,13 +152,7 @@
 				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
 				{#if proyecto.esDeducible}
-					<span
-						class="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/25 px-2 py-0.5 text-xs font-medium text-amber-100 backdrop-blur-sm"
-						title="Donaciones deducibles de Ganancias (RG 2681)"
-					>
-						<Icon src={CurrencyDollar} class="h-3 w-3" />
-						ARCA
-					</span>
+					<BadgeArca />
 				{:else}
 					<span></span>
 				{/if}
