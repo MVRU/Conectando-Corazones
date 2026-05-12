@@ -4,7 +4,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import Pagination from '$lib/components/ui/elementos/Pagination.svelte';
-	import type { Writable } from 'svelte/store';
+	import { writable, type Writable } from 'svelte/store';
 	import ProyectosFiltro from './ProyectosFiltro.svelte';
 
 	let {
@@ -32,6 +32,8 @@
 		tiposParticipacionDisponibles = [],
 		calcularLocalidadesDisponibles,
 		restablecerFiltros,
+		soloBeneficiosFiscales = undefined,
+		mostrarFiltroFiscal = false,
 		headerActions,
 		card,
 		emptyAction
@@ -60,10 +62,15 @@
 		tiposParticipacionDisponibles?: string[];
 		calcularLocalidadesDisponibles: (proyectos: Proyecto[], provincia: string) => string[];
 		restablecerFiltros: () => void;
+		soloBeneficiosFiscales?: Writable<boolean>;
+		mostrarFiltroFiscal?: boolean;
 		headerActions?: Snippet;
 		card: Snippet<[{ proyecto: Proyecto }]>;
 		emptyAction?: Snippet<[{ restablecerFiltros: () => void }]>;
 	}>();
+
+	const _sbfFallback = writable(false);
+	const sbfStore = soloBeneficiosFiscales ?? _sbfFallback;
 
 	let localidades = $derived(calcularLocalidadesDisponibles(proyectos, $provinciaSeleccionada));
 
@@ -132,6 +139,8 @@
 			bind:estado={$estadoSeleccionado}
 			{estadosDisponibles}
 			bind:criterioOrden={$criterioOrden}
+			bind:soloBeneficiosFiscales={$sbfStore}
+			{mostrarFiltroFiscal}
 			onreset={() => {
 				restablecerFiltros();
 			}}

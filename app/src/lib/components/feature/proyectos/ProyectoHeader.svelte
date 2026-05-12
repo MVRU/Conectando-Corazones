@@ -2,7 +2,7 @@
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
 	import LocationDisplay from '$lib/components/ui/badges/LocationDisplay.svelte';
-	import { Photo, EllipsisHorizontal, Flag } from '@steeze-ui/heroicons';
+	import { Photo, EllipsisHorizontal, Flag, CurrencyDollar } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import { obtenerUrlPerfil } from '$lib/utils/util-perfil';
 	import { pushState } from '$app/navigation';
@@ -106,9 +106,18 @@
 
 	<div class="absolute bottom-0 left-0 w-full p-4 text-white sm:p-6">
 		<div class="flex flex-col gap-2">
-			<div class="mb-2 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+			<div class="mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
 				<StatusBadge estado={proyecto.estado} />
 				<LocationDisplay {proyecto} variant="badge" />
+				{#if proyecto.institucion?.arcaVigente}
+					<span
+						class="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/25 px-2 py-0.5 text-xs font-medium text-amber-100 backdrop-blur-sm"
+						title="Donaciones deducibles de Ganancias (RG 2681)"
+					>
+						<Icon src={CurrencyDollar} class="h-3 w-3" />
+						ARCA
+					</span>
+				{/if}
 			</div>
 
 			<h1

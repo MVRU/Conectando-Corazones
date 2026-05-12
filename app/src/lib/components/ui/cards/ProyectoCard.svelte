@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Proyecto } from '$lib/domain/types/Proyecto';
 	import type { Usuario } from '$lib/domain/types/Usuario';
-	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
+	import { MapPin, GlobeAlt, Photo, XCircle, CurrencyDollar } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
 	const usuarioPorDefecto = '/users/user-default.png';
 
@@ -18,7 +18,6 @@
 	} from '$lib/utils/util-proyectos';
 	import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 	import StatusBadge from '$lib/components/ui/badges/StatusBadge.svelte';
-	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
@@ -147,10 +146,21 @@
 					{ubicacionCorta}
 				</span>
 			</div>
-			<!-- Rango de fechas -->
+			<!-- Franja inferior: ARCA (izquierda) + fechas (derecha) -->
 			<div
-				class="absolute right-0 bottom-0 left-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
+				{#if proyecto.institucion?.arcaVigente}
+					<span
+						class="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/25 px-2 py-0.5 text-xs font-medium text-amber-100 backdrop-blur-sm"
+						title="Donaciones deducibles de Ganancias (RG 2681)"
+					>
+						<Icon src={CurrencyDollar} class="h-3 w-3" />
+						ARCA
+					</span>
+				{:else}
+					<span></span>
+				{/if}
 				<span
 					class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
 				>
@@ -183,9 +193,6 @@
 						<span class="truncate font-medium text-gray-700">
 							{proyecto.institucion.nombre_legal}
 						</span>
-						{#if proyecto.institucion.arcaVigente}
-							<BadgeArca />
-						{/if}
 					</div>
 				{/if}
 			</div>
