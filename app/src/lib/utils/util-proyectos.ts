@@ -66,9 +66,14 @@ export function filtrarProyectos(
 	searchQuery: string,
 	estado: string[],
 	provincia: string,
-	categoria: string[] = []
+	categoria: string[] = [],
+	soloBeneficiosFiscales: boolean = false
 ): Proyecto[] {
 	let resultado = [...proyectos];
+
+	if (soloBeneficiosFiscales) {
+		resultado = resultado.filter((p) => p.institucion?.arcaVigente === true);
+	}
 
 	if (filtros.length > 0 && !filtros.includes('Todos')) {
 		const tiposEsperados = filtros.filter((f) => f !== 'Todos');

@@ -34,7 +34,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		},
 		institucion: {
 			include: {
-				localidad: { include: { provincia: true } }
+				localidad: { include: { provincia: true } },
+				verificaciones: {
+					where: { tipo: 'arca', estado: 'aprobada' },
+					orderBy: { created_at: 'desc' as const },
+					take: 1
+				}
 			}
 		},
 		colaboraciones: {

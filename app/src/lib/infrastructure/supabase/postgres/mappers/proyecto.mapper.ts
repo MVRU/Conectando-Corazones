@@ -7,6 +7,7 @@ import { mapUbicacionToDomain } from './ubicacion.mapper';
 import type { UbicacionDisyuncion } from '$lib/domain/types/Ubicacion';
 import { UsuarioMapper } from './usuario.mapper';
 import { ColaboracionMapper } from './colaboracion.mapper';
+import { TIPOS_PARTICIPACION_DEDUCIBLES } from '$lib/domain/types/TipoParticipacion';
 
 export class ProyectoMapper {
 	static toDomain(
@@ -93,8 +94,11 @@ export class ProyectoMapper {
 				if (!rawInst) return undefined;
 				const u = UsuarioMapper.toDomain(rawInst);
 				const arcaVerif = (rawInst as any).verificaciones?.[0] ?? null;
+				const tieneParticipacionDeducible = (prismaProyecto.participacion_permitida ?? []).some(
+					(pp) => TIPOS_PARTICIPACION_DEDUCIBLES.includes(pp?.tipo_participacion?.descripcion)
+				);
 				u.arcaVigente = arcaVerif?.fecha_vencimiento
-					? new Date(arcaVerif.fecha_vencimiento) > new Date()
+					? new Date(arcaVerif.fecha_vencimiento) > new Date() && tieneParticipacionDeducible
 					: false;
 				return u;
 			})(),
