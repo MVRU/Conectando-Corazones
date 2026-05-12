@@ -72,7 +72,7 @@ export function filtrarProyectos(
 	let resultado = [...proyectos];
 
 	if (soloBeneficiosFiscales) {
-		resultado = resultado.filter((p) => p.institucion?.arcaVigente === true);
+		resultado = resultado.filter((p) => p.esDeducible === true);
 	}
 
 	if (filtros.length > 0 && !filtros.includes('Todos')) {

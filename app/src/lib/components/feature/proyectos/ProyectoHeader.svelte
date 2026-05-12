@@ -109,7 +109,7 @@
 			<div class="mb-2 flex flex-wrap items-center gap-2 sm:gap-3">
 				<StatusBadge estado={proyecto.estado} />
 				<LocationDisplay {proyecto} variant="badge" />
-				{#if proyecto.institucion?.arcaVigente}
+				{#if proyecto.esDeducible}
 					<span
 						class="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/25 px-2 py-0.5 text-xs font-medium text-amber-100 backdrop-blur-sm"
 						title="Donaciones deducibles de Ganancias (RG 2681)"

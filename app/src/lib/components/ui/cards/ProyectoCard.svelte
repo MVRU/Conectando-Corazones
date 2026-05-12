@@ -150,7 +150,7 @@
 			<div
 				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
-				{#if proyecto.institucion?.arcaVigente}
+				{#if proyecto.esDeducible}
 					<span
 						class="inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/25 px-2 py-0.5 text-xs font-medium text-amber-100 backdrop-blur-sm"
 						title="Donaciones deducibles de Ganancias (RG 2681)"

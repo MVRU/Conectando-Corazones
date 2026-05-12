@@ -20,7 +20,11 @@ export class ProyectoMapper {
 			colaboraciones?: any[];
 		}
 	): Proyecto {
-		return new Proyecto({
+		const tieneParticipacionDeducible = (prismaProyecto.participacion_permitida ?? []).some(
+			(pp: any) => TIPOS_PARTICIPACION_DEDUCIBLES.includes(pp?.tipo_participacion?.descripcion)
+		);
+
+		const proyecto = new Proyecto({
 			id_proyecto: prismaProyecto.id_proyecto,
 			titulo: prismaProyecto.titulo,
 			descripcion: prismaProyecto.descripcion,
@@ -94,12 +98,9 @@ export class ProyectoMapper {
 				if (!rawInst) return undefined;
 				const u = UsuarioMapper.toDomain(rawInst);
 				const arcaVerif = (rawInst as any).verificaciones?.[0] ?? null;
-				const tieneParticipacionDeducible = (prismaProyecto.participacion_permitida ?? []).some(
-					(pp) => TIPOS_PARTICIPACION_DEDUCIBLES.includes(pp?.tipo_participacion?.descripcion)
-				);
-				u.arcaVigente = arcaVerif?.fecha_vencimiento
-					? new Date(arcaVerif.fecha_vencimiento) > new Date() && tieneParticipacionDeducible
-					: false;
+				u.arcaVigente =
+					!!arcaVerif?.fecha_vencimiento &&
+					new Date(arcaVerif.fecha_vencimiento) > new Date();
 				return u;
 			})(),
 
@@ -109,5 +110,9 @@ export class ProyectoMapper {
 						.filter((c) => c !== null)
 				: []
 		});
+
+		proyecto.esDeducible = (proyecto.institucion?.arcaVigente ?? false) && tieneParticipacionDeducible;
+
+		return proyecto;
 	}
 }

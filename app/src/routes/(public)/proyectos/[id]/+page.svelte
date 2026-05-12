@@ -90,7 +90,7 @@
 	let puedeVerBeneficioFiscal = $derived(
 		colaboradorPuedeDeducirEnProyecto({
 			proyectoEstado: estadoCodigo,
-			institucionVerificacionArca: proyecto?.institucion?.arcaVigente
+			institucionVerificacionArca: proyecto?.esDeducible
 				? { tipo: 'arca' as const, estado: 'aprobada' as const, fecha_vencimiento: new Date('2099-12-31') }
 				: null,
 			colaboradorConFinesLucro: data.conFinesLucro,
