@@ -39,13 +39,14 @@
 	let misAportes = $state(untrack(() => data.aportes.map((a: any) => ({ ...a, expanded: false }))));
 
 	$effect(() => {
-		// Actualizar estado local si data.aportes cambia (ej. tras invalidateAll)
-		// Pero preservamos el estado de 'expanded' si el ID coincide
-		const nuevosAportes = data.aportes.map((a: any) => {
-			const existente = misAportes.find((m: any) => m.id_colaboracion_tipo_participacion === a.id_colaboracion_tipo_participacion);
+		const aportes = data.aportes;
+		const snapshot = untrack(() => misAportes);
+		misAportes = aportes.map((a: any) => {
+			const existente = snapshot.find(
+				(m: any) => m.id_colaboracion_tipo_participacion === a.id_colaboracion_tipo_participacion
+			);
 			return { ...a, expanded: existente ? existente.expanded : false };
 		});
-		misAportes = nuevosAportes;
 	});
 
 	function toggleExpand(index: number) {
