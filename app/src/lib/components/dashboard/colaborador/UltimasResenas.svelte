@@ -1,4 +1,3 @@
-<!-- TODO: implementar módulo de reseñas -->
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
 

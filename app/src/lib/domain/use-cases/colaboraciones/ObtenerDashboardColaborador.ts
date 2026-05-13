@@ -1,13 +1,17 @@
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
+import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
 import type { ColaboradorDashboardData } from '$lib/components/dashboard/colaborador/types';
 
 export class ObtenerDashboardColaborador {
 	constructor(
 		private colaboracionRepo: ColaboracionRepository,
 		private proyectoRepo: ProyectoRepository,
-		private usuarioRepo: UsuarioRepository
+		private usuarioRepo: UsuarioRepository,
+		private resenaRepo: ResenaRepository,
+		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
 	async execute(colaboradorId: number): Promise<ColaboradorDashboardData> {
@@ -104,10 +108,11 @@ export class ObtenerDashboardColaborador {
 		);
 		const estadisticasAyuda = this.calcularEstadisticasAyuda(colaboraciones);
 
-		const proyectosComunidad = await this.calcularProyectosRecomendados(
-			colaborador,
-			proyectosColaborador
-		);
+		const [proyectosComunidad, ultimasResenas, heatmapActividad] = await Promise.all([
+			this.calcularProyectosRecomendados(colaborador, proyectosColaborador),
+			this.obtenerUltimasResenas(colaboradorId),
+			this.calcularHeatmapActividad(colaboradorId)
+		]);
 
 		return {
 			info: {
@@ -138,10 +143,51 @@ export class ObtenerDashboardColaborador {
 			seguimientoObjetivos,
 			estadisticasAyuda,
 			topColaboradores: [],
-			ultimasResenas: [],
-			heatmapActividad: [],
+			ultimasResenas,
+			heatmapActividad,
 			proyectosComunidad
 		};
+	}
+
+	private async obtenerUltimasResenas(colaboradorId: number) {
+		const resenas = await this.resenaRepo.findByObjetoAprobadas('usuario', colaboradorId, 5);
+
+		return resenas.map((r) => ({
+			id: r.id_resena?.toString() || '',
+			usuario: r.username || 'Usuario anónimo',
+			avatarUrl: r.autor?.url_foto ?? undefined,
+			calificacion: r.puntaje || 0,
+			comentario: r.contenido || '',
+			fecha: r.created_at?.toISOString() ?? new Date().toISOString()
+		}));
+	}
+
+	private async calcularHeatmapActividad(colaboradorId: number) {
+		const desde = new Date();
+		desde.setDate(desde.getDate() - 182);
+
+		const cambios = await this.historialRepo.findAll({ usuario_id: colaboradorId, desde });
+
+		const conteoPorDia = new Map<string, number>();
+		for (const cambio of cambios) {
+			if (!cambio.created_at) continue;
+			const fecha = new Date(cambio.created_at);
+			const clave = fecha.toISOString().split('T')[0];
+			conteoPorDia.set(clave, (conteoPorDia.get(clave) || 0) + 1);
+		}
+
+		return Array.from(conteoPorDia.entries()).map(([fecha, conteo]) => ({
+			fecha,
+			intensidad: this.mapearIntensidad(conteo)
+		}));
+	}
+
+	private mapearIntensidad(conteo: number): number {
+		if (conteo <= 0) return 0;
+		if (conteo === 1) return 1;
+		if (conteo <= 3) return 2;
+		if (conteo <= 5) return 3;
+		return 4;
 	}
 
 	private calcularEstadisticasProyectos(proyectos: any[], colaboraciones: any[]) {
