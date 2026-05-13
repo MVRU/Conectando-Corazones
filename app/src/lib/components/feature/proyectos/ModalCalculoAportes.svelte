@@ -94,8 +94,8 @@
 					</p>
 				{:else if step === 1}
 					<p>
-						Se calcula el porcentaje total alcanzado sobre el total necesario, sumando todas las
-						cantidades recaudadas y dividiéndolas por la suma de los objetivos.
+						Para cada tipo de participación (monetaria, voluntariado, especie) se calcula su
+						porcentaje individual. Luego se promedia el resultado para que cada tipo pese igual.
 					</p>
 					<div
 						class="rounded-lg border border-sky-100 bg-sky-50 p-3 font-mono text-xs leading-snug text-sky-900"
@@ -104,7 +104,7 @@
 							<div class="h-2 w-2 rounded-full bg-sky-400"></div>
 							<span class="font-medium text-sky-700">Fórmula:</span>
 						</div>
-						<span>progreso = (recaudado_i) / (objetivo_i) × 100</span>
+						<span>progreso = promedio( recaudado_i / objetivo_i × 100 )</span>
 					</div>
 					<p class="mt-2">
 						<strong
@@ -130,7 +130,7 @@
 						>
 					</p>
 				{:else if step === 3}
-					<p>Se combina con un peso del 60% a objetivos y 40% al tiempo.</p>
+					<p>Se combina con un peso del 80% a objetivos y 20% al tiempo.</p>
 					<div
 						class="rounded-lg border border-purple-100 bg-purple-50 p-3 font-mono text-xs leading-snug text-purple-900"
 					>
@@ -138,7 +138,7 @@
 							<div class="h-2 w-2 rounded-full bg-purple-400"></div>
 							<span class="font-medium text-purple-700">Fórmula:</span>
 						</div>
-						<span>total = 0.6 × objetivos + 0.4 × tiempo</span>
+						<span>total = 0.8 × objetivos + 0.2 × tiempo</span>
 					</div>
 					<p class="mt-2">
 						<strong>Progreso total: <span class="text-purple-700">{progresoTotal}%</span></strong>

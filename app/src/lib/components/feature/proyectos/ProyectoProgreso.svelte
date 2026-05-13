@@ -96,7 +96,7 @@
 
 	let progresoCantidad = $derived(calcularProgresoCantidad(participaciones));
 	let progresoTiempo = $derived(calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa));
-	let progresoTotal = $derived(Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo));
+	let progresoTotal = $derived(Math.round(0.8 * progresoCantidad + 0.2 * progresoTiempo));
 
 	function getMensajeProgreso() {
 		if (progresoCantidad > 100) {
