@@ -17,8 +17,6 @@ export const ENABLED_BREADCRUMB_PATHS = [
 	'/colaborador/proyectos/:id/mis-aportes/nuevo',
 	'/colaborador/proyectos/:id/evaluar-cierre',
 
-	// Mensajes
-	'/mensajes/:proyecto_id'
 ];
 
 /**
