@@ -171,6 +171,24 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 		}
 	}
 
+	async getEvidenciasPorColaboracion(colaboracionId: number, _usuarioId: number): Promise<any[]> {
+		try {
+			return await prisma.evidencia.findMany({
+				where: {
+					participacion_permitida: {
+						colaboraciones_tipo_participacion: {
+							some: { colaboracion_id: colaboracionId }
+						}
+					}
+				},
+				include: { archivos: true }
+			});
+		} catch (error) {
+			console.error('Error getting evidencias por colaboracion:', error);
+			return [];
+		}
+	}
+
 	async getColaboracionesPorProyecto(proyectoId: number): Promise<Colaboracion[]> {
 		try {
 			const colaboraciones = await prisma.colaboracion.findMany({

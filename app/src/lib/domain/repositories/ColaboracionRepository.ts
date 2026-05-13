@@ -18,5 +18,6 @@ export interface ColaboracionRepository {
 	getColaboracion(proyectoId: number, usuarioId: number): Promise<Colaboracion | null>;
 	getAportesPorColaboracion(colaboracionId: number): Promise<any[]>;
 	getEvidencias(participacionPermitidaId: number): Promise<any[]>;
+	getEvidenciasPorColaboracion(colaboracionId: number, usuarioId: number): Promise<any[]>;
 	getColaboracionesPorProyecto(proyectoId: number): Promise<Colaboracion[]>;
 }
