@@ -208,25 +208,9 @@ export const actions = {
 			// 1. Procesar eliminaciones
 			if (eliminadas.length > 0) {
 				await Promise.all(
-					eliminadas.map(async (idArchivo: number) => {
-						const archivoEliminado = await eliminarArchivo.execute(
-							idArchivo,
-							locals.usuario!.id_usuario!
-						);
-
-						// Eliminar de Supabase Storage
-						if (archivoEliminado && archivoEliminado.url) {
-							const partes = archivoEliminado.url.split('/');
-							if (partes.length > 1) {
-								const bucket = partes[0];
-								const path = partes.slice(1).join('/');
-
-								if (bucket && path) {
-									await supabaseAdmin.storage.from(bucket).remove([path]);
-								}
-							}
-						}
-					})
+					eliminadas.map((idArchivo: number) =>
+						eliminarArchivo.execute(idArchivo, locals.usuario!.id_usuario!)
+					)
 				);
 			}
 
