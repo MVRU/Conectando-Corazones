@@ -333,21 +333,21 @@
 		estaGuardando = true;
 
 		try {
-			// 1. Subir archivos a Supabase si los hay
-			const archivosSubidos: any[] = [];
-			for (const evidencia of evidenciasNuevas) {
-				for (const archivo of evidencia.archivos) {
+			// 1. Subir todos los archivos a Supabase en paralelo
+			const todosLosArchivos = evidenciasNuevas.flatMap((ev) => ev.archivos);
+			const archivosSubidos = await Promise.all(
+				todosLosArchivos.map(async (archivo) => {
 					const archivoSubido = await subirArchivoASupabase(archivo);
-					archivosSubidos.push({
+					return {
 						nombre_original: archivoSubido.nombre_original,
 						descripcion: archivoSubido.descripcion,
 						tipo_mime: archivoSubido.tipo_mime,
 						tamanio_bytes: archivoSubido.tamanio_bytes,
-						url: archivoSubido.url, // Path en storage
+						url: archivoSubido.url,
 						proyecto_id: archivoSubido.proyecto_id
-					});
-				}
-			}
+					};
+				})
+			);
 
 			// 2. Preparar FormData para la acción de SvelteKit
 			const formData = new FormData();

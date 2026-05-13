@@ -7,7 +7,7 @@ export class ObtenerMisAportes {
 	constructor(
 		private colaboracionRepo: ColaboracionRepository,
 		private proyectoRepo: ProyectoRepository
-	) {}
+	) { }
 
 	async execute(usuarioId: number, proyectoId: number) {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
@@ -19,41 +19,48 @@ export class ObtenerMisAportes {
 			return { colaboracion: null, aportes: [], proyecto };
 		}
 
-		const rawAportes = (await this.colaboracionRepo.getAportesPorColaboracion(
-			colaboracion.id_colaboracion
-		)) as ColaboracionTipoParticipacion[];
+		const [rawAportes, todasEvidencias] = await Promise.all([
+			this.colaboracionRepo.getAportesPorColaboracion(
+				colaboracion.id_colaboracion
+			) as Promise<ColaboracionTipoParticipacion[]>,
+			this.colaboracionRepo.getEvidenciasPorColaboracion(
+				colaboracion.id_colaboracion,
+				usuarioId
+			) as Promise<Evidencia[]>
+		]);
 
-		const aportes = await Promise.all(
-			rawAportes.map(async (aporte) => {
-				const pp = proyecto.participacion_permitida?.find(
-					(p) => p.id_participacion_permitida === aporte.participacion_permitida_id
-				);
+		const evidenciasPorParticipacion = new Map<number, Evidencia[]>();
+		for (const evidencia of todasEvidencias) {
+			const ppId = evidencia.id_participacion_permitida!;
+			const arr = evidenciasPorParticipacion.get(ppId);
+			if (arr) arr.push(evidencia);
+			else evidenciasPorParticipacion.set(ppId, [evidencia]);
+		}
 
-				const todasEvidencias = (await this.colaboracionRepo.getEvidencias(
-					aporte.participacion_permitida_id!
-				)) as (Evidencia & {
-					participacion_permitida?: { colaboraciones_tipo_participacion?: any[] };
-				})[];
+		const aportes = rawAportes.map((aporte) => {
+			const pp = proyecto.participacion_permitida?.find(
+				(p: any) => p.id_participacion_permitida === aporte.participacion_permitida_id
+			);
 
-				// Extraer archivos de evidencias de entrada (del usuario)
-				const evidenciasEntrada = todasEvidencias
-					.filter((e) => e.tipo_evidencia === 'entrada')
-					.flatMap((e) => e.archivos || [])
-					.filter((a) => a.usuario_id === usuarioId);
+			const evidenciasDelAporte =
+				evidenciasPorParticipacion.get(aporte.participacion_permitida_id!) ?? [];
 
-				// Extraer archivos de evidencias de salida (de la institución)
-				const evidenciasSalida = todasEvidencias
-					.filter((e) => e.tipo_evidencia === 'salida')
-					.flatMap((e) => e.archivos || []);
+			const evidenciasEntrada = evidenciasDelAporte
+				.filter((e) => e.tipo_evidencia === 'entrada')
+				.flatMap((e) => e.archivos || [])
+				.filter((a) => a.usuario_id === usuarioId);
 
-				return {
-					...aporte,
-					participacion_permitida: pp,
-					evidenciasEntrada,
-					evidenciasSalida
-				};
-			})
-		);
+			const evidenciasSalida = evidenciasDelAporte
+				.filter((e) => e.tipo_evidencia === 'salida')
+				.flatMap((e) => e.archivos || []);
+
+			return {
+				...aporte,
+				participacion_permitida: pp,
+				evidenciasEntrada,
+				evidenciasSalida
+			};
+		});
 
 		return {
 			colaboracion,
