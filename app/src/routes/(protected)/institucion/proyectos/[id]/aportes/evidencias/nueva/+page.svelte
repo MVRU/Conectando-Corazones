@@ -164,18 +164,20 @@
 
 	let evidenciasSalidaTotal = $derived<ArchivoUI[]>([
 		...evidenciasSalidaExistentes.filter((e) => !evidenciasEliminadas.has(e.id_archivo ?? 0)),
-		...evidenciasSalidaNuevas.flatMap((ev) =>
-			ev.archivos.map((archivo) => ({
-				...archivo,
-				uploader_nombre: proyectoActual.nombreInstitucion || 'Institución',
-				fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
-				tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
-				tamanio_formateado: archivo.tamanio_bytes
-					? `${(archivo.tamanio_bytes / (1024 * 1024)).toFixed(1)} MB`
-					: 'Desconocido',
-				evidencia_temp_id: ev.id_temp
-			}))
-		)
+		...evidenciasSalidaNuevas
+			.filter((ev) => ev.id_participacion_permitida === selectedParticipacionPermitidaId)
+			.flatMap((ev) =>
+				ev.archivos.map((archivo) => ({
+					...archivo,
+					uploader_nombre: proyectoActual.nombreInstitucion || 'Institución',
+					fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
+					tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
+					tamanio_formateado: archivo.tamanio_bytes
+						? `${(archivo.tamanio_bytes / (1024 * 1024)).toFixed(1)} MB`
+						: 'Desconocido',
+					evidencia_temp_id: ev.id_temp
+				}))
+			)
 	]);
 
 	let hayaCambios = $derived(
@@ -288,7 +290,7 @@
 	}
 
 	async function guardarCambios() {
-		if (!selectedParticipacionPermitidaId) return;
+		if (!hayaCambios) return;
 
 		estaGuardando = true;
 		const toastId = toastStore.show({
@@ -321,7 +323,6 @@
 			const formData = new FormData();
 			formData.append('evidencias', JSON.stringify(evidenciasProcesadas));
 			formData.append('eliminadas', JSON.stringify(Array.from(evidenciasEliminadas)));
-			formData.append('id_participacion_permitida', selectedParticipacionPermitidaId.toString());
 
 			const response = await fetch('?/guardarEvidencia', {
 				method: 'POST',
@@ -342,7 +343,7 @@
 				evidenciasEliminadas = new SvelteSet();
 
 				await invalidateAll();
-				goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
+				await goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
 			} else {
 				throw new Error('Error al registrar en base de datos');
 			}
@@ -762,7 +763,7 @@
 					<div class="flex-1 md:flex-none">
 						<Button
 							label="Guardar"
-							disabled={!hayaCambios || !selectedParticipacionPermitidaId}
+							disabled={!hayaCambios}
 							size="md"
 							customClass="w-full shadow-lg shadow-blue-200"
 							onclick={guardarCambios}

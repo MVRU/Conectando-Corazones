@@ -177,13 +177,11 @@ export const actions = {
 		const formData = await request.formData();
 		const evidenciasJson = formData.get('evidencias')?.toString();
 		const eliminadasJson = formData.get('eliminadas')?.toString();
-		const idParticipacionPermitidaStr = formData.get('id_participacion_permitida')?.toString();
 
-		if (!evidenciasJson || !idParticipacionPermitidaStr) {
+		if (!evidenciasJson) {
 			return fail(400, { error: 'Faltan datos requeridos' });
 		}
 
-		const idParticipacionPermitida = Number(idParticipacionPermitidaStr);
 		const evidencias = JSON.parse(evidenciasJson); // EvidenciaNueva[] del frontend
 		const eliminadas = eliminadasJson ? JSON.parse(eliminadasJson) : []; // number[] IDs de archivos
 
@@ -232,28 +230,39 @@ export const actions = {
 				);
 			}
 
-			// 2. Procesar nuevas evidencias
-			const archivosAProcesar: Archivo[] = evidencias.flatMap((ev: any) =>
-				ev.archivos.map((a: any) => {
-					// Mapear al dominio Archivo
-					return new Archivo({
-						nombre_original: a.nombre_original,
-						url: a.url, // Full path devuelto por API
-						tipo_mime: a.tipo_mime,
-						tamanio_bytes: a.tamanio_bytes,
-						descripcion: a.descripcion,
-						usuario_id: locals.usuario!.id_usuario!
-					});
-				})
-			);
+			// 2. Procesar nuevas evidencias agrupadas por participacion_permitida
+			const archivosPorParticipacion = new Map<number, Archivo[]>();
+			for (const ev of evidencias as any[]) {
+				const idParticipacion = Number(ev.id_participacion_permitida);
+				if (!idParticipacion) continue;
+				if (!archivosPorParticipacion.has(idParticipacion)) {
+					archivosPorParticipacion.set(idParticipacion, []);
+				}
+				for (const a of ev.archivos as any[]) {
+					archivosPorParticipacion.get(idParticipacion)!.push(
+						new Archivo({
+							nombre_original: a.nombre_original,
+							url: a.url,
+							tipo_mime: a.tipo_mime,
+							tamanio_bytes: a.tamanio_bytes,
+							descripcion: a.descripcion,
+							usuario_id: locals.usuario!.id_usuario!
+						})
+					);
+				}
+			}
 
-			if (archivosAProcesar.length > 0) {
-				await subirEvidencia.execute(
-					locals.usuario.id_usuario!,
-					locals.usuario.rol,
-					idParticipacionPermitida,
-					'salida',
-					archivosAProcesar
+			if (archivosPorParticipacion.size > 0) {
+				await Promise.all(
+					Array.from(archivosPorParticipacion.entries()).map(([idParticipacion, archivos]) =>
+						subirEvidencia.execute(
+							locals.usuario!.id_usuario!,
+							locals.usuario!.rol,
+							idParticipacion,
+							'salida',
+							archivos
+						)
+					)
 				);
 			}
 
