@@ -13,7 +13,7 @@
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { SvelteSet, SvelteURL } from 'svelte/reactivity';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -46,55 +46,25 @@
 		archivos: (Archivo & { file: File })[];
 	};
 
-	let selectedProyectoId = $state<number>(0);
 	let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>('');
 	let selectedParticipacionPermitidaId = $state<number | null>(null);
 
 	$effect(() => {
-		// Inicialización reactiva basada en data
-		if (selectedProyectoId === 0) {
-			selectedProyectoId = data.proyecto.id_proyecto ?? 0;
-		}
-		if (selectedTipoParticipacion === '') {
-			selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
-		}
+		selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
 	});
 
-	let proyectoActual = $derived(
-		data.proyectosDisponibles.find((p: { id_proyecto: number }) => p.id_proyecto === selectedProyectoId) || data.proyecto
-	);
-
-	// Sincronizar URL y Breadcrumbs cuando cambia el proyecto seleccionado
 	$effect(() => {
-		if (selectedProyectoId && selectedProyectoId !== Number(page.params.id)) {
-			// Actualizar URL sin recargar la página (Shallow Routing parcial)
-			const newUrl = new SvelteURL(window.location.href);
-			newUrl.pathname = newUrl.pathname.replace(`/${page.params.id}/`, `/${selectedProyectoId}/`);
-			window.history.replaceState({}, '', newUrl.toString());
-		}
-
 		setBreadcrumbs([
 			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
-			{ label: 'Aportes', href: `/institucion/proyectos/${selectedProyectoId}/aportes` },
+			{ label: 'Aportes', href: `/institucion/proyectos/${data.proyecto.id_proyecto}/aportes` },
 			{ label: 'Nueva Evidencia' }
 		]);
 	});
 
-	// Filtro de evidencias por proyecto seleccionado (Reactividad pura Svelte 5)
-	const evidenciasDelProyecto = $derived(
-		(data.evidencias as (Evidencia & { id_proyecto: number })[]).filter(
-			(e) => e.id_proyecto === selectedProyectoId
-		)
-	);
-
-	// Filtrar participaciones por proyecto y tipo seleccionado
+	// Filtrar participaciones por tipo seleccionado
 	let filteredParticipaciones = $derived(
-		(data.participacionesPermitidas as (ParticipacionPermitida & { id_proyecto: number })[]).filter(
-			(p) => {
-				if (p.id_proyecto !== selectedProyectoId) return false;
-				if (!selectedTipoParticipacion) return false;
-				return p.tipo_participacion?.descripcion === selectedTipoParticipacion;
-			}
+		(data.participacionesPermitidas as ParticipacionPermitida[]).filter(
+			(p) => !!selectedTipoParticipacion && p.tipo_participacion?.descripcion === selectedTipoParticipacion
 		)
 	);
 
@@ -110,7 +80,7 @@
 
 	let evidenciasEntrada = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? evidenciasDelProyecto
+			? (data.evidencias as Evidencia[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -132,7 +102,7 @@
 
 	let evidenciasSalidaExistentes = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? evidenciasDelProyecto
+			? (data.evidencias as Evidencia[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -169,7 +139,7 @@
 			.flatMap((ev) =>
 				ev.archivos.map((archivo) => ({
 					...archivo,
-					uploader_nombre: proyectoActual.nombreInstitucion || 'Institución',
+					uploader_nombre: data.proyecto.nombreInstitucion || 'Institución',
 					fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
 					tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
 					tamanio_formateado: archivo.tamanio_bytes
@@ -186,17 +156,11 @@
 			archivosTemporales.length > 0
 	);
 
-	let isMobile = $state(false);
 	let mostrarModalConfirmacion = $state(false);
 	let navegacionPendiente: (() => void) | null = $state(null);
 	let estaGuardando = $state(false);
 
 	onMount(() => {
-		const mql = window.matchMedia('(max-width: 640px)');
-		isMobile = mql.matches;
-		const listener = (e: MediaQueryListEvent) => (isMobile = e.matches);
-		mql.addEventListener('change', listener);
-
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			if (hayaCambios && !estaGuardando) {
 				e.preventDefault();
@@ -207,19 +171,20 @@
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		return () => {
-			mql.removeEventListener('change', listener);
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
 	});
 
 	beforeNavigate((navigation) => {
 		if (hayaCambios && !mostrarModalConfirmacion && !estaGuardando) {
+			const destino = navigation.to?.url
+				? navigation.to.url.pathname + navigation.to.url.search
+				: `/institucion/proyectos/${data.proyecto.id_proyecto}/aportes`;
 			navigation.cancel();
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
 				evidenciasEliminadas = new SvelteSet();
-				navigation.cancel();
-				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
+				goto(destino);
 			};
 			mostrarModalConfirmacion = true;
 		}
@@ -230,7 +195,7 @@
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
 				evidenciasEliminadas = new SvelteSet();
-				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
+				goto(`/institucion/proyectos/${data.proyecto.id_proyecto}/aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		} else {
@@ -555,7 +520,13 @@
 					</label>
 					<select
 						id="proyecto"
-						bind:value={selectedProyectoId}
+						value={data.proyecto.id_proyecto}
+						onchange={(e) => {
+							const newId = Number((e.target as HTMLSelectElement).value);
+							if (newId !== data.proyecto.id_proyecto) {
+								goto(`/institucion/proyectos/${newId}/aportes/evidencias/nueva`);
+							}
+						}}
 						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						{#each data.proyectosDisponibles as proyecto (proyecto.id_proyecto)}

@@ -62,71 +62,40 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			nombreInstitucion = institucion.nombre_legal;
 		}
 
-		// 4. Cargar Evidencias y Participaciones de TODOS los proyectos disponibles
+		// Cargar evidencias y participaciones solo del proyecto actual
 		const evidenciaRepo = new PostgresEvidenciaRepository();
 		const colaboracionRepo = new PostgresColaboracionRepository();
 		const listarEvidencias = new ListarEvidencias(evidenciaRepo, proyectoRepo, colaboracionRepo);
 
-		const dataProyectos = await Promise.all(
-			proyectosDisponibles.map(async (p) => {
-				const id = p.id_proyecto!;
-				try {
-					// Obtener proyecto completo para sus participaciones
-					const fullProject = await proyectoRepo.findById(id);
-					const evidenciasDominio = await listarEvidencias.execute(
-						id,
-						usuario.id_usuario!,
-						usuario.rol
-					);
+		const evidenciasDominio = await listarEvidencias.execute(projectId, usuario.id_usuario!, usuario.rol);
 
-					// Mapear y generar URLs firmadas
-					const evidenciasConUrl = await Promise.all(
-						evidenciasDominio.map(async (ev) => {
-							const archivosConUrl = await Promise.all(
-								ev.archivos.map(async (archivo: any) => {
-									let urlFirmada = archivo.url;
-									if (
-										archivo.url &&
-										!archivo.url.startsWith('http') &&
-										!archivo.url.startsWith('data:')
-									) {
-										const partes = archivo.url.split('/');
-										const bucketName = partes[0] === 'evidencias' ? 'evidencias' : 'avatars';
-										const path = partes.slice(1).join('/');
-
-										if (path) {
-											const { data: signedData } = await supabaseAdmin.storage
-												.from(bucketName)
-												.createSignedUrl(path, 3600);
-
-											if (signedData?.signedUrl) {
-												urlFirmada = signedData.signedUrl;
-											}
-										}
-									}
-									return { ...archivo, url: urlFirmada };
-								})
-							);
-							return { ...ev, id_proyecto: id, archivos: archivosConUrl };
-						})
-					);
-
-					return {
-						id_proyecto: id,
-						participaciones: fullProject?.participacion_permitida || [],
-						evidencias: evidenciasConUrl
-					};
-				} catch (e) {
-					console.error(`Error cargando datos para proyecto ${id}:`, e);
-					return { id_proyecto: id, participaciones: [], evidencias: [] };
-				}
+		const evidencias = await Promise.all(
+			evidenciasDominio.map(async (ev) => {
+				const archivosConUrl = await Promise.all(
+					ev.archivos.map(async (archivo: any) => {
+						let urlFirmada = archivo.url;
+						if (archivo.url && !archivo.url.startsWith('http') && !archivo.url.startsWith('data:')) {
+							const partes = archivo.url.split('/');
+							const bucketName = partes[0] === 'evidencias' ? 'evidencias' : 'avatars';
+							const path = partes.slice(1).join('/');
+							if (path) {
+								const { data: signedData } = await supabaseAdmin.storage
+									.from(bucketName)
+									.createSignedUrl(path, 3600);
+								if (signedData?.signedUrl) urlFirmada = signedData.signedUrl;
+							}
+						}
+						return { ...archivo, url: urlFirmada };
+					})
+				);
+				return { ...ev, archivos: archivosConUrl };
 			})
 		);
 
-		const todasLasEvidencias = dataProyectos.flatMap((dp) => dp.evidencias);
-		const todasLasParticipaciones = dataProyectos.flatMap((dp) =>
-			dp.participaciones.map((p) => ({ ...p, id_proyecto: dp.id_proyecto }))
-		);
+		const participacionesPermitidas = (project.participacion_permitida || []).map((p) => ({
+			...p,
+			id_proyecto: projectId
+		}));
 
 		return {
 			proyecto: JSON.parse(
@@ -140,8 +109,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			),
 			proyectosDisponibles: JSON.parse(JSON.stringify(proyectosDisponibles)),
 			tiposParticipacion: tiposUnicos,
-			participacionesPermitidas: JSON.parse(JSON.stringify(todasLasParticipaciones)),
-			evidencias: JSON.parse(JSON.stringify(todasLasEvidencias))
+			participacionesPermitidas: JSON.parse(JSON.stringify(participacionesPermitidas)),
+			evidencias: JSON.parse(JSON.stringify(evidencias))
 		};
 	} catch (err) {
 		console.error('Error loading evidencias page:', err);
@@ -165,7 +134,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions = {
-	guardarEvidencia: async ({ request, locals, params }) => {
+	guardarEvidencia: async ({ request, locals }) => {
 		if (!locals.usuario) {
 			throw error(401, 'Usuario no autenticado');
 		}
