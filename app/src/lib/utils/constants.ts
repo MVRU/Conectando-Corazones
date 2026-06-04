@@ -173,6 +173,23 @@ export const DEFAULT_PARTICIPACION_ICON = ArchiveBox;
 
 export const HEATMAP_SEMANAS = 26;
 
+// --- MANUALES DE USUARIO ---
+
+export const MANUALES_USUARIO = {
+	administrador: {
+		url: 'https://drive.google.com/file/d/1qE8uuueDDwxIQMsS_7C_vbfDq6d4uG5x/view?usp=drive_link',
+		titulo: 'Manual de administradores'
+	},
+	colaborador: {
+		url: 'https://drive.google.com/file/d/1KDpFjqes-7FAssc9_yZ2WFVVhEe2X0zx/view?usp=drive_link',
+		titulo: 'Manual de colaboradores'
+	},
+	institucion: {
+		url: 'https://drive.google.com/file/d/110f2wYRTv40N1mcHo9lK2-FgDYuAXNFN/view?usp=drive_link',
+		titulo: 'Manual de instituciones'
+	}
+} as const satisfies Record<'administrador' | 'colaborador' | 'institucion', { url: string; titulo: string }>;
+
 // --- COLORES UI ---
 
 export const COLORES_UI = {

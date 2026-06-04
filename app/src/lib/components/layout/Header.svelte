@@ -25,8 +25,11 @@
 		LogOut,
 		Menu,
 		X,
-		FileWarning
+		FileWarning,
+		BookOpen,
+		ExternalLink
 	} from 'lucide-svelte';
+	import { MANUALES_USUARIO } from '$lib/utils/constants';
 
 	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
@@ -60,6 +63,16 @@
 	}
 
 	const verificacionAprobada = $derived($isInstitucionVerificada);
+
+	const manualUsuario = $derived(
+		$isAdmin
+			? MANUALES_USUARIO.administrador
+			: $isInstitucion
+				? MANUALES_USUARIO.institucion
+				: $isColaborador
+					? MANUALES_USUARIO.colaborador
+					: null
+	);
 
 	const emailUsuario = $derived(
 		$userLoginEmail || 'Sin email'
@@ -318,6 +331,21 @@
 									</a>
 								{/if}
 
+								{#if manualUsuario}
+									<a
+										href={manualUsuario.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label="Abrir manual de usuario en nueva pestaña"
+										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+										onclick={() => (mostrarDropdown = false)}
+									>
+										<BookOpen class="h-4 w-4 text-gray-400 group-hover:text-white" />
+										Manual de usuario
+										<ExternalLink class="ml-auto h-3 w-3 text-gray-600 group-hover:text-gray-400" />
+									</a>
+								{/if}
+
 								<a
 									href="/configuracion"
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
@@ -479,6 +507,20 @@
 								onclick={() => (menuAbierto = false)}
 							>
 								<FileText class="h-4 w-4" /> Mis reportes
+							</a>
+						{/if}
+
+						{#if manualUsuario}
+							<a
+								href={manualUsuario.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label="Abrir manual de usuario en nueva pestaña"
+								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+								onclick={() => (menuAbierto = false)}
+							>
+								<BookOpen class="h-4 w-4" /> Manual de usuario
+								<ExternalLink class="ml-auto h-3 w-3 text-gray-600" />
 							</a>
 						{/if}
 
