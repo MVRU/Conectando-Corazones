@@ -286,7 +286,7 @@
 							value={ubicacion.tipo_ubicacion}
 							onchange={(e) => manejarCambioTipo(index, e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal || esAdmin}
 							class:border-red-300={errores[`ubicacion_${index}_tipo`] && (!esOriginal || esAdmin)}
 							class:cursor-not-allowed={esOriginal && !esAdmin}
@@ -320,7 +320,7 @@
 								oninput={(e) =>
 									actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
 								placeholder="Escribí el tipo de ubicación..."
-								class="focus:ring-opacity-20 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-red-300={errores[`ubicacion_${index}_tipo`]}
 							/>
 							<button
@@ -347,7 +347,7 @@
 						value={ubicacion.modalidad}
 						onchange={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
 						disabled={esOriginal && !esAdmin}
-						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+						class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						class:border-gray-300={!esOriginal || esAdmin}
 						class:border-red-300={errores[`ubicacion_${index}_modalidad`] &&
 							(!esOriginal || esAdmin)}
@@ -380,7 +380,7 @@
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
 							}}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_url_virtual`] && !esOriginal}
 							class:cursor-not-allowed={esOriginal}
@@ -411,7 +411,7 @@
 								value={ubicacion.direccion_presencial?.provincia}
 								onchange={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_provincia`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -458,7 +458,7 @@
 									};
 								}}
 								disabled={(esOriginal && !esAdmin) || !ubicacion.direccion_presencial?.provincia}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_localidad`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -493,7 +493,7 @@
 								value={ubicacion.direccion_presencial?.calle}
 								oninput={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -521,7 +521,7 @@
 								value={ubicacion.direccion_presencial?.numero}
 								oninput={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -546,7 +546,7 @@
 								value={ubicacion.direccion_presencial?.piso || ''}
 								oninput={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_piso`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -571,7 +571,7 @@
 								value={ubicacion.direccion_presencial?.departamento || ''}
 								oninput={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:cursor-not-allowed={esOriginal}
 								class:bg-gray-50={esOriginal}
@@ -593,7 +593,7 @@
 							value={ubicacion.direccion_presencial?.referencia}
 							oninput={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
-							class="focus:ring-opacity-20 w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={true}
 							class:border-red-300={errores[`ubicacion_${index}_referencia`]}
 						></textarea>

@@ -55,7 +55,7 @@
 	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();
 	}}
-	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-none backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-hidden backdrop:bg-black/30 backdrop:backdrop-blur-sm"
 >
 	{#if abierto}
 		<div
@@ -74,7 +74,7 @@
 					{/if}
 					<button
 						type="button"
-						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+						class="rounded-full p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-hidden"
 						onclick={cerrar}
 						aria-label="Cerrar modal"
 					>

@@ -7,13 +7,14 @@
 	import type { PageData } from './$types';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { toastStore } from '$lib/stores/toast';
 
 	let { data }: { data: PageData } = $props();
 
 	let mounted = $state(false);
 	let proyectoSeleccionado = $state<string>('');
 	let enviandoSolicitud = $state(false);
-	let solicitudEnviada = $state(false);
 	let modalReporteAbierto = $state(false);
 	let errorSolicitud = $state<string | null>(null);
 	let checks = $state({
@@ -219,14 +220,13 @@
 			}
 
 			errorSolicitud = null;
-
-			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
-			solicitudEnviada = true;
 
-			const url = new URL(window.location.href);
-			url.searchParams.delete('proyecto');
-			window.location.href = url.toString();
+			toastStore.show({
+				variant: 'success',
+				title: '¡Solicitud enviada!',
+				message: 'Tu solicitud de cierre ha sido enviada exitosamente para revisión.'
+			});
 
 			checks = {
 				evidenciasSuficientes: false,
@@ -235,10 +235,11 @@
 				noRequiereMasEvidencias: false,
 				conformidadRevision: false
 			};
+			proyectoSeleccionado = '';
 
-			setTimeout(() => {
-				solicitudEnviada = false;
-			}, 5000);
+			const url = new URL(window.location.href);
+			url.searchParams.delete('proyecto');
+			goto(url.pathname, { invalidateAll: true });
 		} catch (err) {
 			console.error('Error inesperado al enviar la solicitud de cierre', err);
 			enviandoSolicitud = false;
@@ -308,19 +309,6 @@
 					Ver mis proyectos
 				</button>
 			</div>
-		{:else if solicitudEnviada}
-			<div
-				class="rounded-2xl border border-green-200 bg-green-50 p-8 text-center shadow-sm"
-				in:fade
-			>
-				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-green-100 p-3">
-					<CheckCircle class="h-8 w-8 text-green-600" />
-				</div>
-				<h3 class="mb-2 text-2xl font-bold text-green-800">¡Solicitud enviada!</h3>
-				<p class="text-green-700">
-					Tu solicitud de cierre ha sido enviada exitosamente para revisión.
-				</p>
-			</div>
 		{:else}
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
 				<div class="space-y-6 lg:col-span-2">
@@ -346,7 +334,7 @@
 						{#if formularioBloqueadoPorAuditoria}
 							<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
 								<div class="flex gap-3">
-									<AlertTriangle class="h-5 w-5 flex-shrink-0 text-red-600" />
+									<AlertTriangle class="h-5 w-5 shrink-0 text-red-600" />
 									<div>
 										<h3 class="text-sm font-bold text-red-800">Revisión administrativa</h3>
 										<p class="mt-1 text-sm text-red-700">
@@ -374,7 +362,7 @@
 						{:else if muchosRechazos}
 							<div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
 								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-amber-700" />
+									<Info class="h-5 w-5 shrink-0 text-amber-700" />
 									<div>
 										<h3 class="text-sm font-bold text-amber-900">Podés volver a intentar</h3>
 										<p class="mt-1 text-sm text-amber-800">
@@ -396,7 +384,7 @@
 						{:else if solicitudPendienteExistente}
 							<div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
 								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-amber-600" />
+									<Info class="h-5 w-5 shrink-0 text-amber-600" />
 									<div>
 										<h3 class="text-sm font-bold text-amber-800">Solicitud pendiente</h3>
 										<p class="mt-1 text-sm text-amber-700">
@@ -435,7 +423,7 @@
 								{#if !todosLosObjetivosTienenEvidenciasCompletas}
 									<div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<div class="flex gap-3">
-											<AlertTriangle class="h-5 w-5 flex-shrink-0 text-amber-600" />
+											<AlertTriangle class="h-5 w-5 shrink-0 text-amber-600" />
 											<div>
 												<h3 class="text-sm font-bold text-amber-800">
 													Atención: Faltan evidencias
@@ -518,7 +506,7 @@
 							{#if !formularioBloqueadoPorAuditoria && !tieneSolicitudPendiente}
 								<div class="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4">
 									<div class="flex gap-3">
-										<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
+										<Info class="h-5 w-5 shrink-0 text-blue-600" />
 										<div class="text-sm text-slate-800">
 											<p class="font-semibold text-blue-900">Información importante</p>
 											<p class="mt-1 text-sm leading-relaxed text-slate-700">

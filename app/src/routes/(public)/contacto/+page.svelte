@@ -76,7 +76,7 @@
 	/>
 </svelte:head>
 
-<main class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
+<main class="w-full bg-linear-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h1 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">Contacto</h1>
 		<p class="mx-auto mt-8 max-w-2xl text-lg text-gray-500">
@@ -144,7 +144,7 @@
 								type="text"
 								placeholder="Tu nombre completo"
 								required
-								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-200"
 							/>
 						</div>
 						<div>
@@ -157,7 +157,7 @@
 								type="email"
 								placeholder="tu.email@ejemplo.com"
 								required
-								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+								customClass="mt-1 w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-hidden focus:ring-2 focus:ring-blue-200"
 							/>
 						</div>
 					</div>
@@ -187,14 +187,14 @@
 							rows="5"
 							required
 							placeholder="Escribí tu mensaje aquí..."
-							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+							class="mt-1 w-full resize-none rounded-xl border border-gray-300 px-4 py-3 text-gray-900 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-hidden"
 						></textarea>
 					</div>
 
 					<Button
 						label={enviandoFormulario ? 'Enviando...' : 'Enviar mensaje'}
 						disabled={enviandoFormulario}
-						customClass="w-full rounded-xl bg-blue-600 py-3 text-base font-medium text-white shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+						customClass="w-full rounded-xl bg-blue-600 py-3 text-base font-medium text-white shadow-md hover:bg-blue-700 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
 					/>
 				</form>
 			{/if}

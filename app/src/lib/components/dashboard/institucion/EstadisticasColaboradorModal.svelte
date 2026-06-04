@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
-	import { X, Users, MapPin, Star, Award, TrendingUp, UserPlus } from 'lucide-svelte';
+	import { X, Users, MapPin, Star, Award, UserPlus } from 'lucide-svelte';
 	import type { EstadisticasColaboradores } from './types';
 	import { quintOut } from 'svelte/easing';
 
@@ -73,13 +73,10 @@
 					<div
 						class="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-transform hover:-translate-y-1"
 					>
-						<div class="mb-4 flex items-center justify-between">
+						<div class="mb-4 flex items-center">
 							<div class="rounded-lg bg-blue-500/10 p-2 text-blue-400">
 								<Users size={20} />
 							</div>
-							<span class="flex items-center gap-1 text-xs font-medium text-emerald-400">
-								<TrendingUp size={12} /> +12%
-							</span>
 						</div>
 						<div class="mb-1 text-3xl font-bold text-white">{stats.totalActivos}</div>
 						<div class="text-xs text-slate-400">Colaboradores activos</div>
@@ -92,13 +89,10 @@
 					<div
 						class="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-transform hover:-translate-y-1"
 					>
-						<div class="mb-4 flex items-center justify-between">
+						<div class="mb-4 flex items-center">
 							<div class="rounded-lg bg-emerald-500/10 p-2 text-emerald-400">
 								<UserPlus size={20} />
 							</div>
-							<span class="flex items-center gap-1 text-xs font-medium text-emerald-400">
-								<TrendingUp size={12} /> +5%
-							</span>
 						</div>
 						<div class="mb-1 text-3xl font-bold text-white">{stats.nuevosEsteMes}</div>
 						<div class="text-xs text-slate-400">Nuevos este mes</div>
@@ -111,11 +105,10 @@
 					<div
 						class="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-transform hover:-translate-y-1"
 					>
-						<div class="mb-4 flex items-center justify-between">
+						<div class="mb-4 flex items-center">
 							<div class="rounded-lg bg-violet-500/10 p-2 text-violet-400">
 								<Award size={20} />
 							</div>
-							<span class="text-xs text-slate-500">vs. mes anterior</span>
 						</div>
 						<div class="mb-1 text-3xl font-bold text-white">{stats.retencion}%</div>
 						<div class="text-xs text-slate-400">Tasa de retención</div>
@@ -147,7 +140,7 @@
 										<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
 											<span class="truncate font-medium text-slate-200">{skill.label}</span>
 										</div>
-										<div class="relative z-10 flex-shrink-0 text-right">
+										<div class="relative z-10 shrink-0 text-right">
 											<div class="font-bold text-white">{skill.count}</div>
 											<div class="text-[10px] text-slate-400">{skill.percentage}%</div>
 										</div>
@@ -185,7 +178,7 @@
 										<div class="relative z-10 flex min-w-0 flex-1 items-center gap-3">
 											<span class="truncate font-medium text-slate-200">{loc.label}</span>
 										</div>
-										<div class="relative z-10 flex-shrink-0 text-right">
+										<div class="relative z-10 shrink-0 text-right">
 											<div class="font-bold text-white">{loc.count}</div>
 											<div class="text-[10px] text-slate-400">{loc.percentage}%</div>
 										</div>
@@ -214,7 +207,7 @@
 							<div
 								class="group relative flex items-center gap-4 rounded-xl border border-white/5 bg-slate-900/50 p-4 transition-all hover:border-blue-500/30 hover:bg-blue-500/5 hover:shadow-lg hover:shadow-blue-900/20"
 							>
-								<div class="relative flex-shrink-0">
+								<div class="relative shrink-0">
 									<div
 										class="h-12 w-12 overflow-hidden rounded-full border-2 border-slate-700 transition-colors group-hover:border-blue-500"
 									>

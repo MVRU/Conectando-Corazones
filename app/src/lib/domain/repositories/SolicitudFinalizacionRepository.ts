@@ -6,4 +6,6 @@ export interface SolicitudFinalizacionRepository {
 	updateEstado(id: number, estado: string, motivoRechazo?: string): Promise<SolicitudFinalizacion>;
 	countRechazadasByProyectoId(proyectoId: number): Promise<number>;
 	create(solicitud: SolicitudFinalizacion): Promise<SolicitudFinalizacion>;
+	findByProyectoIdLean(proyectoId: number): Promise<{ id_solicitud: number; estado: string | null } | null>;
+	updateEstadoLean(id: number, estado: string): Promise<void>;
 }

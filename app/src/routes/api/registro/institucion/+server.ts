@@ -4,6 +4,7 @@ import type { RegisterInstitucionInput } from '$lib/stores/auth';
 import { RegistrationService } from '$lib/server/registration.service';
 import { RateLimitService, AUTH_RATE_LIMITS } from '$lib/server/rate-limit.service';
 import { getClientIp } from '$lib/server/request.helper';
+import { notificarNuevaCuentaInstitucionAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 export const POST: RequestHandler = async (event) => {
 	const { request } = event;
@@ -49,6 +50,14 @@ export const POST: RequestHandler = async (event) => {
 
 		// Reiniciar límite de velocidad en registro exitoso
 		RateLimitService.reset(clientIp, input.email, AUTH_RATE_LIMITS.REGISTER);
+
+		if (usuarioCreado.id_usuario) {
+			await notificarNuevaCuentaInstitucionAdmin({
+				usuarioId: usuarioCreado.id_usuario,
+				username: usuarioCreado.username,
+				email: input.email
+			});
+		}
 
 		return json({ usuario: usuarioCreado });
 	} catch (error) {

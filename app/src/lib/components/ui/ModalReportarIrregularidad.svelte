@@ -93,7 +93,7 @@
 	<!-- Overlay -->
 	<div
 		use:portal
-		class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
+		class="fixed inset-0 z-9999 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
 		onclick={cerrarModal}
 		onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && cerrarModal()}
 		role="button"

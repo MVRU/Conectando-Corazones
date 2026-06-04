@@ -27,7 +27,7 @@ export class CrearSolicitudFinalizacion {
 		idProyecto: number,
 		evidenciaIds: number[]
 	): Promise<SolicitudFinalizacion> {
-		const proyecto = await this.proyectoRepo.findById(idProyecto);
+		const proyecto = await this.proyectoRepo.findByIdLean(idProyecto);
 		if (!proyecto) {
 			throw new Error('Proyecto no encontrado.');
 		}
@@ -43,7 +43,7 @@ export class CrearSolicitudFinalizacion {
 		}
 
 		// Verificar si ya existe una solicitud de finalización para este proyecto (pendiente)
-		const solicitudExistente = await this.solicitudRepo.findByProyectoId(idProyecto);
+		const solicitudExistente = await this.solicitudRepo.findByProyectoIdLean(idProyecto);
 		if (solicitudExistente && solicitudExistente.estado === 'pendiente') {
 			throw new Error('Ya existe una solicitud de finalización pendiente para este proyecto.');
 		}
@@ -61,8 +61,8 @@ export class CrearSolicitudFinalizacion {
 		}
 
 		// Validar que las evidencias pertenezcan al proyecto
-		const evidenciasProyecto = await this.evidenciaRepo.findAllByProyecto(idProyecto);
-		const idsValidos = new Set(evidenciasProyecto.map((e) => e.id_evidencia));
+		const idsValidosArray = await this.evidenciaRepo.findIdsByProyecto(idProyecto);
+		const idsValidos = new Set(idsValidosArray);
 		const idsInvalidos = evidenciaIds.filter((id) => !idsValidos.has(id));
 
 		if (idsInvalidos.length > 0) {

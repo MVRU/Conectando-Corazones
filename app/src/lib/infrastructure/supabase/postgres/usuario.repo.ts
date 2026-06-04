@@ -206,6 +206,15 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return count > 0;
 	}
 
+	async obtenerArcaVigente(usuarioId: number): Promise<boolean> {
+		const verif = await prisma.verificacion.findFirst({
+			where: { usuario_id: usuarioId, tipo: 'arca', estado: 'aprobada' },
+			orderBy: { created_at: 'desc' },
+			select: { fecha_vencimiento: true }
+		});
+		return !!verif?.fecha_vencimiento && new Date(verif.fecha_vencimiento) > new Date();
+	}
+
 	async update(usuario: Usuario): Promise<Usuario> {
 		if (!usuario.id_usuario) throw new Error('ID requerido para actualizar');
 

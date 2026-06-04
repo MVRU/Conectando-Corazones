@@ -2,6 +2,7 @@
 	import type { Usuario, Institucion, Organizacion } from '$lib/domain/types/Usuario';
 	import { obtenerColorRol } from '$lib/utils/util-ui';
 	import BadgeVerificacion from '$lib/components/ui/badges/BadgeVerificacion.svelte';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 	import { Pencil, Camera, CheckCircle2 } from 'lucide-svelte';
 	import { fly, fade } from 'svelte/transition';
@@ -10,10 +11,11 @@
 
 	type UsuarioCompleto = Usuario | Institucion | Organizacion;
 
-	let { perfilUsuario, esMiPerfil, estadoVerificacion, onEditarClick } = $props<{
+	let { perfilUsuario, esMiPerfil, estadoVerificacion, requiereCargaInicialDocumentacion, onEditarClick } = $props<{
 		perfilUsuario: UsuarioCompleto;
 		esMiPerfil: boolean;
 		estadoVerificacion: EstadoVerificacionDisplay;
+		requiereCargaInicialDocumentacion: boolean;
 		onEditarClick: () => void;
 	}>();
 
@@ -60,6 +62,18 @@
 	let nombreCompleto = $derived(obtenerNombreCompleto(perfilUsuario));
 	let subtipoBadge = $derived(obtenerSubtipoBadge(perfilUsuario));
 	let mostrarRepresentante = $derived(debeMostrarRepresentante(perfilUsuario));
+let enlaceGestionVerificacion = $derived(
+	esMiPerfil &&
+		perfilUsuario.rol === 'institucion' &&
+		(requiereCargaInicialDocumentacion ||
+			estadoVerificacion === 'verificacion_pendiente' ||
+			estadoVerificacion === 'verificacion_rechazada')
+		? '/institucion/verificacion'
+		: null
+);
+let textoBadgeVerificacion = $derived(
+	requiereCargaInicialDocumentacion ? 'Verificar' : null
+);
 </script>
 
 <div class="flex w-full flex-col items-start gap-6 md:flex-row md:gap-8">
@@ -129,7 +143,14 @@
 					{/if}
 
 					{#if perfilUsuario.rol === 'institucion'}
-						<BadgeVerificacion estado={estadoVerificacion} />
+						<BadgeVerificacion
+							estado={estadoVerificacion}
+							href={enlaceGestionVerificacion}
+							textoAccion={textoBadgeVerificacion}
+						/>
+						{#if (perfilUsuario as Institucion).arcaVigente}
+							<BadgeArca />
+						{/if}
 					{/if}
 				</div>
 			</div>
@@ -137,7 +158,7 @@
 			<!-- Botón editar (desktop) -->
 			{#if esMiPerfil}
 				<button
-					class="group hidden shrink-0 items-center gap-2 rounded-xl border border-[#007FFF]/20 bg-gradient-to-r from-[#007FFF] to-[#42A1FF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-[#42A1FF] hover:to-[#007FFF] hover:shadow-md md:inline-flex"
+					class="group hidden shrink-0 items-center gap-2 rounded-xl border border-[#007FFF]/20 bg-linear-to-r from-[#007FFF] to-[#42A1FF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:from-[#42A1FF] hover:to-[#007FFF] hover:shadow-md md:inline-flex"
 					onclick={onEditarClick}
 					type="button"
 				>
@@ -158,7 +179,7 @@
 		{#if esMiPerfil}
 			<button
 				onclick={onEditarClick}
-				class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:border-[#007FFF]/40 hover:bg-blue-50 hover:text-[#007FFF] active:scale-[0.98] md:hidden"
+				class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:border-[#007FFF]/40 hover:bg-blue-50 hover:text-[#007FFF] active:scale-98 md:hidden"
 			>
 				<Pencil class="h-4 w-4" />
 				Editar perfil

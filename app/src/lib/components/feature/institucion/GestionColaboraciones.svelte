@@ -222,7 +222,7 @@
 						<select
 							id="project-select"
 							bind:value={proyectoSeleccionadoId}
-							class="w-full cursor-pointer appearance-none rounded-xl border-gray-200 bg-white py-3 pr-10 pl-4 text-gray-900 shadow-sm transition-colors hover:border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none sm:text-sm"
+							class="w-full cursor-pointer appearance-none rounded-xl border-gray-200 bg-white py-3 pr-10 pl-4 text-gray-900 shadow-sm transition-colors hover:border-gray-300 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-hidden sm:text-sm"
 						>
 							{#each proyectos as proyecto}
 								<option value={proyecto.id_proyecto}>
@@ -353,7 +353,7 @@
 						Solicitudes pendientes
 						{#if pendientes.length > 0}
 							<span
-								class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-orange-100 px-1 text-xs font-semibold text-orange-700"
+								class="flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-100 px-1 text-xs font-semibold text-orange-700"
 							>
 								{pendientes.length}
 							</span>
@@ -393,7 +393,7 @@
 												/>
 											{:else}
 												<div
-													class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-gray-100 to-gray-200 text-lg font-bold text-gray-600 shadow-sm"
+													class="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-gray-100 to-gray-200 text-lg font-bold text-gray-600 shadow-sm"
 												>
 													{getIniciales(colaboracion.colaborador?.username)}
 												</div>
@@ -458,7 +458,7 @@
 											type="button"
 											onclick={() => mostrarModalParaRechazar(colaboracion.id_colaboracion || 0)}
 											disabled={loadingAprobacion !== null}
-											customClass="!w-full justify-center"
+											customClass="w-full! justify-center"
 										/>
 										<Button
 											label={loadingAprobacion === colaboracion.id_colaboracion
@@ -470,7 +470,7 @@
 											onclick={() => aceptarColaboracion(colaboracion.id_colaboracion || 0)}
 											disabled={loadingAprobacion !== null}
 											loading={loadingAprobacion === colaboracion.id_colaboracion}
-											customClass="!w-full justify-center"
+											customClass="w-full! justify-center"
 										/>
 									</div>
 								</div>
@@ -487,7 +487,7 @@
 						Colaboradores activos
 						{#if aprobadas.length > 0}
 							<span
-								class="flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-green-100 px-1 text-xs font-semibold text-green-700"
+								class="flex h-5 min-w-5 items-center justify-center rounded-full bg-green-100 px-1 text-xs font-semibold text-green-700"
 							>
 								{aprobadas.length}
 							</span>
@@ -532,7 +532,7 @@
 											/>
 										{:else}
 											<div
-												class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-blue-100 text-sm font-bold text-blue-600 shadow-sm"
+												class="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-blue-50 to-blue-100 text-sm font-bold text-blue-600 shadow-sm"
 											>
 												{getIniciales(colaboracion.colaborador?.username)}
 											</div>
@@ -623,7 +623,7 @@
 			<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 				<div class="sm:flex sm:items-start">
 					<div
-						class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+						class="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
 					>
 						<Icon src={XCircle} class="h-6 w-6 text-red-600" />
 					</div>
@@ -663,7 +663,7 @@
 					onclick={confirmarRechazo}
 					disabled={!justificacionRechazo.trim() || loadingRechazo}
 					loading={loadingRechazo}
-					customClass="!w-full sm:!w-auto sm:!ml-3 justify-center !bg-red-600 hover:!bg-red-700"
+					customClass="w-full! sm:w-auto! sm:ml-3! justify-center bg-red-600! hover:bg-red-700!"
 				/>
 				<Button
 					label="Cancelar"
@@ -672,7 +672,7 @@
 					type="button"
 					onclick={cerrarModalRechazo}
 					disabled={loadingRechazo}
-					customClass="!w-full sm:!w-auto mt-3 sm:mt-0 justify-center !bg-white !text-gray-900 !ring-1 !ring-inset !ring-gray-300 hover:!bg-gray-50"
+					customClass="w-full! sm:w-auto! mt-3 sm:mt-0 justify-center bg-white! text-gray-900! ring-1! ring-inset! ring-gray-300! hover:bg-gray-50!"
 				/>
 			</div>
 		</div>

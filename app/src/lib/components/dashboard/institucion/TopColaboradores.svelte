@@ -19,7 +19,7 @@
 <div
 	use:reveal
 	onreveal={() => (revealed = true)}
-	class="reveal-hidden h-full rounded-[2rem] border border-emerald-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="reveal-hidden h-full rounded-4xl border border-emerald-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-8 flex items-center gap-2">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Top de colaboradores</h2>
@@ -50,10 +50,10 @@
 						<div
 							class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold text-white shadow-lg ring-2 ring-[#0F1029]
                             {index === 0
-								? 'bg-gradient-to-br from-amber-300 to-amber-500'
+								? 'bg-linear-to-br from-amber-300 to-amber-500'
 								: index === 1
-									? 'bg-gradient-to-br from-slate-300 to-slate-500'
-									: 'bg-gradient-to-br from-amber-600 to-amber-800'}"
+									? 'bg-linear-to-br from-slate-300 to-slate-500'
+									: 'bg-linear-to-br from-amber-600 to-amber-800'}"
 						>
 							{index + 1}
 						</div>

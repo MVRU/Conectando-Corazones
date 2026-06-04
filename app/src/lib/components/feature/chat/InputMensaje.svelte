@@ -83,7 +83,7 @@
 	});
 </script>
 
-<div class="relative z-10 shrink-0 border-t border-white/5 bg-white/[0.02] px-3 py-3 backdrop-blur-md md:px-5 md:py-4">
+<div class="relative z-10 shrink-0 border-t border-white/5 bg-white/2 px-3 py-3 backdrop-blur-md md:px-5 md:py-4">
 	<div class="mx-auto w-full max-w-4xl">
 		<div class="flex items-end gap-2 rounded-[1.75rem] border border-white/5 bg-[#0F1029]/80 px-2 py-2 shadow-lg shadow-black/20 ring-1 ring-white/5 md:gap-3 md:px-3">
 			<textarea
@@ -95,14 +95,14 @@
 				{placeholder}
 				maxlength={4000}
 				rows="1"
-				class="no-scrollbar min-h-12 flex-1 resize-none overflow-y-auto rounded-3xl border border-transparent bg-white/5 px-4 py-3 text-sm text-slate-100 transition placeholder:text-slate-500 focus:border-[#007FFF]/30 focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none disabled:bg-white/[0.02] disabled:text-slate-500 md:text-[15px]"
+				class="no-scrollbar min-h-12 flex-1 resize-none overflow-y-auto rounded-3xl border border-transparent bg-white/5 px-4 py-3 text-sm text-slate-100 transition placeholder:text-slate-500 focus:border-[#007FFF]/30 focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-hidden disabled:bg-white/2 disabled:text-slate-500 md:text-[15px]"
 				style="max-height: 200px;"
 			></textarea>
 
 			<button
 				onclick={() => void enviar()}
 				disabled={!mensaje.trim() || deshabilitado || procesando || enviando}
-				class="flex h-12 min-w-12 items-center justify-center self-end rounded-full bg-[#007FFF] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#42A1FF] focus:outline-none focus:ring-2 focus:ring-[#007FFF]/20 disabled:cursor-not-allowed disabled:bg-[#181A40] disabled:text-slate-500 disabled:shadow-none md:min-w-[7.5rem] md:gap-2 md:px-5"
+				class="flex h-12 min-w-12 items-center justify-center self-end rounded-full bg-[#007FFF] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#42A1FF] focus:outline-hidden focus:ring-2 focus:ring-[#007FFF]/20 disabled:cursor-not-allowed disabled:bg-[#181A40] disabled:text-slate-500 disabled:shadow-none md:min-w-30 md:gap-2 md:px-5"
 				aria-label={procesando || enviando ? 'Enviando mensaje' : 'Enviar mensaje'}
 			>
 				{#if procesando || enviando}

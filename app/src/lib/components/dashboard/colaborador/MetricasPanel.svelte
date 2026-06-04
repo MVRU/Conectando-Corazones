@@ -8,25 +8,29 @@
 		Clock,
 		Calendar,
 		CheckCircle2,
-		Smile
+		Smile,
+		PartyPopper
 	} from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
 	import { tweened } from 'svelte/motion';
 	import { cubicOut } from 'svelte/easing';
 	import type { ComponentType } from 'svelte';
 
-	let { 
-		metricas, 
-		onclickProyectos = () => {}, 
-		onclickInstituciones = () => {}, 
-		onclickAgenda = () => {} 
+	let {
+		metricas,
+		mostrarBadgeNuevas = true,
+		onclickProyectos = () => {},
+		onclickInstituciones = () => {},
+		onclickAgenda = () => {}
 	} = $props<{
 		metricas: {
 			proyectosActivos: number;
+			nuevosProyectos: number;
 			institucionesAlcanzadas: number;
 			nuevasInstituciones: number;
 			proximoCierre: number;
 		};
+		mostrarBadgeNuevas?: boolean;
 		onclickProyectos?: () => void;
 		onclickInstituciones?: () => void;
 		onclickAgenda?: () => void;
@@ -40,11 +44,11 @@
 	const tInstituciones = tweened(0, { duration: 2000, easing: cubicOut });
 	const tCierre = tweened(0, { duration: 2000, easing: cubicOut });
 
-	function handleReveal() {
+	$effect(() => {
 		tProyectos.set(metricas.proyectosActivos);
 		tInstituciones.set(metricas.institucionesAlcanzadas);
 		tCierre.set(metricas.proximoCierre);
-	}
+	});
 
 	// Función para generar mensaje contextual según días restantes
 	function getMensajeCierre(dias: number): {
@@ -53,7 +57,14 @@
 		colorTexto: string;
 		colorIcono: string;
 	} {
-		if (dias === 0) {
+		if (dias < 0) {
+			return {
+				texto: 'Sin próximos cierres',
+				Icono: PartyPopper,
+				colorTexto: 'text-amber-400/60',
+				colorIcono: 'text-amber-500/60'
+			};
+		} else if (dias === 0) {
 			return {
 				texto: '¡Hoy es el día!',
 				Icono: Flame,
@@ -107,11 +118,10 @@
 	<button
 		onclick={handleClickProyectos}
 		use:reveal={{ threshold: 0.2 }}
-		onreveal={handleReveal}
-		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
+		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-4xl border border-emerald-500/20 bg-emerald-500/10 p-6 text-left backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-[40px] transition-all duration-700 group-hover:bg-emerald-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl transition-all duration-700 group-hover:bg-emerald-500/20"
 		></div>
 
 		<div class="relative z-10 flex h-full flex-col justify-between">
@@ -126,13 +136,15 @@
 					<FolderOpen size={24} />
 				</div>
 			</div>
-			<div class="mt-4">
-				<span
-					class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-300"
-				>
-					+2 nuevos este mes
-				</span>
-			</div>
+			{#if mostrarBadgeNuevas}
+				<div class="mt-4">
+					<span
+						class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-medium text-emerald-300"
+					>
+						+{metricas.nuevosProyectos} nuevos este mes
+					</span>
+				</div>
+			{/if}
 		</div>
 	</button>
 
@@ -140,10 +152,10 @@
 	<button
 		onclick={handleClickInstituciones}
 		use:reveal={{ threshold: 0.2 }}
-		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 text-left backdrop-blur-md transition-all delay-100 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
+		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-4xl border border-blue-500/20 bg-blue-500/10 p-6 text-left backdrop-blur-md transition-all delay-100 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-[40px] transition-all duration-700 group-hover:bg-blue-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl transition-all duration-700 group-hover:bg-blue-500/20"
 		></div>
 
 		<div class="relative z-10 flex h-full flex-col justify-between">
@@ -160,11 +172,14 @@
 					<Users size={24} />
 				</div>
 			</div>
-			<div class="mt-4">
-				<span class="text-sm text-slate-400">
-					<span class="font-bold text-blue-400">+{metricas.nuevasInstituciones}</span> nuevas este mes
-				</span>
-			</div>
+			{#if mostrarBadgeNuevas}
+				<div class="mt-4">
+					<span class="text-sm text-slate-400">
+						<span class="font-bold text-blue-400">+{metricas.nuevasInstituciones}</span> nuevas este
+						mes
+					</span>
+				</div>
+			{/if}
 		</div>
 	</button>
 
@@ -172,10 +187,10 @@
 	<button
 		onclick={handleClickAgenda}
 		use:reveal={{ threshold: 0.2 }}
-		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-[2rem] border border-amber-500/20 bg-amber-500/10 p-6 text-left backdrop-blur-md transition-all delay-200 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10"
+		class="reveal-hidden group relative w-full cursor-pointer overflow-hidden rounded-4xl border border-amber-500/20 bg-amber-500/10 p-6 text-left backdrop-blur-md transition-all delay-200 duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-amber-500/10 blur-[40px] transition-all duration-700 group-hover:bg-amber-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-amber-500/10 blur-2xl transition-all duration-700 group-hover:bg-amber-500/20"
 		></div>
 
 		<div class="relative z-10 flex h-full flex-col justify-between">
@@ -183,7 +198,11 @@
 				<div>
 					<p class="text-sm font-medium tracking-wider text-amber-400 uppercase">Próximo cierre</p>
 					<h3 class="mt-2 text-4xl font-bold tracking-tight text-white">
-						{Math.floor($tCierre)} <span class="text-lg font-medium text-slate-400">días</span>
+						{#if metricas.proximoCierre < 0}
+							— <span class="text-lg font-medium text-slate-400"></span>
+						{:else}
+							{Math.floor($tCierre)} <span class="text-lg font-medium text-slate-400">días</span>
+						{/if}
 					</h3>
 				</div>
 				<div class="rounded-2xl bg-amber-500/20 p-3 text-amber-400">

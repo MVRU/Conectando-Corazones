@@ -56,10 +56,6 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			p.estado === 'pendiente_solicitud_cierre'
 	);
 
-	const proyectosDisponiblesIds = new Set(
-		proyectosDisponibles.map((proyecto) => Number(proyecto.id_proyecto))
-	);
-
 	let proyectoActual = null;
 	let solicitudPendiente = null;
 	let solicitudesRechazadas: unknown[] = [];
@@ -70,7 +66,17 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const idProyecto = Number(proyectoId);
 
 		if (idProyecto && !isNaN(idProyecto)) {
-			if (!proyectosDisponiblesIds.has(idProyecto)) {
+			const proyectoSolicitado = allProyectos.find(
+				(p) => Number(p.id_proyecto) === idProyecto
+			);
+
+			if (
+				!proyectoSolicitado ||
+				proyectoSolicitado.institucion_id !== user.id_usuario ||
+				!['pendiente_solicitud_cierre', 'en_revision', 'en_auditoria'].includes(
+					proyectoSolicitado.estado || ''
+				)
+			) {
 				throw redirect(303, url.pathname);
 			}
 
@@ -252,13 +258,24 @@ export const actions: Actions = {
 					return solicitudCreada;
 				},
 				{
-					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+					timeout: 15000,
+					maxWait: 5000
 				}
 			);
 
 			return { success: true, solicitud };
 		} catch (error: any) {
-			return fail(400, { message: error.message });
+			console.error('[solicitar-cierre] Error al crear solicitud:', {
+				proyectoId,
+				usuarioId: user.id_usuario,
+				message: error?.message,
+				code: error?.code,
+				stack: error?.stack
+			});
+			return fail(400, {
+				message: error?.message ?? 'No se pudo procesar la solicitud. Intentalo nuevamente.'
+			});
 		}
 	}
 };

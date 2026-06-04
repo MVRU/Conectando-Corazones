@@ -3,14 +3,15 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { env } from '$env/dynamic/private';
 
-const connectionString = process.env.DB_POOLER_URL || process.env.DATABASE_URL || env.DATABASE_URL;
+const connectionString =
+	process.env.DB_POOLER_URL || process.env.DATABASE_URL || env.DATABASE_URL;
 
 const pool = new Pool({
 	connectionString,
 	ssl: { rejectUnauthorized: false },
-	max: 5, // Máximo 5 conexiones concurrentes (plan gratuito de Supabase)
-	idleTimeoutMillis: 30000, // Cerrar conexiones idle después de 30s
-	connectionTimeoutMillis: 10000 // Timeout de conexión 10s
+	max: 3, // Serverless: 1-3 conexiones es suficiente y evita saturar el límite del plan gratuito
+	idleTimeoutMillis: 20000,
+	connectionTimeoutMillis: 10000
 });
 const adapter = new PrismaPg(pool);
 
@@ -23,8 +24,9 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export type PrismaDbClient = PrismaClient | Prisma.TransactionClient;
 
+
 export function esClientePrisma(db: PrismaDbClient): db is PrismaClient {
-	return '$transaction' in db;
+	return '$connect' in db;
 }
 
 export async function ejecutarEnTransaccionExistenteOTotal<T>(

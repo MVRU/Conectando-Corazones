@@ -49,7 +49,8 @@
 		estadosDisponibles: estadosDisponiblesStore,
 		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
-		restablecerFiltros
+		restablecerFiltros,
+		soloBeneficiosFiscales
 	} = filtros;
 
 	$effect(() => {
@@ -153,7 +154,7 @@
 	);
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
+<section class="w-full bg-linear-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
 	<ProyectosBase
 		proyectos={$proyectosOrdenados}
 		titulo={tituloSeccion}
@@ -178,6 +179,8 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
+		{soloBeneficiosFiscales}
+		mostrarFiltroFiscal={true}
 		headerActions={headerActionsSnippet}
 		card={cardSnippet}
 	/>
@@ -186,7 +189,7 @@
 		<div class="mb-4 flex flex-wrap justify-center gap-3">
 			<button
 				class={clsx(
-					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none',
+					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-hidden',
 					pestanaActiva === 'todos'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
 						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'
@@ -197,7 +200,7 @@
 			</button>
 			<button
 				class={clsx(
-					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none',
+					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-hidden',
 					pestanaActiva === 'activos'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
 						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'
@@ -208,7 +211,7 @@
 			</button>
 			<button
 				class={clsx(
-					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-none',
+					'rounded-full px-5 py-2 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-gray-900/10 focus:outline-hidden',
 					pestanaActiva === 'completados'
 						? 'bg-blue-600 text-white shadow-sm hover:bg-blue-500'
 						: 'bg-white text-gray-600 ring-1 ring-gray-200 ring-inset hover:bg-gray-50 hover:text-gray-900'

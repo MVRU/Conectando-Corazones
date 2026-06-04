@@ -342,7 +342,7 @@
 	</div>
 {:else}
 	<div class="flex h-full flex-col text-slate-100 bg-transparent">
-		<header class="message-enter relative z-10 flex-shrink-0 border-b border-white/5 bg-white/[0.02] px-4 py-3 backdrop-blur-md md:px-6 md:py-4" style="--message-enter-delay: 40ms;">
+		<header class="message-enter relative z-10 shrink-0 border-b border-white/5 bg-white/2 px-4 py-3 backdrop-blur-md md:px-6 md:py-4" style="--message-enter-delay: 40ms;">
 			<div class="mx-auto flex w-full max-w-5xl items-start justify-between gap-4">
 				<a
 					href={resolve('/mensajes')}
@@ -473,7 +473,7 @@
 		>
 			{#if mensajes.length === 0}
 				<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center">
-					<div class="max-w-md w-full rounded-[2.5rem] border border-white/5 bg-white/[0.02] px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-lg transition-all hover:border-white/10">
+					<div class="max-w-md w-full rounded-[2.5rem] border border-white/5 bg-white/2 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-lg transition-all hover:border-white/10">
 						<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/5 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20 shadow-[0_0_30px_rgba(0,127,255,0.10)]">
 							<MessageSquareText class="h-10 w-10" strokeWidth={1.5} />
 						</div>

@@ -13,7 +13,7 @@
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
-	import { SvelteSet, SvelteURL } from 'svelte/reactivity';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	import { deserialize } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
@@ -46,55 +46,25 @@
 		archivos: (Archivo & { file: File })[];
 	};
 
-	let selectedProyectoId = $state<number>(0);
 	let selectedTipoParticipacion = $state<TipoParticipacionDescripcion | ''>('');
 	let selectedParticipacionPermitidaId = $state<number | null>(null);
 
 	$effect(() => {
-		// Inicialización reactiva basada en data
-		if (selectedProyectoId === 0) {
-			selectedProyectoId = data.proyecto.id_proyecto ?? 0;
-		}
-		if (selectedTipoParticipacion === '') {
-			selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
-		}
+		selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
 	});
 
-	let proyectoActual = $derived(
-		data.proyectosDisponibles.find((p: { id_proyecto: number }) => p.id_proyecto === selectedProyectoId) || data.proyecto
-	);
-
-	// Sincronizar URL y Breadcrumbs cuando cambia el proyecto seleccionado
 	$effect(() => {
-		if (selectedProyectoId && selectedProyectoId !== Number(page.params.id)) {
-			// Actualizar URL sin recargar la página (Shallow Routing parcial)
-			const newUrl = new SvelteURL(window.location.href);
-			newUrl.pathname = newUrl.pathname.replace(`/${page.params.id}/`, `/${selectedProyectoId}/`);
-			window.history.replaceState({}, '', newUrl.toString());
-		}
-
 		setBreadcrumbs([
 			{ label: 'Mi Panel', href: '/institucion/mi-panel' },
-			{ label: 'Aportes', href: `/institucion/proyectos/${selectedProyectoId}/aportes` },
+			{ label: 'Aportes', href: `/institucion/proyectos/${data.proyecto.id_proyecto}/aportes` },
 			{ label: 'Nueva Evidencia' }
 		]);
 	});
 
-	// Filtro de evidencias por proyecto seleccionado (Reactividad pura Svelte 5)
-	const evidenciasDelProyecto = $derived(
-		(data.evidencias as (Evidencia & { id_proyecto: number })[]).filter(
-			(e) => e.id_proyecto === selectedProyectoId
-		)
-	);
-
-	// Filtrar participaciones por proyecto y tipo seleccionado
+	// Filtrar participaciones por tipo seleccionado
 	let filteredParticipaciones = $derived(
-		(data.participacionesPermitidas as (ParticipacionPermitida & { id_proyecto: number })[]).filter(
-			(p) => {
-				if (p.id_proyecto !== selectedProyectoId) return false;
-				if (!selectedTipoParticipacion) return false;
-				return p.tipo_participacion?.descripcion === selectedTipoParticipacion;
-			}
+		(data.participacionesPermitidas as ParticipacionPermitida[]).filter(
+			(p) => !!selectedTipoParticipacion && p.tipo_participacion?.descripcion === selectedTipoParticipacion
 		)
 	);
 
@@ -110,7 +80,7 @@
 
 	let evidenciasEntrada = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? evidenciasDelProyecto
+			? (data.evidencias as Evidencia[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -132,7 +102,7 @@
 
 	let evidenciasSalidaExistentes = $derived<ArchivoUI[]>(
 		selectedParticipacionPermitidaId
-			? evidenciasDelProyecto
+			? (data.evidencias as Evidencia[])
 					.filter(
 						(e) =>
 							e.id_participacion_permitida === selectedParticipacionPermitidaId &&
@@ -164,18 +134,20 @@
 
 	let evidenciasSalidaTotal = $derived<ArchivoUI[]>([
 		...evidenciasSalidaExistentes.filter((e) => !evidenciasEliminadas.has(e.id_archivo ?? 0)),
-		...evidenciasSalidaNuevas.flatMap((ev) =>
-			ev.archivos.map((archivo) => ({
-				...archivo,
-				uploader_nombre: proyectoActual.nombreInstitucion || 'Institución',
-				fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
-				tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
-				tamanio_formateado: archivo.tamanio_bytes
-					? `${(archivo.tamanio_bytes / (1024 * 1024)).toFixed(1)} MB`
-					: 'Desconocido',
-				evidencia_temp_id: ev.id_temp
-			}))
-		)
+		...evidenciasSalidaNuevas
+			.filter((ev) => ev.id_participacion_permitida === selectedParticipacionPermitidaId)
+			.flatMap((ev) =>
+				ev.archivos.map((archivo) => ({
+					...archivo,
+					uploader_nombre: data.proyecto.nombreInstitucion || 'Institución',
+					fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
+					tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
+					tamanio_formateado: archivo.tamanio_bytes
+						? `${(archivo.tamanio_bytes / (1024 * 1024)).toFixed(1)} MB`
+						: 'Desconocido',
+					evidencia_temp_id: ev.id_temp
+				}))
+			)
 	]);
 
 	let hayaCambios = $derived(
@@ -184,17 +156,11 @@
 			archivosTemporales.length > 0
 	);
 
-	let isMobile = $state(false);
 	let mostrarModalConfirmacion = $state(false);
 	let navegacionPendiente: (() => void) | null = $state(null);
 	let estaGuardando = $state(false);
 
 	onMount(() => {
-		const mql = window.matchMedia('(max-width: 640px)');
-		isMobile = mql.matches;
-		const listener = (e: MediaQueryListEvent) => (isMobile = e.matches);
-		mql.addEventListener('change', listener);
-
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
 			if (hayaCambios && !estaGuardando) {
 				e.preventDefault();
@@ -205,19 +171,20 @@
 		window.addEventListener('beforeunload', handleBeforeUnload);
 
 		return () => {
-			mql.removeEventListener('change', listener);
 			window.removeEventListener('beforeunload', handleBeforeUnload);
 		};
 	});
 
 	beforeNavigate((navigation) => {
 		if (hayaCambios && !mostrarModalConfirmacion && !estaGuardando) {
+			const destino = navigation.to?.url
+				? navigation.to.url.pathname + navigation.to.url.search
+				: `/institucion/proyectos/${data.proyecto.id_proyecto}/aportes`;
 			navigation.cancel();
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
 				evidenciasEliminadas = new SvelteSet();
-				navigation.cancel();
-				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
+				goto(destino);
 			};
 			mostrarModalConfirmacion = true;
 		}
@@ -228,7 +195,7 @@
 			navegacionPendiente = () => {
 				evidenciasSalidaNuevas = [];
 				evidenciasEliminadas = new SvelteSet();
-				goto(`/institucion/proyectos/${selectedProyectoId}/aportes`);
+				goto(`/institucion/proyectos/${data.proyecto.id_proyecto}/aportes`);
 			};
 			mostrarModalConfirmacion = true;
 		} else {
@@ -288,7 +255,7 @@
 	}
 
 	async function guardarCambios() {
-		if (!selectedParticipacionPermitidaId) return;
+		if (!hayaCambios) return;
 
 		estaGuardando = true;
 		const toastId = toastStore.show({
@@ -321,7 +288,6 @@
 			const formData = new FormData();
 			formData.append('evidencias', JSON.stringify(evidenciasProcesadas));
 			formData.append('eliminadas', JSON.stringify(Array.from(evidenciasEliminadas)));
-			formData.append('id_participacion_permitida', selectedParticipacionPermitidaId.toString());
 
 			const response = await fetch('?/guardarEvidencia', {
 				method: 'POST',
@@ -342,7 +308,7 @@
 				evidenciasEliminadas = new SvelteSet();
 
 				await invalidateAll();
-				goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
+				await goto(`/institucion/proyectos/${projectIdUrl}/aportes`);
 			} else {
 				throw new Error('Error al registrar en base de datos');
 			}
@@ -554,8 +520,14 @@
 					</label>
 					<select
 						id="proyecto"
-						bind:value={selectedProyectoId}
-						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+						value={data.proyecto.id_proyecto}
+						onchange={(e) => {
+							const newId = Number((e.target as HTMLSelectElement).value);
+							if (newId !== data.proyecto.id_proyecto) {
+								goto(`/institucion/proyectos/${newId}/aportes/evidencias/nueva`);
+							}
+						}}
+						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						{#each data.proyectosDisponibles as proyecto (proyecto.id_proyecto)}
 							<option value={proyecto.id_proyecto}>{proyecto.titulo}</option>
@@ -574,7 +546,7 @@
 					<select
 						id="tipo"
 						bind:value={selectedTipoParticipacion}
-						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						<option value="" disabled>Seleccionar tipo</option>
 						{#each data.tiposParticipacion as tipo (tipo)}
@@ -595,7 +567,7 @@
 						<select
 							id="participacion"
 							bind:value={selectedParticipacionPermitidaId}
-							class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-none hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+							class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 						>
 							<option value={null} disabled>Seleccionar meta</option>
 							{#each filteredParticipaciones as p (p.id_participacion_permitida)}
@@ -762,7 +734,7 @@
 					<div class="flex-1 md:flex-none">
 						<Button
 							label="Guardar"
-							disabled={!hayaCambios || !selectedParticipacionPermitidaId}
+							disabled={!hayaCambios}
 							size="md"
 							customClass="w-full shadow-lg shadow-blue-200"
 							onclick={guardarCambios}
@@ -796,7 +768,7 @@
 		>
 			<!-- Header -->
 			<div
-				class="border-b border-slate-100 bg-gradient-to-br from-amber-50 to-orange-50 p-6 md:p-8"
+				class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8"
 			>
 				<div class="flex items-start gap-4">
 					<div class="shrink-0 rounded-xl bg-amber-100 p-3 text-amber-600">
@@ -825,7 +797,7 @@
 					</button>
 					<button
 						onclick={confirmarSalida}
-						class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
+						class="flex-1 rounded-xl bg-linear-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
 					>
 						Descartar cambios
 					</button>
@@ -855,7 +827,7 @@
 			class="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
 			transition:slide={{ duration: 300 }}
 		>
-			<div class="bg-gradient-to-br from-red-50 to-white p-8 text-center">
+			<div class="bg-linear-to-br from-red-50 to-white p-8 text-center">
 				<div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
 					<X size={28} />
 				</div>
@@ -905,7 +877,7 @@
 			class="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl md:rounded-3xl"
 			transition:slide={{ duration: 300 }}
 		>
-			<div class="border-b border-slate-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 md:p-8">
+			<div class="border-b border-slate-100 bg-linear-to-br from-blue-50 to-indigo-50 p-6 md:p-8">
 				<div class="flex items-start justify-between">
 					<div class="flex items-start gap-4">
 						<div class="shrink-0 rounded-xl bg-blue-100 p-3 text-blue-600">
@@ -967,7 +939,7 @@
 									value={archivo.descripcion} 
 									oninput={(e) => actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
 									placeholder="Descripción breve (ej: Factura de compra)" 
-									class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+									class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
 								/>
 							</div>
 						{/each}

@@ -22,15 +22,15 @@ export class RegistrarEvaluacion {
         justificacion?: string;
     }): Promise<void> {
         // 1. Validar estao del proyecto
-        const proyecto = await this.proyectoRepo.findById(params.proyectoId);
+        const proyecto = await this.proyectoRepo.findByIdLean(params.proyectoId);
         if (!proyecto) throw new Error('Proyecto no encontrado');
         if (proyecto.estado !== 'en_revision') {
             throw new Error(`El proyecto no está en revisión (Estado actual: ${proyecto.estado})`);
         }
 
         // 2. Validar permiso del Colaborador
-        const colaboracion = await this.colaboracionRepo.findByProyectoAndColaborador(params.proyectoId, params.colaboradorId);
-        if (!colaboracion || colaboracion.estado !== 'aprobada') {
+        const isAprobada = await this.colaboracionRepo.existsAprobada(params.proyectoId, params.colaboradorId);
+        if (!isAprobada) {
             throw new Error('El usuario no es un colaborador activo de este proyecto.');
         }
 
@@ -39,7 +39,7 @@ export class RegistrarEvaluacion {
         if (existente) throw new Error('Ya has enviado tu evaluación para esta solicitud.');
 
         // 4. Validar que la solicitud corresponda al proyecto evaluado y siga pendiente
-        const solicitud = await this.solicitudRepo.findByProyectoId(params.proyectoId);
+        const solicitud = await this.solicitudRepo.findByProyectoIdLean(params.proyectoId);
         if (!solicitud || solicitud.id_solicitud !== params.solicitudId) {
             throw new Error('La solicitud no corresponde al proyecto indicado.');
         }
@@ -76,7 +76,7 @@ export class RegistrarEvaluacion {
             const nuevoEstado = rechazosPrevios >= 2 ? 'en_auditoria' : 'pendiente_solicitud_cierre';
             
             const estadoAnterior = proyecto.estado ?? 'en_revision';
-            await this.proyectoRepo.updateEstado(params.proyectoId, nuevoEstado);
+            await this.proyectoRepo.updateEstadoLean(params.proyectoId, nuevoEstado);
             
             // Auditoría: Cambio de estado del Proyecto por rechazo
             await this.historialRepo.create({
@@ -90,7 +90,7 @@ export class RegistrarEvaluacion {
                 usuario_id: params.colaboradorId
             });
 
-            await this.solicitudRepo.updateEstado(params.solicitudId, 'rechazada');
+            await this.solicitudRepo.updateEstadoLean(params.solicitudId, 'rechazada');
             
             // Auditoría: Cierre de la Solicitud
             await this.historialRepo.create({
@@ -108,13 +108,12 @@ export class RegistrarEvaluacion {
             const conteo = await this.evaluacionRepo.countVotosBySolicitud(params.solicitudId);
 
             // Contar colaboradores activos
-            const colaboradores = await this.colaboracionRepo.findByProyecto(params.proyectoId);
-            const totalActivos = colaboradores.filter(c => c.estado === 'aprobada').length;
+            const totalActivos = await this.colaboracionRepo.countAprobadas(params.proyectoId);
 
             if (conteo.aprobados >= totalActivos) {
                 // Hay consenso -> proyecto completado
                 const estadoAnterior = proyecto.estado ?? 'en_revision';
-                await this.proyectoRepo.updateEstado(params.proyectoId, 'completado');
+                await this.proyectoRepo.updateEstadoLean(params.proyectoId, 'completado');
                 
                 // Auditoría: Proyecto Completado
                 await this.historialRepo.create({
@@ -128,7 +127,7 @@ export class RegistrarEvaluacion {
                     usuario_id: params.colaboradorId
                 });
 
-                await this.solicitudRepo.updateEstado(params.solicitudId, 'aprobada');
+                await this.solicitudRepo.updateEstadoLean(params.solicitudId, 'aprobada');
 
                 // Auditoría: Solicitud Aprobada
                 await this.historialRepo.create({

@@ -71,7 +71,7 @@
 	/>
 </svelte:head>
 
-<main class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
+<main class="w-full bg-linear-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16">
 		<div class="mb-8 flex items-center justify-center gap-4">

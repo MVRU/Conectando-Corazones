@@ -6,4 +6,5 @@ export interface EvidenciaRepository {
 	findByParticipacionAndTipo(idParticipacion: number, tipo: string): Promise<Evidencia | null>;
 	create(evidencia: Evidencia): Promise<Evidencia>;
 	addArchivos(idEvidencia: number, archivos: Archivo[]): Promise<Archivo[]>;
+	findIdsByProyecto(proyectoId: number): Promise<number[]>;
 }

@@ -40,7 +40,7 @@
 			></div>
 
 			<div
-				class="absolute top-1/2 left-0 -z-10 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-in-out"
+				class="absolute top-1/2 left-0 -z-10 h-1 -translate-y-1/2 rounded-full bg-linear-to-r from-blue-500 to-green-500 transition-all duration-500 ease-in-out"
 				style="width: {((Math.min(pasoActual, totalNormalizado) - 1) / (totalNormalizado - 1)) *
 					100}%"
 			></div>
@@ -102,7 +102,7 @@
 			<!-- Progress Bar -->
 			<div class="h-2 w-full overflow-hidden rounded-full bg-gray-200">
 				<div
-					class="h-full bg-gradient-to-r from-blue-500 to-green-400 transition-all duration-500 ease-out"
+					class="h-full bg-linear-to-r from-blue-500 to-green-400 transition-all duration-500 ease-out"
 					style="width: {porcentajeProgreso}%"
 				></div>
 			</div>

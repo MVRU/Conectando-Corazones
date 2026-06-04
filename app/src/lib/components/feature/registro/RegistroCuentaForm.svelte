@@ -157,7 +157,7 @@
 			id: 'google',
 			label: 'Google',
 			descripcion: 'Conectate con tu cuenta de Gmail en segundos.',
-			cardClass: 'border-amber-100/70 bg-gradient-to-br from-white via-white to-amber-50/60',
+			cardClass: 'border-amber-100/70 bg-linear-to-br from-white via-white to-amber-50/60',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-amber-100/80 text-amber-700'
 		},
@@ -165,7 +165,7 @@
 			id: 'facebook',
 			label: 'Facebook',
 			descripcion: 'Pronto vas a poder ingresar con tu perfil social.',
-			cardClass: 'border-blue-100/80 bg-gradient-to-br from-white via-white to-blue-50/70',
+			cardClass: 'border-blue-100/80 bg-linear-to-br from-white via-white to-blue-50/70',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-blue-100/80 text-blue-700'
 		},
@@ -173,7 +173,7 @@
 			id: 'microsoft',
 			label: 'Microsoft',
 			descripcion: 'Ideal si usás Outlook o Teams a diario.',
-			cardClass: 'border-slate-200 bg-gradient-to-br from-white via-white to-slate-50',
+			cardClass: 'border-slate-200 bg-linear-to-br from-white via-white to-slate-50',
 			iconClass: 'bg-white',
 			badgeClass: 'bg-slate-200 text-slate-700'
 		},
@@ -181,7 +181,7 @@
 			id: 'apple',
 			label: 'Apple',
 			descripcion: 'Usá tu Apple ID para un acceso seguro.',
-			cardClass: 'border-neutral-200 bg-gradient-to-br from-white via-white to-neutral-100',
+			cardClass: 'border-neutral-200 bg-linear-to-br from-white via-white to-neutral-100',
 			iconClass: 'text-white',
 			badgeClass: 'bg-neutral-900 text-white'
 		}
@@ -1168,7 +1168,7 @@
 						tabindex={obtenerTabIndexMetodo(metodo.id, metodo.disponible)}
 						onclick={() => seleccionarMetodoAcceso(metodo.id)}
 						onkeydown={(event) => manejarKeydownMetodo(event, metodo.id, metodo.disponible)}
-						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none ${
+						class={`group flex h-full flex-col gap-4 rounded-2xl border px-6 py-6 text-left transition duration-200 focus-visible:ring-2 focus-visible:ring-[#7CB9FF]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-hidden ${
 							metodo.disponible
 								? 'hover:shadow-[0_12px_30px_rgba(15,23,42,0.08)]'
 								: 'cursor-not-allowed opacity-70'
@@ -1181,7 +1181,7 @@
 						<div class="flex items-start gap-3">
 							{#if metodo.id === 'manual'}
 								<span
-									class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#F5F9FF] text-[#3B82F6]"
+									class="relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#F5F9FF] text-[#3B82F6]"
 								>
 									<Mail class="h-6 w-6" strokeWidth={1.6} />
 									<span
@@ -1192,7 +1192,7 @@
 								</span>
 							{:else}
 								<span
-									class="relative inline-flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[#FFE5E9] text-[#E24D5C]"
+									class="relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#FFE5E9] text-[#E24D5C]"
 								>
 									<Globe class="h-6 w-6" strokeWidth={1.4} />
 									<span
@@ -1621,14 +1621,14 @@
 								/>
 								<label
 									for={`tipo-institucion-${opcion.value}`}
-									class={`group relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] ${
+									class={`group relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-98 ${
 										tipoInstitucionSeleccion === opcion.value
 											? 'border-sky-500 bg-sky-50/10 shadow-[0_8px_20px_rgba(14,165,233,0.08)]'
 											: 'border-slate-200 bg-white hover:border-sky-300'
 									} peer-focus-visible:outline-2 peer-focus-visible:outline-sky-200`}
 								>
 									<span
-										class={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-lg transition-colors ${
+										class={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg transition-colors ${
 											tipoInstitucionSeleccion === opcion.value
 												? 'bg-sky-100 text-sky-600'
 												: 'bg-slate-50 text-slate-500 group-hover:bg-sky-50 group-hover:text-sky-400'
@@ -1774,7 +1774,7 @@
 							{@const Icon = opcion.icon}
 							<div>
 								<label
-									class={`relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-[0.98] lg:flex-row lg:items-center ${
+									class={`relative flex cursor-pointer flex-col gap-4 rounded-2xl border-2 p-5 transition-all active:scale-98 lg:flex-row lg:items-center ${
 										tipoColaborador === opcion.value
 											? 'border-sky-500 bg-sky-50/20 shadow-[0_8px_20px_rgba(14,165,233,0.06)]'
 											: 'border-slate-200 bg-white hover:border-sky-300'
@@ -1931,7 +1931,7 @@
 
 {#if mostrarModalPassword}
 	<div
-		class="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm"
+		class="fixed inset-0 z-10000 flex items-center justify-center bg-slate-900/60 px-4 py-10 backdrop-blur-sm"
 		aria-live="assertive"
 	>
 		<div
@@ -1960,7 +1960,7 @@
 							id="modal_password"
 							name="modal_password"
 							type={mostrarModalPasswordTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-hidden focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Ingresá una contraseña segura"
@@ -1993,7 +1993,7 @@
 							id="modal_password_confirm"
 							name="modal_password_confirm"
 							type={mostrarModalPasswordConfirmTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-hidden focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Repetí la contraseña"

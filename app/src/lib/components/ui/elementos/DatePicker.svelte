@@ -317,7 +317,7 @@
 {#snippet suffixSnippet()}
 	<button
 		type="button"
-		class="absolute top-1/2 right-3 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-sky-600 focus:ring-2 focus:ring-sky-500/20 focus:outline-none"
+		class="absolute top-1/2 right-3 -translate-y-1/2 rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-sky-600 focus:ring-2 focus:ring-sky-500/20 focus:outline-hidden"
 		onclick={openDatePicker}
 		aria-label="Abrir calendario"
 	>

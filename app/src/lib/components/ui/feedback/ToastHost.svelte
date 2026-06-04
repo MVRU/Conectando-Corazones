@@ -4,7 +4,7 @@
 	import { Info, CheckCircle2, AlertTriangle, ShieldAlert, X } from 'lucide-svelte';
 	import type { ComponentType } from 'svelte';
 
-	let toasts = $state<ToastMessage[]>([]);
+	let toasts = $derived($toastStore);
 	type VariantConfig = {
 		border: string;
 		iconWrapper: string;
@@ -45,15 +45,7 @@
 		}
 	};
 
-	const unsubscribe = toastStore.subscribe((items) => {
-		toasts = items;
-	});
 
-	$effect(() => {
-		if (toasts.length === 0) {
-			unsubscribe();
-		}
-	});
 
 	function closeToast(id: string) {
 		toastStore.dismiss(id);
@@ -61,7 +53,7 @@
 </script>
 
 <div
-	class="pointer-events-none fixed inset-0 z-[9999] flex flex-col items-end justify-end gap-3 p-4 sm:p-6"
+	class="pointer-events-none fixed inset-0 z-9999 flex flex-col items-end justify-end gap-3 p-4 sm:p-6"
 >
 	{#each toasts as toast (toast.id)}
 		{@const IconComponent = VARIANT_STYLES[toast.variant].icon as ComponentType}
@@ -74,11 +66,11 @@
 		>
 			<div class="flex items-start gap-3">
 				<span
-					class={`relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br ${VARIANT_STYLES[toast.variant].iconWrapper}`}
+					class={`relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-linear-to-br ${VARIANT_STYLES[toast.variant].iconWrapper}`}
 					aria-hidden="true"
 				>
 					<span
-						class="absolute inset-0 animate-pulse bg-gradient-to-br from-white/50 to-transparent opacity-50"
+						class="absolute inset-0 animate-pulse bg-linear-to-br from-white/50 to-transparent opacity-50"
 					></span>
 					<IconComponent
 						class={`relative h-5 w-5 ${VARIANT_STYLES[toast.variant].iconClass}`}

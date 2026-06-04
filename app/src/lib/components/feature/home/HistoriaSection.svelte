@@ -33,7 +33,7 @@
 <section class="w-full bg-white px-4 pt-20 pb-70 md:px-8">
 	<div
 		bind:this={sectionRef}
-		class="relative mx-auto max-w-5xl overflow-hidden rounded-4xl bg-gradient-to-b from-[rgb(var(--base-color))] to-[#27273e] px-6 pt-12 text-white shadow-2xl sm:px-10 sm:pt-16"
+		class="relative mx-auto max-w-5xl overflow-hidden rounded-4xl bg-linear-to-b from-[rgb(var(--base-color))] to-[#27273e] px-6 pt-12 text-white shadow-2xl sm:px-10 sm:pt-16"
 		style="
 			opacity: {visible ? 1 : 0};
 			filter: blur({visible ? 0 : 5}px);
@@ -71,7 +71,7 @@
 		<!-- Imagen destacada -->
 		<div class="flex flex-1 items-end justify-center pt-10">
 			<div
-				class="history-img-outer group relative overflow-visible rounded-[2rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-600 hover:ring-blue-400/30"
+				class="history-img-outer group relative overflow-visible rounded-4xl shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-600 hover:ring-blue-400/30"
 				style="
 					opacity: {visible ? 1 : 0};
 					filter: blur({visible ? 0 : 13}px) brightness({visible ? 1 : 0.94});
@@ -81,7 +81,7 @@
 				"
 			>
 				<div
-					class="top-0 left-0 h-full w-full overflow-hidden rounded-[2rem]"
+					class="top-0 left-0 h-full w-full overflow-hidden rounded-4xl"
 					style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 					tabindex="-1"
 				>
@@ -93,7 +93,7 @@
 							opacity:{visible ? 0.22 : 0};
 							transition: opacity 1.4s .68s cubic-bezier(.43,0,.2,1);
 						"
-						class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#7dd3fc] via-transparent to-[#818cf833] blur-[18px]"
+						class="pointer-events-none absolute inset-0 bg-linear-to-tr from-[#7dd3fc] via-transparent to-[#818cf833] blur-[18px]"
 					></div>
 				</div>
 			</div>

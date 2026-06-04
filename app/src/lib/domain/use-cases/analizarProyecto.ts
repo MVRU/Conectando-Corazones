@@ -69,6 +69,7 @@ export async function analizarProyecto(idProyecto: number) {
 
 		return { success: true };
 	} catch (error) {
+		console.error(`[IA] Error en analizarProyecto(${idProyecto}):`, error);
 		return { success: false, error: 'Fallo en servicio de IA' };
 	}
 }

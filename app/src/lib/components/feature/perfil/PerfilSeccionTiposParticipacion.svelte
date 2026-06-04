@@ -47,17 +47,17 @@
 
 	const coloresChip: Record<string, string> = {
 		verde:
-			'border-emerald-100 bg-gradient-to-r from-emerald-50 to-emerald-50/60 text-emerald-700 hover:border-emerald-200 hover:from-emerald-100',
+			'border-emerald-100 bg-linear-to-r from-emerald-50 to-emerald-50/60 text-emerald-700 hover:border-emerald-200 hover:from-emerald-100',
 		azul:
-			'border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50/60 text-[#007FFF] hover:border-[#007FFF]/30 hover:from-blue-100',
+			'border-blue-100 bg-linear-to-r from-blue-50 to-blue-50/60 text-[#007FFF] hover:border-[#007FFF]/30 hover:from-blue-100',
 		morado:
-			'border-purple-100 bg-gradient-to-r from-purple-50 to-purple-50/60 text-purple-700 hover:border-purple-200 hover:from-purple-100',
+			'border-purple-100 bg-linear-to-r from-purple-50 to-purple-50/60 text-purple-700 hover:border-purple-200 hover:from-purple-100',
 		naranja:
-			'border-orange-100 bg-gradient-to-r from-orange-50 to-orange-50/60 text-orange-700 hover:border-orange-200 hover:from-orange-100',
+			'border-orange-100 bg-linear-to-r from-orange-50 to-orange-50/60 text-orange-700 hover:border-orange-200 hover:from-orange-100',
 		rojo:
-			'border-red-100 bg-gradient-to-r from-red-50 to-red-50/60 text-red-700 hover:border-red-200 hover:from-red-100',
+			'border-red-100 bg-linear-to-r from-red-50 to-red-50/60 text-red-700 hover:border-red-200 hover:from-red-100',
 		gray:
-			'border-gray-100 bg-gradient-to-r from-gray-50 to-gray-50/60 text-gray-700 hover:border-gray-200 hover:from-gray-100'
+			'border-gray-100 bg-linear-to-r from-gray-50 to-gray-50/60 text-gray-700 hover:border-gray-200 hover:from-gray-100'
 	};
 
 	function obtenerClaseChip(color: string): string {

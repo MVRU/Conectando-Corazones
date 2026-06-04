@@ -9,24 +9,25 @@ export class GestionarEstadoProyecto {
 		private historialRepo: HistorialDeCambiosRepository
 	) {}
 
-	async solicitarCierre(proyectoId: number, usuarioId: number): Promise<Proyecto> {
-		const proyecto = await this.proyectoRepo.findById(proyectoId);
+	async solicitarCierre(proyectoId: number, usuarioId: number): Promise<void> {
+		const proyecto = await this.proyectoRepo.findByIdLean(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
 		if (proyecto.institucion_id !== usuarioId) {
 			throw new Error('No tenés permiso para finalizar las actividades de este proyecto');
 		}
 
-		if (!proyecto.puedeCambiarA('pendiente_solicitud_cierre')) {
+		if (proyecto.estado !== 'en_curso') {
 			throw new Error(`No se puede solicitar cierre desde el estado ${proyecto.estado}`);
 		}
 
-		if (!proyecto.objetivosAlcanzados()) {
+		const objetivosOk = await this.proyectoRepo.checkObjetivosAlcanzados(proyectoId);
+		if (!objetivosOk) {
 			console.warn('Advertencia: objetivos no completados al 100%');
 		}
 
 		const estadoAnterior = proyecto.estado ?? 'desconocido';
-		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'pendiente_solicitud_cierre');
+		await this.proyectoRepo.updateEstadoLean(proyectoId, 'pendiente_solicitud_cierre');
 
 		await this.historialRepo.create({
 			tipo_objeto: 'proyecto',
@@ -37,20 +38,18 @@ export class GestionarEstadoProyecto {
 			valor_nuevo: 'pendiente_solicitud_cierre',
 			usuario_id: usuarioId
 		});
-
-		return proyectoActualizado;
 	}
 
-	async enviarASolicitudCierreConEvidencias(proyectoId: number, usuarioId: number): Promise<Proyecto> {
-		const proyecto = await this.proyectoRepo.findById(proyectoId);
+	async enviarASolicitudCierreConEvidencias(proyectoId: number, usuarioId: number): Promise<void> {
+		const proyecto = await this.proyectoRepo.findByIdLean(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 
-		if (!proyecto.puedeCambiarA('en_revision')) {
+		if (proyecto.estado !== 'pendiente_solicitud_cierre') {
 			throw new Error(`Transición inválida a En Revisión desde ${proyecto.estado}`);
 		}
 
 		const estadoAnterior = proyecto.estado ?? 'desconocido';
-		const proyectoActualizado = await this.proyectoRepo.updateEstado(proyectoId, 'en_revision');
+		await this.proyectoRepo.updateEstadoLean(proyectoId, 'en_revision');
 
 		await this.historialRepo.create({
 			tipo_objeto: 'proyecto',
@@ -61,8 +60,6 @@ export class GestionarEstadoProyecto {
 			valor_nuevo: 'en_revision',
 			usuario_id: usuarioId
 		});
-
-		return proyectoActualizado;
 	}
 
 	async aprobarCierre(proyectoId: number, usuarioId: number): Promise<Proyecto> {

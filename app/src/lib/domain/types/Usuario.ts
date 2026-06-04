@@ -33,6 +33,7 @@ export interface Usuario {
 export interface Institucion extends Usuario {
 	nombre_legal: string;
 	tipo_institucion: string;
+	arcaVigente?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

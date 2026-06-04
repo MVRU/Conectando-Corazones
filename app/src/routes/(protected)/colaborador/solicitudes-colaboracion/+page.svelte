@@ -4,6 +4,7 @@
 		Clock,
 		CheckCircle2,
 		XCircle,
+		Ban,
 		Search,
 		Calendar,
 		Building2,
@@ -18,7 +19,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let activeTab: 'pendiente' | 'aprobada' | 'rechazada' = $state('pendiente');
+	let activeTab: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada' = $state('pendiente');
 	let searchTerm = $state('');
 
 	let filteredColaboraciones = $derived(data.colaboraciones.filter((c) => {
@@ -50,6 +51,13 @@
 			icon: XCircle,
 			activeClass: 'bg-white text-rose-600 shadow-sm ring-1 ring-black/5',
 			inactiveClass: 'text-gray-500 hover:text-rose-600 hover:bg-white/50'
+		},
+		{
+			id: 'anulada',
+			label: 'Anuladas',
+			icon: Ban,
+			activeClass: 'bg-white text-slate-600 shadow-sm ring-1 ring-black/5',
+			inactiveClass: 'text-gray-500 hover:text-slate-600 hover:bg-white/50'
 		}
 	];
 
@@ -136,7 +144,7 @@
 			<div class="inline-flex rounded-full bg-gray-100/80 p-1.5 shadow-inner backdrop-blur-sm">
 				{#each tabs as tab}
 					<button
-						class="relative flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-300 focus:outline-none
+						class="relative flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-medium whitespace-nowrap transition-all duration-300 focus:outline-hidden
                         {activeTab === tab.id ? tab.activeClass : tab.inactiveClass}"
 						onclick={() => (activeTab = tab.id as any)}
 					>
@@ -164,14 +172,14 @@
 						in:fly={{ y: 20, duration: 400, delay: i * 50 }}
 						class="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-blue-500/20"
 					>
-						<div class="relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+						<div class="relative aspect-video w-full overflow-hidden bg-gray-100">
 							<img
 								src={colab.proyecto.url_portada}
 								alt={colab.proyecto.titulo}
 								class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
 							/>
 							<div
-								class="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent opacity-60"
+								class="absolute inset-0 bg-linear-to-t from-gray-900/60 via-transparent to-transparent opacity-60"
 							></div>
 
 							<!-- Etiqueta de Estado (Arriba a la izquierda) -->
@@ -189,6 +197,13 @@
 									>
 										<CheckCircle2 class="h-3 w-3" />
 										Aprobada
+									</span>
+								{:else if colab.estado === 'anulada'}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full bg-slate-500/90 px-2.5 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md"
+									>
+										<Ban class="h-3 w-3" />
+										Anulada
 									</span>
 								{:else}
 									<span

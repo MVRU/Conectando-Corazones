@@ -66,6 +66,7 @@ model Colaboracion {
 
   colaboraciones_tipo_participacion ColaboracionTipoParticipacion[]
   @@unique([proyecto_id, colaborador_id]) // Un colaborador no puede enviar más de una solicitud de colaboración al mismo proyecto
+  @@index([proyecto_id], map: "idx_colaboraciones_proyecto")
   @@map("colaboraciones")
 }
 
@@ -142,6 +143,7 @@ model Evidencia {
   solicitud_evidencias SolicitudFinalizacionEvidencia[]
 
   @@unique([id_participacion_permitida, tipo_evidencia]) // Garantiza una única carpeta/registro de evidencia por tipo para una participación
+  @@index([id_participacion_permitida], map: "idx_evidencias_participacion_permitida")
   @@map("evidencias")
 }
 
@@ -159,6 +161,7 @@ model HistorialDeCambios {
 
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
 
+  @@index([usuario_id], map: "idx_historial_de_cambios_usuario")
   @@map("historial_de_cambios")
 }
 
@@ -201,6 +204,7 @@ model ParticipacionPermitida {
   evidencias                        Evidencia[]
 
 
+  @@index([id_proyecto], map: "idx_participaciones_permitidas_proyecto")
   @@map("participaciones_permitidas")
 }
 
@@ -254,6 +258,7 @@ model ProyectoCategoria {
   proyecto  Proyecto  @relation(fields: [proyecto_id], references: [id_proyecto])
 
   @@unique([proyecto_id, categoria_id]) // Evita duplicidad en la categorización del proyecto
+  @@index([proyecto_id], map: "idx_proyecto_categorias_proyecto")
   @@map("proyecto_categorias")
 }
 
@@ -266,6 +271,7 @@ model ProyectoUbicacion {
   ubicacion Ubicacion @relation(fields: [ubicacion_id], references: [id_ubicacion])
 
   @@unique([proyecto_id, ubicacion_id]) // Evita duplicidad en la ubicación del proyecto
+  @@index([proyecto_id], map: "idx_proyecto_ubicaciones_proyecto")
   @@map("proyecto_ubicaciones")
 }
 
@@ -319,6 +325,7 @@ model SolicitudFinalizacion {
   evaluaciones         Evaluacion[]
   solicitud_evidencias SolicitudFinalizacionEvidencia[]
 
+  @@index([proyecto_id], map: "idx_solicitudes_finalizacion_proyecto")
   @@map("solicitudes_finalizacion")
 }
 
@@ -331,6 +338,7 @@ model SolicitudFinalizacionEvidencia {
   solicitud_finalizacion SolicitudFinalizacion @relation(fields: [solicitud_finalizacion_id], references: [id_solicitud])
 
   @@unique([evidencia_id, solicitud_finalizacion_id])
+  @@index([solicitud_finalizacion_id], map: "idx_solicitud_finalizacion_evidencias_solicitud")
   @@map("solicitud_finalizacion_evidencias")
 }
 
@@ -444,5 +452,6 @@ model Verificacion {
   usuario Usuario? @relation(fields: [usuario_id], references: [id_usuario])
   documentos Archivo[]
 
+  @@unique([usuario_id, tipo])
   @@map("verificaciones")
 }

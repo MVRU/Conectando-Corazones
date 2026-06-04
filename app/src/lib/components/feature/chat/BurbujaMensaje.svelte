@@ -92,7 +92,7 @@
 	<div
 		class="group relative w-full max-w-[calc(100%-3rem)] rounded-3xl px-3.5 py-3 shadow-sm backdrop-blur-sm sm:max-w-[85%] md:max-w-[72%] md:px-4 {esPropio
 			? 'rounded-br-md border border-[#42A1FF]/20 bg-[#007FFF] text-white shadow-[#007FFF]/20'
-			: 'rounded-bl-md border border-white/5 bg-white/[0.03] text-slate-100 shadow-black/20'} {estadoLocal === 'pendiente'
+			: 'rounded-bl-md border border-white/5 bg-white/3 text-slate-100 shadow-black/20'} {estadoLocal === 'pendiente'
 			? 'ring-2 ring-amber-200'
 			: ''}"
 	>
@@ -131,7 +131,7 @@
 			</div>
 		</div>
 
-		<p class="text-sm leading-6 break-words whitespace-pre-wrap md:text-[15px]">{mensaje.contenido}</p>
+		<p class="text-sm leading-6 wrap-break-word whitespace-pre-wrap md:text-[15px]">{mensaje.contenido}</p>
 
 		{#if esPropio}
 			<div
@@ -140,7 +140,7 @@
 			></div>
 		{:else}
 			<div
-				class="absolute left-0 -bottom-px h-3 w-3 border-b border-l border-white/5 bg-white/[0.03] backdrop-blur-sm"
+				class="absolute left-0 -bottom-px h-3 w-3 border-b border-l border-white/5 bg-white/3 backdrop-blur-sm"
 				style="clip-path: polygon(0 0, 0 100%, 100% 100%);"
 			></div>
 		{/if}

@@ -248,7 +248,7 @@
 							href={urlGoogleMaps}
 							target="_blank"
 							rel="noopener noreferrer"
-							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 pr-14 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+							class="block w-full rounded-2xl border border-transparent bg-blue-50 px-4 py-3 pr-14 text-base text-blue-700 underline transition-colors duration-200 hover:bg-blue-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-hidden"
 						>
 							{urlGoogleMapsLegible}
 						</a>
@@ -263,7 +263,7 @@
 					<button
 						type="button"
 						onclick={() => (editandoUrlMapaGoogle = !editandoUrlMapaGoogle)}
-						class="absolute top-0 right-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+						class="absolute top-0 right-0 flex h-full w-11 items-center justify-center rounded-r-2xl border border-gray-200 bg-white text-blue-600 shadow-sm transition-colors duration-200 hover:bg-blue-50 focus:ring-2 focus:ring-blue-200 focus:outline-hidden"
 						aria-label={editandoUrlMapaGoogle ? 'Cancelar edición' : 'Editar URL'}
 						aria-pressed={editandoUrlMapaGoogle}
 					>

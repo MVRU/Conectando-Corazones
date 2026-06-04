@@ -140,8 +140,8 @@
 				{/if}
 			{:else}
 				<!-- Estado privado -->
-				<div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100/60 p-6">
-					<div class="pointer-events-none absolute -top-6 -right-6 opacity-[0.04]">
+				<div class="relative overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-br from-gray-50 to-gray-100/60 p-6">
+					<div class="pointer-events-none absolute -top-6 -right-6 opacity-4">
 						<Lock class="h-36 w-36" />
 					</div>
 					<div class="relative z-10 flex flex-col items-center gap-3 text-center">

@@ -50,7 +50,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each categorias as categoria, i (categoria.descripcion)}
 				<div
-					class="group flex cursor-default items-center gap-1.5 rounded-full border border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50/60 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:border-[#007FFF]/30 hover:from-blue-100 hover:to-blue-50 hover:shadow-sm"
+					class="group flex cursor-default items-center gap-1.5 rounded-full border border-blue-100 bg-linear-to-r from-blue-50 to-blue-50/60 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:border-[#007FFF]/30 hover:from-blue-100 hover:to-blue-50 hover:shadow-sm"
 					in:fly={{ y: 8, duration: 250, delay: i * 50, easing: cubicOut }}
 				>
 					<Icon

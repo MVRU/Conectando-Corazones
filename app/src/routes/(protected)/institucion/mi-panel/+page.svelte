@@ -23,7 +23,7 @@
 		class:opacity-0={!animate}
 		class:opacity-100={animate}
 	>
-		<DashboardInstitucion data={dashboardData} />
+		<DashboardInstitucion data={dashboardData} periodo={data.periodo} />
 	</div>
 {:else if data.error}
 	<div class="flex min-h-screen items-center justify-center bg-[#0F1029]">

@@ -15,4 +15,7 @@ export interface ProyectoRepository {
 	updateEstado(id: number, nuevoEstado: EstadoDescripcion): Promise<Proyecto>;
 	cancel(id: number, usuarioEjecutorId: number, justificacion?: string, historialData?: HistorialDeCambios): Promise<void>;
 	countSolicitudesRechazadas(id: number): Promise<number>;
+	findByIdLean(id: number): Promise<{ id_proyecto: number; estado: string | null; institucion_id: number | null } | null>;
+	updateEstadoLean(id: number, nuevoEstado: string): Promise<void>;
+	checkObjetivosAlcanzados(id: number): Promise<boolean>;
 }

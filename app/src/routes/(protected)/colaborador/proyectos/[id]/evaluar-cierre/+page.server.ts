@@ -7,27 +7,16 @@ import { PostgresSolicitudFinalizacionRepository } from '$lib/infrastructure/sup
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
 import { RegistrarEvaluacion } from '$lib/domain/use-cases/evaluacion/RegistrarEvaluacion';
 import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
+import { notificarProyectoEnAuditoriaAdmin } from '$lib/server/servicio-notificaciones-admin';
 import { prisma } from '$lib/infrastructure/prisma/client';
 import { Prisma } from '@prisma/client';
+import { waitUntil } from '@vercel/functions';
 
-const proyectoRepo = new PostgresProyectoRepository();
-const colaboracionRepo = new PostgresColaboracionRepository();
+export const config = {
+	maxDuration: 30
+};
+
 const evaluacionRepo = new PostgresEvaluacionRepository();
-const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
-const historialRepo = new PostgresHistorialDeCambiosRepository();
-
-function dispararAnalisisProyectoCompletado(proyectoId: number) {
-	setTimeout(async () => {
-		try {
-			const result = await analizarProyecto(proyectoId);
-			if (!result.success && result.error) {
-				console.error(`[IA] Error en análisis del proyecto ${proyectoId}:`, result.error);
-			}
-		} catch (error) {
-			console.error(`[IA] Excepción no controlada en background task del proyecto ${proyectoId}:`, error);
-		}
-	}, 0);
-}
 
 /**
  * Evaluación de solicitudes de cierre por parte del colaborador.
@@ -42,7 +31,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw redirect(303, '/proyectos');
 	}
 
-	const [proyectoRow, colaboracionAprobada, totalColaboradores, solicitudRow] = await Promise.all([
+	const [proyectoRow, colaboracionAprobada, totalColaboradores, solicitudRow, resenaPropia] = await Promise.all([
 		prisma.proyecto.findUnique({
 			where: { id_proyecto: proyectoId },
 			select: {
@@ -137,6 +126,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					}
 				}
 			}
+		}),
+		prisma.resena.findFirst({
+			where: {
+				autor_id: user.id_usuario!,
+				tipo_objeto: 'proyecto',
+				id_objeto: proyectoId
+			},
+			select: { id_resena: true }
 		})
 	]);
 
@@ -164,46 +161,46 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			especie: participacion.especie ?? undefined,
 			tipo_participacion: participacion.tipo_participacion
 				? {
-						id_tipo_participacion: participacion.tipo_participacion.id_tipo_participacion,
-						descripcion: participacion.tipo_participacion.descripcion
-					}
+					id_tipo_participacion: participacion.tipo_participacion.id_tipo_participacion,
+					descripcion: participacion.tipo_participacion.descripcion
+				}
 				: undefined
 		}))
 	};
 
 	const solicitud = solicitudRow
 		? {
-				id_solicitud: solicitudRow.id_solicitud,
-				proyecto_id: solicitudRow.proyecto_id,
-				estado: solicitudRow.estado ?? undefined,
-				created_at: solicitudRow.created_at ?? undefined,
-				evidencia_ids: solicitudRow.solicitud_evidencias.map(
-					({ evidencia }) => evidencia.id_evidencia
-				),
-				evidencias: solicitudRow.solicitud_evidencias.map(({ evidencia }) => ({
-					id_evidencia: evidencia.id_evidencia,
-					tipo_evidencia: evidencia.tipo_evidencia,
-					created_at: evidencia.created_at ?? undefined,
-					id_participacion_permitida: evidencia.id_participacion_permitida,
-					archivos_ids: evidencia.archivos.map((archivo) => archivo.id_archivo),
-					archivos: evidencia.archivos.map((archivo) => ({
-						id_archivo: archivo.id_archivo,
-						nombre_original: archivo.nombre_original,
-						url: archivo.url,
-						descripcion: archivo.descripcion,
-						tipo_mime: archivo.tipo_mime,
-						tamanio_bytes: archivo.tamanio_bytes ? Number(archivo.tamanio_bytes) : null,
-						created_at: archivo.created_at ?? undefined,
-						usuario: archivo.usuario
-							? {
-									nombre: archivo.usuario.nombre,
-									apellido: archivo.usuario.apellido,
-									username: archivo.usuario.username
-								}
-							: undefined
-					}))
+			id_solicitud: solicitudRow.id_solicitud,
+			proyecto_id: solicitudRow.proyecto_id,
+			estado: solicitudRow.estado ?? undefined,
+			created_at: solicitudRow.created_at ?? undefined,
+			evidencia_ids: solicitudRow.solicitud_evidencias.map(
+				({ evidencia }) => evidencia.id_evidencia
+			),
+			evidencias: solicitudRow.solicitud_evidencias.map(({ evidencia }) => ({
+				id_evidencia: evidencia.id_evidencia,
+				tipo_evidencia: evidencia.tipo_evidencia,
+				created_at: evidencia.created_at ?? undefined,
+				id_participacion_permitida: evidencia.id_participacion_permitida,
+				archivos_ids: evidencia.archivos.map((archivo) => archivo.id_archivo),
+				archivos: evidencia.archivos.map((archivo) => ({
+					id_archivo: archivo.id_archivo,
+					nombre_original: archivo.nombre_original,
+					url: archivo.url,
+					descripcion: archivo.descripcion,
+					tipo_mime: archivo.tipo_mime,
+					tamanio_bytes: archivo.tamanio_bytes ? Number(archivo.tamanio_bytes) : null,
+					created_at: archivo.created_at ?? undefined,
+					usuario: archivo.usuario
+						? {
+							nombre: archivo.usuario.nombre,
+							apellido: archivo.usuario.apellido,
+							username: archivo.usuario.username
+						}
+						: undefined
 				}))
-			}
+			}))
+		}
 		: null;
 
 	// Si no hay solicitud y el proyecto está en revisión, es un estado inconsistente o
@@ -215,13 +212,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const [evaluacionUsuario, votosRealizados] =
 		solicitud && solicitud.id_solicitud !== undefined && user.id_usuario !== undefined
 			? await Promise.all([
-					evaluacionRepo.findBySolicitudAndColaborador(solicitud.id_solicitud, user.id_usuario),
-					prisma.evaluacion.count({
-						where: {
-							solicitud_id: solicitud.id_solicitud
-						}
-					})
-				])
+				evaluacionRepo.findBySolicitudAndColaborador(solicitud.id_solicitud, user.id_usuario),
+				prisma.evaluacion.count({
+					where: {
+						solicitud_id: solicitud.id_solicitud
+					}
+				})
+			])
 			: [null, 0];
 
 	return {
@@ -231,7 +228,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		yaVote: !!evaluacionUsuario,
 		totalColaboradores,
 		votosRealizados,
-		isEnRevision: proyecto.estado === 'en_revision'
+		isEnRevision: proyecto.estado === 'en_revision',
+		tieneResena: !!resenaPropia
 	};
 };
 
@@ -267,7 +265,9 @@ export const actions: Actions = {
 					});
 				},
 				{
-					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+					timeout: 15000,
+					maxWait: 5000
 				}
 			);
 
@@ -283,8 +283,18 @@ export const actions: Actions = {
 			});
 
 			if (proyectoActualizado?.estado?.descripcion === 'completado') {
-				dispararAnalisisProyectoCompletado(proyectoId);
+				waitUntil(
+					analizarProyecto(proyectoId).catch((err) => {
+						console.error(`[IA] Error al generar análisis del proyecto ${proyectoId}:`, err);
+					})
+				);
 			}
+
+			console.log('[evaluar-cierre:aprobar] tx commit OK', {
+				proyectoId,
+				solicitudId,
+				usuarioId: user.id_usuario
+			});
 
 			return {
 				success: true,
@@ -293,9 +303,18 @@ export const actions: Actions = {
 						? 'Tu voto fue registrado. El proyecto quedó completado.'
 						: 'Tu voto fue registrado correctamente.'
 			};
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error interno';
-			return fail(400, { error: errorMessage });
+		} catch (error: any) {
+			console.error('[evaluar-cierre:aprobar] Error al registrar evaluación:', {
+				proyectoId,
+				solicitudId,
+				usuarioId: user.id_usuario,
+				message: error?.message,
+				code: error?.code,
+				stack: error?.stack
+			});
+			return fail(400, {
+				error: error?.message ?? 'No se pudo registrar tu voto. Intentalo nuevamente.'
+			});
 		}
 	},
 
@@ -332,19 +351,38 @@ export const actions: Actions = {
 					});
 				},
 				{
-					isolationLevel: Prisma.TransactionIsolationLevel.Serializable
+					isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+					timeout: 15000,
+					maxWait: 5000
 				}
 			);
 
 			const proyectoActualizado = await prisma.proyecto.findUnique({
 				where: { id_proyecto: proyectoId },
 				select: {
+					titulo: true,
 					estado: {
 						select: {
 							descripcion: true
 						}
 					}
 				}
+			});
+
+			if (proyectoActualizado?.estado?.descripcion === 'en_auditoria') {
+				await notificarProyectoEnAuditoriaAdmin({
+					proyectoId,
+					tituloProyecto: proyectoActualizado.titulo,
+					solicitudId,
+					colaboradorId: user.id_usuario!,
+					colaboradorUsername: user.username
+				});
+			}
+
+			console.log('[evaluar-cierre:rechazar] tx commit OK', {
+				proyectoId,
+				solicitudId,
+				usuarioId: user.id_usuario
 			});
 
 			return {
@@ -354,9 +392,18 @@ export const actions: Actions = {
 						? 'Tu rechazo fue registrado. El proyecto pasó a auditoría.'
 						: 'Tu rechazo fue registrado. El proyecto volvió a pendiente de solicitud de cierre.'
 			};
-		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error interno';
-			return fail(400, { error: errorMessage });
+		} catch (error: any) {
+			console.error('[evaluar-cierre:rechazar] Error al registrar evaluación:', {
+				proyectoId,
+				solicitudId,
+				usuarioId: user.id_usuario,
+				message: error?.message,
+				code: error?.code,
+				stack: error?.stack
+			});
+			return fail(400, {
+				error: error?.message ?? 'No se pudo registrar tu voto. Intentalo nuevamente.'
+			});
 		}
 	},
 

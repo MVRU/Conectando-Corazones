@@ -30,7 +30,7 @@
 <button
 	onclick={scrollToTop}
 	aria-label="Volver arriba"
-	class="fixed right-5 z-[120] cursor-pointer rounded-full p-[3px] transition-all duration-700 {$layoutStore.hasStickyBottomBar
+	class="fixed right-5 z-120 cursor-pointer rounded-full p-[3px] transition-all duration-700 {$layoutStore.hasStickyBottomBar
 		? 'bottom-32 lg:bottom-7'
 		: 'bottom-7'}"
 	style="
@@ -44,7 +44,7 @@
 	"
 >
 	<span
-		class="group flex h-14 w-14 items-center justify-center rounded-full border-2 border-blue-200 bg-gradient-to-br from-white/80 to-blue-100 shadow-xl transition-all
+		class="group flex h-14 w-14 items-center justify-center rounded-full border-2 border-blue-200 bg-linear-to-br from-white/80 to-blue-100 shadow-xl transition-all
 			duration-500
 			hover:shadow-[0_8px_28px_0_#60a5fa55,0_0_0_6px_#38bdf855]"
 	>

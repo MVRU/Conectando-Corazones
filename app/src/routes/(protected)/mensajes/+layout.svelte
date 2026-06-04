@@ -1,10 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { resolve } from '$app/paths';
 	import type { Chat } from '$lib/domain/types/Chat';
 	import { formatearCantidadMensajes } from '$lib/utils/chatTexto';
 	import { usuario } from '$lib/stores/auth';
 	import { chatStore } from '$lib/stores/chatStore';
+	import { marcarVisitaChat } from '$lib/utils/chat-visit';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
 	import {
 		Archive,
@@ -15,6 +17,10 @@
 	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
+
+	onMount(() => {
+		marcarVisitaChat();
+	});
 
 	interface Props {
 		data: any;
@@ -60,18 +66,18 @@
 <div class="relative flex h-full w-full overflow-hidden bg-[#0F1029] text-slate-100">
 	<!-- Decoración de fondo idéntica al dashboard -->
 	<div
-		class="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+		class="pointer-events-none fixed inset-0 z-0 opacity-3"
 		style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"
 	></div>
-	<div class="fixed top-0 left-1/4 -z-0 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#007FFF]/10 blur-[130px]"></div>
-	<div class="fixed bottom-0 right-1/4 -z-0 h-[400px] w-[400px] translate-y-1/2 rounded-full bg-emerald-500/5 blur-[120px]"></div>
+	<div class="fixed top-0 left-1/4 z-0 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#007FFF]/10 blur-[130px]"></div>
+	<div class="fixed bottom-0 right-1/4 z-0 h-[400px] w-[400px] translate-y-1/2 rounded-full bg-emerald-500/5 blur-[120px]"></div>
 
 	<aside
-		class="relative z-10 flex-shrink-0 border-r border-white/5 bg-white/[0.02] backdrop-blur-xl transition-all duration-300 {isInChat
+		class="relative z-10 shrink-0 border-r border-white/5 bg-white/2 backdrop-blur-xl transition-all duration-300 {isInChat
 			? 'hidden md:flex md:flex-col'
-			: 'flex flex-col'} {$chatStore.sidebarCollapsed ? 'md:w-0 md:opacity-0' : 'w-full md:w-[22rem]'}"
+			: 'flex flex-col'} {$chatStore.sidebarCollapsed ? 'md:w-0 md:opacity-0' : 'w-full md:w-88'}"
 	>
-		<div class="message-enter flex-shrink-0 border-b border-white/5 bg-white/[0.03] p-5" style="--message-enter-delay: 40ms;">
+		<div class="message-enter shrink-0 border-b border-white/5 bg-white/3 p-5" style="--message-enter-delay: 40ms;">
 			<div class="flex items-center justify-between gap-3">
 				<div class="flex items-center gap-3">
 					<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007FFF]/15 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20">
@@ -99,7 +105,7 @@
 			</div>
 		</div>
 
-		<div class="message-enter flex gap-2 border-b border-white/5 bg-white/[0.01] px-3 py-3" style="--message-enter-delay: 90ms;">
+		<div class="message-enter flex gap-2 border-b border-white/5 bg-white/1 px-3 py-3" style="--message-enter-delay: 90ms;">
 			<button
 				onclick={() => chatStore.toggleArchived()}
 				class="relative flex flex-1 items-center justify-center rounded-full px-3 py-2.5 text-sm font-medium transition-all sm:px-4 {!$chatStore.showArchived
@@ -111,7 +117,7 @@
 					<span>Activos</span>
 					{#if activeChats.length > 0}
 						<span
-							class="inline-flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded-full {!$chatStore.showArchived
+							class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full {!$chatStore.showArchived
 								? 'bg-[#007FFF]/20 text-[#42A1FF]'
 								: 'bg-white/5 text-slate-400'} px-1.5 text-xs leading-none font-bold"
 						>
@@ -131,7 +137,7 @@
 					<span>Archivados</span>
 					{#if archivedChats.length > 0}
 						<span
-							class="inline-flex h-5 min-w-[1.25rem] shrink-0 items-center justify-center rounded-full {$chatStore.showArchived
+							class="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full {$chatStore.showArchived
 								? 'bg-[#007FFF]/20 text-[#42A1FF]'
 								: 'bg-white/5 text-slate-400'} px-1.5 text-xs leading-none font-bold"
 						>
@@ -144,7 +150,7 @@
 
 		<div class="message-enter no-scrollbar flex-1 overflow-y-auto p-3" style="--message-enter-delay: 140ms;">
 			{#if ($chatStore.showArchived ? archivedChats : activeChats).length === 0}
-				<div class="rounded-3xl border border-white/5 bg-white/[0.02] backdrop-blur-sm p-8 text-center mt-4">
+				<div class="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-sm p-8 text-center mt-4">
 					<div
 						class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-slate-400"
 					>
@@ -175,7 +181,7 @@
 								class="group block rounded-2xl border px-4 py-3.5 transition-all duration-300 hover:shadow-lg {$page.params
 									.proyecto_id === chat.proyecto_id.toString()
 									? 'border-[#007FFF]/30 bg-[#007FFF]/5 shadow-md shadow-[#007FFF]/5 backdrop-blur-md'
-									: 'border-white/5 bg-white/[0.02] hover:border-white/10 hover:bg-white/[0.04] backdrop-blur-sm opacity-80 hover:opacity-100'}"
+									: 'border-white/5 bg-white/2 hover:border-white/10 hover:bg-white/4 backdrop-blur-sm opacity-80 hover:opacity-100'}"
 							>
 								<div class="mb-2 flex items-start justify-between gap-2">
 									<h3 class="truncate font-semibold text-slate-100">{chat.titulo}</h3>

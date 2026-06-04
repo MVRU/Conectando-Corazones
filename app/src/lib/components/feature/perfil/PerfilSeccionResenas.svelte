@@ -43,7 +43,7 @@
 		{#if mostrarBotonAgregar}
 			<button
 				onclick={onAgregarResenaClick}
-				class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#007FFF] to-[#42A1FF] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:from-[#42A1FF] hover:to-[#007FFF] hover:shadow-md"
+				class="inline-flex items-center gap-1.5 rounded-xl bg-linear-to-r from-[#007FFF] to-[#42A1FF] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:from-[#42A1FF] hover:to-[#007FFF] hover:shadow-md"
 			>
 				<Plus class="h-3.5 w-3.5" />
 				Añadir reseña

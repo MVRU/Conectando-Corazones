@@ -294,7 +294,7 @@
 		tabindex="-1"
 	>
 		<div
-			class="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl focus:outline-none"
+			class="flex max-h-[90vh] w-full max-w-7xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl focus:outline-hidden"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.key === 'Escape' && handleCerrar()}
 			role="dialog"
@@ -309,7 +309,7 @@
 				<button
 					onclick={handleCerrar}
 					aria-label="Cerrar modal"
-					class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-gray-200 focus:outline-none"
+					class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:ring-2 focus:ring-gray-200 focus:outline-hidden"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -328,7 +328,7 @@
 				>
 					<div class="group relative mb-6">
 						<div
-							class="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg ring-1 ring-gray-200 transition-transform duration-300 group-hover:scale-[1.02]"
+							class="h-32 w-32 overflow-hidden rounded-full border-4 border-white shadow-lg ring-1 ring-gray-200 transition-transform duration-300 group-hover:scale-102"
 						>
 							<img
 								src={$datosEdicion.url_foto || '/logo-1.png'}
@@ -370,7 +370,7 @@
 								<p class="text-[11px] text-gray-500">Subí un archivo JPG, PNG o WEBP (máx. 5MB).</p>
 								<button
 									type="button"
-									class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-blue-400 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50"
+									class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:border-blue-400 hover:bg-blue-50 focus:ring-2 focus:ring-blue-500 focus:outline-hidden disabled:cursor-not-allowed disabled:bg-gray-50"
 									disabled={subiendoFoto}
 									onclick={() => document.getElementById('file-upload')?.click()}
 								>
@@ -469,7 +469,7 @@
 					</div>
 
 					<h4 class="mb-1 text-lg font-bold text-gray-900">{nombreUsuario}</h4>
-					<p class="mb-6 text-sm break-words text-gray-500 capitalize">{perfilUsuario.rol}</p>
+					<p class="mb-6 text-sm wrap-break-word text-gray-500 capitalize">{perfilUsuario.rol}</p>
 				</div>
 
 				<div class="col-span-1 flex flex-col overflow-hidden bg-white md:col-span-9">

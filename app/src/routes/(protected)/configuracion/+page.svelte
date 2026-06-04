@@ -115,12 +115,12 @@
 <div class="min-h-screen bg-gray-50">
 	<!-- Banner header -->
 	<div class="relative overflow-hidden border-b border-gray-100 bg-white">
-		<div class="absolute inset-0 bg-gradient-to-r from-[#007FFF]/5 via-transparent to-[#42A1FF]/5"></div>
+		<div class="absolute inset-0 bg-linear-to-r from-[#007FFF]/5 via-transparent to-[#42A1FF]/5"></div>
 		<div class="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 			{#if montado}
 				<div in:fly={{ y: -10, duration: 350, easing: cubicOut }}>
 					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
 							<Settings class="h-5 w-5 text-white" />
 						</div>
 						<div>
@@ -166,7 +166,7 @@
 							<button
 								onclick={() => (tabActiva = tab.id)}
 								class="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-200 {i < tabs.length - 1 ? 'border-b border-gray-50' : ''} {tabActiva === tab.id
-									? 'bg-gradient-to-r from-[#007FFF]/8 to-blue-50/60 text-[#007FFF]'
+									? 'bg-linear-to-r from-[#007FFF]/8 to-blue-50/60 text-[#007FFF]'
 									: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
 							>
 								<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {tabActiva === tab.id ? 'bg-[#007FFF] shadow-sm' : 'bg-gray-100'}">
@@ -207,7 +207,7 @@
 													id="passActual"
 													type={mostrarPassActual ? 'text' : 'password'}
 													bind:value={passActual}
-													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-hidden"
 												/>
 												<button
 													type="button"
@@ -233,7 +233,7 @@
 													id="passNueva"
 													type={mostrarPassNueva ? 'text' : 'password'}
 													bind:value={passNueva}
-													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-hidden"
 												/>
 												<button
 													type="button"
@@ -259,7 +259,7 @@
 													id="passConfirm"
 													type={mostrarPassConfirm ? 'text' : 'password'}
 													bind:value={passConfirm}
-													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-none"
+													customClass="block w-full rounded-xl border border-gray-200 px-4 py-3 pr-12 shadow-sm transition focus:border-[#007FFF] focus:ring-2 focus:ring-[#007FFF]/20 focus:outline-hidden"
 												/>
 												<button
 													type="button"
@@ -311,7 +311,7 @@
 											<p class="mt-0.5 text-xs text-gray-500">Alertas en tiempo real sobre postulaciones y mensajes.</p>
 										</div>
 										<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
-										<div class="relative h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesPush ? 'bg-[#007FFF]' : 'bg-gray-200'}">
+										<div class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesPush ? 'bg-[#007FFF]' : 'bg-gray-200'}">
 											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesPush ? 'translate-x-5' : 'translate-x-0'}"></div>
 										</div>
 									</label>
@@ -321,7 +321,7 @@
 											<p class="mt-0.5 text-xs text-gray-500">Resúmenes semanales y novedades importantes por correo.</p>
 										</div>
 										<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
-										<div class="relative h-6 w-11 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesMail ? 'bg-[#007FFF]' : 'bg-gray-200'}">
+										<div class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesMail ? 'bg-[#007FFF]' : 'bg-gray-200'}">
 											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesMail ? 'translate-x-5' : 'translate-x-0'}"></div>
 										</div>
 									</label>
@@ -347,9 +347,9 @@
 									<!-- Enlace al perfil -->
 									<a
 										href="/perfil/{usuario?.username}"
-										class="group mb-6 flex items-center gap-4 rounded-2xl border border-[#007FFF]/20 bg-gradient-to-r from-blue-50 to-blue-50/40 p-4 transition-all duration-200 hover:border-[#007FFF]/40 hover:shadow-sm"
+										class="group mb-6 flex items-center gap-4 rounded-2xl border border-[#007FFF]/20 bg-linear-to-r from-blue-50 to-blue-50/40 p-4 transition-all duration-200 hover:border-[#007FFF]/40 hover:shadow-sm"
 									>
-										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
 											<UserCircle2 class="h-6 w-6 text-white" />
 										</div>
 										<div class="flex-1">
@@ -360,7 +360,7 @@
 									</a>
 
 									<!-- Zona de peligro -->
-									<div class="overflow-hidden rounded-2xl border border-[#DE1C38]/20 bg-gradient-to-br from-red-50/60 to-red-50/20">
+									<div class="overflow-hidden rounded-2xl border border-[#DE1C38]/20 bg-linear-to-br from-red-50/60 to-red-50/20">
 										<div class="border-b border-[#DE1C38]/10 px-5 py-4">
 											<div class="flex items-center gap-2">
 												<AlertTriangle class="h-4 w-4 text-[#DE1C38]" />

@@ -45,6 +45,8 @@ export interface UsuarioAdminItemDto {
 	estado_verificacion: string | null;
 	estado_gestion: EstadoGestionUsuario;
 	created_at: Date | null;
+	tieneProyectosActivos: boolean;
+	tieneColaboracionesActivas: boolean;
 }
 
 export interface ReporteAdminItemDto {
@@ -81,6 +83,13 @@ export interface RegistroAuditoriaAdminDto {
 	justificacion: string | null;
 	created_at: Date | null;
 	usuario_id: number | null;
+	admin: {
+		id_usuario: number;
+		username: string;
+		nombre: string;
+		apellido: string;
+	} | null;
+	objetoUsername: string | null;
 }
 
 export interface AuditoriaPaginadaAdminDto {

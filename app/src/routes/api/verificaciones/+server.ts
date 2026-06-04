@@ -1,6 +1,7 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { PostgresVerificacionRepository } from '$lib/infrastructure/supabase/postgres/verificacion.repo';
 import { SolicitarVerificacion } from '$lib/domain/use-cases/verificacion/SolicitarVerificacion';
+import { notificarSolicitudVerificacionAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.usuario?.id_usuario || !locals.usuario.rol) {
@@ -43,6 +44,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const repo = new PostgresVerificacionRepository();
 		const useCase = new SolicitarVerificacion(repo);
 		const row = await useCase.execute(locals.usuario.id_usuario, locals.usuario.id_usuario, tipo);
+
+		await notificarSolicitudVerificacionAdmin({
+			usuarioId: locals.usuario.id_usuario,
+			username: locals.usuario.username,
+			tipoSolicitud: String(tipo),
+			cantidadArchivos: 0
+		});
+
 		return json(row, { status: 201 });
 	} catch (e: unknown) {
 		const msg = e instanceof Error ? e.message : 'Error interno';

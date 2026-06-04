@@ -305,7 +305,7 @@
 							value={participacion.especie || ''}
 							oninput={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal || esAdmin}
 							class:border-red-300={errores[`participacion_${index}_especie`] &&
 								(!esOriginal || esAdmin)}
@@ -345,7 +345,7 @@
 							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							placeholder="100"
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
@@ -371,7 +371,7 @@
 							value={participacion.unidad_medida}
 							onchange={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esEdicionRestringida || esAdmin}
 							class:cursor-not-allowed={esOriginal && !esAdmin}
 							class:bg-gray-50={esOriginal && !esAdmin}
@@ -392,7 +392,7 @@
 									value={participacion.unidad_medida_otra || ''}
 									oninput={(e) =>
 										updateParticipacion(index, 'unidad_medida_otra', e.currentTarget.value)}
-									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
 									placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'

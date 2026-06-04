@@ -108,7 +108,7 @@ export const POST: RequestHandler = async (event) => {
 			cookies.delete('remember_me', { path: '/' });
 		}
 
-		return json({ usuario: usuarioSafe });
+		return json({ usuario: usuarioSafe, loginEmail: data.user.email });
 
 	} catch (error) {
 		console.error('ERROR INICIAR SESION:', error);

@@ -279,7 +279,7 @@
 							onclick={() => eliminarContacto(i)}
 							title="Eliminar contacto"
 							aria-label="Eliminar contacto"
-							class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-200 focus:outline-none"
+							class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 focus:ring-2 focus:ring-red-200 focus:outline-hidden"
 						>
 							<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
@@ -292,7 +292,7 @@
 						</button>
 					</div>
 				{:else}
-					<div class="hidden sm:mt-6 sm:block sm:w-[36px]"></div>
+					<div class="hidden sm:mt-6 sm:block sm:w-9"></div>
 				{/if}
 			</div>
 		{/each}

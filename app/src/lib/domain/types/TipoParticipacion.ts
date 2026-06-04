@@ -19,3 +19,6 @@ export const TIPO_PARTICIPACION_LABELS: Record<TipoParticipacionDescripcion, str
 // * Guards canónicos
 export const esTipoParticipacionCanonico = (v: string): v is TipoParticipacionDescripcion =>
 	(TIPOS_PARTICIPACION_DESCRIPCION as readonly string[]).includes(v);
+
+// * Tipos que califican para la deducción de Impuesto a las Ganancias (RG 2681).
+export const TIPOS_PARTICIPACION_DEDUCIBLES: readonly TipoParticipacionDescripcion[] = ['Monetaria', 'Especie'];

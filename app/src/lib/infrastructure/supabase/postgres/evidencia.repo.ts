@@ -225,4 +225,12 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 				})
 		);
 	}
+
+	async findIdsByProyecto(proyectoId: number): Promise<number[]> {
+		const evidencias = await this.db.evidencia.findMany({
+			where: { participacion_permitida: { id_proyecto: proyectoId } },
+			select: { id_evidencia: true }
+		});
+		return evidencias.map((e) => e.id_evidencia);
+	}
 }

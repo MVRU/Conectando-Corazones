@@ -196,7 +196,7 @@
 							>
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white"
+										class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
 										class:bg-amber-500={deadline.tipo === 'finalizacion_proyecto'}
 										class:bg-indigo-500={deadline.tipo === 'verificacion'}
 										class:bg-slate-600={deadline.tipo === 'otro'}

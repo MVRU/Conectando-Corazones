@@ -158,7 +158,7 @@
 									</div>
 									<div class="h-2 w-full overflow-hidden rounded-full bg-slate-700/50">
 										<div
-											class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-1000 ease-out"
+											class="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-1000 ease-out"
 											style="width: {cat.percentage}%"
 										></div>
 									</div>
@@ -208,7 +208,7 @@
 								class="group relative flex flex-col gap-4 rounded-xl border border-white/5 bg-slate-900/50 p-4 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5 hover:shadow-lg hover:shadow-emerald-900/20 sm:flex-row sm:items-center"
 							>
 								<div
-									class="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-slate-800 transition-colors group-hover:bg-emerald-500/20"
+									class="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-800 transition-colors group-hover:bg-emerald-500/20"
 								>
 									{#if project.imagen}
 										<img

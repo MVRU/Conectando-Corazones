@@ -12,7 +12,8 @@
 		Users,
 		Quote,
 		ChevronLeft,
-		ClipboardCheck
+		ClipboardCheck,
+		Star
 	} from 'lucide-svelte';
 	import ObjetivoEvidencias from '$lib/components/feature/institucion/ObjetivoEvidencias.svelte';
 	import ModalReportarIrregularidad from '$lib/components/ui/ModalReportarIrregularidad.svelte';
@@ -258,6 +259,46 @@
 							<ClipboardCheck class="mr-2 h-5 w-5 text-blue-600" />
 							Lista de verificación
 						</h3>
+
+						{#if !data.yaVote}
+							{#if data.tieneResena}
+								<div
+									class="mb-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4"
+									in:fade
+								>
+									<div class="flex gap-3">
+										<CheckCircle class="h-5 w-5 shrink-0 text-emerald-600" />
+										<div class="text-sm">
+											<p class="font-semibold text-emerald-900">¡Gracias por tu reseña!</p>
+											<p class="mt-1 text-emerald-800">
+												Tu opinión ya quedó registrada y nutrirá el resumen y aprendizajes del proyecto.
+											</p>
+										</div>
+									</div>
+								</div>
+							{:else}
+								<div
+									class="mb-6 rounded-xl border border-sky-100 bg-sky-50 p-4"
+									in:fade
+								>
+									<div class="flex gap-3">
+										<Star class="h-5 w-5 shrink-0 text-sky-600" />
+										<div class="text-sm">
+											<p class="font-semibold text-sky-900">Antes de aprobar, dejá tu reseña</p>
+											<p class="mt-1 leading-relaxed text-sky-800">
+												Tu opinión nutre el <strong>resumen y los aprendizajes</strong> que se generan al cerrar el proyecto.
+											</p>
+											<a
+												href={`/proyectos/${proyecto.id_proyecto}?desde=evaluar-cierre#titulo-resenas-proyecto`}
+												class="mt-3 inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-hidden"
+											>
+												Dejar mi reseña ahora
+											</a>
+										</div>
+									</div>
+								</div>
+							{/if}
+						{/if}
 
 						{#if data.yaVote}
 							<div

@@ -66,7 +66,7 @@
 		<div class="mb-8 flex justify-center">
 			<div class="inline-flex rounded-full bg-gray-100/80 p-1.5 shadow-inner">
 				<button
-					class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
+					class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-hidden {activeTab ===
 					'todos'
 						? 'bg-white text-gray-900 shadow-sm'
 						: 'text-gray-500 hover:text-gray-900'}"
@@ -76,7 +76,7 @@
 				</button>
 				{#if esAdministrador}
 					<button
-						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-hidden {activeTab ===
 						'auditoria'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"
@@ -86,7 +86,7 @@
 					</button>
 				{:else}
 					<button
-						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-none {activeTab ===
+						class="relative rounded-full px-6 py-2.5 text-sm font-medium transition-all duration-200 focus:ring-2 focus:ring-black/5 focus:outline-hidden {activeTab ===
 						'mis-proyectos'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"

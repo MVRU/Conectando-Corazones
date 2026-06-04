@@ -8,5 +8,5 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { password: _pwd, ...usuarioSafe } = locals.usuario.toPOJO();
-	return json({ usuario: usuarioSafe });
+	return json({ usuario: usuarioSafe, loginEmail: locals.user?.email || locals.session?.user?.email || null });
 };

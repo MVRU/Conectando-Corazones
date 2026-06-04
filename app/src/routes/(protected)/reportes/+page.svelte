@@ -150,7 +150,7 @@
 	<title>Reportes - Conectando Corazones</title>
 </svelte:head>
 
-<main class="w-full bg-gradient-to-b from-gray-50 to-white px-0 py-20 md:px-12 lg:px-28">
+<main class="w-full bg-linear-to-b from-gray-50 to-white px-0 py-20 md:px-12 lg:px-28">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h1 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
@@ -259,7 +259,7 @@
 													<img
 														src={reporte.imagen_objeto}
 														alt="Foto de perfil"
-														class="h-12 w-12 flex-shrink-0 rounded-full object-cover shadow-sm ring-2 ring-gray-100"
+														class="h-12 w-12 shrink-0 rounded-full object-cover shadow-sm ring-2 ring-gray-100"
 													/>
 												{:else}
 													<User class="h-6 w-6 text-gray-400" />
@@ -268,7 +268,7 @@
 												<img
 													src={reporte.imagen_objeto}
 													alt="Imagen del proyecto"
-													class="h-12 w-12 flex-shrink-0 rounded-xl object-cover shadow-sm ring-2 ring-gray-100"
+													class="h-12 w-12 shrink-0 rounded-xl object-cover shadow-sm ring-2 ring-gray-100"
 												/>
 											{:else}
 												<Folder class="h-6 w-6 text-gray-400" />
@@ -353,14 +353,14 @@
 											class="mb-2 block text-sm font-bold tracking-widest text-gray-400 uppercase"
 											>Descripción Detallada</span
 										>
-										<p class="break-words text-lg leading-relaxed text-gray-700">{reporte.descripcion}</p>
+										<p class="wrap-break-word text-lg leading-relaxed text-gray-700">{reporte.descripcion}</p>
 									</div>
 								</div>
 
 								<div class="flex flex-col gap-4">
 									{#if reporte.estado === 'verificado' || reporte.estado === 'desestimado'}
 										<div class="h-full rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm md:p-6">
-											<h4 class="mb-4 flex items-center gap-2 break-words text-lg font-bold text-gray-900">
+											<h4 class="mb-4 flex items-center gap-2 wrap-break-word text-lg font-bold text-gray-900">
 												<AlertCircle class="text-primary-500 h-5 w-5" />
 												Resolución Administrativa
 											</h4>
@@ -596,14 +596,14 @@
 			<div class="flex flex-col-reverse justify-end gap-2 sm:flex-row">
 				<button
 					type="button"
-					class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-none sm:mt-0 sm:w-auto sm:text-sm"
+					class="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:outline-hidden sm:mt-0 sm:w-auto sm:text-sm"
 					onclick={cerrarModalResolucion}
 				>
 					Cancelar
 				</button>
 				<button
 					type="button"
-					class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-none sm:w-auto sm:text-sm ${
+					class={`inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:ring-2 focus:ring-offset-2 focus:outline-hidden sm:w-auto sm:text-sm ${
 						resolucionEstado === 'verificado'
 							? 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
 							: 'bg-red-600 hover:bg-red-700 focus:ring-red-500'

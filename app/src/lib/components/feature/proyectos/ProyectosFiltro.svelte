@@ -20,6 +20,8 @@
 		localidadesDisponibles = [],
 		tiposParticipacion = [],
 		criterioOrden = $bindable('recientes'),
+		soloBeneficiosFiscales = $bindable(false),
+		mostrarFiltroFiscal = false,
 		onreset,
 		onubicacionchange,
 		ontoggle
@@ -41,6 +43,8 @@
 		localidadesDisponibles?: string[];
 		tiposParticipacion?: string[];
 		criterioOrden?: 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso';
+		soloBeneficiosFiscales?: boolean;
+		mostrarFiltroFiscal?: boolean;
 		onreset?: () => void;
 		onubicacionchange?: () => void;
 		ontoggle?: () => void;
@@ -67,7 +71,8 @@
 			localidad !== 'Todas',
 			fechaDesde !== '',
 			fechaHasta !== '',
-			mostrarEstado && estado.length > 0 && !estado.includes('Todos')
+			mostrarEstado && estado.length > 0 && !estado.includes('Todos'),
+			soloBeneficiosFiscales
 		].filter(Boolean).length
 	);
 
@@ -85,7 +90,7 @@
 	<div class="relative">
 		<select
 			bind:value={criterioOrden}
-			class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+			class="appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition-all duration-200 hover:border-blue-500 hover:bg-gray-50 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 			aria-label="Ordenar proyectos"
 		>
 			<option value="recientes">Más recientes</option>
@@ -144,7 +149,7 @@
 					<div class="relative">
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 							onclick={() => (participacionDropdownOpen = !participacionDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={participacionDropdownOpen}
@@ -231,7 +236,7 @@
 						<!-- Botón Trigger -->
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 							onclick={() => (categoriaDropdownOpen = !categoriaDropdownOpen)}
 							aria-haspopup="listbox"
 							aria-expanded={categoriaDropdownOpen}
@@ -322,7 +327,7 @@
 					<div class="relative">
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 							onclick={() => (ubicacionDropdownOpen = !ubicacionDropdownOpen)}
 						>
 							<span class="block truncate">{tipoUbicacion}</span>
@@ -380,7 +385,7 @@
 						<div class="relative">
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 								onclick={() => (provinciaDropdownOpen = !provinciaDropdownOpen)}
 							>
 								<span class="block truncate">{provincia}</span>
@@ -436,7 +441,7 @@
 						<div class="relative">
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50"
 								onclick={() => (localidadDropdownOpen = !localidadDropdownOpen)}
 								disabled={provincia === 'Todas'}
 							>
@@ -496,7 +501,7 @@
 							<!-- Botón Trigger -->
 							<button
 								type="button"
-								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+								class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 								onclick={() => (estadoDropdownOpen = !estadoDropdownOpen)}
 								aria-haspopup="listbox"
 								aria-expanded={estadoDropdownOpen}
@@ -591,7 +596,7 @@
 						<!-- Botón Trigger -->
 						<button
 							type="button"
-							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-none"
+							class="flex w-full items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-left text-sm font-medium text-gray-700 transition-colors focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 focus:outline-hidden"
 							onclick={() => (fechaDropdownOpen = !fechaDropdownOpen)}
 							aria-haspopup="dialog"
 							aria-expanded={fechaDropdownOpen}
@@ -655,7 +660,7 @@
 												id="{prefijoId}-fecha-desde"
 												type="date"
 												bind:value={fechaDesde}
-												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
 											/>
 										</div>
 										<div class="flex flex-col gap-1.5">
@@ -667,7 +672,7 @@
 												type="date"
 												bind:value={fechaHasta}
 												min={fechaDesde}
-												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
+												class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-hidden"
 											/>
 										</div>
 									</div>
@@ -691,6 +696,25 @@
 						{/if}
 					</div>
 				</div>
+
+				<!-- Filtro por Beneficios Fiscales -->
+				{#if mostrarFiltroFiscal}
+					<div class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}">
+						<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
+							Beneficio fiscal
+						</span>
+						<label class="flex cursor-pointer items-start gap-2.5 pt-1">
+							<input
+								type="checkbox"
+								bind:checked={soloBeneficiosFiscales}
+								class="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 text-amber-600 focus:ring-2 focus:ring-amber-500/30 focus:outline-hidden"
+							/>
+							<span class="text-sm leading-snug text-gray-700">
+								Solo con ARCA (RG 2681) — donaciones deducibles de Ganancias
+							</span>
+						</label>
+					</div>
+				{/if}
 			</div>
 		</div>
 	</div>

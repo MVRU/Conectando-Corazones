@@ -116,7 +116,6 @@ export class RegistrationService {
 
 			authUserId = authData.user.id;
 
-			// 2. Crear usuario en Base de Datos Local
 			// Asegurar que el email esté en contactos con valores canónicos
 			const contactos = [...input.perfil.contactos];
 			if (!contactos.some((c) => c.tipo_contacto === 'email' && c.valor === input.email)) {
@@ -171,7 +170,7 @@ export class RegistrationService {
 						await registrarConsent.execute(uid, uid, item.tipo, item.version);
 					}
 				} catch (consentErr) {
-					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => {});
+					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => { });
 					throw consentErr;
 				}
 			}

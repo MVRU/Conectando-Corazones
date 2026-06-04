@@ -32,7 +32,7 @@
 >
 	<!-- *Background con degradado -->
 	<span
-		class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br
+		class="pointer-events-none absolute inset-0 -z-10 bg-linear-to-br
 		       from-sky-50 via-white to-white"
 	></span>
 
@@ -51,7 +51,7 @@
 			class="mx-auto mt-4 max-w-2xl text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl"
 		>
 			<span
-				class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent"
+				class="bg-linear-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent"
 			>
 				Historias reales
 			</span>

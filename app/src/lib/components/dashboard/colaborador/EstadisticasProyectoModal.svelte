@@ -173,7 +173,7 @@
 									</div>
 									<div class="h-2 w-full overflow-hidden rounded-full bg-slate-700/50">
 										<div
-											class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-1000 ease-out"
+											class="h-full rounded-full bg-linear-to-r from-emerald-500 to-teal-500 transition-all duration-1000 ease-out"
 											style="width: {cat.percentage}%"
 										></div>
 									</div>
@@ -195,7 +195,7 @@
 								>
 									<div class="flex items-center gap-2">
 										<div
-											class="h-3 w-3 flex-shrink-0 rounded-full"
+											class="h-3 w-3 shrink-0 rounded-full"
 											style="background-color: {estado.color}; box-shadow: 0 0 10px {estado.color}40;"
 										></div>
 										<span class="text-xs leading-tight font-medium text-slate-300"

@@ -30,7 +30,7 @@
 		}
 	}}
 	class={clsx(
-		'group relative flex w-full flex-col items-center overflow-hidden rounded-[2rem] border p-10 transition-all duration-700 hover:-translate-y-2',
+		'group relative flex w-full flex-col items-center overflow-hidden rounded-4xl border p-10 transition-all duration-700 hover:-translate-y-2',
 		seleccionado
 			? 'border-[rgb(var(--color-primary))] bg-blue-50/10 ring-1 ring-[rgb(var(--color-primary))]/30 shadow-2xl shadow-blue-500/10'
 			: 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-2xl hover:shadow-slate-200/50'

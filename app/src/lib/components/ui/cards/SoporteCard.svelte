@@ -18,7 +18,7 @@
 </script>
 
 <div
-	class="support-card group relative flex flex-col items-center rounded-2xl border border-blue-400/10 bg-gradient-to-b from-white/10 to-[#172040] p-6 text-center shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_8px_40px_0_#7dd3fc33] hover:ring-2 hover:ring-blue-300/20 sm:p-8"
+	class="support-card group relative flex flex-col items-center rounded-2xl border border-blue-400/10 bg-linear-to-b from-white/10 to-[#172040] p-6 text-center shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_8px_40px_0_#7dd3fc33] hover:ring-2 hover:ring-blue-300/20 sm:p-8"
 >
 	<div
 		class="icon-wrapper mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-blue-400/10 transition-all duration-500 group-hover:scale-110 group-hover:bg-blue-400/20 sm:h-16 sm:w-16"

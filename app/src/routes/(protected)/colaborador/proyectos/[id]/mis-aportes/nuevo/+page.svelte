@@ -333,21 +333,21 @@
 		estaGuardando = true;
 
 		try {
-			// 1. Subir archivos a Supabase si los hay
-			const archivosSubidos: any[] = [];
-			for (const evidencia of evidenciasNuevas) {
-				for (const archivo of evidencia.archivos) {
+			// 1. Subir todos los archivos a Supabase en paralelo
+			const todosLosArchivos = evidenciasNuevas.flatMap((ev) => ev.archivos);
+			const archivosSubidos = await Promise.all(
+				todosLosArchivos.map(async (archivo) => {
 					const archivoSubido = await subirArchivoASupabase(archivo);
-					archivosSubidos.push({
+					return {
 						nombre_original: archivoSubido.nombre_original,
 						descripcion: archivoSubido.descripcion,
 						tipo_mime: archivoSubido.tipo_mime,
 						tamanio_bytes: archivoSubido.tamanio_bytes,
-						url: archivoSubido.url, // Path en storage
+						url: archivoSubido.url,
 						proyecto_id: archivoSubido.proyecto_id
-					});
-				}
-			}
+					};
+				})
+			);
 
 			// 2. Preparar FormData para la acción de SvelteKit
 			const formData = new FormData();
@@ -447,7 +447,7 @@
 						id="participacion"
 						bind:value={selectedParticipacionPermitidaId}
 						disabled={estaGuardando}
-						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-hidden focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<option value={null} disabled>Seleccioná una opción...</option>
 						{#each data.participacionesPermitidas as p}
@@ -479,7 +479,7 @@
 								bind:value={cantidadAporte}
 								disabled={estaGuardando}
 								placeholder="0"
-								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-hidden focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 							<div
 								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-400"
@@ -654,7 +654,7 @@
 		>
 			<!-- Header -->
 			<div
-				class="border-b border-slate-100 bg-gradient-to-br from-amber-50 to-orange-50 p-6 md:p-8"
+				class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8"
 			>
 				<div class="flex items-start gap-4">
 					<div class="shrink-0 rounded-xl bg-amber-100 p-3 text-amber-600">
@@ -683,7 +683,7 @@
 					</button>
 					<button
 						onclick={confirmarSalida}
-						class="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
+						class="flex-1 rounded-xl bg-linear-to-r from-red-500 to-red-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-red-200 transition-all hover:from-red-600 hover:to-red-700 hover:shadow-red-300"
 					>
 						Descartar cambios
 					</button>
@@ -714,7 +714,7 @@
 			transition:slide={{ duration: 300 }}
 		>
 			<!-- Header -->
-			<div class="border-b border-slate-100 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 md:p-8">
+			<div class="border-b border-slate-100 bg-linear-to-br from-blue-50 to-indigo-50 p-6 md:p-8">
 				<div class="flex items-start justify-between">
 					<div class="flex items-start gap-4">
 						<div class="shrink-0 rounded-xl bg-blue-100 p-3 text-blue-600">
@@ -822,7 +822,7 @@
 											actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
 										placeholder="Ej: Foto del material entregado"
 										class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700
-											   transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+											   transition-all outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
 									/>
 								</div>
 							</div>

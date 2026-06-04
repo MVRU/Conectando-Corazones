@@ -265,7 +265,7 @@
 	<div class="space-y-5">
 		<div class="flex items-center gap-3">
 			<span
-				class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-sky-50"
+				class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50"
 				aria-hidden="true"
 			>
 				{#if icono}
@@ -332,7 +332,7 @@
 					role="button"
 					tabindex="0"
 					class={clsx(
-						'flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]',
+						'flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition outline-hidden focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))]',
 						arrastrandoArchivo
 							? 'border-[rgb(var(--color-primary))] bg-[rgba(var(--color-primary),0.08)]'
 							: 'border-gray-300 bg-gray-50 hover:border-[rgb(var(--color-primary))] hover:bg-white'

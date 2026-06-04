@@ -93,7 +93,7 @@
 	</div>
 
 	<p
-		class="mb-4 flex-grow leading-relaxed text-gray-600 {variante === 'compacta'
+		class="mb-4 grow leading-relaxed text-gray-600 {variante === 'compacta'
 			? 'text-sm'
 			: ''} text-pretty"
 	>

@@ -32,7 +32,7 @@
 <div class={`group relative w-full ${customClass}`}>
 	<input
 		type="text"
-		class="focus:ring-opacity-50 w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+		class="w-full rounded-xl border border-gray-200 bg-white px-14 py-4 text-sm text-gray-800 placeholder-gray-400 shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-300/50 focus:outline-hidden"
 		{placeholder}
 		aria-label={ariaLabel}
 		bind:this={inputRef}

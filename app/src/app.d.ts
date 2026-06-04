@@ -15,7 +15,9 @@ declare global {
 			user: User | null;
 		}
 		// interface Error {}
-		// interface PageData {}
+		interface PageData {
+			ultimoMensajeAjenoAt?: string | null;
+		}
 		interface PageState {
 			showReportModal?: boolean;
 		}

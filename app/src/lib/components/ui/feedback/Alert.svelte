@@ -57,7 +57,7 @@
 	transition:fade={{ duration: 200 }}
 >
 	<div class="flex items-start gap-4">
-		<div class="mt-0.5 flex-shrink-0">
+		<div class="mt-0.5 shrink-0">
 			<SvelteComponent
 				class="h-5 w-5 {styles[variant as VariantKey].icon}"
 				strokeWidth={2}

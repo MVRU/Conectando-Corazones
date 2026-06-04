@@ -41,11 +41,10 @@
 </script>
 
 <div
-	class="h-full rounded-[2rem] border border-blue-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="h-full rounded-4xl border border-blue-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-6 flex items-center gap-2">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Actividades recientes</h2>
-		<!-- TODO: implementar módulo de historial de cambios -->
 		<History size={18} class="text-slate-400" />
 	</div>
 

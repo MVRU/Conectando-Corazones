@@ -76,11 +76,11 @@
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
 			<div
-				class="relative border-b border-gray-100 bg-gradient-to-tr from-sky-50 to-white px-5 pt-6 pb-5 text-center"
+				class="relative border-b border-gray-100 bg-linear-to-tr from-sky-50 to-white px-5 pt-6 pb-5 text-center"
 			>
 				<button
 					type="button"
-					class="absolute top-4 right-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:ring-2 focus:ring-sky-200 focus:outline-none disabled:opacity-50"
+					class="absolute top-4 right-4 rounded-full px-2 py-2 text-gray-400 transition-colors hover:bg-white hover:text-gray-600 focus:ring-2 focus:ring-sky-200 focus:outline-hidden disabled:opacity-50"
 					onclick={cerrar}
 					disabled={enviando}
 					aria-label="Cerrar modal"
@@ -90,7 +90,7 @@
 
 				<h2
 					id="modal-colaborar-titulo"
-					class="bg-gradient-to-tr from-sky-600 to-sky-400 bg-clip-text text-xl leading-tight font-extrabold text-transparent sm:text-2xl"
+					class="bg-linear-to-tr from-sky-600 to-sky-400 bg-clip-text text-xl leading-tight font-extrabold text-transparent sm:text-2xl"
 				>
 					¡Tu ayuda transforma vidas!
 				</h2>
@@ -119,7 +119,7 @@
 					<textarea
 						id="mensaje-colaboracion"
 						bind:this={textarea}
-						class="min-h-[120px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 focus:outline-none disabled:opacity-50"
+						class="min-h-[120px] w-full resize-y rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-900 shadow-sm transition-all placeholder:text-gray-400 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 focus:outline-hidden disabled:opacity-50"
 						bind:value={mensajeColaboracion}
 						maxlength="500"
 						disabled={enviando}
@@ -134,7 +134,7 @@
 			>
 				<button
 					type="button"
-					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:outline-none disabled:opacity-50 sm:w-auto"
+					class="inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:outline-hidden disabled:opacity-50 sm:w-auto"
 					onclick={cerrar}
 					disabled={enviando}
 				>
@@ -142,7 +142,7 @@
 				</button>
 				<button
 					type="button"
-					class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:outline-none active:translate-y-[1px] disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
+					class="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-tr from-sky-600 to-sky-400 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-200 transition hover:brightness-110 focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:outline-hidden active:translate-y-px disabled:pointer-events-none disabled:opacity-50 sm:w-auto"
 					onclick={enviar}
 					disabled={enviando || mensajeColaboracion.length > 500}
 				>

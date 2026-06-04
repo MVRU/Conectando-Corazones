@@ -9,10 +9,14 @@ export interface BreadcrumbItem {
 
 const custom = writable<BreadcrumbItem[] | null>(null);
 
+const ID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^\d+$/i;
+
 const auto = derived(page, ($page) => {
 	if (!shouldShowBreadcrumbs($page.url)) return [];
 
 	const segments = $page.url.pathname.split('/').filter(Boolean);
+	if (segments.some((seg) => ID_SEGMENT.test(seg))) return [];
+
 	let path = '';
 	const items: BreadcrumbItem[] = [
 		...segments.map((segment, idx) => {

@@ -66,7 +66,7 @@
 			>
 				{#if showUploader && archivo.uploader_nombre}
 					<span
-						class="max-w-[80px] truncate rounded bg-blue-50 px-1.5 py-0.5 text-blue-600 sm:max-w-[150px]"
+						class="max-w-20 truncate rounded bg-blue-50 px-1.5 py-0.5 text-blue-600 sm:max-w-[150px]"
 						title={archivo.uploader_nombre}
 					>
 						{archivo.uploader_nombre}

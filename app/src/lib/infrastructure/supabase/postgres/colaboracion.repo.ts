@@ -171,6 +171,24 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 		}
 	}
 
+	async getEvidenciasPorColaboracion(colaboracionId: number, _usuarioId: number): Promise<any[]> {
+		try {
+			return await prisma.evidencia.findMany({
+				where: {
+					participacion_permitida: {
+						colaboraciones_tipo_participacion: {
+							some: { colaboracion_id: colaboracionId }
+						}
+					}
+				},
+				include: { archivos: true }
+			});
+		} catch (error) {
+			console.error('Error getting evidencias por colaboracion:', error);
+			return [];
+		}
+	}
+
 	async getColaboracionesPorProyecto(proyectoId: number): Promise<Colaboracion[]> {
 		try {
 			const colaboraciones = await prisma.colaboracion.findMany({
@@ -187,5 +205,19 @@ export class PostgresColaboracionRepository implements ColaboracionRepository {
 			console.error('Error getting colaboraciones por proyecto:', error);
 			return [];
 		}
+	}
+
+	async existsAprobada(proyectoId: number, colaboradorId: number): Promise<boolean> {
+		const c = await this.db.colaboracion.findFirst({
+			where: { proyecto_id: proyectoId, colaborador_id: colaboradorId, estado: 'aprobada' },
+			select: { id_colaboracion: true }
+		});
+		return !!c;
+	}
+
+	async countAprobadas(proyectoId: number): Promise<number> {
+		return this.db.colaboracion.count({
+			where: { proyecto_id: proyectoId, estado: 'aprobada' }
+		});
 	}
 }

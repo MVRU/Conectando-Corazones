@@ -9,7 +9,8 @@
 		Award,
 		CheckCircle2,
 		Clock,
-		XCircle
+		XCircle,
+		Ban
 	} from 'lucide-svelte';
 	import type { EstadisticasInstituciones } from './types';
 	import { quintOut } from 'svelte/easing';
@@ -187,7 +188,7 @@
 
 										<!-- Bar -->
 										<div
-											class="w-full max-w-[30px] rounded-t-lg bg-gradient-to-t transition-all duration-700 ease-out hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] sm:max-w-[50px] {getBarGradient(
+											class="w-full max-w-[30px] rounded-t-lg bg-linear-to-t transition-all duration-700 ease-out hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] sm:max-w-[50px] {getBarGradient(
 												institucion.ranking
 											)}"
 											style="height: {height}%;"
@@ -227,7 +228,7 @@
 					<div class="grid gap-8 md:grid-cols-2">
 						<!-- Gráfico Circular (Donut) -->
 						<div class="relative flex items-center justify-center py-4">
-							<svg viewBox="0 0 36 36" class="h-48 w-48 rotate-[-90deg] drop-shadow-2xl">
+							<svg viewBox="0 0 36 36" class="h-48 w-48 -rotate-90 drop-shadow-2xl">
 								<!-- Circle Background -->
 								<path
 									class="text-slate-800/50"
@@ -237,7 +238,7 @@
 									stroke-width="3"
 								/>
 								<!-- Segments -->
-								{#each [{ value: stats.colaboraciones.aprobadas, color: 'text-emerald-500', offset: 0, label: 'aprobadas' }, { value: stats.colaboraciones.pendientes, color: 'text-amber-500', offset: (stats.colaboraciones.aprobadas / stats.colaboraciones.total) * 100, label: 'pendientes' }, { value: stats.colaboraciones.rechazadas, color: 'text-rose-500', offset: ((stats.colaboraciones.aprobadas + stats.colaboraciones.pendientes) / stats.colaboraciones.total) * 100, label: 'rechazadas' }] as segment (segment.label)}
+								{#each [{ value: stats.colaboraciones.aprobadas, color: 'text-emerald-500', offset: 0, label: 'aprobadas' }, { value: stats.colaboraciones.pendientes, color: 'text-amber-500', offset: (stats.colaboraciones.aprobadas / stats.colaboraciones.total) * 100, label: 'pendientes' }, { value: stats.colaboraciones.rechazadas, color: 'text-rose-500', offset: ((stats.colaboraciones.aprobadas + stats.colaboraciones.pendientes) / stats.colaboraciones.total) * 100, label: 'rechazadas' }, { value: stats.colaboraciones.anuladas, color: 'text-slate-400', offset: ((stats.colaboraciones.aprobadas + stats.colaboraciones.pendientes + stats.colaboraciones.rechazadas) / stats.colaboraciones.total) * 100, label: 'anuladas' }] as segment (segment.label)}
 									{#if segment.value > 0}
 										<path
 											class="{segment.color} transition-all duration-1000 ease-out hover:opacity-80"
@@ -333,7 +334,7 @@
 										<p class="text-sm font-medium text-slate-300 group-hover:text-rose-300">
 											Rechazadas
 										</p>
-										<p class="text-xs text-slate-500">No aceptadas</p>
+										<p class="text-xs text-slate-500">No aceptadas por la institución</p>
 									</div>
 								</div>
 								<div class="text-right">
@@ -344,6 +345,35 @@
 									<span class="text-xs font-medium text-rose-400"
 										>{(
 											(stats.colaboraciones.rechazadas / stats.colaboraciones.total) *
+											100
+										).toFixed(0)}%</span
+									>
+								</div>
+							</div>
+
+							<!-- Anuladas -->
+							<div
+								class="group flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-4 transition-all hover:border-slate-400/30 hover:bg-white/10"
+							>
+								<div class="flex items-center gap-3">
+									<div class="rounded-lg bg-slate-400/10 p-2 text-slate-300">
+										<Ban size={18} />
+									</div>
+									<div>
+										<p class="text-sm font-medium text-slate-300 group-hover:text-slate-100">
+											Anuladas
+										</p>
+										<p class="text-xs text-slate-500">Retiradas por vos</p>
+									</div>
+								</div>
+								<div class="text-right">
+									<span
+										class="block text-xl font-bold text-white transition-transform group-hover:scale-110"
+										>{stats.colaboraciones.anuladas}</span
+									>
+									<span class="text-xs font-medium text-slate-300"
+										>{(
+											(stats.colaboraciones.anuladas / stats.colaboraciones.total) *
 											100
 										).toFixed(0)}%</span
 									>

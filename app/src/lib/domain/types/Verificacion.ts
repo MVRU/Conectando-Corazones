@@ -1,5 +1,10 @@
 // * Códigos canónicos
-export const TIPOS_VERIFICACION = ['email_institucional', 'documental', 'renaper'] as const;
+export const TIPOS_VERIFICACION = [
+	'email_institucional',
+	'institucional',
+	'renaper',
+	'arca'
+] as const;
 
 export type TipoVerificacion = (typeof TIPOS_VERIFICACION)[number];
 
@@ -24,3 +29,15 @@ export const esTipoVerificacionCanonico = (v: string): v is TipoVerificacion =>
 
 export const esEstadoVerificacionCanonico = (v: string): v is EstadoVerificacion =>
 	(ESTADOS_VERIFICACION as readonly string[]).includes(v);
+
+/**
+ * La verificación ARCA (RG 2681) está vigente si fue aprobada y la
+ * fecha de vencimiento del certificado es posterior a "hoy".
+ */
+export const esArcaVigente = (v: Verificacion | null | undefined, hoy: Date = new Date()): boolean => {
+	if (!v) return false;
+	if (v.tipo !== 'arca') return false;
+	if (v.estado !== 'aprobada') return false;
+	if (!v.fecha_vencimiento) return false;
+	return new Date(v.fecha_vencimiento).getTime() > hoy.getTime();
+};

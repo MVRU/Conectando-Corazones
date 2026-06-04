@@ -20,7 +20,8 @@ export function useProyectosFiltrosUrl(filtros: ProyectosFiltros) {
 		estadoSeleccionado,
 		criterioOrden,
 		mostrarFiltros,
-		tiposParticipacionDisponibles
+		tiposParticipacionDisponibles,
+		soloBeneficiosFiscales
 	} = filtros;
 
 	// Inicializar filtros desde la URL
@@ -46,6 +47,7 @@ export function useProyectosFiltrosUrl(filtros: ProyectosFiltros) {
 					FILTROS_INICIALES.criterioOrden
 			);
 		if (params.get('filtros') === 'true') mostrarFiltros.set(true);
+		if (params.get('fiscal') === '1') soloBeneficiosFiscales.set(true);
 	});
 
 	// Actualizar URL cuando cambian los filtros
@@ -120,6 +122,10 @@ export function useProyectosFiltrosUrl(filtros: ProyectosFiltros) {
 			if ($mostrarFiltros) params.set('filtros', 'true');
 			else params.delete('filtros');
 
+			const $soloBeneficiosFiscales = get(soloBeneficiosFiscales);
+			if ($soloBeneficiosFiscales) params.set('fiscal', '1');
+			else params.delete('fiscal');
+
 			goto(url, { replaceState: true, noScroll: true, keepFocus: true });
 		}, 300);
 	};
@@ -135,7 +141,8 @@ export function useProyectosFiltrosUrl(filtros: ProyectosFiltros) {
 		fechaHasta.subscribe(() => browser && updateUrl()),
 		estadoSeleccionado.subscribe(() => browser && updateUrl()),
 		criterioOrden.subscribe(() => browser && updateUrl()),
-		mostrarFiltros.subscribe(() => browser && updateUrl())
+		mostrarFiltros.subscribe(() => browser && updateUrl()),
+		soloBeneficiosFiscales.subscribe(() => browser && updateUrl())
 	];
 
 	onDestroy(() => {

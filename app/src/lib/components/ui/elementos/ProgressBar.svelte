@@ -49,7 +49,7 @@
 	aria-valuemax="100"
 >
 	<div
-		class={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${gradient}
+		class={`absolute inset-y-0 left-0 rounded-full bg-linear-to-r ${gradient}
 		        shadow-[0_0_6px_1px_rgba(56,189,248,0.35)]`}
 		style={`width:${percent}%; transition:width 1.1s cubic-bezier(.4,0,.2,1) ${show ? '0s' : '.0s'};
 		        width:${show ? percent + '%' : '0%'};`}

@@ -60,12 +60,12 @@
 	const tEsp = tweened(0, { duration: 1500, easing: cubicOut });
 	const tTotal = tweened(0, { duration: 2000, easing: cubicOut });
 
-	function handleReveal() {
+	$effect(() => {
 		tVol.set(targetVol);
 		tMon.set(targetMon);
 		tEsp.set(targetEsp);
 		tTotal.set(estadisticas.totalProyectos);
-	}
+	});
 
 	// Dynamic gradient based on tweened values
 	const gradient = $derived(`conic-gradient(
@@ -77,8 +77,7 @@
 
 <div
 	use:reveal
-	onreveal={handleReveal}
-	class="reveal-hidden flex h-full flex-col rounded-[2rem] border border-amber-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="reveal-hidden flex h-full flex-col rounded-4xl border border-amber-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<h2 class="mb-6 w-full text-center text-xl font-semibold tracking-tight text-white md:text-left">
 		Mis tipos de ayuda
@@ -111,7 +110,7 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 flex-shrink-0 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
+						class="h-3 w-3 shrink-0 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>Voluntariado</span
@@ -137,7 +136,7 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 flex-shrink-0 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
+						class="h-3 w-3 shrink-0 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>Monetaria</span
@@ -155,7 +154,7 @@
 			<div class="group flex flex-col gap-1">
 				<div class="flex items-center gap-3">
 					<div
-						class="h-3 w-3 flex-shrink-0 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
+						class="h-3 w-3 shrink-0 rounded-full bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
 					></div>
 					<span class="text-sm font-medium text-slate-200 transition-colors group-hover:text-white"
 						>En especie</span

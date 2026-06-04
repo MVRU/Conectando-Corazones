@@ -3,6 +3,7 @@
 	import type { Usuario } from '$lib/domain/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	const usuarioPorDefecto = '/users/user-default.png';
 
 	function aplicarFallbackImagen(event: Event) {
@@ -88,7 +89,7 @@
 	<!-- Link principal del contenido -->
 	<a
 		href={`/proyectos/${proyecto.id_proyecto}`}
-		class="flex flex-grow flex-col text-inherit no-underline focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset"
+		class="flex grow flex-col text-inherit no-underline focus:ring-2 focus:ring-blue-500 focus:outline-hidden focus:ring-inset"
 	>
 		<!-- Imagen Cover -->
 		<div class="relative h-48 overflow-hidden bg-gray-100">
@@ -98,7 +99,7 @@
 					alt={proyecto.titulo}
 					class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 					class:opacity-90={estaInactivo}
-					class:grayscale-[0.8]={estaInactivo}
+					class:grayscale-80={estaInactivo}
 					loading="lazy"
 				/>
 			{:else}
@@ -146,10 +147,15 @@
 					{ubicacionCorta}
 				</span>
 			</div>
-			<!-- Rango de fechas -->
+			<!-- Franja inferior: ARCA (izquierda) + fechas (derecha) -->
 			<div
-				class="absolute right-0 bottom-0 left-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-linear-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
+				{#if proyecto.esDeducible}
+					<BadgeArca />
+				{:else}
+					<span></span>
+				{/if}
 				<span
 					class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
 				>
@@ -164,7 +170,7 @@
 		<div class="flex flex-col p-3 pb-0 sm:p-4">
 			<div class="mb-3">
 				<h3
-					class="mb-1.5 line-clamp-2 text-lg leading-tight font-bold break-words text-gray-900 transition-colors group-hover:text-blue-600"
+					class="mb-1.5 line-clamp-2 text-lg leading-tight font-bold wrap-break-word text-gray-900 transition-colors group-hover:text-blue-600"
 					title={proyecto.titulo}
 				>
 					{proyecto.titulo}
@@ -356,7 +362,7 @@
 		<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 			<button
 				type="button"
-				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 				onclick={() => (mostrarJustificacion = false)}
 			>
 				Cerrar

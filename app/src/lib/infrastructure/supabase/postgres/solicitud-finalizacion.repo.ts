@@ -125,41 +125,24 @@ export class PostgresSolicitudFinalizacionRepository
 				}
 			});
 
-			for (const evidenciaId of solicitud.evidencia_ids) {
-				await tx.solicitudFinalizacionEvidencia.create({
-					data: {
-						evidencia_id: evidenciaId,
-						solicitud_finalizacion_id: nuevaSolicitud.id_solicitud
-					}
-				});
-			}
-
-			const withRelations = await tx.solicitudFinalizacion.findUnique({
-				where: { id_solicitud: nuevaSolicitud.id_solicitud },
-				include: {
-					proyecto: true,
-					solicitud_evidencias: {
-						include: {
-							evidencia: {
-								include: {
-									archivos: archivoInclude,
-									participacion_permitida: true
-								}
-							}
-						}
-					},
-					evaluaciones: true
-				}
+			await tx.solicitudFinalizacionEvidencia.createMany({
+				data: solicitud.evidencia_ids!.map((evidenciaId) => ({
+					evidencia_id: evidenciaId,
+					solicitud_finalizacion_id: nuevaSolicitud.id_solicitud
+				}))
 			});
 
-			if (!withRelations) {
-				throw new Error('No se pudo recuperar la solicitud de finalización recién creada.');
-			}
-
-			return withRelations;
+			return nuevaSolicitud;
 		});
 
-		return this.toDomain(created);
+		return {
+			id_solicitud: created.id_solicitud,
+			proyecto_id: created.proyecto_id,
+			estado: created.estado ?? undefined,
+			created_at: created.created_at ?? undefined,
+			evidencia_ids: solicitud.evidencia_ids,
+			votos: []
+		};
 	}
 
 	private toDomain(record: any): SolicitudFinalizacion {
@@ -189,5 +172,23 @@ export class PostgresSolicitudFinalizacionRepository
 		};
 
 		return domain;
+	}
+
+	async findByProyectoIdLean(
+		proyectoId: number
+	): Promise<{ id_solicitud: number; estado: string | null } | null> {
+		return this.db.solicitudFinalizacion.findFirst({
+			where: { proyecto_id: proyectoId },
+			orderBy: { created_at: 'desc' },
+			select: { id_solicitud: true, estado: true }
+		});
+	}
+
+	async updateEstadoLean(id: number, estado: string): Promise<void> {
+		await this.db.solicitudFinalizacion.update({
+			where: { id_solicitud: id },
+			data: { estado },
+			select: { id_solicitud: true }
+		});
 	}
 }

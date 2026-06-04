@@ -6,6 +6,7 @@
 		FolderKanban,
 		MessageSquare,
 		XCircle,
+		Clock3,
 		ChevronDown,
 		ChevronUp
 	} from 'lucide-svelte';
@@ -17,15 +18,23 @@
 	let {
 		solicitudesPendientes = 0,
 		mensajesNoLeidos = 0,
+		hayNuevosMensajes = false,
 		proyectosPendienteCierre = 0,
 		estaVerificado = false,
+		estadoVerificacion = null,
+		requiereVerificacionDocumental = false,
+		documentacionVerificacionEnRevision = false,
 		showEvidenceModal = $bindable(false),
 		onExportPDF = () => {}
 	} = $props<{
 		solicitudesPendientes?: number;
 		mensajesNoLeidos?: number;
+		hayNuevosMensajes?: boolean;
 		proyectosPendienteCierre?: number;
 		estaVerificado?: boolean;
+		estadoVerificacion?: 'aprobada' | 'pendiente' | 'rechazada' | null;
+		requiereVerificacionDocumental?: boolean;
+		documentacionVerificacionEnRevision?: boolean;
 		showEvidenceModal?: boolean;
 		onExportPDF?: () => void;
 	}>();
@@ -57,6 +66,11 @@
 			count: proyectosPendienteCierre,
 			color: 'bg-emerald-500',
 			shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+		},
+		Verificar: {
+			count: requiereVerificacionDocumental ? 1 : 0,
+			color: 'bg-amber-500',
+			shadow: 'shadow-[0_0_10px_rgba(245,158,11,0.5)]'
 		}
 	}));
 
@@ -75,7 +89,29 @@
 				{ label: 'Cargar evidencia', icon: UploadCloud, onClick: () => (showEvidenceModal = true) },
 				{ label: 'Mis proyectos', icon: FolderKanban, href: '/proyectos?tab=mis-proyectos' },
 				{ label: 'Mis chats', icon: MessageSquare, href: '/mensajes' },
-				{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' }
+				{ label: 'Solicitar cierre', icon: XCircle, href: '/institucion/solicitar-cierre' },
+				...(estadoVerificacion === 'rechazada'
+					? [
+							{
+								label: 'Reenviar documentación',
+								icon: UploadCloud,
+								href: '/institucion/verificacion',
+								secondary: true,
+								color: 'amber'
+							}
+						]
+					: []),
+				...(requiereVerificacionDocumental && estadoVerificacion === null
+					? [
+							{
+								label: 'Verificar institución',
+								icon: UploadCloud,
+								href: '/institucion/verificacion',
+								secondary: true,
+								color: 'amber'
+							}
+						]
+					: [])
 			] as Accion[]
 	);
 
@@ -109,15 +145,23 @@
 					{accion.disabled
 							? 'pointer-events-none cursor-not-allowed border-white/5 bg-white/5 text-slate-500 opacity-50 grayscale'
 							: accion.primary
-								? 'border border-blue-500/30 bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_6px_25px_-4px_rgba(59,130,246,0.6)]'
+								? 'border border-blue-500/30 bg-linear-to-r from-blue-600/80 to-blue-500/80 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_6px_25px_-4px_rgba(59,130,246,0.6)]'
 								: accion.secondary && accion.color === 'rose'
-									? 'border border-rose-500/30 bg-gradient-to-r from-rose-600/80 to-rose-500/80 text-white shadow-[0_4px_20px_-4px_rgba(244,63,94,0.5)] hover:-translate-y-0.5 hover:bg-rose-500 hover:shadow-[0_6px_25px_-4px_rgba(244,63,94,0.6)]'
+									? 'border border-rose-500/30 bg-linear-to-r from-rose-600/80 to-rose-500/80 text-white shadow-[0_4px_20px_-4px_rgba(244,63,94,0.5)] hover:-translate-y-0.5 hover:bg-rose-500 hover:shadow-[0_6px_25px_-4px_rgba(244,63,94,0.6)]'
+									: accion.secondary && accion.color === 'amber'
+										? 'border border-amber-500/30 bg-linear-to-r from-amber-500/85 to-amber-400/85 text-amber-950 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.45)] hover:-translate-y-0.5 hover:shadow-[0_6px_25px_-4px_rgba(245,158,11,0.55)]'
+									: accion.secondary && accion.color === 'sky'
+										? 'border border-sky-500/30 bg-linear-to-r from-sky-600/80 to-cyan-500/80 text-white shadow-[0_4px_20px_-4px_rgba(14,165,233,0.45)] hover:-translate-y-0.5 hover:shadow-[0_6px_25px_-4px_rgba(14,165,233,0.55)]'
 									: 'border border-white/5 bg-white/5 text-slate-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10 hover:text-white'}"
 					>
 						<div
 							class={accion.disabled
 								? 'text-slate-500'
-								: accion.primary || (accion.secondary && accion.color === 'rose')
+								: accion.primary ||
+									  (accion.secondary &&
+											(accion.color === 'rose' ||
+												accion.color === 'amber' ||
+												accion.color === 'sky'))
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
@@ -135,15 +179,23 @@
 					{accion.disabled
 							? 'cursor-not-allowed border-white/5 bg-white/5 text-slate-500 opacity-50 grayscale'
 							: accion.primary
-								? 'border border-blue-500/30 bg-gradient-to-r from-blue-600/80 to-blue-500/80 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_6px_25px_-4px_rgba(59,130,246,0.6)]'
+								? 'border border-blue-500/30 bg-linear-to-r from-blue-600/80 to-blue-500/80 text-white shadow-[0_4px_20px_-4px_rgba(59,130,246,0.5)] hover:-translate-y-0.5 hover:bg-blue-500 hover:shadow-[0_6px_25px_-4px_rgba(59,130,246,0.6)]'
 								: accion.secondary && accion.color === 'rose'
-									? 'border border-rose-500/30 bg-gradient-to-r from-rose-600/80 to-rose-500/80 text-white shadow-[0_4px_20px_-4px_rgba(244,63,94,0.5)] hover:-translate-y-0.5 hover:bg-rose-500 hover:shadow-[0_6px_25px_-4px_rgba(244,63,94,0.6)]'
+									? 'border border-rose-500/30 bg-linear-to-r from-rose-600/80 to-rose-500/80 text-white shadow-[0_4px_20px_-4px_rgba(244,63,94,0.5)] hover:-translate-y-0.5 hover:bg-rose-500 hover:shadow-[0_6px_25px_-4px_rgba(244,63,94,0.6)]'
+									: accion.secondary && accion.color === 'amber'
+										? 'border border-amber-500/30 bg-linear-to-r from-amber-500/85 to-amber-400/85 text-amber-950 shadow-[0_4px_20px_-4px_rgba(245,158,11,0.45)] hover:-translate-y-0.5 hover:shadow-[0_6px_25px_-4px_rgba(245,158,11,0.55)]'
+									: accion.secondary && accion.color === 'sky'
+										? 'border border-sky-500/30 bg-linear-to-r from-sky-600/80 to-cyan-500/80 text-white shadow-[0_4px_20px_-4px_rgba(14,165,233,0.45)] hover:-translate-y-0.5 hover:shadow-[0_6px_25px_-4px_rgba(14,165,233,0.55)]'
 									: 'border border-white/5 bg-white/5 text-slate-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/10 hover:text-white'}"
 					>
 						<div
 							class={accion.disabled
 								? 'text-slate-500'
-								: accion.primary || (accion.secondary && accion.color === 'rose')
+								: accion.primary ||
+									  (accion.secondary &&
+											(accion.color === 'rose' ||
+												accion.color === 'amber' ||
+												accion.color === 'sky'))
 									? 'text-white'
 									: 'text-slate-400 transition-colors group-hover:text-white'}
 						>
@@ -154,7 +206,12 @@
 				{/if}
 
 				<!-- Dinamically rendered Badges -->
-				{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
+				{#if accion.label === 'Mis chats' && hayNuevosMensajes}
+					<span
+						class="animate-bounce-subtle pointer-events-none absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)] ring-2 ring-[#0F1029]"
+						aria-label="Tenés mensajes nuevos"
+					></span>
+				{:else if accion.label !== 'Mis chats' && badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 					<div
 						class="animate-bounce-subtle pointer-events-none absolute -top-1.5 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white ring-2 ring-[#0F1029] select-none md:-top-2 md:-right-2 {badgeConfig[
 							accion.label as keyof typeof badgeConfig
@@ -170,22 +227,26 @@
 	<!-- Mobile Layout (Stack + Expandable) -->
 	<div class="flex flex-col gap-3 sm:hidden">
 		<!-- Featured Actions (Always Visible) -->
-		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && a.color === 'rose')) as accion (accion.label)}
+		{#each todasLasAcciones.filter((a) => a.primary || (a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion (accion.label)}
 			<div class="relative w-full">
 				{#if accion.href}
 					{@const Icono = accion.icon}
 					<a
 						href={accion.href}
 						title={accion.title}
-						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
+						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-98
 						{accion.disabled
 							? 'pointer-events-none cursor-not-allowed border-white/10 bg-white/5 text-slate-500 opacity-50 grayscale'
 							: accion.primary
-								? 'border border-blue-500/30 bg-gradient-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
-								: 'border border-rose-500/30 bg-gradient-to-br from-rose-500/90 via-rose-600/90 to-rose-800/90 shadow-rose-500/25 hover:shadow-rose-500/40'}"
+								? 'border border-blue-500/30 bg-linear-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
+								: accion.secondary && accion.color === 'amber'
+									? 'border border-amber-500/35 bg-linear-to-br from-amber-400/95 via-amber-500/95 to-amber-600/95 text-amber-950 shadow-amber-500/30 hover:shadow-amber-500/40'
+								: accion.secondary && accion.color === 'sky'
+									? 'border border-sky-500/35 bg-linear-to-br from-sky-500/90 via-sky-600/90 to-cyan-700/90 text-white shadow-sky-500/30 hover:shadow-sky-500/40'
+									: 'border border-rose-500/30 bg-linear-to-br from-rose-500/90 via-rose-600/90 to-rose-800/90 shadow-rose-500/25 hover:shadow-rose-500/40'}"
 					>
 						<div
-							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+							class="absolute inset-0 bg-linear-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
 						<Icono size={22} weight="bold" />
@@ -195,14 +256,18 @@
 					{@const Icono = accion.icon}
 					<button
 						onclick={accion.onClick}
-						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-[0.98]
+						class="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-2xl p-4 text-white shadow-lg backdrop-blur-xl transition-all duration-300 active:scale-98
 						{accion.primary
-							? 'border border-blue-500/30 bg-gradient-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
-							: 'border border-rose-500/30 bg-gradient-to-br from-rose-500/90 via-rose-600/90 to-rose-800/90 shadow-rose-500/25 hover:shadow-rose-500/40'}"
+							? 'border border-blue-500/30 bg-linear-to-br from-blue-500/90 via-blue-600/90 to-blue-800/90 shadow-blue-500/25 hover:shadow-blue-500/40'
+							: accion.secondary && accion.color === 'amber'
+								? 'border border-amber-500/35 bg-linear-to-br from-amber-400/95 via-amber-500/95 to-amber-600/95 text-amber-950 shadow-amber-500/30 hover:shadow-amber-500/40'
+							: accion.secondary && accion.color === 'sky'
+								? 'border border-sky-500/35 bg-linear-to-br from-sky-500/90 via-sky-600/90 to-cyan-700/90 text-white shadow-sky-500/30 hover:shadow-sky-500/40'
+								: 'border border-rose-500/30 bg-linear-to-br from-rose-500/90 via-rose-600/90 to-rose-800/90 shadow-rose-500/25 hover:shadow-rose-500/40'}"
 					>
 						<!-- Subtle Shine Effect -->
 						<div
-							class="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+							class="absolute inset-0 bg-linear-to-tr from-white/0 via-white/5 to-white/0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						></div>
 
 						<Icono size={22} weight="bold" />
@@ -215,15 +280,13 @@
 		<!-- Secondary Actions (Expandable) -->
 		{#if showAllActions}
 			<div transition:slide={{ duration: 300, axis: 'y' }} class="grid grid-cols-2 gap-3 pt-2">
-				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && a.color === 'rose')) as accion (accion.label)}
-					<div
-						class="group relative flex flex-col items-center justify-center gap-3 transition-all active:scale-95"
-					>
+				{#each todasLasAcciones.filter((a) => !a.primary && !(a.secondary && (a.color === 'rose' || a.color === 'amber' || a.color === 'sky'))) as accion (accion.label)}
+					<div class="relative w-full">
 						{#if accion.href}
 							{@const Icono = accion.icon}
 							<a
 								href={accion.href}
-								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
+								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-98 active:bg-white/10"
 							>
 								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
@@ -232,7 +295,7 @@
 							{@const Icono = accion.icon}
 							<button
 								onclick={accion.onClick}
-								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-[0.98] active:bg-white/10"
+								class="flex w-full flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/5 p-4 text-slate-300 backdrop-blur-md transition-all active:scale-98 active:bg-white/10"
 							>
 								<Icono size={20} />
 								<span class="text-center text-xs font-medium">{accion.label}</span>
@@ -240,7 +303,12 @@
 						{/if}
 
 						<!-- Badges -->
-						{#if badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
+						{#if accion.label === 'Mis chats' && hayNuevosMensajes}
+							<div
+								class="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.5)]"
+								aria-label="Tenés mensajes nuevos"
+							></div>
+						{:else if accion.label !== 'Mis chats' && badgeConfig[accion.label as keyof typeof badgeConfig] && badgeConfig[accion.label as keyof typeof badgeConfig].count > 0}
 							<div
 								class="absolute top-2 right-2 flex h-2.5 w-2.5 rounded-full {badgeConfig[
 									accion.label as keyof typeof badgeConfig

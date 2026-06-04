@@ -32,10 +32,10 @@
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 	<!-- Usuarios -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-blue-500/20 bg-blue-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-[40px] transition-all duration-700 group-hover:bg-blue-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl transition-all duration-700 group-hover:bg-blue-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -66,10 +66,10 @@
 
 	<!-- Proyectos -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-emerald-500/20 bg-emerald-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-[40px] transition-all duration-700 group-hover:bg-emerald-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl transition-all duration-700 group-hover:bg-emerald-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -94,11 +94,12 @@
 	</div>
 
 	<!-- Reportes -->
-	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10"
+	<a
+		href="/reportes"
+		class="group relative overflow-hidden rounded-4xl border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10 block"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-[40px] transition-all duration-700 group-hover:bg-rose-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-2xl transition-all duration-700 group-hover:bg-rose-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -112,7 +113,7 @@
 					<ShieldAlert size={24} />
 				</div>
 			</div>
-			<div class="mt-5">
+			<div class="mt-5 space-y-1">
 				<span
 					class="inline-flex items-center gap-1 text-xs font-bold {kpis.reportesPendientes > 0
 						? 'text-rose-400 animate-pulse'
@@ -124,16 +125,19 @@
 						Todo al día
 					{/if}
 				</span>
+				<p class="text-[11px] font-semibold text-rose-300/90 group-hover:text-rose-200">
+					Ir a Gestión de reportes
+				</p>
 			</div>
 		</div>
-	</div>
+	</a>
 
 	<!-- Validación -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-purple-500/20 bg-purple-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-purple-500/20 bg-purple-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-purple-500/10 blur-[40px] transition-all duration-700 group-hover:bg-purple-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-purple-500/10 blur-2xl transition-all duration-700 group-hover:bg-purple-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -158,7 +162,7 @@
 <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
 	<!-- Roles -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+		class="rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
 	>
 		<div class="mb-4 flex items-center gap-2">
 			<UserCog size={18} class="text-slate-400" />
@@ -200,7 +204,7 @@
 
 	<!-- Estado General -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+		class="rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
 	>
 		<div class="mb-4 flex items-center gap-2">
 			<Activity size={18} class="text-slate-400" />
@@ -230,7 +234,7 @@
 
 	<!-- Rendimiento -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 flex flex-col justify-between"
+		class="rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 flex flex-col justify-between"
 	>
 		<div>
 			<div class="mb-4 flex items-center gap-2">
@@ -251,5 +255,3 @@
 		</div>
 	</div>
 </div>
-
-

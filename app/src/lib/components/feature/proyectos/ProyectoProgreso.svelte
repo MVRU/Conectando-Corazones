@@ -96,7 +96,7 @@
 
 	let progresoCantidad = $derived(calcularProgresoCantidad(participaciones));
 	let progresoTiempo = $derived(calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa));
-	let progresoTotal = $derived(Math.round(0.6 * progresoCantidad + 0.4 * progresoTiempo));
+	let progresoTotal = $derived(Math.round(0.8 * progresoCantidad + 0.2 * progresoTiempo));
 
 	function getMensajeProgreso() {
 		if (progresoCantidad > 100) {
@@ -137,7 +137,7 @@
 			class={`relative mt-3 ${variant === 'extended' ? 'h-3.5' : 'h-2.5'} w-full rounded-full bg-slate-100 shadow-inner`}
 		>
 			<div
-				class={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r ${getGradientClass(color)} transition-all duration-700 ease-out`}
+				class={`absolute inset-y-0 left-0 rounded-full bg-linear-to-r ${getGradientClass(color)} transition-all duration-700 ease-out`}
 				style={`width: ${Math.min(progresoTotal, 100)}%`}
 				role="progressbar"
 				aria-valuenow={progresoTotal}
@@ -152,7 +152,7 @@
 			<div class="mt-2 text-right">
 				<button
 					type="button"
-					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:ring-2 focus:ring-sky-200 focus:outline-none"
+					class="inline-flex cursor-pointer items-center rounded px-1.5 py-0.5 text-xs text-sky-600 transition-colors hover:text-sky-800 focus:underline focus:ring-2 focus:ring-sky-200 focus:outline-hidden"
 					onclick={() => (showModal = true)}
 					aria-label="Ver cómo se calcula el progreso"
 				>
@@ -172,7 +172,7 @@
 
 <ModalCalculoAportes 
 	bind:show={showModal} 
-	progresoCantidad={progresoCantidad}
+	{progresoCantidad}
 	{progresoTiempo}
 	{progresoTotal}
 />

@@ -69,7 +69,7 @@
 <div
 	use:reveal
 	onreveal={() => (revealed = true)}
-	class="reveal-hidden h-full rounded-[2rem] border border-emerald-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="reveal-hidden h-full rounded-4xl border border-emerald-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-8 flex items-center justify-between">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Seguimiento de objetivos</h2>
@@ -130,7 +130,7 @@
 									style="width: {revealed ? obj.progreso : 0}%"
 								>
 									<div
-										class="animate-progress-shine absolute top-0 right-0 bottom-0 w-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
+										class="animate-progress-shine absolute top-0 right-0 bottom-0 w-full bg-linear-to-r from-transparent via-white/20 to-transparent"
 									></div>
 								</div>
 							</div>

@@ -63,7 +63,7 @@
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div
-				class="relative mb-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 p-4 text-white"
+				class="relative mb-4 rounded-xl bg-linear-to-r from-sky-600 to-indigo-500 p-4 text-white"
 			>
 				<button
 					onclick={cerrar}

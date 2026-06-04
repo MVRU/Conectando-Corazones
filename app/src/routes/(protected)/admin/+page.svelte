@@ -5,12 +5,11 @@
 	import TarjetasMetricasAdmin from '$lib/components/feature/admin/TarjetasMetricasAdmin.svelte';
 	import TablaOnboardingAdmin from '$lib/components/feature/admin/TablaOnboardingAdmin.svelte';
 	import TablaUsuariosAdmin from '$lib/components/feature/admin/TablaUsuariosAdmin.svelte';
-	import TablaReportesAdmin from '$lib/components/feature/admin/TablaReportesAdmin.svelte';
 	import TablaAuditoriaAdmin from '$lib/components/feature/admin/TablaAuditoriaAdmin.svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
-	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'reportes' | 'auditoria'>(
+	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'auditoria'>(
 		'dashboard'
 	);
 	let loading = $state(false);
@@ -18,14 +17,12 @@
 	let kpisOverride = $state<PageData['kpis'] | null>(null);
 	let onboardingOverride = $state<PageData['onboarding'] | null>(null);
 	let usuariosOverride = $state<PageData['usuarios'] | null>(null);
-	let reportesOverride = $state<PageData['reportes'] | null>(null);
 	let logsOverride = $state<PageData['logs'] | null>(null);
 	let auditoriaPaginacionOverride = $state<PageData['auditoriaPaginacion'] | null>(null);
 
 	let kpis = $derived(kpisOverride ?? data.kpis);
 	let onboarding = $derived(onboardingOverride ?? data.onboarding);
 	let usuarios = $derived(usuariosOverride ?? data.usuarios);
-	let reportes = $derived(reportesOverride ?? data.reportes);
 	let logs = $derived(logsOverride ?? data.logs);
 	let auditoriaPaginacion = $derived(auditoriaPaginacionOverride ?? data.auditoriaPaginacion);
 
@@ -34,7 +31,6 @@
 		kpisOverride = null;
 		onboardingOverride = null;
 		usuariosOverride = null;
-		reportesOverride = null;
 		logsOverride = null;
 		auditoriaPaginacionOverride = null;
 	});
@@ -47,14 +43,19 @@
 
 	let filtrosAuditoria = $state({
 		idObjeto: '' as string | number,
-		usuarioId: '' as string | number
+		usuarioId: '' as string | number,
+		tipoObjeto: '',
+		accion: '',
+		atributoAfectado: '',
+		fechaDesde: '',
+		fechaHasta: '',
+		texto: ''
 	});
 
 	const tabs = [
 		{ id: 'dashboard', label: 'Inicio' },
 		{ id: 'onboarding', label: 'Validación documental' },
 		{ id: 'usuarios', label: 'Usuarios' },
-		{ id: 'reportes', label: 'Reportes' },
 		{ id: 'auditoria', label: 'Auditoría' }
 	] as const;
 
@@ -77,12 +78,7 @@
 		if (res.ok) usuariosOverride = await res.json();
 	}
 
-	async function refreshReportes() {
-		const res = await fetch('/api/admin/reportes');
-		if (res.ok) reportesOverride = await res.json();
-	}
-
-	async function onAprobarOnboarding(detail: { idVerificacion: number }) {
+	async function onAprobarOnboarding(detail: { idVerificacion: number; fechaVencimiento?: Date }) {
 		loading = true;
 		try {
 			const res = await fetch('/api/admin/onboarding', {
@@ -90,7 +86,10 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					idVerificacion: detail.idVerificacion,
-					accion: 'aprobar'
+					accion: 'aprobar',
+					...(detail.fechaVencimiento
+						? { fechaVencimiento: detail.fechaVencimiento.toISOString() }
+						: {})
 				})
 			});
 			const body = await res.json().catch(() => null);
@@ -164,40 +163,26 @@
 		goto(`/perfil/${detail.username}`);
 	}
 
-	async function onResolverReporte(detail: {
-		reporteId: number;
-		accion: 'desestimar' | 'inhabilitar_cuenta' | 'forzar_baja_proyecto';
-		comentario: string;
-	}) {
-		loading = true;
-		try {
-			const res = await fetch('/api/admin/reportes', {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(detail)
-			});
-			const body = await res.json().catch(() => null);
-			if (!res.ok) throw new Error(body?.error || 'No se pudo resolver reporte');
-			toastStore.show({ variant: 'success', message: 'Reporte resuelto.' });
-			await Promise.all([refreshReportes(), refreshDashboard(), refreshUsuarios()]);
-		} catch (error) {
-			toastStore.show({
-				variant: 'error',
-				message: error instanceof Error ? error.message : 'Error al resolver reporte.'
-			});
-		} finally {
-			loading = false;
-		}
-	}
-
 	async function fetchAuditoria(page: number = 1) {
 		loading = true;
 		try {
 			const query = new URLSearchParams();
 			const idObjeto = String(filtrosAuditoria.idObjeto ?? '').trim();
 			const usuarioId = String(filtrosAuditoria.usuarioId ?? '').trim();
+			const tipoObjeto = filtrosAuditoria.tipoObjeto.trim();
+			const accion = filtrosAuditoria.accion.trim();
+			const atributoAfectado = filtrosAuditoria.atributoAfectado.trim();
+			const fechaDesde = filtrosAuditoria.fechaDesde.trim();
+			const fechaHasta = filtrosAuditoria.fechaHasta.trim();
+			const texto = filtrosAuditoria.texto.trim();
 			if (idObjeto) query.set('id_objeto', idObjeto);
 			if (usuarioId) query.set('usuario_id', usuarioId);
+			if (tipoObjeto) query.set('tipo_objeto', tipoObjeto);
+			if (accion) query.set('accion', accion);
+			if (atributoAfectado) query.set('atributo_afectado', atributoAfectado);
+			if (fechaDesde) query.set('fecha_desde', fechaDesde);
+			if (fechaHasta) query.set('fecha_hasta', fechaHasta);
+			if (texto) query.set('texto', texto);
 			query.set('page', String(page));
 			query.set('pageSize', String(auditoriaPaginacion.pageSize || 100));
 			const res = await fetch(`/api/admin/auditoria?${query.toString()}`);
@@ -219,7 +204,16 @@
 		}
 	}
 
-	async function onBuscarAuditoria(detail: { idObjeto: string | number; usuarioId: string | number }) {
+	async function onBuscarAuditoria(detail: {
+		idObjeto: string | number;
+		usuarioId: string | number;
+		tipoObjeto: string;
+		accion: string;
+		atributoAfectado: string;
+		fechaDesde: string;
+		fechaHasta: string;
+		texto: string;
+	}) {
 		filtrosAuditoria = detail;
 		await fetchAuditoria(1);
 	}
@@ -238,7 +232,7 @@
 >
 	<!-- overlay de textura con ruido -->
 	<div
-		class="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+		class="pointer-events-none fixed inset-0 z-0 opacity-3"
 		style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"
 	></div>
 
@@ -271,7 +265,7 @@
 					class="font-display mb-6 text-3xl font-bold tracking-tight text-white drop-shadow-sm md:mb-8 md:text-5xl lg:text-6xl"
 				>
 					Panel de <span
-						class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+						class="bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
 						>Administración</span
 					>
 				</h1>
@@ -288,7 +282,7 @@
 						<button
 							class={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
 								activeTab === tab.id
-									? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20 scale-105'
+									? 'bg-linear-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20 scale-105'
 									: 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
 							}`}
 							onclick={() => (activeTab = tab.id)}
@@ -351,7 +345,7 @@
 							bind:value={filtrosUsuarios.fechaAltaDesde}
 						/>
 						<button
-							class="rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
+							class="rounded-lg bg-linear-to-r from-emerald-500 to-cyan-500 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:opacity-90 active:scale-95"
 							onclick={refreshUsuarios}
 						>
 							Aplicar filtros
@@ -364,16 +358,6 @@
 					{loading}
 					onToggleEstado={onToggleEstadoUsuario}
 					onVerPerfil={onVerPerfil}
-				/>
-			</div>
-		{/if}
-
-		{#if activeTab === 'reportes'}
-			<div class="animate-fade-in-up delay-200">
-				<TablaReportesAdmin
-					reportes={reportes}
-					{loading}
-					onResolver={onResolverReporte}
 				/>
 			</div>
 		{/if}

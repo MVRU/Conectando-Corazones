@@ -24,7 +24,8 @@ export const FILTROS_INICIALES = {
 	fechaDesde: '',
 	fechaHasta: '',
 	estadoSeleccionado: [] as string[],
-	criterioOrden: 'recientes' as 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso'
+	criterioOrden: 'recientes' as 'recientes' | 'antiguos' | 'mayor_progreso' | 'menor_progreso',
+	soloBeneficiosFiscales: false
 };
 
 /**
@@ -44,6 +45,7 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 	const fechaHasta = writable(FILTROS_INICIALES.fechaHasta);
 	const estadoSeleccionado = writable(FILTROS_INICIALES.estadoSeleccionado);
 	const criterioOrden = writable(FILTROS_INICIALES.criterioOrden);
+	const soloBeneficiosFiscales = writable(FILTROS_INICIALES.soloBeneficiosFiscales);
 	const consultaBusqueda = writable('');
 
 	const proyectosFiltrados = derived(
@@ -57,7 +59,8 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 			tipoUbicacion,
 			fechaDesde,
 			fechaHasta,
-			localidadSeleccionada
+			localidadSeleccionada,
+			soloBeneficiosFiscales
 		],
 		([
 			$proyectos,
@@ -69,7 +72,8 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 			$tipoUbicacion,
 			$fechaDesde,
 			$fechaHasta,
-			$localidad
+			$localidad,
+			$soloBeneficiosFiscales
 		]) => {
 			let resultado = filtrarProyectos(
 				$proyectos,
@@ -77,7 +81,8 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 				$search,
 				$estado,
 				$provincia,
-				$categoria
+				$categoria,
+				$soloBeneficiosFiscales
 			);
 
 			resultado = filtrarPorTipoUbicacion(resultado, $tipoUbicacion);
@@ -143,6 +148,7 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		fechaDesde.set(FILTROS_INICIALES.fechaDesde);
 		fechaHasta.set(FILTROS_INICIALES.fechaHasta);
 		estadoSeleccionado.set(FILTROS_INICIALES.estadoSeleccionado);
+		soloBeneficiosFiscales.set(FILTROS_INICIALES.soloBeneficiosFiscales);
 		consultaBusqueda.set('');
 	}
 
@@ -159,6 +165,7 @@ export function createProyectosFiltros(initialProyectos: Proyecto[] = []) {
 		fechaHasta,
 		estadoSeleccionado,
 		criterioOrden,
+		soloBeneficiosFiscales,
 		consultaBusqueda,
 
 		// Stores derivados (readonly)

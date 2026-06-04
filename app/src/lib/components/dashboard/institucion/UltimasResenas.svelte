@@ -1,4 +1,3 @@
-<!-- TODO: implementar módulo de reseñas -->
 <script lang="ts">
 	import { Star } from 'lucide-svelte';
 
@@ -17,14 +16,14 @@
 </script>
 
 <div
-	class="h-full rounded-[2rem] border border-amber-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="h-full rounded-4xl border border-amber-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<h2 class="mb-8 text-xl font-semibold tracking-tight text-white">Últimas reseñas</h2>
 
 	<div class="space-y-4">
 		{#each resenas as resena}
 			<div
-				class="rounded-2xl border border-white/5 bg-white/[0.05] p-5 backdrop-blur-md transition-all hover:bg-white/10"
+				class="rounded-2xl border border-white/5 bg-white/5 p-5 backdrop-blur-md transition-all hover:bg-white/10"
 			>
 				<div class="mb-3 flex items-start justify-between">
 					<div class="flex items-center gap-3">

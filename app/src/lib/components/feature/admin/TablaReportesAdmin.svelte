@@ -71,7 +71,7 @@
 </script>
 
 <div class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md shadow-sm">
-	<div class="border-b border-white/10 bg-gradient-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5">
+	<div class="border-b border-white/10 bg-linear-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5">
 		<h3 class="text-xl font-bold text-white">Denuncias y Reportes</h3>
 		<p class="text-sm text-slate-400">Revisión de contenido reportado y acciones disciplinarias.</p>
 	</div>
@@ -156,7 +156,7 @@
 										size="sm"
 										onclick={() => abrirResolucion(reporte)}
 										disabled={loading}
-										class="!bg-emerald-600 !hover:bg-emerald-700 !text-white !rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+										class="bg-emerald-600! hover:bg-emerald-700! text-white! rounded-full! shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
 									/>
 								{:else}
 									<span class="text-xs font-bold text-slate-500 italic">Resuelto</span>
@@ -209,14 +209,14 @@
 				variant="secondary"
 				size="sm"
 				onclick={() => (modalAbierto = false)}
-				class="!rounded-full"
+				class="rounded-full!"
 			/>
 			<Button
 				label="Confirmar Resolución"
 				variant="primary"
 				size="sm"
 				onclick={confirmarResolucion}
-				class="!bg-blue-600 !hover:bg-blue-700 !text-white !rounded-full shadow-lg"
+				class="bg-blue-600! hover:bg-blue-700! text-white! rounded-full! shadow-lg"
 			/>
 		</div>
 	{/snippet}
