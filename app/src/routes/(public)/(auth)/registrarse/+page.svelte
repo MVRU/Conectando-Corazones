@@ -337,7 +337,7 @@
 				message: 'Tu verificación quedó en proceso de revisión.'
 			});
 			setEtapaConPersistencia('contacto');
-		} catch (error) {
+		} catch {
 			toastStore.show({
 				variant: 'error',
 				title: 'Error de carga',

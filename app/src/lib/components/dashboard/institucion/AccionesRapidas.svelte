@@ -6,7 +6,6 @@
 		FolderKanban,
 		MessageSquare,
 		XCircle,
-		Clock3,
 		ChevronDown,
 		ChevronUp
 	} from 'lucide-svelte';
@@ -23,6 +22,7 @@
 		estaVerificado = false,
 		estadoVerificacion = null,
 		requiereVerificacionDocumental = false,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		documentacionVerificacionEnRevision = false,
 		showEvidenceModal = $bindable(false),
 		onExportPDF = () => {}

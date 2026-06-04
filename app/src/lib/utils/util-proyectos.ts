@@ -6,7 +6,6 @@ import type { Localidad } from '$lib/domain/entities/Localidad';
 import type { Provincia } from '$lib/domain/entities/Provincia';
 import type { Ubicacion, UbicacionPresencial, UbicacionVirtual } from '$lib/domain/types/Ubicacion';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
-import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 import {
 	ESTADO_PRIORIDAD,

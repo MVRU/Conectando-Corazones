@@ -66,9 +66,11 @@
 
 	$effect(() => {
 		// Resetear a página 1 cuando cambia el filtro o el orden
+		/* eslint-disable @typescript-eslint/no-unused-expressions */
 		busqueda;
 		sortBy;
 		sortDir;
+		/* eslint-enable @typescript-eslint/no-unused-expressions */
 		paginaActual = 1;
 	});
 

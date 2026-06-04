@@ -8,8 +8,7 @@
 		AlertTriangle,
 		AlertCircle,
 		CalendarClock,
-		ArrowRight,
-		Users
+		ArrowRight
 	} from 'lucide-svelte';
 	import type { EstadisticasCalendario } from './types';
 	import { quintOut } from 'svelte/easing';

@@ -4,7 +4,6 @@
 
 	let { data }: { data: PageData } = $props();
 	let dashboardData = $derived(data.dashboardData);
-	let error = $derived(data.error);
 
 	let animate = $state(false);
 

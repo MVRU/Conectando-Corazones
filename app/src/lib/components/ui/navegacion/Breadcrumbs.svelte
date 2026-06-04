@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { BreadcrumbItem } from '$lib/stores/breadcrumbs';
 	import { breadcrumbs as breadcrumbsStore } from '$lib/stores/breadcrumbs';
 	import { ChevronRight } from 'lucide-svelte';
 

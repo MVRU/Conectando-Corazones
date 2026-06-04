@@ -103,7 +103,7 @@ export class GoogleGenerativeAIService {
 				resumen: rawResult.resumen,
 				aprendizajes: aprendizajesString
 			};
-		} catch (error) {
+		} catch {
 			throw new Error('Fallo al generar análisis de IA');
 		}
 	}

@@ -45,7 +45,6 @@
 			{#each etiquetasEfectivas as etiqueta, i (i)}
 				{@const isCompleted = pasoActual > i + 1}
 				{@const isCurrent = pasoActual === i + 1}
-				{@const isUpcoming = pasoActual < i + 1}
 
 				<li class="group relative flex cursor-default flex-col items-center">
 					<div

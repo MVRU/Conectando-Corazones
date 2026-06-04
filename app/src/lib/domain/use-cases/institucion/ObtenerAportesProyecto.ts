@@ -39,7 +39,7 @@ export class ObtenerAportesProyecto {
 					colab.id_colaboracion!
 				)) as ColaboracionTipoParticipacion[];
 
-				let aportes: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
+				const aportes: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
 
 				participaciones.forEach((p) => {
 					const permitida = project.participacion_permitida?.find(

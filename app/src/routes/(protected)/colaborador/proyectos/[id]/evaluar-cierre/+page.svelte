@@ -10,7 +10,6 @@
 		FileText,
 		Calendar,
 		Users,
-		Quote,
 		ChevronLeft,
 		ClipboardCheck,
 		Star
@@ -30,9 +29,6 @@
 
 	let proyecto = $derived(data.proyecto);
 	let solicitud = $derived(data.solicitud as any);
-	let evaluacion = $derived(data.evaluacion);
-	let yaVote = $derived(data.yaVote);
-
 	$effect(() => {
 		if (proyecto) {
 			setBreadcrumbs([

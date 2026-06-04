@@ -213,7 +213,6 @@
 									{#if chat.mensajes.length > 0}
 										{@const autorPreview = getAutorPreview(chat)}
 										<span class="font-medium text-slate-300">{autorPreview}:</span>
-										{' '}
 										{chat.mensajes[chat.mensajes.length - 1].contenido}
 									{:else}
 										<span class="text-slate-500 italic">Sin mensajes</span>

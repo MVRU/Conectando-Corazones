@@ -1,8 +1,5 @@
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
-import {
-	TIPO_PARTICIPACION_LABELS,
-	type TipoParticipacionDescripcion
-} from '$lib/domain/types/TipoParticipacion';
+import { TIPO_PARTICIPACION_LABELS } from '$lib/domain/types/TipoParticipacion';
 import type { TipoUbicacion } from '$lib/domain/types/Ubicacion';
 import {
 	CurrencyDollar,
@@ -10,7 +7,6 @@ import {
 	Cube,
 	ArchiveBox,
 	Heart,
-	QuestionMarkCircle,
 	ComputerDesktop,
 	Pencil,
 	Beaker,
@@ -33,8 +29,7 @@ import {
 	UserGroup,
 	HandRaised,
 	MusicalNote,
-	ClipboardDocumentList,
-	Truck
+	ClipboardDocumentList
 } from '@steeze-ui/heroicons';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 

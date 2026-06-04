@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 declare module 'svelte/elements' {
 	export interface HTMLAttributes<T> {
 		onreveal?: (event: CustomEvent<void>) => void;
@@ -11,3 +12,4 @@ declare namespace svelteHTML {
 		onhide?: (event: CustomEvent<void>) => void;
 	}
 }
+/* eslint-enable @typescript-eslint/no-unused-vars */

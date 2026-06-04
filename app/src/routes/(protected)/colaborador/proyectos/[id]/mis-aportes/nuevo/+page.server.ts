@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-	guardarAporte: async ({ request, locals, params }) => {
+	guardarAporte: async ({ request, locals }) => {
 		const usuario = locals.usuario;
 		if (!usuario || usuario.rol !== 'colaborador' || !usuario.id_usuario) {
 			return fail(401, { error: 'No autorizado' });

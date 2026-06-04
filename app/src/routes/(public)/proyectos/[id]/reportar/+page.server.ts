@@ -5,7 +5,6 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params }) => {
 	const proyectoRepo = new PostgresProyectoRepository();
 	const proyectoId = Number(params.id);
-	// @ts-ignore
 	const proyecto = await proyectoRepo.findById(proyectoId);
 
 	if (!proyecto) throw error(404, 'Proyecto no encontrado');

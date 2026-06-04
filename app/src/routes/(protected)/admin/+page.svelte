@@ -25,6 +25,7 @@
 	let auditoriaPaginacion = $derived(auditoriaPaginacionOverride ?? data.auditoriaPaginacion);
 
 	$effect(() => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 		data;
 		kpisOverride = null;
 		onboardingOverride = null;

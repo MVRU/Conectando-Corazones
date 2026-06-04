@@ -3,7 +3,6 @@ import { PostgresCategoriaRepository } from '$lib/infrastructure/supabase/postgr
 
 export const load: PageServerLoad = async () => {
 	const categoriaRepo = new PostgresCategoriaRepository();
-	// @ts-ignore
 	const categorias = await categoriaRepo.findAll();
 
 	return {

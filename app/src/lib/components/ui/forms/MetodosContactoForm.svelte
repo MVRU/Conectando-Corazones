@@ -18,7 +18,7 @@
 		validarUrl,
 		MENSAJES_ERROR
 	} from '$lib/utils/validaciones';
-	import { onMount, type Snippet } from 'svelte';
+	import { type Snippet } from 'svelte';
 
 	interface Props {
 		mostrarOmitir?: boolean;

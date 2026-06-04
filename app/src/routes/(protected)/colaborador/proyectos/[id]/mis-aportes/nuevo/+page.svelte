@@ -77,7 +77,7 @@
 	let navegacionPendiente: (() => void) | null = null;
 	let estaGuardando = $state(false);
 
-	let isMobile = $state(false);
+	let _isMobile = $state(false);
 
 	onMount(() => {
 		// Pre-selección por query param (desde el botón "Subir evidencias" de Mis Aportes)
@@ -100,8 +100,8 @@
 		});
 
 		const mql = window.matchMedia('(max-width: 640px)');
-		isMobile = mql.matches;
-		const listener = (e: MediaQueryListEvent) => (isMobile = e.matches);
+		_isMobile = mql.matches;
+		const listener = (e: MediaQueryListEvent) => (_isMobile = e.matches);
 		mql.addEventListener('change', listener);
 
 		const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -374,7 +374,7 @@
 				try {
 					const parsed = JSON.parse(result.data);
 					errorMsg = parsed[1] || parsed.error || errorMsg;
-				} catch (e) {
+				} catch {
 					/* ignore */
 				}
 				throw new Error(errorMsg);

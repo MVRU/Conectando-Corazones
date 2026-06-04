@@ -55,8 +55,6 @@
 		role="presentation"
 		onclick={oncerrar}
 	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
 			role="dialog"

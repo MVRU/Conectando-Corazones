@@ -22,9 +22,7 @@
 	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/domain/types/forms/CrearProyectoForm';
-	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus, Lock } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
 
@@ -36,6 +34,7 @@
 		esEdicionRestringida = false,
 		participacionesOriginales = [],
 		esAdmin = false,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		tieneColaboradoresAprobados = false,
 		tiposParticipacion = []
 	} = $props<{

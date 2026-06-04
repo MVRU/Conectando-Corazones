@@ -226,7 +226,7 @@
 			if ('showPicker' in HTMLInputElement.prototype) {
 				try {
 					dateInputRef.showPicker();
-				} catch (err) {
+				} catch {
 					dateInputRef.click();
 				}
 			} else {

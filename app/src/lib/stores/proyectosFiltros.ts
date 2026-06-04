@@ -8,7 +8,6 @@ import {
 	filtrarPorLocalidad
 } from '$lib/utils/util-proyectos';
 import { writable, derived, type Writable } from 'svelte/store';
-import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import { calcularProgresoTotal } from '$lib/utils/util-progreso';
 
 /**

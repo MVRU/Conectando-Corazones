@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { X, FolderKanban, UploadCloud, XCircle } from 'lucide-svelte';
+	import { X, FolderKanban, UploadCloud } from 'lucide-svelte';
 
 	let {
 		show = false,

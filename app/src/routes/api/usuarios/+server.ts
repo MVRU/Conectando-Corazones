@@ -2,7 +2,6 @@ import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
 import { PostgresUsuarioRepository } from '$lib/infrastructure/supabase/postgres/usuario.repo';
 import { CrearUsuario } from '$lib/domain/use-cases/usuarios/CrearUsuario';
-import { Usuario } from '$lib/domain/entities/Usuario';
 
 const repository = new PostgresUsuarioRepository();
 const crearUsuario = new CrearUsuario(repository);

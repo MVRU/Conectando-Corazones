@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Sparkles, BrainCircuit, Lightbulb, ArrowRight, BookOpen } from 'lucide-svelte';
-	import { slide, fade } from 'svelte/transition';
+	import { fade } from 'svelte/transition';
 
 	let { aspectos = [] } = $props<{
 		aspectos?: {

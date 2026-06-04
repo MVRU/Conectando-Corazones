@@ -8,10 +8,7 @@
 		Heart,
 		BarChart3,
 		PieChart,
-		Users,
-		DollarSign,
-		AlertTriangle,
-		CheckCircle2
+		DollarSign
 	} from 'lucide-svelte';
 	import type { EstadisticasProyectos } from './types';
 	import { quintOut } from 'svelte/easing';

@@ -435,7 +435,7 @@ export class ObtenerDashboardInstitucion {
 			.filter((v) => v.diff > 0)
 			.sort((a, b) => a.diff - b.diff)
 			.slice(0, 5)
-			.map(({ diff, ...rest }) => rest);
+			.map(({ diff: _diff, ...rest }) => rest);
 
 		return {
 			verificacion,

@@ -8,7 +8,7 @@ interface ChatState {
 }
 
 function createChatStore() {
-	const { subscribe, set, update } = writable<ChatState>({
+	const { subscribe, update } = writable<ChatState>({
 		sidebarCollapsed: false,
 		currentChatId: null,
 		draftMessages: new Map(),

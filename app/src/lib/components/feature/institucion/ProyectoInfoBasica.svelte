@@ -131,8 +131,6 @@
 
 	let beneficiariosOriginales = $derived(originales?.beneficiarios);
 	let fechaOriginal = $derived(originales?.fechaFin);
-	let categoriaIdsOriginales = $derived(originales?.categoriasSeleccionadas || []);
-
 	function normalizarBeneficiarios() {
 		if (beneficiarios == null || Number.isNaN(beneficiarios)) return;
 		beneficiarios = Math.trunc(beneficiarios);

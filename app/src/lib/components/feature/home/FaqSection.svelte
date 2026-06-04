@@ -1,8 +1,8 @@
 <script lang="ts">
 	import FaqItem from '$lib/components/ui/elementos/FaqItem.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
-	import { faqs as allFaqs } from '\$lib/domain/types/static-data/faqs';
-	import { inView } from '\$lib/utils/actions/inView';
+	import { faqs as allFaqs } from '$lib/domain/types/static-data/faqs';
+	import { inView } from '$lib/utils/actions/inView';
 
 	let faqVisible = $state(false);
 	let imagenVisible = $state(false);

@@ -97,6 +97,7 @@ export class Proyecto {
 		const esBorrador = this.estado === 'borrador';
 
 		if (!esBorrador && !esEstadoFinalizable) {
+			// pendiente de implementar validación de estado
 		}
 
 		if (this.fecha_fin_tentativa) {

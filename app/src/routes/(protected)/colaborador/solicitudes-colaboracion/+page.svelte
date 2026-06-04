@@ -9,9 +9,6 @@
 		Calendar,
 		Building2,
 		ArrowRight,
-		MapPin,
-		Globe,
-		ImageIcon,
 		ChevronDown
 	} from 'lucide-svelte';
 	import type { PageData } from './$types';

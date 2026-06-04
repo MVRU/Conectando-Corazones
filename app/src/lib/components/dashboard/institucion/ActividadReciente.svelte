@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { History, Share2, PlusCircle, Settings } from 'lucide-svelte';
+	import { History } from 'lucide-svelte';
 
 	let { actividad = [] } = $props<{
 		actividad?: {
@@ -16,28 +16,6 @@
 		colaboracion: 'Colaboración',
 		evidencia: 'Evidencia'
 	} as const;
-
-	function getIcon(tipo: string) {
-		switch (tipo) {
-			case 'proyecto':
-				return PlusCircle;
-			case 'colaboracion':
-				return Share2;
-			default:
-				return Settings;
-		}
-	}
-
-	function getColor(tipo: string) {
-		switch (tipo) {
-			case 'proyecto':
-				return 'text-emerald-400 bg-emerald-400/10';
-			case 'colaboracion':
-				return 'text-blue-400 bg-blue-400/10';
-			default:
-				return 'text-slate-400 bg-slate-400/10';
-		}
-	}
 </script>
 
 <div

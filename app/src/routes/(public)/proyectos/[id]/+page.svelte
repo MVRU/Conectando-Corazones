@@ -39,7 +39,6 @@
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { guardarReporteLog } from '$lib/utils/util-reportes';
 	import {
 		ChevronDown as ChevronDownIcon,
 		ChevronLeft,
@@ -63,7 +62,6 @@
 		XCircle,
 		Pencil,
 		ShieldCheck,
-		ChevronDown,
 		ChatBubbleLeftRight,
 		ClipboardDocumentList,
 		Photo,

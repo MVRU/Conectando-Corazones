@@ -12,7 +12,6 @@
 		DireccionPresencialFormulario
 	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import { obtenerDescripcionTipo } from '$lib/utils/util-proyecto-form';
-	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Lock } from 'lucide-svelte';
 
 	let {
@@ -30,20 +29,15 @@
 	// Estados locales para datos
 	let provinciasData = $state<Provincia[]>([]);
 	let localidadesCache = $state<Record<string, Localidad[]>>({});
-	let cargandoProvincias = $state(false);
-
 	$effect(() => {
 		(async () => {
 			try {
-				cargandoProvincias = true;
 				const res = await fetch('/api/ubicaciones/provincias');
 				if (res.ok) {
 					provinciasData = await res.json();
 				}
 			} catch (e) {
 				console.error('Error cargando provincias:', e);
-			} finally {
-				cargandoProvincias = false;
 			}
 		})();
 	});

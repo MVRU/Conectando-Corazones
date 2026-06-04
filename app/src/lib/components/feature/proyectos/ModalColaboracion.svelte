@@ -24,9 +24,6 @@
 	}
 
 	async function enviar() {
-		if (!mensajeColaboracion.trim() && mensajeColaboracion.length === 0) {
-		}
-
 		if (mensajeColaboracion.length > 500) return;
 
 		enviando = true;
@@ -36,7 +33,8 @@
 			}
 			mensajeColaboracion = '';
 			cerrar();
-		} catch (error) {
+		} catch {
+			// error silenciado intencionalmente
 		} finally {
 			enviando = false;
 		}

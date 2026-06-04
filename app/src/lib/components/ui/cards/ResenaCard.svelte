@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Star } from 'lucide-svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import type {
 		Usuario,

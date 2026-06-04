@@ -2,7 +2,7 @@
 	import { isAdmin } from '$lib/stores/auth';
 	import type { Reporte } from '$lib/domain/entities/Reporte';
 	import { fly } from 'svelte/transition';
-	import { User, Folder, AlertCircle, Trash2, CheckCircle, FileX } from 'lucide-svelte';
+	import { User, Folder, AlertCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { page, navigating } from '$app/stores';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';

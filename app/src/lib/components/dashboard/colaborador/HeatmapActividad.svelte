@@ -8,8 +8,6 @@
 	}>();
 
 	const weeksToShow = HEATMAP_SEMANAS;
-	const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
 	function getColor(intensity: number) {
 		if (intensity === 0) return 'bg-white/5';
 		if (intensity === 1) return 'bg-emerald-900/40';

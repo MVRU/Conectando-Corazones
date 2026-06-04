@@ -5,7 +5,7 @@
 	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 	import { Pencil, Camera, CheckCircle2 } from 'lucide-svelte';
-	import { fly, fade } from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
 	import { IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
 

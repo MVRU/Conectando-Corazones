@@ -400,7 +400,7 @@ export class ObtenerDashboardColaborador {
 		}));
 	}
 
-	private calcularEstadisticasCalendario(proyectos: any[], colaborador: any) {
+	private calcularEstadisticasCalendario(proyectos: any[], _colaborador: any) {
 		const hoy = new Date();
 
 		const projectTimeline = proyectos
