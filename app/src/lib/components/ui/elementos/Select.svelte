@@ -184,7 +184,7 @@
 			class={clsx(
 				'w-full rounded-2xl border border-slate-200/80 bg-white/95 pr-12 text-left text-[15px] text-slate-900 shadow-sm ring-1 ring-transparent transition-all duration-200 placeholder:text-slate-400',
 				sizeClasses[size],
-				'focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgba(var(--color-primary),0.45)] focus:ring-offset-1 focus:ring-offset-white focus:outline-none',
+				'focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgba(var(--color-primary),0.45)] focus:ring-offset-1 focus:ring-offset-white focus:outline-hidden',
 				error
 					? 'border-red-400 bg-red-50/80 text-red-900 placeholder:text-red-400 focus:ring-red-300 focus:ring-offset-0'
 					: 'hover:border-slate-300',
@@ -228,7 +228,7 @@
 								'group w-full px-4 py-2 text-left text-sm transition-colors duration-150',
 								option.value === value
 									? 'bg-[rgb(var(--color-primary))] text-white'
-									: 'text-slate-600 hover:bg-slate-100 focus:bg-slate-100 focus:outline-none'
+									: 'text-slate-600 hover:bg-slate-100 focus:bg-slate-100 focus:outline-hidden'
 							)}
 							onclick={() => handleSelect(option)}
 							role="option"

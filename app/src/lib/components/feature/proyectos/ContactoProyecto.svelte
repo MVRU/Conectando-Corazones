@@ -67,7 +67,7 @@
 									href={`mailto:${contacto.valor}`}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-none"
+									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-hidden"
 								>
 									{contacto.valor}
 								</a>
@@ -76,7 +76,7 @@
 									href={`https://${contacto.valor.replace(/^https?:\/\//, '')}`}
 									target="_blank"
 									rel="noopener noreferrer"
-									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-none"
+									class="font-medium break-all text-[rgb(var(--color-primary))] transition-colors hover:text-[rgb(var(--color-primary))/80] focus:ring-2 focus:ring-[rgb(var(--color-primary))] focus:ring-offset-2 focus:outline-hidden"
 								>
 									{contacto.valor}
 								</a>

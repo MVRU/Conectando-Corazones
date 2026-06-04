@@ -6,7 +6,6 @@ import type { Localidad } from '$lib/domain/entities/Localidad';
 import type { Provincia } from '$lib/domain/entities/Provincia';
 import type { Ubicacion, UbicacionPresencial, UbicacionVirtual } from '$lib/domain/types/Ubicacion';
 import { PRIORIDAD_TIPO, type ProyectoUbicacion } from '$lib/domain/types/ProyectoUbicacion';
-import { ESTADO_LABELS } from '$lib/domain/types/Estado';
 import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 import {
 	ESTADO_PRIORIDAD,
@@ -66,9 +65,14 @@ export function filtrarProyectos(
 	searchQuery: string,
 	estado: string[],
 	provincia: string,
-	categoria: string[] = []
+	categoria: string[] = [],
+	soloBeneficiosFiscales: boolean = false
 ): Proyecto[] {
 	let resultado = [...proyectos];
+
+	if (soloBeneficiosFiscales) {
+		resultado = resultado.filter((p) => p.esDeducible === true);
+	}
 
 	if (filtros.length > 0 && !filtros.includes('Todos')) {
 		const tiposEsperados = filtros.filter((f) => f !== 'Todos');

@@ -4,6 +4,7 @@ export const load: LayoutServerLoad = async ({ locals, depends }) => {
 	depends('supabase:auth');
 	return {
 		session: locals.session,
-		usuario: locals.usuario ? locals.usuario.toPOJO() : null
+		usuario: locals.usuario ? locals.usuario.toPOJO() : null,
+		loginEmail: locals.user?.email || locals.session?.user?.email || null
 	};
 };

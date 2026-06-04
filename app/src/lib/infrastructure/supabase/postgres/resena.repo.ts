@@ -74,12 +74,14 @@ export class PostgresResenaRepository implements ResenaRepository {
 
 	async create(resena: Resena): Promise<Resena> {
 		try {
-			const data = ResenaMapper.toPrisma(resena);
-			const created = await prisma.resena.create({ data });
+			const data = ResenaMapper.toPrisma(resena) as any;
+			const created = await prisma.resena.create({ data, include: { autor: true } });
 			return ResenaMapper.toDomain(created);
 		} catch (error) {
 			console.error('Error creating resena in DB:', error);
-			throw new Error('Error en BD al crear la reseña. Puede que los datos violen una restricción única.');
+			throw new Error(
+				'Error en BD al crear la reseña. Puede que los datos violen una restricción única.'
+			);
 		}
 	}
 

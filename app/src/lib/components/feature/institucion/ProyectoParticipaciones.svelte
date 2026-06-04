@@ -22,9 +22,7 @@
 	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import type { ParticipacionForm } from '$lib/domain/types/forms/CrearProyectoForm';
-	import { Users, CurrencyDollar, Cube } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
-	import type { IconSource } from '@steeze-ui/svelte-icon';
 	import { TriangleAlert, Trash2, Plus, Lock } from 'lucide-svelte';
 	import { INFO_TIPOS_PARTICIPACION, UNIDADES_POR_TIPO } from '$lib/utils/constants';
 
@@ -36,6 +34,7 @@
 		esEdicionRestringida = false,
 		participacionesOriginales = [],
 		esAdmin = false,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		tieneColaboradoresAprobados = false,
 		tiposParticipacion = []
 	} = $props<{
@@ -70,7 +69,9 @@
 				return;
 			}
 
-			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
+			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(
+				(t: TipoParticipacionDescripcion) => t !== tipo
+			);
 			participacionesPermitidas = participacionesPermitidas.filter(
 				(p: ParticipacionForm) => p.tipo_participacion?.descripcion !== tipo
 			);
@@ -169,13 +170,17 @@
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
-		participacionesPermitidas = participacionesPermitidas.filter((_: any, i: number) => i !== index);
+		participacionesPermitidas = participacionesPermitidas.filter(
+			(_: any, i: number) => i !== index
+		);
 		if (tipo) {
 			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(
 				(p: ParticipacionForm) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (!tieneOtrosDelMismoTipo) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(
+					(t: TipoParticipacionDescripcion) => t !== tipo
+				);
 			}
 		}
 	}
@@ -193,13 +198,18 @@
 		];
 	}
 
-	let tiposDisponibles = $derived(tiposParticipacion.filter(
-		(t: TipoParticipacion) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
-	));
+	let tiposDisponibles = $derived(
+		tiposParticipacion.filter(
+			(t: TipoParticipacion) =>
+				!tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+		)
+	);
 
-	let cantidadDonacionesEspecie = $derived(participacionesPermitidas.filter(
-		(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
-	).length);
+	let cantidadDonacionesEspecie = $derived(
+		participacionesPermitidas.filter(
+			(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
+		).length
+	);
 
 	let limiteEspecieAlcanzado = $derived(cantidadDonacionesEspecie >= 10);
 </script>
@@ -257,7 +267,8 @@
 		{@const esOriginal = esEdicionRestringida && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
 			? participacionesOriginales.find(
-					(p: ParticipacionPermitida) => p.id_participacion_permitida === participacion.id_participacion_permitida
+					(p: ParticipacionPermitida) =>
+						p.id_participacion_permitida === participacion.id_participacion_permitida
 				)
 			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
@@ -267,7 +278,8 @@
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
 					{TIPO_PARTICIPACION_LABELS[
-						(participacion.tipo_participacion?.descripcion || 'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
+						(participacion.tipo_participacion?.descripcion ||
+							'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
 					]}
 					{#if esOriginal && esEdicionRestringida && !esAdmin}
 						<span
@@ -305,7 +317,7 @@
 							value={participacion.especie || ''}
 							oninput={(e) => updateParticipacion(index, 'especie', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal || esAdmin}
 							class:border-red-300={errores[`participacion_${index}_especie`] &&
 								(!esOriginal || esAdmin)}
@@ -345,7 +357,7 @@
 							min={esOriginal && original && !esAdmin ? original.objetivo : 1}
 							step={participacion.tipo_participacion?.descripcion === 'Monetaria' ? '0.01' : '1'}
 							placeholder="100"
-							class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-red-300={errores[`participacion_${index}_objetivo`]}
 						/>
 						{#if errores[`participacion_${index}_objetivo`]}
@@ -371,7 +383,7 @@
 							value={participacion.unidad_medida}
 							onchange={(e) => updateParticipacion(index, 'unidad_medida', e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esEdicionRestringida || esAdmin}
 							class:cursor-not-allowed={esOriginal && !esAdmin}
 							class:bg-gray-50={esOriginal && !esAdmin}
@@ -392,7 +404,7 @@
 									value={participacion.unidad_medida_otra || ''}
 									oninput={(e) =>
 										updateParticipacion(index, 'unidad_medida_otra', e.currentTarget.value)}
-									class="focus:ring-opacity-20 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+									class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 									class:border-red-300={errores[`participacion_${index}_unidad_otra`]}
 									aria-invalid={!!errores[`participacion_${index}_unidad_otra`]}
 									placeholder={participacion.tipo_participacion?.descripcion === 'Monetaria'

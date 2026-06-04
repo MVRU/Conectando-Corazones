@@ -12,6 +12,7 @@
 		estadosDisponibles = [],
 		categoriasDisponibles = [],
 		tiposParticipacionDisponibles = [],
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		oncambiarTab
 	} = $props<{
 		proyectos?: Proyecto[];
@@ -42,7 +43,8 @@
 		estadosDisponibles: estadosDisponiblesStore,
 		tiposParticipacionDisponibles: tiposParticipacionDisponiblesStore,
 		calcularLocalidadesDisponibles,
-		restablecerFiltros
+		restablecerFiltros,
+		soloBeneficiosFiscales
 	} = filtros;
 
 	useProyectosFiltrosUrl(filtros);
@@ -74,13 +76,9 @@
 			tiposParticipacionDisponiblesStore.set(tiposParticipacionDisponibles);
 		}
 	});
-
-	function cambiarTab(tab: 'todos' | 'mis-proyectos' | 'auditoria') {
-		oncambiarTab?.(tab);
-	}
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
+<section class="w-full bg-linear-to-b from-gray-50 to-white px-6 pt-8 pb-6 sm:px-10 lg:px-20">
 	<ProyectosBase
 		proyectos={$proyectosOrdenados}
 		titulo="Todos los proyectos"
@@ -107,6 +105,8 @@
 		tiposParticipacionDisponibles={$tiposParticipacionDisponiblesStore}
 		{calcularLocalidadesDisponibles}
 		{restablecerFiltros}
+		{soloBeneficiosFiscales}
+		mostrarFiltroFiscal={true}
 	>
 		{#snippet card({ proyecto })}
 			<ProyectoCard {proyecto} usuario={$usuario} />

@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { Bell, Newspaper, ArrowUpRight } from 'lucide-svelte';
 
-	let {
-		novedades = []
-	} = $props<{
+	let { novedades = [] } = $props<{
 		novedades?: {
 			id: string;
 			titulo: string;
@@ -15,7 +13,7 @@
 </script>
 
 <div
-	class="relative h-full overflow-hidden rounded-[2rem] border border-white/5 bg-white/[0.03] p-5 shadow-2xl backdrop-blur-sm sm:p-8"
+	class="relative h-full overflow-hidden rounded-4xl border border-white/5 bg-white/3 p-5 shadow-2xl backdrop-blur-sm sm:p-8"
 >
 	<div
 		class="pointer-events-none absolute -top-10 -right-10 h-64 w-64 rounded-full bg-rose-500/10 blur-[80px]"
@@ -45,7 +43,7 @@
 		<div class="flex flex-col gap-3 sm:gap-4">
 			{#each novedades as novedad}
 				<div
-					class="group relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg outline-1 outline-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl hover:outline-white/20 sm:aspect-[2.5/1]"
+					class="group relative aspect-video w-full overflow-hidden rounded-2xl bg-slate-900 shadow-lg outline-1 outline-white/10 transition-all hover:-translate-y-1 hover:shadow-2xl hover:outline-white/20 sm:aspect-2.5/1"
 				>
 					{#if novedad.imagen}
 						<img
@@ -60,7 +58,7 @@
 					{/if}
 
 					<div
-						class="absolute inset-0 bg-gradient-to-t from-[#0F1029] via-[#0F1029]/60 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-80"
+						class="absolute inset-0 bg-linear-to-t from-[#0F1029] via-[#0F1029]/60 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-80"
 					></div>
 
 					<div class="absolute inset-0 flex flex-col justify-end p-4 sm:p-6">

@@ -62,7 +62,7 @@
 
 <section
 	bind:this={sectionRef}
-	class="w-full bg-gradient-to-b from-white via-blue-50 to-gray-100 px-4 py-20 sm:px-6 lg:px-8"
+	class="w-full bg-linear-to-b from-white via-blue-50 to-gray-100 px-4 py-20 sm:px-6 lg:px-8"
 	style="
         opacity:{visible ? 1 : 0};
         transform:translateY({visible ? '0' : '40px'}) scale({visible ? 1 : 0.96});
@@ -73,7 +73,7 @@
     "
 >
 	<div
-		class="mx-auto mb-12 max-w-5xl text-center opacity-0 transition delay-100 duration-900 data-[visible]:transform-none data-[visible]:opacity-100"
+		class="mx-auto mb-12 max-w-5xl text-center opacity-0 transition delay-100 duration-900 data-visible:transform-none data-visible:opacity-100"
 		data-visible={visible}
 		style="transform:translateY({visible ? 0 : '24px'}); opacity:{visible ? 1 : 0};"
 	>
@@ -110,7 +110,7 @@
 			<div class="mt-6 flex w-full justify-between px-4">
 				<button
 					onclick={mostrarAnterior}
-					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-hidden"
 					aria-label="Anterior testimonio"
 				>
 					<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,7 +125,7 @@
 
 				<button
 					onclick={mostrarSiguiente}
-					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+					class="nav-btn flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-white p-2 shadow-md transition-all hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-hidden"
 					aria-label="Siguiente testimonio"
 				>
 					<svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

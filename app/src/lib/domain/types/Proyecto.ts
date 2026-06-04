@@ -38,4 +38,5 @@ export interface Proyecto {
 	institucion?: Institucion;
 	ubicaciones?: ProyectoUbicacion[];
 	solicitudes_finalizacion?: SolicitudFinalizacion[];
+	esDeducible?: boolean;
 }

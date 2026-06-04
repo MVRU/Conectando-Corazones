@@ -2,21 +2,21 @@
 	import type { Resena, TipoObjetoResena } from '$lib/domain/types/Resena';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let { 
-		mostrar = false, 
-		titulo = 'Agregar reseña', 
-		placeholder = 'Compartí tu experiencia...', 
-		tipoObjeto = 'usuario', 
-		idObjeto = undefined, 
+	let {
+		mostrar = false,
+		titulo = 'Agregar reseña',
+		placeholder = 'Compartí tu experiencia...',
+		tipoObjeto = 'usuario',
+		idObjeto = undefined,
 		maxCaracteres = 500,
 		onguardar,
 		oncerrar
-	}: { 
-		mostrar?: boolean; 
-		titulo?: string; 
-		placeholder?: string; 
-		tipoObjeto?: string; 
-		idObjeto?: number; 
+	}: {
+		mostrar?: boolean;
+		titulo?: string;
+		placeholder?: string;
+		tipoObjeto?: string;
+		idObjeto?: number;
 		maxCaracteres?: number;
 		onguardar: (resena: Resena) => void;
 		oncerrar: () => void;
@@ -55,8 +55,6 @@
 		role="presentation"
 		onclick={oncerrar}
 	>
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
 			class="w-full max-w-2xl rounded-2xl border border-gray-200 bg-white p-6 shadow-xl"
 			role="dialog"
@@ -82,7 +80,13 @@
 				</button>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); guardar(); }} class="space-y-6">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					guardar();
+				}}
+				class="space-y-6"
+			>
 				<!-- Puntaje -->
 				<div>
 					<fieldset>

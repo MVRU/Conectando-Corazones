@@ -29,7 +29,7 @@
 	});
 </script>
 
-<section class="w-full bg-gradient-to-br from-[#0f1029] to-[#1e2052] px-2 py-10 sm:px-4 md:px-8">
+<section class="w-full bg-linear-to-br from-[#0f1029] to-[#1e2052] px-2 py-10 sm:px-4 md:px-8">
 	<div
 		bind:this={sectionRef}
 		class="mx-auto flex max-w-7xl flex-col-reverse items-center justify-between gap-8 md:gap-12 lg:flex-row"
@@ -100,10 +100,10 @@
 			style="transition-delay: .23s"
 		>
 			<div
-				class="cta-img-outer group relative h-64 w-44 overflow-visible rounded-[2rem] shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px] md:h-[480px] md:w-[350px]"
+				class="cta-img-outer group relative h-64 w-44 overflow-visible rounded-4xl shadow-xl ring-2 shadow-blue-950/20 ring-blue-400/10 transition-all duration-500 hover:ring-blue-400/30 sm:h-[460px] sm:w-[320px] md:h-[480px] md:w-[350px]"
 			>
 				<div
-					class="absolute top-0 left-0 h-full w-full overflow-hidden rounded-[2rem]"
+					class="absolute top-0 left-0 h-full w-full overflow-hidden rounded-4xl"
 					style="will-change: transform; transition: transform 0.85s cubic-bezier(.43,0,.15,1);"
 					tabindex="-1"
 				>

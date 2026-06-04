@@ -7,13 +7,14 @@
 	import type { PageData } from './$types';
 	import { fade } from 'svelte/transition';
 	import { AlertTriangle, CheckCircle, FileText, Info, ShieldAlert } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { toastStore } from '$lib/stores/toast';
 
 	let { data }: { data: PageData } = $props();
 
 	let mounted = $state(false);
 	let proyectoSeleccionado = $state<string>('');
 	let enviandoSolicitud = $state(false);
-	let solicitudEnviada = $state(false);
 	let modalReporteAbierto = $state(false);
 	let errorSolicitud = $state<string | null>(null);
 	let checks = $state({
@@ -56,12 +57,12 @@
 
 	let tieneSolicitudPendiente = $derived(!!solicitudPendienteExistente);
 	let proyectoPerteneceAInstitucion = $derived(
-		proyectoActual
-			? proyectoActual.institucion_id === $usuario?.id_usuario
-			: false
+		proyectoActual ? proyectoActual.institucion_id === $usuario?.id_usuario : false
 	);
 	let muchosRechazos = $derived((solicitudesRechazadas?.length || 0) >= 3);
-	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
+	let formularioBloqueadoPorAuditoria = $derived(
+		muchosRechazos && proyectoActual?.estado === 'en_auditoria'
+	);
 
 	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
 	let accesoEstado = $derived.by(() => {
@@ -75,11 +76,18 @@
 		// Verificar estado de aprobación de la institución
 		const verificacion = data.verificacion;
 		if (verificacion && verificacion.estado !== 'aprobada') {
-			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
+			return {
+				denegado: true,
+				mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}`
+			};
 		}
 
 		// Verificar que el proyecto seleccionado pertenece a la institución del usuario
-		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
+		if (
+			proyectoSeleccionado &&
+			proyectoActual &&
+			proyectoActual.institucion_id !== $usuario?.id_usuario
+		) {
 			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
 		}
 
@@ -94,7 +102,10 @@
 		// Priorizar proyectoActual.participacion_permitida como fuente de verdad
 		// Fallback a data.objetivos si participacion_permitida no está disponible
 		let items = [];
-		if (proyectoActual?.participacion_permitida && proyectoActual.participacion_permitida.length > 0) {
+		if (
+			proyectoActual?.participacion_permitida &&
+			proyectoActual.participacion_permitida.length > 0
+		) {
 			items = proyectoActual.participacion_permitida;
 		} else {
 			items = data.objetivos || [];
@@ -107,13 +118,13 @@
 		if (!objetivosDelProyecto || objetivosDelProyecto.length === 0) {
 			return [];
 		}
-		
+
 		const evidencias = data.evidencias || [];
-		
+
 		const result = (objetivosDelProyecto || []).map((obj: any) => {
 			const objId = Number(obj.id_participacion_permitida);
-			const evsParaEsteObjetivo = evidencias.filter((ev: any) => 
-				Number(ev.id_participacion_permitida) === objId
+			const evsParaEsteObjetivo = evidencias.filter(
+				(ev: any) => Number(ev.id_participacion_permitida) === objId
 			);
 
 			const entrada = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'entrada');
@@ -138,11 +149,9 @@
 
 	let todosLosObjetivosTienenEvidenciasCompletas = $derived.by(() => {
 		if (!evidenciasPorObjetivo || evidenciasPorObjetivo.length === 0) return false;
-		return (evidenciasPorObjetivo || []).every((item: {
-			evidenciasEntrada: unknown[];
-			evidenciasSalida: unknown[];
-		}) =>
-			item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
+		return (evidenciasPorObjetivo || []).every(
+			(item: { evidenciasEntrada: unknown[]; evidenciasSalida: unknown[] }) =>
+				item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
 		);
 	});
 
@@ -213,20 +222,20 @@
 
 			// SvelteKit serializa fail() como { type: 'failure', data: { message: '...' } }
 			if (resultado?.type === 'failure' || !response.ok) {
-				errorSolicitud = resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
+				errorSolicitud =
+					resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
 				enviandoSolicitud = false;
 				return;
 			}
 
 			errorSolicitud = null;
-
-			// Si todo salió bien, mostramos mensaje de éxito y reseteamos estados locales
 			enviandoSolicitud = false;
-			solicitudEnviada = true;
 
-			const url = new URL(window.location.href);
-			url.searchParams.delete('proyecto');
-			window.location.href = url.toString();
+			toastStore.show({
+				variant: 'success',
+				title: '¡Solicitud enviada!',
+				message: 'Tu solicitud de cierre ha sido enviada exitosamente para revisión.'
+			});
 
 			checks = {
 				evidenciasSuficientes: false,
@@ -235,10 +244,11 @@
 				noRequiereMasEvidencias: false,
 				conformidadRevision: false
 			};
+			proyectoSeleccionado = '';
 
-			setTimeout(() => {
-				solicitudEnviada = false;
-			}, 5000);
+			const url = new URL(window.location.href);
+			url.searchParams.delete('proyecto');
+			goto(url.pathname, { invalidateAll: true });
 		} catch (err) {
 			console.error('Error inesperado al enviar la solicitud de cierre', err);
 			enviandoSolicitud = false;
@@ -286,7 +296,7 @@
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
 				<p class="text-slate-600">{accesoEstado.mensaje}</p>
 				<button
-					onclick={() => window.location.href = '/'}
+					onclick={() => (window.location.href = '/')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"
 				>
 					Volver al inicio
@@ -302,24 +312,11 @@
 					No tenés ningún proyecto pendiente de solicitud de cierre en este momento.
 				</p>
 				<button
-					onclick={() => window.location.href = '/proyectos'}
+					onclick={() => (window.location.href = '/proyectos')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
 				>
 					Ver mis proyectos
 				</button>
-			</div>
-		{:else if solicitudEnviada}
-			<div
-				class="rounded-2xl border border-green-200 bg-green-50 p-8 text-center shadow-sm"
-				in:fade
-			>
-				<div class="mb-4 inline-flex items-center justify-center rounded-full bg-green-100 p-3">
-					<CheckCircle class="h-8 w-8 text-green-600" />
-				</div>
-				<h3 class="mb-2 text-2xl font-bold text-green-800">¡Solicitud enviada!</h3>
-				<p class="text-green-700">
-					Tu solicitud de cierre ha sido enviada exitosamente para revisión.
-				</p>
 			</div>
 		{:else}
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -346,7 +343,7 @@
 						{#if formularioBloqueadoPorAuditoria}
 							<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
 								<div class="flex gap-3">
-									<AlertTriangle class="h-5 w-5 flex-shrink-0 text-red-600" />
+									<AlertTriangle class="h-5 w-5 shrink-0 text-red-600" />
 									<div>
 										<h3 class="text-sm font-bold text-red-800">Revisión administrativa</h3>
 										<p class="mt-1 text-sm text-red-700">
@@ -374,7 +371,7 @@
 						{:else if muchosRechazos}
 							<div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
 								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-amber-700" />
+									<Info class="h-5 w-5 shrink-0 text-amber-700" />
 									<div>
 										<h3 class="text-sm font-bold text-amber-900">Podés volver a intentar</h3>
 										<p class="mt-1 text-sm text-amber-800">
@@ -396,7 +393,7 @@
 						{:else if solicitudPendienteExistente}
 							<div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
 								<div class="flex gap-3">
-									<Info class="h-5 w-5 flex-shrink-0 text-amber-600" />
+									<Info class="h-5 w-5 shrink-0 text-amber-600" />
 									<div>
 										<h3 class="text-sm font-bold text-amber-800">Solicitud pendiente</h3>
 										<p class="mt-1 text-sm text-amber-700">
@@ -435,7 +432,7 @@
 								{#if !todosLosObjetivosTienenEvidenciasCompletas}
 									<div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<div class="flex gap-3">
-											<AlertTriangle class="h-5 w-5 flex-shrink-0 text-amber-600" />
+											<AlertTriangle class="h-5 w-5 shrink-0 text-amber-600" />
 											<div>
 												<h3 class="text-sm font-bold text-amber-800">
 													Atención: Faltan evidencias
@@ -518,7 +515,7 @@
 							{#if !formularioBloqueadoPorAuditoria && !tieneSolicitudPendiente}
 								<div class="mt-6 rounded-xl border border-blue-100 bg-blue-50 p-4">
 									<div class="flex gap-3">
-										<Info class="h-5 w-5 flex-shrink-0 text-blue-600" />
+										<Info class="h-5 w-5 shrink-0 text-blue-600" />
 										<div class="text-sm text-slate-800">
 											<p class="font-semibold text-blue-900">Información importante</p>
 											<p class="mt-1 text-sm leading-relaxed text-slate-700">

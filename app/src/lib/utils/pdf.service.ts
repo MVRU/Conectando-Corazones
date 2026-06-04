@@ -302,7 +302,7 @@ export class PdfService {
 				fillColor: [248, 250, 252]
 			}
 		});
-		// @ts-ignore
+		// @ts-expect-error lastAutoTable es inyectado por jspdf-autotable en runtime
 		return doc.lastAutoTable.finalY + 15;
 	}
 

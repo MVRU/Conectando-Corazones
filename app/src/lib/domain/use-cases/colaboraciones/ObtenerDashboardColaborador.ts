@@ -1,16 +1,30 @@
 import type { ColaboracionRepository } from '$lib/domain/repositories/ColaboracionRepository';
 import type { ProyectoRepository } from '$lib/domain/repositories/ProyectoRepository';
 import type { UsuarioRepository } from '$lib/domain/repositories/UsuarioRepository';
+import type { ResenaRepository } from '$lib/domain/repositories/ResenaRepository';
+import type { HistorialDeCambiosRepository } from '$lib/domain/repositories/HistorialDeCambiosRepository';
+import type { ChatRepository } from '$lib/domain/repositories/ChatRepository';
+import { ESTADO_LABELS, ESTADOS_ACTIVOS_PROYECTO } from '$lib/domain/types/Estado';
+import { HEATMAP_SEMANAS } from '$lib/utils/constants';
+import { getColorEstadoHex } from '$lib/utils/util-estados';
 import type { ColaboradorDashboardData } from '$lib/components/dashboard/colaborador/types';
 
 export class ObtenerDashboardColaborador {
 	constructor(
 		private colaboracionRepo: ColaboracionRepository,
 		private proyectoRepo: ProyectoRepository,
-		private usuarioRepo: UsuarioRepository
+		private usuarioRepo: UsuarioRepository,
+		private resenaRepo: ResenaRepository,
+		private historialRepo: HistorialDeCambiosRepository,
+		private chatRepo: ChatRepository
 	) {}
 
-	async execute(colaboradorId: number): Promise<ColaboradorDashboardData> {
+	async execute(
+		colaboradorId: number,
+		opciones?: { desde?: Date | null }
+	): Promise<ColaboradorDashboardData> {
+		const desde = opciones?.desde ?? null;
+
 		const [colaborador, colaboraciones, proyectos] = await Promise.all([
 			this.usuarioRepo.findById(colaboradorId),
 			this.colaboracionRepo.findByColaborador(colaboradorId),
@@ -24,12 +38,37 @@ export class ObtenerDashboardColaborador {
 		const colaboracionesAprobadas = colaboraciones.filter((c) => c.estaAprobada());
 		const colaboracionesPendientes = colaboraciones.filter((c) => c.estaPendiente());
 
-		const proyectosColaborador = proyectos.filter((p) =>
-			colaboraciones.some((c) => c.proyecto_id === p.id_proyecto && c.estaAprobada())
+		// Filtros por período (desde = null ⇒ todo el tiempo)
+		const colaboracionesEnPeriodo = desde
+			? colaboraciones.filter((c) => c.created_at && c.created_at >= desde)
+			: colaboraciones;
+
+		// Set con IDs de proyectos donde el usuario tiene colaboración aprobada DENTRO del período.
+		// Lookup O(1) en el filtro de proyectos => complejidad total O(N+M) en lugar de O(N·M).
+		const idsProyectosAprobadosEnPeriodo = new Set<number>(
+			colaboracionesEnPeriodo
+				.filter((c) => c.estaAprobada())
+				.map((c) => c.proyecto_id)
+				.filter((id): id is number => typeof id === 'number')
+		);
+
+		const proyectosColaboradorEnPeriodo = proyectos.filter(
+			(p) => p.id_proyecto != null && idsProyectosAprobadosEnPeriodo.has(p.id_proyecto)
+		);
+
+		// Histórico (sin filtrar por período) — necesario para secciones que NO se filtran:
+		// seguimiento de objetivos, proyectos comunidad, etc.
+		const idsProyectosAprobadosTotales = new Set<number>(
+			colaboracionesAprobadas
+				.map((c) => c.proyecto_id)
+				.filter((id): id is number => typeof id === 'number')
+		);
+		const proyectosColaborador = proyectos.filter(
+			(p) => p.id_proyecto != null && idsProyectosAprobadosTotales.has(p.id_proyecto)
 		);
 
 		const institucionesUnicas = new Set(
-			proyectosColaborador.map((p) => p.institucion_id).filter(Boolean)
+			proyectosColaboradorEnPeriodo.map((p) => p.institucion_id).filter(Boolean)
 		);
 
 		const hoy = new Date();
@@ -46,7 +85,16 @@ export class ObtenerDashboardColaborador {
 				.filter(Boolean)
 		);
 
-		const proyectosConFecha = proyectosColaborador.filter((p) => p.fecha_fin_tentativa);
+		const proyectosNuevosEsteMes = proyectosColaborador.filter((p) => {
+			const colabProyecto = colaboraciones.find(
+				(c) => c.proyecto_id === p.id_proyecto && c.estaAprobada()
+			);
+			return colabProyecto?.created_at && colabProyecto.created_at >= inicioMes;
+		}).length;
+
+		const proyectosConFecha = proyectosColaborador.filter(
+			(p) => p.fecha_fin_tentativa && ESTADOS_ACTIVOS_PROYECTO.includes(p.estado as any)
+		);
 		const proximoCierre = proyectosConFecha.reduce(
 			(min, p) => {
 				if (!p.fecha_fin_tentativa) return min;
@@ -59,7 +107,7 @@ export class ObtenerDashboardColaborador {
 
 		const diasProximoCierre = proximoCierre
 			? Math.ceil((proximoCierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
-			: 0;
+			: -1;
 
 		const proyectosParaCierre = proyectosColaborador
 			.filter((p) => p.estado === 'en_revision')
@@ -85,29 +133,48 @@ export class ObtenerDashboardColaborador {
 					? colaborador.razon_social || 'Organización'
 					: 'Colaborador/a';
 
+		// Filtradas por período: card de proyectos + modal, card de instituciones + modal
 		const estadisticasProyectos = this.calcularEstadisticasProyectos(
-			proyectosColaborador,
-			colaboraciones
+			proyectosColaboradorEnPeriodo,
+			colaboracionesEnPeriodo
 		);
+		const estadisticasInstituciones = this.calcularEstadisticasInstituciones(
+			proyectosColaboradorEnPeriodo,
+			colaboracionesEnPeriodo
+		);
+
+		// Sin filtrar: agenda/próximos cierres y seguimiento de objetivos (en UI)
 		const estadisticasCalendario = this.calcularEstadisticasCalendario(
 			proyectosColaborador,
 			colaborador
 		);
-		const estadisticasInstituciones = this.calcularEstadisticasInstituciones(
-			proyectosColaborador,
-			colaboraciones
-		);
-
 		const seguimientoObjetivos = this.calcularSeguimientoObjetivos(
 			proyectosColaborador,
 			colaboraciones
 		);
-		const estadisticasAyuda = this.calcularEstadisticasAyuda(colaboraciones);
 
-		const proyectosComunidad = await this.calcularProyectosRecomendados(
-			colaborador,
-			proyectosColaborador
-		);
+		// Versión filtrada por período del seguimiento — solo se usa en la exportación PDF.
+		// Si no hay filtro, reutiliza la versión histórica (mismo array).
+		const seguimientoObjetivosEnPeriodo = desde
+			? this.calcularSeguimientoObjetivos(proyectosColaboradorEnPeriodo, colaboracionesEnPeriodo)
+			: seguimientoObjetivos;
+
+		// Filtrado por período: gráfico de torta "Tipos de Ayuda"
+		const estadisticasAyuda = this.calcularEstadisticasAyuda(colaboracionesEnPeriodo);
+
+		const [proyectosComunidad, ultimasResenas, heatmapActividad] = await Promise.all([
+			this.calcularProyectosRecomendados(colaborador, proyectosColaborador),
+			this.obtenerUltimasResenas(colaboradorId),
+			this.calcularHeatmapActividad(colaboradorId)
+		]);
+
+		const proyectosParaEvidencia = proyectosColaborador
+			.filter((p) => p.estado === 'en_curso' || p.estado === 'pendiente_solicitud_cierre')
+			.map((p) => ({
+				id: p.id_proyecto?.toString() || '',
+				titulo: p.titulo,
+				estado: ESTADO_LABELS[p.estado as keyof typeof ESTADO_LABELS] ?? p.estado ?? 'Desconocido'
+			}));
 
 		return {
 			info: {
@@ -123,7 +190,8 @@ export class ObtenerDashboardColaborador {
 				bio: colaborador.descripcion
 			},
 			metricas: {
-				proyectosTotales: proyectosColaborador.length,
+				proyectosTotales: proyectosColaboradorEnPeriodo.length,
+				nuevosProyectos: proyectosNuevosEsteMes,
 				institucionesAlcanzadas: institucionesUnicas.size,
 				nuevasInstituciones: institucionesNuevasEsteMes.size,
 				diasProximoCierre,
@@ -136,12 +204,67 @@ export class ObtenerDashboardColaborador {
 				estadisticasInstituciones
 			},
 			seguimientoObjetivos,
+			seguimientoObjetivosEnPeriodo,
 			estadisticasAyuda,
-			topColaboradores: [],
-			ultimasResenas: [],
-			heatmapActividad: [],
-			proyectosComunidad
+			ultimasResenas,
+			heatmapActividad,
+			proyectosComunidad,
+			proyectosParaEvidencia
 		};
+	}
+
+	private async obtenerUltimasResenas(colaboradorId: number) {
+		const resenas = await this.resenaRepo.findByObjetoAprobadas('usuario', colaboradorId, 5);
+
+		return resenas.map((r) => ({
+			id: r.id_resena?.toString() || '',
+			usuario: r.username || 'Usuario anónimo',
+			avatarUrl: r.autor?.url_foto ?? undefined,
+			calificacion: r.puntaje || 0,
+			comentario: r.contenido || '',
+			fecha: r.created_at?.toISOString() ?? new Date().toISOString()
+		}));
+	}
+
+	private async calcularHeatmapActividad(colaboradorId: number) {
+		const desde = new Date();
+		desde.setDate(desde.getDate() - HEATMAP_SEMANAS * 7);
+
+		const [cambios, eventosChat] = await Promise.all([
+			this.historialRepo.findAll({ usuario_id: colaboradorId, desde }),
+			this.chatRepo.obtenerEventosChatDelUsuario(colaboradorId, desde)
+		]);
+
+		const conteoPorDia = new Map<string, number>();
+
+		for (const cambio of cambios) {
+			if (!cambio.created_at) continue;
+			const clave = new Date(cambio.created_at).toISOString().split('T')[0];
+			conteoPorDia.set(clave, (conteoPorDia.get(clave) || 0) + 1);
+		}
+
+		const tuplasChat = new Set<string>();
+		for (const ev of eventosChat) {
+			const dia = ev.fecha.toISOString().split('T')[0];
+			const clave = `${ev.proyecto_id}::${dia}`;
+			if (tuplasChat.has(clave)) continue;
+			tuplasChat.add(clave);
+			conteoPorDia.set(dia, (conteoPorDia.get(dia) || 0) + 1);
+		}
+
+		return Array.from(conteoPorDia.entries()).map(([fecha, conteo]) => ({
+			fecha,
+			intensidad: this.mapearIntensidad(conteo),
+			conteo
+		}));
+	}
+
+	private mapearIntensidad(conteo: number): number {
+		if (conteo <= 0) return 0;
+		if (conteo === 1) return 1;
+		if (conteo <= 3) return 2;
+		if (conteo <= 5) return 3;
+		return 4;
 	}
 
 	private calcularEstadisticasProyectos(proyectos: any[], colaboraciones: any[]) {
@@ -186,7 +309,7 @@ export class ObtenerDashboardColaborador {
 			.map((p) => ({
 				id: p.id_proyecto?.toString() || '',
 				titulo: p.titulo,
-				estado: p.estado || 'desconocido',
+				estado: ESTADO_LABELS[p.estado as keyof typeof ESTADO_LABELS] ?? p.estado ?? 'Desconocido',
 				progreso: p.progreso,
 				beneficiarios: Number(p.beneficiarios) || 0,
 				imagen: p.url_portada
@@ -237,27 +360,21 @@ export class ObtenerDashboardColaborador {
 		);
 
 		const total = proyectos.length || 1;
-		const colores: Record<string, string> = {
-			en_curso: '#3b82f6',
-			pendiente_solicitud_cierre: '#f59e0b',
-			en_revision: '#8b5cf6',
-			completado: '#10b981'
-		};
 
-		const labels: Record<string, string> = {
-			en_curso: 'En curso',
-			pendiente_solicitud_cierre: 'Pendiente de cierre',
-			en_revision: 'En revisión',
-			completado: 'Completado'
-		};
-
-		const ordenEstados = ['en_curso', 'pendiente_solicitud_cierre', 'en_revision', 'completado'];
+		const ordenEstados = [
+			'en_curso',
+			'pendiente_solicitud_cierre',
+			'en_revision',
+			'completado',
+			'cancelado',
+			'en_auditoria'
+		];
 
 		return ordenEstados.map((estado) => ({
-			label: labels[estado] || this.formatearEstado(estado),
+			label: ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS] ?? estado,
 			count: (estados[estado] as number) || 0,
 			percentage: Math.round((((estados[estado] as number) || 0) / total) * 100),
-			color: colores[estado] || '#6b7280'
+			color: getColorEstadoHex(estado)
 		}));
 	}
 
@@ -283,7 +400,7 @@ export class ObtenerDashboardColaborador {
 		}));
 	}
 
-	private calcularEstadisticasCalendario(proyectos: any[], colaborador: any) {
+	private calcularEstadisticasCalendario(proyectos: any[], _colaborador: any) {
 		const hoy = new Date();
 
 		const projectTimeline = proyectos
@@ -294,12 +411,13 @@ export class ObtenerDashboardColaborador {
 				fechaInicio: p.created_at,
 				fechaFin: p.fecha_fin_tentativa || '',
 				estado: p.estado || 'desconocido',
-				color: this.getColorEstado(p.estado)
+				color: getColorEstadoHex(p.estado)
 			}));
 
 		const proximosVencimientos = proyectos
 			.filter((p) => {
-				if (!p.fecha_fin_tentativa) return false;
+				if (!p.fecha_fin_tentativa || !ESTADOS_ACTIVOS_PROYECTO.includes(p.estado || ''))
+					return false;
 				const fechaFin = new Date(p.fecha_fin_tentativa);
 				return fechaFin > hoy;
 			})
@@ -361,6 +479,7 @@ export class ObtenerDashboardColaborador {
 		const aprobadas = colaboraciones.filter((c) => c.estaAprobada()).length;
 		const pendientes = colaboraciones.filter((c) => c.estaPendiente()).length;
 		const rechazadas = colaboraciones.filter((c) => c.estaRechazada()).length;
+		const anuladas = colaboraciones.filter((c) => c.estaAnulada()).length;
 		const total = colaboraciones.length;
 
 		return {
@@ -369,6 +488,7 @@ export class ObtenerDashboardColaborador {
 				pendientes,
 				aprobadas,
 				rechazadas,
+				anuladas,
 				total
 			}
 		};
@@ -528,28 +648,6 @@ export class ObtenerDashboardColaborador {
 				especie: proyectosPorTipo.especie.size
 			}
 		};
-	}
-
-	private formatearEstado(estado: string): string {
-		const mapeo: Record<string, string> = {
-			en_curso: 'En curso',
-			en_revision: 'En revisión',
-			completado: 'Completado',
-			cancelado: 'Cancelado',
-			borrador: 'Borrador'
-		};
-		return mapeo[estado] || estado;
-	}
-
-	private getColorEstado(estado: string): string {
-		const colores: Record<string, string> = {
-			en_curso: '#3b82f6',
-			en_revision: '#f59e0b',
-			completado: '#10b981',
-			cancelado: '#ef4444',
-			borrador: '#6b7280'
-		};
-		return colores[estado] || '#6b7280';
 	}
 
 	private async calcularProyectosRecomendados(colaborador: any, proyectosColaborador: any[]) {

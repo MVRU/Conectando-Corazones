@@ -107,7 +107,7 @@ export class ObtenerDetalleAportesColaborador {
 					(c: Colaboracion) => c.colaborador_id === userId
 				);
 
-				let aportesList: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
+				const aportesList: { cosa: string; cantidad: string; unidad_medida?: string }[] = [];
 
 				for (const colab of userColabs) {
 					const participations = (await this.colaboracionRepo.getAportesPorColaboracion(

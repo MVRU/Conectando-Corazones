@@ -1,6 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { Filter, ChevronRight, ChevronDown, MapPin, School, HeartOff, Activity, Users, Sparkles } from 'lucide-svelte';
+	import {
+		Filter,
+		ChevronDown,
+		MapPin,
+		School,
+		HeartOff,
+		Activity,
+		Users,
+		Sparkles
+	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './institucion/AccionesRapidas.svelte';
 	import MetricasPanel from './institucion/MetricasPanel.svelte';
@@ -16,52 +24,46 @@
 	import EstadisticasAgendaModal from './institucion/EstadisticasAgendaModal.svelte';
 	import GestionarEvidenciasModal from './institucion/GestionarEvidenciasModal.svelte';
 	import EmptyState from './ui/EmptyState.svelte';
+	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
+	import {
+		PERIODO_OPCIONES,
+		normalizarPeriodo,
+		obtenerTituloPeriodo,
+		type PeriodoSlug
+	} from '$lib/utils/periodo';
 	import type { InstitucionDashboardData } from './institucion/types';
+	import jsPDF from 'jspdf';
+	import { PdfService } from '$lib/utils/pdf.service';
 
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
-	// Filters state
-	let filters = $state({
-		periodo: 'mes_actual',
-		categoria: 'todas',
-		estado: 'en_curso',
-		tipoParticipacion: 'todos',
-		ubicacion: 'todas'
-	});
-
-	// Animation & Scroll
 	let showFilters = $state(false);
-	let showLeftGradient = $state(false);
-	let showRightGradient = $state(false);
 	let showCollaboratorStats = $state(false);
 	let showProjectStats = $state(false);
 	let showCalendarStats = $state(false);
 	let showEvidenceModal = $state(false);
 
-	let filterScrollContainer: HTMLDivElement | undefined = $state();
-	let showFilterIndicator = $state(false);
-
-	function checkFilterScroll() {
-		if (!filterScrollContainer) return;
-		const { scrollLeft, scrollWidth, clientWidth } = filterScrollContainer;
-		showLeftGradient = scrollLeft > 10;
-		showRightGradient = scrollWidth > clientWidth && scrollLeft < scrollWidth - clientWidth - 10;
-		showFilterIndicator = showRightGradient;
-	}
-
-	import jsPDF from 'jspdf';
-	import { PdfService } from '$lib/utils/pdf.service';
-
-	onMount(() => {
-		setTimeout(checkFilterScroll, 100);
-		window.addEventListener('resize', checkFilterScroll);
-		return () => window.removeEventListener('resize', checkFilterScroll);
-	});
-
 	interface Props {
 		data: InstitucionDashboardData;
+		periodo?: PeriodoSlug;
 	}
 
-	let { data }: Props = $props();
+	let { data, periodo = 'todo' }: Props = $props();
+
+	const mostrarBadgeNuevas = $derived(periodo === 'todo');
+
+	function cambiarPeriodo(event: Event) {
+		const target = event.target as HTMLSelectElement;
+		const nuevo = normalizarPeriodo(target.value);
+		const url = new URL(page.url);
+		if (nuevo === 'todo') url.searchParams.delete('periodo');
+		else url.searchParams.set('periodo', nuevo);
+		goto(url, { keepFocus: true, noScroll: true });
+	}
 
 	async function generatePDF() {
 		const doc = new jsPDF();
@@ -83,6 +85,27 @@
 			undefined, // Bio no usada en encabezado para Institución
 			data.info.estaVerificado
 		);
+
+		// --- Subtítulo de período centrado en pill (solo si no es "todo") ---
+		const tituloPeriodo = obtenerTituloPeriodo(periodo);
+		if (tituloPeriodo) {
+			yPos -= 5;
+			const anchoPagina = doc.internal.pageSize.getWidth();
+			const texto = `Período: ${tituloPeriodo}`;
+			doc.setFontSize(13);
+			doc.setFont('helvetica', 'bold');
+			const anchoTexto = doc.getTextWidth(texto);
+			const padding = 10;
+			const anchoPill = anchoTexto + padding * 2;
+			const altoPill = 9;
+			const xPill = (anchoPagina - anchoPill) / 2;
+			doc.setFillColor(239, 246, 255);
+			doc.setDrawColor(...PdfService.COLORES.AZUL_500);
+			doc.roundedRect(xPill, yPos, anchoPill, altoPill, 3, 3, 'FD');
+			doc.setTextColor(...PdfService.COLORES.AZUL_500);
+			doc.text(texto, anchoPagina / 2, yPos + altoPill / 2 + 1.5, { align: 'center' });
+			yPos += altoPill + 8;
+		}
 
 		// --- Resumen Ejecutivo (KPIs) ---
 		yPos = PdfService.dibujarTituloSeccion(doc, 'Resumen Ejecutivo', yPos);
@@ -269,7 +292,7 @@
 >
 	<!-- overlay de textura con ruido -->
 	<div
-		class="pointer-events-none fixed inset-0 z-0 opacity-[0.03]"
+		class="pointer-events-none fixed inset-0 z-0 opacity-3"
 		style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"
 	></div>
 
@@ -302,7 +325,7 @@
 					class="font-display mb-6 text-3xl font-bold tracking-tight text-white drop-shadow-sm md:mb-8 md:text-5xl lg:text-6xl"
 				>
 					Hola, <span
-						class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
+						class="bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent"
 						>{data.info.nombre}</span
 					>
 				</h1>
@@ -356,8 +379,12 @@
 			<AccionesRapidas
 				solicitudesPendientes={data.metricas.solicitudesPendientes}
 				mensajesNoLeidos={data.metricas.mensajesNoLeidos}
+				hayNuevosMensajes={hayNuevosMensajesChat}
 				proyectosPendienteCierre={data.metricas.proyectosPendienteCierre}
 				estaVerificado={data.info.estaVerificado}
+				estadoVerificacion={data.info.estadoVerificacion ?? null}
+				requiereVerificacionDocumental={data.info.requiereVerificacionDocumental ?? false}
+				documentacionVerificacionEnRevision={data.info.documentacionVerificacionEnRevision ?? false}
 				bind:showEvidenceModal
 				onExportPDF={generatePDF}
 			/>
@@ -374,109 +401,24 @@
 					<div class="rounded-lg bg-blue-500/10 p-2 text-blue-400">
 						<Filter size={18} />
 					</div>
-					<span class="text-sm font-medium">Filtrar vista por:</span>
+					<span class="text-sm font-medium">Filtrar por período:</span>
 				</div>
 
-				<div
-					bind:this={filterScrollContainer}
-					onscroll={checkFilterScroll}
-					class="grid w-full grid-cols-1 gap-3 pb-2 md:grid md:w-full md:grid-cols-3 md:pb-0 lg:w-auto xl:grid-cols-5"
-				>
-					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
-						<select
-							bind:value={filters.periodo}
-							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
-						>
-							<option value="mes_actual">Este mes</option>
-							<option value="trimestre">Este trimestre</option>
-							<option value="anio">Este año</option>
-						</select>
-						<ChevronDown
-							size={14}
-							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
-						/>
-					</div>
-
-					<div class="relative w-full min-w-[160px] shrink-0 snap-start">
-						<select
-							bind:value={filters.categoria}
-							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
-						>
-							<option value="todas">Todas las categorías</option>
-							<option value="educacion">Educación</option>
-							<option value="salud">Salud</option>
-							<option value="tecnologia">Tecnología</option>
-						</select>
-						<ChevronDown
-							size={14}
-							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
-						/>
-					</div>
-
-					<div class="relative w-full min-w-[140px] shrink-0 snap-start">
-						<select
-							bind:value={filters.estado}
-							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
-						>
-							<option value="todos">Todos los estados</option>
-							<option value="en_curso">En curso</option>
-							<option value="pendiente_solicitud_cierre">Pendiente solicitud cierre</option>
-							<option value="en_revision">En revisión</option>
-							<option value="completado">Completado</option>
-							<option value="cancelado">Cancelado</option>
-						</select>
-						<ChevronDown
-							size={14}
-							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
-						/>
-					</div>
-
-					<div class="relative w-full min-w-[150px] shrink-0 snap-start">
-						<select
-							bind:value={filters.tipoParticipacion}
-							class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
-						>
-							<option value="todos">Cualquier ayuda</option>
-							<option value="voluntariado">Voluntariado</option>
-							<option value="monetaria">Monetaria</option>
-							<option value="especie">En especie</option>
-						</select>
-						<ChevronDown
-							size={14}
-							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
-						/>
-					</div>
-
-					<div class="relative w-full min-w-[150px] shrink-0 snap-start">
-						<select
-							bind:value={filters.ubicacion}
-							class="focus:border-primary focus:ring-primary w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 focus:ring-1"
-						>
-							<option value="todas">Todas las ubicaciones</option>
-							<option value="local">Local</option>
-							<option value="provincial">Provincial</option>
-							<option value="nacional">Nacional</option>
-						</select>
-						<ChevronDown
-							size={14}
-							class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
-						/>
-					</div>
-				</div>
-
-				<!-- Scroll Indicators -->
-				{#if showLeftGradient}
-					<div
-						class="from-bg-[#0F1029] via-bg-[#0F1029]/80 pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-8 bg-gradient-to-r to-transparent md:hidden"
-					></div>
-				{/if}
-				{#if showRightGradient}
-					<div
-						class="to-bg-[#0F1029] via-bg-[#0F1029]/80 pointer-events-none absolute top-0 right-0 bottom-0 z-10 flex w-12 items-center justify-end bg-gradient-to-r from-transparent p-2 md:hidden"
+				<div class="relative w-full min-w-[180px] lg:w-auto">
+					<select
+						value={periodo}
+						onchange={cambiarPeriodo}
+						class="w-full appearance-none rounded-lg border-white/10 bg-[#151730] py-2 pr-10 pl-3 text-xs font-medium text-slate-300 transition-all focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
 					>
-						<ChevronRight size={16} class="text-primary animate-pulse" />
-					</div>
-				{/if}
+						{#each PERIODO_OPCIONES as opcion (opcion.slug)}
+							<option value={opcion.slug}>{opcion.label}</option>
+						{/each}
+					</select>
+					<ChevronDown
+						size={14}
+						class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-slate-400"
+					/>
+				</div>
 			</div>
 		{/if}
 
@@ -485,10 +427,11 @@
 			<MetricasPanel
 				metricas={{
 					proyectosActivos: data.metricas.proyectosTotales,
+					nuevosProyectos: data.metricas.nuevosProyectos,
 					colaboradores: data.metricas.colaboradoresActivos,
-					nuevosColaboradores: 2,
 					proximoCierre: data.metricas.diasProximoCierre
 				}}
+				{mostrarBadgeNuevas}
 				onclickColaboradores={() => (showCollaboratorStats = true)}
 				onclickProyectos={() => (showProjectStats = true)}
 				onclickAgenda={() => (showCalendarStats = true)}
@@ -504,9 +447,11 @@
 					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
 						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="No hay proyectos activos" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="No hay proyectos activos"
 								description="Cuando crees un proyecto y comiences a recibir ayuda, podrás ver el progreso de tus objetivos aquí."
 								icon={HeartOff}
 							/>
@@ -518,9 +463,11 @@
 					{#if data.actividadReciente && data.actividadReciente.length > 0}
 						<ActividadReciente actividad={data.actividadReciente} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="Sin actividad reciente" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="Sin actividad reciente"
 								description="Aquí aparecerán las últimas interacciones con tus proyectos y colaboradores."
 								icon={Activity}
 							/>
@@ -542,9 +489,11 @@
 					{#if data.topColaboradores && data.topColaboradores.length > 0}
 						<TopColaboradores colaboradores={data.topColaboradores} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="Sin colaboradores aún" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="Sin colaboradores aún"
 								description="Tus colaboradores más destacados aparecerán aquí cuando comiencen a participar en tus proyectos."
 								icon={Users}
 							/>
@@ -554,7 +503,6 @@
 
 				<!-- Últimas Reseñas -->
 				<div class="min-h-[300px]">
-					<!-- TODO: implementar módulo de reseñas -->
 					<UltimasResenas resenas={data.ultimasResenas} />
 				</div>
 			</div>
@@ -567,9 +515,11 @@
 				{#if data.aspectosMejorar && data.aspectosMejorar.length > 0}
 					<AspectosMejorar aspectos={data.aspectosMejorar} />
 				{:else}
-					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-						<EmptyState 
-							message="Todo en orden" 
+					<div
+						class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+					>
+						<EmptyState
+							message="Todo en orden"
 							description="No hay sugerencias o aspectos críticos a mejorar reportados por tus colaboradores actualmente."
 							icon={Sparkles}
 						/>
@@ -625,7 +575,7 @@
 
 	<GestionarEvidenciasModal
 		show={showEvidenceModal}
-		proyectos={data.metricas.estadisticasProyectos?.proyectosDestacados || []}
+		proyectos={data.proyectosParaEvidencia || []}
 		onClose={() => (showEvidenceModal = false)}
 	/>
 </div>

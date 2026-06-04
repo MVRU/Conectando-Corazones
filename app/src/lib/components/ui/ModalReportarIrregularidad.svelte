@@ -2,7 +2,7 @@
 	import { usuario as usuarioStore } from '$lib/stores/auth';
 	import ReporteForm from '$lib/components/ui/forms/ReporteForm.svelte';
 	import { crearReporte } from '$lib/utils/util-reportes';
-	import { portal } from '\$lib/utils/actions/portal';
+	import { portal } from '$lib/utils/actions/portal';
 	import { Button } from '$lib';
 
 	// recibidas del componente padre
@@ -93,7 +93,7 @@
 	<!-- Overlay -->
 	<div
 		use:portal
-		class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
+		class="fixed inset-0 z-9999 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-md transition-all duration-300"
 		onclick={cerrarModal}
 		onkeydown={(e: KeyboardEvent) => e.key === 'Enter' && cerrarModal()}
 		role="button"

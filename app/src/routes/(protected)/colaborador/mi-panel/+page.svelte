@@ -21,7 +21,7 @@
 		class:opacity-0={!animate}
 		class:opacity-100={animate}
 	>
-		<DashboardColaborador data={data.dashboardData} />
+		<DashboardColaborador data={data.dashboardData} periodo={data.periodo} />
 	</div>
 {:else if data.error}
 	<div class="flex min-h-screen items-center justify-center">

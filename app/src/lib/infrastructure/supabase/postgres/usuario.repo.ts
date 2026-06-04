@@ -24,7 +24,10 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(usuario);
 	}
 
-	async findByUsername(username: string, includeInactive: boolean = false): Promise<Usuario | null> {
+	async findByUsername(
+		username: string,
+		includeInactive: boolean = false
+	): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { username },
 			include: this.includeOptions
@@ -58,7 +61,10 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 	 * Versión optimizada para autenticación - solo carga datos esenciales
 	 * Reduce el tiempo de carga en hooks.server.ts
 	 */
-	async findByUsernameBasic(username: string, includeInactive: boolean = false): Promise<Usuario | null> {
+	async findByUsernameBasic(
+		username: string,
+		includeInactive: boolean = false
+	): Promise<Usuario | null> {
 		const usuario = await prisma.usuario.findUnique({
 			where: { username },
 			select: {
@@ -161,11 +167,19 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 		return UsuarioMapper.toDomain(created);
 	}
 
-	async findAll(filtros?: { rol?: string; estado?: string; includeInactive?: boolean }): Promise<Usuario[]> {
+	async findAll(filtros?: {
+		rol?: string;
+		estado?: string;
+		includeInactive?: boolean;
+	}): Promise<Usuario[]> {
 		const usuarios = await prisma.usuario.findMany({
 			where: {
 				...(filtros?.rol ? { rol: filtros.rol } : {}),
-				...(filtros?.estado ? { estado: filtros.estado } : !filtros?.includeInactive ? { estado: { not: 'inactivo' } } : {})
+				...(filtros?.estado
+					? { estado: filtros.estado }
+					: !filtros?.includeInactive
+						? { estado: { not: 'inactivo' } }
+						: {})
 			},
 			include: this.includeOptions
 		});
@@ -204,6 +218,15 @@ export class PostgresUsuarioRepository implements UsuarioRepository {
 			}
 		});
 		return count > 0;
+	}
+
+	async obtenerArcaVigente(usuarioId: number): Promise<boolean> {
+		const verif = await prisma.verificacion.findFirst({
+			where: { usuario_id: usuarioId, tipo: 'arca', estado: 'aprobada' },
+			orderBy: { created_at: 'desc' },
+			select: { fecha_vencimiento: true }
+		});
+		return !!verif?.fecha_vencimiento && new Date(verif.fecha_vencimiento) > new Date();
 	}
 
 	async update(usuario: Usuario): Promise<Usuario> {

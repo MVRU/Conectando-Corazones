@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { toastStore } from '$lib/stores/toast';
 	import { goto } from '$app/navigation';
-	import { usuario } from '$lib/stores/auth';
 	import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 	import ProyectoInfoBasica from './ProyectoInfoBasica.svelte';
@@ -32,8 +31,6 @@
 		validarAumentoObjetivo,
 		validarAumentoBeneficiarios
 	} from '$lib/utils/util-proyecto-form';
-	import type { Categoria } from '$lib/domain/types/Categoria';
-	import type { TipoParticipacion } from '$lib/domain/types/TipoParticipacion';
 	import type { ProyectoCreate } from '$lib/domain/types/dto/ProyectoCreate';
 	import type { UbicacionCreate } from '$lib/domain/types/dto/UbicacionCreate';
 	import type { ParticipacionPermitidaCreate } from '$lib/domain/types/dto/ParticipacionPermitidaCreate';
@@ -142,7 +139,9 @@
 
 	$effect(() => {
 		if (seleccionoOtra) {
-			const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+			const err = validadorCategoria.validarCategoriaOtraDescripcion(
+				categoriaOtraDescripcion || ''
+			);
 			if (err) {
 				errores.categoria_otra = err;
 			} else {
@@ -670,7 +669,10 @@
 		{/if}
 
 		<form
-			onsubmit={(e) => { e.preventDefault(); enviarFormulario(estaVerificado ? 'en_curso' : 'borrador'); }}
+			onsubmit={(e) => {
+				e.preventDefault();
+				enviarFormulario(estaVerificado ? 'en_curso' : 'borrador');
+			}}
 			class="space-y-8"
 		>
 			<ProyectoInfoBasica
@@ -699,7 +701,7 @@
 				{esEdicionRestringida}
 				{esAdmin}
 				participacionesOriginales={initialData?.originales?.participacionesOriginales || []}
-				tieneColaboradoresAprobados={tieneColaboradoresAprobados}
+				{tieneColaboradoresAprobados}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} {esEdicionRestringida} {esAdmin} />

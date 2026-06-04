@@ -12,7 +12,6 @@
 		DireccionPresencialFormulario
 	} from '$lib/domain/types/forms/CrearProyectoForm';
 	import { obtenerDescripcionTipo } from '$lib/utils/util-proyecto-form';
-	import { Icon } from '@steeze-ui/svelte-icon';
 	import { Lock } from 'lucide-svelte';
 
 	let {
@@ -30,20 +29,15 @@
 	// Estados locales para datos
 	let provinciasData = $state<Provincia[]>([]);
 	let localidadesCache = $state<Record<string, Localidad[]>>({});
-	let cargandoProvincias = $state(false);
-
 	$effect(() => {
 		(async () => {
 			try {
-				cargandoProvincias = true;
 				const res = await fetch('/api/ubicaciones/provincias');
 				if (res.ok) {
 					provinciasData = await res.json();
 				}
 			} catch (e) {
 				console.error('Error cargando provincias:', e);
-			} finally {
-				cargandoProvincias = false;
 			}
 		})();
 	});
@@ -128,7 +122,9 @@
 			!esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')
 		) {
 			const valorNormalizado = valor.trim().toLowerCase();
-			const existeEnLista = TIPO_UBICACION.some((tipo: string) => tipo.toLowerCase() === valorNormalizado);
+			const existeEnLista = TIPO_UBICACION.some(
+				(tipo: string) => tipo.toLowerCase() === valorNormalizado
+			);
 
 			if (existeEnLista) {
 				errores[`ubicacion_${index}_tipo`] = 'Ese tipo de ubicación ya existe en la lista oficial.';
@@ -148,7 +144,8 @@
 		// Verificar si intenta marcar como "Principal" cuando ya existe una
 		if (campo === 'tipo_ubicacion' && valor.toLowerCase() === 'principal') {
 			const yaTienePrincipal = ubicaciones.some(
-				(u: UbicacionFormulario, i: number) => i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
+				(u: UbicacionFormulario, i: number) =>
+					i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
 			);
 			if (yaTienePrincipal) {
 				errores[`ubicacion_${index}_tipo`] =
@@ -213,7 +210,9 @@
 		}
 	}
 
-	let yaTienePrincipal = $derived(ubicaciones.some((u: UbicacionFormulario) => u.tipo_ubicacion?.toLowerCase() === 'principal'));
+	let yaTienePrincipal = $derived(
+		ubicaciones.some((u: UbicacionFormulario) => u.tipo_ubicacion?.toLowerCase() === 'principal')
+	);
 
 	// Función para obtener tipos disponibles según el índice
 	function obtenerTiposDisponibles(index: number): readonly string[] {
@@ -286,7 +285,7 @@
 							value={ubicacion.tipo_ubicacion}
 							onchange={(e) => manejarCambioTipo(index, e.currentTarget.value)}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal || esAdmin}
 							class:border-red-300={errores[`ubicacion_${index}_tipo`] && (!esOriginal || esAdmin)}
 							class:cursor-not-allowed={esOriginal && !esAdmin}
@@ -317,10 +316,9 @@
 								value={ubicacion.tipo_ubicacion === 'personalizado_input'
 									? ''
 									: ubicacion.tipo_ubicacion}
-								oninput={(e) =>
-									actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
+								oninput={(e) => actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
 								placeholder="Escribí el tipo de ubicación..."
-								class="focus:ring-opacity-20 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-red-300={errores[`ubicacion_${index}_tipo`]}
 							/>
 							<button
@@ -347,7 +345,7 @@
 						value={ubicacion.modalidad}
 						onchange={(e) => actualizarUbicacion(index, 'modalidad', e.currentTarget.value)}
 						disabled={esOriginal && !esAdmin}
-						class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+						class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 						class:border-gray-300={!esOriginal || esAdmin}
 						class:border-red-300={errores[`ubicacion_${index}_modalidad`] &&
 							(!esOriginal || esAdmin)}
@@ -380,7 +378,7 @@
 								ubicaciones[index] = { ...ubicaciones[index], url_virtual: e.currentTarget.value };
 							}}
 							disabled={esOriginal && !esAdmin}
-							class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={!esOriginal}
 							class:border-red-300={errores[`ubicacion_${index}_url_virtual`] && !esOriginal}
 							class:cursor-not-allowed={esOriginal}
@@ -411,7 +409,7 @@
 								value={ubicacion.direccion_presencial?.provincia}
 								onchange={(e) => actualizarDireccion(index, 'provincia', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_provincia`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -458,7 +456,7 @@
 									};
 								}}
 								disabled={(esOriginal && !esAdmin) || !ubicacion.direccion_presencial?.provincia}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_localidad`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -493,7 +491,7 @@
 								value={ubicacion.direccion_presencial?.calle}
 								oninput={(e) => actualizarDireccion(index, 'calle', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_calle`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -521,7 +519,7 @@
 								value={ubicacion.direccion_presencial?.numero}
 								oninput={(e) => actualizarDireccion(index, 'numero', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_numero`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -546,7 +544,7 @@
 								value={ubicacion.direccion_presencial?.piso || ''}
 								oninput={(e) => actualizarDireccion(index, 'piso', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:border-red-300={errores[`ubicacion_${index}_piso`] && !esOriginal}
 								class:cursor-not-allowed={esOriginal}
@@ -571,7 +569,7 @@
 								value={ubicacion.direccion_presencial?.departamento || ''}
 								oninput={(e) => actualizarDireccion(index, 'departamento', e.currentTarget.value)}
 								disabled={esOriginal && !esAdmin}
-								class="focus:ring-opacity-20 w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+								class="w-full rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-gray-300={!esOriginal}
 								class:cursor-not-allowed={esOriginal}
 								class:bg-gray-50={esOriginal}
@@ -593,7 +591,7 @@
 							value={ubicacion.direccion_presencial?.referencia}
 							oninput={(e) => actualizarDireccion(index, 'referencia', e.currentTarget.value)}
 							rows="2"
-							class="focus:ring-opacity-20 w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+							class="w-full resize-none rounded-lg border px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 							class:border-gray-300={true}
 							class:border-red-300={errores[`ubicacion_${index}_referencia`]}
 						></textarea>

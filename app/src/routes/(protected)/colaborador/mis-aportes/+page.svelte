@@ -24,7 +24,7 @@
 	<title>Mis Aportes - Conectando Corazones</title>
 </svelte:head>
 
-<div class="absolute inset-0 -z-10 bg-gradient-to-br from-purple-50 via-white to-blue-50"></div>
+<div class="absolute inset-0 -z-10 bg-linear-to-br from-purple-50 via-white to-blue-50"></div>
 
 <main class="relative z-10 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 	<!-- Header -->
@@ -104,7 +104,7 @@
 							<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 								{#each compromisos as compromiso}
 									<div
-										class="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm"
+										class="rounded-xl border border-blue-100 bg-linear-to-br from-blue-50 to-white p-4 shadow-sm"
 									>
 										<p class="text-xs font-semibold text-blue-600">
 											{compromiso.participacion_permitida?.tipo_participacion?.descripcion ||

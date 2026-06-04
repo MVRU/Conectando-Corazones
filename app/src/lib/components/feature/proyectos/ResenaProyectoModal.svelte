@@ -63,7 +63,7 @@
 			onkeydown={(e) => e.stopPropagation()}
 		>
 			<div
-				class="relative mb-4 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-500 p-4 text-white"
+				class="relative mb-4 rounded-xl bg-linear-to-r from-sky-600 to-indigo-500 p-4 text-white"
 			>
 				<button
 					onclick={cerrar}
@@ -88,7 +88,13 @@
 				</ul>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); guardar(); }} class="mt-6 space-y-6">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					guardar();
+				}}
+				class="mt-6 space-y-6"
+			>
 				<div>
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>

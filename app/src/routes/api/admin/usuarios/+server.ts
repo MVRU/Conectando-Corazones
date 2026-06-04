@@ -17,7 +17,9 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	const usuarios = await service.getUsuarios({
 		rol,
 		estadoGestion:
-			estadoGestion === 'activo' || estadoGestion === 'pendiente' || estadoGestion === 'inhabilitado'
+			estadoGestion === 'activo' ||
+			estadoGestion === 'pendiente' ||
+			estadoGestion === 'inhabilitado'
 				? estadoGestion
 				: undefined,
 		fechaAltaDesde: fechaAltaDesdeRaw ? new Date(fechaAltaDesdeRaw) : undefined,

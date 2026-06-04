@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { ArrowLeft, ArrowRight } from 'lucide-svelte';
 
-	let {
-		currentPage,
-		totalPages,
-		onpagechange
-	} = $props<{
+	let { currentPage, totalPages, onpagechange } = $props<{
 		currentPage: number;
 		totalPages: number;
 		onpagechange?: (page: number) => void;

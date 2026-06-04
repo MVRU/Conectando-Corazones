@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
-	import {
-		X,
-		Calendar,
-		Clock,
-		CalendarClock,
-		ArrowRight,
-		AlertCircle
-	} from 'lucide-svelte';
+	import { X, Calendar, Clock, CalendarClock, ArrowRight, AlertCircle } from 'lucide-svelte';
 	import type { EstadisticasCalendario } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+	let {
+		show = false,
+		stats = undefined,
+		onClose = () => {}
+	} = $props<{
 		show?: boolean;
 		stats?: EstadisticasCalendario;
 		onClose?: () => void;
@@ -196,7 +193,7 @@
 							>
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white"
+										class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
 										class:bg-amber-500={deadline.tipo === 'finalizacion_proyecto'}
 										class:bg-indigo-500={deadline.tipo === 'verificacion'}
 										class:bg-slate-600={deadline.tipo === 'otro'}

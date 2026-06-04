@@ -7,9 +7,14 @@ export interface UsuarioRepository {
 	findByUsernameBasic(username: string, includeInactive?: boolean): Promise<Usuario | null>;
 	findByEmail(email: string, includeInactive?: boolean): Promise<Usuario | null>;
 	findByAuthId(authId: string, includeInactive?: boolean): Promise<Usuario | null>;
-	findAll(filtros?: { rol?: string; estado?: string; includeInactive?: boolean }): Promise<Usuario[]>;
+	findAll(filtros?: {
+		rol?: string;
+		estado?: string;
+		includeInactive?: boolean;
+	}): Promise<Usuario[]>;
 	update(usuario: Usuario): Promise<Usuario>;
 	delete(id: number): Promise<void>;
 	hasActiveProjects(id: number): Promise<boolean>;
 	hasActiveCollaborations(id: number): Promise<boolean>;
+	obtenerArcaVigente(usuarioId: number): Promise<boolean>;
 }

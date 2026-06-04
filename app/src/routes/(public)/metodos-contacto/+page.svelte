@@ -2,10 +2,10 @@
 	import MetodosContactoForm from '$lib/components/ui/forms/MetodosContactoForm.svelte';
 </script>
 
-<div class="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-white to-purple-50"></div>
+<div class="absolute inset-0 -z-10 bg-linear-to-br from-blue-50 via-white to-purple-50"></div>
 
 <div
-	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-gradient-to-t from-blue-50 via-white to-transparent"
+	class="absolute top-[80%] right-0 bottom-0 left-0 -z-10 bg-linear-to-t from-blue-50 via-white to-transparent"
 	style="background-size: 100% 400px; background-repeat: repeat-y;"
 ></div>
 

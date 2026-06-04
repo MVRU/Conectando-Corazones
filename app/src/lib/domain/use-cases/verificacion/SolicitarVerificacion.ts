@@ -7,7 +7,7 @@ export class SolicitarVerificacion {
 
 	/**
 	 * RN: Solo el propio usuario puede solicitar una verificación para sí mismo.
-	 * RN: El tipo debe ser canónico (`email_institucional`, `documental`, `renaper`).
+	 * RN: El tipo debe ser canónico (`email_institucional`, `institucional`, `renaper`, `arca`).
 	 * RN: No puede existir otra solicitud `pendiente` del mismo tipo para el mismo usuario.
 	 */
 	async execute(usuarioId: number, actorUserId: number, tipo: string): Promise<Verificacion> {

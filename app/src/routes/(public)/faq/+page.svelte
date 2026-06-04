@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { writable, derived } from 'svelte/store';
 	import { onMount } from 'svelte';
-	import { faqs as allFaqs } from '\$lib/domain/types/static-data/faqs';
+	import { faqs as allFaqs } from '$lib/domain/types/static-data/faqs';
 	import SearchBar from '$lib/components/ui/elementos/SearchBar.svelte';
 	import Highlight from '$lib/components/ui/Highlight.svelte';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
@@ -57,7 +57,7 @@
 	});
 </script>
 
-<section class="w-full bg-gradient-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
+<section class="w-full bg-linear-to-b from-gray-50 to-white px-6 py-20 md:px-12 lg:px-28">
 	<!-- Encabezado -->
 	<div class="animate-fade-in-up mb-16 text-center">
 		<h2 class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">

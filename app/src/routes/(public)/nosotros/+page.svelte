@@ -29,7 +29,7 @@
 </script>
 
 <div
-	class="mx-auto max-w-7xl rounded-3xl bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-8 shadow-xl sm:px-6 md:py-14 lg:px-8"
+	class="mx-auto max-w-7xl rounded-3xl bg-linear-to-br from-blue-50 via-white to-purple-50 px-4 py-8 shadow-xl sm:px-6 md:py-14 lg:px-8"
 >
 	<!-- Sección "Por qué existimos" -->
 	<section class="mb-24">
@@ -38,22 +38,22 @@
 		>
 			<div class="pointer-events-none absolute inset-0">
 				<div
-					class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-blue-200/30 via-purple-200/20 to-transparent blur-3xl"
+					class="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-linear-to-br from-blue-200/30 via-purple-200/20 to-transparent blur-3xl"
 				></div>
 				<div
-					class="absolute -right-16 -bottom-16 h-56 w-56 rounded-full bg-gradient-to-tr from-blue-100/30 via-pink-100/20 to-transparent blur-2xl"
+					class="absolute -right-16 -bottom-16 h-56 w-56 rounded-full bg-linear-to-tr from-blue-100/30 via-pink-100/20 to-transparent blur-2xl"
 				></div>
 			</div>
 			<div class="mb-8 flex justify-center">
 				<span
-					class="letter-spacing-wide inline-block rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-purple-400 px-6 py-2 text-sm font-semibold tracking-wide text-white uppercase shadow-md"
+					class="letter-spacing-wide inline-block rounded-full bg-linear-to-r from-blue-500 via-blue-400 to-purple-400 px-6 py-2 text-sm font-semibold tracking-wide text-white uppercase shadow-md"
 				>
 					Sobre Nosotros
 				</span>
 			</div>
 			<div class="mx-auto mb-12 max-w-4xl text-center">
 				<div
-					class="relative inline-block aspect-[4/3] min-h-[320px] overflow-hidden rounded-[2.5rem] border-4 border-white/80 shadow-2xl transition-transform duration-500 hover:scale-95"
+					class="relative inline-block aspect-4/3 min-h-[320px] overflow-hidden rounded-[2.5rem] border-4 border-white/80 shadow-2xl transition-transform duration-500 hover:scale-95"
 				>
 					<img
 						src="/img/manosUnidas.jpg"
@@ -66,7 +66,7 @@
 				</div>
 				<h1 class="mt-10 text-4xl leading-tight font-extrabold tracking-tight sm:text-5xl">
 					<span
-						class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
+						class="bg-linear-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
 					>
 						¿Por qué existimos?
 					</span>
@@ -78,7 +78,7 @@
 					<div data-aos="fade-up" data-aos-delay={i * 120} class="relative overflow-visible">
 						<blockquote
 							class="mx-auto max-w-2xl rounded-3xl border border-blue-200/40 px-7 py-8 text-center text-lg leading-relaxed font-normal italic shadow-[0_4px_28px_0_#bbeafe20] md:px-10 md:py-10 md:text-2xl"
-							class:bg-gradient-to-b={i % 2 === 0}
+							class:bg-linear-to-b={i % 2 === 0}
 							class:from-[#e0f2fe]={i % 2 === 0}
 							class:via-[#f0faff]={i % 2 === 0}
 							class:to-[#e0f2fe]={i % 2 === 0}
@@ -103,7 +103,7 @@
 	<section class="mb-24">
 		<h2 class="mb-14 text-center text-3xl font-bold">
 			<span
-				class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
+				class="bg-linear-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
 			>
 				Misión, Visión y Valores
 			</span>
@@ -211,13 +211,13 @@
 	<section>
 		<h2 class="mb-10 text-center text-3xl font-bold">
 			<span
-				class="bg-gradient-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
+				class="bg-linear-to-r from-[#007fff] via-[#68b4ff] to-[#007fff] bg-clip-text text-transparent drop-shadow-md"
 			>
 				Nuestro Equipo
 			</span>
 		</h2>
 		<div
-			class="mx-auto mb-14 max-w-4xl space-y-4 rounded-2xl bg-gradient-to-br from-gray-50 via-white to-blue-50 p-8 text-justify text-lg leading-relaxed text-gray-700 shadow-md md:p-10"
+			class="mx-auto mb-14 max-w-4xl space-y-4 rounded-2xl bg-linear-to-br from-gray-50 via-white to-blue-50 p-8 text-justify text-lg leading-relaxed text-gray-700 shadow-md md:p-10"
 		>
 			<p>
 				Somos tres estudiantes de la Universidad Tecnológica Nacional – Facultad Regional Rosario,
@@ -245,7 +245,7 @@
 						href={member.url}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="mx-auto mb-4 block h-40 w-40 overflow-hidden rounded-3xl border-4 border-white/80 bg-gradient-to-br from-blue-100 via-purple-100 to-white shadow-lg transition-transform duration-300 group-hover:scale-105"
+						class="mx-auto mb-4 block h-40 w-40 overflow-hidden rounded-3xl border-4 border-white/80 bg-linear-to-br from-blue-100 via-purple-100 to-white shadow-lg transition-transform duration-300 group-hover:scale-105"
 					>
 						<img
 							src={member.img}

@@ -5,11 +5,11 @@
 
 	interface Props {
 		estadisticas: {
-		voluntariado: number;
-		monetaria: number;
-		especie: number;
-		totalBeneficiarios: number;
-	};
+			voluntariado: number;
+			monetaria: number;
+			especie: number;
+			totalBeneficiarios: number;
+		};
 	}
 
 	let { estadisticas }: Props = $props();
@@ -26,12 +26,12 @@
 	const tEsp = tweened(0, { duration: 1500, easing: cubicOut });
 	const tTotal = tweened(0, { duration: 2000, easing: cubicOut });
 
-	function handleReveal() {
+	$effect(() => {
 		tVol.set(targetVol);
 		tMon.set(targetMon);
 		tEsp.set(targetEsp);
 		tTotal.set(estadisticas.totalBeneficiarios);
-	}
+	});
 
 	// Dynamic gradient based on tweened values
 	let gradient = $derived(`conic-gradient(
@@ -43,8 +43,7 @@
 
 <div
 	use:reveal
-	onreveal={handleReveal}
-	class="reveal-hidden flex h-full flex-col rounded-[2rem] border border-amber-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="reveal-hidden flex h-full flex-col rounded-4xl border border-amber-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<h2 class="mb-6 w-full text-center text-xl font-semibold tracking-tight text-white md:text-left">
 		Porcentaje de tipos de ayuda

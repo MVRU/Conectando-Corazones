@@ -27,3 +27,14 @@ export const ESTADO_LABELS: Record<EstadoDescripcion, string> = {
 	completado: 'Completado',
 	cancelado: 'Cancelado'
 };
+
+/**
+ * Se usa para filtrar cálculos como "Próximo Cierre" y "Próximos Vencimientos",
+ * excluyendo proyectos completados o cancelados.
+ */
+export const ESTADOS_ACTIVOS_PROYECTO: readonly EstadoDescripcion[] = [
+	'en_curso',
+	'pendiente_solicitud_cierre',
+	'en_revision',
+	'en_auditoria'
+] as const;

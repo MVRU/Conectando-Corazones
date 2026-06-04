@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Star } from 'lucide-svelte';
 	import type { Resena } from '$lib/domain/types/Resena';
 	import type {
 		Usuario,
@@ -93,7 +92,7 @@
 	</div>
 
 	<p
-		class="mb-4 flex-grow leading-relaxed text-gray-600 {variante === 'compacta'
+		class="mb-4 grow leading-relaxed text-gray-600 {variante === 'compacta'
 			? 'text-sm'
 			: ''} text-pretty"
 	>

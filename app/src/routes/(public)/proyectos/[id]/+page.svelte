@@ -39,8 +39,15 @@
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
-	import { guardarReporteLog } from '$lib/utils/util-reportes';
-	import { ChevronDown as ChevronDownIcon, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
+	import {
+		ChevronDown as ChevronDownIcon,
+		ChevronLeft,
+		FileText,
+		Lightbulb,
+		Loader2
+	} from 'lucide-svelte';
+	import BeneficioFiscalArca from '$lib/components/feature/proyectos/BeneficioFiscalArca.svelte';
+	import { colaboradorPuedeDeducirEnProyecto } from '$lib/domain/use-cases/colaboraciones/colaboradorPuedeDeducirEnProyecto';
 
 	import {
 		CheckCircle,
@@ -55,7 +62,6 @@
 		XCircle,
 		Pencil,
 		ShieldCheck,
-		ChevronDown,
 		ChatBubbleLeftRight,
 		ClipboardDocumentList,
 		Photo,
@@ -67,23 +73,58 @@
 
 	let proyecto: Proyecto = $derived(data.proyecto);
 	let chatAviso = $derived(data.chatAviso ?? false);
-	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
-	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
-	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
-	
+	let colaboracionesActivas: Colaboracion[] = $derived(
+		colaboracionesVisibles(proyecto?.colaboraciones ?? [])
+	);
+	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(
+		ordenarPorProgreso(proyecto?.participacion_permitida ?? [])
+	);
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(
+		ordenarUbicaciones(proyecto?.ubicaciones)
+	);
+
 	let resenasProyecto: Resena[] = $state([]);
 	let resenaAEliminar: Resena | null = $state(null);
 	let mostrarModalResena = $state(false);
 	let mostrarConfirmarEliminar = $state(false);
 	const maxCaracteresResena = 500;
 
-	let esCreador = $derived(!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario);
+	let esCreador = $derived(
+		!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario
+	);
 	let colaboracionUsuario = $derived(
 		$usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
 			: undefined
 	);
-	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
+	let misAportes: ColaboracionTipoParticipacion[] = $derived(
+		colaboracionUsuario?.colaboraciones_tipo_participacion || []
+	);
+	let estadoCodigo = $derived(
+		proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso'
+	);
+
+	let puedeVerBeneficioFiscal = $derived(
+		colaboradorPuedeDeducirEnProyecto({
+			proyectoEstado: estadoCodigo,
+			institucionVerificacionArca: proyecto?.esDeducible
+				? {
+						tipo: 'arca' as const,
+						estado: 'aprobada' as const,
+						fecha_vencimiento: new Date('2099-12-31')
+					}
+				: null,
+			colaboradorConFinesLucro: data.conFinesLucro ?? false,
+			colaboracionDelUsuario: colaboracionUsuario
+				? {
+						estado: colaboracionUsuario.estado ?? '',
+						tipos: misAportes.map((a) => ({
+							descripcion: a.participacion_permitida?.tipo_participacion?.descripcion ?? ''
+						}))
+					}
+				: null
+		})
+	);
 
 	let esColaboradorAprobado = $derived(colaboracionUsuario?.estado === 'aprobada');
 	let esSolicitudRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
@@ -92,15 +133,14 @@
 	let esAdministrador = $derived($usuario?.rol === 'administrador');
 	let esInstitucion = $derived($usuario?.rol === 'institucion');
 
-	let resenaUsuarioActual = $derived(resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario));
+	let resenaUsuarioActual = $derived(
+		resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario)
+	);
 	let tieneResenaUsuario = $derived(!!resenaUsuarioActual);
 
 	$effect(() => {
 		if (proyecto) {
-			setBreadcrumbs([
-				BREADCRUMB_ROUTES.proyectos,
-				{ label: proyecto.titulo }
-			]);
+			setBreadcrumbs([BREADCRUMB_ROUTES.proyectos, { label: proyecto.titulo }]);
 		}
 	});
 
@@ -150,38 +190,45 @@
 	function clasesEstado(estado: EstadoDescripcion) {
 		return (
 			{
-				borrador: 'text-slate-600 bg-slate-100',
-				en_curso: 'text-green-600 bg-green-100',
-				pendiente_solicitud_cierre: 'text-orange-600 bg-orange-100',
-				en_revision: 'text-gray-600 bg-gray-100',
-				en_auditoria: 'text-gray-600 bg-gray-100',
-				completado: 'text-blue-600 bg-blue-100',
-				cancelado: 'text-gray-600 bg-gray-100'
-			}[estado] || 'text-gray-600 bg-gray-100'
+				borrador: 'text-slate-700 bg-slate-100',
+				en_curso: 'text-emerald-700 bg-emerald-100',
+				pendiente_solicitud_cierre: 'text-amber-700 bg-amber-100',
+				en_revision: 'text-blue-700 bg-blue-100',
+				en_auditoria: 'text-purple-700 bg-purple-100',
+				completado: 'text-gray-700 bg-gray-100',
+				cancelado: 'text-red-700 bg-red-100'
+			}[estado] ?? 'text-gray-700 bg-gray-100'
 		);
 	}
 
-	let estadoCodigo = $derived(proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso');
 	let clasesChipEstado = $derived(clasesEstado(estadoCodigo));
 	let puedeVerResenas = $derived(
 		estadoCodigo === 'completado' || estadoCodigo === 'en_revision' || esCreador
 	);
-	let puedeRedactarResena = $derived((esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision');
+	let puedeRedactarResena = $derived(
+		(esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision'
+	);
 	let puedeCrearResena = $derived(puedeRedactarResena && !tieneResenaUsuario);
-	let mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let mensajeResenaBloqueada =
+		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let vieneDeEvaluarCierre = $derived(page.url.searchParams.get('desde') === 'evaluar-cierre');
 	let resumenTexto = $derived((proyecto?.resumen || '').trim());
 	let aprendizajesTexto = $derived((proyecto?.aprendizajes || '').trim());
-	let listadoAprendizajes = $derived((aprendizajesTexto || '')
-		.split('\n')
-		.map((l) => l.trim())
-		.filter((l) => l.length > 0)
-		.map((l) => l.replace(/^[-*•]\s*/, '')));
+	let listadoAprendizajes = $derived(
+		(aprendizajesTexto || '')
+			.split('\n')
+			.map((l) => l.trim())
+			.filter((l) => l.length > 0)
+			.map((l) => l.replace(/^[-*•]\s*/, ''))
+	);
 
-	let listadoResumen = $derived((resumenTexto || '')
-		.split('. ')
-		.map((s) => s.trim())
-		.filter((s) => s.length > 0)
-		.map((s) => (s.endsWith('.') ? s : s + '.')));
+	let listadoResumen = $derived(
+		(resumenTexto || '')
+			.split('. ')
+			.map((s) => s.trim())
+			.filter((s) => s.length > 0)
+			.map((s) => (s.endsWith('.') ? s : s + '.'))
+	);
 
 	let tieneResumenIA = $derived(Boolean(resumenTexto));
 	let tieneAprendizajesIA = $derived(Boolean(aprendizajesTexto));
@@ -215,12 +262,12 @@
 		});
 	}
 
-	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
+	let colaboradoresAprobados = $derived(
+		(colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada')
+	);
 	let chatHabilitado = $derived(colaboradoresAprobados.length > 0);
 
-	let mostrarAccionFinalizar = $derived(
-		esCreador && estadoCodigo === 'en_curso'
-	);
+	let mostrarAccionFinalizar = $derived(esCreador && estadoCodigo === 'en_curso');
 
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
@@ -449,7 +496,12 @@
 				icon: ShieldCheck,
 				onclick: () => {}
 			});
-			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
+			acc.push({ divider: true } as {
+				label: string;
+				icon: any;
+				onclick: () => void;
+				divider: boolean;
+			});
 			acc.push({
 				label: 'Cancelar proyecto',
 				icon: XCircle,
@@ -476,33 +528,28 @@
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
 				});
-				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado' && estadoCodigo !== 'en_curso') {
+				if (
+					estadoCodigo !== 'borrador' &&
+					estadoCodigo !== 'cancelado' &&
+					estadoCodigo !== 'en_curso'
+				) {
 					acc.push({
 						label: 'Solicitudes de cierre',
 						icon: ClipboardDocumentCheck,
-						onclick: () =>
-							goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+						onclick: () => goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
 					});
 				}
 				if (estadoCodigo === 'pendiente_solicitud_cierre') {
 					acc.push({
 						label: 'Solicitar cierre',
 						icon: CheckCircle,
-						onclick: () =>
-							goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
+						onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
 					});
 				}
-			} else {
-				acc.push({
-					label: 'Solicitudes de colaboración',
-					icon: ClipboardDocumentList,
-					onclick: () =>
-						goto(`/colaborador/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
-				});
 			}
 
 			if (esColaboradorAprobado) {
-				if (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre') {
+				if (estadoCodigo === 'en_curso') {
 					acc.push({
 						label: 'Agregar aporte',
 						icon: Plus,
@@ -524,7 +571,12 @@
 				onclick: irAAportes
 			});
 
-			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
+			acc.push({ divider: true } as {
+				label: string;
+				icon: any;
+				onclick: () => void;
+				divider: boolean;
+			});
 
 			if (esCreador) {
 				const esEditable = estadoCodigo === 'en_curso';
@@ -705,11 +757,13 @@
 
 	$effect(() => {
 		layoutStore.showStickyBottomBar();
-		
+
 		async function cargarResenas() {
 			if (proyecto?.id_proyecto) {
 				try {
-					const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+					const res = await fetch(
+						`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`
+					);
 					if (res.ok) {
 						resenasProyecto = await res.json();
 					}
@@ -759,7 +813,7 @@
 					bind:isOpen={mostrarMenuGestion}
 					{accionesMenu}
 					{isMobile}
-					esAdministrador={esAdministrador}
+					{esAdministrador}
 				/>
 			{/if}
 		{/snippet}
@@ -772,7 +826,7 @@
 			{#if esAdministrador}
 				<div
 					class="sticky z-40 -mt-6 mb-6 flex w-full items-center justify-center bg-blue-800 px-4 py-2 text-center text-sm font-medium text-white shadow-md transition-all duration-500 sm:-mt-10 sm:mb-10 {$layoutStore.headerVisible
-						? 'top-[4.5rem]'
+						? 'top-18'
 						: 'top-0'}"
 					role="alert"
 				>
@@ -788,7 +842,7 @@
 			{#if estadoCodigo === 'en_auditoria' && !esAdministrador}
 				<div
 					class="sticky z-40 -mt-6 mb-6 flex w-full items-center justify-center bg-purple-800 px-4 py-3 text-center text-sm font-medium text-purple-50 shadow-md transition-all duration-500 sm:-mt-10 sm:mb-10 {$layoutStore.headerVisible
-						? 'top-[4.5rem]'
+						? 'top-18'
 						: 'top-0'}"
 					role="alert"
 				>
@@ -832,7 +886,7 @@
 								{#if esCreador && (estadoCodigo === 'en_curso' || estadoCodigo === 'pendiente_solicitud_cierre')}
 									<a
 										href={`/proyectos/${proyecto.id_proyecto}`}
-										class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-none"
+										class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition hover:bg-sky-100 focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 focus-visible:outline-hidden"
 									>
 										<Icon src={Pencil} class="h-4 w-4" />
 										Actualizar progreso
@@ -862,7 +916,7 @@
 									</p>
 									<a
 										href={`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`}
-										class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+										class="mt-4 inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-hidden"
 									>
 										Solicitar cierre
 									</a>
@@ -901,7 +955,7 @@
 												role="group"
 												aria-label={`Progreso de ${p.unidad_medida}`}
 											>
-												<div class="flex-shrink-0" aria-hidden="true">
+												<div class="shrink-0" aria-hidden="true">
 													{#if estadoObjetivo(p.actual || 0, p.objetivo) === 'completo'}
 														<span
 															class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
@@ -1066,7 +1120,7 @@
 														<ul class="flex flex-col gap-4">
 															{#each listadoAprendizajes as item (item)}
 																<li class="flex gap-4">
-																	<div class="relative mt-2 flex-shrink-0">
+																	<div class="relative mt-2 shrink-0">
 																		<div
 																			class="flex h-2 w-2 items-center justify-center rounded-full bg-amber-400 ring-4 ring-amber-100"
 																		></div>
@@ -1094,6 +1148,11 @@
 								</div>
 							</section>
 						{/if}
+
+						{#if puedeVerBeneficioFiscal}
+							<BeneficioFiscalArca />
+						{/if}
+
 						<section
 							class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 							aria-label="Detalles del proyecto"
@@ -1106,6 +1165,17 @@
 								class="rounded-xl border border-gray-200 bg-white p-4 shadow transition-shadow hover:shadow-lg sm:p-6"
 								aria-labelledby="titulo-resenas-proyecto"
 							>
+								{#if vieneDeEvaluarCierre}
+									<nav class="mb-4">
+										<a
+											href={`/colaborador/proyectos/${proyecto.id_proyecto}/evaluar-cierre`}
+											class="flex items-center text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
+										>
+											<ChevronLeft class="mr-1 h-4 w-4" />
+											Volver a tu evaluación de cierre
+										</a>
+									</nav>
+								{/if}
 								<div class="flex flex-wrap items-start justify-between gap-4">
 									<div>
 										<h2 id="titulo-resenas-proyecto" class="text-xl font-semibold sm:text-2xl">
@@ -1125,7 +1195,7 @@
 										type="button"
 										onclick={abrirModalResena}
 										disabled={!puedeCrearResena}
-										class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
+										class="inline-flex items-center gap-2 rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500"
 									>
 										<Icon src={Star} class="h-4 w-4" />
 										{tieneResenaUsuario ? 'Reseña publicada' : 'Redactar reseña'}
@@ -1139,7 +1209,9 @@
 												<ResenaCard
 													{resena}
 													autor={resena.autor}
-													onEliminar={resena.autor_id && resena.autor_id === $usuario?.id_usuario || esAdministrador
+													onEliminar={(resena.autor_id &&
+														resena.autor_id === $usuario?.id_usuario) ||
+													esAdministrador
 														? () => solicitarEliminarResena(resena)
 														: null}
 												/>
@@ -1158,7 +1230,7 @@
 					<!-- Columna lateral -->
 					<div class="animate-fade-up order-1 space-y-6 lg:order-2" style="animation-delay: 100ms">
 						<div
-							class="hidden lg:sticky lg:top-6 lg:z-[1] lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-[backdrop-filter]:bg-white/40"
+							class="hidden lg:sticky lg:top-6 lg:z-1 lg:block lg:rounded-2xl lg:bg-white/60 lg:p-1 lg:backdrop-blur lg:supports-backdrop-filter:bg-white/40"
 							role="group"
 							aria-label="Acciones principales del proyecto"
 						>
@@ -1171,7 +1243,7 @@
 											<button
 												type="button"
 												onclick={() => (mostrarModalJustificacion = true)}
-												class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+												class="inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-100 font-semibold text-red-700 shadow-sm transition hover:bg-red-200 focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:outline-hidden active:translate-y-px"
 												aria-label="Ver motivo del rechazo"
 											>
 												<Icon src={XCircle} class="h-4 w-4" aria-hidden="true" />
@@ -1181,7 +1253,7 @@
 											<button
 												type="button"
 												disabled
-												class="inline-flex h-11 flex-1 cursor-wait items-center justify-center gap-2 rounded-xl bg-orange-100 font-semibold text-orange-700 decoration-inherit opacity-80 shadow-sm focus-visible:outline-none active:translate-y-[1px]"
+												class="inline-flex h-11 flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-orange-100 font-semibold text-orange-700 decoration-inherit opacity-80 shadow-sm focus-visible:outline-hidden active:translate-y-px"
 												aria-label="Solicitud anulada"
 											>
 												<Icon src={XCircle} class="h-4 w-4" aria-hidden="true" />
@@ -1193,8 +1265,8 @@
 												onclick={manejarClickSolicitud}
 												disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
 												class={tieneSolicitudPendiente || solicitudRecienEnviada
-													? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]'
-													: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
+													? 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-100 font-semibold text-amber-700 shadow-sm transition hover:bg-amber-200 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:outline-hidden active:translate-y-px'
+													: 'inline-flex h-11 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-linear-to-tr from-sky-600 to-sky-400 font-semibold text-white shadow-[0_8px_24px_rgba(2,132,199,.35)] transition hover:brightness-110 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-hidden active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none disabled:grayscale'}
 												aria-label={tieneSolicitudPendiente || solicitudRecienEnviada
 													? 'Ver estado de solicitud'
 													: 'Colaborar ahora en este proyecto'}
@@ -1212,7 +1284,7 @@
 												<button
 													type="button"
 													onclick={anularSolicitud}
-													class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:translate-y-[1px]"
+													class="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:translate-y-px"
 													title="Anular solicitud"
 													aria-label="Anular solicitud"
 												>
@@ -1225,7 +1297,7 @@
 									<button
 										type="button"
 										onclick={compartirProyecto}
-										class="inline-flex h-11 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-none active:translate-y-[1px]"
+										class="inline-flex h-11 w-12 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-sm transition hover:bg-gray-50 focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:outline-hidden active:translate-y-px"
 										aria-label="Compartir este proyecto"
 									>
 										<Icon src={Share} class="h-4 w-4" aria-hidden="true" />
@@ -1502,10 +1574,12 @@
 										type="button"
 										disabled={data.tieneReportePendiente}
 										onclick={() => pushState('', { showReportModal: true })}
-										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
+										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+										{data.tieneReportePendiente
+											? 'Ya tenés un reporte pendiente'
+											: 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>
@@ -1534,7 +1608,7 @@
 							<button
 								type="button"
 								onclick={() => (mostrarModalJustificacion = true)}
-								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-lg transition active:scale-[0.98]"
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-100 px-4 py-3 font-bold text-red-700 shadow-lg transition active:scale-98"
 							>
 								<Icon src={XCircle} class="h-5 w-5" aria-hidden="true" />
 								Solicitud rechazada
@@ -1553,7 +1627,7 @@
 								type="button"
 								onclick={manejarClickSolicitud}
 								disabled={estadoCodigo !== 'en_curso' || solicitudRecienEnviada}
-								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
+								class="flex flex-1 items-center justify-center gap-2 rounded-xl bg-linear-to-tr from-sky-600 to-sky-400 px-4 py-3 font-bold text-white shadow-lg transition active:scale-98 disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale"
 							>
 								{#if tieneSolicitudPendiente || solicitudRecienEnviada}
 									<Icon src={Clock} class="h-5 w-5" aria-hidden="true" />
@@ -1568,7 +1642,7 @@
 								<button
 									type="button"
 									onclick={anularSolicitud}
-									class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:scale-[0.98]"
+									class="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 shadow-sm transition hover:bg-red-100 active:scale-98"
 									aria-label="Anular solicitud"
 								>
 									<Icon src={XCircle} class="h-6 w-6" />
@@ -1579,7 +1653,7 @@
 					<button
 						type="button"
 						onclick={compartirProyecto}
-						class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+						class="flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-gray-700 hover:bg-gray-100 active:scale-98"
 						aria-label="Compartir"
 					>
 						<Icon src={Share} class="h-5 w-5" />
@@ -1673,7 +1747,7 @@
 				<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 					<button
 						type="button"
-						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 						onclick={() => (mostrarModalExito = false)}
 					>
 						Cerrar
@@ -1724,7 +1798,7 @@
 				<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 					<button
 						type="button"
-						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 						onclick={() => (mostrarModalJustificacion = false)}
 					>
 						Cerrar
@@ -1776,7 +1850,7 @@
 				<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 					<button
 						type="button"
-						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+						class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 						onclick={() => (mostrarModalPendiente = false)}
 					>
 						Cerrar
@@ -1836,7 +1910,7 @@
 							id="justificacion-cancel"
 							bind:value={justificacionCancelacion}
 							placeholder="Explicá brevemente el motivo de la cancelación..."
-							class="w-full rounded-xl border border-gray-200 p-3 text-sm transition-all outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500"
+							class="w-full rounded-xl border border-gray-200 p-3 text-sm outline-hidden transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
 							rows="3"
 						></textarea>
 					</div>
@@ -1929,24 +2003,22 @@
 	</div>
 {/if}
 
-	<ResenaProyectoModal
-		mostrar={mostrarModalResena}
-		modo="crear"
-		resenaInicial={null}
-		maxCaracteres={maxCaracteresResena}
-		onguardar={guardarResena}
-		oncerrar={() => (mostrarModalResena = false)}
-	/>
+<ResenaProyectoModal
+	mostrar={mostrarModalResena}
+	modo="crear"
+	resenaInicial={null}
+	maxCaracteres={maxCaracteresResena}
+	onguardar={guardarResena}
+	oncerrar={() => (mostrarModalResena = false)}
+/>
 
 {#if mostrarConfirmarEliminar}
-	
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
 		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
-	
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"
@@ -1972,14 +2044,14 @@
 			<div class="flex items-center justify-center gap-3 border-t border-gray-100 px-6 py-4">
 				<button
 					type="button"
-					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+					class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 					onclick={cancelarEliminarResena}
 				>
 					Cancelar
 				</button>
 				<button
 					type="button"
-					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-none"
+					class="inline-flex items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 focus:ring-2 focus:ring-red-300 focus:outline-hidden"
 					onclick={confirmarEliminarResena}
 				>
 					Eliminar

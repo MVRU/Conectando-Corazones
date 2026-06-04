@@ -1,4 +1,5 @@
 import { prisma } from '$lib/infrastructure/prisma/client';
+import { supabaseAdmin } from '$lib/infrastructure/supabase/admin-client';
 import type { ArchivoRepository } from '../../../domain/repositories/ArchivoRepository';
 import { Archivo } from '../../../domain/entities/Archivo';
 
@@ -94,10 +95,10 @@ export class PostgresArchivoRepository implements ArchivoRepository {
 	}
 
 	async delete(id: number, usuarioId: number): Promise<void> {
-		await prisma.$transaction(async (tx) => {
-			const anterior = await tx.archivo.findUnique({ where: { id_archivo: id } });
-			if (!anterior) throw new Error(`Archivo con id ${id} no encontrado para eliminar.`);
+		const anterior = await prisma.archivo.findUnique({ where: { id_archivo: id } });
+		if (!anterior) throw new Error(`Archivo con id ${id} no encontrado para eliminar.`);
 
+		await prisma.$transaction(async (tx) => {
 			await tx.historialDeCambios.create({
 				data: {
 					tipo_objeto: 'Archivo',
@@ -114,10 +115,19 @@ export class PostgresArchivoRepository implements ArchivoRepository {
 				}
 			});
 
-			await tx.archivo.delete({
-				where: { id_archivo: id }
-			});
+			await tx.archivo.delete({ where: { id_archivo: id } });
 		});
+
+		if (anterior.url) {
+			const partes = anterior.url.split('/');
+			if (partes.length > 1) {
+				const bucket = partes[0];
+				const path = partes.slice(1).join('/');
+				if (bucket && path) {
+					await supabaseAdmin.storage.from(bucket).remove([path]);
+				}
+			}
+		}
 	}
 
 	async findById(id: number): Promise<Archivo | null> {

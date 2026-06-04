@@ -85,7 +85,7 @@ export class PostgresReporteRepository implements ReporteRepository {
 
 	async findAll(filters: ReporteFilters = {}): Promise<{ data: Reporte[]; total: number }> {
 		const where: Prisma.ReporteWhereInput = {};
-		
+
 		if (filters.estado) where.estado = filters.estado;
 		if (filters.tipo_objeto) where.tipo_objeto = filters.tipo_objeto;
 		if (filters.reportante_id) where.reportante_id = filters.reportante_id;
@@ -144,7 +144,8 @@ export class PostgresReporteRepository implements ReporteRepository {
 			data: data.map((r) => {
 				const reporte = this.toReporte(r);
 				reporte.nombre_objeto = nombresMap.get(`${r.tipo_objeto.toLowerCase()}:${r.id_objeto}`);
-				reporte.imagen_objeto = imagenesMap.get(`${r.tipo_objeto.toLowerCase()}:${r.id_objeto}`) ?? null;
+				reporte.imagen_objeto =
+					imagenesMap.get(`${r.tipo_objeto.toLowerCase()}:${r.id_objeto}`) ?? null;
 				return reporte;
 			}),
 			total

@@ -60,7 +60,7 @@
 		md: 'h-12 md:h-14 min-w-[140px] px-6 py-3',
 		sm: 'h-9  md:h-10 min-w-[100px] px-4 py-2'
 	};
-	const textSize: Record<string, string> = { md: 'text-[18px]', sm: 'text-[15px]' };
+	const textSize: Record<string, string> = { md: 'text-lg', sm: 'text-[15px]' };
 	const iconSize: Record<string, string> = { md: 'w-5 h-5', sm: 'w-4 h-4' };
 	const rootBase =
 		'rounded-4xl group relative flex cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold tracking-tight transition-all duration-300';
@@ -285,7 +285,7 @@
 		onclick={handleClick}
 		class={clsx(
 			rootBase,
-			'cta-minimal-shine-btn inline-flex border border-blue-400 bg-white/5 font-semibold text-blue-400 shadow-none outline-none focus:ring-2 focus:ring-blue-300',
+			'cta-minimal-shine-btn inline-flex border border-blue-400 bg-white/5 font-semibold text-blue-400 shadow-none outline-hidden focus:ring-2 focus:ring-blue-300',
 			size === 'md'
 				? 'h-12 min-w-[140px] px-8 py-3 md:h-14'
 				: 'h-9 min-w-[100px]  px-5 py-2 md:h-10',

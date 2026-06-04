@@ -20,3 +20,16 @@ export function getEstadoCodigo(estado?: EstadoDescripcion, id_estado?: number):
 }
 
 export const estadoLabel = (codigo: EstadoDescripcion) => ESTADO_LABELS[codigo];
+
+export function getColorEstadoHex(estado: string): string {
+	const colores: Record<string, string> = {
+		en_curso: '#10b981',
+		pendiente_solicitud_cierre: '#f59e0b',
+		en_revision: '#3b82f6',
+		en_auditoria: '#8b5cf6',
+		completado: '#6b7280',
+		cancelado: '#ef4444',
+		borrador: '#64748b'
+	};
+	return colores[estado] ?? '#6b7280';
+}

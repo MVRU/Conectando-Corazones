@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma, type PrismaDbClient } from '$lib/infrastructure/prisma/client';
-import type { ChatRepository } from '$lib/domain/repositories/ChatRepository';
+import type { ChatRepository, EventoChatActividad } from '$lib/domain/repositories/ChatRepository';
 import type { Chat, Mensaje, ParticipanteChat } from '$lib/domain/types/Chat';
 import {
 	obtenerHrefPerfilPublico,
@@ -120,9 +120,7 @@ export class PostgresChatRepository implements ChatRepository {
 					estado_proyecto: proyecto.estado?.descripcion as Chat['estado_proyecto']
 				} satisfies Chat;
 			})
-			.sort(
-				(a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-			);
+			.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 	}
 
 	async obtenerChatPorProyecto(idProyecto: number): Promise<Chat | null> {
@@ -210,6 +208,45 @@ export class PostgresChatRepository implements ChatRepository {
 		});
 
 		return this.mapMensaje(mensaje);
+	}
+
+	async obtenerEventosChatDelUsuario(
+		usuarioId: number,
+		desde: Date
+	): Promise<EventoChatActividad[]> {
+		const mensajes = await this.db.mensajeChat.findMany({
+			where: {
+				autor_id: usuarioId,
+				created_at: { gte: desde }
+			},
+			select: { proyecto_id: true, created_at: true }
+		});
+
+		return mensajes
+			.filter((m): m is { proyecto_id: number; created_at: Date } => m.created_at !== null)
+			.map((m) => ({ proyecto_id: m.proyecto_id, fecha: m.created_at }));
+	}
+
+	async obtenerFechaUltimoMensajeAjeno(usuarioId: number): Promise<Date | null> {
+		const ultimo = await this.db.mensajeChat.findFirst({
+			where: {
+				autor_id: { not: usuarioId },
+				proyecto: {
+					OR: [
+						{ institucion_id: usuarioId },
+						{
+							colaboraciones: {
+								some: { colaborador_id: usuarioId, estado: 'aprobada' }
+							}
+						}
+					]
+				}
+			},
+			orderBy: { created_at: 'desc' },
+			select: { created_at: true }
+		});
+
+		return ultimo?.created_at ?? null;
 	}
 
 	private mapParticipantes(

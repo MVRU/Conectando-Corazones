@@ -1,4 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';
 import { PostgresColaboracionRepository } from '$lib/infrastructure/supabase/postgres/colaboracion.repo';
@@ -24,8 +24,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(404, 'Proyecto no encontrado');
 	}
 
-	const allowedStatuses = ['en_curso', 'pendiente_solicitud_cierre'];
-	if (!proyecto.estado || !allowedStatuses.includes(proyecto.estado)) {
+	if (proyecto.estado !== 'en_curso') {
 		throw error(403, 'El proyecto no acepta nuevos aportes en su estado actual');
 	}
 
@@ -48,7 +47,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-	guardarAporte: async ({ request, locals, params }) => {
+	guardarAporte: async ({ request, locals }) => {
 		const usuario = locals.usuario;
 		if (!usuario || usuario.rol !== 'colaborador' || !usuario.id_usuario) {
 			return fail(401, { error: 'No autorizado' });

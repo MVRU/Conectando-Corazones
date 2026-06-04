@@ -1,5 +1,9 @@
 <script lang="ts">
-	let { question, answer, initiallyOpen = false } = $props<{
+	let {
+		question,
+		answer,
+		initiallyOpen = false
+	} = $props<{
 		question: string;
 		answer: string;
 		initiallyOpen?: boolean;
@@ -16,7 +20,7 @@
 >
 	<button
 		type="button"
-		class="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-none sm:px-6 sm:py-4"
+		class="flex w-full items-center justify-between px-4 py-3 text-left focus:outline-hidden sm:px-6 sm:py-4"
 		aria-expanded={open}
 		onclick={() => (open = !open)}
 	>

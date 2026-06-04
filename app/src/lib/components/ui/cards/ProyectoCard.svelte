@@ -3,6 +3,7 @@
 	import type { Usuario } from '$lib/domain/types/Usuario';
 	import { MapPin, GlobeAlt, Photo, XCircle } from '@steeze-ui/heroicons';
 	import { Icon } from '@steeze-ui/svelte-icon';
+	import BadgeArca from '$lib/components/ui/badges/BadgeArca.svelte';
 	const usuarioPorDefecto = '/users/user-default.png';
 
 	function aplicarFallbackImagen(event: Event) {
@@ -22,7 +23,19 @@
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
-	let { proyecto, usuario = null, mostrarBotones = false, variante = 'default', esInstitucion = false }: { proyecto: Proyecto; usuario?: Usuario | null; mostrarBotones?: boolean; variante?: 'default' | 'mis-proyectos'; esInstitucion?: boolean } = $props();
+	let {
+		proyecto,
+		usuario = null,
+		mostrarBotones = false,
+		variante = 'default',
+		esInstitucion = false
+	}: {
+		proyecto: Proyecto;
+		usuario?: Usuario | null;
+		mostrarBotones?: boolean;
+		variante?: 'default' | 'mis-proyectos';
+		esInstitucion?: boolean;
+	} = $props();
 
 	// Obtener colaboración del usuario
 	const colaboracionUsuario = $derived(
@@ -36,18 +49,18 @@
 
 	const esParticipante = $derived(
 		!esCreador &&
-		!!usuario &&
-		usuario.rol === 'colaborador' &&
-		colaboracionUsuario?.estado === 'aprobada'
+			!!usuario &&
+			usuario.rol === 'colaborador' &&
+			colaboracionUsuario?.estado === 'aprobada'
 	);
 
 	// Detectar si el usuario ya envió una solicitud (pendiente, rechazada, etc) pero NO está aprobada (ya cubierto por esParticipante)
 	const yaColaboro = $derived(
 		!esCreador &&
-		!esParticipante &&
-		!!usuario &&
-		usuario.rol === 'colaborador' &&
-		!!colaboracionUsuario
+			!esParticipante &&
+			!!usuario &&
+			usuario.rol === 'colaborador' &&
+			!!colaboracionUsuario
 	);
 
 	const esRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
@@ -66,17 +79,23 @@
 	}
 
 	const progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
-	const diasFaltantes = $derived(proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999);
+	const diasFaltantes = $derived(
+		proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999
+	);
 	const listoParaFinalizar = $derived(
 		esCreador &&
-		proyecto.estado === 'en_curso' &&
-		(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7))
+			proyecto.estado === 'en_curso' &&
+			(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7))
 	);
 
-	const botonColaborarDeshabilitado = $derived(proyecto.estado !== 'en_curso' || yaColaboro || esAnulada);
+	const botonColaborarDeshabilitado = $derived(
+		proyecto.estado !== 'en_curso' || yaColaboro || esAnulada
+	);
 	const ubicacionCorta = $derived(getUbicacionCorta(proyecto));
 	const esVirtual = $derived(ubicacionCorta === 'Virtual');
-	const estaInactivo = $derived(proyecto.estado === 'completado' || proyecto.estado === 'cancelado');
+	const estaInactivo = $derived(
+		proyecto.estado === 'completado' || proyecto.estado === 'cancelado'
+	);
 </script>
 
 <div
@@ -88,7 +107,7 @@
 	<!-- Link principal del contenido -->
 	<a
 		href={`/proyectos/${proyecto.id_proyecto}`}
-		class="flex flex-grow flex-col text-inherit no-underline focus:ring-2 focus:ring-blue-500 focus:outline-none focus:ring-inset"
+		class="flex grow flex-col text-inherit no-underline focus:ring-2 focus:ring-blue-500 focus:outline-hidden focus:ring-inset"
 	>
 		<!-- Imagen Cover -->
 		<div class="relative h-48 overflow-hidden bg-gray-100">
@@ -98,7 +117,7 @@
 					alt={proyecto.titulo}
 					class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 					class:opacity-90={estaInactivo}
-					class:grayscale-[0.8]={estaInactivo}
+					class:grayscale-80={estaInactivo}
 					loading="lazy"
 				/>
 			{:else}
@@ -146,10 +165,15 @@
 					{ubicacionCorta}
 				</span>
 			</div>
-			<!-- Rango de fechas -->
+			<!-- Franja inferior: ARCA (izquierda) + fechas (derecha) -->
 			<div
-				class="absolute right-0 bottom-0 left-0 flex items-end justify-end bg-gradient-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
+				class="absolute right-0 bottom-0 left-0 flex items-end justify-between bg-linear-to-t from-black/70 via-black/30 to-transparent p-3 pt-12"
 			>
+				{#if proyecto.esDeducible}
+					<BadgeArca />
+				{:else}
+					<span></span>
+				{/if}
 				<span
 					class="rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur-md transition-colors duration-300 group-hover:bg-black/20"
 				>
@@ -164,7 +188,7 @@
 		<div class="flex flex-col p-3 pb-0 sm:p-4">
 			<div class="mb-3">
 				<h3
-					class="mb-1.5 line-clamp-2 text-lg leading-tight font-bold break-words text-gray-900 transition-colors group-hover:text-blue-600"
+					class="mb-1.5 line-clamp-2 text-lg leading-tight font-bold wrap-break-word text-gray-900 transition-colors group-hover:text-blue-600"
 					title={proyecto.titulo}
 				>
 					{proyecto.titulo}
@@ -211,11 +235,15 @@
 				{#if esInstitucion && proyecto.estado === 'en_curso'}
 					<Button
 						label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
-						href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
+						href={listoParaFinalizar
+							? `/proyectos/${proyecto.id_proyecto}`
+							: `/proyectos/${proyecto.id_proyecto}/editar`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
-						customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
+						customAriaLabel={listoParaFinalizar
+							? 'Finalizar actividades del proyecto'
+							: 'Editar proyecto'}
 					/>
 					<Button
 						label="Ver detalles"
@@ -240,11 +268,15 @@
 					{#if proyecto.estado === 'en_curso'}
 						<Button
 							label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
-							href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
+							href={listoParaFinalizar
+								? `/proyectos/${proyecto.id_proyecto}`
+								: `/proyectos/${proyecto.id_proyecto}/editar`}
 							variant="secondary"
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
+							customAriaLabel={listoParaFinalizar
+								? 'Finalizar actividades del proyecto'
+								: 'Editar proyecto'}
 						/>
 					{/if}
 					<Button
@@ -356,7 +388,7 @@
 		<div class="flex items-center justify-center border-t border-gray-100 px-6 py-4">
 			<button
 				type="button"
-				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-none"
+				class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 focus:ring-2 focus:ring-gray-300 focus:outline-hidden"
 				onclick={() => (mostrarJustificacion = false)}
 			>
 				Cerrar

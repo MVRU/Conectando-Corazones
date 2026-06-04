@@ -1,9 +1,13 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import { X, FolderKanban, UploadCloud, XCircle } from 'lucide-svelte';
+	import { X, FolderKanban, UploadCloud } from 'lucide-svelte';
 
-	let { show = false, onClose = () => {}, proyectos = [] } = $props<{
+	let {
+		show = false,
+		onClose = () => {},
+		proyectos = []
+	} = $props<{
 		show?: boolean;
 		onClose?: () => void;
 		proyectos?: { id: string; titulo: string; estado: string }[];
@@ -71,7 +75,7 @@
 				<div class="grid gap-3">
 					{#each proyectos as proyecto}
 						{@const puedeSubir =
-							proyecto.estado === 'En curso' || proyecto.estado === 'Pendiente solicitud cierre'}
+							proyecto.estado === 'En curso' || proyecto.estado === 'Pendiente de cierre'}
 						<div
 							class="group flex items-center justify-between rounded-2xl border border-white/5 bg-white/5 p-4 transition-all hover:border-emerald-500/30 hover:bg-emerald-500/5 hover:shadow-lg hover:shadow-emerald-900/20"
 						>

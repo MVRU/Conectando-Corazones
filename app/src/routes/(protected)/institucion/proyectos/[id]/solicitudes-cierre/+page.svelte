@@ -1,13 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
-	import {
-		ArrowLeft,
-		ClipboardList,
-		MessageSquareText,
-		Calendar,
-		UserCircle
-	} from 'lucide-svelte';
+	import { ArrowLeft, ClipboardList, MessageSquareText, Calendar, UserCircle } from 'lucide-svelte';
 
 	interface Props {
 		data: PageData;
@@ -16,23 +10,25 @@
 	let { data }: Props = $props();
 
 	let proyecto = $derived(data.proyecto);
-	let solicitudes = $derived(data.solicitudes as Array<{
-		id_solicitud: number;
-		estado: string | null;
-		created_at: string | null;
-		evaluaciones?: Array<{
-			id_evaluacion: number;
-			voto: string | null;
-			justificacion: string | null;
+	let solicitudes = $derived(
+		data.solicitudes as Array<{
+			id_solicitud: number;
+			estado: string | null;
 			created_at: string | null;
-			colaborador: {
-				id_usuario: number;
-				username: string;
-				nombre: string;
-				apellido: string;
-			} | null;
-		}>;
-	}>);
+			evaluaciones?: Array<{
+				id_evaluacion: number;
+				voto: string | null;
+				justificacion: string | null;
+				created_at: string | null;
+				colaborador: {
+					id_usuario: number;
+					username: string;
+					nombre: string;
+					apellido: string;
+				} | null;
+			}>;
+		}>
+	);
 
 	function labelEstadoSolicitud(estado: string | null | undefined): string {
 		const e = (estado || '').toLowerCase();
@@ -50,7 +46,8 @@
 		const e = (estado || '').toLowerCase();
 		if (e === 'aprobada') return 'bg-emerald-100 text-emerald-800 ring-emerald-200';
 		if (e === 'rechazada') return 'bg-red-100 text-red-800 ring-red-200';
-		if (e === 'en_revision' || e === 'pendiente') return 'bg-amber-100 text-amber-900 ring-amber-200';
+		if (e === 'en_revision' || e === 'pendiente')
+			return 'bg-amber-100 text-amber-900 ring-amber-200';
 		return 'bg-slate-100 text-slate-700 ring-slate-200';
 	}
 
@@ -126,8 +123,8 @@
 			>
 				<p class="text-lg font-medium text-slate-800">Todavía no hay solicitudes registradas</p>
 				<p class="mt-2 text-sm">
-					Cuando envíes una solicitud de cierre, vas a ver acá el estado y los comentarios de quienes
-					la evalúen.
+					Cuando envíes una solicitud de cierre, vas a ver acá el estado y los comentarios de
+					quienes la evalúen.
 				</p>
 			</div>
 		{:else}
@@ -169,14 +166,15 @@
 												<span class="font-semibold text-slate-800">{nombreColaborador(ev)}</span>
 												<span class="text-slate-400">·</span>
 												<span class="font-medium text-slate-600">{labelVoto(ev.voto)}</span>
-												<span class="ml-auto text-xs text-slate-500">{fmtFecha(ev.created_at)}</span>
+												<span class="ml-auto text-xs text-slate-500">{fmtFecha(ev.created_at)}</span
+												>
 											</div>
 											{#if ev.justificacion?.trim()}
 												<p class="mt-2 text-sm leading-relaxed text-slate-700">
 													{ev.justificacion}
 												</p>
 											{:else}
-												<p class="mt-2 text-sm italic text-slate-400">Sin comentario escrito.</p>
+												<p class="mt-2 text-sm text-slate-400 italic">Sin comentario escrito.</p>
 											{/if}
 										</li>
 									{/each}

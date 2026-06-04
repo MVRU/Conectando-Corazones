@@ -10,7 +10,8 @@
 		isAdmin,
 		isInstitucion,
 		isColaborador,
-		isInstitucionVerificada
+		isInstitucionVerificada,
+		userLoginEmail
 	} from '$lib/stores/auth';
 	import { layoutStore } from '$lib/stores/layout';
 	import {
@@ -24,10 +25,18 @@
 		LogOut,
 		Menu,
 		X,
-		FileWarning
+		FileWarning,
+		BookOpen,
+		ExternalLink
 	} from 'lucide-svelte';
+	import { MANUALES_USUARIO } from '$lib/utils/constants';
 
 	import { obtenerNombreCompleto, IMAGEN_USUARIO_FALLBACK } from '$lib/utils/util-usuarios';
+	import { tieneNuevosMensajes } from '$lib/utils/chat-visit';
+
+	const hayNuevosMensajesChat = $derived(
+		tieneNuevosMensajes(page.data.ultimoMensajeAjenoAt ?? null)
+	);
 
 	let menuAbierto = $state(false);
 	let visible = $state(true);
@@ -55,14 +64,19 @@
 
 	const verificacionAprobada = $derived($isInstitucionVerificada);
 
-	const emailUsuario = $derived(
-		$usuarioStore?.contactos?.find((c) => c.tipo_contacto === 'email' && c.etiqueta === 'principal')
-			?.valor || 'Sin email'
+	const manualUsuario = $derived(
+		$isAdmin
+			? MANUALES_USUARIO.administrador
+			: $isInstitucion
+				? MANUALES_USUARIO.institucion
+				: $isColaborador
+					? MANUALES_USUARIO.colaborador
+					: null
 	);
 
-	const nombreCompleto = $derived(
-		$usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario'
-	);
+	const emailUsuario = $derived($userLoginEmail || 'Sin email');
+
+	const nombreCompleto = $derived($usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario');
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -169,7 +183,7 @@
 				>
 					{label}
 					<span
-						class="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-gradient-to-r from-blue-400 to-cyan-300 transition-all duration-300 group-hover:w-full"
+						class="absolute bottom-0 left-0 h-0.5 w-0 rounded-full bg-linear-to-r from-blue-400 to-cyan-300 transition-all duration-300 group-hover:w-full"
 					></span>
 				</a>
 			{/each}
@@ -182,7 +196,7 @@
 		>
 			{#if $isAuthenticated}
 				<!-- Mis mensajes (Desktop) -->
-				<div class="hidden md:block">
+				<div class="relative hidden md:block">
 					<a
 						href="/mensajes"
 						class="group flex items-center gap-2 rounded-full border border-blue-500/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-all hover:bg-blue-500/20 hover:text-white"
@@ -191,6 +205,12 @@
 						<MessageCircle class="h-4 w-4" />
 						<span>Mis chats</span>
 					</a>
+					{#if hayNuevosMensajesChat}
+						<span
+							class="header-chat-dot pointer-events-none absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+							aria-label="Tenés mensajes nuevos"
+						></span>
+					{/if}
 				</div>
 
 				<!-- Dropdown Auth -->
@@ -200,7 +220,7 @@
 						aria-haspopup="true"
 						aria-expanded={mostrarDropdown}
 						onclick={toggleDropdown}
-						class="flex items-center gap-2 rounded-full border border-transparent bg-transparent p-1 pr-3 pl-2 transition-all hover:bg-blue-500/10 focus:ring-2 focus:ring-blue-400/50 focus:outline-none active:scale-95 {mostrarDropdown
+						class="flex items-center gap-2 rounded-full border border-transparent bg-transparent p-1 pr-3 pl-2 transition-all hover:bg-blue-500/10 focus:ring-2 focus:ring-blue-400/50 focus:outline-hidden active:scale-95 {mostrarDropdown
 							? 'bg-blue-500/10 ring-2 ring-blue-400/50'
 							: ''}"
 					>
@@ -263,7 +283,11 @@
 								{/if}
 
 								<a
-									href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
+									href={$isAdmin
+										? '/admin'
+										: $isInstitucion
+											? '/institucion/mi-panel'
+											: '/colaborador/mi-panel'}
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
 									onclick={() => (mostrarDropdown = false)}
 								>
@@ -304,6 +328,21 @@
 									>
 										<FileText class="h-4 w-4 text-gray-400 group-hover:text-white" />
 										Mis reportes
+									</a>
+								{/if}
+
+								{#if manualUsuario}
+									<a
+										href={manualUsuario.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label="Abrir manual de usuario en nueva pestaña"
+										class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
+										onclick={() => (mostrarDropdown = false)}
+									>
+										<BookOpen class="h-4 w-4 text-gray-400 group-hover:text-white" />
+										Manual de usuario
+										<ExternalLink class="ml-auto h-3 w-3 text-gray-600 group-hover:text-gray-400" />
 									</a>
 								{/if}
 
@@ -384,14 +423,24 @@
 					<div class="mb-4 grid grid-cols-2 gap-2">
 						<a
 							href="/mensajes"
-							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
+							class="relative flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							onclick={() => (menuAbierto = false)}
 						>
 							<MessageCircle class="h-5 w-5 text-blue-400" />
 							<span class="text-xs font-medium text-blue-100">Mis chats</span>
+							{#if hayNuevosMensajesChat}
+								<span
+									class="header-chat-dot pointer-events-none absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.6)] ring-2 ring-[#0F1029]"
+									aria-label="Tenés mensajes nuevos"
+								></span>
+							{/if}
 						</a>
 						<a
-							href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
+							href={$isAdmin
+								? '/admin'
+								: $isInstitucion
+									? '/institucion/mi-panel'
+									: '/colaborador/mi-panel'}
 							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							onclick={() => (menuAbierto = false)}
 						>
@@ -462,6 +511,20 @@
 								onclick={() => (menuAbierto = false)}
 							>
 								<FileText class="h-4 w-4" /> Mis reportes
+							</a>
+						{/if}
+
+						{#if manualUsuario}
+							<a
+								href={manualUsuario.url}
+								target="_blank"
+								rel="noopener noreferrer"
+								aria-label="Abrir manual de usuario en nueva pestaña"
+								class="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm text-gray-300 hover:bg-blue-500/10 hover:text-white"
+								onclick={() => (menuAbierto = false)}
+							>
+								<BookOpen class="h-4 w-4" /> Manual de usuario
+								<ExternalLink class="ml-auto h-3 w-3 text-gray-600" />
 							</a>
 						{/if}
 

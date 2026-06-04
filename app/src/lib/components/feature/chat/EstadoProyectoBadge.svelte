@@ -57,7 +57,9 @@
 	let config = $derived(estadoConfig[estado as keyof typeof estadoConfig] || estadoConfig.en_curso);
 </script>
 
-<div class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium {config.bgColor} {config.textColor} shadow-sm border {config.borderColor} backdrop-blur-sm transition-colors">
+<div
+	class="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium {config.bgColor} {config.textColor} border shadow-sm {config.borderColor} backdrop-blur-sm transition-colors"
+>
 	<span class="h-1.5 w-1.5 rounded-full {config.dotColor} shadow-sm"></span>
 	{ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS]}
 </div>

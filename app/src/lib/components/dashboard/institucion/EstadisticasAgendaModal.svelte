@@ -8,13 +8,16 @@
 		AlertTriangle,
 		AlertCircle,
 		CalendarClock,
-		ArrowRight,
-		Users
+		ArrowRight
 	} from 'lucide-svelte';
 	import type { EstadisticasCalendario } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+	let {
+		show = false,
+		stats = undefined,
+		onClose = () => {}
+	} = $props<{
 		show?: boolean;
 		stats?: EstadisticasCalendario;
 		onClose?: () => void;
@@ -117,33 +120,53 @@
 			<div class="custom-scrollbar flex-1 overflow-y-auto p-5 sm:p-8">
 				<!-- KPIs Row -->
 				<div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-					<!-- Verification Status -->
+					<!-- Certificado ARCA Status -->
 					<div
 						class="relative overflow-hidden rounded-2xl border border-white/5 bg-white/5 p-5 transition-transform hover:-translate-y-1"
 					>
 						<div class="mb-4 flex items-center justify-between">
-							<div class="rounded-lg bg-green-500/10 p-2 text-green-400">
+							<div
+								class="rounded-lg p-2 {stats.verificacion.estado === 'vigente'
+									? 'bg-emerald-500/10 text-emerald-400'
+									: stats.verificacion.estado === 'vencido'
+										? 'bg-red-500/10 text-red-400'
+										: 'bg-slate-500/10 text-slate-400'}"
+							>
 								<CheckCircle2 size={20} />
 							</div>
 							<span
 								class="flex items-center gap-1 text-xs font-medium {stats.verificacion.estado ===
-								'verificada'
+								'vigente'
 									? 'text-emerald-400'
-									: 'text-amber-400'}"
+									: stats.verificacion.estado === 'vencido'
+										? 'text-red-400'
+										: 'text-slate-400'}"
 							>
-								{#if stats.verificacion.estado === 'verificada'}
-									Verificado
+								{#if stats.verificacion.estado === 'vigente'}
+									Vigente
+								{:else if stats.verificacion.estado === 'vencido'}
+									Vencido
 								{:else}
-									Pendiente
+									Sin registrar
 								{/if}
 							</span>
 						</div>
-						<div class="mb-1 text-2xl font-bold text-white sm:text-3xl">
-							{stats.verificacion.diasRestantes} días
-						</div>
-						<div class="text-xs text-slate-400">
-							Para renovar verificación ({formatDate(stats.verificacion.fechaRenovacion)})
-						</div>
+						{#if stats.verificacion.estado === 'vigente'}
+							<div class="mb-1 text-2xl font-bold text-white sm:text-3xl">
+								{stats.verificacion.diasRestantes} días
+							</div>
+							<div class="text-xs text-slate-400">
+								Certificado ARCA — vence el {formatDate(stats.verificacion.fechaRenovacion!)}
+							</div>
+						{:else if stats.verificacion.estado === 'vencido'}
+							<div class="mb-1 text-2xl font-bold text-white sm:text-3xl">Vencido</div>
+							<div class="text-xs text-slate-400">
+								Certificado ARCA — venció el {formatDate(stats.verificacion.fechaRenovacion!)}
+							</div>
+						{:else}
+							<div class="mb-1 text-2xl font-bold text-white sm:text-3xl">—</div>
+							<div class="text-xs text-slate-400">Sin certificado ARCA registrado</div>
+						{/if}
 						<div
 							class="absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-indigo-500/5 blur-xl"
 						></div>
@@ -233,7 +256,7 @@
 							>
 								<div class="flex items-center gap-3">
 									<div
-										class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-white"
+										class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white"
 										class:bg-amber-500={deadline.tipo === 'finalizacion_proyecto'}
 										class:bg-indigo-500={deadline.tipo === 'verificacion'}
 										class:bg-slate-600={deadline.tipo === 'otro'}

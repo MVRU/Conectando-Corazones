@@ -7,7 +7,12 @@ import type { InstitucionDashboardData } from '$lib/components/dashboard/institu
 import type { Colaboracion } from '$lib/domain/entities/Colaboracion';
 import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { Usuario } from '$lib/domain/entities/Usuario';
+import type { EstadoVerificacion, Verificacion } from '$lib/domain/types/Verificacion';
+import { esArcaVigente } from '$lib/domain/types/Verificacion';
+import { ESTADO_LABELS, ESTADOS_ACTIVOS_PROYECTO } from '$lib/domain/types/Estado';
 import { obtenerNombreCompleto } from '$lib/utils/util-usuarios';
+import { getColorEstadoHex } from '$lib/utils/util-estados';
+import { obtenerUltimaVerificacion } from '$lib/utils/util-verificacion';
 
 export class ObtenerDashboardInstitucion {
 	constructor(
@@ -17,7 +22,43 @@ export class ObtenerDashboardInstitucion {
 		private resenaRepo: ResenaRepository
 	) {}
 
-	async execute(institucionId: number): Promise<InstitucionDashboardData> {
+	private obtenerEstadoVerificacionActual(institucion: Usuario): EstadoVerificacion | null {
+		const verificacionesGlobales = (institucion.verificaciones ?? []).filter(
+			(v) => v.tipo !== 'arca'
+		);
+		const ultima = obtenerUltimaVerificacion(verificacionesGlobales);
+		if (ultima?.estado === 'aprobada') return 'aprobada';
+		if (ultima?.estado === 'pendiente') return 'pendiente';
+		if (ultima?.estado === 'rechazada') return 'rechazada';
+		return (institucion.estado_verificacion as EstadoVerificacion | null) ?? null;
+	}
+
+	private obtenerMetaVerificacion(institucion: Usuario): {
+		estado: EstadoVerificacion | null;
+		requiereVerificacionDocumental: boolean;
+		documentacionVerificacionEnRevision: boolean;
+	} {
+		const estado = this.obtenerEstadoVerificacionActual(institucion);
+		const tieneSolicitudVerificacion = (institucion.verificaciones ?? []).some(
+			(v) => v.tipo !== 'arca'
+		);
+		const requiereVerificacionDocumental = !tieneSolicitudVerificacion && estado !== 'aprobada';
+		const documentacionVerificacionEnRevision =
+			estado === 'pendiente' && tieneSolicitudVerificacion;
+
+		return {
+			estado,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		};
+	}
+
+	async execute(
+		institucionId: number,
+		opciones?: { desde?: Date | null }
+	): Promise<InstitucionDashboardData> {
+		const desde = opciones?.desde ?? null;
+
 		const [institucion, proyectos] = await Promise.all([
 			this.usuarioRepo.findById(institucionId),
 			this.proyectoRepo.findByInstitucionId(institucionId)
@@ -40,9 +81,24 @@ export class ObtenerDashboardInstitucion {
 			c.estaPendiente()
 		);
 
-		const hoy = new Date();
+		// Filtros por período
+		const proyectosEnPeriodo = desde
+			? proyectos.filter((p) => p.created_at && new Date(p.created_at) >= desde)
+			: proyectos;
 
-		const proyectosConFecha = proyectos.filter((p) => p.fecha_fin_tentativa);
+		const colaboracionesAprobadasEnPeriodo = desde
+			? colaboracionesAprobadas.filter((c) => c.created_at && c.created_at >= desde)
+			: colaboracionesAprobadas;
+
+		const hoy = new Date();
+		const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+		const proyectosNuevosEsteMes = proyectos.filter(
+			(p) => p.created_at && new Date(p.created_at) >= inicioMes
+		).length;
+
+		const proyectosConFecha = proyectos.filter(
+			(p) => p.fecha_fin_tentativa && ESTADOS_ACTIVOS_PROYECTO.includes(p.estado as any)
+		);
 		const proximoCierre = proyectosConFecha.reduce(
 			(min, p) => {
 				if (!p.fecha_fin_tentativa) return min;
@@ -55,37 +111,53 @@ export class ObtenerDashboardInstitucion {
 
 		const diasProximoCierre = proximoCierre
 			? Math.ceil((proximoCierre.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
-			: 0;
+			: -1;
 
 		const proyectosPendienteCierre = proyectos.filter(
 			(p) => p.estado === 'pendiente_solicitud_cierre'
 		).length;
 
-		const estaVerificado = !!(
-			institucion.estado_verificacion === 'aprobada' ||
-			(institucion.verificaciones &&
-				institucion.verificaciones.some((v: any) => v.estado === 'aprobada'))
-		);
+		const {
+			estado: estadoVerificacion,
+			requiereVerificacionDocumental,
+			documentacionVerificacionEnRevision
+		} = this.obtenerMetaVerificacion(institucion);
+		const estaVerificado = estadoVerificacion === 'aprobada';
 
+		// Filtrado por período: card de colaboradores activos
 		const colaboradoresUnicos = new Set(
-			colaboracionesAprobadas.map((c) => c.colaborador_id).filter(Boolean)
+			colaboracionesAprobadasEnPeriodo.map((c) => c.colaborador_id).filter(Boolean)
 		);
 
+		// Filtrados por período: card de proyectos + modal, card de colaboradores + modal, torta, top colaboradores
 		const estadisticasProyectos = this.calcularEstadisticasProyectos(
-			proyectos,
-			colaboracionesAprobadas
+			proyectosEnPeriodo,
+			colaboracionesAprobadasEnPeriodo
 		);
-		const estadisticasCalendario = this.calcularEstadisticasCalendario(proyectos, institucion);
 		const estadisticasColaboradores = await this.calcularEstadisticasColaboradores(
 			proyectos,
-			colaboracionesAprobadas
+			colaboracionesAprobadasEnPeriodo
 		);
+		const estadisticasAyuda = this.calcularEstadisticasAyuda(
+			colaboracionesAprobadasEnPeriodo,
+			proyectosEnPeriodo
+		);
+		const topColaboradores = await this.calcularTopColaboradores(colaboracionesAprobadasEnPeriodo);
+
+		// Sin filtrar: agenda, seguimiento objetivos, actividad reciente, reseñas, aspectos a mejorar
+		const estadisticasCalendario = this.calcularEstadisticasCalendario(proyectos, institucion);
 		const seguimientoObjetivos = this.calcularSeguimientoObjetivos(proyectos);
-		const estadisticasAyuda = this.calcularEstadisticasAyuda(colaboracionesAprobadas, proyectos);
-		const topColaboradores = await this.calcularTopColaboradores(colaboracionesAprobadas);
 		const actividadReciente = this.obtenerActividadReciente(proyectos, todasColaboraciones);
 		const ultimasResenas = await this.obtenerUltimasResenas(institucionId);
 		const aspectosMejorar = this.generarAspectosMejorar(proyectos);
+
+		const proyectosParaEvidencia = proyectos
+			.filter((p) => p.estado === 'en_curso' || p.estado === 'pendiente_solicitud_cierre')
+			.map((p) => ({
+				id: p.id_proyecto?.toString() || '',
+				titulo: p.titulo,
+				estado: ESTADO_LABELS[p.estado as keyof typeof ESTADO_LABELS] ?? p.estado ?? 'Desconocido'
+			}));
 
 		return {
 			info: {
@@ -102,10 +174,14 @@ export class ObtenerDashboardInstitucion {
 						? `${institucion.localidad.nombre}, ${institucion.localidad.provincia.nombre}`
 						: (institucion as any).domicilio_legal || 'Sin ubicación',
 				estaVerificado,
+				estadoVerificacion,
+				requiereVerificacionDocumental,
+				documentacionVerificacionEnRevision,
 				bio: institucion.descripcion || 'Sin descripción disponible.'
 			},
 			metricas: {
-				proyectosTotales: proyectos.length,
+				proyectosTotales: proyectosEnPeriodo.length,
+				nuevosProyectos: proyectosNuevosEsteMes,
 				colaboradoresActivos: colaboradoresUnicos.size,
 				diasProximoCierre,
 				solicitudesPendientes: colaboracionesPendientes.length,
@@ -120,7 +196,8 @@ export class ObtenerDashboardInstitucion {
 			topColaboradores,
 			actividadReciente,
 			ultimasResenas,
-			aspectosMejorar
+			aspectosMejorar,
+			proyectosParaEvidencia
 		};
 	}
 
@@ -187,7 +264,7 @@ export class ObtenerDashboardInstitucion {
 			.map((p) => ({
 				id: p.id_proyecto?.toString() || '',
 				titulo: p.titulo,
-				estado: this.getLabelEstado(p.estado || ''),
+				estado: ESTADO_LABELS[p.estado as keyof typeof ESTADO_LABELS] ?? p.estado ?? 'Desconocido',
 				progreso: Math.round(this.calcularProgresoProyecto(p)),
 				beneficiarios: Number(p.beneficiarios) || 0,
 				imagen: p.url_portada || undefined
@@ -222,25 +299,31 @@ export class ObtenerDashboardInstitucion {
 	}
 
 	private calcularDistribucionEstado(proyectos: Proyecto[]) {
-		const estados = {
-			en_curso: { label: 'En curso', count: 0, color: '#3b82f6' },
-			en_revision: { label: 'En revisión', count: 0, color: '#f59e0b' },
-			completado: { label: 'Completado', count: 0, color: '#10b981' },
-			cancelado: { label: 'Cancelado', count: 0, color: '#ef4444' }
-		};
-
-		proyectos.forEach((p) => {
-			const estado = p.estado as keyof typeof estados;
-			if (estados[estado]) {
-				estados[estado].count++;
-			}
-		});
+		const conteos = proyectos.reduce(
+			(acc, p) => {
+				const estado = p.estado || 'desconocido';
+				acc[estado] = (acc[estado] || 0) + 1;
+				return acc;
+			},
+			{} as Record<string, number>
+		);
 
 		const total = proyectos.length || 1;
 
-		return Object.values(estados).map((e) => ({
-			...e,
-			percentage: Math.round((e.count / total) * 100)
+		const ordenEstados = [
+			'en_curso',
+			'pendiente_solicitud_cierre',
+			'en_revision',
+			'completado',
+			'cancelado',
+			'en_auditoria'
+		];
+
+		return ordenEstados.map((estado) => ({
+			label: ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS] ?? estado,
+			count: conteos[estado] || 0,
+			percentage: Math.round(((conteos[estado] || 0) / total) * 100),
+			color: getColorEstadoHex(estado)
 		}));
 	}
 
@@ -281,13 +364,40 @@ export class ObtenerDashboardInstitucion {
 	private calcularEstadisticasCalendario(proyectos: Proyecto[], institucion: Usuario) {
 		const hoy = new Date();
 
-		const verificacion = {
-			estado: 'verificada' as const,
-			fechaRenovacion: new Date(hoy.getFullYear() + 1, hoy.getMonth(), hoy.getDate())
-				.toISOString()
-				.split('T')[0],
-			diasRestantes: 365
+		// Estado del certificado ARCA (RG 2681):
+		const arcasAprobadas = ((institucion.verificaciones ?? []) as Verificacion[]).filter(
+			(v) => v.tipo === 'arca' && v.estado === 'aprobada' && v.fecha_vencimiento
+		);
+		const arcaMasReciente = arcasAprobadas.sort(
+			(a, b) => new Date(b.fecha_vencimiento!).getTime() - new Date(a.fecha_vencimiento!).getTime()
+		)[0];
+
+		let verificacion: {
+			estado: 'vigente' | 'vencido' | 'sin_registro';
+			fechaRenovacion: string | null;
+			diasRestantes: number | null;
 		};
+
+		if (arcaMasReciente && esArcaVigente(arcaMasReciente, hoy)) {
+			const fechaVenc = new Date(arcaMasReciente.fecha_vencimiento!);
+			verificacion = {
+				estado: 'vigente',
+				fechaRenovacion: fechaVenc.toISOString().split('T')[0],
+				diasRestantes: Math.ceil((fechaVenc.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+			};
+		} else if (arcaMasReciente) {
+			verificacion = {
+				estado: 'vencido',
+				fechaRenovacion: new Date(arcaMasReciente.fecha_vencimiento!).toISOString().split('T')[0],
+				diasRestantes: null
+			};
+		} else {
+			verificacion = {
+				estado: 'sin_registro',
+				fechaRenovacion: null,
+				diasRestantes: null
+			};
+		}
 
 		const projectTimeline = proyectos
 			.filter((p) => p.created_at && p.fecha_fin_tentativa)
@@ -303,11 +413,11 @@ export class ObtenerDashboardInstitucion {
 						? p.fecha_fin_tentativa.toISOString().split('T')[0]
 						: (p.fecha_fin_tentativa as string),
 				estado: p.estado || 'desconocido',
-				color: this.getColorEstado(p.estado || '')
+				color: getColorEstadoHex(p.estado || '')
 			}));
 
 		const proximosVencimientos = proyectos
-			.filter((p) => p.fecha_fin_tentativa)
+			.filter((p) => p.fecha_fin_tentativa && ESTADOS_ACTIVOS_PROYECTO.includes(p.estado as any))
 			.map((p) => {
 				const fechaFin = new Date(p.fecha_fin_tentativa as string);
 				return {
@@ -325,37 +435,13 @@ export class ObtenerDashboardInstitucion {
 			.filter((v) => v.diff > 0)
 			.sort((a, b) => a.diff - b.diff)
 			.slice(0, 5)
-			.map(({ diff, ...rest }) => rest);
+			.map(({ diff: _diff, ...rest }) => rest);
 
 		return {
 			verificacion,
 			projectTimeline: projectTimeline as any,
 			proximosVencimientos: proximosVencimientos as any
 		};
-	}
-
-	private getColorEstado(estado: string): string {
-		const colores: Record<string, string> = {
-			en_curso: '#3b82f6',
-			en_revision: '#f59e0b',
-			completado: '#10b981',
-			cancelado: '#ef4444',
-			pendiente_solicitud_cierre: '#8b5cf6'
-		};
-		return colores[estado] || '#6b7280';
-	}
-
-	private getLabelEstado(estado: string): string {
-		const labels: Record<string, string> = {
-			en_curso: 'En curso',
-			en_revision: 'En revisión',
-			completado: 'Completado',
-			cancelado: 'Cancelado',
-			pendiente_solicitud_cierre: 'Cierre pendiente',
-			borrador: 'Borrador',
-			en_auditoria: 'En auditoría'
-		};
-		return labels[estado] || 'Desconocido';
 	}
 
 	private async calcularEstadisticasColaboradores(
@@ -378,7 +464,8 @@ export class ObtenerDashboardInstitucion {
 		const ubicacionCount = new Map<string, number>();
 		const topColaboradoresMap = new Map<number, { count: number; proyectos: Set<number> }>();
 
-		// Cargar datos detallados de colaboradores únicos
+		// Cargar datos detallados de colaboradores únicos (solo ubicación; las categorías
+		// se cuentan desde los proyectos colaborados, no desde el perfil del usuario)
 		await Promise.all(
 			Array.from(colaboradoresUnicosIds).map(async (id) => {
 				if (!id) return;
@@ -386,15 +473,6 @@ export class ObtenerDashboardInstitucion {
 					const usuario = await this.usuarioRepo.findById(id);
 					if (!usuario) return;
 
-					// Contar categorías preferidas
-					if (usuario.categorias_preferidas) {
-						usuario.categorias_preferidas.forEach((catPref: any) => {
-							const categoria = catPref.categoria?.descripcion || 'Otra';
-							categoriasCount.set(categoria, (categoriasCount.get(categoria) || 0) + 1);
-						});
-					}
-
-					// Contar ubicación (Localidad, Provincia)
 					if (usuario.localidad) {
 						const loc = usuario.localidad.nombre;
 						const prov = usuario.localidad.provincia?.nombre;
@@ -406,6 +484,26 @@ export class ObtenerDashboardInstitucion {
 				}
 			})
 		);
+
+		// Distribución por categorías: cuenta 1 por cada par (colaboración aprobada,
+		// categoría del proyecto colaborado). Un proyecto con N categorías suma N veces.
+		const categoriasPorProyecto = new Map<number, string[]>();
+		for (const p of proyectos) {
+			if (p.id_proyecto == null) continue;
+			const cats = ((p as any).categorias ?? [])
+				.map((c: any) => c.descripcion)
+				.filter((d: any): d is string => typeof d === 'string' && d.length > 0);
+			if (cats.length > 0) categoriasPorProyecto.set(p.id_proyecto, cats);
+		}
+
+		for (const c of colaboraciones) {
+			if (c.proyecto_id == null) continue;
+			const cats = categoriasPorProyecto.get(c.proyecto_id);
+			if (!cats) continue;
+			for (const cat of cats) {
+				categoriasCount.set(cat, (categoriasCount.get(cat) || 0) + 1);
+			}
+		}
 
 		// Calcular Distribución de Categorías (Top 3 + Otros)
 		const totalCategorias = Array.from(categoriasCount.values()).reduce((a, b) => a + b, 0) || 1;
@@ -483,10 +581,24 @@ export class ObtenerDashboardInstitucion {
 			})
 		);
 
+		// Tasa de retención: % de colaboradores únicos con ≥2 colaboraciones aprobadas
+		const conteoPorColaborador = new Map<number, number>();
+		for (const c of colaboraciones) {
+			if (c.colaborador_id == null) continue;
+			conteoPorColaborador.set(
+				c.colaborador_id,
+				(conteoPorColaborador.get(c.colaborador_id) || 0) + 1
+			);
+		}
+		const totalUnicosRetencion = conteoPorColaborador.size;
+		const recurrentes = Array.from(conteoPorColaborador.values()).filter((n) => n >= 2).length;
+		const retencion =
+			totalUnicosRetencion > 0 ? Math.round((recurrentes / totalUnicosRetencion) * 100) : 0;
+
 		return {
 			totalActivos: colaboradoresUnicosIds.size,
 			nuevosEsteMes: colaboradoresNuevos.size,
-			retencion: 92, // Placeholder o calcular según lógica específica
+			retencion,
 			distribucionCategorias,
 			distribucionUbicacion,
 			topColaboradores
@@ -596,39 +708,47 @@ export class ObtenerDashboardInstitucion {
 	}
 
 	private obtenerActividadReciente(proyectos: any[], colaboraciones: any[]) {
-		const actividades: any[] = [];
+		// Unificar eventos manteniendo la fecha como Date, ordenar desc por fecha,
+		// recortar a 4 y recién entonces formatear para display.
+		type Evento = {
+			id: string;
+			titulo: string;
+			descripcion: string;
+			fechaDate: Date;
+			tipo: 'proyecto' | 'colaboracion';
+		};
 
-		proyectos.slice(0, 2).forEach((p) => {
-			if (p.created_at) {
-				actividades.push({
-					id: `proyecto-${p.id_proyecto}`,
-					titulo: 'Nuevo proyecto creado',
-					descripcion: `Se ha publicado correctamente "${p.titulo}".`,
-					fecha: this.formatearFechaRelativa(new Date(p.created_at)),
-					tipo: 'proyecto' as const
-				});
-			}
-		});
+		const eventos: Evento[] = [];
 
-		colaboraciones.slice(0, 2).forEach((c) => {
-			if (c.created_at) {
-				actividades.push({
-					id: `colaboracion-${c.id_colaboracion}`,
-					titulo: 'Colaboración recibida',
-					descripcion: 'Se ha recibido una nueva colaboración.',
-					fecha: this.formatearFechaRelativa(new Date(c.created_at)),
-					tipo: 'colaboracion' as const
-				});
-			}
-		});
+		for (const p of proyectos) {
+			if (!p.created_at) continue;
+			eventos.push({
+				id: `proyecto-${p.id_proyecto}`,
+				titulo: 'Nuevo proyecto creado',
+				descripcion: `Se ha publicado correctamente "${p.titulo}".`,
+				fechaDate: new Date(p.created_at),
+				tipo: 'proyecto'
+			});
+		}
 
-		return actividades
-			.sort((a, b) => {
-				const fechaA = this.parsearFechaRelativa(a.fecha);
-				const fechaB = this.parsearFechaRelativa(b.fecha);
-				return fechaB.getTime() - fechaA.getTime();
-			})
-			.slice(0, 4);
+		for (const c of colaboraciones) {
+			if (!c.created_at) continue;
+			eventos.push({
+				id: `colaboracion-${c.id_colaboracion}`,
+				titulo: 'Colaboración recibida',
+				descripcion: 'Se ha recibido una nueva colaboración.',
+				fechaDate: new Date(c.created_at),
+				tipo: 'colaboracion'
+			});
+		}
+
+		return eventos
+			.sort((a, b) => b.fechaDate.getTime() - a.fechaDate.getTime())
+			.slice(0, 4)
+			.map(({ fechaDate, ...rest }) => ({
+				...rest,
+				fecha: this.formatearFechaRelativa(fechaDate)
+			}));
 	}
 
 	private formatearFechaRelativa(fecha: Date): string {
@@ -644,31 +764,16 @@ export class ObtenerDashboardInstitucion {
 		return fecha.toLocaleDateString('es-AR');
 	}
 
-	private parsearFechaRelativa(fechaStr: string): Date {
-		const ahora = new Date();
-		if (fechaStr.includes('minutos')) return new Date(ahora.getTime() - 30 * 60 * 1000);
-		if (fechaStr.includes('hora')) {
-			const horas = parseInt(fechaStr.match(/\d+/)?.[0] || '1');
-			return new Date(ahora.getTime() - horas * 60 * 60 * 1000);
-		}
-		if (fechaStr === 'Ayer') return new Date(ahora.getTime() - 24 * 60 * 60 * 1000);
-		if (fechaStr.includes('días')) {
-			const dias = parseInt(fechaStr.match(/\d+/)?.[0] || '2');
-			return new Date(ahora.getTime() - dias * 24 * 60 * 60 * 1000);
-		}
-		return new Date(fechaStr);
-	}
-
 	private async obtenerUltimasResenas(institucionId: number) {
-		const resenas = await this.resenaRepo.findByObjetoAprobadas('institucion', institucionId, 5);
+		const resenas = await this.resenaRepo.findByObjetoAprobadas('usuario', institucionId, 5);
 
 		return resenas.map((r) => ({
 			id: r.id_resena?.toString() || '',
 			usuario: r.username || 'Usuario anónimo',
-			avatarUrl: undefined,
+			avatarUrl: r.autor?.url_foto ?? undefined,
 			calificacion: r.puntaje || 0,
 			comentario: r.contenido || '',
-			fecha: new Date().toISOString()
+			fecha: r.created_at?.toISOString() ?? new Date().toISOString()
 		}));
 	}
 

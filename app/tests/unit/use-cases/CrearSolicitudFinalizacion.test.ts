@@ -12,17 +12,17 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si el proyecto no existe', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue(null)
+			findByIdLean: vi.fn().mockResolvedValue(null)
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn(),
+			findByProyectoIdLean: vi.fn(),
 			countRechazadasByProyectoId: vi.fn(),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn()
+			findIdsByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -37,7 +37,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si la institución no es dueña del proyecto', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 999,
 				estado: 'pendiente_solicitud_cierre',
@@ -47,13 +47,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn(),
+			findByProyectoIdLean: vi.fn(),
 			countRechazadasByProyectoId: vi.fn(),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn()
+			findIdsByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -70,7 +70,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si el proyecto no está en pendiente_solicitud_cierre', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 10,
 				estado: 'en_curso',
@@ -80,13 +80,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn(),
+			findByProyectoIdLean: vi.fn(),
 			countRechazadasByProyectoId: vi.fn(),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn()
+			findIdsByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -103,7 +103,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si ya existe una solicitud pendiente', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 10,
 				estado: 'pendiente_solicitud_cierre',
@@ -113,13 +113,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn().mockResolvedValue({ estado: 'pendiente' }),
+			findByProyectoIdLean: vi.fn().mockResolvedValue({ estado: 'pendiente' }),
 			countRechazadasByProyectoId: vi.fn(),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn()
+			findIdsByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -136,7 +136,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si el proyecto alcanzó el límite de rechazadas (>= 3)', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 10,
 				estado: 'pendiente_solicitud_cierre',
@@ -146,13 +146,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn().mockResolvedValue(null),
+			findByProyectoIdLean: vi.fn().mockResolvedValue(null),
 			countRechazadasByProyectoId: vi.fn().mockResolvedValue(3),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }])
+			findIdsByProyecto: vi.fn().mockResolvedValue([1])
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -169,7 +169,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si no hay evidencia_ids', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 10,
 				estado: 'pendiente_solicitud_cierre',
@@ -179,13 +179,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn().mockResolvedValue(null),
+			findByProyectoIdLean: vi.fn().mockResolvedValue(null),
 			countRechazadasByProyectoId: vi.fn().mockResolvedValue(0),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn()
+			findIdsByProyecto: vi.fn()
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -202,7 +202,7 @@ describe('CrearSolicitudFinalizacion', () => {
 
 	it('lanza error si alguna evidencia no pertenece al proyecto', async () => {
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: 123,
 				institucion_id: 10,
 				estado: 'pendiente_solicitud_cierre',
@@ -212,13 +212,13 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn().mockResolvedValue(null),
+			findByProyectoIdLean: vi.fn().mockResolvedValue(null),
 			countRechazadasByProyectoId: vi.fn().mockResolvedValue(0),
 			create: vi.fn()
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }])
+			findIdsByProyecto: vi.fn().mockResolvedValue([1])
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -239,7 +239,7 @@ describe('CrearSolicitudFinalizacion', () => {
 		const evidenciaIds = [1, 2];
 
 		const proyectoRepo = {
-			findById: vi.fn().mockResolvedValue({
+			findByIdLean: vi.fn().mockResolvedValue({
 				id_proyecto: idProyecto,
 				institucion_id: idInstitucion,
 				estado: 'pendiente_solicitud_cierre',
@@ -249,7 +249,7 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as ProyectoRepository;
 
 		const solicitudRepo = {
-			findByProyectoId: vi.fn().mockResolvedValue(null),
+			findByProyectoIdLean: vi.fn().mockResolvedValue(null),
 			countRechazadasByProyectoId: vi.fn().mockResolvedValue(1),
 			create: vi.fn().mockResolvedValue({
 				id_solicitud: 500,
@@ -260,7 +260,7 @@ describe('CrearSolicitudFinalizacion', () => {
 		} as unknown as SolicitudFinalizacionRepository;
 
 		const evidenciaRepo = {
-			findAllByProyecto: vi.fn().mockResolvedValue([{ id_evidencia: 1 }, { id_evidencia: 2 }])
+			findIdsByProyecto: vi.fn().mockResolvedValue([1, 2])
 		} as unknown as EvidenciaRepository;
 
 		const useCase = new CrearSolicitudFinalizacion(
@@ -287,4 +287,3 @@ describe('CrearSolicitudFinalizacion', () => {
 		});
 	});
 });
-

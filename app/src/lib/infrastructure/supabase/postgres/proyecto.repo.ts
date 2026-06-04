@@ -3,13 +3,12 @@ import type { Proyecto } from '$lib/domain/entities/Proyecto';
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
 import type { HistorialDeCambios } from '$lib/domain/types/HistorialDeCambios';
 import type { TipoParticipacionDescripcion } from '$lib/domain/types/TipoParticipacion';
-import { esClientePrisma, type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
+import { type PrismaDbClient, prisma } from '$lib/infrastructure/prisma/client';
 import { ProyectoMapper } from './mappers/proyecto.mapper';
 import { ProyectoCategoriaRepoPrisma } from './proyecto-categoria.repo';
 import { PostgresCategoriaRepository } from './categoria.repo';
 import { RegistrarCategoriasDeProyecto } from '$lib/domain/use-cases/proyecto-categoria/RegistrarCategoriasDeProyecto';
 import type { ProyectoSearchCriteria } from '$lib/domain/types/dto/ProyectoSearchCriteria';
-import { analizarProyecto } from '$lib/domain/use-cases/analizarProyecto';
 
 export class PostgresProyectoRepository implements ProyectoRepository {
 	constructor(private readonly db: PrismaDbClient = prisma) {}
@@ -34,7 +33,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		},
 		institucion: {
 			include: {
-				localidad: { include: { provincia: true } }
+				localidad: { include: { provincia: true } },
+				verificaciones: {
+					where: { tipo: 'arca', estado: 'aprobada' },
+					orderBy: { created_at: 'desc' as const },
+					take: 1
+				}
 			}
 		},
 		colaboraciones: {
@@ -117,7 +121,13 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 						username: true,
 						rol: true,
 						nombre_legal: true,
-						url_foto: true
+						url_foto: true,
+						verificaciones: {
+							where: { tipo: 'arca', estado: 'aprobada' },
+							orderBy: { created_at: 'desc' },
+							take: 1,
+							select: { tipo: true, estado: true, fecha_vencimiento: true }
+						}
 					}
 				},
 				proyecto_categorias: {
@@ -446,9 +456,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				await tx.participacionPermitida.deleteMany({
 					where: {
 						id_proyecto: proyecto.id_proyecto,
-						...(idsPayload.length > 0
-							? { id_participacion_permitida: { notIn: idsPayload } }
-							: {})
+						...(idsPayload.length > 0 ? { id_participacion_permitida: { notIn: idsPayload } } : {})
 					}
 				});
 
@@ -596,24 +604,15 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 			include: this.includeOptions
 		});
 
-		// Generación de resumen y aprendizajes (asíncrono)
-		if (nuevoEstado === 'completado' && esClientePrisma(this.db)) {
-			setTimeout(async () => {
-				try {
-					const result = await analizarProyecto(id);
-					if (!result.success && result.error) {
-						console.error(`[IA] Error en análisis del proyecto ${id}:`, result.error);
-					}
-				} catch (err) {
-					console.error(`[IA] Excepción no controlada en background task del proyecto ${id}:`, err);
-				}
-			}, 0);
-		}
-
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
-	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string, historialData?: HistorialDeCambios): Promise<void> {
+	async cancel(
+		id: number,
+		usuarioEjecutorId: number,
+		justificacion?: string,
+		historialData?: HistorialDeCambios
+	): Promise<void> {
 		const estadoCancelado = await prisma.estado.findUnique({
 			where: { descripcion: 'cancelado' }
 		});
@@ -649,6 +648,59 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				proyecto_id: id,
 				estado: 'rechazada'
 			}
+		});
+	}
+
+	async findByIdLean(
+		id: number
+	): Promise<{ id_proyecto: number; estado: string | null; institucion_id: number | null } | null> {
+		const p = await this.db.proyecto.findUnique({
+			where: { id_proyecto: id },
+			select: {
+				id_proyecto: true,
+				institucion_id: true,
+				estado: { select: { descripcion: true } }
+			}
+		});
+		return p
+			? {
+					id_proyecto: p.id_proyecto,
+					institucion_id: p.institucion_id,
+					estado: p.estado?.descripcion ?? null
+				}
+			: null;
+	}
+
+	async updateEstadoLean(id: number, nuevoEstado: string): Promise<void> {
+		const estadoObj = await this.db.estado.findUnique({
+			where: { descripcion: nuevoEstado }
+		});
+		if (!estadoObj) throw new Error(`Estado ${nuevoEstado} no encontrado`);
+
+		await this.db.proyecto.update({
+			where: { id_proyecto: id },
+			data: { estado_id: estadoObj.id_estado },
+			select: { id_proyecto: true }
+		});
+	}
+
+	async checkObjetivosAlcanzados(id: number): Promise<boolean> {
+		const participaciones = await this.db.participacionPermitida.findMany({
+			where: { id_proyecto: id },
+			select: {
+				objetivo: true,
+				colaboraciones_tipo_participacion: {
+					select: { cantidad: true }
+				}
+			}
+		});
+		if (participaciones.length === 0) return false;
+		return participaciones.every((p) => {
+			const actual = p.colaboraciones_tipo_participacion.reduce(
+				(sum, c) => sum + Number(c.cantidad || 0),
+				0
+			);
+			return actual >= Number(p.objetivo);
 		});
 	}
 }

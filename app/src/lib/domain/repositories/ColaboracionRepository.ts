@@ -14,9 +14,11 @@ export interface ColaboracionRepository {
 	delete(id: number): Promise<void>;
 
 	// Métodos legacy para compatibilidad con casos de uso existentes
-	// TODO: Refactorizar casos de uso para eliminar estos métodos
 	getColaboracion(proyectoId: number, usuarioId: number): Promise<Colaboracion | null>;
 	getAportesPorColaboracion(colaboracionId: number): Promise<any[]>;
 	getEvidencias(participacionPermitidaId: number): Promise<any[]>;
+	getEvidenciasPorColaboracion(colaboracionId: number, usuarioId: number): Promise<any[]>;
 	getColaboracionesPorProyecto(proyectoId: number): Promise<Colaboracion[]>;
+	existsAprobada(proyectoId: number, colaboradorId: number): Promise<boolean>;
+	countAprobadas(proyectoId: number): Promise<number>;
 }

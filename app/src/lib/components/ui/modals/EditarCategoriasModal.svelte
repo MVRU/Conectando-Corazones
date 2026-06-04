@@ -4,17 +4,17 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let { 
-		mostrar = $bindable(false), 
-		categoriasSeleccionadas = [], 
-		categorias = [], 
+	let {
+		mostrar = $bindable(false),
+		categoriasSeleccionadas = [],
+		categorias = [],
 		guardando = false,
 		onguardar,
 		oncerrar
-	}: { 
-		mostrar?: boolean; 
-		categoriasSeleccionadas?: Categoria[]; 
-		categorias?: Categoria[]; 
+	}: {
+		mostrar?: boolean;
+		categoriasSeleccionadas?: Categoria[];
+		categorias?: Categoria[];
 		guardando?: boolean;
 		onguardar: (categorias: Categoria[]) => void;
 		oncerrar: () => void;
@@ -127,56 +127,55 @@
 
 			<!-- Lista de categorías -->
 			<div class="mb-6 max-h-[400px] overflow-y-auto">
-					{#each categoriasVisibles as categoria (categoria.id_categoria)}
-						{@const seleccionada =
-							categoria.id_categoria !== undefined &&
-							categoriasMarcadas.has(categoria.id_categoria)}
-						{@const _ = categoriasMarcadasArray}
-						<!-- Force reactivity -->
-						<button
-							type="button"
-							onclick={() => toggleCategoria(categoria)}
-							class="group relative flex items-center gap-3 rounded-lg border p-3 text-left transition-all {seleccionada
-								? 'border-blue-500 bg-blue-50'
-								: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}"
+				{#each categoriasVisibles as categoria (categoria.id_categoria)}
+					{@const seleccionada =
+						categoria.id_categoria !== undefined && categoriasMarcadas.has(categoria.id_categoria)}
+					{@const _ = categoriasMarcadasArray}
+					<!-- Force reactivity -->
+					<button
+						type="button"
+						onclick={() => toggleCategoria(categoria)}
+						class="group relative flex items-center gap-3 rounded-lg border p-3 text-left transition-all {seleccionada
+							? 'border-blue-500 bg-blue-50'
+							: 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'}"
+					>
+						<!-- Checkbox visual -->
+						<div
+							class="flex h-5 w-5 items-center justify-center rounded border-2 transition-colors {seleccionada
+								? 'border-blue-500 bg-blue-500'
+								: 'border-gray-300 bg-white'}"
 						>
-							<!-- Checkbox visual -->
-							<div
-								class="flex h-5 w-5 items-center justify-center rounded border-2 transition-colors {seleccionada
-									? 'border-blue-500 bg-blue-500'
-									: 'border-gray-300 bg-white'}"
-							>
-								{#if seleccionada}
-									<svg
-										class="h-3 w-3 text-white"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="3"
-											d="M5 13l4 4L19 7"
-										/>
-									</svg>
-								{/if}
-							</div>
+							{#if seleccionada}
+								<svg
+									class="h-3 w-3 text-white"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										stroke-linecap="round"
+										stroke-linejoin="round"
+										stroke-width="3"
+										d="M5 13l4 4L19 7"
+									/>
+								</svg>
+							{/if}
+						</div>
 
-							<!-- Icono -->
-							<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-								<Icon
-									src={obtenerIconoCategoria(categoria.descripcion)}
-									class="h-5 w-5 text-blue-600"
-								/>
-							</div>
-							<!-- Nombre de la categoría -->
-							<div class="flex-1">
-								<span class="font-medium text-gray-900">{categoria.descripcion}</span>
-							</div>
-						</button>
-					{/each}
-				</div>
+						<!-- Icono -->
+						<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
+							<Icon
+								src={obtenerIconoCategoria(categoria.descripcion)}
+								class="h-5 w-5 text-blue-600"
+							/>
+						</div>
+						<!-- Nombre de la categoría -->
+						<div class="flex-1">
+							<span class="font-medium text-gray-900">{categoria.descripcion}</span>
+						</div>
+					</button>
+				{/each}
+			</div>
 
 			<!-- Contador de seleccionadas -->
 			<div class="mb-6 rounded-lg bg-blue-50 p-3">

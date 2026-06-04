@@ -14,18 +14,15 @@ import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPerm
 export function calcularProgresoCantidad(participaciones: ParticipacionPermitida[] = []): number {
 	if (participaciones.length === 0) return 0;
 
-	// Filtramos solo participaciones válidas (> 0)
-	const participacionesValidas = participaciones.filter((p) => (p.objetivo ?? 0) > 0);
+	const validas = participaciones.filter((p) => (p.objetivo ?? 0) > 0);
 
-	if (participacionesValidas.length === 0) return 0;
+	if (validas.length === 0) return 0;
 
-	const totalObjetivo = participacionesValidas.reduce((acc, p) => acc + (p.objetivo ?? 0), 0);
+	const porcentajes = validas.map((p) =>
+		Math.min(((p.actual ?? 0) / (p.objetivo ?? 1)) * 100, 100)
+	);
 
-	if (totalObjetivo === 0) return 0;
-
-	const totalActual = participacionesValidas.reduce((acc, p) => acc + (p.actual ?? 0), 0);
-
-	return Math.min((totalActual / totalObjetivo) * 100, 100);
+	return porcentajes.reduce((acc, p) => acc + p, 0) / porcentajes.length;
 }
 
 /**
@@ -75,5 +72,5 @@ export function calcularProgresoTotal(proyecto: Proyecto): number {
 	const cantidad = calcularProgresoCantidad(proyecto.participacion_permitida || []);
 	const tiempo = calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa);
 
-	return Math.round(0.6 * cantidad + 0.4 * tiempo);
+	return Math.round(0.8 * cantidad + 0.2 * tiempo);
 }

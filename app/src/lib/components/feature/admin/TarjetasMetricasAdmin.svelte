@@ -32,10 +32,10 @@
 <div class="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 	<!-- Usuarios -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-blue-500/20 bg-blue-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-blue-500/20 bg-blue-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-[40px] transition-all duration-700 group-hover:bg-blue-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-blue-500/10 blur-2xl transition-all duration-700 group-hover:bg-blue-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -51,12 +51,12 @@
 			</div>
 			<div class="mt-5 flex items-center gap-3">
 				<span
-					class="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30"
+					class="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300"
 				>
 					{kpis.usuariosActivos} Activos
 				</span>
 				<span
-					class="inline-flex items-center rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30"
+					class="inline-flex items-center rounded-full border border-amber-500/30 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300"
 				>
 					{kpis.usuariosPendientes} Pendientes
 				</span>
@@ -66,10 +66,10 @@
 
 	<!-- Proyectos -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-emerald-500/20 bg-emerald-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-[40px] transition-all duration-700 group-hover:bg-emerald-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl transition-all duration-700 group-hover:bg-emerald-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -87,18 +87,19 @@
 			</div>
 			<div class="mt-5">
 				<p class="text-xs font-medium text-slate-400">
-					<span class="text-emerald-400 font-bold">{kpis.proyectosFinalizados}</span> finalizados exitosamente
+					<span class="font-bold text-emerald-400">{kpis.proyectosFinalizados}</span> finalizados exitosamente
 				</p>
 			</div>
 		</div>
 	</div>
 
 	<!-- Reportes -->
-	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10"
+	<a
+		href="/reportes"
+		class="group relative block overflow-hidden rounded-4xl border border-rose-500/20 bg-rose-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-[40px] transition-all duration-700 group-hover:bg-rose-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rose-500/10 blur-2xl transition-all duration-700 group-hover:bg-rose-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -112,10 +113,10 @@
 					<ShieldAlert size={24} />
 				</div>
 			</div>
-			<div class="mt-5">
+			<div class="mt-5 space-y-1">
 				<span
 					class="inline-flex items-center gap-1 text-xs font-bold {kpis.reportesPendientes > 0
-						? 'text-rose-400 animate-pulse'
+						? 'animate-pulse text-rose-400'
 						: 'text-slate-400'}"
 				>
 					{#if kpis.reportesPendientes > 0}
@@ -124,16 +125,19 @@
 						Todo al día
 					{/if}
 				</span>
+				<p class="text-[11px] font-semibold text-rose-300/90 group-hover:text-rose-200">
+					Ir a Gestión de reportes
+				</p>
 			</div>
 		</div>
-	</div>
+	</a>
 
 	<!-- Validación -->
 	<div
-		class="group relative overflow-hidden rounded-[2rem] border border-purple-500/20 bg-purple-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10"
+		class="group relative overflow-hidden rounded-4xl border border-purple-500/20 bg-purple-500/10 p-6 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-purple-500/10"
 	>
 		<div
-			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-purple-500/10 blur-[40px] transition-all duration-700 group-hover:bg-purple-500/20"
+			class="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-purple-500/10 blur-2xl transition-all duration-700 group-hover:bg-purple-500/20"
 		></div>
 		<div class="relative z-10 flex h-full flex-col justify-between">
 			<div class="flex items-start justify-between">
@@ -158,18 +162,20 @@
 <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
 	<!-- Roles -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+		class="rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
 	>
 		<div class="mb-4 flex items-center gap-2">
 			<UserCog size={18} class="text-slate-400" />
-			<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Distribución de Roles</p>
+			<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">
+				Distribución de Roles
+			</p>
 		</div>
 		<div class="flex flex-col gap-3">
 			<div class="flex items-center justify-between">
 				<span class="text-sm font-medium text-slate-300">Administradores</span>
 				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.administrador ?? 0}</span>
 			</div>
-			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+			<div class="h-1 w-full overflow-hidden rounded-full bg-white/5">
 				<div
 					class="h-full bg-blue-500"
 					style="width: {((kpis.usuariosPorRol.administrador || 0) / kpis.totalUsuarios) * 100}%"
@@ -179,7 +185,7 @@
 				<span class="text-sm font-medium text-slate-300">Instituciones</span>
 				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.institucion ?? 0}</span>
 			</div>
-			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+			<div class="h-1 w-full overflow-hidden rounded-full bg-white/5">
 				<div
 					class="h-full bg-emerald-500"
 					style="width: {((kpis.usuariosPorRol.institucion || 0) / kpis.totalUsuarios) * 100}%"
@@ -189,7 +195,7 @@
 				<span class="text-sm font-medium text-slate-300">Colaboradores</span>
 				<span class="text-sm font-black text-white">{kpis.usuariosPorRol.colaborador ?? 0}</span>
 			</div>
-			<div class="h-1 w-full rounded-full bg-white/5 overflow-hidden">
+			<div class="h-1 w-full overflow-hidden rounded-full bg-white/5">
 				<div
 					class="h-full bg-purple-500"
 					style="width: {((kpis.usuariosPorRol.colaborador || 0) / kpis.totalUsuarios) * 100}%"
@@ -200,37 +206,45 @@
 
 	<!-- Estado General -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
+		class="rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
 	>
 		<div class="mb-4 flex items-center gap-2">
 			<Activity size={18} class="text-slate-400" />
 			<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Estado General</p>
 		</div>
 		<div class="space-y-4">
-			<div class="flex items-center justify-between rounded-xl bg-rose-500/10 p-4 border border-rose-500/20">
+			<div
+				class="flex items-center justify-between rounded-xl border border-rose-500/20 bg-rose-500/10 p-4"
+			>
 				<div>
-					<p class="text-[10px] font-bold text-rose-400 uppercase tracking-widest">Inhabilitados</p>
+					<p class="text-[10px] font-bold tracking-widest text-rose-400 uppercase">Inhabilitados</p>
 					<p class="text-2xl font-black text-white">{kpis.usuariosInhabilitados}</p>
 				</div>
-                <div class="h-10 w-10 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 font-bold">
-                    !
-                </div>
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-500/20 font-bold text-rose-400"
+				>
+					!
+				</div>
 			</div>
-			<div class="flex items-center justify-between rounded-xl bg-amber-500/10 p-4 border border-amber-500/20">
+			<div
+				class="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/10 p-4"
+			>
 				<div>
-					<p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest">Pendientes</p>
+					<p class="text-[10px] font-bold tracking-widest text-amber-400 uppercase">Pendientes</p>
 					<p class="text-2xl font-black text-white">{kpis.usuariosPendientes}</p>
 				</div>
-                <div class="h-10 w-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold italic">
-                    ?
-                </div>
+				<div
+					class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/20 font-bold text-amber-400 italic"
+				>
+					?
+				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Rendimiento -->
 	<div
-		class="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10 flex flex-col justify-between"
+		class="flex flex-col justify-between rounded-3xl border border-white/5 bg-white/5 p-6 backdrop-blur-sm transition-all hover:bg-white/10"
 	>
 		<div>
 			<div class="mb-4 flex items-center gap-2">
@@ -238,18 +252,16 @@
 				<p class="text-xs font-bold tracking-widest text-slate-500 uppercase">Resolución mensual</p>
 			</div>
 			<div class="mt-6 flex flex-col items-center justify-center text-center">
-				<p class="text-6xl font-black text-white tracking-tighter">{kpis.reportesResueltosMes}</p>
-				<p class="mt-2 text-sm font-bold text-emerald-400 uppercase tracking-widest">
+				<p class="text-6xl font-black tracking-tighter text-white">{kpis.reportesResueltosMes}</p>
+				<p class="mt-2 text-sm font-bold tracking-widest text-emerald-400 uppercase">
 					Reportes resueltos
 				</p>
 			</div>
 		</div>
 		<div class="mt-6">
-			<p class="text-center text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em]">
+			<p class="text-center text-[10px] font-medium tracking-[0.2em] text-slate-500 uppercase">
 				Últimos 30 días
 			</p>
 		</div>
 	</div>
 </div>
-
-

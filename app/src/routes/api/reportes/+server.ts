@@ -6,6 +6,7 @@ import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supaba
 import { CrearReporte } from '$lib/domain/use-cases/reportes/CrearReporte';
 import { ListarReportes } from '$lib/domain/use-cases/reportes/ListarReportes';
 import { MotivoReporte } from '$lib/domain/types/Reporte';
+import { notificarNuevoReporteAdmin } from '$lib/server/servicio-notificaciones-admin';
 
 // POST /api/reportes — Crear un reporte (cualquier usuario autenticado)
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -19,7 +20,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// 1. Validaciones estrictas de entrada (Runtime check)
 		if (!['Usuario', 'Proyecto'].includes(data.tipo_objeto)) {
-			return json({ error: 'tipo_objeto inválido. Debe ser "Usuario" o "Proyecto".' }, { status: 400 });
+			return json(
+				{ error: 'tipo_objeto inválido. Debe ser "Usuario" o "Proyecto".' },
+				{ status: 400 }
+			);
 		}
 
 		const id_objeto = Number(data.id_objeto);
@@ -34,10 +38,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const descripcion = data.descripcion?.trim();
 		if (!descripcion || descripcion.length < 20) {
-			return json({ error: 'La descripción del reporte debe tener al menos 20 caracteres.' }, { status: 400 });
+			return json(
+				{ error: 'La descripción del reporte debe tener al menos 20 caracteres.' },
+				{ status: 400 }
+			);
 		}
 		if (descripcion.length > 800) {
-			return json({ error: 'La descripción no puede superar los 800 caracteres.' }, { status: 400 });
+			return json(
+				{ error: 'La descripción no puede superar los 800 caracteres.' },
+				{ status: 400 }
+			);
 		}
 
 		const repo = new PostgresReporteRepository();
@@ -51,6 +61,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			motivo: data.motivo as MotivoReporte,
 			descripcion: data.descripcion,
 			reportante_id: usuario.id_usuario!
+		});
+
+		await notificarNuevoReporteAdmin({
+			tipoObjeto: data.tipo_objeto as 'Usuario' | 'Proyecto',
+			idObjeto: id_objeto,
+			motivo: String(data.motivo),
+			reportanteId: usuario.id_usuario!,
+			reportanteUsername: usuario.username
 		});
 
 		return json({ success: true, reporte }, { status: 201 });
@@ -71,8 +89,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	const esAdmin = usuario.rol === 'administrador';
 
 	try {
-		const estado = url.searchParams.get('estado') as 'pendiente' | 'verificado' | 'desestimado' | null;
-		
+		const estado = url.searchParams.get('estado') as
+			| 'pendiente'
+			| 'verificado'
+			| 'desestimado'
+			| null;
+
 		const estadosValidos = ['pendiente', 'verificado', 'desestimado'];
 		if (estado && !estadosValidos.includes(estado)) {
 			return json({ error: 'estado de filtro inválido.' }, { status: 400 });
@@ -85,14 +107,14 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 		const limitStr = url.searchParams.get('limit') ?? '20';
 		const offsetStr = url.searchParams.get('offset') ?? '0';
-		
+
 		const limit = parseInt(limitStr);
 		const offset = parseInt(offsetStr);
 
 		if (isNaN(limit) || isNaN(offset)) {
 			return json({ error: 'limit y offset deben ser números.' }, { status: 400 });
 		}
-		
+
 		const desdeStr = url.searchParams.get('desde');
 		const hastaStr = url.searchParams.get('hasta');
 

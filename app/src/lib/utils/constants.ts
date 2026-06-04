@@ -1,8 +1,5 @@
 import type { EstadoDescripcion } from '$lib/domain/types/Estado';
-import {
-	TIPO_PARTICIPACION_LABELS,
-	type TipoParticipacionDescripcion
-} from '$lib/domain/types/TipoParticipacion';
+import { TIPO_PARTICIPACION_LABELS } from '$lib/domain/types/TipoParticipacion';
 import type { TipoUbicacion } from '$lib/domain/types/Ubicacion';
 import {
 	CurrencyDollar,
@@ -10,7 +7,6 @@ import {
 	Cube,
 	ArchiveBox,
 	Heart,
-	QuestionMarkCircle,
 	ComputerDesktop,
 	Pencil,
 	Beaker,
@@ -33,8 +29,7 @@ import {
 	UserGroup,
 	HandRaised,
 	MusicalNote,
-	ClipboardDocumentList,
-	Truck
+	ClipboardDocumentList
 } from '@steeze-ui/heroicons';
 import type { IconSource } from '@steeze-ui/svelte-icon';
 
@@ -168,6 +163,30 @@ export const ICONOS_UNIDAD: Record<string, IconSource> = {
 };
 
 export const DEFAULT_PARTICIPACION_ICON = ArchiveBox;
+
+// --- HEATMAP DE ACTIVIDAD ---
+
+export const HEATMAP_SEMANAS = 26;
+
+// --- MANUALES DE USUARIO ---
+
+export const MANUALES_USUARIO = {
+	administrador: {
+		url: 'https://drive.google.com/file/d/1qE8uuueDDwxIQMsS_7C_vbfDq6d4uG5x/view?usp=drive_link',
+		titulo: 'Manual de administradores'
+	},
+	colaborador: {
+		url: 'https://drive.google.com/file/d/1KDpFjqes-7FAssc9_yZ2WFVVhEe2X0zx/view?usp=drive_link',
+		titulo: 'Manual de colaboradores'
+	},
+	institucion: {
+		url: 'https://drive.google.com/file/d/110f2wYRTv40N1mcHo9lK2-FgDYuAXNFN/view?usp=drive_link',
+		titulo: 'Manual de instituciones'
+	}
+} as const satisfies Record<
+	'administrador' | 'colaborador' | 'institucion',
+	{ url: string; titulo: string }
+>;
 
 // --- COLORES UI ---
 

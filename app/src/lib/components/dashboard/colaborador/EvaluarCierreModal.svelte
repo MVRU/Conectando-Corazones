@@ -3,7 +3,11 @@
 	import { quintOut } from 'svelte/easing';
 	import { X, CheckCircle2, ChevronRight, AlertCircle } from 'lucide-svelte';
 
-	let { show = false, onClose = () => {}, proyectos = [] } = $props<{
+	let {
+		show = false,
+		onClose = () => {},
+		proyectos = []
+	} = $props<{
 		show?: boolean;
 		onClose?: () => void;
 		proyectos?: { id: string; titulo: string; fechaFin: string; estado: string }[];

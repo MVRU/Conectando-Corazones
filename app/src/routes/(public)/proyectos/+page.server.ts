@@ -1,5 +1,4 @@
 import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 import { GetAllProvincias } from '$lib/domain/use-cases/ubicacion/GetAllProvincias';
 import { ProvinciaRepoPrisma } from '$lib/infrastructure/supabase/postgres/provincia.repo';
 import { PostgresProyectoRepository } from '$lib/infrastructure/supabase/postgres/proyecto.repo';

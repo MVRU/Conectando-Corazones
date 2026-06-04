@@ -93,7 +93,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	} catch (err) {
 		// Si es una redirección de SvelteKit, la relanzamos
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		if (err instanceof Error && err.constructor.name === 'Redirect' || (err as any)?.status >= 300) {
+		if (
+			(err instanceof Error && err.constructor.name === 'Redirect') ||
+			(err as any)?.status >= 300
+		) {
 			throw err;
 		}
 		console.error('[AuthGuard] Error inesperado en el guardia:', err);

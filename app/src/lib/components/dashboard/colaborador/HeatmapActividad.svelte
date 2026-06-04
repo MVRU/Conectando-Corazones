@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Flame, Info } from 'lucide-svelte';
 	import { reveal } from '$lib/actions/reveal';
+	import { HEATMAP_SEMANAS } from '$lib/utils/constants';
 
 	let { data = [] } = $props<{
-		data?: { fecha: string; intensidad: number }[];
+		data?: { fecha: string; intensidad: number; conteo: number }[];
 	}>();
 
-	const weeksToShow = 26;
-	const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-
+	const weeksToShow = HEATMAP_SEMANAS;
 	function getColor(intensity: number) {
 		if (intensity === 0) return 'bg-white/5';
 		if (intensity === 1) return 'bg-emerald-900/40';
@@ -27,10 +26,13 @@
 				date.setDate(today.getDate() - ((weeksToShow - 1 - w) * 7 + (6 - d)));
 				const dateStr = date.toISOString().split('T')[0];
 
-				const found = data.find((d: { fecha: string; nivel: number }) => d.fecha === dateStr);
+				const found = data.find(
+					(d: { fecha: string; intensidad: number; conteo: number }) => d.fecha === dateStr
+				);
 				week.push({
 					date: dateStr,
-					intensity: found ? found.intensidad : 0
+					intensity: found ? found.intensidad : 0,
+					conteo: found?.conteo ?? 0
 				});
 			}
 			grid.push(week);
@@ -43,7 +45,7 @@
 
 <div
 	use:reveal
-	class="reveal-hidden h-full rounded-[2rem] border border-emerald-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="reveal-hidden h-full rounded-4xl border border-emerald-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-8 flex items-center justify-between gap-2">
 		<div class="flex items-center gap-2">
@@ -66,7 +68,7 @@
 				<div class="flex flex-col gap-1">
 					{#each week as day}
 						<div
-							title={`${day.date}: ${day.intensity} actividades`}
+							title={`${day.date.split('-').reverse().join('/')}: ${day.conteo} actividades`}
 							class="h-3 w-3 rounded-sm transition-colors hover:border hover:border-white/20 {getColor(
 								day.intensity
 							)}"
@@ -79,7 +81,6 @@
 
 	<div class="mt-4 flex items-center gap-2 rounded-lg bg-white/5 p-3 text-xs text-slate-400">
 		<Info size={14} class="text-blue-400" />
-		<!-- TODO: implementar historial de cambios -->
 		<p>Tu actividad impulsa proyectos. ¡Seguí así!</p>
 	</div>
 </div>

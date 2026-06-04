@@ -118,15 +118,18 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 			created_at: ev.created_at,
 			id_participacion_permitida: ev.id_participacion_permitida,
 			archivos: ev.archivos.map(
-				(a: any) => new Archivo({
-					...a,
-					nombre_original: a.nombre_original ?? undefined,
-					usuario: a.usuario ? {
-						nombre: a.usuario.nombre,
-						apellido: a.usuario.apellido,
-						username: a.usuario.username
-					} : undefined
-				})
+				(a: any) =>
+					new Archivo({
+						...a,
+						nombre_original: a.nombre_original ?? undefined,
+						usuario: a.usuario
+							? {
+									nombre: a.usuario.nombre,
+									apellido: a.usuario.apellido,
+									username: a.usuario.username
+								}
+							: undefined
+					})
 			)
 		});
 	}
@@ -215,14 +218,24 @@ export class PostgresEvidenciaRepository implements EvidenciaRepository {
 								usuario_id: a.usuario_id,
 								evidencia_id: a.evidencia_id,
 								proyecto_id: a.proyecto_id,
-								usuario: a.usuario ? {
-									nombre: a.usuario.nombre,
-									apellido: a.usuario.apellido,
-									username: a.usuario.username
-								} : undefined
+								usuario: a.usuario
+									? {
+											nombre: a.usuario.nombre,
+											apellido: a.usuario.apellido,
+											username: a.usuario.username
+										}
+									: undefined
 							})
 					)
 				})
 		);
+	}
+
+	async findIdsByProyecto(proyectoId: number): Promise<number[]> {
+		const evidencias = await this.db.evidencia.findMany({
+			where: { participacion_permitida: { id_proyecto: proyectoId } },
+			select: { id_evidencia: true }
+		});
+		return evidencias.map((e) => e.id_evidencia);
 	}
 }

@@ -32,7 +32,8 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		return {
 			proyecto: JSON.parse(JSON.stringify(proyecto)),
 			tieneReportePendiente,
-			chatAviso: url.searchParams.get('chat') === 'no-habilitado'
+			chatAviso: url.searchParams.get('chat') === 'no-habilitado',
+			conFinesLucro: locals.usuario?.con_fines_de_lucro ?? false
 		};
 	} catch (err: unknown) {
 		console.error('Error loading project:', err);
@@ -47,6 +48,8 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		return {
 			proyecto: null,
 			chatAviso: false,
+			conFinesLucro: false,
+			tieneReportePendiente: false,
 			error:
 				'Hubo un problema al cargar los detalles del proyecto. Por favor, intentá nuevamente más tarde.'
 		};

@@ -75,7 +75,7 @@
 		</p>
 
 		<input
-			class="mt-8 w-full max-w-xs rounded-lg border px-4 py-3 text-center text-2xl tracking-widest text-gray-800 focus:border-blue-500 focus:outline-none"
+			class="mt-8 w-full max-w-xs rounded-lg border px-4 py-3 text-center text-2xl tracking-widest text-gray-800 focus:border-blue-500 focus:outline-hidden"
 			bind:value={codigo}
 			oninput={(e) => {
 				const target = e.target as HTMLInputElement;

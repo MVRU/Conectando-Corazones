@@ -43,7 +43,7 @@
 
 	<!-- *Overlay -->
 	<div
-		class="relative z-10 flex h-full flex-col justify-end bg-gradient-to-t
+		class="relative z-10 flex h-full flex-col justify-end bg-linear-to-t
 		       from-[#0f1029]/60 via-[#0f1029]/35 to-transparent p-5
 		       transition-colors duration-500
 		       group-hover:from-[#0f1029]/75 group-hover:via-[#0f1029]/50"

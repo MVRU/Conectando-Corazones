@@ -32,14 +32,14 @@
 
 <div class="my-6 flex items-center justify-center">
 	<div class="relative">
-		<div class="rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 px-4 py-1.5 shadow-sm">
+		<div class="rounded-full bg-linear-to-r from-blue-100 to-indigo-100 px-4 py-1.5 shadow-sm">
 			<span class="text-xs font-semibold text-blue-800">{formatearFecha(fecha)}</span>
 		</div>
 		<div
-			class="absolute top-1/2 left-full ml-3 h-px w-12 bg-gradient-to-r from-gray-300 to-transparent"
+			class="absolute top-1/2 left-full ml-3 h-px w-12 bg-linear-to-r from-gray-300 to-transparent"
 		></div>
 		<div
-			class="absolute top-1/2 right-full mr-3 h-px w-12 bg-gradient-to-l from-gray-300 to-transparent"
+			class="absolute top-1/2 right-full mr-3 h-px w-12 bg-linear-to-l from-gray-300 to-transparent"
 		></div>
 	</div>
 </div>

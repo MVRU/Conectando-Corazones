@@ -1,11 +1,14 @@
 {
   "dependencies": {
     "@fontsource/raleway": "^5.2.6",
+    "@vercel/functions": "^3.6.0",
     "aos": "^2.3.4",
     "lucide-svelte": "^0.553.0"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "^7.0.0",
-    "@types/aos": "^3.0.7"
+    "@types/aos": "^3.0.7",
+    "prettier": "^3.8.3",
+    "prettier-plugin-svelte": "^3.5.2"
   }
 }

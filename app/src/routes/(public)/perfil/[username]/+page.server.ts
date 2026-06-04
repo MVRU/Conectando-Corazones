@@ -53,6 +53,11 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		// 4. Verificar si es mi perfil
 		const esMiPerfil = locals.usuario?.id_usuario === perfilUsuario.id_usuario;
 
+		// 5. Cargar estado ARCA para instituciones
+		if (perfilUsuario.id_usuario && perfilUsuario.rol === 'institucion') {
+			perfilUsuario.arcaVigente = await usuarioRepo.obtenerArcaVigente(perfilUsuario.id_usuario);
+		}
+
 		// Serializar todas las entidades de dominio
 		return {
 			perfilUsuario: perfilUsuario.toPOJO(),
@@ -67,7 +72,12 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		console.error('Error loading profile:', err);
 
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
+		if (
+			err &&
+			typeof err === 'object' &&
+			'status' in err &&
+			(err as { status: number }).status === 404
+		) {
 			throw err;
 		}
 

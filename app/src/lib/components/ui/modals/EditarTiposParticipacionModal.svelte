@@ -7,17 +7,17 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import Button from '$lib/components/ui/elementos/Button.svelte';
 
-	let { 
-		mostrar = $bindable(false), 
-		tiposSeleccionados = [], 
-		tiposParticipacion = [], 
+	let {
+		mostrar = $bindable(false),
+		tiposSeleccionados = [],
+		tiposParticipacion = [],
 		guardando = false,
 		onguardar,
 		oncerrar
-	}: { 
-		mostrar?: boolean; 
-		tiposSeleccionados?: TipoParticipacion[]; 
-		tiposParticipacion?: TipoParticipacion[]; 
+	}: {
+		mostrar?: boolean;
+		tiposSeleccionados?: TipoParticipacion[];
+		tiposParticipacion?: TipoParticipacion[];
 		guardando?: boolean;
 		onguardar: (tipos: TipoParticipacion[]) => void;
 		oncerrar: () => void;

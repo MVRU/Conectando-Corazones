@@ -50,7 +50,7 @@
 		<div class="flex flex-wrap gap-2">
 			{#each categorias as categoria, i (categoria.descripcion)}
 				<div
-					class="group flex cursor-default items-center gap-1.5 rounded-full border border-blue-100 bg-gradient-to-r from-blue-50 to-blue-50/60 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:border-[#007FFF]/30 hover:from-blue-100 hover:to-blue-50 hover:shadow-sm"
+					class="group flex cursor-default items-center gap-1.5 rounded-full border border-blue-100 bg-linear-to-r from-blue-50 to-blue-50/60 px-3 py-1.5 text-xs font-semibold text-[#007FFF] transition-all duration-200 hover:border-[#007FFF]/30 hover:from-blue-100 hover:to-blue-50 hover:shadow-sm"
 					in:fly={{ y: 8, duration: 250, delay: i * 50, easing: cubicOut }}
 				>
 					<Icon
@@ -62,8 +62,12 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-[#007FFF]/30 hover:bg-white hover:shadow-sm">
-			<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]">
+		<div
+			class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-[#007FFF]/30 hover:bg-white hover:shadow-sm"
+		>
+			<div
+				class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]"
+			>
 				<Tag class="h-7 w-7" />
 			</div>
 

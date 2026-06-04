@@ -53,7 +53,7 @@
 		class="bg-gradient-radial pointer-events-none absolute top-0 left-1/2 z-0 h-[700px] w-[150vw] -translate-x-1/2 from-sky-500/30 via-transparent to-transparent"
 	></span>
 	<span
-		class="pointer-events-none absolute inset-0 z-0 bg-gradient-to-br from-transparent via-blue-900/10 to-sky-900/20"
+		class="pointer-events-none absolute inset-0 z-0 bg-linear-to-br from-transparent via-blue-900/10 to-sky-900/20"
 	></span>
 
 	<!-- -*-Luz azul suave detrás de la hero -->
@@ -83,7 +83,7 @@
 				style="transition-delay: 180ms"
 			>
 				<span
-					class="block bg-gradient-to-r from-sky-400 via-cyan-300 to-blue-300 bg-clip-text text-transparent drop-shadow-md"
+					class="block bg-linear-to-r from-sky-400 via-cyan-300 to-blue-300 bg-clip-text text-transparent drop-shadow-md"
 				>
 					Cambiá una vida
 				</span>
@@ -110,7 +110,7 @@
 						href={ctaHref}
 						variant="primary"
 						size="md"
-						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
+						customClass="px-8 py-3 text-lg font-bold shadow-lg bg-linear-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 mt-3 "
 					/>
 				</div>
 			</div>

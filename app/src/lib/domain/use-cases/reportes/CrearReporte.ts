@@ -9,7 +9,7 @@ export class CrearReporte {
 		private reporteRepository: ReporteRepository,
 		private historialRepo: HistorialDeCambiosRepository,
 		private proyectoRepository?: ProyectoRepository
-	) { }
+	) {}
 
 	async execute(data: {
 		tipo_objeto: 'Usuario' | 'Proyecto';
@@ -28,7 +28,9 @@ export class CrearReporte {
 			data.id_objeto
 		);
 		if (existente) {
-			throw new Error('Ya enviaste un reporte para este elemento. Solo se permite uno por entidad.');
+			throw new Error(
+				'Ya enviaste un reporte para este elemento. Solo se permite uno por entidad.'
+			);
 		}
 
 		// 3. Persistir la entidad construida y validada

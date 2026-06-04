@@ -22,9 +22,9 @@ export interface EstadisticasProyectos {
 
 export interface EstadisticasCalendario {
 	verificacion: {
-		estado: 'verificada' | 'pendiente' | 'expirado';
-		fechaRenovacion: string;
-		diasRestantes: number;
+		estado: 'vigente' | 'vencido' | 'sin_registro';
+		fechaRenovacion: string | null;
+		diasRestantes: number | null;
 	};
 	projectTimeline: {
 		id: string;
@@ -66,10 +66,14 @@ export interface InstitucionDashboardData {
 		fecha: string;
 		ubicacion: string;
 		estaVerificado: boolean;
+		estadoVerificacion?: 'aprobada' | 'pendiente' | 'rechazada' | null;
+		requiereVerificacionDocumental?: boolean;
+		documentacionVerificacionEnRevision?: boolean;
 		bio?: string;
 	};
 	metricas: {
 		proyectosTotales: number;
+		nuevosProyectos: number;
 		colaboradoresActivos: number;
 		diasProximoCierre: number;
 		solicitudesPendientes: number;
@@ -79,6 +83,11 @@ export interface InstitucionDashboardData {
 		estadisticasProyectos?: EstadisticasProyectos;
 		estadisticasCalendario?: EstadisticasCalendario;
 	};
+	proyectosParaEvidencia?: {
+		id: string;
+		titulo: string;
+		estado: string;
+	}[];
 	seguimientoObjetivos: {
 		id: string;
 		nombre: string;

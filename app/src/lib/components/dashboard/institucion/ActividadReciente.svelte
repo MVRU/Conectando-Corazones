@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { History, Share2, PlusCircle, Settings } from 'lucide-svelte';
+	import { History } from 'lucide-svelte';
 
 	let { actividad = [] } = $props<{
 		actividad?: {
@@ -16,36 +16,13 @@
 		colaboracion: 'Colaboración',
 		evidencia: 'Evidencia'
 	} as const;
-
-	function getIcon(tipo: string) {
-		switch (tipo) {
-			case 'proyecto':
-				return PlusCircle;
-			case 'colaboracion':
-				return Share2;
-			default:
-				return Settings;
-		}
-	}
-
-	function getColor(tipo: string) {
-		switch (tipo) {
-			case 'proyecto':
-				return 'text-emerald-400 bg-emerald-400/10';
-			case 'colaboracion':
-				return 'text-blue-400 bg-blue-400/10';
-			default:
-				return 'text-slate-400 bg-slate-400/10';
-		}
-	}
 </script>
 
 <div
-	class="h-full rounded-[2rem] border border-blue-500/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-sm"
+	class="h-full rounded-4xl border border-blue-500/10 bg-white/2 p-8 shadow-2xl backdrop-blur-sm"
 >
 	<div class="mb-6 flex items-center gap-2">
 		<h2 class="text-xl font-semibold tracking-tight text-white">Actividades recientes</h2>
-		<!-- TODO: implementar módulo de historial de cambios -->
 		<History size={18} class="text-slate-400" />
 	</div>
 

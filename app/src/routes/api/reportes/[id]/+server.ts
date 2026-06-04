@@ -19,9 +19,12 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 	try {
 		const data = await request.json();
-		
+
 		if (!data.estado || !['verificado', 'desestimado'].includes(data.estado)) {
-			return json({ error: 'Estado inválido. Debe ser "verificado" o "desestimado".' }, { status: 400 });
+			return json(
+				{ error: 'Estado inválido. Debe ser "verificado" o "desestimado".' },
+				{ status: 400 }
+			);
 		}
 
 		const comentario = data.comentario?.trim();

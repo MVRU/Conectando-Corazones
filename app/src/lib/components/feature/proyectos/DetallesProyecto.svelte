@@ -38,7 +38,7 @@
 	let categorias = $derived(obtenerCategorias(proyecto?.categorias));
 
 	const claseCard =
-		'animate-fade-up rounded-xl border border-gray-100 bg-white p-4 shadow-sm ring-1 ring-transparent transition-all hover:shadow-md hover:ring-gray-100 min-h-[96px] sm:p-5';
+		'animate-fade-up rounded-xl border border-gray-100 bg-white p-4 shadow-sm ring-1 ring-transparent transition-all hover:shadow-md hover:ring-gray-100 min-h-24 sm:p-5';
 	const claseHeader = 'mb-2 flex items-center gap-3';
 	const claseIcono =
 		'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sky-50 ring-1 ring-sky-100';

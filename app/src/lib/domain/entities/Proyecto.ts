@@ -34,6 +34,7 @@ export class Proyecto {
 	institucion?: Usuario;
 	ubicaciones?: ProyectoUbicacion[];
 	solicitudes_finalizacion?: SolicitudFinalizacion[];
+	esDeducible?: boolean;
 
 	constructor(data: Partial<Proyecto> | any) {
 		this.id_proyecto = data.id_proyecto;
@@ -76,6 +77,7 @@ export class Proyecto {
 		if (data.colaboraciones) {
 			this.colaboraciones = data.colaboraciones;
 		}
+		if (data.esDeducible !== undefined) this.esDeducible = data.esDeducible;
 
 		this.validar();
 	}
@@ -95,6 +97,7 @@ export class Proyecto {
 		const esBorrador = this.estado === 'borrador';
 
 		if (!esBorrador && !esEstadoFinalizable) {
+			// pendiente de implementar validación de estado
 		}
 
 		if (this.fecha_fin_tentativa) {

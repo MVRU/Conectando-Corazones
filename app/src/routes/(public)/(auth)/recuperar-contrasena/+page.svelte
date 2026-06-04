@@ -307,8 +307,11 @@
 		content: '';
 		position: absolute;
 		inset: 0;
-		background-image:
-			radial-gradient(ellipse 60% 40% at 80% 20%, rgba(0, 127, 255, 0.18) 0%, transparent 60%),
+		background-image: radial-gradient(
+				ellipse 60% 40% at 80% 20%,
+				rgba(0, 127, 255, 0.18) 0%,
+				transparent 60%
+			),
 			radial-gradient(ellipse 40% 50% at 10% 90%, rgba(222, 28, 56, 0.1) 0%, transparent 60%);
 	}
 

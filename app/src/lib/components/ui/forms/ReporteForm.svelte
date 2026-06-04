@@ -148,7 +148,7 @@
 			bind:value={motivo}
 			disabled={isLoading}
 			class={clsx(
-				'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+				'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
 				errorMotivo
 					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
@@ -187,7 +187,7 @@
 				disabled={isLoading}
 				placeholder="Detalle su motivo..."
 				class={clsx(
-					'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+					'mt-2 w-full rounded-lg border px-4 py-2.5 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
 					errorMotivoOtro
 						? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 						: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
@@ -228,7 +228,7 @@
 			maxlength="800"
 			placeholder="Describí en detalle la irregularidad observada. Incluí fechas, nombres, montos o cualquier evidencia que ayude a la investigación..."
 			class={clsx(
-				'mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50',
+				'mt-2 w-full resize-none rounded-lg border px-4 py-3 text-gray-900 shadow-sm transition focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50',
 				errorDescripcion
 					? 'border-red-300 focus:border-red-500 focus:ring-red-200'
 					: 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
@@ -264,7 +264,7 @@
 	<div class="rounded-lg border border-blue-100 bg-blue-50 p-4">
 		<div class="flex gap-3">
 			<svg
-				class="h-6 w-6 flex-shrink-0 text-blue-600"
+				class="h-6 w-6 shrink-0 text-blue-600"
 				fill="none"
 				stroke="currentColor"
 				stroke-width="2"

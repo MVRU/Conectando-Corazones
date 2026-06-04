@@ -1,8 +1,8 @@
 <script lang="ts">
 	import FaqItem from '$lib/components/ui/elementos/FaqItem.svelte';
 	import Image from '$lib/components/ui/elementos/Image.svelte';
-	import { faqs as allFaqs } from '\$lib/domain/types/static-data/faqs';
-	import { inView } from '\$lib/utils/actions/inView';
+	import { faqs as allFaqs } from '$lib/domain/types/static-data/faqs';
+	import { inView } from '$lib/utils/actions/inView';
 
 	let faqVisible = $state(false);
 	let imagenVisible = $state(false);
@@ -11,10 +11,7 @@
 	const faqs = allFaqs.filter((faq) => faq.categoria === 'General');
 </script>
 
-<section
-	id="faq"
-	class="w-full bg-gradient-to-b from-[#f7f8fd] to-white px-2 py-50 sm:px-4 md:px-8"
->
+<section id="faq" class="w-full bg-linear-to-b from-[#f7f8fd] to-white px-2 py-50 sm:px-4 md:px-8">
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
 		<!-- *Contenido -->
 		<div
