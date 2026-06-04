@@ -9,7 +9,7 @@ export class ResolverReporte {
 		private reporteRepository: ReporteRepository,
 		private historialRepo: HistorialDeCambiosRepository,
 		private proyectoRepository?: ProyectoRepository
-	) { }
+	) {}
 
 	async execute(data: {
 		reporte_id: number;
@@ -68,14 +68,18 @@ export class ResolverReporte {
 			} else {
 				// Reporte (desestimado): vuelve al estado anterior
 				// 1. Buscar en el historial cuál era el estado antes de 'en_auditoria'
-				const historial = await this.historialRepo.findByObjeto('proyecto', reporteActualizado.id_objeto);
+				const historial = await this.historialRepo.findByObjeto(
+					'proyecto',
+					reporteActualizado.id_objeto
+				);
 
 				// Buscamos el registro más reciente de cambio_estado hacia 'en_auditoria'
 				const registroAuditoria = historial.find(
 					(h) => h.accion === 'cambio_estado' && h.valor_nuevo === 'en_auditoria'
 				);
 
-				const estadoARestaurar = (registroAuditoria?.valor_anterior as EstadoDescripcion) || 'en_curso';
+				const estadoARestaurar =
+					(registroAuditoria?.valor_anterior as EstadoDescripcion) || 'en_curso';
 
 				await this.proyectoRepository.updateEstado(reporteActualizado.id_objeto, estadoARestaurar);
 

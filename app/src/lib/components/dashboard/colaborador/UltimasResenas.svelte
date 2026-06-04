@@ -3,13 +3,13 @@
 
 	interface Props {
 		resenas?: {
-		id: string;
-		usuario: string;
-		avatarUrl?: string;
-		calificacion: number;
-		comentario: string;
-		fecha: string;
-	}[];
+			id: string;
+			usuario: string;
+			avatarUrl?: string;
+			calificacion: number;
+			comentario: string;
+			fecha: string;
+		}[];
 	}
 
 	let { resenas = [] }: Props = $props();

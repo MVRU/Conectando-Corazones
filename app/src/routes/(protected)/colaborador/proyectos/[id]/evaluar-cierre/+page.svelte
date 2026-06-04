@@ -98,10 +98,12 @@
 	}
 
 	// Agrupar evidencias por objetivo
-	let evidenciasPorObjetivo = $derived(agruparEvidenciasPorObjetivo(
-		data.proyecto.participacion_permitida ?? [],
-		(data.solicitud as any)?.evidencias ?? []
-	));
+	let evidenciasPorObjetivo = $derived(
+		agruparEvidenciasPorObjetivo(
+			data.proyecto.participacion_permitida ?? [],
+			(data.solicitud as any)?.evidencias ?? []
+		)
+	);
 
 	function estaExpandido(objetivoId: number | null | undefined): boolean {
 		if (objetivoId == null) return false;
@@ -262,31 +264,27 @@
 
 						{#if !data.yaVote}
 							{#if data.tieneResena}
-								<div
-									class="mb-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4"
-									in:fade
-								>
+								<div class="mb-6 rounded-xl border border-emerald-100 bg-emerald-50 p-4" in:fade>
 									<div class="flex gap-3">
 										<CheckCircle class="h-5 w-5 shrink-0 text-emerald-600" />
 										<div class="text-sm">
 											<p class="font-semibold text-emerald-900">¡Gracias por tu reseña!</p>
 											<p class="mt-1 text-emerald-800">
-												Tu opinión ya quedó registrada y nutrirá el resumen y aprendizajes del proyecto.
+												Tu opinión ya quedó registrada y nutrirá el resumen y aprendizajes del
+												proyecto.
 											</p>
 										</div>
 									</div>
 								</div>
 							{:else}
-								<div
-									class="mb-6 rounded-xl border border-sky-100 bg-sky-50 p-4"
-									in:fade
-								>
+								<div class="mb-6 rounded-xl border border-sky-100 bg-sky-50 p-4" in:fade>
 									<div class="flex gap-3">
 										<Star class="h-5 w-5 shrink-0 text-sky-600" />
 										<div class="text-sm">
 											<p class="font-semibold text-sky-900">Antes de aprobar, dejá tu reseña</p>
 											<p class="mt-1 leading-relaxed text-sky-800">
-												Tu opinión nutre el <strong>resumen y los aprendizajes</strong> que se generan al cerrar el proyecto.
+												Tu opinión nutre el <strong>resumen y los aprendizajes</strong> que se generan
+												al cerrar el proyecto.
 											</p>
 											<a
 												href={`/proyectos/${proyecto.id_proyecto}?desde=evaluar-cierre#titulo-resenas-proyecto`}
@@ -337,17 +335,17 @@
 							<div class="space-y-4">
 								<form
 									method="POST"
-								action="?/aprobar"
-								use:enhance={() => {
-									loading = true;
-									return async ({ result, update }) => {
-										await manejarResultadoVotacion(
-											result,
-											update,
-											'Tu voto fue registrado correctamente.'
-										);
-									};
-								}}
+									action="?/aprobar"
+									use:enhance={() => {
+										loading = true;
+										return async ({ result, update }) => {
+											await manejarResultadoVotacion(
+												result,
+												update,
+												'Tu voto fue registrado correctamente.'
+											);
+										};
+									}}
 								>
 									<input type="hidden" name="solicitud_id" value={solicitud.id_solicitud} />
 									<button

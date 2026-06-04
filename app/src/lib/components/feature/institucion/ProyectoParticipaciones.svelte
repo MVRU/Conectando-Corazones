@@ -70,7 +70,9 @@
 				return;
 			}
 
-			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
+			tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(
+				(t: TipoParticipacionDescripcion) => t !== tipo
+			);
 			participacionesPermitidas = participacionesPermitidas.filter(
 				(p: ParticipacionForm) => p.tipo_participacion?.descripcion !== tipo
 			);
@@ -169,13 +171,17 @@
 		const tipo = participacionesPermitidas[index].tipo_participacion?.descripcion as
 			| TipoParticipacionDescripcion
 			| undefined;
-		participacionesPermitidas = participacionesPermitidas.filter((_: any, i: number) => i !== index);
+		participacionesPermitidas = participacionesPermitidas.filter(
+			(_: any, i: number) => i !== index
+		);
 		if (tipo) {
 			const tieneOtrosDelMismoTipo = participacionesPermitidas.some(
 				(p: ParticipacionForm) => p.tipo_participacion?.descripcion === tipo
 			);
 			if (!tieneOtrosDelMismoTipo) {
-				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter((t: TipoParticipacionDescripcion) => t !== tipo);
+				tiposParticipacionSeleccionados = tiposParticipacionSeleccionados.filter(
+					(t: TipoParticipacionDescripcion) => t !== tipo
+				);
 			}
 		}
 	}
@@ -193,13 +199,18 @@
 		];
 	}
 
-	let tiposDisponibles = $derived(tiposParticipacion.filter(
-		(t: TipoParticipacion) => !tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
-	));
+	let tiposDisponibles = $derived(
+		tiposParticipacion.filter(
+			(t: TipoParticipacion) =>
+				!tiposParticipacionSeleccionados.includes(t.descripcion as TipoParticipacionDescripcion)
+		)
+	);
 
-	let cantidadDonacionesEspecie = $derived(participacionesPermitidas.filter(
-		(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
-	).length);
+	let cantidadDonacionesEspecie = $derived(
+		participacionesPermitidas.filter(
+			(p: ParticipacionForm) => p.tipo_participacion?.descripcion === 'Especie'
+		).length
+	);
 
 	let limiteEspecieAlcanzado = $derived(cantidadDonacionesEspecie >= 10);
 </script>
@@ -257,7 +268,8 @@
 		{@const esOriginal = esEdicionRestringida && !!participacion.id_participacion_permitida}
 		{@const original = esOriginal
 			? participacionesOriginales.find(
-					(p: ParticipacionPermitida) => p.id_participacion_permitida === participacion.id_participacion_permitida
+					(p: ParticipacionPermitida) =>
+						p.id_participacion_permitida === participacion.id_participacion_permitida
 				)
 			: undefined}
 		<div class="mt-6 rounded-lg border-2 p-4 {clases.border} {clases.bg}">
@@ -267,7 +279,8 @@
 						<Icon src={tipoInfo.icon} class="h-6 w-6" />
 					</span>
 					{TIPO_PARTICIPACION_LABELS[
-						(participacion.tipo_participacion?.descripcion || 'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
+						(participacion.tipo_participacion?.descripcion ||
+							'Voluntariado') as keyof typeof TIPO_PARTICIPACION_LABELS
 					]}
 					{#if esOriginal && esEdicionRestringida && !esAdmin}
 						<span

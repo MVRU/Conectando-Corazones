@@ -224,7 +224,7 @@
 				? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
 				: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
 		>
-		 	Certificación ARCA
+			Certificación ARCA
 			{#if indicadorArca}
 				<span
 					class="h-2 w-2 rounded-full {coloresIndicador[indicadorArca]}"
@@ -252,7 +252,8 @@
 				</p>
 				{#if motivoRechazo}
 					<p class="mt-2 rounded-xl border border-amber-300/70 bg-white/70 px-3 py-2 text-sm">
-						<strong>Motivo informado por administración:</strong> {motivoRechazo}
+						<strong>Motivo informado por administración:</strong>
+						{motivoRechazo}
 					</p>
 				{/if}
 			</div>
@@ -261,7 +262,9 @@
 		{#if estado === 'pendiente'}
 			<div class="rounded-2xl border border-sky-200 bg-sky-50 p-5 text-sky-900">
 				<h2 class="text-sm font-semibold">Tu documentación está en revisión</h2>
-				<p class="mt-1 text-sm">No podés editarla hasta que el equipo de administración responda.</p>
+				<p class="mt-1 text-sm">
+					No podés editarla hasta que el equipo de administración responda.
+				</p>
 
 				{#if documentosVerificacion.length > 0}
 					<ul class="mt-4 space-y-2">
@@ -270,7 +273,10 @@
 								class="flex flex-col gap-2 rounded-lg border border-sky-100 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
 							>
 								<div class="min-w-0">
-									<p class="truncate text-sm font-medium text-slate-900" title={doc.nombre_original ?? 'Documento'}>
+									<p
+										class="truncate text-sm font-medium text-slate-900"
+										title={doc.nombre_original ?? 'Documento'}
+									>
 										{doc.nombre_original ?? `Documento #${doc.id_archivo}`}
 									</p>
 								</div>
@@ -286,7 +292,7 @@
 						{/each}
 					</ul>
 				{:else}
-					<p class="mt-3 text-sm italic text-sky-700">No hay documentos cargados aún.</p>
+					<p class="mt-3 text-sm text-sky-700 italic">No hay documentos cargados aún.</p>
 				{/if}
 
 				<div class="mt-5">

@@ -67,14 +67,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const colaboracionRepo = new PostgresColaboracionRepository();
 		const listarEvidencias = new ListarEvidencias(evidenciaRepo, proyectoRepo, colaboracionRepo);
 
-		const evidenciasDominio = await listarEvidencias.execute(projectId, usuario.id_usuario!, usuario.rol);
+		const evidenciasDominio = await listarEvidencias.execute(
+			projectId,
+			usuario.id_usuario!,
+			usuario.rol
+		);
 
 		const evidencias = await Promise.all(
 			evidenciasDominio.map(async (ev) => {
 				const archivosConUrl = await Promise.all(
 					ev.archivos.map(async (archivo: any) => {
 						let urlFirmada = archivo.url;
-						if (archivo.url && !archivo.url.startsWith('http') && !archivo.url.startsWith('data:')) {
+						if (
+							archivo.url &&
+							!archivo.url.startsWith('http') &&
+							!archivo.url.startsWith('data:')
+						) {
 							const partes = archivo.url.split('/');
 							const bucketName = partes[0] === 'evidencias' ? 'evidencias' : 'avatars';
 							const path = partes.slice(1).join('/');

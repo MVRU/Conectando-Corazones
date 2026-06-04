@@ -45,14 +45,15 @@
 
 	let selectedParticipacion = $derived(
 		data.participacionesPermitidas.find(
-			(p: ParticipacionPermitida) => p.id_participacion_permitida === selectedParticipacionPermitidaId
+			(p: ParticipacionPermitida) =>
+				p.id_participacion_permitida === selectedParticipacionPermitidaId
 		)
 	);
 
 	let esMonetaria = $derived(
 		selectedParticipacion?.tipo_participacion?.descripcion === 'Monetaria'
 	);
-	
+
 	let mostrarModalSubirArchivos = $state(false);
 	let archivosTemporales: (Archivo & { file: File })[] = $state([]);
 	let evidenciasNuevas: EvidenciaEntradaNueva[] = $state([]);
@@ -84,7 +85,11 @@
 			const participacionId = page.url.searchParams.get('participacion');
 			if (participacionId) {
 				const id = Number(participacionId);
-				if (data.participacionesPermitidas.some((p: ParticipacionPermitida) => p.id_participacion_permitida === id)) {
+				if (
+					data.participacionesPermitidas.some(
+						(p: ParticipacionPermitida) => p.id_participacion_permitida === id
+					)
+				) {
 					selectedParticipacionPermitidaId = id;
 					// Si ya existe una contribución de este tipo, sugerimos cantidad 0 para solo evidencias
 					if (data.existingContributions?.some((c: any) => c.participacion_permitida_id === id)) {
@@ -447,7 +452,7 @@
 						id="participacion"
 						bind:value={selectedParticipacionPermitidaId}
 						disabled={estaGuardando}
-						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-hidden focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+						class="w-full cursor-pointer appearance-none rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 outline-hidden transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<option value={null} disabled>Seleccioná una opción...</option>
 						{#each data.participacionesPermitidas as p}
@@ -479,7 +484,7 @@
 								bind:value={cantidadAporte}
 								disabled={estaGuardando}
 								placeholder="0"
-								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 transition-all outline-hidden focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+								class="w-full rounded-xl border-2 border-slate-100 bg-slate-50 p-4 font-medium text-slate-700 outline-hidden transition-all focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-50"
 							/>
 							<div
 								class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium text-slate-400"
@@ -653,9 +658,7 @@
 			transition:slide={{ duration: 300 }}
 		>
 			<!-- Header -->
-			<div
-				class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8"
-			>
+			<div class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8">
 				<div class="flex items-start gap-4">
 					<div class="shrink-0 rounded-xl bg-amber-100 p-3 text-amber-600">
 						<AlertCircle size={24} />
@@ -822,7 +825,7 @@
 											actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
 										placeholder="Ej: Foto del material entregado"
 										class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium text-slate-700
-											   transition-all outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+											   outline-hidden transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
 									/>
 								</div>
 							</div>

@@ -184,14 +184,16 @@
 						</div>
 
 						{#if evidenciasEntrada.length === 0}
-							<p class="py-4 text-center text-sm italic text-slate-400">Sin evidencias de entrada</p>
+							<p class="py-4 text-center text-sm text-slate-400 italic">
+								Sin evidencias de entrada
+							</p>
 						{:else}
 							<div class="space-y-4">
 								{#each evidenciasEntrada as evidencia}
 									<div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
 										<div class="mb-3 flex items-center justify-between">
 											<div class="flex flex-col">
-												<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+												<span class="text-xs font-bold tracking-wider text-slate-500 uppercase">
 													Cargado por
 												</span>
 												<span class="text-sm font-medium text-slate-900">
@@ -233,20 +235,22 @@
 								/>
 							</svg>
 							<h4 class="font-bold text-slate-800">Salida</h4>
-							<span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700">
+							<span
+								class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700"
+							>
 								{evidenciasSalida.length}
 							</span>
 						</div>
 
 						{#if evidenciasSalida.length === 0}
-							<p class="py-4 text-center text-sm italic text-slate-400">Sin evidencias de salida</p>
+							<p class="py-4 text-center text-sm text-slate-400 italic">Sin evidencias de salida</p>
 						{:else}
 							<div class="space-y-4">
 								{#each evidenciasSalida as evidencia}
 									<div class="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
 										<div class="mb-3 flex items-center justify-between">
 											<div class="flex flex-col">
-												<span class="text-xs font-bold text-slate-500 uppercase tracking-wider">
+												<span class="text-xs font-bold tracking-wider text-slate-500 uppercase">
 													Cargado por
 												</span>
 												<span class="text-sm font-medium text-slate-900">

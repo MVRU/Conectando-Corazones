@@ -12,7 +12,10 @@ export class ActualizarUsuario {
 		}
 
 		// No permitir modificar campos sensibles como estado_verificacion
-		if (cambios.estado_verificacion !== undefined && cambios.estado_verificacion !== usuarioExistente.estado_verificacion) {
+		if (
+			cambios.estado_verificacion !== undefined &&
+			cambios.estado_verificacion !== usuarioExistente.estado_verificacion
+		) {
 			throw new Error('No se permite modificar el estado de verificación manualmente.');
 		}
 
@@ -27,7 +30,7 @@ export class ActualizarUsuario {
 
 		// Validar disponibilidad de email si cambió en los contactos
 		if (cambios.contactos) {
-			const emails = cambios.contactos.filter(c => c.tipo_contacto === 'email');
+			const emails = cambios.contactos.filter((c) => c.tipo_contacto === 'email');
 			for (const email of emails) {
 				// Solo validamos el email principal si es el que cambió
 				const emailExistente = await this.usuarioRepository.findByEmail(email.valor);
@@ -44,7 +47,8 @@ export class ActualizarUsuario {
 
 		// Campos requeridos (con normalización)
 		if (cambios.nombre) usuarioExistente.nombre = normalizeName(cambios.nombre) || cambios.nombre;
-		if (cambios.apellido) usuarioExistente.apellido = normalizeName(cambios.apellido) || cambios.apellido;
+		if (cambios.apellido)
+			usuarioExistente.apellido = normalizeName(cambios.apellido) || cambios.apellido;
 		if (cambios.url_foto) usuarioExistente.url_foto = cambios.url_foto;
 
 		// Campos opcionales
@@ -66,13 +70,17 @@ export class ActualizarUsuario {
 
 		// Campos específicos opcionales (con normalización)
 		if (cambios.nombre_legal !== undefined)
-			usuarioExistente.nombre_legal = cambios.nombre_legal ? normalizeName(cambios.nombre_legal) || cambios.nombre_legal : '';
+			usuarioExistente.nombre_legal = cambios.nombre_legal
+				? normalizeName(cambios.nombre_legal) || cambios.nombre_legal
+				: '';
 		if (cambios.tipo_institucion !== undefined)
 			usuarioExistente.tipo_institucion = cambios.tipo_institucion || '';
 		if (cambios.tipo_colaborador !== undefined)
 			usuarioExistente.tipo_colaborador = cambios.tipo_colaborador || '';
 		if (cambios.razon_social !== undefined)
-			usuarioExistente.razon_social = cambios.razon_social ? normalizeName(cambios.razon_social) || cambios.razon_social : '';
+			usuarioExistente.razon_social = cambios.razon_social
+				? normalizeName(cambios.razon_social) || cambios.razon_social
+				: '';
 		if (cambios.con_fines_de_lucro !== undefined)
 			usuarioExistente.con_fines_de_lucro = cambios.con_fines_de_lucro;
 

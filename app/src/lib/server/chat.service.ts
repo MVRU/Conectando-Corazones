@@ -72,7 +72,9 @@ export async function validarAccesoChatProyecto(
 	const colaboradoresAprobados = proyecto.colaboraciones
 		.map((colaboracion) => colaboracion.colaborador)
 		.filter(
-			(colaborador): colaborador is NonNullable<(typeof proyecto.colaboraciones)[number]['colaborador']> =>
+			(
+				colaborador
+			): colaborador is NonNullable<(typeof proyecto.colaboraciones)[number]['colaborador']> =>
 				!!colaborador
 		);
 

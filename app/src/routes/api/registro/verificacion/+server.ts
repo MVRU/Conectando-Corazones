@@ -177,9 +177,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 
 			if (verificacionExistente?.estado === 'pendiente') {
-				throw Object.assign(new Error('No podés modificar la documentación mientras está en revisión.'), {
-					statusCode: 409
-				});
+				throw Object.assign(
+					new Error('No podés modificar la documentación mientras está en revisión.'),
+					{
+						statusCode: 409
+					}
+				);
 			}
 
 			if (verificacionExistente) {
@@ -298,7 +301,10 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 		if (storageError) {
 			console.error('Error al eliminar archivo de storage:', storageError);
 			return json(
-				{ success: false, error: 'No se pudo eliminar el archivo del almacenamiento. Intentá de nuevo.' },
+				{
+					success: false,
+					error: 'No se pudo eliminar el archivo del almacenamiento. Intentá de nuevo.'
+				},
 				{ status: 500 }
 			);
 		}
@@ -347,10 +353,7 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		});
 
 		if (!verificacion) {
-			return json(
-				{ success: false, error: 'No tenés una verificación activa.' },
-				{ status: 409 }
-			);
+			return json({ success: false, error: 'No tenés una verificación activa.' }, { status: 409 });
 		}
 
 		if (verificacion.estado === 'pendiente') {

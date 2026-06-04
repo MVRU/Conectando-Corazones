@@ -5,14 +5,14 @@
 
 	type MetodoVerificacion = 'manual' | 'renaper' | 'omitido';
 
-interface DocumentoExistente {
-	id_archivo: number;
-	nombre_original: string | null;
-	url: string;
-	tipo_mime: string | null;
-	tamanio_bytes: number | null;
-	created_at: string | null;
-}
+	interface DocumentoExistente {
+		id_archivo: number;
+		nombre_original: string | null;
+		url: string;
+		tipo_mime: string | null;
+		tamanio_bytes: number | null;
+		created_at: string | null;
+	}
 
 	interface Props {
 		permitirOmitir?: boolean;
@@ -46,7 +46,9 @@ interface DocumentoExistente {
 	let errorFormulario: string | null = $state(null);
 	let avisoArchivosMostrado = $state(false);
 
-	$effect(() => { onMetodoChange?.(metodoSeleccionado); });
+	$effect(() => {
+		onMetodoChange?.(metodoSeleccionado);
+	});
 
 	let botonEnviarDeshabilitado = $derived(!aceptoDeclaracion);
 
@@ -312,7 +314,9 @@ interface DocumentoExistente {
 												{doc.nombre_original ?? `Documento #${doc.id_archivo}`}
 											</p>
 											<p class="text-xs text-slate-500">
-												{formatearTamanio(doc.tamanio_bytes)} · Subido el {formatearFecha(doc.created_at)}
+												{formatearTamanio(doc.tamanio_bytes)} · Subido el {formatearFecha(
+													doc.created_at
+												)}
 											</p>
 										</div>
 										<div class="flex items-center gap-2">

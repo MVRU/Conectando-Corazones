@@ -1,5 +1,13 @@
 <script lang="ts">
-	import { Filter, ChevronDown, MapPin, Users, HeartOff, Calendar, LayoutGrid } from 'lucide-svelte';
+	import {
+		Filter,
+		ChevronDown,
+		MapPin,
+		Users,
+		HeartOff,
+		Calendar,
+		LayoutGrid
+	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './colaborador/AccionesRapidas.svelte';
 	import MetricasPanel from './colaborador/MetricasPanel.svelte';
@@ -356,9 +364,11 @@
 					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
 						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="No estás participando en proyectos" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="No estás participando en proyectos"
 								description="Explora los proyectos de la comunidad y comienza a colaborar para ver tus objetivos aquí."
 								icon={HeartOff}
 							/>
@@ -370,9 +380,11 @@
 					{#if data.heatmapActividad && data.heatmapActividad.length > 0}
 						<HeatmapActividad data={data.heatmapActividad} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm p-8">
-							<EmptyState 
-								message="Sin actividad registrada" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 p-8 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="Sin actividad registrada"
 								description="Tu historial de colaboraciones aparecerá aquí conforme participes en proyectos solidarios."
 								icon={Calendar}
 							/>
@@ -402,9 +414,11 @@
 				{#if data.proyectosComunidad && data.proyectosComunidad.length > 0}
 					<ProyectosComunidad proyectos={data.proyectosComunidad} />
 				{:else}
-					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-						<EmptyState 
-							message="No hay recomendaciones" 
+					<div
+						class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+					>
+						<EmptyState
+							message="No hay recomendaciones"
 							description="Prueba actualizar tus categorías preferidas para que podamos recomendarte proyectos afines."
 							icon={LayoutGrid}
 						/>

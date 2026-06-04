@@ -2,7 +2,8 @@
 	import { Info, CircleCheck, TriangleAlert, CircleAlert } from 'lucide-svelte';
 	import { fade } from 'svelte/transition';
 
-	let { children,
+	let {
+		children,
 		variant = 'info' as 'info' | 'success' | 'warning' | 'error',
 		title = '',
 		message = ''
@@ -52,16 +53,14 @@
 </script>
 
 <div
-	class="rounded-lg border p-4 shadow-sm transition-all duration-300 {styles[variant as VariantKey].container}"
+	class="rounded-lg border p-4 shadow-sm transition-all duration-300 {styles[variant as VariantKey]
+		.container}"
 	role="alert"
 	transition:fade={{ duration: 200 }}
 >
 	<div class="flex items-start gap-4">
 		<div class="mt-0.5 shrink-0">
-			<SvelteComponent
-				class="h-5 w-5 {styles[variant as VariantKey].icon}"
-				strokeWidth={2}
-			/>
+			<SvelteComponent class="h-5 w-5 {styles[variant as VariantKey].icon}" strokeWidth={2} />
 		</div>
 		<div class="flex-1">
 			{#if title}

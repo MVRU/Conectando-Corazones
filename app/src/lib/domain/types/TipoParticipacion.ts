@@ -21,4 +21,7 @@ export const esTipoParticipacionCanonico = (v: string): v is TipoParticipacionDe
 	(TIPOS_PARTICIPACION_DESCRIPCION as readonly string[]).includes(v);
 
 // * Tipos que califican para la deducción de Impuesto a las Ganancias (RG 2681).
-export const TIPOS_PARTICIPACION_DEDUCIBLES: readonly TipoParticipacionDescripcion[] = ['Monetaria', 'Especie'];
+export const TIPOS_PARTICIPACION_DEDUCIBLES: readonly TipoParticipacionDescripcion[] = [
+	'Monetaria',
+	'Especie'
+];

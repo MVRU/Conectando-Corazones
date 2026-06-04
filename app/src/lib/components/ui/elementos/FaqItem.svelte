@@ -1,5 +1,9 @@
 <script lang="ts">
-	let { question, answer, initiallyOpen = false } = $props<{
+	let {
+		question,
+		answer,
+		initiallyOpen = false
+	} = $props<{
 		question: string;
 		answer: string;
 		initiallyOpen?: boolean;

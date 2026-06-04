@@ -15,7 +15,11 @@
 	import type { EstadisticasInstituciones } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+	let {
+		show = false,
+		stats = undefined,
+		onClose = () => {}
+	} = $props<{
 		show?: boolean;
 		stats?: EstadisticasInstituciones;
 		onClose?: () => void;
@@ -29,7 +33,10 @@
 
 	// Calcular el máximo para escalar las barras
 	const maxProyectos = $derived(
-		stats?.institucionesAyudadas.reduce((max: number, inst: { cantidadProyectos: number }) => Math.max(max, inst.cantidadProyectos), 0) || 1
+		stats?.institucionesAyudadas.reduce(
+			(max: number, inst: { cantidadProyectos: number }) => Math.max(max, inst.cantidadProyectos),
+			0
+		) || 1
 	);
 
 	// Función para obtener el icono de ranking
@@ -372,10 +379,9 @@
 										>{stats.colaboraciones.anuladas}</span
 									>
 									<span class="text-xs font-medium text-slate-300"
-										>{(
-											(stats.colaboraciones.anuladas / stats.colaboraciones.total) *
-											100
-										).toFixed(0)}%</span
+										>{((stats.colaboraciones.anuladas / stats.colaboraciones.total) * 100).toFixed(
+											0
+										)}%</span
 									>
 								</div>
 							</div>

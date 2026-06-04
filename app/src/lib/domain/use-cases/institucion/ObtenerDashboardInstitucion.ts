@@ -20,7 +20,7 @@ export class ObtenerDashboardInstitucion {
 		private colaboracionRepo: ColaboracionRepository,
 		private usuarioRepo: UsuarioRepository,
 		private resenaRepo: ResenaRepository
-	) { }
+	) {}
 
 	private obtenerEstadoVerificacionActual(institucion: Usuario): EstadoVerificacion | null {
 		const verificacionesGlobales = (institucion.verificaciones ?? []).filter(
@@ -43,7 +43,8 @@ export class ObtenerDashboardInstitucion {
 			(v) => v.tipo !== 'arca'
 		);
 		const requiereVerificacionDocumental = !tieneSolicitudVerificacion && estado !== 'aprobada';
-		const documentacionVerificacionEnRevision = estado === 'pendiente' && tieneSolicitudVerificacion;
+		const documentacionVerificacionEnRevision =
+			estado === 'pendiente' && tieneSolicitudVerificacion;
 
 		return {
 			estado,
@@ -226,16 +227,16 @@ export class ObtenerDashboardInstitucion {
 		const promedioProgreso =
 			proyectosConProgreso.length > 0
 				? proyectosConProgreso.reduce((sum, p) => {
-					const progreso = (p.participacion_permitida || []).reduce(
-						(total: number, pp: ParticipacionPermitida) => {
-							const objetivo = Number(pp.objetivo) || 0;
-							const actual = Number(pp.actual) || 0;
-							return total + (objetivo > 0 ? (actual / objetivo) * 100 : 0);
-						},
-						0
-					);
-					return sum + progreso / ((p.participacion_permitida || []).length || 1);
-				}, 0) / proyectosConProgreso.length
+						const progreso = (p.participacion_permitida || []).reduce(
+							(total: number, pp: ParticipacionPermitida) => {
+								const objetivo = Number(pp.objetivo) || 0;
+								const actual = Number(pp.actual) || 0;
+								return total + (objetivo > 0 ? (actual / objetivo) * 100 : 0);
+							},
+							0
+						);
+						return sum + progreso / ((p.participacion_permitida || []).length || 1);
+					}, 0) / proyectosConProgreso.length
 				: 0;
 
 		const proyectosEnAuditoria = proyectos
@@ -309,7 +310,14 @@ export class ObtenerDashboardInstitucion {
 
 		const total = proyectos.length || 1;
 
-		const ordenEstados = ['en_curso', 'pendiente_solicitud_cierre', 'en_revision', 'completado', 'cancelado', 'en_auditoria'];
+		const ordenEstados = [
+			'en_curso',
+			'pendiente_solicitud_cierre',
+			'en_revision',
+			'completado',
+			'cancelado',
+			'en_auditoria'
+		];
 
 		return ordenEstados.map((estado) => ({
 			label: ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS] ?? estado,
@@ -361,8 +369,7 @@ export class ObtenerDashboardInstitucion {
 			(v) => v.tipo === 'arca' && v.estado === 'aprobada' && v.fecha_vencimiento
 		);
 		const arcaMasReciente = arcasAprobadas.sort(
-			(a, b) =>
-				new Date(b.fecha_vencimiento!).getTime() - new Date(a.fecha_vencimiento!).getTime()
+			(a, b) => new Date(b.fecha_vencimiento!).getTime() - new Date(a.fecha_vencimiento!).getTime()
 		)[0];
 
 		let verificacion: {

@@ -3,14 +3,14 @@
 
 	interface Props {
 		proyectos?: {
-		id: string;
-		titulo: string;
-		institucion: string;
-		categoria: string;
-		imagen?: string;
-		coincidencia: number;
-		ubicacion: string;
-	}[];
+			id: string;
+			titulo: string;
+			institucion: string;
+			categoria: string;
+			imagen?: string;
+			coincidencia: number;
+			ubicacion: string;
+		}[];
 	}
 
 	let { proyectos = [] }: Props = $props();

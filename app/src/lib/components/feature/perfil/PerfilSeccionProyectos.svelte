@@ -65,15 +65,19 @@
 			</div>
 		{/if}
 	{:else}
-		<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-12 text-center transition-all duration-300 hover:border-[#007FFF]/20 hover:bg-white hover:shadow-sm">
-			<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]">
+		<div
+			class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-12 text-center transition-all duration-300 hover:border-[#007FFF]/20 hover:bg-white hover:shadow-sm"
+		>
+			<div
+				class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]"
+			>
 				<FolderOpen class="h-8 w-8" />
 			</div>
-			
+
 			<h4 class="mb-1 text-sm font-semibold text-gray-800">
 				No hay {tituloSeccion.toLowerCase()} aún
 			</h4>
-			
+
 			<p class="max-w-[260px] text-xs leading-relaxed text-gray-500">
 				{mensajeVacio}
 			</p>
@@ -82,7 +86,7 @@
 				{#if estadoVerificacion === 'verificado_documental' || estadoVerificacion === 'verificado_email_institucional' || estadoVerificacion === 'verificado_renaper'}
 					<a
 						href="/proyectos/nuevo"
-						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-100 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95 text-center"
+						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#007FFF] px-5 py-2.5 text-center text-xs font-bold text-white shadow-md shadow-blue-100 transition-all duration-200 hover:bg-[#42A1FF] hover:shadow-lg active:scale-95"
 					>
 						<Layers2 class="h-4 w-4" />
 						Crear mi primer proyecto
@@ -91,12 +95,12 @@
 					<button
 						disabled
 						title="Tu institución debe estar verificada para publicar proyectos"
-						class="mt-6 inline-flex items-center gap-2 rounded-xl bg-gray-300 px-5 py-2.5 text-xs font-bold text-gray-500 cursor-not-allowed opacity-60 text-center"
+						class="mt-6 inline-flex cursor-not-allowed items-center gap-2 rounded-xl bg-gray-300 px-5 py-2.5 text-center text-xs font-bold text-gray-500 opacity-60"
 					>
 						<Layers2 class="h-4 w-4" />
 						Crear mi primer proyecto
 					</button>
-					<p class="mt-3 text-xs text-rose-600 font-medium">
+					<p class="mt-3 text-xs font-medium text-rose-600">
 						Tu institución debe estar verificada para publicar proyectos
 					</p>
 				{/if}

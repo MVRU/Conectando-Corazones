@@ -95,8 +95,8 @@
 
 			// Actualizar estado en el proyecto seleccionado
 			if (proyectoSeleccionado && proyectoSeleccionado.colaboraciones) {
-				proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map((c: Colaboracion) =>
-					c.id_colaboracion === colaboracionId ? result : c
+				proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map(
+					(c: Colaboracion) => (c.id_colaboracion === colaboracionId ? result : c)
 				);
 			}
 
@@ -148,8 +148,8 @@
 				}
 
 				if (proyectoSeleccionado && proyectoSeleccionado.colaboraciones) {
-					proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map((c: Colaboracion) =>
-						c.id_colaboracion === colaboracionARechazar ? result : c
+					proyectoSeleccionado!.colaboraciones = proyectoSeleccionado!.colaboraciones.map(
+						(c: Colaboracion) => (c.id_colaboracion === colaboracionARechazar ? result : c)
 					);
 				}
 

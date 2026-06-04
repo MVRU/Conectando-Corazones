@@ -39,12 +39,19 @@ async function obtenerCorreosDestinatarios(): Promise<string[]> {
 }
 
 function escapeHtml(s: string): string {
-	return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	return s
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
 }
 
 function renderHtml(payload: DatosNotificacionAdmin): string {
 	const detalleHtml = payload.detalles
-		.map((detalle) => `<li><strong>${escapeHtml(detalle.etiqueta)}:</strong> ${escapeHtml(detalle.valor)}</li>`)
+		.map(
+			(detalle) =>
+				`<li><strong>${escapeHtml(detalle.etiqueta)}:</strong> ${escapeHtml(detalle.valor)}</li>`
+		)
 		.join('');
 
 	return `
@@ -57,21 +64,30 @@ function renderHtml(payload: DatosNotificacionAdmin): string {
 }
 
 function renderText(payload: DatosNotificacionAdmin): string {
-	const detalleText = payload.detalles.map((detalle) => `- ${detalle.etiqueta}: ${detalle.valor}`).join('\n');
+	const detalleText = payload.detalles
+		.map((detalle) => `- ${detalle.etiqueta}: ${detalle.valor}`)
+		.join('\n');
 	return `${payload.titulo}\n\n${payload.resumen}\n\n${detalleText}`;
 }
 
-async function enviarEmail(destinatarios: string[], payload: DatosNotificacionAdmin): Promise<void> {
+async function enviarEmail(
+	destinatarios: string[],
+	payload: DatosNotificacionAdmin
+): Promise<void> {
 	const apiKey = env.RESEND_API_KEY;
 	const sender = env.ADMIN_ALERTS_EMAIL_FROM || 'onboarding@resend.dev';
 
 	if (!apiKey) {
-		console.warn('[ServicioNotificacionesAdmin] RESEND_API_KEY no configurada. Se omite envío de email.');
+		console.warn(
+			'[ServicioNotificacionesAdmin] RESEND_API_KEY no configurada. Se omite envío de email.'
+		);
 		return;
 	}
 
 	if (destinatarios.length === 0) {
-		console.warn('[ServicioNotificacionesAdmin] No hay destinatarios administradores para notificar.');
+		console.warn(
+			'[ServicioNotificacionesAdmin] No hay destinatarios administradores para notificar.'
+		);
 		return;
 	}
 

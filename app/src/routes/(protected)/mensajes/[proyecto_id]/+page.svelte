@@ -16,7 +16,13 @@
 		type ChatOutboxEntry,
 		upsertChatOutboxEntry
 	} from '$lib/utils/chatOutbox';
-	import { ArrowLeft, EllipsisVertical, FolderKanban, MessageSquareText, ShieldAlert } from 'lucide-svelte';
+	import {
+		ArrowLeft,
+		EllipsisVertical,
+		FolderKanban,
+		MessageSquareText,
+		ShieldAlert
+	} from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import type { Mensaje } from '$lib/domain/types/Chat';
 	import type { PageData } from './$types';
@@ -220,7 +226,7 @@
 				estadoLocal:
 					mensajeNuevo.estadoLocal === 'persistido'
 						? 'persistido'
-						: mensajeNuevo.estadoLocal ?? actual.estadoLocal ?? 'persistido'
+						: (mensajeNuevo.estadoLocal ?? actual.estadoLocal ?? 'persistido')
 			} satisfies MensajeVista;
 
 			mensajes = ordenarMensajes(
@@ -329,20 +335,28 @@
 </script>
 
 {#if !chat}
-	<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center bg-transparent px-4">
-		<div class="max-w-md w-full rounded-[2.5rem] border border-white/10 bg-white/5 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-xl">
-			<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-rose-500/10 text-rose-400 ring-1 ring-inset ring-rose-400/20 shadow-[0_0_30px_rgba(244,63,94,0.15)]">
+	<div
+		in:fade={{ duration: 400 }}
+		class="flex h-full items-center justify-center bg-transparent px-4"
+	>
+		<div
+			class="w-full max-w-md rounded-[2.5rem] border border-white/10 bg-white/5 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-xl"
+		>
+			<div
+				class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-rose-500/10 text-rose-400 shadow-[0_0_30px_rgba(244,63,94,0.15)] ring-1 ring-rose-400/20 ring-inset"
+			>
 				<ShieldAlert class="h-10 w-10" />
 			</div>
 			<p class="text-xl font-bold text-slate-100">Chat no disponible</p>
-			<p class="mt-3 text-sm text-slate-400">
-				No pudimos cargar esta conversación.
-			</p>
+			<p class="mt-3 text-sm text-slate-400">No pudimos cargar esta conversación.</p>
 		</div>
 	</div>
 {:else}
-	<div class="flex h-full flex-col text-slate-100 bg-transparent">
-		<header class="message-enter relative z-10 shrink-0 border-b border-white/5 bg-white/2 px-4 py-3 backdrop-blur-md md:px-6 md:py-4" style="--message-enter-delay: 40ms;">
+	<div class="flex h-full flex-col bg-transparent text-slate-100">
+		<header
+			class="message-enter relative z-10 shrink-0 border-b border-white/5 bg-white/2 px-4 py-3 backdrop-blur-md md:px-6 md:py-4"
+			style="--message-enter-delay: 40ms;"
+		>
 			<div class="mx-auto flex w-full max-w-5xl items-start justify-between gap-4">
 				<a
 					href={resolve('/mensajes')}
@@ -353,13 +367,13 @@
 				</a>
 
 				<div class="min-w-0 flex-1">
-					<div class="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase ring-1 ring-inset ring-slate-800">
+					<div
+						class="inline-flex items-center gap-2 rounded-full bg-slate-900/80 px-3 py-1 text-[11px] font-semibold tracking-[0.16em] text-slate-400 uppercase ring-1 ring-slate-800 ring-inset"
+					>
 						<MessageSquareText class="h-3.5 w-3.5" />
 						Chat del proyecto
 					</div>
-					<p class="sr-only">
-						Conversación del proyecto
-					</p>
+					<p class="sr-only">Conversación del proyecto</p>
 					<h1 class="mt-2 truncate text-lg font-bold tracking-tight text-slate-50 md:text-[1.4rem]">
 						{chat.titulo}
 					</h1>
@@ -367,7 +381,9 @@
 						{#if proyecto?.estado}
 							<EstadoProyectoBadge estado={proyecto.estado} />
 						{/if}
-						<span class="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 ring-1 ring-inset ring-slate-700">
+						<span
+							class="rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 ring-1 ring-slate-700 ring-inset"
+						>
 							{formatearCantidadMensajes(cantidadMensajesPersistidos)}
 						</span>
 					</div>
@@ -386,14 +402,18 @@
 					{#if proyectoId}
 						{#if esInstitucionActual}
 							<a
-								href={resolve('/(protected)/institucion/proyectos/[id]/aportes', { id: String(proyectoId) })}
+								href={resolve('/(protected)/institucion/proyectos/[id]/aportes', {
+									id: String(proyectoId)
+								})}
 								class="hidden items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 shadow-sm transition hover:bg-slate-800 md:flex"
 							>
 								Evidencias
 							</a>
 						{:else}
 							<a
-								href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', { id: String(proyectoId) })}
+								href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', {
+									id: String(proyectoId)
+								})}
 								class="hidden items-center gap-2 rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm font-medium text-slate-200 shadow-sm transition hover:bg-slate-800 md:flex"
 							>
 								Mis aportes
@@ -411,7 +431,9 @@
 			</div>
 
 			{#if showMobileMenu}
-				<div class="absolute top-full right-4 z-10 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-950 p-1 shadow-2xl md:hidden">
+				<div
+					class="absolute top-full right-4 z-10 mt-2 w-56 rounded-2xl border border-slate-700 bg-slate-950 p-1 shadow-2xl md:hidden"
+				>
 					<div class="py-1">
 						{#if proyectoId}
 							<a
@@ -425,7 +447,9 @@
 						{#if proyectoId}
 							{#if esInstitucionActual}
 								<a
-									href={resolve('/(protected)/institucion/proyectos/[id]/aportes', { id: String(proyectoId) })}
+									href={resolve('/(protected)/institucion/proyectos/[id]/aportes', {
+										id: String(proyectoId)
+									})}
 									class="block rounded-xl px-4 py-3 text-sm text-slate-200 transition-colors hover:bg-slate-900"
 									onclick={() => (showMobileMenu = false)}
 								>
@@ -433,7 +457,9 @@
 								</a>
 							{:else}
 								<a
-									href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', { id: String(proyectoId) })}
+									href={resolve('/(protected)/colaborador/proyectos/[id]/mis-aportes', {
+										id: String(proyectoId)
+									})}
 									class="block rounded-xl px-4 py-3 text-sm text-slate-200 transition-colors hover:bg-slate-900"
 									onclick={() => (showMobileMenu = false)}
 								>
@@ -447,17 +473,19 @@
 		</header>
 
 		{#if errorEnvio}
-			<div class="message-enter relative z-10 border-b border-amber-500/10 bg-amber-500/5 px-4 py-3 backdrop-blur-md md:px-6" style="--message-enter-delay: 90ms;">
-				<Alert
-					variant="warning"
-					title="Hubo un problema al enviar"
-					message={errorEnvio}
-				/>
+			<div
+				class="message-enter relative z-10 border-b border-amber-500/10 bg-amber-500/5 px-4 py-3 backdrop-blur-md md:px-6"
+				style="--message-enter-delay: 90ms;"
+			>
+				<Alert variant="warning" title="Hubo un problema al enviar" message={errorEnvio} />
 			</div>
 		{/if}
 
 		{#if hayPendientes}
-			<div class="message-enter relative z-10 border-b border-[#007FFF]/10 bg-[#007FFF]/5 px-4 py-3 backdrop-blur-md md:px-6" style="--message-enter-delay: 90ms;">
+			<div
+				class="message-enter relative z-10 border-b border-[#007FFF]/10 bg-[#007FFF]/5 px-4 py-3 backdrop-blur-md md:px-6"
+				style="--message-enter-delay: 90ms;"
+			>
 				<Alert
 					variant="info"
 					title="Hay mensajes pendientes"
@@ -467,14 +495,18 @@
 		{/if}
 
 		<div
-			class="message-enter relative z-0 no-scrollbar flex-1 overflow-y-auto bg-transparent px-3 py-4 sm:px-4 md:px-6 md:py-5"
+			class="message-enter no-scrollbar relative z-0 flex-1 overflow-y-auto bg-transparent px-3 py-4 sm:px-4 md:px-6 md:py-5"
 			style="--message-enter-delay: 120ms;"
 			bind:this={chatContainer}
 		>
 			{#if mensajes.length === 0}
 				<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center">
-					<div class="max-w-md w-full rounded-[2.5rem] border border-white/5 bg-white/2 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-lg transition-all hover:border-white/10">
-						<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/5 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20 shadow-[0_0_30px_rgba(0,127,255,0.10)]">
+					<div
+						class="w-full max-w-md rounded-[2.5rem] border border-white/5 bg-white/2 px-10 py-12 text-center shadow-2xl shadow-black/40 backdrop-blur-lg transition-all hover:border-white/10"
+					>
+						<div
+							class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/5 text-[#42A1FF] shadow-[0_0_30px_rgba(0,127,255,0.10)] ring-1 ring-[#007FFF]/20 ring-inset"
+						>
 							<MessageSquareText class="h-10 w-10" strokeWidth={1.5} />
 						</div>
 						<p class="text-xl font-bold tracking-tight text-slate-100">Todavía no hay mensajes</p>
@@ -503,10 +535,10 @@
 
 		<div class="message-enter" style="--message-enter-delay: 160ms;">
 			<InputMensaje
-			deshabilitado={!puedeEnviar}
-			enviando={enviandoActual}
-			chatId={chat.id_chat}
-			onSend={handleSend}
+				deshabilitado={!puedeEnviar}
+				enviando={enviandoActual}
+				chatId={chat.id_chat}
+				onSend={handleSend}
 			/>
 		</div>
 	</div>

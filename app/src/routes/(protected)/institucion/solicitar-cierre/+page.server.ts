@@ -44,16 +44,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 	const solicitudRepo = new PostgresSolicitudFinalizacionRepository();
 
 	const proyectoId = url.searchParams.get('proyecto');
-	
+
 	// Consulta base para el selector móvil/desktop
-	const [allProyectos] = await Promise.all([
-		proyectoRepo.findAllSummary()
-	]);
+	const [allProyectos] = await Promise.all([proyectoRepo.findAllSummary()]);
 
 	const proyectosDisponibles = allProyectos.filter(
-		(p) =>
-			p.institucion_id === user.id_usuario &&
-			p.estado === 'pendiente_solicitud_cierre'
+		(p) => p.institucion_id === user.id_usuario && p.estado === 'pendiente_solicitud_cierre'
 	);
 
 	let proyectoActual = null;
@@ -66,9 +62,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		const idProyecto = Number(proyectoId);
 
 		if (idProyecto && !isNaN(idProyecto)) {
-			const proyectoSolicitado = allProyectos.find(
-				(p) => Number(p.id_proyecto) === idProyecto
-			);
+			const proyectoSolicitado = allProyectos.find((p) => Number(p.id_proyecto) === idProyecto);
 
 			if (
 				!proyectoSolicitado ||
@@ -133,8 +127,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				solicitudesRechazadas = rechazadas;
 
 				const participacionesPermitidas = p.participacion_permitida || [];
-				const objetivosIds = new Set(participacionesPermitidas.map((obj: any) => Number(obj.id_participacion_permitida)));
-				
+				const objetivosIds = new Set(
+					participacionesPermitidas.map((obj: any) => Number(obj.id_participacion_permitida))
+				);
+
 				evidencias = evs.filter((ev: any) => {
 					const evObjId = Number(ev.id_participacion_permitida);
 					return evObjId != null && objetivosIds.has(evObjId);
@@ -143,11 +139,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				objetivos = participacionesPermitidas.map((obj) => {
 					const actual = calcularActual(obj);
 					return {
-					...obj,
-					id_participacion_permitida: Number(obj.id_participacion_permitida),
-					actual,
-					porcentaje: (Number(obj.objetivo) || 0) > 0 ? (actual / (Number(obj.objetivo) || 1)) * 100 : 0
-				};
+						...obj,
+						id_participacion_permitida: Number(obj.id_participacion_permitida),
+						actual,
+						porcentaje:
+							(Number(obj.objetivo) || 0) > 0 ? (actual / (Number(obj.objetivo) || 1)) * 100 : 0
+					};
 				});
 			}
 		}
@@ -155,25 +152,29 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	// Mapeo exhaustivo a POJO antes de enviar al cliente
 	// Esto asegura que Svelte/Kit reciba datos limpios, tipados y con relaciones anidadas
-	const pActualMapped = proyectoActual ? {
-		...JSON.parse(JSON.stringify(proyectoActual)),
-		id_proyecto: Number(proyectoActual.id_proyecto),
-		participacion_permitida: (proyectoActual.participacion_permitida || []).map((p) => {
-			const actual = calcularActual(p);
-			return {
-				...JSON.parse(JSON.stringify(p)),
-				id_participacion_permitida: Number(p.id_participacion_permitida),
-				id_proyecto: Number(p.id_proyecto),
-				id_tipo_participacion: Number(p.id_tipo_participacion),
-				objetivo: Number(p.objetivo),
-				actual,
-				tipo_participacion: p.tipo_participacion ? {
-					id_tipo_participacion: Number(p.tipo_participacion.id_tipo_participacion),
-					descripcion: p.tipo_participacion.descripcion
-				} : undefined
-			};
-		})
-	} : null;
+	const pActualMapped = proyectoActual
+		? {
+				...JSON.parse(JSON.stringify(proyectoActual)),
+				id_proyecto: Number(proyectoActual.id_proyecto),
+				participacion_permitida: (proyectoActual.participacion_permitida || []).map((p) => {
+					const actual = calcularActual(p);
+					return {
+						...JSON.parse(JSON.stringify(p)),
+						id_participacion_permitida: Number(p.id_participacion_permitida),
+						id_proyecto: Number(p.id_proyecto),
+						id_tipo_participacion: Number(p.id_tipo_participacion),
+						objetivo: Number(p.objetivo),
+						actual,
+						tipo_participacion: p.tipo_participacion
+							? {
+									id_tipo_participacion: Number(p.tipo_participacion.id_tipo_participacion),
+									descripcion: p.tipo_participacion.descripcion
+								}
+							: undefined
+					};
+				})
+			}
+		: null;
 
 	const evidenciasMapped = evidencias.map((ev: any) => ({
 		id_evidencia: Number(ev.id_evidencia),
@@ -188,18 +189,20 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			tipo_mime: a.tipo_mime,
 			tamanio_bytes: Number(a.tamanio_bytes || 0),
 			created_at: a.created_at instanceof Date ? a.created_at.toISOString() : a.created_at,
-			usuario: a.usuario ? {
-				nombre: a.usuario.nombre,
-				apellido: a.usuario.apellido,
-				username: a.usuario.username
-			} : undefined
+			usuario: a.usuario
+				? {
+						nombre: a.usuario.nombre,
+						apellido: a.usuario.apellido,
+						username: a.usuario.username
+					}
+				: undefined
 		}))
 	}));
 
 	return {
 		proyectos: JSON.parse(JSON.stringify(proyectosDisponibles)),
 		proyectoActual: pActualMapped,
-		objetivos: objetivos.map(obj => ({
+		objetivos: objetivos.map((obj) => ({
 			...JSON.parse(JSON.stringify(obj)),
 			id_participacion_permitida: Number(obj.id_participacion_permitida),
 			objetivo: Number(obj.objetivo),
@@ -220,11 +223,15 @@ export const actions: Actions = {
 		const user = locals.usuario;
 
 		if (!user) return fail(401, { message: 'No autenticado' });
-		if (user.rol !== 'institucion') return fail(403, { message: 'Solo las instituciones pueden solicitar cierre' });
+		if (user.rol !== 'institucion')
+			return fail(403, { message: 'Solo las instituciones pueden solicitar cierre' });
 
 		const formData = await request.formData();
 		const proyectoId = Number(formData.get('proyecto_id'));
-		const evidenciaIds = formData.getAll('evidencia_ids').map(Number).filter(n => !isNaN(n));
+		const evidenciaIds = formData
+			.getAll('evidencia_ids')
+			.map(Number)
+			.filter((n) => !isNaN(n));
 
 		if (!proyectoId) return fail(400, { message: 'Debe seleccionar un proyecto' });
 
@@ -243,17 +250,10 @@ export const actions: Actions = {
 						historialRepo
 					);
 
-					const solicitudCreada = await useCase.execute(
-						user.id_usuario!,
-						proyectoId,
-						evidenciaIds
-					);
+					const solicitudCreada = await useCase.execute(user.id_usuario!, proyectoId, evidenciaIds);
 
 					const gestionEstado = new GestionarEstadoProyecto(proyectoRepo, historialRepo);
-					await gestionEstado.enviarASolicitudCierreConEvidencias(
-						proyectoId,
-						user.id_usuario!
-					);
+					await gestionEstado.enviarASolicitudCierreConEvidencias(proyectoId, user.id_usuario!);
 
 					return solicitudCreada;
 				},

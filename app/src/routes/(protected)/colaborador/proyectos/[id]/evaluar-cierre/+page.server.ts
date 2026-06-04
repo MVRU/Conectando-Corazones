@@ -31,92 +31,94 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw redirect(303, '/proyectos');
 	}
 
-	const [proyectoRow, colaboracionAprobada, totalColaboradores, solicitudRow, resenaPropia] = await Promise.all([
-		prisma.proyecto.findUnique({
-			where: { id_proyecto: proyectoId },
-			select: {
-				id_proyecto: true,
-				titulo: true,
-				beneficiarios: true,
-				estado: {
-					select: {
-						descripcion: true
-					}
-				},
-				participacion_permitida: {
-					select: {
-						id_participacion_permitida: true,
-						id_proyecto: true,
-						id_tipo_participacion: true,
-						objetivo: true,
-						unidad_medida: true,
-						especie: true,
-						tipo_participacion: {
-							select: {
-								id_tipo_participacion: true,
-								descripcion: true
-							}
-						},
-						colaboraciones_tipo_participacion: {
-							select: {
-								cantidad: true
+	const [proyectoRow, colaboracionAprobada, totalColaboradores, solicitudRow, resenaPropia] =
+		await Promise.all([
+			prisma.proyecto.findUnique({
+				where: { id_proyecto: proyectoId },
+				select: {
+					id_proyecto: true,
+					titulo: true,
+					beneficiarios: true,
+					estado: {
+						select: {
+							descripcion: true
+						}
+					},
+					participacion_permitida: {
+						select: {
+							id_participacion_permitida: true,
+							id_proyecto: true,
+							id_tipo_participacion: true,
+							objetivo: true,
+							unidad_medida: true,
+							especie: true,
+							tipo_participacion: {
+								select: {
+									id_tipo_participacion: true,
+									descripcion: true
+								}
+							},
+							colaboraciones_tipo_participacion: {
+								select: {
+									cantidad: true
+								}
 							}
 						}
 					}
 				}
-			}
-		}),
-		prisma.colaboracion.findFirst({
-			where: {
-				proyecto_id: proyectoId,
-				colaborador_id: user.id_usuario!,
-				estado: 'aprobada'
-			},
-			select: {
-				id_colaboracion: true
-			}
-		}),
-		prisma.colaboracion.count({
-			where: {
-				proyecto_id: proyectoId,
-				estado: 'aprobada'
-			}
-		}),
-		prisma.solicitudFinalizacion.findFirst({
-			where: {
-				proyecto_id: proyectoId,
-				estado: 'pendiente'
-			},
-			orderBy: {
-				created_at: 'desc'
-			},
-			select: {
-				id_solicitud: true,
-				proyecto_id: true,
-				estado: true,
-				created_at: true,
-				solicitud_evidencias: {
-					select: {
-						evidencia: {
-							select: {
-								id_evidencia: true,
-								tipo_evidencia: true,
-								created_at: true,
-								id_participacion_permitida: true,
-								archivos: {
-									select: {
-										id_archivo: true,
-										nombre_original: true,
-										url: true,
-										descripcion: true,
-										tipo_mime: true,
-										tamanio_bytes: true,
-										created_at: true,
-										usuario: {
-											select: {
-												nombre: true,
-												apellido: true,
-												username: true
+			}),
+			prisma.colaboracion.findFirst({
+				where: {
+					proyecto_id: proyectoId,
+					colaborador_id: user.id_usuario!,
+					estado: 'aprobada'
+				},
+				select: {
+					id_colaboracion: true
+				}
+			}),
+			prisma.colaboracion.count({
+				where: {
+					proyecto_id: proyectoId,
+					estado: 'aprobada'
+				}
+			}),
+			prisma.solicitudFinalizacion.findFirst({
+				where: {
+					proyecto_id: proyectoId,
+					estado: 'pendiente'
+				},
+				orderBy: {
+					created_at: 'desc'
+				},
+				select: {
+					id_solicitud: true,
+					proyecto_id: true,
+					estado: true,
+					created_at: true,
+					solicitud_evidencias: {
+						select: {
+							evidencia: {
+								select: {
+									id_evidencia: true,
+									tipo_evidencia: true,
+									created_at: true,
+									id_participacion_permitida: true,
+									archivos: {
+										select: {
+											id_archivo: true,
+											nombre_original: true,
+											url: true,
+											descripcion: true,
+											tipo_mime: true,
+											tamanio_bytes: true,
+											created_at: true,
+											usuario: {
+												select: {
+													nombre: true,
+													apellido: true,
+													username: true
+												}
 											}
 										}
 									}
@@ -125,17 +127,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						}
 					}
 				}
-			}
-		}),
-		prisma.resena.findFirst({
-			where: {
-				autor_id: user.id_usuario!,
-				tipo_objeto: 'proyecto',
-				id_objeto: proyectoId
-			},
-			select: { id_resena: true }
-		})
-	]);
+			}),
+			prisma.resena.findFirst({
+				where: {
+					autor_id: user.id_usuario!,
+					tipo_objeto: 'proyecto',
+					id_objeto: proyectoId
+				},
+				select: { id_resena: true }
+			})
+		]);
 
 	if (!proyectoRow) throw redirect(303, '/proyectos');
 
@@ -161,46 +162,46 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			especie: participacion.especie ?? undefined,
 			tipo_participacion: participacion.tipo_participacion
 				? {
-					id_tipo_participacion: participacion.tipo_participacion.id_tipo_participacion,
-					descripcion: participacion.tipo_participacion.descripcion
-				}
+						id_tipo_participacion: participacion.tipo_participacion.id_tipo_participacion,
+						descripcion: participacion.tipo_participacion.descripcion
+					}
 				: undefined
 		}))
 	};
 
 	const solicitud = solicitudRow
 		? {
-			id_solicitud: solicitudRow.id_solicitud,
-			proyecto_id: solicitudRow.proyecto_id,
-			estado: solicitudRow.estado ?? undefined,
-			created_at: solicitudRow.created_at ?? undefined,
-			evidencia_ids: solicitudRow.solicitud_evidencias.map(
-				({ evidencia }) => evidencia.id_evidencia
-			),
-			evidencias: solicitudRow.solicitud_evidencias.map(({ evidencia }) => ({
-				id_evidencia: evidencia.id_evidencia,
-				tipo_evidencia: evidencia.tipo_evidencia,
-				created_at: evidencia.created_at ?? undefined,
-				id_participacion_permitida: evidencia.id_participacion_permitida,
-				archivos_ids: evidencia.archivos.map((archivo) => archivo.id_archivo),
-				archivos: evidencia.archivos.map((archivo) => ({
-					id_archivo: archivo.id_archivo,
-					nombre_original: archivo.nombre_original,
-					url: archivo.url,
-					descripcion: archivo.descripcion,
-					tipo_mime: archivo.tipo_mime,
-					tamanio_bytes: archivo.tamanio_bytes ? Number(archivo.tamanio_bytes) : null,
-					created_at: archivo.created_at ?? undefined,
-					usuario: archivo.usuario
-						? {
-							nombre: archivo.usuario.nombre,
-							apellido: archivo.usuario.apellido,
-							username: archivo.usuario.username
-						}
-						: undefined
+				id_solicitud: solicitudRow.id_solicitud,
+				proyecto_id: solicitudRow.proyecto_id,
+				estado: solicitudRow.estado ?? undefined,
+				created_at: solicitudRow.created_at ?? undefined,
+				evidencia_ids: solicitudRow.solicitud_evidencias.map(
+					({ evidencia }) => evidencia.id_evidencia
+				),
+				evidencias: solicitudRow.solicitud_evidencias.map(({ evidencia }) => ({
+					id_evidencia: evidencia.id_evidencia,
+					tipo_evidencia: evidencia.tipo_evidencia,
+					created_at: evidencia.created_at ?? undefined,
+					id_participacion_permitida: evidencia.id_participacion_permitida,
+					archivos_ids: evidencia.archivos.map((archivo) => archivo.id_archivo),
+					archivos: evidencia.archivos.map((archivo) => ({
+						id_archivo: archivo.id_archivo,
+						nombre_original: archivo.nombre_original,
+						url: archivo.url,
+						descripcion: archivo.descripcion,
+						tipo_mime: archivo.tipo_mime,
+						tamanio_bytes: archivo.tamanio_bytes ? Number(archivo.tamanio_bytes) : null,
+						created_at: archivo.created_at ?? undefined,
+						usuario: archivo.usuario
+							? {
+									nombre: archivo.usuario.nombre,
+									apellido: archivo.usuario.apellido,
+									username: archivo.usuario.username
+								}
+							: undefined
+					}))
 				}))
-			}))
-		}
+			}
 		: null;
 
 	// Si no hay solicitud y el proyecto está en revisión, es un estado inconsistente o
@@ -212,13 +213,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const [evaluacionUsuario, votosRealizados] =
 		solicitud && solicitud.id_solicitud !== undefined && user.id_usuario !== undefined
 			? await Promise.all([
-				evaluacionRepo.findBySolicitudAndColaborador(solicitud.id_solicitud, user.id_usuario),
-				prisma.evaluacion.count({
-					where: {
-						solicitud_id: solicitud.id_solicitud
-					}
-				})
-			])
+					evaluacionRepo.findBySolicitudAndColaborador(solicitud.id_solicitud, user.id_usuario),
+					prisma.evaluacion.count({
+						where: {
+							solicitud_id: solicitud.id_solicitud
+						}
+					})
+				])
 			: [null, 0];
 
 	return {

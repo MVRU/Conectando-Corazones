@@ -170,7 +170,7 @@ export class RegistrationService {
 						await registrarConsent.execute(uid, uid, item.tipo, item.version);
 					}
 				} catch (consentErr) {
-					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => { });
+					await prisma.usuario.delete({ where: { id_usuario: uid } }).catch(() => {});
 					throw consentErr;
 				}
 			}

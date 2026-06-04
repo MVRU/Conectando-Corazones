@@ -55,7 +55,7 @@
 	onkeydown={(e) => {
 		if (e.key === 'Escape') cerrar();
 	}}
-	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl transition-all outline-hidden backdrop:bg-black/30 backdrop:backdrop-blur-sm"
+	class="m-auto w-full {anchoMaximo} rounded-2xl bg-transparent p-0 text-left shadow-xl outline-hidden transition-all backdrop:bg-black/30 backdrop:backdrop-blur-sm"
 >
 	{#if abierto}
 		<div

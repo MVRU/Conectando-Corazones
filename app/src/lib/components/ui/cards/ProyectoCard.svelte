@@ -23,7 +23,19 @@
 	import ProyectoProgreso from '$lib/components/feature/proyectos/ProyectoProgreso.svelte';
 	import Modal from '$lib/components/ui/overlays/Modal.svelte';
 
-	let { proyecto, usuario = null, mostrarBotones = false, variante = 'default', esInstitucion = false }: { proyecto: Proyecto; usuario?: Usuario | null; mostrarBotones?: boolean; variante?: 'default' | 'mis-proyectos'; esInstitucion?: boolean } = $props();
+	let {
+		proyecto,
+		usuario = null,
+		mostrarBotones = false,
+		variante = 'default',
+		esInstitucion = false
+	}: {
+		proyecto: Proyecto;
+		usuario?: Usuario | null;
+		mostrarBotones?: boolean;
+		variante?: 'default' | 'mis-proyectos';
+		esInstitucion?: boolean;
+	} = $props();
 
 	// Obtener colaboración del usuario
 	const colaboracionUsuario = $derived(
@@ -37,18 +49,18 @@
 
 	const esParticipante = $derived(
 		!esCreador &&
-		!!usuario &&
-		usuario.rol === 'colaborador' &&
-		colaboracionUsuario?.estado === 'aprobada'
+			!!usuario &&
+			usuario.rol === 'colaborador' &&
+			colaboracionUsuario?.estado === 'aprobada'
 	);
 
 	// Detectar si el usuario ya envió una solicitud (pendiente, rechazada, etc) pero NO está aprobada (ya cubierto por esParticipante)
 	const yaColaboro = $derived(
 		!esCreador &&
-		!esParticipante &&
-		!!usuario &&
-		usuario.rol === 'colaborador' &&
-		!!colaboracionUsuario
+			!esParticipante &&
+			!!usuario &&
+			usuario.rol === 'colaborador' &&
+			!!colaboracionUsuario
 	);
 
 	const esRechazada = $derived(colaboracionUsuario?.estado === 'rechazada');
@@ -67,17 +79,23 @@
 	}
 
 	const progresoTotal = $derived(proyecto ? calcularProgresoTotal(proyecto) : 0);
-	const diasFaltantes = $derived(proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999);
+	const diasFaltantes = $derived(
+		proyecto.fecha_fin_tentativa ? calcularDiasRestantes(proyecto.fecha_fin_tentativa) : 999
+	);
 	const listoParaFinalizar = $derived(
 		esCreador &&
-		proyecto.estado === 'en_curso' &&
-		(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7))
+			proyecto.estado === 'en_curso' &&
+			(progresoTotal >= 80 || (proyecto.fecha_fin_tentativa && diasFaltantes <= 7))
 	);
 
-	const botonColaborarDeshabilitado = $derived(proyecto.estado !== 'en_curso' || yaColaboro || esAnulada);
+	const botonColaborarDeshabilitado = $derived(
+		proyecto.estado !== 'en_curso' || yaColaboro || esAnulada
+	);
 	const ubicacionCorta = $derived(getUbicacionCorta(proyecto));
 	const esVirtual = $derived(ubicacionCorta === 'Virtual');
-	const estaInactivo = $derived(proyecto.estado === 'completado' || proyecto.estado === 'cancelado');
+	const estaInactivo = $derived(
+		proyecto.estado === 'completado' || proyecto.estado === 'cancelado'
+	);
 </script>
 
 <div
@@ -217,11 +235,15 @@
 				{#if esInstitucion && proyecto.estado === 'en_curso'}
 					<Button
 						label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
-						href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
+						href={listoParaFinalizar
+							? `/proyectos/${proyecto.id_proyecto}`
+							: `/proyectos/${proyecto.id_proyecto}/editar`}
 						variant="secondary"
 						size="sm"
 						customClass="flex-1"
-						customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
+						customAriaLabel={listoParaFinalizar
+							? 'Finalizar actividades del proyecto'
+							: 'Editar proyecto'}
 					/>
 					<Button
 						label="Ver detalles"
@@ -246,11 +268,15 @@
 					{#if proyecto.estado === 'en_curso'}
 						<Button
 							label={listoParaFinalizar ? 'Finalizar' : 'Editar'}
-							href={listoParaFinalizar ? `/proyectos/${proyecto.id_proyecto}` : `/proyectos/${proyecto.id_proyecto}/editar`}
+							href={listoParaFinalizar
+								? `/proyectos/${proyecto.id_proyecto}`
+								: `/proyectos/${proyecto.id_proyecto}/editar`}
 							variant="secondary"
 							size="sm"
 							customClass="flex-1"
-							customAriaLabel={listoParaFinalizar ? 'Finalizar actividades del proyecto' : 'Editar proyecto'}
+							customAriaLabel={listoParaFinalizar
+								? 'Finalizar actividades del proyecto'
+								: 'Editar proyecto'}
 						/>
 					{/if}
 					<Button

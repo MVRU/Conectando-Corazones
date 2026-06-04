@@ -292,7 +292,8 @@
 														Usuario: {reporte.nombre_objeto ?? `ID ${reporte.id_objeto}`}
 													</a>
 												{:else}
-													{reporte.tipo_objeto}: {reporte.nombre_objeto ?? `ID ${reporte.id_objeto}`}
+													{reporte.tipo_objeto}: {reporte.nombre_objeto ??
+														`ID ${reporte.id_objeto}`}
 												{/if}
 											</h3>
 										</div>
@@ -312,7 +313,9 @@
 									</p>
 
 									{#if $isAdmin}
-										<div class="mt-2 ml-0 flex items-center gap-2 text-base text-gray-600 md:ml-[64px]">
+										<div
+											class="mt-2 ml-0 flex items-center gap-2 text-base text-gray-600 md:ml-[64px]"
+										>
 											<span class="font-medium">Reportado por:</span>
 											<a
 												href={reporte.reportante?.username
@@ -353,19 +356,25 @@
 											class="mb-2 block text-sm font-bold tracking-widest text-gray-400 uppercase"
 											>Descripción Detallada</span
 										>
-										<p class="wrap-break-word text-lg leading-relaxed text-gray-700">{reporte.descripcion}</p>
+										<p class="text-lg leading-relaxed wrap-break-word text-gray-700">
+											{reporte.descripcion}
+										</p>
 									</div>
 								</div>
 
 								<div class="flex flex-col gap-4">
 									{#if reporte.estado === 'verificado' || reporte.estado === 'desestimado'}
-										<div class="h-full rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm md:p-6">
-											<h4 class="mb-4 flex items-center gap-2 wrap-break-word text-lg font-bold text-gray-900">
+										<div
+											class="h-full rounded-2xl border border-gray-100 bg-gray-50 p-4 shadow-sm md:p-6"
+										>
+											<h4
+												class="mb-4 flex items-center gap-2 text-lg font-bold wrap-break-word text-gray-900"
+											>
 												<AlertCircle class="text-primary-500 h-5 w-5" />
 												Resolución Administrativa
 											</h4>
 											{#if reporte.fecha_resolucion}
-												<p class="mb-2 break-all text-xs text-gray-500">
+												<p class="mb-2 text-xs break-all text-gray-500">
 													Finalizado el {formatDate(reporte.fecha_resolucion)}
 													{#if reporte.admin_id}
 														por <span class="font-medium text-gray-700"
@@ -375,7 +384,7 @@
 												</p>
 											{/if}
 											{#if reporte.comentario_resolucion}
-												<p class="break-all text-sm text-gray-700 italic">
+												<p class="text-sm break-all text-gray-700 italic">
 													"{reporte.comentario_resolucion}"
 												</p>
 											{:else}

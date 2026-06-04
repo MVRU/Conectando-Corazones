@@ -6,7 +6,7 @@ import { Resena } from '$lib/domain/entities/Resena';
 import type { TipoObjetoResena } from '$lib/domain/types/Resena';
 
 const ESTADOS_VALIDOS = ['aprobada'] as const;
-type EstadoValido = typeof ESTADOS_VALIDOS[number];
+type EstadoValido = (typeof ESTADOS_VALIDOS)[number];
 
 interface CrearResenaInput {
 	tipo_objeto: TipoObjetoResena;
@@ -24,7 +24,7 @@ export class CrearResena {
 		private colaboracionRepository: ColaboracionRepository,
 		private proyectoRepository: ProyectoRepository,
 		private historialRepo: HistorialDeCambiosRepository
-	) { }
+	) {}
 
 	async execute(input: CrearResenaInput): Promise<Resena> {
 		// 1. Validar duplicado
@@ -48,12 +48,13 @@ export class CrearResena {
 
 			const participoEnProyecto = colaboraciones.some(
 				(c) =>
-					c.proyecto_id === input.id_objeto &&
-					ESTADOS_VALIDOS.includes(c.estado as EstadoValido)
+					c.proyecto_id === input.id_objeto && ESTADOS_VALIDOS.includes(c.estado as EstadoValido)
 			);
 
 			if (!participoEnProyecto) {
-				throw new Error('Debés tener una colaboración aprobada en este proyecto para poder reseñarlo.');
+				throw new Error(
+					'Debés tener una colaboración aprobada en este proyecto para poder reseñarlo.'
+				);
 			}
 		}
 
@@ -63,7 +64,10 @@ export class CrearResena {
 				throw new Error('No podés reseñarte a vos mismo.');
 			}
 
-			let misColaboraciones, colaboracionesOtro, proyectosDondeIdObjetoEsDuenio, proyectosDondeAutorEsDuenio;
+			let misColaboraciones,
+				colaboracionesOtro,
+				proyectosDondeIdObjetoEsDuenio,
+				proyectosDondeAutorEsDuenio;
 			try {
 				[
 					misColaboraciones,
@@ -87,7 +91,9 @@ export class CrearResena {
 			);
 
 			const misProyectosPropiedadIds = new Set(
-				proyectosDondeAutorEsDuenio.map((p) => p.id_proyecto).filter((id): id is number => id !== undefined)
+				proyectosDondeAutorEsDuenio
+					.map((p) => p.id_proyecto)
+					.filter((id): id is number => id !== undefined)
 			);
 
 			// Caso A: Coincidieron como colaboradores

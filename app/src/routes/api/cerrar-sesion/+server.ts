@@ -8,6 +8,5 @@ export const POST: RequestHandler = async ({ locals, cookies }) => {
 
 	cookies.delete('remember_me', { path: '/' });
 
-
 	return json({ success: true });
 };

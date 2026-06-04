@@ -3,7 +3,11 @@
 	import { quintOut } from 'svelte/easing';
 	import { X, FolderKanban, UploadCloud } from 'lucide-svelte';
 
-	let { show = false, onClose = () => {}, proyectos = [] } = $props<{
+	let {
+		show = false,
+		onClose = () => {},
+		proyectos = []
+	} = $props<{
 		show?: boolean;
 		onClose?: () => void;
 		proyectos?: { id: string; titulo: string; estado: string }[];

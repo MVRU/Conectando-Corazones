@@ -34,7 +34,10 @@ export const esEstadoVerificacionCanonico = (v: string): v is EstadoVerificacion
  * La verificación ARCA (RG 2681) está vigente si fue aprobada y la
  * fecha de vencimiento del certificado es posterior a "hoy".
  */
-export const esArcaVigente = (v: Verificacion | null | undefined, hoy: Date = new Date()): boolean => {
+export const esArcaVigente = (
+	v: Verificacion | null | undefined,
+	hoy: Date = new Date()
+): boolean => {
 	if (!v) return false;
 	if (v.tipo !== 'arca') return false;
 	if (v.estado !== 'aprobada') return false;

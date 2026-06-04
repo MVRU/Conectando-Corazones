@@ -117,7 +117,9 @@
 
 <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-10">
 	<div class="mb-6">
-		<h2 class="text-lg font-semibold text-slate-900">Certificación ARCA <span class="text-sm font-normal text-slate-400">(opcional)</span></h2>
+		<h2 class="text-lg font-semibold text-slate-900">
+			Certificación ARCA <span class="text-sm font-normal text-slate-400">(opcional)</span>
+		</h2>
 		<p class="mt-1 text-sm text-slate-600">
 			Si tu institución está inscripta en el padrón de entidades exentas de ARCA (RG 2681), podés
 			cargar el certificado de exención para que las empresas que colaboren con tus proyectos puedan
@@ -142,7 +144,6 @@
 				</div>
 			{/if}
 		</div>
-
 	{:else if estadoDisplay === 'aprobada'}
 		<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-900">
 			<p class="text-sm font-semibold">Certificación ARCA aprobada</p>
@@ -171,7 +172,6 @@
 				Renovar o actualizar el certificado
 			</button>
 		{/if}
-
 	{:else if estadoDisplay === 'vencida'}
 		<div class="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-amber-900">
 			<p class="text-sm font-semibold">Tu certificado ARCA está vencido</p>
@@ -180,13 +180,13 @@
 				nuevo certificado emitido por ARCA para renovarlo.
 			</p>
 		</div>
-
 	{:else if estadoDisplay === 'rechazada'}
 		<div class="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-900">
 			<p class="text-sm font-semibold">Tu certificado ARCA fue rechazado</p>
 			{#if motivoRechazo}
 				<p class="mt-2 rounded-xl border border-rose-300/70 bg-white/70 px-3 py-2 text-sm">
-					<strong>Motivo:</strong> {motivoRechazo}
+					<strong>Motivo:</strong>
+					{motivoRechazo}
 				</p>
 			{/if}
 			<p class="mt-2 text-sm">Podés corregirlo y volver a enviarlo.</p>
@@ -209,7 +209,9 @@
 	{/if}
 
 	{#if puedeCargar && (!wizardMode || inscriptaArca)}
-		<div class="mt-6 space-y-5 rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-6 sm:p-8">
+		<div
+			class="mt-6 space-y-5 rounded-2xl border border-dashed border-blue-200 bg-blue-50/70 p-6 sm:p-8"
+		>
 			{#if documentoExistente && (estadoDisplay === 'rechazada' || estadoDisplay === 'vencida' || mostrandoFormActualizacion)}
 				<div class="rounded-lg border border-sky-200 bg-sky-50 p-4">
 					<p class="text-sm font-semibold text-sky-900">Certificado actual</p>
@@ -219,7 +221,9 @@
 								{documentoExistente.nombre_original ?? 'Certificado ARCA'}
 							</p>
 							{#if documentoExistente.tamanio_bytes}
-								<p class="text-xs text-slate-500">{formatearTamanio(documentoExistente.tamanio_bytes)}</p>
+								<p class="text-xs text-slate-500">
+									{formatearTamanio(documentoExistente.tamanio_bytes)}
+								</p>
 							{/if}
 						</div>
 						<div class="flex items-center gap-2">
@@ -260,7 +264,9 @@
 			</div>
 
 			{#if archivoSeleccionado}
-				<div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm">
+				<div
+					class="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm"
+				>
 					<span class="truncate pr-4 text-slate-800">{archivoSeleccionado.name}</span>
 					<div class="flex items-center gap-3">
 						<span class="text-xs whitespace-nowrap text-slate-500">
@@ -269,7 +275,10 @@
 						<button
 							type="button"
 							class="text-slate-400 transition hover:text-red-500"
-							onclick={() => { archivoSeleccionado = null; onArchivoChange?.(null); }}
+							onclick={() => {
+								archivoSeleccionado = null;
+								onArchivoChange?.(null);
+							}}
 							aria-label="Quitar archivo seleccionado"
 						>
 							<X class="h-4 w-4" />
@@ -279,7 +288,10 @@
 			{/if}
 
 			{#if errorFormulario}
-				<p role="alert" class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+				<p
+					role="alert"
+					class="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+				>
 					{errorFormulario}
 				</p>
 			{/if}
@@ -291,7 +303,11 @@
 							type="button"
 							variant="secondary"
 							label="Cancelar"
-							onclick={() => { mostrandoFormActualizacion = false; archivoSeleccionado = null; errorFormulario = null; }}
+							onclick={() => {
+								mostrandoFormActualizacion = false;
+								archivoSeleccionado = null;
+								errorFormulario = null;
+							}}
 						/>
 					{/if}
 					<Button

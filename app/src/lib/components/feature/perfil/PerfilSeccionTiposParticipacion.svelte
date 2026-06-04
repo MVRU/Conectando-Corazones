@@ -48,16 +48,13 @@
 	const coloresChip: Record<string, string> = {
 		verde:
 			'border-emerald-100 bg-linear-to-r from-emerald-50 to-emerald-50/60 text-emerald-700 hover:border-emerald-200 hover:from-emerald-100',
-		azul:
-			'border-blue-100 bg-linear-to-r from-blue-50 to-blue-50/60 text-[#007FFF] hover:border-[#007FFF]/30 hover:from-blue-100',
+		azul: 'border-blue-100 bg-linear-to-r from-blue-50 to-blue-50/60 text-[#007FFF] hover:border-[#007FFF]/30 hover:from-blue-100',
 		morado:
 			'border-purple-100 bg-linear-to-r from-purple-50 to-purple-50/60 text-purple-700 hover:border-purple-200 hover:from-purple-100',
 		naranja:
 			'border-orange-100 bg-linear-to-r from-orange-50 to-orange-50/60 text-orange-700 hover:border-orange-200 hover:from-orange-100',
-		rojo:
-			'border-red-100 bg-linear-to-r from-red-50 to-red-50/60 text-red-700 hover:border-red-200 hover:from-red-100',
-		gray:
-			'border-gray-100 bg-linear-to-r from-gray-50 to-gray-50/60 text-gray-700 hover:border-gray-200 hover:from-gray-100'
+		rojo: 'border-red-100 bg-linear-to-r from-red-50 to-red-50/60 text-red-700 hover:border-red-200 hover:from-red-100',
+		gray: 'border-gray-100 bg-linear-to-r from-gray-50 to-gray-50/60 text-gray-700 hover:border-gray-200 hover:from-gray-100'
 	};
 
 	function obtenerClaseChip(color: string): string {
@@ -87,9 +84,15 @@
 		<div class="flex flex-wrap gap-2">
 			{#each tiposParticipacion as tipo, i (tipo.descripcion)}
 				{@const key = tipo.descripcion as keyof typeof INFO_TIPOS_PARTICIPACION}
-				{@const info = INFO_TIPOS_PARTICIPACION[key] ?? { titulo: tipo.descripcion, color: 'gray', icon: null }}
+				{@const info = INFO_TIPOS_PARTICIPACION[key] ?? {
+					titulo: tipo.descripcion,
+					color: 'gray',
+					icon: null
+				}}
 				<div
-					class="group flex cursor-default items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:shadow-sm {obtenerClaseChip(info.color)}"
+					class="group flex cursor-default items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all duration-200 hover:shadow-sm {obtenerClaseChip(
+						info.color
+					)}"
 					in:fly={{ y: 8, duration: 250, delay: i * 50, easing: cubicOut }}
 				>
 					{#if info.icon}
@@ -103,8 +106,12 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:shadow-sm">
-			<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:text-emerald-600">
+		<div
+			class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-emerald-200 hover:bg-white hover:shadow-sm"
+		>
+			<div
+				class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:text-emerald-600"
+			>
 				<HandHelping class="h-7 w-7" />
 			</div>
 

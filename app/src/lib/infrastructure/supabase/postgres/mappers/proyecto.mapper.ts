@@ -99,8 +99,7 @@ export class ProyectoMapper {
 				const u = UsuarioMapper.toDomain(rawInst);
 				const arcaVerif = (rawInst as any).verificaciones?.[0] ?? null;
 				u.arcaVigente =
-					!!arcaVerif?.fecha_vencimiento &&
-					new Date(arcaVerif.fecha_vencimiento) > new Date();
+					!!arcaVerif?.fecha_vencimiento && new Date(arcaVerif.fecha_vencimiento) > new Date();
 				return u;
 			})(),
 
@@ -111,7 +110,8 @@ export class ProyectoMapper {
 				: []
 		});
 
-		proyecto.esDeducible = (proyecto.institucion?.arcaVigente ?? false) && tieneParticipacionDeducible;
+		proyecto.esDeducible =
+			(proyecto.institucion?.arcaVigente ?? false) && tieneParticipacionDeducible;
 
 		return proyecto;
 	}

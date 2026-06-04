@@ -7,7 +7,7 @@ export class ObtenerMisAportes {
 	constructor(
 		private colaboracionRepo: ColaboracionRepository,
 		private proyectoRepo: ProyectoRepository
-	) { }
+	) {}
 
 	async execute(usuarioId: number, proyectoId: number) {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
@@ -20,9 +20,9 @@ export class ObtenerMisAportes {
 		}
 
 		const [rawAportes, todasEvidencias] = await Promise.all([
-			this.colaboracionRepo.getAportesPorColaboracion(
-				colaboracion.id_colaboracion
-			) as Promise<ColaboracionTipoParticipacion[]>,
+			this.colaboracionRepo.getAportesPorColaboracion(colaboracion.id_colaboracion) as Promise<
+				ColaboracionTipoParticipacion[]
+			>,
 			this.colaboracionRepo.getEvidenciasPorColaboracion(
 				colaboracion.id_colaboracion,
 				usuarioId

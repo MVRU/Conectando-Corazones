@@ -109,19 +109,23 @@
 	}
 </script>
 
-<div class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md shadow-sm">
+<div
+	class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 shadow-sm backdrop-blur-md"
+>
 	<div class="border-b border-white/10 bg-linear-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5">
 		<h3 class="text-xl font-bold text-white">Bandeja de validación documental</h3>
-		<p class="text-sm text-slate-400">Validación documental pendiente de instituciones y colaboradores.</p>
+		<p class="text-sm text-slate-400">
+			Validación documental pendiente de instituciones y colaboradores.
+		</p>
 	</div>
 	<div class="overflow-x-auto">
 		<table class="min-w-full divide-y divide-white/5 text-sm">
 			<thead class="bg-white/5 text-left">
 				<tr>
-					<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Usuario</th>
+					<th class="px-6 py-4 font-bold tracking-wider text-slate-300 uppercase">Usuario</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('rol')}
 						>
 							Rol {sortBy === 'rol' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -129,7 +133,7 @@
 					</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('tipo')}
 						>
 							Solicitud {sortBy === 'tipo' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -137,14 +141,16 @@
 					</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('created_at')}
 						>
 							Fecha {sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
 						</button>
 					</th>
-					<th class="px-6 py-4 text-center font-bold text-slate-300 uppercase tracking-wider">Documentos</th>
-					<th class="px-6 py-4 text-center font-bold text-slate-300 uppercase tracking-wider">
+					<th class="px-6 py-4 text-center font-bold tracking-wider text-slate-300 uppercase"
+						>Documentos</th
+					>
+					<th class="px-6 py-4 text-center font-bold tracking-wider text-slate-300 uppercase">
 						Acciones
 					</th>
 				</tr>
@@ -158,29 +164,31 @@
 					</tr>
 				{:else}
 					{#each itemsOrdenados as item}
-						<tr class="align-top hover:bg-white/5 transition-colors">
+						<tr class="align-top transition-colors hover:bg-white/5">
 							<td class="px-6 py-5">
 								<div class="font-bold text-white">{item.nombre} {item.apellido}</div>
 								<div class="text-xs font-medium text-slate-500">@{item.username}</div>
 							</td>
 							<td class="px-6 py-5 capitalize">
 								<span
-									class="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400 border border-blue-500/20"
+									class="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400"
 								>
 									{item.rol}
 								</span>
 							</td>
 							<td class="px-6 py-5">
-								<span class="text-slate-300 font-medium">{item.tipo}</span>
+								<span class="font-medium text-slate-300">{item.tipo}</span>
 							</td>
-							<td class="px-6 py-5 text-xs text-slate-400 font-medium">
-								{#if item.created_at}{new Date(item.created_at).toLocaleString('es-AR')}{:else}-{/if}
+							<td class="px-6 py-5 text-xs font-medium text-slate-400">
+								{#if item.created_at}{new Date(item.created_at).toLocaleString(
+										'es-AR'
+									)}{:else}-{/if}
 							</td>
 							<td class="px-6 py-5 text-center">
 								<div class="flex flex-col items-center gap-1.5">
 									{#each item.documentos as doc}
 										<a
-											class="inline-flex items-center text-xs text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
+											class="inline-flex items-center text-xs text-cyan-400 transition-colors hover:text-cyan-300 hover:underline"
 											href={doc.url}
 											target="_blank"
 											rel="noreferrer"
@@ -210,7 +218,7 @@
 										size="sm"
 										onclick={() => manejarAprobar(item)}
 										disabled={loading}
-										class="bg-emerald-600! hover:bg-emerald-700! text-white! rounded-full! shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+										class="rounded-full! bg-emerald-600! text-white! shadow-lg shadow-emerald-500/20 hover:bg-emerald-700! hover:shadow-emerald-500/40"
 									/>
 									<Button
 										label="Rechazar"
@@ -218,7 +226,7 @@
 										variant="danger"
 										onclick={() => abrirRechazo(item.id_verificacion)}
 										disabled={loading}
-										class="bg-rose-600! hover:bg-rose-700! text-white! rounded-full! shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40"
+										class="rounded-full! bg-rose-600! text-white! shadow-lg shadow-rose-500/20 hover:bg-rose-700! hover:shadow-rose-500/40"
 									/>
 								</div>
 							</td>
@@ -232,19 +240,36 @@
 
 <Modal bind:abierto={modalRechazoAbierto} titulo="Motivo de rechazo" anchoMaximo="max-w-xl">
 	<div class="space-y-3">
-		<label for="motivo-rechazo" class="block text-sm font-medium text-gray-700">Este motivo será enviado al usuario.</label>
-		<textarea id="motivo-rechazo" class="w-full rounded-lg border border-gray-300 p-3 text-sm" rows="4" bind:value={motivo} placeholder="Ingresá un motivo claro del rechazo documental..."></textarea>
+		<label for="motivo-rechazo" class="block text-sm font-medium text-gray-700"
+			>Este motivo será enviado al usuario.</label
+		>
+		<textarea
+			id="motivo-rechazo"
+			class="w-full rounded-lg border border-gray-300 p-3 text-sm"
+			rows="4"
+			bind:value={motivo}
+			placeholder="Ingresá un motivo claro del rechazo documental..."
+		></textarea>
 		{#if error}<p class="text-sm text-red-600">{error}</p>{/if}
 	</div>
 	{#snippet footer()}
 		<div class="flex gap-2">
-			<Button label="Cancelar" variant="secondary" size="sm" onclick={() => (modalRechazoAbierto = false)} />
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				size="sm"
+				onclick={() => (modalRechazoAbierto = false)}
+			/>
 			<Button label="Confirmar rechazo" variant="danger" size="sm" onclick={confirmarRechazo} />
 		</div>
 	{/snippet}
 </Modal>
 
-<Modal bind:abierto={modalAprobacionArcaAbierto} titulo="Aprobar certificación ARCA" anchoMaximo="max-w-md">
+<Modal
+	bind:abierto={modalAprobacionArcaAbierto}
+	titulo="Aprobar certificación ARCA"
+	anchoMaximo="max-w-md"
+>
 	<div class="space-y-4">
 		<p class="text-sm text-gray-600">
 			Indicá la fecha de vencimiento del certificado emitido por ARCA (RG 2681). La institución
@@ -266,7 +291,12 @@
 	</div>
 	{#snippet footer()}
 		<div class="flex gap-2">
-			<Button label="Cancelar" variant="secondary" size="sm" onclick={() => (modalAprobacionArcaAbierto = false)} />
+			<Button
+				label="Cancelar"
+				variant="secondary"
+				size="sm"
+				onclick={() => (modalAprobacionArcaAbierto = false)}
+			/>
 			<Button label="Aprobar ARCA" size="sm" onclick={confirmarAprobacionArca} />
 		</div>
 	{/snippet}

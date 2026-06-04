@@ -1,8 +1,5 @@
 <script lang="ts">
-	let {
-		percent = 0,
-		color = 'blue' as 'blue' | 'green' | 'purple'
-	} = $props<{
+	let { percent = 0, color = 'blue' as 'blue' | 'green' | 'purple' } = $props<{
 		percent?: number;
 		color?: 'blue' | 'green' | 'purple';
 	}>();

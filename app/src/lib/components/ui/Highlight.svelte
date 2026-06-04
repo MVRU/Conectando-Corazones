@@ -11,10 +11,12 @@
 			return [{ text, highlighted: false }];
 		}
 		const regex = new RegExp(`(${escapeRegExp(query.trim())})`, 'gi');
-		return text.split(regex).map((part: string, i: number): { text: string; highlighted: boolean } => ({
-			text: part,
-			highlighted: i % 2 === 1
-		}));
+		return text
+			.split(regex)
+			.map((part: string, i: number): { text: string; highlighted: boolean } => ({
+				text: part,
+				highlighted: i % 2 === 1
+			}));
 	});
 </script>
 

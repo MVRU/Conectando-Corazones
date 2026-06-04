@@ -20,7 +20,9 @@ export class EliminarUsuario {
 		// RN 1.3 - No permitir eliminación si hay colaboraciones activas
 		const hasActiveCollaborations = await this.usuarioRepository.hasActiveCollaborations(id);
 		if (hasActiveCollaborations) {
-			throw new Error('No se puede eliminar el usuario porque tiene colaboraciones activas en proyectos en curso.');
+			throw new Error(
+				'No se puede eliminar el usuario porque tiene colaboraciones activas en proyectos en curso.'
+			);
 		}
 
 		await this.usuarioRepository.delete(id);

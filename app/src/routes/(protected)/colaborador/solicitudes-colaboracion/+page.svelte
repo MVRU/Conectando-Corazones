@@ -22,13 +22,15 @@
 	let activeTab: 'pendiente' | 'aprobada' | 'rechazada' | 'anulada' = $state('pendiente');
 	let searchTerm = $state('');
 
-	let filteredColaboraciones = $derived(data.colaboraciones.filter((c) => {
-		const matchesTab = c.estado === activeTab;
-		const matchesSearch =
-			c.proyecto.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			c.proyecto.institucion.nombre_legal.toLowerCase().includes(searchTerm.toLowerCase());
-		return matchesTab && matchesSearch;
-	}));
+	let filteredColaboraciones = $derived(
+		data.colaboraciones.filter((c) => {
+			const matchesTab = c.estado === activeTab;
+			const matchesSearch =
+				c.proyecto.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				c.proyecto.institucion.nombre_legal.toLowerCase().includes(searchTerm.toLowerCase());
+			return matchesTab && matchesSearch;
+		})
+	);
 
 	const tabs = [
 		{
@@ -109,9 +111,7 @@
 				<div
 					class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500"
 				>
-					<SvelteComponent
-						class="h-5 w-5 text-gray-400"
-					/>
+					<SvelteComponent class="h-5 w-5 text-gray-400" />
 				</div>
 				<select
 					id="tabs"

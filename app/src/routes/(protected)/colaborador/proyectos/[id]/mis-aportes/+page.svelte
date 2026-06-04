@@ -610,7 +610,7 @@
 						type="text"
 						bind:value={newDescription}
 						placeholder="Ej: Comprobante de transferencia..."
-						class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 shadow-inner transition-all outline-hidden placeholder:text-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+						class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-700 shadow-inner outline-hidden transition-all placeholder:text-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
 					/>
 				</div>
 			</div>

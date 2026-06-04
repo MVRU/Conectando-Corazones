@@ -8,13 +8,7 @@
 	import { chatStore } from '$lib/stores/chatStore';
 	import { marcarVisitaChat } from '$lib/utils/chat-visit';
 	import EstadoProyectoBadge from '$lib/components/feature/chat/EstadoProyectoBadge.svelte';
-	import {
-		Archive,
-		Inbox,
-		MessageSquareText,
-		PanelLeftClose,
-		PanelLeftOpen
-	} from 'lucide-svelte';
+	import { Archive, Inbox, MessageSquareText, PanelLeftClose, PanelLeftOpen } from 'lucide-svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 
@@ -69,22 +63,33 @@
 		class="pointer-events-none fixed inset-0 z-0 opacity-3"
 		style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%221%22/%3E%3C/svg%3E');"
 	></div>
-	<div class="fixed top-0 left-1/4 z-0 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#007FFF]/10 blur-[130px]"></div>
-	<div class="fixed bottom-0 right-1/4 z-0 h-[400px] w-[400px] translate-y-1/2 rounded-full bg-emerald-500/5 blur-[120px]"></div>
+	<div
+		class="fixed top-0 left-1/4 z-0 h-[500px] w-[500px] -translate-y-1/2 rounded-full bg-[#007FFF]/10 blur-[130px]"
+	></div>
+	<div
+		class="fixed right-1/4 bottom-0 z-0 h-[400px] w-[400px] translate-y-1/2 rounded-full bg-emerald-500/5 blur-[120px]"
+	></div>
 
 	<aside
 		class="relative z-10 shrink-0 border-r border-white/5 bg-white/2 backdrop-blur-xl transition-all duration-300 {isInChat
 			? 'hidden md:flex md:flex-col'
 			: 'flex flex-col'} {$chatStore.sidebarCollapsed ? 'md:w-0 md:opacity-0' : 'w-full md:w-88'}"
 	>
-		<div class="message-enter shrink-0 border-b border-white/5 bg-white/3 p-5" style="--message-enter-delay: 40ms;">
+		<div
+			class="message-enter shrink-0 border-b border-white/5 bg-white/3 p-5"
+			style="--message-enter-delay: 40ms;"
+		>
 			<div class="flex items-center justify-between gap-3">
 				<div class="flex items-center gap-3">
-					<div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007FFF]/15 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20">
+					<div
+						class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#007FFF]/15 text-[#42A1FF] ring-1 ring-[#007FFF]/20 ring-inset"
+					>
 						<MessageSquareText class="h-5 w-5" />
 					</div>
 					<div>
-						<h2 class="font-display tracking-tight text-xl font-bold text-slate-50 drop-shadow-sm">Mensajes</h2>
+						<h2 class="font-display text-xl font-bold tracking-tight text-slate-50 drop-shadow-sm">
+							Mensajes
+						</h2>
 						<p class="text-xs text-slate-400">
 							{activeChats.length + archivedChats.length} conversaciones
 						</p>
@@ -105,11 +110,14 @@
 			</div>
 		</div>
 
-		<div class="message-enter flex gap-2 border-b border-white/5 bg-white/1 px-3 py-3" style="--message-enter-delay: 90ms;">
+		<div
+			class="message-enter flex gap-2 border-b border-white/5 bg-white/1 px-3 py-3"
+			style="--message-enter-delay: 90ms;"
+		>
 			<button
 				onclick={() => chatStore.toggleArchived()}
 				class="relative flex flex-1 items-center justify-center rounded-full px-3 py-2.5 text-sm font-medium transition-all sm:px-4 {!$chatStore.showArchived
-					? 'bg-white/10 text-slate-50 shadow-sm ring-1 ring-inset ring-white/10 backdrop-blur-sm'
+					? 'bg-white/10 text-slate-50 shadow-sm ring-1 ring-white/10 backdrop-blur-sm ring-inset'
 					: 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}"
 			>
 				<span class="inline-flex min-w-0 items-center justify-center gap-2 whitespace-nowrap">
@@ -129,7 +137,7 @@
 			<button
 				onclick={() => chatStore.toggleArchived()}
 				class="relative flex flex-1 items-center justify-center rounded-full px-3 py-2.5 text-sm font-medium transition-all sm:px-4 {$chatStore.showArchived
-					? 'bg-white/10 text-slate-50 shadow-sm ring-1 ring-inset ring-white/10 backdrop-blur-sm'
+					? 'bg-white/10 text-slate-50 shadow-sm ring-1 ring-white/10 backdrop-blur-sm ring-inset'
 					: 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}"
 			>
 				<span class="inline-flex min-w-0 items-center justify-center gap-2 whitespace-nowrap">
@@ -148,9 +156,14 @@
 			</button>
 		</div>
 
-		<div class="message-enter no-scrollbar flex-1 overflow-y-auto p-3" style="--message-enter-delay: 140ms;">
+		<div
+			class="message-enter no-scrollbar flex-1 overflow-y-auto p-3"
+			style="--message-enter-delay: 140ms;"
+		>
 			{#if ($chatStore.showArchived ? archivedChats : activeChats).length === 0}
-				<div class="rounded-3xl border border-white/5 bg-white/2 backdrop-blur-sm p-8 text-center mt-4">
+				<div
+					class="mt-4 rounded-3xl border border-white/5 bg-white/2 p-8 text-center backdrop-blur-sm"
+				>
 					<div
 						class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-slate-400"
 					>
@@ -173,15 +186,19 @@
 				<ul class="space-y-3">
 					{#each $chatStore.showArchived ? archivedChats : activeChats as chat (chat.proyecto_id)}
 						{@const proyecto = getProyecto(chat.proyecto_id)}
-						<li animate:flip={{ duration: 300 }} in:fly={{ y: 20, duration: 300 }} out:fade={{ duration: 200 }}>
+						<li
+							animate:flip={{ duration: 300 }}
+							in:fly={{ y: 20, duration: 300 }}
+							out:fade={{ duration: 200 }}
+						>
 							<a
 								href={resolve('/(protected)/mensajes/[proyecto_id]', {
 									proyecto_id: String(chat.proyecto_id)
 								})}
-								class="group block rounded-2xl border px-4 py-3.5 transition-all duration-300 hover:shadow-lg {$page.params
-									.proyecto_id === chat.proyecto_id.toString()
+								class="group block rounded-2xl border px-4 py-3.5 transition-all duration-300 hover:shadow-lg {$page
+									.params.proyecto_id === chat.proyecto_id.toString()
 									? 'border-[#007FFF]/30 bg-[#007FFF]/5 shadow-md shadow-[#007FFF]/5 backdrop-blur-md'
-									: 'border-white/5 bg-white/2 hover:border-white/10 hover:bg-white/4 backdrop-blur-sm opacity-80 hover:opacity-100'}"
+									: 'border-white/5 bg-white/2 opacity-80 backdrop-blur-sm hover:border-white/10 hover:bg-white/4 hover:opacity-100'}"
 							>
 								<div class="mb-2 flex items-start justify-between gap-2">
 									<h3 class="truncate font-semibold text-slate-100">{chat.titulo}</h3>
@@ -199,7 +216,7 @@
 										{' '}
 										{chat.mensajes[chat.mensajes.length - 1].contenido}
 									{:else}
-										<span class="italic text-slate-500">Sin mensajes</span>
+										<span class="text-slate-500 italic">Sin mensajes</span>
 									{/if}
 								</p>
 								<div class="flex items-center justify-between gap-2">
@@ -221,7 +238,9 @@
 	</aside>
 
 	<main
-		class="relative z-10 flex min-w-0 flex-1 flex-col bg-transparent {isInChat ? 'flex' : 'hidden md:flex'}"
+		class="relative z-10 flex min-w-0 flex-1 flex-col bg-transparent {isInChat
+			? 'flex'
+			: 'hidden md:flex'}"
 	>
 		{#if $chatStore.sidebarCollapsed}
 			<div class="absolute top-0 left-0 z-20 hidden p-4 md:block">
@@ -238,8 +257,13 @@
 
 		{#if !isInChat}
 			<div in:fade={{ duration: 400 }} class="flex h-full items-center justify-center px-6">
-				<div class="message-enter max-w-md w-full rounded-3xl border border-white/5 bg-white/5 p-10 text-center shadow-2xl backdrop-blur-lg transition-all hover:bg-white/10" style="--message-enter-delay: 120ms;">
-					<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/10 text-[#42A1FF] ring-1 ring-inset ring-[#007FFF]/20 shadow-[0_0_30px_rgba(0,127,255,0.15)]">
+				<div
+					class="message-enter w-full max-w-md rounded-3xl border border-white/5 bg-white/5 p-10 text-center shadow-2xl backdrop-blur-lg transition-all hover:bg-white/10"
+					style="--message-enter-delay: 120ms;"
+				>
+					<div
+						class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[#007FFF]/10 text-[#42A1FF] shadow-[0_0_30px_rgba(0,127,255,0.15)] ring-1 ring-[#007FFF]/20 ring-inset"
+					>
 						<MessageSquareText class="h-10 w-10" strokeWidth={1.5} />
 					</div>
 					<h3 class="text-xl font-bold tracking-tight text-slate-100">Seleccioná un chat</h3>

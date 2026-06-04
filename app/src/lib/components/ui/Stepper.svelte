@@ -16,10 +16,7 @@
 	const ETIQUETA_COMPLETADO = 'Completado';
 
 	let etiquetasEfectivas = $derived(
-		Array.from(
-			{ length: totalNormalizado },
-			(_, index) => etiquetas[index] ?? `Paso ${index + 1}`
-		)
+		Array.from({ length: totalNormalizado }, (_, index) => etiquetas[index] ?? `Paso ${index + 1}`)
 	);
 
 	let porcentajeProgreso = $derived(Math.min((pasoActual / totalNormalizado) * 100, 100));

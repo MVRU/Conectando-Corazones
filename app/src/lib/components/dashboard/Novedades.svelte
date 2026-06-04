@@ -1,9 +1,7 @@
 <script lang="ts">
 	import { Bell, Newspaper, ArrowUpRight } from 'lucide-svelte';
 
-	let {
-		novedades = []
-	} = $props<{
+	let { novedades = [] } = $props<{
 		novedades?: {
 			id: string;
 			titulo: string;

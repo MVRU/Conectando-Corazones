@@ -22,8 +22,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({ error: 'Payload inválido' }, { status: 400 });
 	}
 
-	const contenido =
-		typeof payload.contenido === 'string' ? payload.contenido.trim() : '';
+	const contenido = typeof payload.contenido === 'string' ? payload.contenido.trim() : '';
 	const clientId = typeof payload.clientId === 'string' ? payload.clientId.trim() : '';
 
 	if (!contenido) {
@@ -53,8 +52,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({ mensaje });
 	} catch (err) {
 		if (err instanceof ChatAccessError) {
-			const status =
-				err.code === 'not_found' ? 404 : err.code === 'not_enabled' ? 409 : 403;
+			const status = err.code === 'not_found' ? 404 : err.code === 'not_enabled' ? 409 : 403;
 			return json({ error: err.message }, { status });
 		}
 

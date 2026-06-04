@@ -456,9 +456,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 				await tx.participacionPermitida.deleteMany({
 					where: {
 						id_proyecto: proyecto.id_proyecto,
-						...(idsPayload.length > 0
-							? { id_participacion_permitida: { notIn: idsPayload } }
-							: {})
+						...(idsPayload.length > 0 ? { id_participacion_permitida: { notIn: idsPayload } } : {})
 					}
 				});
 
@@ -609,7 +607,12 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 		return ProyectoMapper.toDomain(updated as any);
 	}
 
-	async cancel(id: number, usuarioEjecutorId: number, justificacion?: string, historialData?: HistorialDeCambios): Promise<void> {
+	async cancel(
+		id: number,
+		usuarioEjecutorId: number,
+		justificacion?: string,
+		historialData?: HistorialDeCambios
+	): Promise<void> {
 		const estadoCancelado = await prisma.estado.findUnique({
 			where: { descripcion: 'cancelado' }
 		});
@@ -664,7 +667,7 @@ export class PostgresProyectoRepository implements ProyectoRepository {
 					id_proyecto: p.id_proyecto,
 					institucion_id: p.institucion_id,
 					estado: p.estado?.descripcion ?? null
-			  }
+				}
 			: null;
 	}
 

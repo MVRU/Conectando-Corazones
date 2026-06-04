@@ -19,7 +19,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ success: false, error: 'ID de usuario requerido' }, { status: 400 });
 		}
 
-		if (locals.usuario.rol !== 'administrador' && locals.usuario.id_usuario !== parseInt(id_usuario)) {
+		if (
+			locals.usuario.rol !== 'administrador' &&
+			locals.usuario.id_usuario !== parseInt(id_usuario)
+		) {
 			return json({ success: false, error: 'No autorizado' }, { status: 403 });
 		}
 

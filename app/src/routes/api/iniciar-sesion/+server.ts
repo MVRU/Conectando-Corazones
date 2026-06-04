@@ -109,7 +109,6 @@ export const POST: RequestHandler = async (event) => {
 		}
 
 		return json({ usuario: usuarioSafe, loginEmail: data.user.email });
-
 	} catch (error) {
 		console.error('ERROR INICIAR SESION:', error);
 		if (error instanceof Error) {

@@ -15,7 +15,9 @@
 		onVerPerfil?: (data: { username: string }) => void;
 	}>();
 
-	let sortBy = $state<'rol' | 'estado_gestion' | 'estado_verificacion' | 'created_at'>('created_at');
+	let sortBy = $state<'rol' | 'estado_gestion' | 'estado_verificacion' | 'created_at'>(
+		'created_at'
+	);
 	let sortDir = $state<'asc' | 'desc'>('desc');
 	let busqueda = $state('');
 	let paginaActual = $state(1);
@@ -39,10 +41,7 @@
 		const filtrados = termino
 			? (users ?? []).filter((u: UsuarioAdminItemDto) => {
 					const nombreCompleto = `${u.nombre} ${u.apellido}`.toLowerCase();
-					return (
-						nombreCompleto.includes(termino) ||
-						u.username.toLowerCase().includes(termino)
-					);
+					return nombreCompleto.includes(termino) || u.username.toLowerCase().includes(termino);
 				})
 			: (users ?? []);
 
@@ -110,8 +109,12 @@
 	}
 </script>
 
-<section class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md shadow-sm">
-	<div class="border-b border-white/10 bg-linear-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+<section
+	class="overflow-hidden rounded-2xl border border-white/5 bg-white/5 shadow-sm backdrop-blur-md"
+>
+	<div
+		class="flex flex-col gap-4 border-b border-white/10 bg-linear-to-r from-[#1a1b3b] to-[#252a5a] px-6 py-5 sm:flex-row sm:items-center sm:justify-between"
+	>
 		<div>
 			<h3 class="text-xl font-bold text-white">Gestión de usuarios</h3>
 			<p class="text-sm text-slate-400">Habilitación, inhabilitación y consulta de perfiles.</p>
@@ -128,10 +131,10 @@
 		<table class="min-w-full divide-y divide-white/5 text-sm">
 			<thead class="bg-white/5 text-left">
 				<tr>
-					<th class="px-6 py-4 font-bold text-slate-300 uppercase tracking-wider">Usuario</th>
+					<th class="px-6 py-4 font-bold tracking-wider text-slate-300 uppercase">Usuario</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('rol')}
 						>
 							Rol {sortBy === 'rol' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -139,7 +142,7 @@
 					</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('estado_gestion')}
 						>
 							Estado {sortBy === 'estado_gestion' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -147,7 +150,7 @@
 					</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('estado_verificacion')}
 						>
 							Verificación {sortBy === 'estado_verificacion' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -155,13 +158,13 @@
 					</th>
 					<th class="px-6 py-4">
 						<button
-							class="flex items-center gap-1 font-bold text-slate-300 uppercase tracking-wider hover:text-white transition-colors"
+							class="flex items-center gap-1 font-bold tracking-wider text-slate-300 uppercase transition-colors hover:text-white"
 							onclick={() => changeSort('created_at')}
 						>
 							Fecha alta {sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
 						</button>
 					</th>
-					<th class="px-6 py-4 text-center font-bold text-slate-300 uppercase tracking-wider">
+					<th class="px-6 py-4 text-center font-bold tracking-wider text-slate-300 uppercase">
 						Acciones
 					</th>
 				</tr>
@@ -170,14 +173,16 @@
 				{#if usuariosOrdenados.length === 0}
 					<tr>
 						<td colspan="6" class="px-6 py-12 text-center text-slate-500 italic">
-							{busqueda.trim() ? `Sin resultados para "${busqueda.trim()}"` : 'Sin resultados para mostrar'}
+							{busqueda.trim()
+								? `Sin resultados para "${busqueda.trim()}"`
+								: 'Sin resultados para mostrar'}
 						</td>
 					</tr>
 				{:else}
 					{#each usuariosPaginados as user}
 						<tr class="transition-colors hover:bg-white/5">
 							<td class="px-6 py-4">
-								<div class="font-bold text-white hover:text-emerald-400 transition-colors">
+								<div class="font-bold text-white transition-colors hover:text-emerald-400">
 									{user.nombre}
 									{user.apellido}
 								</div>
@@ -185,25 +190,25 @@
 							</td>
 							<td class="px-6 py-4">
 								<span
-									class="inline-flex items-center rounded-full bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400 border border-blue-500/20 capitalize"
+									class="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/10 px-2.5 py-0.5 text-xs font-bold text-blue-400 capitalize"
 								>
 									{user.rol}
 								</span>
 							</td>
 							<td class="px-6 py-4">
 								<span
-									class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border transition-all duration-300 ${
+									class={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold transition-all duration-300 ${
 										user.estado_gestion === 'activo'
-											? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+											? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400'
 											: user.estado_gestion === 'pendiente'
-												? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-												: 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+												? 'border-amber-500/20 bg-amber-500/10 text-amber-400'
+												: 'border-rose-500/20 bg-rose-500/10 text-rose-400'
 									}`}
 								>
 									<span
 										class={`mr-1.5 h-1.5 w-1.5 rounded-full ${
 											user.estado_gestion === 'activo'
-												? 'bg-emerald-400 animate-pulse'
+												? 'animate-pulse bg-emerald-400'
 												: user.estado_gestion === 'pendiente'
 													? 'bg-amber-400'
 													: 'bg-rose-400'
@@ -214,13 +219,15 @@
 							</td>
 							<td class="px-6 py-4">
 								<span
-									class={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold border transition-all duration-300 ${user.estado_verificacion === 'aprobada' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : user.estado_verificacion === 'pendiente' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-slate-500/10 text-slate-400 border-slate-500/20'}`}
+									class={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold transition-all duration-300 ${user.estado_verificacion === 'aprobada' ? 'border-indigo-500/20 bg-indigo-500/10 text-indigo-400' : user.estado_verificacion === 'pendiente' ? 'border-amber-500/20 bg-amber-500/10 text-amber-400' : 'border-slate-500/20 bg-slate-500/10 text-slate-400'}`}
 								>
 									{user.estado_verificacion || 'sin solicitud'}
 								</span>
 							</td>
-							<td class="px-6 py-4 text-slate-400 font-medium">
-								{#if user.created_at}{new Date(user.created_at).toLocaleDateString('es-AR')}{:else}-{/if}
+							<td class="px-6 py-4 font-medium text-slate-400">
+								{#if user.created_at}{new Date(user.created_at).toLocaleDateString(
+										'es-AR'
+									)}{:else}-{/if}
 							</td>
 							<td class="px-6 py-4 text-center">
 								<div class="flex justify-center gap-3">
@@ -230,7 +237,7 @@
 										variant="secondary"
 										onclick={() => onVerPerfil?.({ username: user.username })}
 										disabled={loading}
-										class="bg-white/10! text-white! border-white/20! hover:bg-white/20! rounded-full! shadow-lg"
+										class="rounded-full! border-white/20! bg-white/10! text-white! shadow-lg hover:bg-white/20!"
 									/>
 									{#if tooltipInhabilitar(user)}
 										<span title={tooltipInhabilitar(user) ?? ''} class="cursor-not-allowed">
@@ -240,7 +247,7 @@
 												variant="danger"
 												onclick={() => {}}
 												disabled={true}
-												class="bg-rose-600/40! text-white/40! rounded-full! pointer-events-none"
+												class="pointer-events-none rounded-full! bg-rose-600/40! text-white/40!"
 											/>
 										</span>
 									{:else}
@@ -251,8 +258,8 @@
 											onclick={() => confirmarCambioEstado(user)}
 											disabled={loading}
 											class={user.estado_gestion === 'inhabilitado'
-												? 'bg-emerald-600! hover:bg-emerald-700! text-white! rounded-full! shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40'
-												: 'bg-rose-600! hover:bg-rose-700! text-white! rounded-full! shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40'}
+												? 'rounded-full! bg-emerald-600! text-white! shadow-lg shadow-emerald-500/20 hover:bg-emerald-700! hover:shadow-emerald-500/40'
+												: 'rounded-full! bg-rose-600! text-white! shadow-lg shadow-rose-500/20 hover:bg-rose-700! hover:shadow-rose-500/40'}
 										/>
 									{/if}
 								</div>
@@ -266,9 +273,10 @@
 
 	<!-- Paginación -->
 	{#if totalPaginas > 1}
-		<div class="border-t border-white/10 bg-white/5 px-6 py-4 flex items-center justify-between">
+		<div class="flex items-center justify-between border-t border-white/10 bg-white/5 px-6 py-4">
 			<div class="text-xs text-slate-400">
-				Página <span class="font-bold text-white">{paginaActual}</span> de <span class="font-bold text-white">{totalPaginas}</span>
+				Página <span class="font-bold text-white">{paginaActual}</span> de
+				<span class="font-bold text-white">{totalPaginas}</span>
 			</div>
 			<div class="flex gap-2">
 				<button
@@ -293,7 +301,9 @@
 <dialog
 	bind:this={dialogo}
 	onclose={cancelarCambio}
-	onclick={(e) => { if (e.target === dialogo) cancelarCambio(); }}
+	onclick={(e) => {
+		if (e.target === dialogo) cancelarCambio();
+	}}
 	class="m-auto w-full max-w-md rounded-2xl bg-transparent p-0 px-4 outline-hidden backdrop:bg-black/60 backdrop:backdrop-blur-sm"
 >
 	{#if modalConfirmar.abierto && modalConfirmar.usuario}
@@ -310,12 +320,28 @@
 					class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${habilitar ? 'bg-emerald-500/15' : 'bg-rose-500/15'}`}
 				>
 					{#if habilitar}
-						<svg class="h-5 w-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<svg
+							class="h-5 w-5 text-emerald-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2"
+						>
 							<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
 						</svg>
 					{:else}
-						<svg class="h-5 w-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+						<svg
+							class="h-5 w-5 text-rose-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+							/>
 						</svg>
 					{/if}
 				</div>

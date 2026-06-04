@@ -32,23 +32,26 @@
 	}>();
 
 	// Configuracion de indicadores y color para los botones de acción rápida
-	const badgeConfig = $derived.by(() => ({
-		'Ver colaboraciones': {
-			count: solicitudesPendientes,
-			color: 'bg-rose-500',
-			shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
-		},
-		'Mis chats': {
-			count: mensajesNoLeidos,
-			color: 'bg-rose-500',
-			shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
-		},
-		'Evaluar cierre': {
-			count: proyectosPendienteCierre,
-			color: 'bg-emerald-500',
-			shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
-		}
-	} as const));
+	const badgeConfig = $derived.by(
+		() =>
+			({
+				'Ver colaboraciones': {
+					count: solicitudesPendientes,
+					color: 'bg-rose-500',
+					shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
+				},
+				'Mis chats': {
+					count: mensajesNoLeidos,
+					color: 'bg-rose-500',
+					shadow: 'shadow-[0_0_10px_rgba(244,63,94,0.5)]'
+				},
+				'Evaluar cierre': {
+					count: proyectosPendienteCierre,
+					color: 'bg-emerald-500',
+					shadow: 'shadow-[0_0_10px_rgba(16,185,129,0.5)]'
+				}
+			}) as const
+	);
 
 	type BadgeKey = keyof typeof badgeConfig;
 

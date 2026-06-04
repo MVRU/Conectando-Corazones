@@ -145,7 +145,10 @@
 				? ''
 				: MENSAJES_ERROR.ciudadNoPerteneceProvincia,
 		url_google_maps:
-			requiereGeolocalizacion && editandoUrlMapaGoogle && urlGoogleMaps.trim() && !validarUrl(urlGoogleMaps)
+			requiereGeolocalizacion &&
+			editandoUrlMapaGoogle &&
+			urlGoogleMaps.trim() &&
+			!validarUrl(urlGoogleMaps)
 				? MENSAJES_ERROR.urlInvalida
 				: ''
 	});

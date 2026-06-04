@@ -45,8 +45,6 @@
 		}
 	};
 
-
-
 	function closeToast(id: string) {
 		toastStore.dismiss(id);
 	}

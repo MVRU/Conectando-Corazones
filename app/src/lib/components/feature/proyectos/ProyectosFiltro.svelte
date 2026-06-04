@@ -512,7 +512,12 @@
 										Todos
 									{:else if estado.length <= 2}
 										{estado
-											.map((e: string) => estadosDisponibles.find((ed: { value: string; label: string }) => ed.value === e)?.label || e)
+											.map(
+												(e: string) =>
+													estadosDisponibles.find(
+														(ed: { value: string; label: string }) => ed.value === e
+													)?.label || e
+											)
 											.join(', ')}
 									{:else}
 										{estado.length} seleccionados
@@ -699,7 +704,9 @@
 
 				<!-- Filtro por Beneficios Fiscales -->
 				{#if mostrarFiltroFiscal}
-					<div class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}">
+					<div
+						class="flex flex-col gap-1.5 {tipoUbicacion !== 'Presencial' ? 'lg:col-span-2' : ''}"
+					>
 						<span class="text-xs font-medium tracking-wide text-gray-500 uppercase">
 							Beneficio fiscal
 						</span>

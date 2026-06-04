@@ -28,7 +28,12 @@
 	import type { ParticipacionPermitida } from '$lib/domain/types/ParticipacionPermitida';
 	import ModalCalculoAportes from './ModalCalculoAportes.svelte';
 
-	let { proyecto, mostrarBotones = false, variant = 'compact', ocultarEtiquetaObjetivo = false } = $props<{
+	let {
+		proyecto,
+		mostrarBotones = false,
+		variant = 'compact',
+		ocultarEtiquetaObjetivo = false
+	} = $props<{
 		proyecto: Proyecto;
 		mostrarBotones?: boolean;
 		variant?: 'compact' | 'extended';
@@ -53,9 +58,13 @@
 	let showModal = $state(false);
 
 	const hoy = new Date();
-	let cierre = $derived(proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null);
+	let cierre = $derived(
+		proyecto.fecha_fin_tentativa ? new Date(proyecto.fecha_fin_tentativa) : null
+	);
 
-	let estadoCodigo: EstadoDescripcion = $derived(getEstadoCodigo(proyecto.estado, proyecto.estado_id));
+	let estadoCodigo: EstadoDescripcion = $derived(
+		getEstadoCodigo(proyecto.estado, proyecto.estado_id)
+	);
 
 	const getGradientClass = (color: 'green' | 'blue' | 'purple') =>
 		({
@@ -95,7 +104,9 @@
 	let botonColaborarDeshabilitado = $derived(estadoCodigo !== 'en_curso');
 
 	let progresoCantidad = $derived(calcularProgresoCantidad(participaciones));
-	let progresoTiempo = $derived(calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa));
+	let progresoTiempo = $derived(
+		calcularProgresoTiempo(proyecto.created_at, proyecto.fecha_fin_tentativa)
+	);
 	let progresoTotal = $derived(Math.round(0.8 * progresoCantidad + 0.2 * progresoTiempo));
 
 	function getMensajeProgreso() {
@@ -170,12 +181,7 @@
 	</div>
 {/if}
 
-<ModalCalculoAportes 
-	bind:show={showModal} 
-	{progresoCantidad}
-	{progresoTiempo}
-	{progresoTotal}
-/>
+<ModalCalculoAportes bind:show={showModal} {progresoCantidad} {progresoTiempo} {progresoTotal} />
 
 <!-- Botones de acción -->
 {#if mostrarBotones}

@@ -9,7 +9,11 @@
 	import { Icon } from '@steeze-ui/svelte-icon';
 	import type { EstadoVerificacionDisplay } from '$lib/utils/util-verificacion';
 
-	let { estado = $bindable(), href = null, textoAccion = null } = $props<{
+	let {
+		estado = $bindable(),
+		href = null,
+		textoAccion = null
+	} = $props<{
 		estado: EstadoVerificacionDisplay;
 		href?: string | null;
 		textoAccion?: string | null;
@@ -67,8 +71,8 @@
 
 {#if href}
 	<a
-		href={href}
-		class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium {config.color} transition hover:brightness-95 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-amber-400"
+		{href}
+		class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium {config.color} transition hover:brightness-95 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-hidden"
 		title={`${labelMostrado} - Ir a gestión`}
 		aria-label={`${labelMostrado}. Ir a gestionar verificación`}
 	>

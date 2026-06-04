@@ -317,12 +317,16 @@
 				const formArca = new FormData();
 				formArca.append('tipo', 'arca');
 				formArca.append('files', archivoArcaWizard);
-				const resArca = await fetch('/api/registro/verificacion', { method: 'POST', body: formArca });
+				const resArca = await fetch('/api/registro/verificacion', {
+					method: 'POST',
+					body: formArca
+				});
 				if (!resArca.ok) {
 					toastStore.show({
 						variant: 'warning',
 						title: 'Documentación enviada',
-						message: 'No se pudo subir el certificado ARCA. Podrás intentarlo luego desde tu perfil.'
+						message:
+							'No se pudo subir el certificado ARCA. Podrás intentarlo luego desde tu perfil.'
 					});
 				}
 			}
@@ -871,7 +875,10 @@
 									</div>
 
 									{#if errorVerifWizard}
-										<p role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+										<p
+											role="alert"
+											class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+										>
 											{errorVerifWizard}
 										</p>
 									{/if}
@@ -881,7 +888,10 @@
 											type="button"
 											variant="secondary"
 											label="Cancelar"
-											onclick={() => { resetFeedback(); setEtapaConPersistencia('formulario'); }}
+											onclick={() => {
+												resetFeedback();
+												setEtapaConPersistencia('formulario');
+											}}
 											customClass="w-full sm:w-auto"
 										/>
 										<Button

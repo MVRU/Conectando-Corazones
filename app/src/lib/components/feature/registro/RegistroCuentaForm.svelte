@@ -1960,7 +1960,7 @@
 							id="modal_password"
 							name="modal_password"
 							type={mostrarModalPasswordTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-hidden focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-hidden transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Ingresá una contraseña segura"
@@ -1993,7 +1993,7 @@
 							id="modal_password_confirm"
 							name="modal_password_confirm"
 							type={mostrarModalPasswordConfirmTexto ? 'text' : 'password'}
-							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm transition outline-hidden focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
+							class={`w-full rounded-2xl border px-4 py-3 pr-12 text-sm outline-hidden transition focus-visible:ring-2 focus-visible:ring-[rgb(var(--color-primary))] ${
 								modalPasswordConfirmError ? 'border-red-300' : 'border-slate-200'
 							}`}
 							placeholder="Repetí la contraseña"

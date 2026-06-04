@@ -8,7 +8,17 @@
 	import { goto } from '$app/navigation';
 	import { fly } from 'svelte/transition';
 	import { cubicOut } from 'svelte/easing';
-	import { Bell, Trash2, Settings, UserCircle2, ChevronRight, ShieldCheck, AlertTriangle, Eye, EyeOff } from 'lucide-svelte';
+	import {
+		Bell,
+		Trash2,
+		Settings,
+		UserCircle2,
+		ChevronRight,
+		ShieldCheck,
+		AlertTriangle,
+		Eye,
+		EyeOff
+	} from 'lucide-svelte';
 
 	let { data } = $props<{ data: PageData }>();
 
@@ -47,25 +57,42 @@
 	function obtenerNombreDisplay(): string {
 		const u = usuario as Record<string, string | undefined>;
 		if (u?.rol === 'institucion') return u.nombre_legal || u.nombre || '';
-		if (u?.rol === 'colaborador' && u?.tipo_colaborador === 'organizacion') return u.razon_social || `${u.nombre} ${u.apellido}`;
+		if (u?.rol === 'colaborador' && u?.tipo_colaborador === 'organizacion')
+			return u.razon_social || `${u.nombre} ${u.apellido}`;
 		return `${u?.nombre || ''} ${u?.apellido || ''}`.trim();
 	}
 
 	async function cambiarPassword() {
 		if (!passActual.trim()) {
-			toastStore.show({ variant: 'error', title: 'Falta contraseña actual', message: 'Para tu seguridad, ingresá tu contraseña actual.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Falta contraseña actual',
+				message: 'Para tu seguridad, ingresá tu contraseña actual.'
+			});
 			return;
 		}
 		if (!passNueva.trim()) {
-			toastStore.show({ variant: 'error', title: 'Campo requerido', message: 'Por favor, ingresá una contraseña nueva.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Campo requerido',
+				message: 'Por favor, ingresá una contraseña nueva.'
+			});
 			return;
 		}
 		if (passNueva.length < 8) {
-			toastStore.show({ variant: 'error', title: 'Contraseña muy corta', message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Contraseña muy corta',
+				message: 'La nueva contraseña debe tener al menos 8 caracteres.'
+			});
 			return;
 		}
 		if (passNueva !== passConfirm) {
-			toastStore.show({ variant: 'error', title: 'Error de validación', message: 'Las contraseñas nuevas no coinciden.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Error de validación',
+				message: 'Las contraseñas nuevas no coinciden.'
+			});
 			return;
 		}
 		isLoadingPassword = true;
@@ -82,9 +109,17 @@
 			passActual = '';
 			passNueva = '';
 			passConfirm = '';
-			toastStore.show({ variant: 'success', title: 'Contraseña actualizada', message: 'Tu contraseña se cambió con éxito.' });
+			toastStore.show({
+				variant: 'success',
+				title: 'Contraseña actualizada',
+				message: 'Tu contraseña se cambió con éxito.'
+			});
 		} catch (err) {
-			toastStore.show({ variant: 'error', title: 'Error', message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.'
+			});
 		} finally {
 			isLoadingPassword = false;
 		}
@@ -103,7 +138,11 @@
 			goto('/');
 		} catch (err) {
 			isLoadingDelete = false;
-			toastStore.show({ variant: 'error', title: 'Error', message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.' });
+			toastStore.show({
+				variant: 'error',
+				title: 'Error',
+				message: err instanceof Error ? err.message : 'Ocurrió un error inesperado.'
+			});
 		}
 	}
 </script>
@@ -115,12 +154,16 @@
 <div class="min-h-screen bg-gray-50">
 	<!-- Banner header -->
 	<div class="relative overflow-hidden border-b border-gray-100 bg-white">
-		<div class="absolute inset-0 bg-linear-to-r from-[#007FFF]/5 via-transparent to-[#42A1FF]/5"></div>
+		<div
+			class="absolute inset-0 bg-linear-to-r from-[#007FFF]/5 via-transparent to-[#42A1FF]/5"
+		></div>
 		<div class="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 			{#if montado}
 				<div in:fly={{ y: -10, duration: 350, easing: cubicOut }}>
 					<div class="flex items-center gap-3">
-						<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+						<div
+							class="flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm"
+						>
 							<Settings class="h-5 w-5 text-white" />
 						</div>
 						<div>
@@ -135,8 +178,10 @@
 
 	<div class="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 		{#if montado}
-			<div class="flex flex-col gap-6 lg:flex-row lg:gap-8" in:fly={{ y: 20, duration: 400, easing: cubicOut }}>
-
+			<div
+				class="flex flex-col gap-6 lg:flex-row lg:gap-8"
+				in:fly={{ y: 20, duration: 400, easing: cubicOut }}
+			>
 				<!-- Sidebar de navegación -->
 				<aside class="lg:w-64 lg:shrink-0">
 					<!-- Card de perfil / link rápido -->
@@ -145,7 +190,9 @@
 							href="/perfil/{usuario?.username}"
 							class="group flex items-center gap-3 p-4 transition-all duration-200 hover:bg-blue-50/50"
 						>
-							<div class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#007FFF]/20">
+							<div
+								class="relative h-12 w-12 shrink-0 overflow-hidden rounded-full ring-2 ring-[#007FFF]/20"
+							>
 								<img
 									src={usuario?.url_foto ?? '/logo-1.png'}
 									alt="Avatar"
@@ -156,7 +203,9 @@
 								<p class="truncate text-sm font-semibold text-gray-900">{obtenerNombreDisplay()}</p>
 								<p class="text-xs text-[#007FFF]">Ver mi perfil público →</p>
 							</div>
-							<ChevronRight class="h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#007FFF]" />
+							<ChevronRight
+								class="h-4 w-4 shrink-0 text-gray-300 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-[#007FFF]"
+							/>
 						</a>
 					</div>
 
@@ -165,12 +214,22 @@
 						{#each tabs as tab, i (tab.id)}
 							<button
 								onclick={() => (tabActiva = tab.id)}
-								class="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-200 {i < tabs.length - 1 ? 'border-b border-gray-50' : ''} {tabActiva === tab.id
+								class="flex w-full items-center gap-3 px-4 py-3.5 text-sm font-medium transition-all duration-200 {i <
+								tabs.length - 1
+									? 'border-b border-gray-50'
+									: ''} {tabActiva === tab.id
 									? 'bg-linear-to-r from-[#007FFF]/8 to-blue-50/60 text-[#007FFF]'
 									: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
 							>
-								<div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {tabActiva === tab.id ? 'bg-[#007FFF] shadow-sm' : 'bg-gray-100'}">
-									<tab.icon class="h-4 w-4 {tabActiva === tab.id ? 'text-white' : 'text-gray-500'}" />
+								<div
+									class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {tabActiva ===
+									tab.id
+										? 'bg-[#007FFF] shadow-sm'
+										: 'bg-gray-100'}"
+								>
+									<tab.icon
+										class="h-4 w-4 {tabActiva === tab.id ? 'text-white' : 'text-gray-500'}"
+									/>
 								</div>
 								{tab.label}
 								{#if tabActiva === tab.id}
@@ -183,7 +242,6 @@
 
 				<!-- Contenido principal -->
 				<div class="min-w-0 flex-1">
-
 					<!-- Tab: Seguridad -->
 					{#if tabActiva === 'seguridad'}
 						<div in:fly={{ x: 16, duration: 300, easing: cubicOut }}>
@@ -193,13 +251,18 @@
 										<ShieldCheck class="h-5 w-5 text-[#007FFF]" />
 										Cambiar contraseña
 									</h2>
-									<p class="mt-0.5 text-sm text-gray-500">Elegí una contraseña segura de al menos 8 caracteres.</p>
+									<p class="mt-0.5 text-sm text-gray-500">
+										Elegí una contraseña segura de al menos 8 caracteres.
+									</p>
 								</div>
 								<div class="p-6">
 									<div class="flex flex-col gap-5">
 										<!-- Contraseña actual -->
 										<div>
-											<label for="passActual" class="mb-1.5 block text-sm font-semibold text-gray-700">
+											<label
+												for="passActual"
+												class="mb-1.5 block text-sm font-semibold text-gray-700"
+											>
 												Contraseña actual
 											</label>
 											<div class="relative">
@@ -225,7 +288,10 @@
 										</div>
 										<!-- Nueva contraseña -->
 										<div>
-											<label for="passNueva" class="mb-1.5 block text-sm font-semibold text-gray-700">
+											<label
+												for="passNueva"
+												class="mb-1.5 block text-sm font-semibold text-gray-700"
+											>
 												Nueva contraseña
 											</label>
 											<div class="relative">
@@ -251,7 +317,10 @@
 										</div>
 										<!-- Confirmar contraseña -->
 										<div>
-											<label for="passConfirm" class="mb-1.5 block text-sm font-semibold text-gray-700">
+											<label
+												for="passConfirm"
+												class="mb-1.5 block text-sm font-semibold text-gray-700"
+											>
 												Confirmar contraseña
 											</label>
 											<div class="relative">
@@ -275,7 +344,9 @@
 												</button>
 											</div>
 											{#if passNueva && passConfirm && passNueva !== passConfirm}
-												<p class="mt-1.5 text-xs font-medium text-[#DE1C38]">Las contraseñas no coinciden</p>
+												<p class="mt-1.5 text-xs font-medium text-[#DE1C38]">
+													Las contraseñas no coinciden
+												</p>
 											{/if}
 										</div>
 									</div>
@@ -302,27 +373,53 @@
 										<Bell class="h-5 w-5 text-[#007FFF]" />
 										Notificaciones
 									</h2>
-									<p class="mt-0.5 text-sm text-gray-500">Elegí cómo querés recibir novedades sobre proyectos y actividad.</p>
+									<p class="mt-0.5 text-sm text-gray-500">
+										Elegí cómo querés recibir novedades sobre proyectos y actividad.
+									</p>
 								</div>
 								<div class="divide-y divide-gray-50 p-6">
-									<label class="flex cursor-pointer items-center justify-between gap-4 pb-4 select-none">
+									<label
+										class="flex cursor-pointer items-center justify-between gap-4 pb-4 select-none"
+									>
 										<div>
 											<p class="text-sm font-semibold text-gray-800">Notificaciones Push</p>
-											<p class="mt-0.5 text-xs text-gray-500">Alertas en tiempo real sobre postulaciones y mensajes.</p>
+											<p class="mt-0.5 text-xs text-gray-500">
+												Alertas en tiempo real sobre postulaciones y mensajes.
+											</p>
 										</div>
 										<input type="checkbox" bind:checked={notificacionesPush} class="sr-only" />
-										<div class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesPush ? 'bg-[#007FFF]' : 'bg-gray-200'}">
-											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesPush ? 'translate-x-5' : 'translate-x-0'}"></div>
+										<div
+											class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesPush
+												? 'bg-[#007FFF]'
+												: 'bg-gray-200'}"
+										>
+											<div
+												class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesPush
+													? 'translate-x-5'
+													: 'translate-x-0'}"
+											></div>
 										</div>
 									</label>
-									<label class="flex cursor-pointer items-center justify-between gap-4 pt-4 select-none">
+									<label
+										class="flex cursor-pointer items-center justify-between gap-4 pt-4 select-none"
+									>
 										<div>
 											<p class="text-sm font-semibold text-gray-800">Notificaciones por Email</p>
-											<p class="mt-0.5 text-xs text-gray-500">Resúmenes semanales y novedades importantes por correo.</p>
+											<p class="mt-0.5 text-xs text-gray-500">
+												Resúmenes semanales y novedades importantes por correo.
+											</p>
 										</div>
 										<input type="checkbox" bind:checked={notificacionesMail} class="sr-only" />
-										<div class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesMail ? 'bg-[#007FFF]' : 'bg-gray-200'}">
-											<div class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesMail ? 'translate-x-5' : 'translate-x-0'}"></div>
+										<div
+											class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-300 {notificacionesMail
+												? 'bg-[#007FFF]'
+												: 'bg-gray-200'}"
+										>
+											<div
+												class="absolute top-1 left-1 h-4 w-4 rounded-full bg-white shadow transition-transform duration-300 {notificacionesMail
+													? 'translate-x-5'
+													: 'translate-x-0'}"
+											></div>
 										</div>
 									</label>
 								</div>
@@ -349,28 +446,41 @@
 										href="/perfil/{usuario?.username}"
 										class="group mb-6 flex items-center gap-4 rounded-2xl border border-[#007FFF]/20 bg-linear-to-r from-blue-50 to-blue-50/40 p-4 transition-all duration-200 hover:border-[#007FFF]/40 hover:shadow-sm"
 									>
-										<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm">
+										<div
+											class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-linear-to-br from-[#007FFF] to-[#42A1FF] shadow-sm"
+										>
 											<UserCircle2 class="h-6 w-6 text-white" />
 										</div>
 										<div class="flex-1">
 											<p class="text-sm font-semibold text-gray-900">Editar perfil público</p>
-											<p class="text-xs text-gray-500">Foto, descripción, contactos y preferencias</p>
+											<p class="text-xs text-gray-500">
+												Foto, descripción, contactos y preferencias
+											</p>
 										</div>
-										<ChevronRight class="h-4 w-4 text-[#007FFF] transition-transform duration-200 group-hover:translate-x-1" />
+										<ChevronRight
+											class="h-4 w-4 text-[#007FFF] transition-transform duration-200 group-hover:translate-x-1"
+										/>
 									</a>
 
 									<!-- Zona de peligro -->
-									<div class="overflow-hidden rounded-2xl border border-[#DE1C38]/20 bg-linear-to-br from-red-50/60 to-red-50/20">
+									<div
+										class="overflow-hidden rounded-2xl border border-[#DE1C38]/20 bg-linear-to-br from-red-50/60 to-red-50/20"
+									>
 										<div class="border-b border-[#DE1C38]/10 px-5 py-4">
 											<div class="flex items-center gap-2">
 												<AlertTriangle class="h-4 w-4 text-[#DE1C38]" />
 												<span class="text-sm font-bold text-[#DE1C38]">Zona de peligro</span>
 											</div>
 										</div>
-										<div class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+										<div
+											class="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between"
+										>
 											<div>
 												<p class="text-sm font-semibold text-gray-800">Eliminar cuenta</p>
-												<p class="mt-0.5 text-xs text-gray-500">Esta acción es irreversible. Todos tus datos serán eliminados permanentemente.</p>
+												<p class="mt-0.5 text-xs text-gray-500">
+													Esta acción es irreversible. Todos tus datos serán eliminados
+													permanentemente.
+												</p>
 											</div>
 											<Button
 												label="Eliminar cuenta"
@@ -384,7 +494,6 @@
 							</div>
 						</div>
 					{/if}
-
 				</div>
 			</div>
 		{/if}
@@ -397,7 +506,9 @@
 	titulo="Eliminar cuenta"
 	anchoMaximo="max-w-sm"
 	cerrarAlClickearFondo={!isLoadingDelete}
-	oncerrar={() => { if (!isLoadingDelete) showDeleteModal = false; }}
+	oncerrar={() => {
+		if (!isLoadingDelete) showDeleteModal = false;
+	}}
 >
 	<div class="flex flex-col items-center py-2 text-center">
 		<div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-100">
@@ -405,22 +516,25 @@
 		</div>
 		<p class="text-base font-bold text-gray-900">¿Eliminar tu cuenta?</p>
 		<p class="mt-2 text-sm text-gray-500">
-			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados permanentemente.
+			Esta acción no se puede deshacer. Todos tus datos, historial y configuración serán eliminados
+			permanentemente.
 		</p>
 	</div>
 	{#snippet footer()}
-			<Button
-				label="Sí, eliminar"
-				loadingLabel="Eliminando..."
-				variant="danger"
-				loading={isLoadingDelete}
-				onclick={confirmarEliminarCuenta}
-			/>
-			<Button
-				label="Cancelar"
-				variant="secondary"
-				disabled={isLoadingDelete}
-				onclick={() => { if (!isLoadingDelete) showDeleteModal = false; }}
-			/>
+		<Button
+			label="Sí, eliminar"
+			loadingLabel="Eliminando..."
+			variant="danger"
+			loading={isLoadingDelete}
+			onclick={confirmarEliminarCuenta}
+		/>
+		<Button
+			label="Cancelar"
+			variant="secondary"
+			disabled={isLoadingDelete}
+			onclick={() => {
+				if (!isLoadingDelete) showDeleteModal = false;
+			}}
+		/>
 	{/snippet}
 </Modal>

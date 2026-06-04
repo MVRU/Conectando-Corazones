@@ -172,7 +172,8 @@
 
 	let idCategoriaOtra = $derived(
 		categorias.find(
-			(c: Categoria) => c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
+			(c: Categoria) =>
+				c.descripcion?.toLowerCase() === 'otro' || c.descripcion?.toLowerCase() === 'otra'
 		)?.id_categoria
 	);
 

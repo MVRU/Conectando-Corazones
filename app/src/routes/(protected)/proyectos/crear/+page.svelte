@@ -5,10 +5,7 @@
 	import { toastStore } from '$lib/stores/toast';
 	import { setBreadcrumbs } from '$lib/stores/breadcrumbs';
 
-	setBreadcrumbs([
-		{ label: 'Proyectos', href: '/proyectos' },
-		{ label: 'Crear Proyecto' }
-	]);
+	setBreadcrumbs([{ label: 'Proyectos', href: '/proyectos' }, { label: 'Crear Proyecto' }]);
 
 	let { data } = $props();
 

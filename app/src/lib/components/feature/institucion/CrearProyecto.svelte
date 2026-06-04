@@ -142,7 +142,9 @@
 
 	$effect(() => {
 		if (seleccionoOtra) {
-			const err = validadorCategoria.validarCategoriaOtraDescripcion(categoriaOtraDescripcion || '');
+			const err = validadorCategoria.validarCategoriaOtraDescripcion(
+				categoriaOtraDescripcion || ''
+			);
 			if (err) {
 				errores.categoria_otra = err;
 			} else {
@@ -670,7 +672,10 @@
 		{/if}
 
 		<form
-			onsubmit={(e) => { e.preventDefault(); enviarFormulario(estaVerificado ? 'en_curso' : 'borrador'); }}
+			onsubmit={(e) => {
+				e.preventDefault();
+				enviarFormulario(estaVerificado ? 'en_curso' : 'borrador');
+			}}
 			class="space-y-8"
 		>
 			<ProyectoInfoBasica
@@ -699,7 +704,7 @@
 				{esEdicionRestringida}
 				{esAdmin}
 				participacionesOriginales={initialData?.originales?.participacionesOriginales || []}
-				tieneColaboradoresAprobados={tieneColaboradoresAprobados}
+				{tieneColaboradoresAprobados}
 			/>
 
 			<ProyectoUbicaciones bind:ubicaciones {errores} {esEdicionRestringida} {esAdmin} />

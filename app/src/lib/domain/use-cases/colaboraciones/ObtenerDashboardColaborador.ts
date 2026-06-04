@@ -361,7 +361,14 @@ export class ObtenerDashboardColaborador {
 
 		const total = proyectos.length || 1;
 
-		const ordenEstados = ['en_curso', 'pendiente_solicitud_cierre', 'en_revision', 'completado', 'cancelado', 'en_auditoria'];
+		const ordenEstados = [
+			'en_curso',
+			'pendiente_solicitud_cierre',
+			'en_revision',
+			'completado',
+			'cancelado',
+			'en_auditoria'
+		];
 
 		return ordenEstados.map((estado) => ({
 			label: ESTADO_LABELS[estado as keyof typeof ESTADO_LABELS] ?? estado,
@@ -409,7 +416,8 @@ export class ObtenerDashboardColaborador {
 
 		const proximosVencimientos = proyectos
 			.filter((p) => {
-				if (!p.fecha_fin_tentativa || !ESTADOS_ACTIVOS_PROYECTO.includes(p.estado || '')) return false;
+				if (!p.fecha_fin_tentativa || !ESTADOS_ACTIVOS_PROYECTO.includes(p.estado || ''))
+					return false;
 				const fechaFin = new Date(p.fecha_fin_tentativa);
 				return fechaFin > hoy;
 			})

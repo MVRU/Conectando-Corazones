@@ -11,10 +11,7 @@
 	const faqs = allFaqs.filter((faq) => faq.categoria === 'General');
 </script>
 
-<section
-	id="faq"
-	class="w-full bg-linear-to-b from-[#f7f8fd] to-white px-2 py-50 sm:px-4 md:px-8"
->
+<section id="faq" class="w-full bg-linear-to-b from-[#f7f8fd] to-white px-2 py-50 sm:px-4 md:px-8">
 	<div class="mx-auto grid max-w-7xl grid-cols-1 gap-10 sm:gap-16 md:grid-cols-2 md:items-center">
 		<!-- *Contenido -->
 		<div

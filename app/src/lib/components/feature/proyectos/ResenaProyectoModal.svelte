@@ -88,7 +88,13 @@
 				</ul>
 			</div>
 
-			<form onsubmit={(e) => { e.preventDefault(); guardar(); }} class="mt-6 space-y-6">
+			<form
+				onsubmit={(e) => {
+					e.preventDefault();
+					guardar();
+				}}
+				class="mt-6 space-y-6"
+			>
 				<div>
 					<fieldset>
 						<legend class="mb-2 block text-sm font-medium text-gray-700">Puntaje</legend>

@@ -8,9 +8,7 @@ import type { SolicitudFinalizacion } from '$lib/domain/types/SolicitudFinalizac
 
 const archivoInclude = { include: { usuario: true } } as const;
 
-export class PostgresSolicitudFinalizacionRepository
-	implements SolicitudFinalizacionRepository
-{
+export class PostgresSolicitudFinalizacionRepository implements SolicitudFinalizacionRepository {
 	constructor(private readonly db: PrismaDbClient = prisma) {}
 
 	async findByProyectoId(proyectoId: number): Promise<SolicitudFinalizacion | null> {

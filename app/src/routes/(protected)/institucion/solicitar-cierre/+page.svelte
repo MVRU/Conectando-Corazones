@@ -57,12 +57,12 @@
 
 	let tieneSolicitudPendiente = $derived(!!solicitudPendienteExistente);
 	let proyectoPerteneceAInstitucion = $derived(
-		proyectoActual
-			? proyectoActual.institucion_id === $usuario?.id_usuario
-			: false
+		proyectoActual ? proyectoActual.institucion_id === $usuario?.id_usuario : false
 	);
 	let muchosRechazos = $derived((solicitudesRechazadas?.length || 0) >= 3);
-	let formularioBloqueadoPorAuditoria = $derived(muchosRechazos && proyectoActual?.estado === 'en_auditoria');
+	let formularioBloqueadoPorAuditoria = $derived(
+		muchosRechazos && proyectoActual?.estado === 'en_auditoria'
+	);
 
 	// Refactor Acceso Denegado a lógica reactiva Svelte 5 ($derived)
 	let accesoEstado = $derived.by(() => {
@@ -76,11 +76,18 @@
 		// Verificar estado de aprobación de la institución
 		const verificacion = data.verificacion;
 		if (verificacion && verificacion.estado !== 'aprobada') {
-			return { denegado: true, mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}` };
+			return {
+				denegado: true,
+				mensaje: `Tu institución debe estar aprobada para realizar esta acción. Estado: ${verificacion.estado}`
+			};
 		}
 
 		// Verificar que el proyecto seleccionado pertenece a la institución del usuario
-		if (proyectoSeleccionado && proyectoActual && proyectoActual.institucion_id !== $usuario?.id_usuario) {
+		if (
+			proyectoSeleccionado &&
+			proyectoActual &&
+			proyectoActual.institucion_id !== $usuario?.id_usuario
+		) {
 			return { denegado: true, mensaje: 'Este proyecto no pertenece a tu institución.' };
 		}
 
@@ -95,7 +102,10 @@
 		// Priorizar proyectoActual.participacion_permitida como fuente de verdad
 		// Fallback a data.objetivos si participacion_permitida no está disponible
 		let items = [];
-		if (proyectoActual?.participacion_permitida && proyectoActual.participacion_permitida.length > 0) {
+		if (
+			proyectoActual?.participacion_permitida &&
+			proyectoActual.participacion_permitida.length > 0
+		) {
 			items = proyectoActual.participacion_permitida;
 		} else {
 			items = data.objetivos || [];
@@ -108,13 +118,13 @@
 		if (!objetivosDelProyecto || objetivosDelProyecto.length === 0) {
 			return [];
 		}
-		
+
 		const evidencias = data.evidencias || [];
-		
+
 		const result = (objetivosDelProyecto || []).map((obj: any) => {
 			const objId = Number(obj.id_participacion_permitida);
-			const evsParaEsteObjetivo = evidencias.filter((ev: any) => 
-				Number(ev.id_participacion_permitida) === objId
+			const evsParaEsteObjetivo = evidencias.filter(
+				(ev: any) => Number(ev.id_participacion_permitida) === objId
 			);
 
 			const entrada = evsParaEsteObjetivo.filter((ev: any) => ev.tipo_evidencia === 'entrada');
@@ -139,11 +149,9 @@
 
 	let todosLosObjetivosTienenEvidenciasCompletas = $derived.by(() => {
 		if (!evidenciasPorObjetivo || evidenciasPorObjetivo.length === 0) return false;
-		return (evidenciasPorObjetivo || []).every((item: {
-			evidenciasEntrada: unknown[];
-			evidenciasSalida: unknown[];
-		}) =>
-			item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
+		return (evidenciasPorObjetivo || []).every(
+			(item: { evidenciasEntrada: unknown[]; evidenciasSalida: unknown[] }) =>
+				item.evidenciasEntrada.length > 0 && item.evidenciasSalida.length > 0
 		);
 	});
 
@@ -214,7 +222,8 @@
 
 			// SvelteKit serializa fail() como { type: 'failure', data: { message: '...' } }
 			if (resultado?.type === 'failure' || !response.ok) {
-				errorSolicitud = resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
+				errorSolicitud =
+					resultado?.data?.message ?? resultado?.message ?? 'Error al enviar la solicitud.';
 				enviandoSolicitud = false;
 				return;
 			}
@@ -287,7 +296,7 @@
 				<h3 class="mb-2 text-xl font-bold text-slate-900">Acceso restringido</h3>
 				<p class="text-slate-600">{accesoEstado.mensaje}</p>
 				<button
-					onclick={() => window.location.href = '/'}
+					onclick={() => (window.location.href = '/')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 font-medium text-white transition hover:bg-slate-800"
 				>
 					Volver al inicio
@@ -303,7 +312,7 @@
 					No tenés ningún proyecto pendiente de solicitud de cierre en este momento.
 				</p>
 				<button
-					onclick={() => window.location.href = '/proyectos'}
+					onclick={() => (window.location.href = '/proyectos')}
 					class="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
 				>
 					Ver mis proyectos

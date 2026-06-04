@@ -5,11 +5,11 @@
 
 	interface Props {
 		estadisticas: {
-		voluntariado: number;
-		monetaria: number;
-		especie: number;
-		totalBeneficiarios: number;
-	};
+			voluntariado: number;
+			monetaria: number;
+			especie: number;
+			totalBeneficiarios: number;
+		};
 	}
 
 	let { estadisticas }: Props = $props();

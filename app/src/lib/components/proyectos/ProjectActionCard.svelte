@@ -33,7 +33,7 @@
 >
 	<!-- Decorative background icon -->
 	<div
-		class="pointer-events-none absolute -right-4 -top-4 opacity-3 transition-transform duration-500 group-hover:scale-110"
+		class="pointer-events-none absolute -top-4 -right-4 opacity-3 transition-transform duration-500 group-hover:scale-110"
 	>
 		<Icon src={isCierre ? CheckCircle : Clock} class="h-24 w-24" />
 	</div>

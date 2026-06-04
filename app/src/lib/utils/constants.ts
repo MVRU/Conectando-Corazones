@@ -188,7 +188,10 @@ export const MANUALES_USUARIO = {
 		url: 'https://drive.google.com/file/d/110f2wYRTv40N1mcHo9lK2-FgDYuAXNFN/view?usp=drive_link',
 		titulo: 'Manual de instituciones'
 	}
-} as const satisfies Record<'administrador' | 'colaborador' | 'institucion', { url: string; titulo: string }>;
+} as const satisfies Record<
+	'administrador' | 'colaborador' | 'institucion',
+	{ url: string; titulo: string }
+>;
 
 // --- COLORES UI ---
 

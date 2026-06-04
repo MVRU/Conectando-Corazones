@@ -4,7 +4,11 @@
 	import type { EstadisticasColaboradores } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+	let {
+		show = false,
+		stats = undefined,
+		onClose = () => {}
+	} = $props<{
 		show?: boolean;
 		stats?: EstadisticasColaboradores;
 		onClose?: () => void;

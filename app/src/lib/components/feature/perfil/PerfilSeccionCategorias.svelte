@@ -62,8 +62,12 @@
 			{/each}
 		</div>
 	{:else}
-		<div class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-[#007FFF]/30 hover:bg-white hover:shadow-sm">
-			<div class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]">
+		<div
+			class="group flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white/50 p-8 py-10 text-center transition-all duration-300 hover:border-[#007FFF]/30 hover:bg-white hover:shadow-sm"
+		>
+			<div
+				class="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-50 text-gray-400 transition-all duration-300 group-hover:scale-110 group-hover:bg-blue-50 group-hover:text-[#007FFF]"
+			>
 				<Tag class="h-7 w-7" />
 			</div>
 

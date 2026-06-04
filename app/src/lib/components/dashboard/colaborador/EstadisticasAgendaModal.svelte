@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { fade, fly, scale } from 'svelte/transition';
-	import {
-		X,
-		Calendar,
-		Clock,
-		CalendarClock,
-		ArrowRight,
-		AlertCircle
-	} from 'lucide-svelte';
+	import { X, Calendar, Clock, CalendarClock, ArrowRight, AlertCircle } from 'lucide-svelte';
 	import type { EstadisticasCalendario } from './types';
 	import { quintOut } from 'svelte/easing';
 
-	let { show = false, stats = undefined, onClose = () => {} } = $props<{
+	let {
+		show = false,
+		stats = undefined,
+		onClose = () => {}
+	} = $props<{
 		show?: boolean;
 		stats?: EstadisticasCalendario;
 		onClose?: () => void;

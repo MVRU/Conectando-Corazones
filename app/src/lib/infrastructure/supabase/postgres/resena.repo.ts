@@ -79,7 +79,9 @@ export class PostgresResenaRepository implements ResenaRepository {
 			return ResenaMapper.toDomain(created);
 		} catch (error) {
 			console.error('Error creating resena in DB:', error);
-			throw new Error('Error en BD al crear la reseña. Puede que los datos violen una restricción única.');
+			throw new Error(
+				'Error en BD al crear la reseña. Puede que los datos violen una restricción única.'
+			);
 		}
 	}
 

@@ -45,10 +45,7 @@ export class Resena implements IResena {
 			throw new Error('El puntaje debe estar entre 1 y 5.');
 		}
 
-		if (
-			this.tipo_objeto &&
-			!['usuario', 'proyecto', 'plataforma'].includes(this.tipo_objeto)
-		) {
+		if (this.tipo_objeto && !['usuario', 'proyecto', 'plataforma'].includes(this.tipo_objeto)) {
 			throw new Error("El tipo_objeto debe ser 'usuario', 'proyecto' o 'plataforma'.");
 		}
 	}

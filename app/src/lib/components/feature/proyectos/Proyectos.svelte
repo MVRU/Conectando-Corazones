@@ -80,7 +80,7 @@
 						'auditoria'
 							? 'bg-white text-gray-900 shadow-sm'
 							: 'text-gray-500 hover:text-gray-900'}"
-					onclick={() => handleTabChange('auditoria')}
+						onclick={() => handleTabChange('auditoria')}
 					>
 						Proyectos en auditoría
 					</button>

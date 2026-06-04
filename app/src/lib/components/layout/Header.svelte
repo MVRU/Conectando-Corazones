@@ -74,13 +74,9 @@
 					: null
 	);
 
-	const emailUsuario = $derived(
-		$userLoginEmail || 'Sin email'
-	);
+	const emailUsuario = $derived($userLoginEmail || 'Sin email');
 
-	const nombreCompleto = $derived(
-		$usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario'
-	);
+	const nombreCompleto = $derived($usuarioStore ? obtenerNombreCompleto($usuarioStore) : 'Usuario');
 
 	function toggleDropdown() {
 		mostrarDropdown = !mostrarDropdown;
@@ -287,7 +283,11 @@
 								{/if}
 
 								<a
-									href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
+									href={$isAdmin
+										? '/admin'
+										: $isInstitucion
+											? '/institucion/mi-panel'
+											: '/colaborador/mi-panel'}
 									class="group flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-200 hover:bg-blue-500/20 hover:text-white"
 									onclick={() => (mostrarDropdown = false)}
 								>
@@ -436,7 +436,11 @@
 							{/if}
 						</a>
 						<a
-							href={$isAdmin ? '/admin' : $isInstitucion ? '/institucion/mi-panel' : '/colaborador/mi-panel'}
+							href={$isAdmin
+								? '/admin'
+								: $isInstitucion
+									? '/institucion/mi-panel'
+									: '/colaborador/mi-panel'}
 							class="flex flex-col items-center justify-center gap-1 rounded-lg bg-blue-500/10 p-3 text-center transition-colors hover:bg-blue-500/20"
 							onclick={() => (menuAbierto = false)}
 						>

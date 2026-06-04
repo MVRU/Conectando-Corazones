@@ -84,7 +84,10 @@ export const isInstitucionVerificada = derived(authStore, ($auth) =>
 	esInstitucionVerificada($auth.usuario)
 );
 
-export function syncAuthState(usuario: UsuarioCompleto | null, loginEmail: string | null = null): void {
+export function syncAuthState(
+	usuario: UsuarioCompleto | null,
+	loginEmail: string | null = null
+): void {
 	if (usuario) {
 		authStore.update((state) => ({
 			...state,
@@ -138,7 +141,10 @@ export const authActions = {
 				throw new Error(error ?? 'Error al iniciar sesión');
 			}
 
-			const { usuario, loginEmail } = (await response.json()) as { usuario: UsuarioCompleto, loginEmail?: string };
+			const { usuario, loginEmail } = (await response.json()) as {
+				usuario: UsuarioCompleto;
+				loginEmail?: string;
+			};
 
 			authStore.update((state) => ({
 				...state,
@@ -183,7 +189,10 @@ export const authActions = {
 		authStore.update((state) => ({ ...state, isLoading: true }));
 		try {
 			const response = await fetch('/api/sesion');
-			const { usuario, loginEmail } = (await response.json()) as { usuario: UsuarioCompleto | null, loginEmail?: string | null };
+			const { usuario, loginEmail } = (await response.json()) as {
+				usuario: UsuarioCompleto | null;
+				loginEmail?: string | null;
+			};
 			if (usuario) {
 				authStore.update((state) => ({
 					...state,
@@ -497,7 +506,7 @@ async function enviarSolicitudRegistro<T = { usuario: Usuario }>(
 async function enviarSolicitudOAuth(
 	rol: 'institucion' | 'colaborador',
 	fallbackError: string
-): Promise<{ usuario: UsuarioCompleto | null, loginEmail?: string | null } | null> {
+): Promise<{ usuario: UsuarioCompleto | null; loginEmail?: string | null } | null> {
 	const response = await fetch('/api/auth/google', {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },

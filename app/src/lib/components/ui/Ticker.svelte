@@ -14,10 +14,7 @@
 <script lang="ts">
 	import clsx from 'clsx';
 
-	let {
-		logos = [],
-		customClass = ''
-	} = $props<{
+	let { logos = [], customClass = '' } = $props<{
 		logos?: Array<string | { src: string; href?: string }>;
 		customClass?: string;
 	}>();
@@ -26,11 +23,7 @@
 	let tickerRef: HTMLElement | undefined = $state();
 
 	// Memorizar la lista extendida para evitar re-crear arrays en el render que causan loops
-	const extendedLogos = $derived(
-		Array(6)
-			.fill(logos)
-			.flat()
-	);
+	const extendedLogos = $derived(Array(6).fill(logos).flat());
 
 	$effect(() => {
 		if (!tickerRef) return;

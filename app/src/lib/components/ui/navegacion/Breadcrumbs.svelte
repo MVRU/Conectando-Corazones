@@ -5,9 +5,7 @@
 
 	import { untrack } from 'svelte';
 
-	let {
-		useIconSeparator = true
-	} = $props<{
+	let { useIconSeparator = true } = $props<{
 		useIconSeparator?: boolean;
 	}>();
 
@@ -81,7 +79,6 @@
 			window.removeEventListener('click', closePopoverOnClickOutside);
 		};
 	});
-
 </script>
 
 {#if breadcrumbs && breadcrumbs.length >= 2}

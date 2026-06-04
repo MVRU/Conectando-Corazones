@@ -40,7 +40,13 @@
 	import Alert from '$lib/components/ui/feedback/Alert.svelte';
 	import { toastStore } from '$lib/stores/toast';
 	import { guardarReporteLog } from '$lib/utils/util-reportes';
-	import { ChevronDown as ChevronDownIcon, ChevronLeft, FileText, Lightbulb, Loader2 } from 'lucide-svelte';
+	import {
+		ChevronDown as ChevronDownIcon,
+		ChevronLeft,
+		FileText,
+		Lightbulb,
+		Loader2
+	} from 'lucide-svelte';
 	import BeneficioFiscalArca from '$lib/components/feature/proyectos/BeneficioFiscalArca.svelte';
 	import { colaboradorPuedeDeducirEnProyecto } from '$lib/domain/use-cases/colaboraciones/colaboradorPuedeDeducirEnProyecto';
 
@@ -69,30 +75,46 @@
 
 	let proyecto: Proyecto = $derived(data.proyecto);
 	let chatAviso = $derived(data.chatAviso ?? false);
-	let colaboracionesActivas: Colaboracion[] = $derived(colaboracionesVisibles(proyecto?.colaboraciones ?? []));
-	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(ordenarPorProgreso(proyecto?.participacion_permitida ?? []));
-	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(ordenarUbicaciones(proyecto?.ubicaciones));
-	
+	let colaboracionesActivas: Colaboracion[] = $derived(
+		colaboracionesVisibles(proyecto?.colaboraciones ?? [])
+	);
+	let participacionesOrdenadas: ParticipacionPermitida[] = $derived(
+		ordenarPorProgreso(proyecto?.participacion_permitida ?? [])
+	);
+	let ubicacionesOrdenadas: ProyectoUbicacion[] = $derived(
+		ordenarUbicaciones(proyecto?.ubicaciones)
+	);
+
 	let resenasProyecto: Resena[] = $state([]);
 	let resenaAEliminar: Resena | null = $state(null);
 	let mostrarModalResena = $state(false);
 	let mostrarConfirmarEliminar = $state(false);
 	const maxCaracteresResena = 500;
 
-	let esCreador = $derived(!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario);
+	let esCreador = $derived(
+		!!$usuario && !!proyecto && $usuario.id_usuario === proyecto.institucion?.id_usuario
+	);
 	let colaboracionUsuario = $derived(
 		$usuario && proyecto?.colaboraciones
 			? proyecto.colaboraciones.find((c) => c.colaborador_id === $usuario?.id_usuario)
 			: undefined
 	);
-	let misAportes: ColaboracionTipoParticipacion[] = $derived(colaboracionUsuario?.colaboraciones_tipo_participacion || []);
-	let estadoCodigo = $derived(proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso');
+	let misAportes: ColaboracionTipoParticipacion[] = $derived(
+		colaboracionUsuario?.colaboraciones_tipo_participacion || []
+	);
+	let estadoCodigo = $derived(
+		proyecto ? getEstadoCodigo(proyecto.estado, proyecto.estado_id) : 'en_curso'
+	);
 
 	let puedeVerBeneficioFiscal = $derived(
 		colaboradorPuedeDeducirEnProyecto({
 			proyectoEstado: estadoCodigo,
 			institucionVerificacionArca: proyecto?.esDeducible
-				? { tipo: 'arca' as const, estado: 'aprobada' as const, fecha_vencimiento: new Date('2099-12-31') }
+				? {
+						tipo: 'arca' as const,
+						estado: 'aprobada' as const,
+						fecha_vencimiento: new Date('2099-12-31')
+					}
 				: null,
 			colaboradorConFinesLucro: data.conFinesLucro ?? false,
 			colaboracionDelUsuario: colaboracionUsuario
@@ -113,15 +135,14 @@
 	let esAdministrador = $derived($usuario?.rol === 'administrador');
 	let esInstitucion = $derived($usuario?.rol === 'institucion');
 
-	let resenaUsuarioActual = $derived(resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario));
+	let resenaUsuarioActual = $derived(
+		resenasProyecto.find((r) => r.autor_id === $usuario?.id_usuario)
+	);
 	let tieneResenaUsuario = $derived(!!resenaUsuarioActual);
 
 	$effect(() => {
 		if (proyecto) {
-			setBreadcrumbs([
-				BREADCRUMB_ROUTES.proyectos,
-				{ label: proyecto.titulo }
-			]);
+			setBreadcrumbs([BREADCRUMB_ROUTES.proyectos, { label: proyecto.titulo }]);
 		}
 	});
 
@@ -186,23 +207,30 @@
 	let puedeVerResenas = $derived(
 		estadoCodigo === 'completado' || estadoCodigo === 'en_revision' || esCreador
 	);
-	let puedeRedactarResena = $derived((esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision');
+	let puedeRedactarResena = $derived(
+		(esCreador || esColaboradorAprobado) && estadoCodigo === 'en_revision'
+	);
 	let puedeCrearResena = $derived(puedeRedactarResena && !tieneResenaUsuario);
-	let mensajeResenaBloqueada = 'La reseña solo puede redactarse cuando el proyecto está en revisión.';
+	let mensajeResenaBloqueada =
+		'La reseña solo puede redactarse cuando el proyecto está en revisión.';
 	let vieneDeEvaluarCierre = $derived(page.url.searchParams.get('desde') === 'evaluar-cierre');
 	let resumenTexto = $derived((proyecto?.resumen || '').trim());
 	let aprendizajesTexto = $derived((proyecto?.aprendizajes || '').trim());
-	let listadoAprendizajes = $derived((aprendizajesTexto || '')
-		.split('\n')
-		.map((l) => l.trim())
-		.filter((l) => l.length > 0)
-		.map((l) => l.replace(/^[-*•]\s*/, '')));
+	let listadoAprendizajes = $derived(
+		(aprendizajesTexto || '')
+			.split('\n')
+			.map((l) => l.trim())
+			.filter((l) => l.length > 0)
+			.map((l) => l.replace(/^[-*•]\s*/, ''))
+	);
 
-	let listadoResumen = $derived((resumenTexto || '')
-		.split('. ')
-		.map((s) => s.trim())
-		.filter((s) => s.length > 0)
-		.map((s) => (s.endsWith('.') ? s : s + '.')));
+	let listadoResumen = $derived(
+		(resumenTexto || '')
+			.split('. ')
+			.map((s) => s.trim())
+			.filter((s) => s.length > 0)
+			.map((s) => (s.endsWith('.') ? s : s + '.'))
+	);
 
 	let tieneResumenIA = $derived(Boolean(resumenTexto));
 	let tieneAprendizajesIA = $derived(Boolean(aprendizajesTexto));
@@ -236,12 +264,12 @@
 		});
 	}
 
-	let colaboradoresAprobados = $derived((colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada'));
+	let colaboradoresAprobados = $derived(
+		(colaboracionesActivas ?? []).filter((c) => c.estado === 'aprobada')
+	);
 	let chatHabilitado = $derived(colaboradoresAprobados.length > 0);
 
-	let mostrarAccionFinalizar = $derived(
-		esCreador && estadoCodigo === 'en_curso'
-	);
+	let mostrarAccionFinalizar = $derived(esCreador && estadoCodigo === 'en_curso');
 
 	function clasesChipColaborador(tipo?: string) {
 		const t = (tipo || '').toLowerCase();
@@ -470,7 +498,12 @@
 				icon: ShieldCheck,
 				onclick: () => {}
 			});
-			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
+			acc.push({ divider: true } as {
+				label: string;
+				icon: any;
+				onclick: () => void;
+				divider: boolean;
+			});
 			acc.push({
 				label: 'Cancelar proyecto',
 				icon: XCircle,
@@ -497,20 +530,22 @@
 					onclick: () =>
 						goto(`/institucion/solicitudes-colaboracion?proyecto=${proyecto.id_proyecto}`)
 				});
-				if (estadoCodigo !== 'borrador' && estadoCodigo !== 'cancelado' && estadoCodigo !== 'en_curso') {
+				if (
+					estadoCodigo !== 'borrador' &&
+					estadoCodigo !== 'cancelado' &&
+					estadoCodigo !== 'en_curso'
+				) {
 					acc.push({
 						label: 'Solicitudes de cierre',
 						icon: ClipboardDocumentCheck,
-						onclick: () =>
-							goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
+						onclick: () => goto(`/institucion/proyectos/${proyecto.id_proyecto}/solicitudes-cierre`)
 					});
 				}
 				if (estadoCodigo === 'pendiente_solicitud_cierre') {
 					acc.push({
 						label: 'Solicitar cierre',
 						icon: CheckCircle,
-						onclick: () =>
-							goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
+						onclick: () => goto(`/institucion/solicitar-cierre?proyecto=${proyecto.id_proyecto}`)
 					});
 				}
 			}
@@ -538,7 +573,12 @@
 				onclick: irAAportes
 			});
 
-			acc.push({ divider: true } as { label: string; icon: any; onclick: () => void; divider: boolean });
+			acc.push({ divider: true } as {
+				label: string;
+				icon: any;
+				onclick: () => void;
+				divider: boolean;
+			});
 
 			if (esCreador) {
 				const esEditable = estadoCodigo === 'en_curso';
@@ -719,11 +759,13 @@
 
 	$effect(() => {
 		layoutStore.showStickyBottomBar();
-		
+
 		async function cargarResenas() {
 			if (proyecto?.id_proyecto) {
 				try {
-					const res = await fetch(`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`);
+					const res = await fetch(
+						`/api/resenas?tipo_objeto=proyecto&id_objeto=${proyecto.id_proyecto}`
+					);
 					if (res.ok) {
 						resenasProyecto = await res.json();
 					}
@@ -773,7 +815,7 @@
 					bind:isOpen={mostrarMenuGestion}
 					{accionesMenu}
 					{isMobile}
-					esAdministrador={esAdministrador}
+					{esAdministrador}
 				/>
 			{/if}
 		{/snippet}
@@ -1169,7 +1211,9 @@
 												<ResenaCard
 													{resena}
 													autor={resena.autor}
-													onEliminar={resena.autor_id && resena.autor_id === $usuario?.id_usuario || esAdministrador
+													onEliminar={(resena.autor_id &&
+														resena.autor_id === $usuario?.id_usuario) ||
+													esAdministrador
 														? () => solicitarEliminarResena(resena)
 														: null}
 												/>
@@ -1535,7 +1579,9 @@
 										class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900 focus:ring-2 focus:ring-gray-200 focus:ring-offset-2 focus:outline-hidden disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-75"
 									>
 										<Icon src={Flag} class="h-4 w-4" />
-										{data.tieneReportePendiente ? 'Ya tenés un reporte pendiente' : 'Reportar irregularidad'}
+										{data.tieneReportePendiente
+											? 'Ya tenés un reporte pendiente'
+											: 'Reportar irregularidad'}
 									</button>
 								</div>
 							</section>
@@ -1866,7 +1912,7 @@
 							id="justificacion-cancel"
 							bind:value={justificacionCancelacion}
 							placeholder="Explicá brevemente el motivo de la cancelación..."
-							class="w-full rounded-xl border border-gray-200 p-3 text-sm transition-all outline-hidden focus:border-red-500 focus:ring-1 focus:ring-red-500"
+							class="w-full rounded-xl border border-gray-200 p-3 text-sm outline-hidden transition-all focus:border-red-500 focus:ring-1 focus:ring-red-500"
 							rows="3"
 						></textarea>
 					</div>
@@ -1959,24 +2005,22 @@
 	</div>
 {/if}
 
-	<ResenaProyectoModal
-		mostrar={mostrarModalResena}
-		modo="crear"
-		resenaInicial={null}
-		maxCaracteres={maxCaracteresResena}
-		onguardar={guardarResena}
-		oncerrar={() => (mostrarModalResena = false)}
-	/>
+<ResenaProyectoModal
+	mostrar={mostrarModalResena}
+	modo="crear"
+	resenaInicial={null}
+	maxCaracteres={maxCaracteresResena}
+	onguardar={guardarResena}
+	oncerrar={() => (mostrarModalResena = false)}
+/>
 
 {#if mostrarConfirmarEliminar}
-	
 	<div
 		class="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-all duration-300"
 		onclick={cancelarEliminarResena}
 		aria-hidden="true"
 	></div>
 
-	
 	<div class="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
 		<div
 			class="pointer-events-auto relative mx-auto w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200/60"

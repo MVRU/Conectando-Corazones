@@ -51,19 +51,54 @@
 		colorIcono: string;
 	} {
 		if (dias < 0) {
-			return { texto: 'Sin próximos cierres', Icono: PartyPopper, colorTexto: 'text-amber-400/60', colorIcono: 'text-amber-500/60' };
+			return {
+				texto: 'Sin próximos cierres',
+				Icono: PartyPopper,
+				colorTexto: 'text-amber-400/60',
+				colorIcono: 'text-amber-500/60'
+			};
 		} else if (dias === 0) {
-			return { texto: '¡Hoy es el día!', Icono: Flame, colorTexto: 'text-amber-300', colorIcono: 'text-amber-400' };
+			return {
+				texto: '¡Hoy es el día!',
+				Icono: Flame,
+				colorTexto: 'text-amber-300',
+				colorIcono: 'text-amber-400'
+			};
 		} else if (dias <= 3) {
-			return { texto: '¡Fecha límite inminente!', Icono: AlertTriangle, colorTexto: 'text-amber-300', colorIcono: 'text-amber-400' };
+			return {
+				texto: '¡Fecha límite inminente!',
+				Icono: AlertTriangle,
+				colorTexto: 'text-amber-300',
+				colorIcono: 'text-amber-400'
+			};
 		} else if (dias <= 7) {
-			return { texto: 'Fecha límite cercana', Icono: Clock, colorTexto: 'text-amber-400', colorIcono: 'text-amber-500' };
+			return {
+				texto: 'Fecha límite cercana',
+				Icono: Clock,
+				colorTexto: 'text-amber-400',
+				colorIcono: 'text-amber-500'
+			};
 		} else if (dias <= 14) {
-			return { texto: 'Aún hay tiempo', Icono: Calendar, colorTexto: 'text-amber-400', colorIcono: 'text-amber-500' };
+			return {
+				texto: 'Aún hay tiempo',
+				Icono: Calendar,
+				colorTexto: 'text-amber-400',
+				colorIcono: 'text-amber-500'
+			};
 		} else if (dias <= 30) {
-			return { texto: 'Todo bajo control', Icono: CheckCircle2, colorTexto: 'text-amber-400/80', colorIcono: 'text-amber-500/80' };
+			return {
+				texto: 'Todo bajo control',
+				Icono: CheckCircle2,
+				colorTexto: 'text-amber-400/80',
+				colorIcono: 'text-amber-500/80'
+			};
 		} else {
-			return { texto: 'Sin urgencias', Icono: Smile, colorTexto: 'text-amber-400/60', colorIcono: 'text-amber-500/60' };
+			return {
+				texto: 'Sin urgencias',
+				Icono: Smile,
+				colorTexto: 'text-amber-400/60',
+				colorIcono: 'text-amber-500/60'
+			};
 		}
 	}
 

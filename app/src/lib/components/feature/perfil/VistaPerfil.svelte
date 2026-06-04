@@ -117,9 +117,9 @@
 			? 'Tu cuenta todavía no tiene documentación para validar identidad institucional. Completá la carga para habilitar la revisión.'
 			: estadoVerificacion === 'verificacion_pendiente'
 				? 'Tu documentación fue recibida y está siendo evaluada por el equipo de administración. Te avisaremos cuando haya una resolución.'
-			: estadoVerificacion === 'verificacion_rechazada'
-				? 'Tu verificación fue rechazada. Revisá el motivo y reenviá la documentación correcta desde esta sección.'
-				: 'Tu cuenta aún no está verificada. Completá la verificación para evitar bloqueos en funcionalidades.'
+				: estadoVerificacion === 'verificacion_rechazada'
+					? 'Tu verificación fue rechazada. Revisá el motivo y reenviá la documentación correcta desde esta sección.'
+					: 'Tu cuenta aún no está verificada. Completá la verificación para evitar bloqueos en funcionalidades.'
 	);
 
 	const modales = usePerfilModales();
@@ -275,9 +275,7 @@
 	const abrirModalTiposParticipacion = crearAbrirModal('tiposParticipacion');
 
 	function handleGuardarCategorias(cats: Categoria[]) {
-		actualizarUsuarioCon({ categorias_preferidas: cats }, () =>
-			modales.cerrar('categorias')
-		);
+		actualizarUsuarioCon({ categorias_preferidas: cats }, () => modales.cerrar('categorias'));
 	}
 
 	function handleGuardarTiposParticipacion(tipos: TipoParticipacion[]) {
@@ -450,7 +448,8 @@
 									Documentación verificada
 								</h4>
 								<p class="mt-2 text-sm text-emerald-800">
-									Tu institución está verificada. Podés renovar o actualizar la documentación cuando lo necesites.
+									Tu institución está verificada. Podés renovar o actualizar la documentación cuando
+									lo necesites.
 								</p>
 								<a
 									href="/institucion/verificacion"
@@ -503,11 +502,7 @@
 						in:fly={{ y: 20, duration: 350, delay: 200, easing: cubicOut }}
 					>
 						<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-							<PerfilSeccionProyectos
-								proyectos={proyectos}
-								rol={perfilUsuario.rol}
-								{estadoVerificacion}
-							/>
+							<PerfilSeccionProyectos {proyectos} rol={perfilUsuario.rol} {estadoVerificacion} />
 						</div>
 					</div>
 

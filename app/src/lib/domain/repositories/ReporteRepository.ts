@@ -21,4 +21,3 @@ export interface ReporteRepository {
 	findAll(filters?: ReporteFilters): Promise<{ data: Reporte[]; total: number }>;
 	save(reporte: Reporte): Promise<Reporte>;
 }
-

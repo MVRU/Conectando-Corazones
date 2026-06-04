@@ -112,12 +112,7 @@ export async function crearReporte(
 	}
 
 	// Registrar localmente para feedback inmediato en la UI
-	guardarReporteLog(
-		datosReporte.reportante_id,
-		datosReporte.tipo_objeto,
-		datosReporte.id_objeto
-	);
+	guardarReporteLog(datosReporte.reportante_id, datosReporte.tipo_objeto, datosReporte.id_objeto);
 
 	return result.reporte as Reporte;
 }
-

@@ -50,7 +50,8 @@
 	let selectedParticipacionPermitidaId = $state<number | null>(null);
 
 	$effect(() => {
-		selectedTipoParticipacion = (data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
+		selectedTipoParticipacion =
+			(data.tiposParticipacion?.[0] as TipoParticipacionDescripcion) || '';
 	});
 
 	$effect(() => {
@@ -64,7 +65,9 @@
 	// Filtrar participaciones por tipo seleccionado
 	let filteredParticipaciones = $derived(
 		(data.participacionesPermitidas as ParticipacionPermitida[]).filter(
-			(p) => !!selectedTipoParticipacion && p.tipo_participacion?.descripcion === selectedTipoParticipacion
+			(p) =>
+				!!selectedTipoParticipacion &&
+				p.tipo_participacion?.descripcion === selectedTipoParticipacion
 		)
 	);
 
@@ -140,7 +143,9 @@
 				ev.archivos.map((archivo) => ({
 					...archivo,
 					uploader_nombre: data.proyecto.nombreInstitucion || 'Institución',
-					fecha_formateada: ev.created_at ? new Date(ev.created_at).toLocaleDateString('es-AR') : '',
+					fecha_formateada: ev.created_at
+						? new Date(ev.created_at).toLocaleDateString('es-AR')
+						: '',
 					tipo_visual: (archivo.tipo_mime?.includes('pdf') ? 'pdf' : 'image') as 'pdf' | 'image',
 					tamanio_formateado: archivo.tamanio_bytes
 						? `${(archivo.tamanio_bytes / (1024 * 1024)).toFixed(1)} MB`
@@ -527,7 +532,7 @@
 								goto(`/institucion/proyectos/${newId}/aportes/evidencias/nueva`);
 							}
 						}}
-						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm outline-hidden transition-all hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						{#each data.proyectosDisponibles as proyecto (proyecto.id_proyecto)}
 							<option value={proyecto.id_proyecto}>{proyecto.titulo}</option>
@@ -546,7 +551,7 @@
 					<select
 						id="tipo"
 						bind:value={selectedTipoParticipacion}
-						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+						class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm outline-hidden transition-all hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 					>
 						<option value="" disabled>Seleccionar tipo</option>
 						{#each data.tiposParticipacion as tipo (tipo)}
@@ -567,7 +572,7 @@
 						<select
 							id="participacion"
 							bind:value={selectedParticipacionPermitidaId}
-							class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm transition-all outline-hidden hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
+							class="w-full cursor-pointer appearance-none rounded-2xl border-2 border-slate-200 bg-white p-4 font-bold text-slate-700 shadow-sm outline-hidden transition-all hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 md:p-5"
 						>
 							<option value={null} disabled>Seleccionar meta</option>
 							{#each filteredParticipaciones as p (p.id_participacion_permitida)}
@@ -656,8 +661,8 @@
 								: 'Agregar evidencia de salida'}
 							class="rounded-xl p-3 text-white shadow-lg transition-all
 								{selectedParticipacionPermitidaId
-									? 'cursor-pointer bg-slate-900 hover:-translate-y-0.5 hover:bg-blue-600 hover:shadow-blue-200 active:scale-95'
-									: 'cursor-not-allowed bg-slate-300 shadow-none'}"
+								? 'cursor-pointer bg-slate-900 hover:-translate-y-0.5 hover:bg-blue-600 hover:shadow-blue-200 active:scale-95'
+								: 'cursor-not-allowed bg-slate-300 shadow-none'}"
 							aria-label="Agregar evidencia de salida"
 						>
 							<Plus size={20} />
@@ -767,9 +772,7 @@
 			transition:slide={{ duration: 300 }}
 		>
 			<!-- Header -->
-			<div
-				class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8"
-			>
+			<div class="border-b border-slate-100 bg-linear-to-br from-amber-50 to-orange-50 p-6 md:p-8">
 				<div class="flex items-start gap-4">
 					<div class="shrink-0 rounded-xl bg-amber-100 p-3 text-amber-600">
 						<AlertCircle size={24} />
@@ -828,14 +831,17 @@
 			transition:slide={{ duration: 300 }}
 		>
 			<div class="bg-linear-to-br from-red-50 to-white p-8 text-center">
-				<div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600">
+				<div
+					class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-600"
+				>
 					<X size={28} />
 				</div>
 				<h3 id="modal-delete-title" class="mb-2 text-lg font-black text-slate-900">
 					¿Eliminar archivo?
 				</h3>
 				<p class="text-xs leading-relaxed text-slate-500">
-					Esta acción quitará el archivo de la lista. No es permanente hasta que guardes los cambios.
+					Esta acción quitará el archivo de la lista. No es permanente hasta que guardes los
+					cambios.
 				</p>
 			</div>
 
@@ -904,14 +910,22 @@
 			<div class="custom-scrollbar flex-1 overflow-y-auto p-6 md:p-8">
 				<div class="mb-8">
 					<label class="block w-full cursor-pointer">
-						<div class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10 transition-all hover:border-blue-400 hover:bg-blue-50/50">
+						<div
+							class="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-slate-50/50 py-10 transition-all hover:border-blue-400 hover:bg-blue-50/50"
+						>
 							<div class="mb-3 rounded-2xl bg-white p-4 text-blue-600 shadow-sm">
 								<Plus size={32} />
 							</div>
 							<p class="text-sm font-black text-slate-700">Seleccionar archivo</p>
 							<p class="mt-1 text-xs text-slate-400">PDF o imágenes hasta 10MB</p>
 						</div>
-						<input type="file" multiple class="hidden" accept="image/*,.pdf" onchange={handleFileSelection} />
+						<input
+							type="file"
+							multiple
+							class="hidden"
+							accept="image/*,.pdf"
+							onchange={handleFileSelection}
+						/>
 					</label>
 				</div>
 
@@ -928,17 +942,23 @@
 										<div class="shrink-0 rounded-xl bg-white p-2 text-slate-400 shadow-sm">
 											<Icon size={20} />
 										</div>
-										<p class="truncate text-sm font-bold text-slate-700">{archivo.nombre_original}</p>
+										<p class="truncate text-sm font-bold text-slate-700">
+											{archivo.nombre_original}
+										</p>
 									</div>
-									<button onclick={() => eliminarArchivoTemporal(archivo.id_archivo!)} class="p-2 text-slate-400 hover:text-red-500">
+									<button
+										onclick={() => eliminarArchivoTemporal(archivo.id_archivo!)}
+										class="p-2 text-slate-400 hover:text-red-500"
+									>
 										<X size={18} />
 									</button>
 								</div>
-								<input 
-									type="text" 
-									value={archivo.descripcion} 
-									oninput={(e) => actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
-									placeholder="Descripción breve (ej: Factura de compra)" 
+								<input
+									type="text"
+									value={archivo.descripcion}
+									oninput={(e) =>
+										actualizarDescripcionArchivo(archivo.id_archivo!, e.currentTarget.value)}
+									placeholder="Descripción breve (ej: Factura de compra)"
 									class="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm font-medium outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
 								/>
 							</div>
@@ -948,11 +968,11 @@
 			</div>
 
 			<div class="flex justify-center border-t border-slate-100 bg-slate-50/50 p-8">
-				<Button 
-					label="Confirmar archivos" 
+				<Button
+					label="Confirmar archivos"
 					disabled={archivosTemporales.length === 0}
-					customClass="px-12 shadow-lg shadow-blue-200" 
-					onclick={agregarArchivosAEvidencia} 
+					customClass="px-12 shadow-lg shadow-blue-200"
+					onclick={agregarArchivosAEvidencia}
 				/>
 			</div>
 		</div>

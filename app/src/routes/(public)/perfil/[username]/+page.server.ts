@@ -72,7 +72,12 @@ export const load: PageServerLoad = async ({ params, locals, url }) => {
 		console.error('Error loading profile:', err);
 
 		// Si es un error 404, lo re-lanzamos
-		if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 404) {
+		if (
+			err &&
+			typeof err === 'object' &&
+			'status' in err &&
+			(err as { status: number }).status === 404
+		) {
 			throw err;
 		}
 

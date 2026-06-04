@@ -128,7 +128,9 @@
 			!esTipoPredefinido(ubicaciones[index].tipo_ubicacion || '')
 		) {
 			const valorNormalizado = valor.trim().toLowerCase();
-			const existeEnLista = TIPO_UBICACION.some((tipo: string) => tipo.toLowerCase() === valorNormalizado);
+			const existeEnLista = TIPO_UBICACION.some(
+				(tipo: string) => tipo.toLowerCase() === valorNormalizado
+			);
 
 			if (existeEnLista) {
 				errores[`ubicacion_${index}_tipo`] = 'Ese tipo de ubicación ya existe en la lista oficial.';
@@ -148,7 +150,8 @@
 		// Verificar si intenta marcar como "Principal" cuando ya existe una
 		if (campo === 'tipo_ubicacion' && valor.toLowerCase() === 'principal') {
 			const yaTienePrincipal = ubicaciones.some(
-				(u: UbicacionFormulario, i: number) => i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
+				(u: UbicacionFormulario, i: number) =>
+					i !== index && u.tipo_ubicacion?.toLowerCase() === 'principal'
 			);
 			if (yaTienePrincipal) {
 				errores[`ubicacion_${index}_tipo`] =
@@ -213,7 +216,9 @@
 		}
 	}
 
-	let yaTienePrincipal = $derived(ubicaciones.some((u: UbicacionFormulario) => u.tipo_ubicacion?.toLowerCase() === 'principal'));
+	let yaTienePrincipal = $derived(
+		ubicaciones.some((u: UbicacionFormulario) => u.tipo_ubicacion?.toLowerCase() === 'principal')
+	);
 
 	// Función para obtener tipos disponibles según el índice
 	function obtenerTiposDisponibles(index: number): readonly string[] {
@@ -317,8 +322,7 @@
 								value={ubicacion.tipo_ubicacion === 'personalizado_input'
 									? ''
 									: ubicacion.tipo_ubicacion}
-								oninput={(e) =>
-									actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
+								oninput={(e) => actualizarUbicacion(index, 'tipo_ubicacion', e.currentTarget.value)}
 								placeholder="Escribí el tipo de ubicación..."
 								class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
 								class:border-red-300={errores[`ubicacion_${index}_tipo`]}

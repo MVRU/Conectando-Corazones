@@ -63,7 +63,10 @@
 	});
 
 	$effect(() => {
-		syncAuthState(data.usuario ? new Usuario(data.usuario) : null, data.loginEmail as string | null);
+		syncAuthState(
+			data.usuario ? new Usuario(data.usuario) : null,
+			data.loginEmail as string | null
+		);
 	});
 
 	$effect(() => {
@@ -73,7 +76,8 @@
 				setTimeout(() => {
 					toastStore.show({
 						title: 'Sesión activa',
-						message: 'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
+						message:
+							'Ya iniciaste sesión. Si deseás registrarte nuevamente, cerrá la sesión actual.',
 						variant: 'info'
 					});
 

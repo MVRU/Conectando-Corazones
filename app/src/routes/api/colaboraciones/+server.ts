@@ -8,7 +8,7 @@ import { ListarColaboracionesPorColaborador } from '$lib/domain/use-cases/colabo
 import { CrearColaboracion } from '$lib/domain/use-cases/colaboraciones/CrearColaboracion';
 
 import { PostgresHistorialDeCambiosRepository } from '$lib/infrastructure/supabase/postgres/historial-cambios.repo';
- 
+
 const repo = new PostgresColaboracionRepository();
 const proyectoRepo = new PostgresProyectoRepository();
 const usuarioRepo = new PostgresUsuarioRepository();

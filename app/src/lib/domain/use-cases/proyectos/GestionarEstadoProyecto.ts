@@ -86,7 +86,11 @@ export class GestionarEstadoProyecto {
 		return proyectoActualizado;
 	}
 
-	async rechazarCierre(proyectoId: number, usuarioId: number, escalar: boolean = false): Promise<Proyecto> {
+	async rechazarCierre(
+		proyectoId: number,
+		usuarioId: number,
+		escalar: boolean = false
+	): Promise<Proyecto> {
 		const proyecto = await this.proyectoRepo.findById(proyectoId);
 		if (!proyecto) throw new Error('Proyecto no encontrado');
 

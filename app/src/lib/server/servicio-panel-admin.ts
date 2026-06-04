@@ -56,42 +56,50 @@ export class ServicioPanelAdmin {
 						OR: [{ estado_verificacion: null }, { estado_verificacion: { not: 'pendiente' } }]
 					}
 				}),
-				prisma.usuario.count({ where: { estado_verificacion: 'pendiente', estado: { not: 'inactivo' } } }),
+				prisma.usuario.count({
+					where: { estado_verificacion: 'pendiente', estado: { not: 'inactivo' } }
+				}),
 				prisma.usuario.count({ where: { estado: 'inactivo' } })
 			]);
 
-		const [proyectosEnCurso, proyectosFinalizados, proyectosCancelados, reportesPendientes, reportesResueltosMes, onboardingPendiente] =
-			await Promise.all([
-				prisma.proyecto.count({
-					where: { estado: { descripcion: 'en_curso' } }
-				}),
-				prisma.proyecto.count({
-					where: { estado: { descripcion: { in: ['completado', 'cancelado'] } } }
-				}),
-				prisma.proyecto.count({
-					where: { estado: { descripcion: 'cancelado' } }
-				}),
-				prisma.reporte.count({ where: { estado: 'pendiente' } }),
-				prisma.reporte.count({
-					where: {
-						estado: { in: ['verificado', 'desestimado'] },
-						OR: [
-							{
-								fecha_resolucion: {
-									gte: hace30Dias
-								}
-							},
-							{
-								fecha_resolucion: null,
-								created_at: {
-									gte: hace30Dias
-								}
+		const [
+			proyectosEnCurso,
+			proyectosFinalizados,
+			proyectosCancelados,
+			reportesPendientes,
+			reportesResueltosMes,
+			onboardingPendiente
+		] = await Promise.all([
+			prisma.proyecto.count({
+				where: { estado: { descripcion: 'en_curso' } }
+			}),
+			prisma.proyecto.count({
+				where: { estado: { descripcion: { in: ['completado', 'cancelado'] } } }
+			}),
+			prisma.proyecto.count({
+				where: { estado: { descripcion: 'cancelado' } }
+			}),
+			prisma.reporte.count({ where: { estado: 'pendiente' } }),
+			prisma.reporte.count({
+				where: {
+					estado: { in: ['verificado', 'desestimado'] },
+					OR: [
+						{
+							fecha_resolucion: {
+								gte: hace30Dias
 							}
-						]
-					}
-				}),
-				prisma.verificacion.count({ where: { estado: 'pendiente' } })
-			]);
+						},
+						{
+							fecha_resolucion: null,
+							created_at: {
+								gte: hace30Dias
+							}
+						}
+					]
+				}
+			}),
+			prisma.verificacion.count({ where: { estado: 'pendiente' } })
+		]);
 
 		const usuariosPorRol: Record<string, number> = {};
 		for (const item of porRol) usuariosPorRol[item.rol] = item._count._all;
@@ -121,35 +129,37 @@ export class ServicioPanelAdmin {
 			}
 		});
 
-		const mapped = rows.filter((v) => v.usuario).map(async (v) => {
-			const documentos = await Promise.all(
-				v.documentos.map(async (doc) => {
-					const signed = await supabaseAdmin.storage
-						.from('documentos-privados')
-						.createSignedUrl(doc.url, 60 * 15);
-					return {
-						id_archivo: doc.id_archivo,
-						nombre_original: doc.nombre_original ?? null,
-						url: signed.data?.signedUrl ?? doc.url,
-						tipo_mime: doc.tipo_mime ?? null,
-						created_at: doc.created_at ?? null
-					};
-				})
-			);
+		const mapped = rows
+			.filter((v) => v.usuario)
+			.map(async (v) => {
+				const documentos = await Promise.all(
+					v.documentos.map(async (doc) => {
+						const signed = await supabaseAdmin.storage
+							.from('documentos-privados')
+							.createSignedUrl(doc.url, 60 * 15);
+						return {
+							id_archivo: doc.id_archivo,
+							nombre_original: doc.nombre_original ?? null,
+							url: signed.data?.signedUrl ?? doc.url,
+							tipo_mime: doc.tipo_mime ?? null,
+							created_at: doc.created_at ?? null
+						};
+					})
+				);
 
-			return {
-				id_verificacion: v.id_verificacion,
-				usuario_id: v.usuario_id ?? 0,
-				username: v.usuario?.username ?? '',
-				nombre: v.usuario?.nombre ?? '',
-				apellido: v.usuario?.apellido ?? '',
-				rol: v.usuario?.rol ?? '',
-				tipo: v.tipo,
-				estado: v.estado,
-				created_at: v.created_at ?? null,
-				documentos
-			};
-		});
+				return {
+					id_verificacion: v.id_verificacion,
+					usuario_id: v.usuario_id ?? 0,
+					username: v.usuario?.username ?? '',
+					nombre: v.usuario?.nombre ?? '',
+					apellido: v.usuario?.apellido ?? '',
+					rol: v.usuario?.rol ?? '',
+					tipo: v.tipo,
+					estado: v.estado,
+					created_at: v.created_at ?? null,
+					documentos
+				};
+			});
 
 		return Promise.all(mapped);
 	}
@@ -178,7 +188,9 @@ export class ServicioPanelAdmin {
 
 			if (esArca && accion === 'aprobar') {
 				if (!fechaVencimiento) {
-					throw new Error('Debés indicar la fecha de vencimiento para aprobar la certificación ARCA.');
+					throw new Error(
+						'Debés indicar la fecha de vencimiento para aprobar la certificación ARCA.'
+					);
 				}
 				if (fechaVencimiento <= new Date()) {
 					throw new Error('La fecha de vencimiento debe ser posterior a hoy.');
@@ -236,7 +248,8 @@ export class ServicioPanelAdmin {
 			});
 
 			if (!esArca && usuarioAnterior) {
-				const nuevoEstadoUsuario = accion === 'aprobar' ? 'activo' : (usuarioAnterior.estado ?? 'inactivo');
+				const nuevoEstadoUsuario =
+					accion === 'aprobar' ? 'activo' : (usuarioAnterior.estado ?? 'inactivo');
 
 				if (usuarioAnterior.estado_verificacion !== nuevoEstado) {
 					await tx.historialDeCambios.create({
@@ -346,7 +359,9 @@ export class ServicioPanelAdmin {
 				throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
 			}
 			if (tieneColaboracionesActivas) {
-				throw new Error('No se puede inhabilitar: el usuario está participando en proyectos en curso.');
+				throw new Error(
+					'No se puede inhabilitar: el usuario está participando en proyectos en curso.'
+				);
 			}
 		}
 
@@ -441,7 +456,9 @@ export class ServicioPanelAdmin {
 					throw new Error('No se puede inhabilitar: el usuario tiene proyectos en curso.');
 				}
 				if (tieneColaboracionesActivas) {
-					throw new Error('No se puede inhabilitar: el usuario está participando en proyectos en curso.');
+					throw new Error(
+						'No se puede inhabilitar: el usuario está participando en proyectos en curso.'
+					);
 				}
 
 				await tx.usuario.update({
@@ -503,14 +520,17 @@ export class ServicioPanelAdmin {
 
 	async getAuditoria(filtros: FiltrosAuditoria = {}): Promise<AuditoriaPaginadaAdminDto> {
 		const page = filtros.page && filtros.page > 0 ? filtros.page : 1;
-		const pageSize = filtros.pageSize && filtros.pageSize > 0 ? Math.min(filtros.pageSize, 200) : 100;
+		const pageSize =
+			filtros.pageSize && filtros.pageSize > 0 ? Math.min(filtros.pageSize, 200) : 100;
 		const where: Prisma.HistorialDeCambiosWhereInput = {
 			...(filtros.idObjeto ? { id_objeto: filtros.idObjeto } : {}),
 			...(filtros.usuarioId ? { usuario_id: filtros.usuarioId } : {}),
 			...(filtros.tipoObjeto
 				? { tipo_objeto: { contains: filtros.tipoObjeto.trim(), mode: 'insensitive' } }
 				: {}),
-			...(filtros.accion ? { accion: { contains: filtros.accion.trim(), mode: 'insensitive' } } : {}),
+			...(filtros.accion
+				? { accion: { contains: filtros.accion.trim(), mode: 'insensitive' } }
+				: {}),
 			...(filtros.atributoAfectado
 				? {
 						atributo_afectado: {
@@ -563,11 +583,7 @@ export class ServicioPanelAdmin {
 		]);
 
 		const usuarioIds = [
-			...new Set(
-				rows
-					.filter((r) => r.tipo_objeto === 'Usuario')
-					.map((r) => r.id_objeto)
-			)
+			...new Set(rows.filter((r) => r.tipo_objeto === 'Usuario').map((r) => r.id_objeto))
 		];
 		const usuariosAfectados =
 			usuarioIds.length > 0
@@ -597,8 +613,7 @@ export class ServicioPanelAdmin {
 						apellido: row.usuario.apellido
 					}
 				: null,
-			objetoUsername:
-				row.tipo_objeto === 'Usuario' ? (usuarioMap.get(row.id_objeto) ?? null) : null
+			objetoUsername: row.tipo_objeto === 'Usuario' ? (usuarioMap.get(row.id_objeto) ?? null) : null
 		}));
 
 		return { items, total, page, pageSize };

@@ -1,9 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma, type PrismaDbClient } from '$lib/infrastructure/prisma/client';
-import type {
-	ChatRepository,
-	EventoChatActividad
-} from '$lib/domain/repositories/ChatRepository';
+import type { ChatRepository, EventoChatActividad } from '$lib/domain/repositories/ChatRepository';
 import type { Chat, Mensaje, ParticipanteChat } from '$lib/domain/types/Chat';
 import {
 	obtenerHrefPerfilPublico,
@@ -123,9 +120,7 @@ export class PostgresChatRepository implements ChatRepository {
 					estado_proyecto: proyecto.estado?.descripcion as Chat['estado_proyecto']
 				} satisfies Chat;
 			})
-			.sort(
-				(a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-			);
+			.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
 	}
 
 	async obtenerChatPorProyecto(idProyecto: number): Promise<Chat | null> {
@@ -228,9 +223,7 @@ export class PostgresChatRepository implements ChatRepository {
 		});
 
 		return mensajes
-			.filter(
-				(m): m is { proyecto_id: number; created_at: Date } => m.created_at !== null
-			)
+			.filter((m): m is { proyecto_id: number; created_at: Date } => m.created_at !== null)
 			.map((m) => ({ proyecto_id: m.proyecto_id, fecha: m.created_at }));
 	}
 

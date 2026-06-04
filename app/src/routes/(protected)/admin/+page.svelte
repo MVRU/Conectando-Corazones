@@ -9,9 +9,7 @@
 
 	let { data } = $props<{ data: PageData }>();
 
-	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'auditoria'>(
-		'dashboard'
-	);
+	let activeTab = $state<'dashboard' | 'onboarding' | 'usuarios' | 'auditoria'>('dashboard');
 	let loading = $state(false);
 
 	let kpisOverride = $state<PageData['kpis'] | null>(null);
@@ -275,14 +273,14 @@
 		<!-- Pestañas -->
 		<div class="animate-fade-in-up delay-100">
 			<section
-				class="rounded-2xl border border-white/5 bg-white/5 p-2 backdrop-blur-md shadow-sm overflow-x-auto"
+				class="overflow-x-auto rounded-2xl border border-white/5 bg-white/5 p-2 shadow-sm backdrop-blur-md"
 			>
-				<div class="flex gap-2 min-w-max p-1">
+				<div class="flex min-w-max gap-2 p-1">
 					{#each tabs as tab}
 						<button
 							class={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all duration-300 ${
 								activeTab === tab.id
-									? 'bg-linear-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20 scale-105'
+									? 'scale-105 bg-linear-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/20'
 									: 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white'
 							}`}
 							onclick={() => (activeTab = tab.id)}
@@ -314,7 +312,7 @@
 		{#if activeTab === 'usuarios'}
 			<div class="animate-fade-in-up space-y-6 delay-200">
 				<section
-					class="rounded-2xl border border-white/5 bg-white/5 p-6 backdrop-blur-md shadow-sm"
+					class="rounded-2xl border border-white/5 bg-white/5 p-6 shadow-sm backdrop-blur-md"
 				>
 					<div class="grid gap-4 md:grid-cols-4">
 						<div class="relative">
@@ -357,7 +355,7 @@
 					users={usuarios}
 					{loading}
 					onToggleEstado={onToggleEstadoUsuario}
-					onVerPerfil={onVerPerfil}
+					{onVerPerfil}
 				/>
 			</div>
 		{/if}
@@ -365,7 +363,7 @@
 		{#if activeTab === 'auditoria'}
 			<div class="animate-fade-in-up delay-200">
 				<TablaAuditoriaAdmin
-					logs={logs}
+					{logs}
 					{loading}
 					filtros={filtrosAuditoria}
 					paginacion={auditoriaPaginacion}

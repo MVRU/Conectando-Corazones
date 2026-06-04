@@ -40,19 +40,19 @@
 	// Calculate target percentages for the donut chart based on PROJECT COUNT (distribucion)
 	const totalDistribucion = $derived(
 		estadisticas.distribucion.voluntariado +
-		estadisticas.distribucion.monetaria +
-		estadisticas.distribucion.especie
+			estadisticas.distribucion.monetaria +
+			estadisticas.distribucion.especie
 	);
 
-	const targetVol = $derived(totalDistribucion
-		? (estadisticas.distribucion.voluntariado / totalDistribucion) * 100
-		: 0);
-	const targetMon = $derived(totalDistribucion
-		? (estadisticas.distribucion.monetaria / totalDistribucion) * 100
-		: 0);
-	const targetEsp = $derived(totalDistribucion
-		? (estadisticas.distribucion.especie / totalDistribucion) * 100
-		: 0);
+	const targetVol = $derived(
+		totalDistribucion ? (estadisticas.distribucion.voluntariado / totalDistribucion) * 100 : 0
+	);
+	const targetMon = $derived(
+		totalDistribucion ? (estadisticas.distribucion.monetaria / totalDistribucion) * 100 : 0
+	);
+	const targetEsp = $derived(
+		totalDistribucion ? (estadisticas.distribucion.especie / totalDistribucion) * 100 : 0
+	);
 
 	// Tweened stores
 	const tVol = tweened(0, { duration: 1500, easing: cubicOut });

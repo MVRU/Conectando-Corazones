@@ -1,5 +1,14 @@
 <script lang="ts">
-	import { Filter, ChevronDown, MapPin, School, HeartOff, Activity, Users, Sparkles } from 'lucide-svelte';
+	import {
+		Filter,
+		ChevronDown,
+		MapPin,
+		School,
+		HeartOff,
+		Activity,
+		Users,
+		Sparkles
+	} from 'lucide-svelte';
 	import { slide } from 'svelte/transition';
 	import AccionesRapidas from './institucion/AccionesRapidas.svelte';
 	import MetricasPanel from './institucion/MetricasPanel.svelte';
@@ -438,9 +447,11 @@
 					{#if data.seguimientoObjetivos && data.seguimientoObjetivos.length > 0}
 						<SeguimientoObjetivos objetivos={data.seguimientoObjetivos} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="No hay proyectos activos" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="No hay proyectos activos"
 								description="Cuando crees un proyecto y comiences a recibir ayuda, podrás ver el progreso de tus objetivos aquí."
 								icon={HeartOff}
 							/>
@@ -452,9 +463,11 @@
 					{#if data.actividadReciente && data.actividadReciente.length > 0}
 						<ActividadReciente actividad={data.actividadReciente} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="Sin actividad reciente" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="Sin actividad reciente"
 								description="Aquí aparecerán las últimas interacciones con tus proyectos y colaboradores."
 								icon={Activity}
 							/>
@@ -476,9 +489,11 @@
 					{#if data.topColaboradores && data.topColaboradores.length > 0}
 						<TopColaboradores colaboradores={data.topColaboradores} />
 					{:else}
-						<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-							<EmptyState 
-								message="Sin colaboradores aún" 
+						<div
+							class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+						>
+							<EmptyState
+								message="Sin colaboradores aún"
 								description="Tus colaboradores más destacados aparecerán aquí cuando comiencen a participar en tus proyectos."
 								icon={Users}
 							/>
@@ -500,9 +515,11 @@
 				{#if data.aspectosMejorar && data.aspectosMejorar.length > 0}
 					<AspectosMejorar aspectos={data.aspectosMejorar} />
 				{:else}
-					<div class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm">
-						<EmptyState 
-							message="Todo en orden" 
+					<div
+						class="flex h-full items-center justify-center rounded-3xl border border-white/5 bg-white/5 backdrop-blur-sm"
+					>
+						<EmptyState
+							message="Todo en orden"
 							description="No hay sugerencias o aspectos críticos a mejorar reportados por tus colaboradores actualmente."
 							icon={Sparkles}
 						/>
